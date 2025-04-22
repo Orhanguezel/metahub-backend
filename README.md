@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 ## 🚀 Ensotek Backend
 
@@ -145,3 +146,7 @@ eklendiğinde sistem otomatik olarak çalışır.
 ---
 
 Hazırsan bu `README.md` dosyasını kök dizine kaydedebiliriz. İstersen `Postman` dosyasını da buna ekleyebilirim. Nasıl ilerleyelim?
+=======
+# metahub-backend
+metahub-backend
+>>>>>>> f2e45f064cced30f52305fed018dd9c53d5f49b6
