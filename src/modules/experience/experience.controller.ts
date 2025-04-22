@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import Experience from "./experience.model";
+import Experience from "./experience.models";
 
 // 🔹 Get all experiences (optional lang filter)
 export const getAllExperiences = asyncHandler(async (req: Request, res: Response) => {

@@ -1,0 +1,40 @@
+{
+  "name": "contact",
+  "label": {
+    "en": "Contact",
+    "de": "Contact",
+    "tr": "Contact"
+  },
+  "description": {
+    "en": "Manage contact",
+    "de": "contact verwalten",
+    "tr": "contact yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
+    }
+  ]
+}

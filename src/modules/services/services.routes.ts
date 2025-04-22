@@ -5,7 +5,7 @@ import {
   getServiceById,
   updateService,
   deleteService,
-} from "./service.controller";
+} from "./services.controller";
 
 import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
 import upload from "../../core/middleware/uploadMiddleware";

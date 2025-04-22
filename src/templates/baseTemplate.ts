@@ -1,4 +1,18 @@
-export const baseTemplate = (content: string, title = "Ensotek Cooling Systems"): string => {
+import path from "path";
+import fs from "fs";
+import dotenv from "dotenv";
+
+// .env ortam dosyasını dinamik profile göre yükle
+const envProfile = process.env.APP_ENV || "metahub";
+const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
+if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+}
+
+const BRAND_NAME = process.env.BRAND_NAME || "Ensotek Cooling Systems";
+const BRAND_WEBSITE = process.env.BRAND_WEBSITE || "https://ensotek.de";
+
+export const baseTemplate = (content: string, title = BRAND_NAME): string => {
   return `
     <!DOCTYPE html>
     <html lang="de">
@@ -38,9 +52,9 @@ export const baseTemplate = (content: string, title = "Ensotek Cooling Systems")
       <div class="email-container">
         ${content}
         <div class="footer">
-          © ${new Date().getFullYear()} <strong>Ensotek Cooling Systems</strong> – Alle Rechte vorbehalten.
+          © ${new Date().getFullYear()} <strong>${BRAND_NAME}</strong> – Alle Rechte vorbehalten.
           <br/>
-          <a href="https://ensotek.de">www.ensotek.de</a>
+          <a href="${BRAND_WEBSITE}">${BRAND_WEBSITE.replace(/^https?:\/\//, "")}</a>
         </div>
       </div>
     </body>

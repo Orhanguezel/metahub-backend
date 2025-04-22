@@ -1,0 +1,52 @@
+{
+  "name": "faq",
+  "label": {
+    "en": "Faq",
+    "de": "Faq",
+    "tr": "Faq"
+  },
+  "description": {
+    "en": "Manage faq",
+    "de": "faq verwalten",
+    "tr": "faq yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "POST",
+      "path": "/ask",
+      "auth": true,
+      "summary": "POST /ask"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id",
+      "auth": true,
+      "summary": "PUT /:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import Sport from "./sport.model";
-import { BASE_URL } from "../../core/middleware/uploadMiddleware";
+import Sport from "./sport.models";
+import { BASE_URL,UPLOAD_BASE_PATH } from "../../core/middleware/uploadMiddleware";
 import { isValidObjectId } from "../../core/utils/validation";
 
 // 📥 Yeni spor ekle (çoklu resimli)
@@ -9,7 +9,8 @@ export const createSport = asyncHandler(async (req: Request, res: Response): Pro
   const { name, description, category, language } = req.body;
 
   const files = req.files as Express.Multer.File[];
-  const imageUrls = files?.map(file => `${BASE_URL}/uploads/sport-images/${file.filename}`) || [];
+  const imageUrls = files?.map(file => `${BASE_URL}/${UPLOAD_BASE_PATH}/sport-images/${file.filename}`
+) || [];
 
   if (!name || imageUrls.length === 0) {
     res.status(400).json({
@@ -90,7 +91,8 @@ export const updateSport = asyncHandler(async (req: Request, res: Response): Pro
   if (language) sport.language = language;
 
   const files = req.files as Express.Multer.File[];
-  const newImages = files?.map(file => `${BASE_URL}/uploads/sport-images/${file.filename}`) || [];
+  const newImages = files?.map(file => `${BASE_URL}/${UPLOAD_BASE_PATH}/sport-images/${file.filename}`
+) || [];
   if (newImages.length > 0) {
     sport.images = [...sport.images, ...newImages];
   }

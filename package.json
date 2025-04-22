@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "bun src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "embed-faqs": "ts-node src/scripts/embedFaqs.ts"
+    "embed-faqs": "ts-node src/scripts/embedFaqs.ts",
+    "generate:meta": "ts-node src/tools/generateMeta.ts",
+    "dev": "bun run generate:meta && bun src/server.ts"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +26,7 @@
     "@types/node": "^22.14.0",
     "@types/socket.io": "^3.0.2",
     "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   },
   "dependencies": {
@@ -55,7 +57,11 @@
     "slugify": "^1.6.6",
     "socket.io": "^4.8.1",
     "source-map-support": "^0.5.21",
-    "uuid": "^11.1.0"
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.3",
+    "zod-to-json-schema": "^3.24.5"
   },
   "overrides": {
     "utf7": {

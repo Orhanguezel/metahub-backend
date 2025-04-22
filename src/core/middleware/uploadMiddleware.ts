@@ -5,12 +5,18 @@ import express from "express";
 import { Request } from "express";
 import dotenv from "dotenv";
 
-dotenv.config();
+// ✅ .env ortam değişkenlerini APP_ENV'e göre yükle
+const envProfile = process.env.APP_ENV || "metahub";
+dotenv.config({
+  path: path.resolve(process.cwd(), `.env.${envProfile}`),
+});
 
+// 🌐 Temel ayarlar
 const BASE_UPLOAD_DIR = "uploads";
-const BASE_URL = process.env.BASE_URL || "http://localhost:5015";
+const BASE_URL = process.env.BASE_URL || "http://localhost:5014";
+const CURRENT_PROJECT = envProfile; // klasör ayrımı için
 
-// 🔁 Kullanılan tüm upload klasörleri
+// 🔁 Klasör tanımları
 export const UPLOAD_FOLDERS = {
   profile: "profile-images",
   product: "product-images",
@@ -23,32 +29,29 @@ export const UPLOAD_FOLDERS = {
   library: "library",
   references: "references",
   sport: "sport-images",
-  default: "misc", // 🟢 fallback olarak güvenli klasör
+  default: "misc",
 } as const;
 
 type UploadFolderKeys = keyof typeof UPLOAD_FOLDERS;
 
+// 📁 Klasör yolu hesaplama: uploads/<proje>/<kategori>
+const resolveUploadPath = (type: string) =>
+  path.join(BASE_UPLOAD_DIR, CURRENT_PROJECT, type);
+
 // 📁 Gerekli klasörleri oluştur
 Object.values(UPLOAD_FOLDERS).forEach((folder) => {
-  const fullPath = path.join(BASE_UPLOAD_DIR, folder);
+  const fullPath = resolveUploadPath(folder);
   if (!fs.existsSync(fullPath)) {
     fs.mkdirSync(fullPath, { recursive: true });
   }
 });
 
-// 📂 Dosya depolama ayarı
+// 📂 Multer depolama ayarı
 const storage = multer.diskStorage({
   destination: (req, _file, cb) => {
     const folderKey = req.uploadType as UploadFolderKeys;
     const uploadFolder = UPLOAD_FOLDERS[folderKey] || UPLOAD_FOLDERS.default;
-    const fullPath = path.join(BASE_UPLOAD_DIR, uploadFolder);
-
-    // ✅ Hata öncesi log
-    if (!uploadFolder) {
-      console.error("❌ No upload folder found for:", req.uploadType);
-      return cb(new Error("Upload folder not defined."), "");
-    }
-
+    const fullPath = resolveUploadPath(uploadFolder);
     cb(null, fullPath);
   },
   filename: (_req, file, cb) => {
@@ -57,7 +60,7 @@ const storage = multer.diskStorage({
   },
 });
 
-// 📌 Desteklenen MIME türleri (görseller + belgeler)
+// ✅ MIME türleri
 const allowedMimeTypes = [
   "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif",
   "application/pdf",
@@ -67,31 +70,25 @@ const allowedMimeTypes = [
   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
 ];
 
+// ✅ Dosya filtreleme
 const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
   console.log("🧾 Checking file:", file.originalname, file.mimetype);
-
-  if (!file || !file.mimetype) {
-    console.warn("❌ Missing file or mimetype");
-    return cb(new Error("File or mimetype is missing"));
+  if (!file?.mimetype || !allowedMimeTypes.includes(file.mimetype)) {
+    console.warn(`❌ Unsupported file type: ${file?.originalname}`);
+    return cb(new Error(`Unsupported file type: ${file?.mimetype}`));
   }
-  
-  if (allowedMimeTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    console.warn(`❌ Unsupported file type: ${file.originalname} (${file.mimetype})`);
-    cb(new Error(`Unsupported file type: ${file.mimetype}`));
-  }
-  
+  cb(null, true);
 };
 
-// 🎯 Multer yapılandırması
+// 🎯 Upload middleware
 const upload = multer({
   storage,
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+  limits: { fileSize: 20 * 1024 * 1024 },
   fileFilter,
 });
 
-// 🌐 Statik dosya servisi
+// 🌐 Statik dosya servisi (örnek: localhost:5014/uploads/metahub/...)
 export const serveUploads = express.static(BASE_UPLOAD_DIR);
 export { BASE_URL, UploadFolderKeys };
+export const UPLOAD_BASE_PATH = `${BASE_UPLOAD_DIR}/${envProfile}`;
 export default upload;

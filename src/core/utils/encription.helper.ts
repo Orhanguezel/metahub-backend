@@ -1,15 +1,40 @@
 import crypto from "crypto-js";
-import "dotenv/config.js";
+import path from "path";
+import fs from "fs";
+import dotenv from "dotenv";
 
-const encriptionKey = process.env.ENCRYPTION_KEY;
+// 🔄 Ortama özel .env dosyasını yükle
+const envProfile = process.env.APP_ENV || "metahub";
+const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
 
-export const encryptData = (data: string) => {
-  const cipher = crypto.AES.encrypt(data, encriptionKey as string).toString();
-  return cipher;
+if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+  console.log(`🔐 Encryption env loaded from ${envPath}`);
+} else {
+  console.warn(`⚠️ Encryption env file not found: ${envPath}`);
+}
+
+const encryptionKey = process.env.ENCRYPTION_KEY;
+
+if (!encryptionKey) {
+  throw new Error("❌ ENCRYPTION_KEY is not defined in your .env file.");
+}
+
+/**
+ * Veriyi AES algoritması ile şifreler.
+ * @param data - Düz metin string
+ * @returns Şifrelenmiş string
+ */
+export const encryptData = (data: string): string => {
+  return crypto.AES.encrypt(data, encryptionKey).toString();
 };
 
-export const decryptData = (data: string) => {
-  const bytes = crypto.AES.decrypt(data, encriptionKey as string);
-  const decryptedData = bytes.toString(crypto.enc.Utf8);
-  return decryptedData;
+/**
+ * AES şifrelenmiş veriyi çözer.
+ * @param encrypted - Şifrelenmiş string
+ * @returns Düz metin
+ */
+export const decryptData = (encrypted: string): string => {
+  const bytes = crypto.AES.decrypt(encrypted, encryptionKey);
+  return bytes.toString(crypto.enc.Utf8);
 };

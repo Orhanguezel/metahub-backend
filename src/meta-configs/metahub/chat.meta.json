@@ -1,0 +1,76 @@
+{
+  "name": "chat",
+  "label": {
+    "en": "Chat",
+    "de": "Chat",
+    "tr": "Chat"
+  },
+  "description": {
+    "en": "Manage chat",
+    "de": "chat verwalten",
+    "tr": "chat yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/:roomId",
+      "auth": true,
+      "summary": "GET /:roomId"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
+    },
+    {
+      "method": "POST",
+      "path": "/bulk",
+      "auth": true,
+      "summary": "POST /bulk"
+    },
+    {
+      "method": "POST",
+      "path": "/manual",
+      "auth": true,
+      "summary": "POST /manual"
+    },
+    {
+      "method": "PATCH",
+      "path": "/read/:roomId",
+      "auth": true,
+      "summary": "PATCH /read/:roomId"
+    },
+    {
+      "method": "GET",
+      "path": "/archived",
+      "auth": true,
+      "summary": "GET /archived"
+    },
+    {
+      "method": "GET",
+      "path": "/sessions/active",
+      "auth": true,
+      "summary": "GET /sessions/active"
+    },
+    {
+      "method": "GET",
+      "path": "/sessions",
+      "auth": true,
+      "summary": "GET /sessions"
+    }
+  ]
+}

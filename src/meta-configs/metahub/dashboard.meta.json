@@ -1,0 +1,64 @@
+{
+  "name": "dashboard",
+  "label": {
+    "en": "Dashboard",
+    "de": "Dashboard",
+    "tr": "Dashboard"
+  },
+  "description": {
+    "en": "Manage dashboard",
+    "de": "dashboard verwalten",
+    "tr": "dashboard yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "GET",
+      "path": "/charts/orders",
+      "auth": true,
+      "summary": "GET /charts/orders"
+    },
+    {
+      "method": "GET",
+      "path": "/charts/revenue",
+      "auth": true,
+      "summary": "GET /charts/revenue"
+    },
+    {
+      "method": "GET",
+      "path": "/reports/top-products",
+      "auth": true,
+      "summary": "GET /reports/top-products"
+    },
+    {
+      "method": "GET",
+      "path": "/reports/user-roles",
+      "auth": true,
+      "summary": "GET /reports/user-roles"
+    },
+    {
+      "method": "GET",
+      "path": "/daily-overview",
+      "auth": true,
+      "summary": "GET /daily-overview"
+    },
+    {
+      "method": "GET",
+      "path": "/logs",
+      "auth": true,
+      "summary": "GET /logs"
+    }
+  ]
+}

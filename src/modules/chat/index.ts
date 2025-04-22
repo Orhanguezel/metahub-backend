@@ -1,3 +1,11 @@
-export * from "./blog.controller";
-export * from "./blog.models";
-export { default as blogRoutes } from "./blog.routes";
+import express from "express";
+import routes from "./chat.routes";
+
+const router = express.Router();
+router.use("/", routes);
+
+export * from "./chat.controller";
+export * from "./chatMessage.model";
+export * from "./chatSession.model";
+
+export default router;

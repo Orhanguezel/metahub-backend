@@ -1,0 +1,52 @@
+{
+  "name": "notification",
+  "label": {
+    "en": "Notification",
+    "de": "Notification",
+    "tr": "Notification"
+  },
+  "description": {
+    "en": "Manage notification",
+    "de": "notification verwalten",
+    "tr": "notification yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/:id/read",
+      "auth": true,
+      "summary": "PATCH /:id/read"
+    },
+    {
+      "method": "PATCH",
+      "path": "/mark-all-read",
+      "auth": true,
+      "summary": "PATCH /mark-all-read"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Reference from "./references.models";
-import { BASE_URL } from "../../core/middleware/uploadMiddleware";
+import { BASE_URL,UPLOAD_BASE_PATH } from "../../core/middleware/uploadMiddleware";
 import fs from "fs";
 import path from "path";
 
@@ -25,7 +25,8 @@ export const createReference = asyncHandler(
     const logos = Array.isArray(req.files)
       ? req.files.map(
           (file: Express.Multer.File) =>
-            `${BASE_URL}/uploads/references/${file.filename}`
+            `${BASE_URL}/${UPLOAD_BASE_PATH}/references/${file.filename}`
+
         )
       : [];
 
@@ -149,7 +150,8 @@ export const updateReference = asyncHandler(
     // 🖼️ Yeni logo görselleri geldiyse ekle
     const files = req.files as Express.Multer.File[];
     const newLogos =
-      files?.map((file) => `${BASE_URL}/uploads/references/${file.filename}`) ||
+      files?.map((file) => `${BASE_URL}/${UPLOAD_BASE_PATH}/references/${file.filename}`
+) ||
       [];
 
     if (newLogos.length > 0) {

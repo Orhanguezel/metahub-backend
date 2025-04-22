@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import LibraryItem from "./library.models";
-import { BASE_URL } from "../../core/middleware/uploadMiddleware";
+import { BASE_URL, UPLOAD_BASE_PATH } from "../../core/middleware/uploadMiddleware";
 import { isValidObjectId } from "../../core/utils/validation";
 
 // 🔹 Yeni belge oluştur (çok dilli destekli)
@@ -17,7 +17,8 @@ export const createLibraryItem = asyncHandler(
 
     const files = req.files as Express.Multer.File[];
     const fileUrl = files?.[0]
-      ? `${BASE_URL}/uploads/library/${files[0].filename}`
+      ? `${BASE_URL}/${UPLOAD_BASE_PATH}/library/${files[0].filename}`
+
       : "";
 
     if (!fileUrl) {

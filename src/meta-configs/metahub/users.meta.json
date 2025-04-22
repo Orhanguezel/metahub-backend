@@ -1,0 +1,76 @@
+{
+  "name": "users",
+  "label": {
+    "en": "Users",
+    "de": "Users",
+    "tr": "Users"
+  },
+  "description": {
+    "en": "Manage users",
+    "de": "users verwalten",
+    "tr": "users yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/register",
+      "auth": true,
+      "summary": "POST /register"
+    },
+    {
+      "method": "POST",
+      "path": "/login",
+      "auth": true,
+      "summary": "POST /login"
+    },
+    {
+      "method": "POST",
+      "path": "/change-password",
+      "auth": true,
+      "summary": "POST /change-password"
+    },
+    {
+      "method": "POST",
+      "path": "/forgot-password",
+      "auth": true,
+      "summary": "POST /forgot-password"
+    },
+    {
+      "method": "POST",
+      "path": "/reset-password/:token",
+      "auth": true,
+      "summary": "POST /reset-password/:token"
+    },
+    {
+      "method": "GET",
+      "path": "/users",
+      "auth": true,
+      "summary": "GET /users"
+    },
+    {
+      "method": "PUT",
+      "path": "/users/:id/role",
+      "auth": true,
+      "summary": "PUT /users/:id/role"
+    },
+    {
+      "method": "PUT",
+      "path": "/users/:id/status",
+      "auth": true,
+      "summary": "PUT /users/:id/status"
+    },
+    {
+      "method": "POST",
+      "path": "/logout",
+      "auth": true,
+      "summary": "POST /logout"
+    }
+  ]
+}

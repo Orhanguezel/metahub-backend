@@ -1,12 +1,13 @@
 import express, { Express } from "express";
-import cors from "cors";
 import http from "http";
+import cors from "cors";
 import "./core/config/env";
 import connectDB from "./core/config/connect";
-import routes from "./routes";
 import cookieParser from "cookie-parser";
-import { setLocale } from "./core/middleware/setLocale";
 import { initializeSocket } from "./socket/socket";
+import { setLocale } from "./core/middleware/setLocale";
+import { getRouter } from "./routes";
+import { setupSwagger } from "./core/swagger/setupSwagger"; 
 
 const app: Express = express();
 const server = http.createServer(app);
@@ -14,13 +15,15 @@ const server = http.createServer(app);
 connectDB();
 
 app.use(cookieParser());
+app.use(express.json({ strict: false }));
+app.use(setLocale);
+app.use("/uploads", express.static("uploads"));
 
+// CORS
 const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [];
-
 app.use(
   cors({
     origin: function (origin, callback) {
-      // SSR veya Postman gibi durumlar için origin null olabilir
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -28,19 +31,22 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true, // Cookie gönderimi için GEREKLİ
+    credentials: true,
   })
 );
 
-app.use(express.json({ strict: false }));
+(async () => {
+  const router = await getRouter();
+  app.use("/api", router);
 
-app.use(setLocale);
-app.use("/uploads", express.static("uploads"));
-app.use("/api", routes);
+  await setupSwagger(app);
 
-initializeSocket(server);
+  const port = process.env.PORT || 5014;
+  server.listen(port, () => {
+    console.log(`✅ Server running at http://localhost:${port}`);
+  });
 
-const port = process.env.PORT || 5015;
-server.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
+  initializeSocket(server);
+})();
+
+

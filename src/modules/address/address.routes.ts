@@ -5,7 +5,7 @@ import {
   getAddressById,
   updateAddress,
   deleteAddress,
-} from "../user/address.controller";
+} from "../users/address.controller";
 import { authenticate } from "../../core/middleware/authMiddleware";
 
 const router = express.Router();
@@ -24,8 +24,6 @@ router.get("/:id", getAddressById);
 
 // ✏️ Adres güncelle
 router.put("/:id", updateAddress);
-
-
 
 // ❌ Adres sil
 router.delete("/:id", deleteAddress);

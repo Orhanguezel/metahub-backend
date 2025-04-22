@@ -1,72 +1,58 @@
-// src/routes/index.ts
-
-import { analyticsLogger } from "../core/middleware/analyticsLogger";
-
-
 import express, { Router } from "express";
-import userRoutes from "../modules/user/user.routes";
-import productRoutes from "../modules/product/product.routes";
+import fs from "fs/promises";
+import path from "path";
+import { analyticsLogger } from "../core/middleware/analyticsLogger";
+import "../core/config/env"; // .env yükleme
 
-import categoryRoutes from "../modules/category/category.routes";
-import orderRoutes from "../modules/order/order.routes";
-import paymentRoutes from "../modules/payment/payment.routes";
+export const getRouter = async (): Promise<Router> => {
+  const router = express.Router();
 
-import blogRoutes from "../modules/blog/blog.routes";
-import newsRoutes from "../modules/news/news.routes";
-import articlesRoutes from "../modules/articles/articles.routes";
-import sparePartsRoutes from "../modules/sparePart/spareParts.routes";
-import librarayRoutes from "../modules/library/library.routes";
-import referencesRoutes from "../modules/references/references.routes";
+  const modulesPath = path.join(__dirname, "..", "modules");
+  const enabledModules =
+    process.env.ENABLED_MODULES?.split(",").map((m) => m.trim().toLowerCase()) ?? [];
 
+  const metaConfigPath = path.resolve(process.cwd(), process.env.META_CONFIG_PATH || "src/meta-configs/metahub");
+  const modules = await fs.readdir(modulesPath, { withFileTypes: true });
 
-import dashboardRoutes from "../modules/dashboard/dashboard.routes";
-import cartRoutes from "../modules/cart/cart.routes";
-import notificationRoutes from "../modules/notification/notification.routes";
-import feedbackRoutes from "../modules/feedback/feedback.routes";
-import settingsRoutes from "../modules/setting/settings.routes";
-import contactRoutes from "../modules/contact/contact.routes";
-import galleryRoutes from "../modules/gallery/gallery.routes";
-import faqRoutes from "../modules/faq/faq.routes";
-import commentRoutes from "../modules/comment/comment.routes";
+  for (const mod of modules) {
+    if (!mod.isDirectory()) continue;
 
+    const moduleName = mod.name;
+    const moduleNameLower = moduleName.toLowerCase();
 
-import accountRoutes from "../modules/account/account.routes";
-import servicesRoutes from "../modules/services/services.routes";
-import emailRoutes from "../modules/email/email.routes";
-import addressRoutes from "../modules/address/address.routes";
-import chatRoutes from "../modules/chat/chat.routes";
+    if (!enabledModules.includes(moduleNameLower)) {
+      console.log(`⏭️  [SKIP] ${moduleName} is not listed in ENABLED_MODULES`);
+      continue;
+    }
 
+    const moduleDir = path.join(modulesPath, moduleName);
+    const metaFile = path.join(metaConfigPath, `${moduleNameLower}.meta.json`);
 
+    try {
+      const metaRaw = await fs.readFile(metaFile, "utf-8");
+      const meta = JSON.parse(metaRaw);
 
+      const indexImport = await import(path.join(moduleDir, "index.ts").replace(".ts", ""));
+      const modRouter = indexImport.default;
 
-const router: Router = express.Router();
+      if (!modRouter) {
+        console.warn(`⚠️  [WARN] ${moduleName}/index.ts has no default export.`);
+        continue;
+      }
 
-router.use("/users", userRoutes);
-router.use("/products", analyticsLogger,productRoutes);
-router.use("/orders", analyticsLogger,orderRoutes);
-router.use("/blogs", analyticsLogger,blogRoutes);
-router.use("/dashboard", dashboardRoutes);
-router.use("/cart", analyticsLogger,cartRoutes);
-router.use("/notifications", notificationRoutes);
-router.use("/feedbacks", feedbackRoutes);
-router.use("/contacts", contactRoutes);
-router.use("/settings", settingsRoutes);
-router.use("/faqs", faqRoutes);
-router.use("/gallery", galleryRoutes);
-router.use("/payments", paymentRoutes);
-router.use("/account", analyticsLogger,accountRoutes);
-router.use("/services", servicesRoutes);
-router.use("/emails", emailRoutes);
-router.use("/categories", categoryRoutes);
-router.use("/news", analyticsLogger,newsRoutes);
-router.use("/articles", analyticsLogger,articlesRoutes);
-router.use("/spareparts", sparePartsRoutes);
-router.use("/library", analyticsLogger,librarayRoutes);
-router.use("/references", referencesRoutes);
-router.use("/comments", commentRoutes);
-router.use("/address", addressRoutes);
-router.use("/chat", chatRoutes);
+      const prefix = meta.prefix || `/${moduleNameLower}`;
 
+      if (meta.useAnalytics) {
+        router.use(prefix, analyticsLogger, modRouter);
+      } else {
+        router.use(prefix, modRouter);
+      }
 
-export default router;
+      console.log(`✅ [OK] Mounted ${prefix} (${moduleName})`);
+    } catch (err: any) {
+      console.error(`❌ [FAIL] Failed to load module "${moduleName}":`, err.message);
+    }
+  }
 
+  return router;
+};

@@ -1,8 +1,11 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import Product from "./product.models";
-import StockMovement from "../stockMovement/stockMovement.models";
-import { BASE_URL, UPLOAD_FOLDERS } from "../../core/middleware/uploadMiddleware";
+import StockMovement from "../stockmovement/stockmovement.models";
+import {
+  BASE_URL,
+  UPLOAD_BASE_PATH,
+} from "../../core/middleware/uploadMiddleware";
 import fs from "fs";
 import path from "path";
 
@@ -37,7 +40,7 @@ export const createProduct = asyncHandler(
       images && images.length > 0
         ? images.map(
             (file) =>
-              `${BASE_URL}/uploads/${UPLOAD_FOLDERS.product}/${file.filename}`
+              `${BASE_URL}/${UPLOAD_BASE_PATH}/product-images/${file.filename}`
           )
         : [];
 
@@ -188,7 +191,7 @@ export const updateProduct = asyncHandler(
     const newImages =
       files?.map(
         (file) =>
-          `${BASE_URL}/uploads/${UPLOAD_FOLDERS.product}/${file.filename}`
+          `${BASE_URL}/${UPLOAD_BASE_PATH}/product-images/${file.filename}`
       ) || [];
 
     if (newImages.length > 0) {

@@ -1,0 +1,21 @@
+{
+  "name": "forum",
+  "label": {
+    "en": "Forum",
+    "de": "Forum",
+    "tr": "Forum"
+  },
+  "description": {
+    "en": "Manage forum",
+    "de": "forum verwalten",
+    "tr": "forum yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": []
+}

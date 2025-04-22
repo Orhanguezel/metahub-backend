@@ -1,0 +1,46 @@
+{
+  "name": "order",
+  "label": {
+    "en": "Order",
+    "de": "Order",
+    "tr": "Order"
+  },
+  "description": {
+    "en": "Manage order",
+    "de": "order verwalten",
+    "tr": "order yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id/deliver",
+      "auth": true,
+      "summary": "PUT /:id/deliver"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id/status",
+      "auth": true,
+      "summary": "PUT /:id/status"
+    }
+  ]
+}

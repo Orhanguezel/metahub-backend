@@ -1,0 +1,34 @@
+{
+  "name": "education",
+  "label": {
+    "en": "Education",
+    "de": "Education",
+    "tr": "Education"
+  },
+  "description": {
+    "en": "Manage education",
+    "de": "education verwalten",
+    "tr": "education yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /"
+    }
+  ]
+}

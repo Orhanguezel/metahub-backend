@@ -1,0 +1,52 @@
+{
+  "name": "guestbook",
+  "label": {
+    "en": "Guestbook",
+    "de": "Guestbook",
+    "tr": "Guestbook"
+  },
+  "description": {
+    "en": "Manage guestbook",
+    "de": "guestbook verwalten",
+    "tr": "guestbook yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "GET",
+      "path": "/admin",
+      "auth": true,
+      "summary": "GET /admin"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id/toggle",
+      "auth": true,
+      "summary": "PUT /:id/toggle"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
+    }
+  ]
+}

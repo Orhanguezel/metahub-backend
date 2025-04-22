@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import User from "../../modules/user/user.models";
+import User from "../users/users.models";
 import Order from "../../modules/order/order.models";
 import Feedback from "../../modules/feedback/feedback.models";
 

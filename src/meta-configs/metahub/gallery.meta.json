@@ -1,0 +1,40 @@
+{
+  "name": "gallery",
+  "label": {
+    "en": "Gallery",
+    "de": "Gallery",
+    "tr": "Gallery"
+  },
+  "description": {
+    "en": "Manage gallery",
+    "de": "gallery verwalten",
+    "tr": "gallery yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "POST",
+      "path": "/upload",
+      "auth": true,
+      "summary": "POST /upload"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
+    }
+  ]
+}

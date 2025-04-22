@@ -5,31 +5,38 @@ interface WelcomeTemplateParams {
   locale?: "de" | "tr" | "en";
 }
 
-export const welcomeTemplate = ({ name, locale = "de" }: WelcomeTemplateParams): string => {
+const BRAND_NAME = process.env.BRAND_NAME || "Ensotek";
+const BRAND_FULL_NAME = process.env.BRAND_FULL_NAME || `${BRAND_NAME} Cooling Systems`;
+const BRAND_TEAM_NAME = process.env.BRAND_TEAM_NAME || `${BRAND_NAME} Team`;
+
+export const welcomeTemplate = ({
+  name,
+  locale = "de",
+}: WelcomeTemplateParams): string => {
   const translations = {
     de: {
-      title: "Willkommen bei Ensotek",
+      title: `Willkommen bei ${BRAND_NAME}`,
       greeting: `Willkommen, ${name}!`,
-      message1: "Vielen Dank für Ihre Registrierung bei <strong>Ensotek Cooling Systems</strong>.",
+      message1: `Vielen Dank für Ihre Registrierung bei <strong>${BRAND_FULL_NAME}</strong>.`,
       message2: "Wir freuen uns, Sie auf dem Weg zu innovativer Kühltechnologie begleiten zu dürfen.",
       message3: "Ab jetzt können Sie unsere Produkte entdecken und online Bestellungen aufgeben.",
-      sign: "Mit freundlichen Grüßen,<br/>Ihr Ensotek Team",
+      sign: `Mit freundlichen Grüßen,<br/>Ihr ${BRAND_TEAM_NAME}`,
     },
     tr: {
-      title: "Ensotek'e Hoş Geldiniz",
+      title: `${BRAND_NAME}'e Hoş Geldiniz`,
       greeting: `Merhaba ${name},`,
-      message1: "<strong>Ensotek Cooling Systems</strong>'e kaydolduğunuz için teşekkür ederiz.",
+      message1: `<strong>${BRAND_FULL_NAME}</strong>'e kaydolduğunuz için teşekkür ederiz.`,
       message2: "Yenilikçi soğutma çözümleri yolculuğunuzda yanınızdayız.",
       message3: "Artık ürünlerimizi keşfedebilir ve çevrim içi sipariş verebilirsiniz.",
-      sign: "Saygılarımızla,<br/>Ensotek Ekibi",
+      sign: `Saygılarımızla,<br/>${BRAND_TEAM_NAME}`,
     },
     en: {
-      title: "Welcome to Ensotek",
+      title: `Welcome to ${BRAND_NAME}`,
       greeting: `Hello ${name},`,
-      message1: "Thank you for registering with <strong>Ensotek Cooling Systems</strong>.",
+      message1: `Thank you for registering with <strong>${BRAND_FULL_NAME}</strong>.`,
       message2: "We are excited to support you on your journey in cooling innovation.",
       message3: "You can now explore our products and place online orders.",
-      sign: "Best regards,<br/>The Ensotek Team",
+      sign: `Best regards,<br/>The ${BRAND_TEAM_NAME}`,
     },
   };
 

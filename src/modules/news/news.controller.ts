@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import News from "./news.models";
-import { BASE_URL } from "../../core/middleware/uploadMiddleware";
+import { BASE_URL,UPLOAD_BASE_PATH } from "../../core/middleware/uploadMiddleware";
 import { isValidObjectId } from "../../core/utils/validation";
 
 // ✅ Çoklu dilde haber oluşturma (çoklu görselli)
@@ -12,7 +12,8 @@ export const createNews = asyncHandler(
     const files = req.files as Express.Multer.File[];
     const imageUrls =
       files?.map(
-        (file) => `${BASE_URL}/uploads/news-images/${file.filename}`
+        (file) => `${BASE_URL}/${UPLOAD_BASE_PATH}/news-images/${file.filename}`
+
       ) || [];
 
     if (imageUrls.length === 0) {
@@ -199,7 +200,8 @@ export const updateNews = asyncHandler(
     const files = req.files as Express.Multer.File[];
     const newImages =
       files?.map(
-        (file) => `${BASE_URL}/uploads/news-images/${file.filename}`
+        (file) => `${BASE_URL}/${UPLOAD_BASE_PATH}/news-images/${file.filename}`
+
       ) || [];
 
     if (newImages.length > 0) {

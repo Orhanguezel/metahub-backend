@@ -1,0 +1,76 @@
+{
+  "name": "payment",
+  "label": {
+    "en": "Payment",
+    "de": "Payment",
+    "tr": "Payment"
+  },
+  "description": {
+    "en": "Manage payment",
+    "de": "payment verwalten",
+    "tr": "payment yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/simulate/stripe",
+      "auth": true,
+      "summary": "POST /simulate/stripe"
+    },
+    {
+      "method": "POST",
+      "path": "/simulate/paypal",
+      "auth": true,
+      "summary": "POST /simulate/paypal"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "GET",
+      "path": "/user",
+      "auth": true,
+      "summary": "GET /user"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id/mark-paid",
+      "auth": true,
+      "summary": "PUT /:id/mark-paid"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id/mark-failed",
+      "auth": true,
+      "summary": "PUT /:id/mark-failed"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id/update-method",
+      "auth": true,
+      "summary": "PUT /:id/update-method"
+    },
+    {
+      "method": "GET",
+      "path": "/order/:orderId",
+      "auth": true,
+      "summary": "GET /order/:orderId"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "name": "coupon",
+  "label": {
+    "en": "Coupon",
+    "de": "Coupon",
+    "tr": "Coupon"
+  },
+  "description": {
+    "en": "Manage coupon",
+    "de": "coupon verwalten",
+    "tr": "coupon yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/check/:code",
+      "auth": true,
+      "summary": "GET /check/:code"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id",
+      "auth": true,
+      "summary": "PUT /:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
+    }
+  ]
+}

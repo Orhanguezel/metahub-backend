@@ -28,10 +28,11 @@ src/
 │   │   ├── blog.controller.ts
 │   │   ├── blog.models.ts
 │   │   └── blog.routes.ts
+        └── index.ts
 │   ├── auth/
 │   ├── cart/
 │   ├── ...
-├── routes/              # Ana router yönlendirmeleri
+├── routes/──index.ts   # Ana router yönlendirmeleri
 ├── services/            # Harici servisler (ör. Email)
 ├── socket/              # WebSocket (Socket.IO) mantığı
 ├── templates/           # E-posta veya PDF şablonları
@@ -100,7 +101,7 @@ EMAIL_PASS=password
 
 ## 🧪 Testler & Araçlar
 
-> Test altyapısı eklenmemişse Jest/Vitest ile genişletilebilir.
+> 
 
 ## 💡 Geliştirici Notları
 
