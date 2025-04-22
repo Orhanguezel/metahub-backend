@@ -1,0 +1,64 @@
+{
+  "name": "account",
+  "label": {
+    "en": "Account",
+    "de": "Account",
+    "tr": "Account"
+  },
+  "description": {
+    "en": "Manage account",
+    "de": "account verwalten",
+    "tr": "account yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/me",
+      "auth": true,
+      "summary": "GET /me"
+    },
+    {
+      "method": "PUT",
+      "path": "/me/update",
+      "auth": true,
+      "summary": "PUT /me/update"
+    },
+    {
+      "method": "PUT",
+      "path": "/me/password",
+      "auth": true,
+      "summary": "PUT /me/password"
+    },
+    {
+      "method": "PATCH",
+      "path": "/me/notifications",
+      "auth": true,
+      "summary": "PATCH /me/notifications"
+    },
+    {
+      "method": "PATCH",
+      "path": "/me/social",
+      "auth": true,
+      "summary": "PATCH /me/social"
+    },
+    {
+      "method": "PUT",
+      "path": "/me/addresses",
+      "auth": true,
+      "summary": "PUT /me/addresses"
+    },
+    {
+      "method": "PUT",
+      "path": "/me/profile-image",
+      "auth": true,
+      "summary": "PUT /me/profile-image"
+    }
+  ]
+}

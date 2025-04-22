@@ -1,0 +1,46 @@
+{
+  "name": "setting",
+  "label": {
+    "en": "Setting",
+    "de": "Setting",
+    "tr": "Setting"
+  },
+  "description": {
+    "en": "Manage setting",
+    "de": "setting verwalten",
+    "tr": "setting yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "GET",
+      "path": "/:key",
+      "auth": true,
+      "summary": "GET /:key"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:key",
+      "auth": true,
+      "summary": "DELETE /:key"
+    }
+  ]
+}

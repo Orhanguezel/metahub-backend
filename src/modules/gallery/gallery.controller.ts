@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Gallery from "./gallery.models";
 import { isValidObjectId } from "../../core/utils/validation";
-import { BASE_URL } from "../../core/middleware/uploadMiddleware";
+import { BASE_URL, UPLOAD_BASE_PATH } from "../../core/middleware/uploadMiddleware";
 
 // 📤 Çoklu medya yükle (3 dilde)
 export const uploadGalleryItem = asyncHandler(
@@ -31,7 +31,8 @@ export const uploadGalleryItem = asyncHandler(
       for (const file of files) {
         const item = await Gallery.create({
           title,
-          image: `${BASE_URL}/uploads/gallery/${file.filename}`,
+          image: `${BASE_URL}/${UPLOAD_BASE_PATH}/gallery/${file.filename}`
+,
           type,
           language: lang,
         });

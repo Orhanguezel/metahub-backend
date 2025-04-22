@@ -1,5 +1,5 @@
 import express from "express";
-import { sendMessage, getAllMessages, deleteMessage } from "./contactMessage.controller";
+import { sendMessage, getAllMessages, deleteMessage } from "./contact.controller";
 import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
 
 const router = express.Router();

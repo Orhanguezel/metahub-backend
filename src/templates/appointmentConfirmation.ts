@@ -1,4 +1,14 @@
 import { baseTemplate } from "./baseTemplate";
+import dotenv from "dotenv";
+import path from "path";
+import fs from "fs";
+
+// 🔄 Ortama özel .env dosyasını yükle
+const envProfile = process.env.APP_ENV || "metahub";
+const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
+if (fs.existsSync(envPath)) dotenv.config({ path: envPath });
+
+const BRAND_NAME = process.env.BRAND_NAME || "Ensotek";
 
 interface AppointmentConfirmationParams {
   name: string;
@@ -19,38 +29,38 @@ export const appointmentConfirmationTemplate = ({
     de: {
       title: "🗓️ Terminbestätigung",
       greeting: `Hallo ${name},`,
-      thanks: "vielen Dank für Ihre Terminbuchung bei <strong>Ensotek</strong>.",
+      thanks: `vielen Dank für Ihre Terminbuchung bei <strong>${BRAND_NAME}</strong>.`,
       received: "Ihre Anfrage wurde erfolgreich empfangen und wird nun verarbeitet.",
       serviceLabel: "🛠️ Service",
       dateLabel: "📅 Datum",
       timeLabel: "⏰ Uhrzeit",
       note: "Sollten Sie Fragen oder Änderungswünsche haben, kontaktieren Sie uns bitte rechtzeitig.",
       closing: "Wir freuen uns, Sie bald persönlich begrüßen zu dürfen.",
-      sign: "Herzliche Grüße,<br/><strong>Ihr Ensotek Team</strong>",
+      sign: `Herzliche Grüße,<br/><strong>Ihr ${BRAND_NAME} Team</strong>`,
     },
     tr: {
       title: "🗓️ Randevu Onayı",
       greeting: `Merhaba ${name},`,
-      thanks: "<strong>Ensotek</strong>'ten randevu aldığınız için teşekkür ederiz.",
+      thanks: `<strong>${BRAND_NAME}</strong>'ten randevu aldığınız için teşekkür ederiz.`,
       received: "Talebiniz başarıyla alındı ve işleniyor.",
       serviceLabel: "🛠️ Hizmet",
       dateLabel: "📅 Tarih",
       timeLabel: "⏰ Saat",
       note: "Herhangi bir sorunuz veya değişiklik talebiniz varsa lütfen bizimle iletişime geçin.",
       closing: "Sizi yakında ağırlamaktan memnuniyet duyarız.",
-      sign: "Saygılarımızla,<br/><strong>Ensotek Ekibi</strong>",
+      sign: `Saygılarımızla,<br/><strong>${BRAND_NAME} Ekibi</strong>`,
     },
     en: {
       title: "🗓️ Appointment Confirmation",
       greeting: `Hello ${name},`,
-      thanks: "Thank you for booking an appointment with <strong>Ensotek</strong>.",
+      thanks: `Thank you for booking an appointment with <strong>${BRAND_NAME}</strong>.`,
       received: "We have successfully received your request and it's now being processed.",
       serviceLabel: "🛠️ Service",
       dateLabel: "📅 Date",
       timeLabel: "⏰ Time",
       note: "If you have any questions or need to make changes, please contact us in advance.",
       closing: "We look forward to welcoming you soon.",
-      sign: "Best regards,<br/><strong>The Ensotek Team</strong>",
+      sign: `Best regards,<br/><strong>The ${BRAND_NAME} Team</strong>`,
     },
   };
 

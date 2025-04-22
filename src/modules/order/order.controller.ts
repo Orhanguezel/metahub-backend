@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Order, { IOrderItem, OrderStatus } from "./order.models";
 import Product from "../product/product.models";
-import User from "../user/user.models";
+import User from "../users/users.models";
 import Notification from "../notification/notification.models";
 import { sendEmail } from "../../services/emailService";
 import { orderConfirmationTemplate } from "../../templates/orderConfirmation";

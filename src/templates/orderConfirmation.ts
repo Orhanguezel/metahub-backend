@@ -7,6 +7,9 @@ interface OrderConfirmationParams {
   locale?: "de" | "tr" | "en";
 }
 
+const BRAND_NAME = process.env.BRAND_NAME || "Ensotek";
+const BRAND_TEAM = process.env.BRAND_TEAM_NAME || `${BRAND_NAME} Team`;
+
 export const orderConfirmationTemplate = ({
   name,
   itemsList,
@@ -17,32 +20,32 @@ export const orderConfirmationTemplate = ({
     de: {
       title: "🧾 Bestellbestätigung",
       greeting: `Hallo ${name},`,
-      thankYou: "Vielen Dank für Ihre Bestellung bei <strong>Ensotek</strong>.",
+      thankYou: `Vielen Dank für Ihre Bestellung bei <strong>${BRAND_NAME}</strong>.`,
       status: "Ihre Bestellung wurde erfolgreich aufgegeben und wird nun bearbeitet.",
       labelItems: "🛍️ Produkte",
       labelTotal: "💰 Gesamtpreis",
       shipping: "Sie erhalten eine Benachrichtigung, sobald Ihre Bestellung versendet wurde.",
-      sign: "Mit freundlichen Grüßen,<br/>Ihr Ensotek Team",
+      sign: `Mit freundlichen Grüßen,<br/>Ihr ${BRAND_TEAM}`,
     },
     tr: {
       title: "🧾 Sipariş Onayı",
       greeting: `Merhaba ${name},`,
-      thankYou: "<strong>Ensotek</strong>'ten sipariş verdiğiniz için teşekkür ederiz.",
+      thankYou: `<strong>${BRAND_NAME}</strong>'ten sipariş verdiğiniz için teşekkür ederiz.`,
       status: "Siparişiniz başarıyla alındı ve işleme alındı.",
       labelItems: "🛍️ Ürünler",
       labelTotal: "💰 Toplam Tutar",
       shipping: "Siparişiniz kargoya verildiğinde bilgilendirileceksiniz.",
-      sign: "Saygılarımızla,<br/>Ensotek Ekibi",
+      sign: `Saygılarımızla,<br/>${BRAND_TEAM}`,
     },
     en: {
       title: "🧾 Order Confirmation",
       greeting: `Hello ${name},`,
-      thankYou: "Thank you for your order at <strong>Ensotek</strong>.",
+      thankYou: `Thank you for your order at <strong>${BRAND_NAME}</strong>.`,
       status: "Your order has been received and is now being processed.",
       labelItems: "🛍️ Items",
       labelTotal: "💰 Total Price",
       shipping: "You’ll be notified once your order is shipped.",
-      sign: "Best regards,<br/>The Ensotek Team",
+      sign: `Best regards,<br/>The ${BRAND_TEAM}`,
     },
   };
 

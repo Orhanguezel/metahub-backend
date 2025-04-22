@@ -1,0 +1,58 @@
+{
+  "name": "library",
+  "label": {
+    "en": "Library",
+    "de": "Library",
+    "tr": "Library"
+  },
+  "description": {
+    "en": "Manage library",
+    "de": "library verwalten",
+    "tr": "library yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "GET",
+      "path": "/slug/:slug",
+      "auth": true,
+      "summary": "GET /slug/:slug"
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id",
+      "auth": true,
+      "summary": "PUT /:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
+    }
+  ]
+}

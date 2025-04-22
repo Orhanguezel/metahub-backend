@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import AnalyticsEvent from "../../modules/analytics/analyticsEvent.models";
+import AnalyticsEvent from "../../modules/dashboard/analyticsEvent.models";
 
 export const analyticsLogger = async (
   req: Request,

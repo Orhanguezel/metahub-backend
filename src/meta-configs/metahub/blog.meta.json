@@ -1,0 +1,86 @@
+{
+  "name": "blog",
+  "label": {
+    "en": "Blog",
+    "de": "Blog",
+    "tr": "Blog"
+  },
+  "description": {
+    "en": "Manage blog",
+    "de": "blog verwalten",
+    "tr": "blog yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "GET",
+      "path": "/slug/:slug",
+      "auth": true,
+      "summary": "GET /slug/:slug"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /",
+      "body": {
+        "$ref": "#/definitions/BlogCreate",
+        "definitions": {
+          "BlogCreate": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 100
+              },
+              "content": {
+                "type": "string",
+                "minLength": 10
+              },
+              "author": {
+                "type": "string",
+                "minLength": 2
+              },
+              "published": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "required": [
+              "title",
+              "content",
+              "author"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/:id",
+      "auth": true,
+      "summary": "PUT /:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
+    }
+  ]
+}

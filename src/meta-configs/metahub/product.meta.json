@@ -1,0 +1,58 @@
+{
+  "name": "product",
+  "label": {
+    "en": "Product",
+    "de": "Product",
+    "tr": "Product"
+  },
+  "description": {
+    "en": "Manage product",
+    "de": "product verwalten",
+    "tr": "product yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id",
+      "auth": true,
+      "summary": "PUT /:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id/publish",
+      "auth": true,
+      "summary": "PUT /:id/publish"
+    }
+  ]
+}

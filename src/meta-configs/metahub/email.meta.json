@@ -1,0 +1,58 @@
+{
+  "name": "email",
+  "label": {
+    "en": "Email",
+    "de": "Email",
+    "tr": "Email"
+  },
+  "description": {
+    "en": "Manage email",
+    "de": "email verwalten",
+    "tr": "email yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/send",
+      "auth": true,
+      "summary": "POST /send"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "GET",
+      "path": "/fetch",
+      "auth": true,
+      "summary": "GET /fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/:id/read",
+      "auth": true,
+      "summary": "PATCH /:id/read"
+    }
+  ]
+}

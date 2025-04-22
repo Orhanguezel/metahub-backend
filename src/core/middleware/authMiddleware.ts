@@ -1,7 +1,7 @@
 // src/middleware/authMiddleware.ts
 import asyncHandler from "express-async-handler";
 import { Request, Response, NextFunction } from "express";
-import User from "../../modules/user/user.models";
+import User from "../../modules/users/users.models";
 import { getTokenFromRequest } from "../utils/authHelpers";
 import { verifyToken } from "../utils/token";
 

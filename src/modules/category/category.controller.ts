@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Category from "./category.models";
 import slugify from "slugify";
-import { BASE_URL } from "../../core/middleware/uploadMiddleware";
+import { BASE_URL, UPLOAD_BASE_PATH } from "../../core/middleware/uploadMiddleware";
 
 // 🔄 Çok dilli kategori oluştur (TR / EN / DE)
 export const createCategory = asyncHandler(async (req: Request, res: Response) => {
@@ -11,7 +11,8 @@ export const createCategory = asyncHandler(async (req: Request, res: Response) =
 
   const files = req.files as Express.Multer.File[];
   const previewImage = files?.[0]?.filename || null;
-  const imageUrl = previewImage ? `${BASE_URL}/uploads/category-images/${previewImage}` : "category.png";
+  const imageUrl = previewImage ? `${BASE_URL}/${UPLOAD_BASE_PATH}/category-images/${previewImage}`
+ : "category.png";
 
   const createdCategories = [];
 
@@ -117,7 +118,7 @@ export const updateCategory = asyncHandler(async (req: Request, res: Response) =
   }
 
   if (req.file) {
-    category.image = `${BASE_URL}/uploads/category-images/${req.file.filename}`;
+    category.image = `${BASE_URL}/category-images/${req.file.filename}`;
   }
 
   await category.save();

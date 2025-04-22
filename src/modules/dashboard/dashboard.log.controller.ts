@@ -1,7 +1,7 @@
 // src/controllers/dashboard/dashboard.log.controller.ts
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import AnalyticsEvent from "../../modules/analytics/analyticsEvent.models";
+import AnalyticsEvent from "./analyticsEvent.models";
 
 // /api/dashboard/logs
 export const getAnalyticsLogs = asyncHandler(

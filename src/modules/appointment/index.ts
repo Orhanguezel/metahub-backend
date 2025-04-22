@@ -1,3 +1,10 @@
-export * from "./blog.controller";
-export * from "./blog.models";
-export { default as blogRoutes } from "./blog.routes";
+import express from "express";
+import routes from "./appointment.routes";
+
+const router = express.Router();
+router.use("/", routes);
+
+export * from "./appointment.controller";
+export * from "./appointment.models";
+
+export default router;

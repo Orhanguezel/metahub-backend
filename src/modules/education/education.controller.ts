@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import Education from "./education.model";
+import Education from "./education.models";
 
 // 🎓 Eğitim bilgilerini getir
 export const getAllEducation = asyncHandler(async (_req: Request, res: Response) => {

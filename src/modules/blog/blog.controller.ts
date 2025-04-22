@@ -3,7 +3,7 @@ import asyncHandler from "express-async-handler";
 import slugify from "slugify";
 import Blog from "./blog.models";
 import { isValidObjectId } from "../../core/utils/validation";
-import { BASE_URL } from "../../core/middleware/uploadMiddleware";
+import { BASE_URL,UPLOAD_BASE_PATH } from "../../core/middleware/uploadMiddleware";
 import { deleteUploadedFiles } from "../../core/utils/deleteUploadedFiles";
 
 // ✅ Çok dilli blog oluştur
@@ -14,7 +14,7 @@ export const createBlog = asyncHandler(
     const files = req.files as Express.Multer.File[];
     const imageUrls =
       files?.map(
-        (file) => `${BASE_URL}/uploads/blog-images/${file.filename}`
+        (file) => `${BASE_URL}/${UPLOAD_BASE_PATH}/blog-images/${file.filename}`
       ) || [];
 
     if (imageUrls.length === 0) {
@@ -139,7 +139,7 @@ export const updateBlog = asyncHandler(
     const files = req.files as Express.Multer.File[];
     const newImages =
       files?.map(
-        (file) => `${BASE_URL}/uploads/blog-images/${file.filename}`
+        (file) => `${BASE_URL}/${UPLOAD_BASE_PATH}/blog-images/${file.filename}`
       ) || [];
 
     // 🔴 Silinen görseller (hem db'den çıkar hem fs'den sil)

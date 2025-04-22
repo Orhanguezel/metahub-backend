@@ -1,0 +1,52 @@
+{
+  "name": "comment",
+  "label": {
+    "en": "Comment",
+    "de": "Comment",
+    "tr": "Comment"
+  },
+  "description": {
+    "en": "Manage comment",
+    "de": "comment verwalten",
+    "tr": "comment yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /"
+    },
+    {
+      "method": "GET",
+      "path": "/:type/:id",
+      "auth": true,
+      "summary": "GET /:type/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id/toggle",
+      "auth": true,
+      "summary": "PUT /:id/toggle"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
+    }
+  ]
+}

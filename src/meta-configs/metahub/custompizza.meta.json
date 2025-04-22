@@ -1,0 +1,46 @@
+{
+  "name": "custompizza",
+  "label": {
+    "en": "Custompizza",
+    "de": "Custompizza",
+    "tr": "Custompizza"
+  },
+  "description": {
+    "en": "Manage custompizza",
+    "de": "custompizza verwalten",
+    "tr": "custompizza yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
+    }
+  ]
+}

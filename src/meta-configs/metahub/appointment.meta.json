@@ -1,0 +1,52 @@
+{
+  "name": "appointment",
+  "label": {
+    "en": "Appointment",
+    "de": "Appointment",
+    "tr": "Appointment"
+  },
+  "description": {
+    "en": "Manage appointment",
+    "de": "appointment verwalten",
+    "tr": "appointment yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id/status",
+      "auth": true,
+      "summary": "PUT /:id/status"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
+    }
+  ]
+}

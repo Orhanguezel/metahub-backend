@@ -17,7 +17,7 @@ export const sendEmail = async ({
     from ||
     (process.env.SMTP_FROM && process.env.SMTP_FROM_NAME
       ? `"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_FROM}>`
-      : undefined);
+      : "no-reply@example.com");
 
   const mailOptions = {
     from: sender,
@@ -28,10 +28,13 @@ export const sendEmail = async ({
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log(`📧 Email sent: ${info.messageId}`);
-    console.log("📨 Recipient:", mailOptions.to);
+    const env = process.env.APP_ENV || "default";
+
+    console.log(
+      `📧 [${env}] Email sent successfully | Message ID: ${info.messageId}`
+    );
+    console.log("📨 To:", mailOptions.to);
   } catch (error) {
     console.error("❌ Failed to send email:", error);
   }
-  console.log("📧 Email sent successfully");
 };

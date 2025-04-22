@@ -6,6 +6,9 @@ interface PasswordResetTemplateParams {
   locale?: "tr" | "en" | "de";
 }
 
+const BRAND_NAME = process.env.BRAND_NAME || "Anastasia Massage";
+const BRAND_TEAM_NAME = process.env.BRAND_TEAM_NAME || `${BRAND_NAME} Team`;
+
 export const passwordResetTemplate = ({
   name,
   resetLink,
@@ -13,31 +16,31 @@ export const passwordResetTemplate = ({
 }: PasswordResetTemplateParams): string => {
   const translations = {
     de: {
-      title: "Passwort zurücksetzen",
+      title: "🔐 Passwort zurücksetzen",
       greeting: `Hallo ${name},`,
       info: "Sie haben eine Anfrage zum Zurücksetzen Ihres Passworts gestellt.",
       action: "Klicken Sie auf den folgenden Button, um Ihr Passwort zurückzusetzen:",
       button: "Passwort zurücksetzen",
       footer: "Wenn Sie diese Anfrage nicht gestellt haben, können Sie diese E-Mail ignorieren.",
-      sign: "Mit freundlichen Grüßen,<br/>Ihr Anastasia Massage Team",
+      sign: `Mit freundlichen Grüßen,<br/>Ihr ${BRAND_TEAM_NAME}`,
     },
     tr: {
-      title: "Şifre Sıfırlama",
+      title: "🔐 Şifre Sıfırlama",
       greeting: `Merhaba ${name},`,
       info: "Şifrenizi sıfırlamak için bir talep aldık.",
       action: "Aşağıdaki butona tıklayarak şifrenizi sıfırlayabilirsiniz:",
       button: "Şifreyi Sıfırla",
       footer: "Eğer bu isteği siz yapmadıysanız, bu e-postayı yok sayabilirsiniz.",
-      sign: "Saygılarımızla,<br/>Anastasia Masaj Ekibi",
+      sign: `Saygılarımızla,<br/>${BRAND_TEAM_NAME}`,
     },
     en: {
-      title: "Reset Your Password",
+      title: "🔐 Reset Your Password",
       greeting: `Hello ${name},`,
       info: "We received a request to reset your password.",
       action: "Click the button below to reset your password:",
       button: "Reset Password",
       footer: "If you didn’t request this, you can safely ignore this email.",
-      sign: "Best regards,<br/>Anastasia Massage Team",
+      sign: `Best regards,<br/>The ${BRAND_TEAM_NAME}`,
     },
   };
 
@@ -58,4 +61,3 @@ export const passwordResetTemplate = ({
 
   return baseTemplate(content, t.title);
 };
-

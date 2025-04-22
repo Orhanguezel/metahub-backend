@@ -6,8 +6,8 @@ import {
   updateNotificationSettings,
   updateSocialMediaLinks,
   updateProfileImage,
-} from "../user/account.controller";
-import { updateAllUserAddresses } from "../user/address.controller";
+} from "../users/account.controller";
+import { updateAllUserAddresses } from "../users/address.controller";
 
 import { authenticate } from "../../core/middleware/authMiddleware";
 import upload from "../../core/middleware/uploadMiddleware";
@@ -21,7 +21,6 @@ router.put("/me/password", authenticate, updateMyPassword);
 router.patch("/me/notifications", authenticate, updateNotificationSettings);
 router.patch("/me/social", authenticate, updateSocialMediaLinks);
 router.put("/me/addresses", authenticate, updateAllUserAddresses);
-
 
 // 📷 Profil fotoğrafı güncelleme
 router.put(

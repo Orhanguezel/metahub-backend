@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import SocialMedia from "./social.model";
+import SocialMedia from "./social.models";
 
 // 🔹 Sosyal medya linklerini getir (isteğe bağlı dil)
 export const getAllSocialLinks = asyncHandler(async (req: Request, res: Response): Promise<void> => {

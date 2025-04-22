@@ -26,7 +26,21 @@ declare global {
         | "references"
         | "news"
         | "article"
-        | "default";
+        | "default"
+        | "contact"
+        | "faq"
+        | "stockMovement"
+        | "email"
+        | "notification"
+        | "chat"
+        | "feedback"
+        | "settings"
+        | "dashboard"
+        | "user"
+        | "admin"
+        | "orders"
+        | "cart"
+        | "comments";
       locale?: "tr" | "en" | "de"; // 🌍 Çok dilli destek (i18n)
     }
   }

@@ -1,0 +1,58 @@
+{
+  "name": "cart",
+  "label": {
+    "en": "Cart",
+    "de": "Cart",
+    "tr": "Cart"
+  },
+  "description": {
+    "en": "Manage cart",
+    "de": "cart verwalten",
+    "tr": "cart yönet"
+  },
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "POST",
+      "path": "/add",
+      "auth": true,
+      "summary": "POST /add"
+    },
+    {
+      "method": "PATCH",
+      "path": "/increase/:productId",
+      "auth": true,
+      "summary": "PATCH /increase/:productId"
+    },
+    {
+      "method": "PATCH",
+      "path": "/decrease/:productId",
+      "auth": true,
+      "summary": "PATCH /decrease/:productId"
+    },
+    {
+      "method": "DELETE",
+      "path": "/remove/:productId",
+      "auth": true,
+      "summary": "DELETE /remove/:productId"
+    },
+    {
+      "method": "DELETE",
+      "path": "/clear",
+      "auth": true,
+      "summary": "DELETE /clear"
+    }
+  ]
+}
