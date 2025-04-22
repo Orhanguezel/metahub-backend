@@ -1,152 +1,118 @@
-<<<<<<< HEAD
 
-## 🚀 Ensotek Backend
+### `README.md`
 
-Ensotek, **soğutma kuleleri üretimi** alanında hizmet veren bir fabrikanın tüm iş süreçlerini kapsayan bir web sistemidir. Bu repository, sistemin **Node.js + Express + MongoDB + TypeScript** tabanlı RESTful API (backend) uygulamasını içerir.
+```md
+# 🧠 MetaHub Backend
 
-### 📦 Teknolojiler
+TypeScript tabanlı, modüler ve genişletilebilir bir Node.js backend yapısıdır. Çok sayıda modül içerir ve farklı projelerde yeniden kullanılabilir bir altyapı sağlar.
 
-- **Node.js** + **Express.js**
-- **TypeScript**
-- **MongoDB** + **Mongoose**
-- **JWT** Authentication (httpOnly cookie ile)
-- **Multer** ile dosya yükleme
-- **i18n destekli altyapı**
-- **Role-Based Access Control (RBAC)**
-- **RESTful API** mimarisi
-- **Modüler dosya yapısı**
+## 🚀 Projeye Genel Bakış
 
----
+- **Dil**: TypeScript
+- **Sunucu**: Express.js
+- **Veritabanı**: MongoDB (Mongoose)
+- **Gerçek Zamanlı**: Socket.IO
+- **E-Posta**: Nodemailer
+- **JWT Auth**: Access & Refresh token destekli
+- **Upload**: `uploads/` klasörüne dosya kaydı
+- **Servis Yapısı**: Service-Controller-Route yapısı
+- **Çoklu Ortam Desteği**: `.env.metahub`, `.env.kuhlturm` gibi env varyantları desteklenir.
 
-## 📁 Proje Yapısı
+## 🗂️ Klasör Yapısı
 
 ```
 src/
-├── config/               # Veritabanı bağlantısı, CORS, env
-├── controllers/          # Tüm modüllere ait iş mantığı
-│   └── user/             # Auth, profile, crud, status
-├── middleware/           # Auth, error handler, upload
-├── models/               # Mongoose veri modelleri
-├── routes/               # Express router modülleri
-├── services/             # E-posta, auth gibi servis katmanları
-├── templates/            # Mail HTML şablonları
-├── utils/                # Yardımcı fonksiyonlar
-└── server.ts             # Uygulamanın giriş noktası
+├── core/                # Çekirdek config'ler ve helper'lar
+├── modules/             # Her modül kendi içinde controller/model/route içerir
+│   ├── blog/
+│   │   ├── blog.controller.ts
+│   │   ├── blog.models.ts
+│   │   └── blog.routes.ts
+│   ├── auth/
+│   ├── cart/
+│   ├── ...
+├── routes/              # Ana router yönlendirmeleri
+├── services/            # Harici servisler (ör. Email)
+├── socket/              # WebSocket (Socket.IO) mantığı
+├── templates/           # E-posta veya PDF şablonları
+├── types/               # Global TypeScript tanımlamaları
+├── server.ts            # Uygulamanın giriş noktası
 ```
 
----
-
-## 🔐 Kimlik Doğrulama
-
-- JWT tabanlı token doğrulama
-- httpOnly cookie ile güvenli oturum
-- Role-based yetkilendirme: `"admin" | "moderator" | "user" | "staff" | "customer"`
-
----
-
-## 📚 API Modülleri
-
-| Modül | Açıklama |
-|-------|----------|
-| **Auth / Account** | Giriş, kayıt, şifre değişimi, profil güncelleme |
-| **User Management** | Admin taraflı kullanıcı işlemleri (CRUD, statü, rol değişimi) |
-| **Products** | Ürün ekleme, stok ilişkisi, kategori |
-| **Orders / Payments** | Sipariş oluşturma, ödeme işlemleri, teslim durumu |
-| **Cart** | Sepet işlemleri (ekle, çıkar, artır, temizle) |
-| **Blog / News / Articles** | İçerik modülleri, yorumlarla birlikte |
-| **References / Library / Gallery** | Kurumsal modüller: referanslar, dökümanlar, medya |
-| **Feedback / FAQ / Comments** | Ziyaretçi içerikleri, yönetim panelinden kontrol |
-| **Dashboard** | Admin paneli istatistikleri |
-| **Notifications / Settings** | Bildirim sistemi, sistem ayarları |
-| **Contact / Email** | İletişim formları ve gelen kutusu (SMTP desteğiyle) |
-
----
-
-## 🌍 Çok Dilli Altyapı
-
-- Tüm içerikler `language: "tr" | "en" | "de"` alanı ile dil bilgisi içerir
-- API tarafı dil filtresi ile çalışır (`req.locale`, `req.query.lang`)
-- Admin paneli üzerinden çok dilli içerik yönetimi mümkündür
-
----
-
-## ⚙️ Kurulum
+## 🛠️ Kurulum
 
 ```bash
 # Bağımlılıkları yükle
-bun install
+bun install      # ya da npm install
 
 # .env dosyasını oluştur
 cp .env.example .env
 
-# Sunucuyu başlat
-bun run dev
+# Projeyi başlat (dev)
+bun run dev      # ya da npm run dev
 ```
 
----
+> `bun` kullanıyorsan `bun.lock` zaten eklenmiş. Alternatif olarak `npm` veya `yarn` da kullanılabilir.
 
-## 🔐 .env Örnek Yapı
+## 🌐 API Endpoints
 
-```
-PORT=5015
-MONGODB_URI=mongodb://localhost:27017/ensotek-db
-JWT_SECRET=your_jwt_secret
-CORS_ORIGIN=http://localhost:3000
-BASE_URL=http://localhost:5015
-SMTP_HOST=smtp.hostinger.com
-SMTP_PORT=465
-SMTP_USER=info@ensotek.de
-SMTP_PASS=your_email_password
-SMTP_FROM="Ensotek"
+Tüm API rotaları `src/modules` klasörü içinden otomatik olarak `routes/index.ts` üzerinden `server.ts`'e bağlanır.
+
+Örnek:
+```http
+POST /api/auth/register
+GET  /api/blog
+POST /api/order
 ```
 
----
+## 🔐 Authentication
 
-## 🧪 Test & Postman
+- JWT tabanlı kimlik doğrulama
+- `accessToken` & `refreshToken` desteği
+- HTTP-only cookie ile güvenli token iletimi
 
-- Postman koleksiyonu `tests/Ensotek.postman_collection.json` olarak hazırdır
-- Testler aşağıdaki modülleri içerir:
-  - Login/Register
-  - Ürün işlemleri
-  - Sepet / Sipariş
-  - Tüm CRUD endpoint'leri
-  - Mail ve Bildirim testleri
-
----
-
-## 📦 Build & Deployment
+## 📦 Önemli Scriptler
 
 ```bash
-bun run build       # dist klasörüne derler
-bun run start       # production ortamı için başlat
+# Dev modda başlat
+bun run dev
+
+# Build al
+bun run build
+
+# Production
+bun run start
 ```
 
-PM2 veya Docker ile deployment yapılabilir.
+## 📁 Ortam Dosyaları
 
----
+`.env.metahub`, `.env.kuhlturm` gibi farklı ortamlar için yapı desteklenir.
 
-## 🤝 Katkı ve Geliştirme
+### `.env.example` örneği:
+```env
+PORT=4000
+MONGO_URI=mongodb://localhost:27017/metahub
+JWT_SECRET=supersecret
+EMAIL_HOST=smtp.example.com
+EMAIL_USER=info@example.com
+EMAIL_PASS=password
+```
 
-Yapı modülerdir ve her modül ayrı `model`, `controller`, `route` ve `slice` yapısına sahiptir. Yeni modül eklemek için:
+## 🧪 Testler & Araçlar
 
-1. Model (`models/`)
-2. Controller (`controllers/`)
-3. Route (`routes/`)
-4. Gerekirse `slice`, `service`, `template`
+> Test altyapısı eklenmemişse Jest/Vitest ile genişletilebilir.
 
-eklendiğinde sistem otomatik olarak çalışır.
+## 💡 Geliştirici Notları
 
----
+- Modül mimarisi sayesinde her yeni özellik bir modül olarak eklenebilir.
+- Ortak backend olarak yapılandırılmıştır, birden fazla frontend ile uyumlu çalışabilir.
+- `.gitignore` dosyasına `.env*`, `node_modules/`, `dist/`, `.next/` gibi dizinler eklenmiştir.
 
-## 📧 İletişim
+## 👥 Katkıda Bulunmak
 
-📨 E-posta: `info@ensotek.de`  
-🌐 Web: [ensotek.de](https://ensotek.de)  
+1. Forkla 🍴
+2. Branch oluştur (`git checkout -b feature/xyz`)
+3. Commit et (`git commit -m 'add xyz'`)
+4. Push et (`git push origin feature/xyz`)
+5. Pull request gönder 🚀
 
----
-
-Hazırsan bu `README.md` dosyasını kök dizine kaydedebiliriz. İstersen `Postman` dosyasını da buna ekleyebilirim. Nasıl ilerleyelim?
-=======
-# metahub-backend
-metahub-backend
->>>>>>> f2e45f064cced30f52305fed018dd9c53d5f49b6
