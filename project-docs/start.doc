@@ -1,0 +1,6 @@
+APP_ENV=metahub bun run dev
+APP_ENV=kuhlturm bun run dev
+
+export APP_ENV=ensotek
+bun run dev
+
