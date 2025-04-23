@@ -1,15 +1,5 @@
 {
   "name": "forum",
-  "label": {
-    "en": "Forum",
-    "de": "Forum",
-    "tr": "Forum"
-  },
-  "description": {
-    "en": "Manage forum",
-    "de": "forum verwalten",
-    "tr": "forum yönet"
-  },
   "icon": "box",
   "visibleInSidebar": true,
   "roles": [
@@ -17,5 +7,21 @@
   ],
   "enabled": true,
   "useAnalytics": false,
-  "routes": []
+  "language": "en",
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /",
+      "pathPrefix": "topic"
+    },
+    {
+      "method": "GET",
+      "path": "/category/:categoryId",
+      "auth": true,
+      "summary": "GET /category/:categoryId",
+      "pathPrefix": "topic"
+    }
+  ]
 }

@@ -1,9 +1,24 @@
-import { Request, Response } from "express";
+import { Response, Request as ExpressRequest } from "express";
 import asyncHandler from "express-async-handler";
 import FAQ, { IFAQ } from "./faq.models";
 import { isValidObjectId } from "../../core/utils/validation";
-import { pinecone } from "../../core/utils/pinecone"; // ✅ merkezi pinecone import
+import { pinecone } from "../../core/utils/pinecone";
 import { askWithOllama } from "../../core/utils/askWithOllama";
+
+// ✅ Custom genişletilmiş Request
+type Request = ExpressRequest & {
+  locale?: "tr" | "en" | "de";
+  body: any;
+  query: any;
+  params: any;
+  user?: {
+    id: string;
+    role: string;
+    name?: string;
+    email?: string;
+  };
+};
+// 🌍 Çok dilli prompt şablonları
 
 // 🌍 Çok dilli prompt şablonları
 const languagePrompts: Record<string, string> = {
@@ -33,13 +48,13 @@ Bitte verwende diese Informationen, um eine kurze, klare und hilfreiche Antwort 
 `,
 };
 
-// 🧪 Dummy vektör üretici (prod'da OpenAI embedding gibi gerçek embedding kullanılmalı)
+// Dummy embedding
 function generateRandomVector(length = 1536): number[] {
   return Array.from({ length }, () => Math.random() * 2 - 1);
 }
 
-// ✅ Soru sor ve AI ile cevap al
-export const askFAQ = asyncHandler(async (req: Request, res: Response) => {
+// ✅ AI destekli SSS yanıtı
+export const askFAQ = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { question, language = "en" } = req.body;
 
   if (!question) {
@@ -69,12 +84,12 @@ export const askFAQ = asyncHandler(async (req: Request, res: Response) => {
       .map((m, i) => `(${i + 1}) Soru: ${m.metadata?.question}\nCevap: ${m.metadata?.answer}`)
       .join("\n\n");
 
-    const promptTemplate = languagePrompts[language] || languagePrompts["en"];
-    const prompt = promptTemplate
-      .replace("{{question}}", question)
-      .replace("{{context}}", context);
+    const answer = await askWithOllama({
+      question,
+      context,
+      lang: language,
+    });
 
-    const answer = await askWithOllama(prompt, context);
     res.status(200).json({ answer });
   } catch (error: any) {
     console.error("❌ askFAQ error:", error);
@@ -85,8 +100,8 @@ export const askFAQ = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// ➕ SSS Oluştur (admin)
-export const createFAQ = asyncHandler(async (req: Request, res: Response) => {
+// ➕ SSS Oluştur
+export const createFAQ = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { question, answer, category, language }: Partial<IFAQ> = req.body;
 
   if (!question || !answer) {
@@ -104,8 +119,8 @@ export const createFAQ = asyncHandler(async (req: Request, res: Response) => {
   res.status(201).json({ message: "FAQ created successfully", faq });
 });
 
-// 📄 Tüm aktif SSS'leri getir (public, dil filtreli)
-export const getAllFAQs = asyncHandler(async (req: Request, res: Response) => {
+// 📄 Tüm aktif SSS'leri getir
+export const getAllFAQs = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { lang } = req.query;
   const filter: any = { isActive: true };
 
@@ -115,8 +130,8 @@ export const getAllFAQs = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json(faqs);
 });
 
-// 🔄 SSS Güncelle (admin)
-export const updateFAQ = asyncHandler(async (req: Request, res: Response) => {
+// 🔄 SSS Güncelle
+export const updateFAQ = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const { question, answer, category, isActive, language } = req.body;
 
@@ -141,8 +156,8 @@ export const updateFAQ = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json({ message: "FAQ updated successfully", faq });
 });
 
-// 🗑️ SSS Sil (admin)
-export const deleteFAQ = asyncHandler(async (req: Request, res: Response) => {
+// 🗑️ SSS Sil
+export const deleteFAQ = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
 
   if (!isValidObjectId(id)) {

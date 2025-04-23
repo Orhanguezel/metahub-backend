@@ -1,15 +1,5 @@
 {
   "name": "product",
-  "label": {
-    "en": "Product",
-    "de": "Product",
-    "tr": "Product"
-  },
-  "description": {
-    "en": "Manage product",
-    "de": "product verwalten",
-    "tr": "product yönet"
-  },
   "icon": "box",
   "visibleInSidebar": true,
   "roles": [
@@ -17,6 +7,7 @@
   ],
   "enabled": true,
   "useAnalytics": false,
+  "language": "en",
   "routes": [
     {
       "method": "GET",

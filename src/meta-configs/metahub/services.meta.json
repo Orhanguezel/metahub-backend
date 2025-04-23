@@ -1,15 +1,5 @@
 {
   "name": "services",
-  "label": {
-    "en": "Services",
-    "de": "Services",
-    "tr": "Services"
-  },
-  "description": {
-    "en": "Manage services",
-    "de": "services verwalten",
-    "tr": "services yönet"
-  },
   "icon": "box",
   "visibleInSidebar": true,
   "roles": [
@@ -17,6 +7,7 @@
   ],
   "enabled": true,
   "useAnalytics": false,
+  "language": "en",
   "routes": [
     {
       "method": "GET",

@@ -1,4 +1,3 @@
-// models/chatSession.model.ts
 import { Schema, model, Types, Document } from "mongoose";
 
 export interface IChatSession extends Document {

@@ -1,31 +1,34 @@
 import fs from "fs";
 import path from "path";
-import { directRouteRegex, chainedRouteRegex } from "../core/utils/regex";
+import dotenv from "dotenv";
+import mongoose from "mongoose";
 import { zodToJsonSchema } from "zod-to-json-schema";
-
-// 🗂️ Klasör yolları
-const modulesPath = path.join(__dirname, "../modules");
-const outputMetaDir = path.join(__dirname, "../meta-configs/metahub");
-
-if (!fs.existsSync(outputMetaDir)) fs.mkdirSync(outputMetaDir, { recursive: true });
+import { directRouteRegex, chainedRouteRegex } from "../core/utils/regex";
+import { getEnvProfiles } from "./getEnvProfiles";
+import connectDB from "../core/config/connect";
+import {
+  ModuleMeta as ModuleMetaType,
+  ModuleSetting,
+  ModuleMetaModel,
+} from "../modules/admin";
 
 type RouteMeta = {
   method: string;
   path: string;
   auth: boolean;
   summary: string;
-  body?: any; // opsiyonel body schema
+  pathPrefix?: string;
+  body?: any;
 };
 
-// 🚏 Routes'ları JS dosyasından çıkar
 const extractRoutesFromFile = (filePath: string): RouteMeta[] => {
   if (!fs.existsSync(filePath)) return [];
 
   const content = fs.readFileSync(filePath, "utf-8");
   const routes: RouteMeta[] = [];
 
-  // router.get("/example")
   let match: RegExpExecArray | null;
+
   while ((match = directRouteRegex.exec(content)) !== null) {
     routes.push({
       method: match[1].toUpperCase(),
@@ -35,11 +38,12 @@ const extractRoutesFromFile = (filePath: string): RouteMeta[] => {
     });
   }
 
-  // router.route("/example").post().put()
   while ((match = chainedRouteRegex.exec(content)) !== null) {
     const routePath = match[1];
     const methodsBlock = match[2];
-    const methodMatches = [...methodsBlock.matchAll(/\.(get|post|put|delete|patch)\(/g)];
+    const methodMatches = [
+      ...methodsBlock.matchAll(/\.(get|post|put|delete|patch)\(/g),
+    ];
 
     for (const m of methodMatches) {
       routes.push({
@@ -54,78 +58,127 @@ const extractRoutesFromFile = (filePath: string): RouteMeta[] => {
   return routes;
 };
 
-// 🧩 Meta yapısı oluştur
-const defaultMeta = (moduleName: string, routes: RouteMeta[]) => ({
-  name: moduleName,
-  label: {
-    en: moduleName.charAt(0).toUpperCase() + moduleName.slice(1),
-    de: moduleName.charAt(0).toUpperCase() + moduleName.slice(1),
-    tr: moduleName.charAt(0).toUpperCase() + moduleName.slice(1),
-  },
-  description: {
-    en: `Manage ${moduleName}`,
-    de: `${moduleName} verwalten`,
-    tr: `${moduleName} yönet`,
-  },
-  icon: "box",
-  visibleInSidebar: true,
-  roles: ["admin"],
-  enabled: true,
-  useAnalytics: false,
-  routes,
-});
+const getAllRouteFiles = (modPath: string): string[] => {
+  return fs.readdirSync(modPath)
+    .filter((f) => f.endsWith(".routes.ts"))
+    .map((f) => path.join(modPath, f));
+};
 
-// 🛠️ index.ts oluşturucu
-const generateIndexTs = (mod: string) => `import express from "express";
-import routes from "./${mod}.routes";
+const generate = async () => {
+  await connectDB();
 
-const router = express.Router();
-router.use("/", routes);
+  const modulesPath = path.join(__dirname, "../modules");
+  const metaRootDir = path.join(__dirname, "../meta-configs");
+  const metaProjectDir = path.join(metaRootDir, "metahub");
 
-export * from "./${mod}.controller";
-export * from "./${mod}.models";
+  if (!fs.existsSync(metaRootDir)) fs.mkdirSync(metaRootDir, { recursive: true });
+  if (!fs.existsSync(metaProjectDir)) fs.mkdirSync(metaProjectDir, { recursive: true });
 
-export default router;
-`;
+  const allModules = fs
+    .readdirSync(modulesPath)
+    .filter((mod) => fs.statSync(path.join(modulesPath, mod)).isDirectory());
 
-// 🔁 Her modül için meta oluştur
-fs.readdirSync(modulesPath).forEach(async (mod) => {
-  const modPath = path.join(modulesPath, mod);
-  if (fs.statSync(modPath).isDirectory()) {
-    const routeFile = path.join(modPath, `${mod}.routes.ts`);
-    const controllerFile = path.join(modPath, `${mod}.controller.ts`);
-    const modelFile = path.join(modPath, `${mod}.models.ts`);
+  for (const mod of allModules) {
+    const modPath = path.join(modulesPath, mod);
+    const routeFiles = getAllRouteFiles(modPath);
 
-    if (fs.existsSync(routeFile) && fs.existsSync(controllerFile) && fs.existsSync(modelFile)) {
-      const indexFilePath = path.join(modPath, "index.ts");
-      fs.writeFileSync(indexFilePath, generateIndexTs(mod), "utf8");
+    if (routeFiles.length === 0) {
+      console.warn(`⚠️  Skipped module: ${mod} (no .routes.ts files found)`);
+      continue;
     }
 
-    let routes = extractRoutesFromFile(routeFile);
+    const metaPath = path.join(metaProjectDir, `${mod}.meta.json`);
+    let existing = {};
+    try {
+      if (fs.existsSync(metaPath)) {
+        existing = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
+      }
+    } catch (err) {
+      console.error(`❌ Failed to read meta for ${mod}:`, err);
+    }
 
-    // 👇 Sadece "blog" için Zod schema ekle
+    let routes: RouteMeta[] = [];
+
+    for (const routeFile of routeFiles) {
+      const fileRoutes = extractRoutesFromFile(routeFile);
+      const filename = path.basename(routeFile).replace(".routes.ts", "");
+      const prefix = filename.replace(`${mod}`, "").replace(/^[A-Z]/, (m) => m.toLowerCase()); // örn: "forumTopic" -> "topic"
+
+      const withPrefix = fileRoutes.map((route) => ({
+        ...route,
+        pathPrefix: prefix || undefined,
+      }));
+
+      routes.push(...withPrefix);
+    }
+
+    // Blog için özel body şeması
     if (mod === "blog") {
       try {
         const { BlogCreateSchema } = await import(`../modules/blog/blog.validation`);
         const bodySchema = zodToJsonSchema(BlogCreateSchema, "BlogCreate");
 
-        // POST /api/blog için body schema ekle
-        routes = routes.map((route) => {
-          if (route.method === "POST" && route.path === "/") {
-            return {
-              ...route,
-              body: bodySchema,
-            };
-          }
-          return route;
-        });
+        routes = routes.map((route) =>
+          route.method === "POST" && route.path === "/"
+            ? { ...route, body: bodySchema }
+            : route
+        );
       } catch (err) {
-        console.error("❌ Failed to import Zod schema for blog:", err);
+        console.error(`❌ Failed to load validation for blog:`, err);
       }
     }
 
-    const meta = defaultMeta(mod, routes);
-    const outputMetaPath = path.join(outputMetaDir, `${mod}.meta.json`);
-    fs.writeFileSync(outputMetaPath, JSON.stringify(meta, null, 2), "utf8");
+    const meta: ModuleMetaType = {
+      name: mod,
+      icon: (existing as any).icon || "box",
+      visibleInSidebar: (existing as any).visibleInSidebar ?? true,
+      roles: (existing as any).roles || ["admin"],
+      enabled: true,
+      useAnalytics: (existing as any).useAnalytics ?? false,
+      language: (existing as any).language || "en",
+      routes,
+    };
+
+    try {
+      fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2), "utf8");
+    } catch (err) {
+      console.error(`❌ Failed to write meta file for ${mod}:`, err);
+      continue;
+    }
+
+    try {
+      await ModuleMetaModel.updateOne({ name: mod }, { $set: meta }, { upsert: true });
+    } catch (err) {
+      console.error(`❌ DB update failed for ${mod}:`, err);
+    }
+
+    for (const profile of getEnvProfiles()) {
+      const envPath = path.resolve(process.cwd(), `.env.${profile}`);
+      if (!fs.existsSync(envPath)) continue;
+
+      const parsed = dotenv.parse(fs.readFileSync(envPath));
+      const enabledModules =
+        parsed.ENABLED_MODULES?.split(",").map((m) => m.trim()) || [];
+      const isEnabled = enabledModules.includes(mod);
+
+      try {
+        await ModuleSetting.updateOne(
+          { project: profile, module: mod },
+          { $set: { enabled: isEnabled, visibleInSidebar: true } },
+          { upsert: true }
+        );
+      } catch (err) {
+        console.error(`❌ DB setting update failed for ${mod} (${profile}):`, err);
+      }
+    }
+
+    console.log(`✅ Meta generated for: ${mod}`);
   }
+
+  mongoose.connection.close();
+};
+
+generate().catch((err) => {
+  console.error("❌ Meta generation failed:", err);
+  mongoose.connection.close();
 });

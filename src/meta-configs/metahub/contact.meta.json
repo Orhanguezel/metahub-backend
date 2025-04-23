@@ -1,15 +1,5 @@
 {
   "name": "contact",
-  "label": {
-    "en": "Contact",
-    "de": "Contact",
-    "tr": "Contact"
-  },
-  "description": {
-    "en": "Manage contact",
-    "de": "contact verwalten",
-    "tr": "contact yönet"
-  },
   "icon": "box",
   "visibleInSidebar": true,
   "roles": [
@@ -17,6 +7,7 @@
   ],
   "enabled": true,
   "useAnalytics": false,
+  "language": "en",
   "routes": [
     {
       "method": "POST",

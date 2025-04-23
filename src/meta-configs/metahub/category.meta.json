@@ -1,15 +1,5 @@
 {
   "name": "category",
-  "label": {
-    "en": "Category",
-    "de": "Category",
-    "tr": "Category"
-  },
-  "description": {
-    "en": "Manage category",
-    "de": "category verwalten",
-    "tr": "category yönet"
-  },
   "icon": "box",
   "visibleInSidebar": true,
   "roles": [
@@ -17,6 +7,7 @@
   ],
   "enabled": true,
   "useAnalytics": false,
+  "language": "en",
   "routes": [
     {
       "method": "GET",

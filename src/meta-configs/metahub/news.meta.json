@@ -1,15 +1,5 @@
 {
   "name": "news",
-  "label": {
-    "en": "News",
-    "de": "News",
-    "tr": "News"
-  },
-  "description": {
-    "en": "Manage news",
-    "de": "news verwalten",
-    "tr": "news yönet"
-  },
   "icon": "box",
   "visibleInSidebar": true,
   "roles": [
@@ -17,6 +7,7 @@
   ],
   "enabled": true,
   "useAnalytics": false,
+  "language": "en",
   "routes": [
     {
       "method": "GET",

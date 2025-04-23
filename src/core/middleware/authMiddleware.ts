@@ -1,12 +1,18 @@
-// src/middleware/authMiddleware.ts
 import asyncHandler from "express-async-handler";
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
 import User from "../../modules/users/users.models";
 import { getTokenFromRequest } from "../utils/authHelpers";
 import { verifyToken } from "../utils/token";
+import { UserPayload } from "../../types/express"; // Yol doğruysa
 
-export const authenticate = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
+// Geçici tip: Express'e uyumlu ama genişletilmiş
+interface AuthRequest extends Request {
+  user?: UserPayload;
+}
+
+// ✅ authenticate fonksiyonunu `RequestHandler` olarak tanımla
+export const authenticate: RequestHandler = asyncHandler(
+  async (req, res, next) => {
     const token = getTokenFromRequest(req);
 
     if (!token) {
@@ -14,39 +20,22 @@ export const authenticate = asyncHandler(
         success: false,
         message: "Authorization token missing",
       });
-      return;
+      return; // ✅ sadece return, response'u bitiriyor
     }
 
     try {
       const decoded = verifyToken(token);
-
-      if (!decoded?.id) {
-        res.status(401).json({
-          success: false,
-          message: "Invalid token payload",
-        });
-        return;
-      }
-
       const user = await User.findById(decoded.id).select("-password");
 
-      if (!user) {
+      if (!user || !user.isActive) {
         res.status(401).json({
           success: false,
-          message: "User not found",
+          message: "Invalid or inactive user",
         });
         return;
       }
 
-      if (!user.isActive) {
-        res.status(403).json({
-          success: false,
-          message: "Account is deactivated",
-        });
-        return;
-      }
-
-      req.user = {
+      (req as AuthRequest).user = {
         id: user.id.toString(),
         _id: user.id.toString(),
         role: user.role,
@@ -57,26 +46,23 @@ export const authenticate = asyncHandler(
 
       next();
     } catch (error: any) {
-      if (error.name === "TokenExpiredError") {
-        res.status(401).json({
-          success: false,
-          message: "Token expired",
-        });
-        return;
-      }
-
       res.status(401).json({
         success: false,
-        message: "Invalid or expired token",
+        message:
+          error.name === "TokenExpiredError"
+            ? "Token expired"
+            : "Invalid or expired token",
       });
+      return; // ✅ yine sadece return
     }
   }
 );
 
-// 🔐 Rol bazlı yetki kontrolü
-export const authorizeRoles = (...roles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
+export const authorizeRoles = (...roles: string[]): RequestHandler => {
+  return (req, res, next) => {
+    const user = (req as AuthRequest).user;
+
+    if (!user) {
       res.status(401).json({
         success: false,
         message: "User not authenticated",
@@ -84,7 +70,7 @@ export const authorizeRoles = (...roles: string[]) => {
       return;
     }
 
-    if (!roles.includes(req.user.role)) {
+    if (!roles.includes(user.role)) {
       res.status(403).json({
         success: false,
         message: `Access denied. Required role(s): ${roles.join(", ")}`,

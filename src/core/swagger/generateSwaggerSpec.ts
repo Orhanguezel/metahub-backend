@@ -73,7 +73,7 @@ export async function generateSwaggerSpecFromMeta() {
       });
 
       for (const route of meta.routes) {
-        const fullPath = `/api/${moduleName}${route.path}`;
+        const fullPath = `/${moduleName}${route.path}`;
         const method = route.method.toLowerCase();
 
         if (!paths[fullPath]) paths[fullPath] = {};

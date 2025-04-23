@@ -1,15 +1,5 @@
 {
   "name": "order",
-  "label": {
-    "en": "Order",
-    "de": "Order",
-    "tr": "Order"
-  },
-  "description": {
-    "en": "Manage order",
-    "de": "order verwalten",
-    "tr": "order yönet"
-  },
   "icon": "box",
   "visibleInSidebar": true,
   "roles": [
@@ -17,6 +7,7 @@
   ],
   "enabled": true,
   "useAnalytics": false,
+  "language": "en",
   "routes": [
     {
       "method": "POST",

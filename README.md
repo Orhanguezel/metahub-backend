@@ -1,119 +1,97 @@
 
-### `README.md`
+```markdown
+# 📦 MetaHub Backend
 
-```md
-# 🧠 MetaHub Backend
+MetaHub ist ein modulares und skalierbares Backend-System auf Basis von Node.js + Express.js. Das Projekt ist in TypeScript geschrieben und wird durch moderne Technologien wie Zod, Swagger und MongoDB unterstützt.
 
-TypeScript tabanlı, modüler ve genişletilebilir bir Node.js backend yapısıdır. Çok sayıda modül içerir ve farklı projelerde yeniden kullanılabilir bir altyapı sağlar.
-
-## 🚀 Projeye Genel Bakış
-
-- **Dil**: TypeScript
-- **Sunucu**: Express.js
-- **Veritabanı**: MongoDB (Mongoose)
-- **Gerçek Zamanlı**: Socket.IO
-- **E-Posta**: Nodemailer
-- **JWT Auth**: Access & Refresh token destekli
-- **Upload**: `uploads/` klasörüne dosya kaydı
-- **Servis Yapısı**: Service-Controller-Route yapısı
-- **Çoklu Ortam Desteği**: `.env.metahub`, `.env.kuhlturm` gibi env varyantları desteklenir.
-
-## 🗂️ Klasör Yapısı
+## 📁 Projektstruktur
 
 ```
-src/
-├── core/                # Çekirdek config'ler ve helper'lar
-├── modules/             # Her modül kendi içinde controller/model/route içerir
-│   ├── blog/
-│   │   ├── blog.controller.ts
-│   │   ├── blog.models.ts
-│   │   └── blog.routes.ts
-        └── index.ts
-│   ├── auth/
-│   ├── cart/
-│   ├── ...
-├── routes/──index.ts   # Ana router yönlendirmeleri
-├── services/            # Harici servisler (ör. Email)
-├── socket/              # WebSocket (Socket.IO) mantığı
-├── templates/           # E-posta veya PDF şablonları
-├── types/               # Global TypeScript tanımlamaları
-├── server.ts            # Uygulamanın giriş noktası
+metahub-backend/
+├── src/
+│   ├── core/               # Zentrale Konfigurationen, Middleware, Hilfsfunktionen
+│   │   ├── config/         # .env-Loader, MongoDB-Verbindung, JWT-Einstellungen
+│   │   ├── middleware/     # Locale, Authentifizierung, Fehlerbehandlung
+│   │   ├── swagger/        # Swagger-Setup und Generierung aus Meta-Daten
+│   │   └── utils/          # Regex, Zod-Schemas, Hilfsfunktionen
+│   ├── modules/            # Alle modularen Features befinden sich hier
+│   │   └── blog/           # Beispielmodul: blog.controller.ts, blog.routes.ts, blog.models.ts
+│   ├── meta-configs/       # Automatisch generierte Meta-Dateien (.meta.json)
+│   └── server.ts           # Hauptanwendung mit Express
+├── .env.metahub            # Umgebungsvariablen
+├── package.json
+└── tsconfig.json
 ```
 
-## 🛠️ Kurulum
+## 🚀 Start
 
 ```bash
-# Bağımlılıkları yükle
-bun install      # ya da npm install
-
-# .env dosyasını oluştur
-cp .env.example .env
-
-# Projeyi başlat (dev)
-bun run dev      # ya da npm run dev
-```
-
-> `bun` kullanıyorsan `bun.lock` zaten eklenmiş. Alternatif olarak `npm` veya `yarn` da kullanılabilir.
-
-## 🌐 API Endpoints
-
-Tüm API rotaları `src/modules` klasörü içinden otomatik olarak `routes/index.ts` üzerinden `server.ts`'e bağlanır.
-
-Örnek:
-```http
-POST /api/auth/register
-GET  /api/blog
-POST /api/order
-```
-
-## 🔐 Authentication
-
-- JWT tabanlı kimlik doğrulama
-- `accessToken` & `refreshToken` desteği
-- HTTP-only cookie ile güvenli token iletimi
-
-## 📦 Önemli Scriptler
-
-```bash
-# Dev modda başlat
+bun install
 bun run dev
-
-# Build al
-bun run build
-
-# Production
-bun run start
 ```
 
-## 📁 Ortam Dosyaları
+## 🔌 Umgebungsvariablen
 
-`.env.metahub`, `.env.kuhlturm` gibi farklı ortamlar için yapı desteklenir.
+Beispiel für `.env.metahub`:
 
-### `.env.example` örneği:
 ```env
-PORT=4000
-MONGO_URI=mongodb://localhost:27017/metahub
-JWT_SECRET=supersecret
-EMAIL_HOST=smtp.example.com
-EMAIL_USER=info@example.com
-EMAIL_PASS=password
+PORT=5014
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:3000
+FRONTEND_URL=http://localhost:3000
+
+ACTIVE_META_PROFILE=metahub
+META_CONFIG_PATH=src/meta-configs/metahub
+ENABLED_MODULES=blog,product,order,...
+PROJECT_NAME=MetaHub
+SWAGGER_ROUTE=/api-docs
+SWAGGER_BASE_URL=http://localhost:5014/api
 ```
 
-## 🧪 Testler & Araçlar
+## 🧩 Modulare Struktur
 
-> 
+Jedes Modul liegt unter `modules/` und enthält folgende Dateien:
 
-## 💡 Geliştirici Notları
+- `modulename.controller.ts`
+- `modulename.routes.ts`
+- `modulename.models.ts`
 
-- Modül mimarisi sayesinde her yeni özellik bir modül olarak eklenebilir.
-- Ortak backend olarak yapılandırılmıştır, birden fazla frontend ile uyumlu çalışabilir.
-- `.gitignore` dosyasına `.env*`, `node_modules/`, `dist/`, `.next/` gibi dizinler eklenmiştir.
+Wenn alle drei existieren, wird automatisch eine `index.ts`-Datei generiert.
 
-## 👥 Katkıda Bulunmak
+## 🧠 Meta-System
 
-1. Forkla 🍴
-2. Branch oluştur (`git checkout -b feature/xyz`)
-3. Commit et (`git commit -m 'add xyz'`)
-4. Push et (`git push origin feature/xyz`)
-5. Pull request gönder 🚀
+- Mit dem Script `generateMeta.ts` wird für jedes Modul eine `.meta.json` erzeugt.
+- Swagger verwendet diese Metadaten zur automatischen Dokumentation.
 
+```bash
+bun run generate:meta
+```
+
+## 🧾 Swagger UI
+
+Alle API-Endpunkte können über Swagger getestet werden:
+
+📘 Swagger UI: [http://localhost:5014/api-docs](http://localhost:5014/api-docs)
+
+## 🔐 Authentifizierung
+
+- JWT-basierte Authentifizierung
+- `authenticate` Middleware ist in geschützten Routen erforderlich
+- Im Swagger-UI kann ein Token über die Schaltfläche `Authorize` getestet werden
+
+## 🧪 Testing & Entwicklung
+
+- API-Tests über Swagger
+- Optional: Postman Collection
+- Zod-Schema-Validierung (in Vorbereitung)
+
+## 👥 Teamorientierte Entwicklung
+
+- Auch bei steigender Anzahl an Modulen bleibt das Projekt übersichtlich
+- Swagger aktualisiert sich automatisch
+- Dank des Meta-Systems ist die API-Übersicht für Frontend-Teams jederzeit zugänglich
+
+---
+
+> Für Fragen oder Beiträge: [orhanguzell@gmail.com](mailto:orhanguzell@gmail.com)
+```

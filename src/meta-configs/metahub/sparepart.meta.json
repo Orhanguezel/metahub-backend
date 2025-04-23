@@ -1,15 +1,5 @@
 {
   "name": "sparepart",
-  "label": {
-    "en": "Sparepart",
-    "de": "Sparepart",
-    "tr": "Sparepart"
-  },
-  "description": {
-    "en": "Manage sparepart",
-    "de": "sparepart verwalten",
-    "tr": "sparepart yönet"
-  },
   "icon": "box",
   "visibleInSidebar": true,
   "roles": [
@@ -17,6 +7,7 @@
   ],
   "enabled": true,
   "useAnalytics": false,
+  "language": "en",
   "routes": [
     {
       "method": "GET",

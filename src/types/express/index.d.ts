@@ -1,4 +1,4 @@
-import "./types/express/express";
+// src/types/express/index.d.ts
 
 export interface UserPayload {
   id: string;
@@ -15,6 +15,7 @@ declare global {
   namespace Express {
     interface Request {
       user?: UserPayload;
+      locale?: "tr" | "en" | "de";
       uploadType?:
         | "profile"
         | "product"
@@ -28,7 +29,6 @@ declare global {
         | "article"
         | "sport"
         | "default";
-      locale?: "tr" | "en" | "de"; // 🌍 Çok dilli destek (i18n)
     }
   }
 
