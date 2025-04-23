@@ -136,3 +136,4 @@ dist
 .pnp.*.env*
 .env.kuhlturm
 .env.metahub
+.env*
