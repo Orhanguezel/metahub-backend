@@ -1,15 +1,5 @@
 {
   "name": "library",
-  "label": {
-    "en": "Library",
-    "de": "Library",
-    "tr": "Library"
-  },
-  "description": {
-    "en": "Manage library",
-    "de": "library verwalten",
-    "tr": "library yönet"
-  },
   "icon": "box",
   "visibleInSidebar": true,
   "roles": [
@@ -17,6 +7,7 @@
   ],
   "enabled": true,
   "useAnalytics": false,
+  "language": "en",
   "routes": [
     {
       "method": "GET",

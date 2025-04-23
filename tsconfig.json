@@ -7,17 +7,17 @@
     "strict": false,
     "skipLibCheck": true,
     "noImplicitAny": false,
-    "types": [
-      "node"
-    ],
+    "types": ["node", "express"],
     "typeRoots": [
       "./node_modules/@types",
-      "./src"
+      "./src/types"
     ],
     "outDir": "dist",
     "rootDir": "src"
   },
   "include": [
-    "src"
-, "src/tools"  ]
+    "src",
+    "src/types/**/*.d.ts",
+    "src/**/*"
+  ]
 }

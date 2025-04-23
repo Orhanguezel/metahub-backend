@@ -1,15 +1,5 @@
 {
   "name": "blog",
-  "label": {
-    "en": "Blog",
-    "de": "Blog",
-    "tr": "Blog"
-  },
-  "description": {
-    "en": "Manage blog",
-    "de": "blog verwalten",
-    "tr": "blog yönet"
-  },
   "icon": "box",
   "visibleInSidebar": true,
   "roles": [
@@ -17,6 +7,7 @@
   ],
   "enabled": true,
   "useAnalytics": false,
+  "language": "en",
   "routes": [
     {
       "method": "GET",

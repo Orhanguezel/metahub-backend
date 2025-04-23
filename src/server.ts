@@ -7,7 +7,9 @@ import cookieParser from "cookie-parser";
 import { initializeSocket } from "./socket/socket";
 import { setLocale } from "./core/middleware/setLocale";
 import { getRouter } from "./routes";
-import { setupSwagger } from "./core/swagger/setupSwagger"; 
+import { setupSwagger } from "./core/swagger/setupSwagger";
+
+
 
 const app: Express = express();
 const server = http.createServer(app);
@@ -48,5 +50,3 @@ app.use(
 
   initializeSocket(server);
 })();
-
-

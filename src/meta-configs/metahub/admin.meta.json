@@ -1,15 +1,5 @@
 {
   "name": "admin",
-  "label": {
-    "en": "Admin",
-    "de": "Admin",
-    "tr": "Admin"
-  },
-  "description": {
-    "en": "Manage admin",
-    "de": "admin verwalten",
-    "tr": "admin yönet"
-  },
   "icon": "box",
   "visibleInSidebar": true,
   "roles": [
@@ -17,6 +7,7 @@
   ],
   "enabled": true,
   "useAnalytics": false,
+  "language": "en",
   "routes": [
     {
       "method": "GET",
@@ -29,6 +20,12 @@
       "path": "/modules/:name",
       "auth": true,
       "summary": "PATCH /modules/:name"
+    },
+    {
+      "method": "GET",
+      "path": "/projects",
+      "auth": true,
+      "summary": "GET /projects"
     }
   ]
 }

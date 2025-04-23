@@ -1,4 +1,3 @@
-// socket.ts
 import { Server as HttpServer } from "http";
 import { Server as SocketIOServer, Socket } from "socket.io";
 import { parse } from "cookie";
@@ -11,7 +10,7 @@ import { v4 as uuidv4 } from "uuid";
 interface ChatMessagePayload {
   room: string;
   message: string;
-  lang?: "tr" | "en" | "de";
+  language?: "tr" | "en" | "de";
 }
 
 interface IUserToken {
@@ -82,7 +81,7 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
 
     socket.on(
       "admin-message",
-      async ({ room, message, lang }: ChatMessagePayload) => {
+      async ({ room, message, language }: ChatMessagePayload) => {
         if (!message.trim() || !room) return;
 
         try {
@@ -92,7 +91,7 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
             message,
             isFromAdmin: true,
             isRead: true,
-            lang,
+            language,
           });
 
           const populated = await adminChat.populate("sender", "name email");
@@ -100,19 +99,19 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
 
           io.to(room).emit("chat-message", {
             _id: populated.id.toString(),
-            message: populated.message,
+            message: populated.get("message"),
             sender: {
               _id: sender._id,
               name: sender.name,
               email: sender.email,
             },
             room,
-            createdAt: populated.createdAt,
+            createdAt: populated.get("createdAt"),
             isFromAdmin: true,
-            lang: populated.lang,
+            language: populated.get("language"),
           });
 
-          console.log("✅ Admin message sent:", populated.message);
+          console.log("✅ Admin message sent:", populated.get("message"));
         } catch (err) {
           console.error("❌ Admin message error:", err);
         }

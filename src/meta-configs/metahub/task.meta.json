@@ -1,15 +1,5 @@
 {
   "name": "task",
-  "label": {
-    "en": "Task",
-    "de": "Task",
-    "tr": "Task"
-  },
-  "description": {
-    "en": "Manage task",
-    "de": "task verwalten",
-    "tr": "task yönet"
-  },
   "icon": "box",
   "visibleInSidebar": true,
   "roles": [
@@ -17,5 +7,6 @@
   ],
   "enabled": true,
   "useAnalytics": false,
+  "language": "en",
   "routes": []
 }
