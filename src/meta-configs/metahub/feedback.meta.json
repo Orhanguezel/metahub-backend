@@ -22,16 +22,34 @@
       "summary": "GET /"
     },
     {
+      "method": "GET",
+      "path": "/published",
+      "auth": true,
+      "summary": "GET /published"
+    },
+    {
       "method": "PATCH",
       "path": "/:id/toggle",
       "auth": true,
       "summary": "PATCH /:id/toggle"
     },
     {
+      "method": "PUT",
+      "path": "/:id",
+      "auth": true,
+      "summary": "PUT /:id"
+    },
+    {
       "method": "DELETE",
       "path": "/:id",
       "auth": true,
       "summary": "DELETE /:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/:id/archive",
+      "auth": true,
+      "summary": "PATCH /:id/archive"
     }
   ]
 }

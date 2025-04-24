@@ -1,7 +1,10 @@
 import express from "express";
-import routes from "./social.routes";
+import socialRoutes from "./social.routes";
+import SocialMedia from "./social.models";
+import * as socialController from "./social.controller";
+
 const router = express.Router();
-router.use("/", routes);
-export * from "./social.controller";
-export * from "./social.models";
+router.use("/", socialRoutes);
+
+export { SocialMedia, socialController };
 export default router;

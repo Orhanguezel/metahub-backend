@@ -1,6 +1,5 @@
-import mongoose, { Schema, Document, Types } from "mongoose";
+import mongoose, { Schema, model, Document, Types } from "mongoose";
 
-// 🎯 Article Type
 export interface IArticle extends Document {
   title: string;
   slug: string;
@@ -9,16 +8,20 @@ export interface IArticle extends Document {
   images: string[];
   category?: string;
   tags: string[];
-  language: "tr" | "en" | "de";
   isPublished: boolean;
   publishedAt?: Date;
   author?: string;
   comments: Types.ObjectId[];
+  label: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
 
-const articleSchema: Schema = new Schema<IArticle>(
+const articleSchema: Schema<IArticle> = new Schema(
   {
     title: { type: String, required: true, trim: true },
     slug: { type: String, required: true, unique: true },
@@ -27,22 +30,20 @@ const articleSchema: Schema = new Schema<IArticle>(
     images: [{ type: String, required: true }],
     category: { type: String },
     tags: [{ type: String }],
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
-    },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
     author: { type: String },
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
+    label: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
+    },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-// 🔁 Otomatik slug üretme
+// 🔁 Slug üretimi
 articleSchema.pre("validate", function (this: IArticle, next) {
   if (!this.slug && this.title) {
     this.slug = this.title
@@ -53,5 +54,9 @@ articleSchema.pre("validate", function (this: IArticle, next) {
   next();
 });
 
-const Article = mongoose.model<IArticle>("Article", articleSchema);
-export default Article;
+const Article = model<IArticle>("Article", articleSchema);
+
+export default Article; 
+export { Article };
+
+

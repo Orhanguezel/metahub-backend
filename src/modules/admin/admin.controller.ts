@@ -3,9 +3,10 @@ import asyncHandler from "express-async-handler";
 import { getEnvProfiles } from "../../tools/getEnvProfiles";
 import ModuleSetting from "./moduleSettings.model";
 
-// 📥 GET /admin/modules?project=xxx
+// 📥 GET /admin/modules?project=xxx&lang=tr
 export const getAllModules = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const project = req.query.project as string;
+  const lang = (req.query.lang as "tr" | "en" | "de") || "en";
 
   if (!project) {
     res.status(400).json({ error: "Project param is required." });
@@ -17,10 +18,12 @@ export const getAllModules = asyncHandler(async (req: Request, res: Response): P
 
     const result = modules.map((mod) => ({
       name: mod.module,
-      label: mod.label || mod.module.charAt(0).toUpperCase() + mod.module.slice(1),
+      label: mod.label?.[lang] || mod.module,
       enabled: mod.enabled,
       icon: mod.icon,
-      language: mod.language,
+      visibleInSidebar: mod.visibleInSidebar,
+      useAnalytics: mod.useAnalytics,
+      roles: mod.roles,
     }));
 
     res.status(200).json(result);
@@ -64,7 +67,6 @@ export const toggleModule = asyncHandler(async (req: Request, res: Response): Pr
     });
   }
 });
-
 
 // 🧾 GET /admin/projects
 export const getAvailableProjects = asyncHandler(async (_req: Request, res: Response): Promise<void> => {

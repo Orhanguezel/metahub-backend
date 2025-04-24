@@ -3,25 +3,29 @@ import asyncHandler from "express-async-handler";
 import Skill from "./skill.models";
 import { isValidObjectId } from "../../core/utils/validation";
 
-// 📥 Tüm Skill'leri Getir
+// ✅ Tüm Skill'leri Getir
 export const getAllSkills = asyncHandler(async (_req: Request, res: Response) => {
   const skills = await Skill.find().sort({ createdAt: -1 });
   res.status(200).json(skills);
 });
 
-// ➕ Yeni Skill Ekle
+// ✅ Yeni Skill Ekle
 export const createSkill = asyncHandler(async (req: Request, res: Response) => {
   const { category, name, image } = req.body;
 
-  if (!category || !name || !image) {
+  if (
+    !category?.tr || !category?.en || !category?.de ||
+    !name?.tr || !name?.en || !name?.de ||
+    !image
+  ) {
     res.status(400).json({
       success: false,
       message:
         req.locale === "de"
-          ? "Alle Felder sind erforderlich."
+          ? "Alle Felder sind erforderlich (inkl. Mehrsprachigkeit)."
           : req.locale === "tr"
-          ? "Tüm alanlar zorunludur."
-          : "All fields are required.",
+          ? "Tüm alanlar (çok dilli) zorunludur."
+          : "All fields (including multilingual) are required.",
     });
     return;
   }
@@ -40,12 +44,15 @@ export const createSkill = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-// 📄 Tekil Skill Getir
+// ✅ Tekil Skill Getir
 export const getSkillById = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
 
   if (!isValidObjectId(id)) {
-    res.status(400).json({ success: false, message: "Invalid skill ID." });
+    res.status(400).json({
+      success: false,
+      message: "Invalid skill ID.",
+    });
     return;
   }
 
@@ -66,7 +73,7 @@ export const getSkillById = asyncHandler(async (req: Request, res: Response) => 
   res.status(200).json({ success: true, skill });
 });
 
-// ✏️ Güncelle
+// ✅ Güncelle
 export const updateSkill = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const { category, name, image } = req.body;
@@ -78,7 +85,15 @@ export const updateSkill = asyncHandler(async (req: Request, res: Response) => {
 
   const skill = await Skill.findById(id);
   if (!skill) {
-    res.status(404).json({ success: false, message: "Skill not found." });
+    res.status(404).json({
+      success: false,
+      message:
+        req.locale === "de"
+          ? "Fähigkeit nicht gefunden."
+          : req.locale === "tr"
+          ? "Yetenek bulunamadı."
+          : "Skill not found.",
+    });
     return;
   }
 
@@ -100,12 +115,15 @@ export const updateSkill = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-// ❌ Sil
+// ✅ Sil
 export const deleteSkill = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
 
   if (!isValidObjectId(id)) {
-    res.status(400).json({ success: false, message: "Invalid skill ID." });
+    res.status(400).json({
+      success: false,
+      message: "Invalid skill ID.",
+    });
     return;
   }
 

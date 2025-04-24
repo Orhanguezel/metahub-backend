@@ -1,60 +1,67 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
 
-export interface IProduct extends Document {
-  name: string;
+// 📦 Product interface
+interface IProduct extends Document {
+  name: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   slug: string;
-  description?: string;
+  description?: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
   price: number;
   stock: number;
   stockThreshold: number;
   category: Types.ObjectId;
   images: string[];
   tags?: string[];
-  language: "tr" | "en" | "de";
   isActive: boolean;
   isPublished: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const productSchema: Schema<IProduct> = new Schema(
+// 🧩 Schema tanımı
+const productSchema = new Schema<IProduct>(
   {
-    name: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true },
-    description: { type: String, trim: true },
+    name: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
+    },
+    slug: { type: String, required: true, unique: true, lowercase: true },
+    description: {
+      tr: { type: String },
+      en: { type: String },
+      de: { type: String },
+    },
     price: { type: Number, required: true, min: 0 },
     stock: { type: Number, required: true, default: 0 },
     stockThreshold: { type: Number, default: 5 },
-
     category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
     images: [{ type: String, required: true }],
     tags: [{ type: String }],
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
-    },
     isActive: { type: Boolean, default: true },
     isPublished: { type: Boolean, default: false },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-// 🔁 Slug otomatik üretimi
-productSchema.pre("validate", function (this: IProduct, next) {
-  if (!this.slug && this.name) {
-    this.slug = this.name
+// 🧠 Slug üretimi
+productSchema.pre("validate", function (next) {
+  if (!this.slug && this.name?.en) {
+    this.slug = this.name.en
       .toLowerCase()
-      .replace(/ /g, "-")
-      .replace(/[^\w-]+/g, "");
+      .replace(/\s+/g, "-")
+      .replace(/[^\w\-]+/g, "");
   }
   next();
 });
 
-const Product: Model<IProduct> = mongoose.model<IProduct>(
-  "Product",
-  productSchema
-);
-export default Product;
+// 📤 Model export
+const Product: Model<IProduct> = mongoose.model<IProduct>("Product", productSchema);
+export { Product, IProduct };

@@ -1,12 +1,19 @@
 import { Schema, model, Document } from "mongoose";
 
 export interface IFAQ extends Document {
-  question: string;
-  answer: string;
+  question: {
+    tr: string;
+    en: string;
+    de: string;
+  };
+  answer: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   category?: string;
   isActive: boolean;
   isPublished: boolean;
-  language?: "tr" | "en" | "de";
   embedding?: number[];
   createdAt: Date;
   updatedAt: Date;
@@ -14,17 +21,19 @@ export interface IFAQ extends Document {
 
 const faqSchema = new Schema<IFAQ>(
   {
-    question: { type: String, required: true, trim: true },
-    answer: { type: String, required: true, trim: true },
+    question: {
+      tr: { type: String, required: true, trim: true },
+      en: { type: String, required: true, trim: true },
+      de: { type: String, required: true, trim: true },
+    },
+    answer: {
+      tr: { type: String, required: true, trim: true },
+      en: { type: String, required: true, trim: true },
+      de: { type: String, required: true, trim: true },
+    },
     category: { type: String, trim: true },
     isActive: { type: Boolean, default: true },
     isPublished: { type: Boolean, default: false },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
-
-    },
     embedding: { type: [Number], default: [] },
   },
   { timestamps: true }

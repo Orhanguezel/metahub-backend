@@ -2,7 +2,11 @@ import express from "express";
 import {
   uploadGalleryItem,
   getAllGalleryItems,
+  getPublishedGalleryItems,
   deleteGalleryItem,
+  togglePublishGalleryItem,
+  softDeleteGalleryItem,
+  updateGalleryItem,
 } from "./gallery.controller";
 
 import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
@@ -10,8 +14,13 @@ import upload from "../../core/middleware/uploadMiddleware";
 
 const router = express.Router();
 
-router.get("/", getAllGalleryItems);
+// 🔓 Public: Yayınlanmış medya
+router.get("/published", getPublishedGalleryItems);
 
+// 🔐 Admin: Tüm medya öğeleri
+router.get("/", authenticate, authorizeRoles("admin"), getAllGalleryItems);
+
+// 🔐 Admin: Medya yükle
 router.post(
   "/upload",
   authenticate,
@@ -24,6 +33,31 @@ router.post(
   uploadGalleryItem
 );
 
+// 🔐 Admin: Yayın durumunu değiştir
+router.patch(
+  "/:id/toggle",
+  authenticate,
+  authorizeRoles("admin"),
+  togglePublishGalleryItem
+);
+
+// 🔐 Admin: Medya güncelle
+router.put(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  updateGalleryItem
+);
+
+// 🔐 Admin: Soft delete (arşivle)
+router.patch(
+  "/:id/archive",
+  authenticate,
+  authorizeRoles("admin"),
+  softDeleteGalleryItem
+);
+
+// 🔐 Admin: Kalıcı silme
 router.delete(
   "/:id",
   authenticate,

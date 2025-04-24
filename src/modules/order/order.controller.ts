@@ -1,106 +1,101 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
+import { Types } from "mongoose";
 import Order, { IOrderItem, OrderStatus } from "./order.models";
-import Product from "../product/product.models";
+import { Product } from "../product";
 import User from "../users/users.models";
 import Notification from "../notification/notification.models";
 import { sendEmail } from "../../services/emailService";
 import { orderConfirmationTemplate } from "../../templates/orderConfirmation";
 
 // ✅ Sipariş oluştur
-export const createOrder = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const {
-      items,
-      shippingAddress,
-      totalPrice,
-    }: { items: IOrderItem[]; shippingAddress: any; totalPrice: number } =
-      req.body;
+export const createOrder = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const {
+    items,
+    shippingAddress,
+    totalPrice,
+  }: { items: IOrderItem[]; shippingAddress: any; totalPrice: number } = req.body;
 
-    if (!items || items.length === 0) {
-      res.status(400).json({
+  if (!items?.length) {
+    res.status(400).json({
+      message:
+        req.locale === "de"
+          ? "Der Warenkorb darf nicht leer sein."
+          : req.locale === "tr"
+          ? "Sepet boş olamaz."
+          : "Cart must not be empty.",
+    });
+    return;
+  }
+
+  const enrichedItems: IOrderItem[] = [];
+  const criticalStockWarnings: string[] = [];
+
+  for (const item of items) {
+    const product = await Product.findById(item.product);
+    if (!product) {
+      res.status(404).json({
         message:
           req.locale === "de"
-            ? "Der Warenkorb darf nicht leer sein."
+            ? `Produkt nicht gefunden: ${item.product}`
             : req.locale === "tr"
-            ? "Sepet boş olamaz."
-            : "Cart must not be empty.",
+            ? `Ürün bulunamadı: ${item.product}`
+            : `Product not found: ${item.product}`,
       });
       return;
     }
 
-    let criticalStockWarnings: string[] = [];
-
-    // 🔍 Ürün stok kontrolü ve azaltma (yeni yapı)
-    for (const item of items) {
-      const product = await Product.findById(item.product);
-      if (!product) {
-        res.status(404).json({
-          message:
-            req.locale === "de"
-              ? `Produkt nicht gefunden: ${item.product}`
-              : req.locale === "tr"
-              ? `Ürün bulunamadı: ${item.product}`
-              : `Product not found: ${item.product}`,
-        });
-        return;
-      }
-
-      if (product.stock < item.quantity) {
-        res.status(400).json({
-          message:
-            req.locale === "de"
-              ? `Nicht genügend Lagerbestand für ${product.name}`
-              : req.locale === "tr"
-              ? `${product.name} için yeterli stok yok`
-              : `Insufficient stock for ${product.name}`,
-        });
-        return;
-      }
-
-      // ❗ Stok azaltma
-      product.stock -= item.quantity;
-
-      // 🚨 Kritik stok kontrolü (stok eşiği altına düşerse)
-      const stockThreshold = product.stockThreshold ?? 5;
-      if (product.stock <= stockThreshold) {
-        criticalStockWarnings.push(
-          `${product.name} → ${product.stock} adet kaldı`
-        );
-      }
-
-      await product.save();
+    if (product.stock < item.quantity) {
+      res.status(400).json({
+        message:
+          req.locale === "de"
+            ? `Nicht genügend Lagerbestand für ${product.name.de}`
+            : req.locale === "tr"
+            ? `${product.name.tr} için yeterli stok yok`
+            : `Insufficient stock for ${product.name.en}`,
+      });
+      return;
     }
 
-    // 🧾 Sipariş oluştur
-    const order = await Order.create({
-      user: req.user?._id || null,
-      items,
-      shippingAddress,
-      totalPrice,
-      paymentMethod: "cash_on_delivery",
-      language: req.locale || "en",
+    product.stock -= item.quantity;
+    await product.save();
+
+    if (product.stock <= (product.stockThreshold ?? 5)) {
+      criticalStockWarnings.push(`${product.name.tr} → ${product.stock} adet kaldı`);
+    }
+
+    enrichedItems.push({
+      product: product._id as Types.ObjectId, 
+      quantity: item.quantity,
+      unitPrice: product.price,
     });
+    
+  }
 
-    // 📨 E-posta gönderimi
-    const itemsList = items
-      .map((item) => `• Produkt ID: ${item.product} – Menge: ${item.quantity}`)
-      .join("<br/>");
+  const order = await Order.create({
+    user: req.user?._id || null,
+    items: enrichedItems,
+    shippingAddress,
+    totalPrice,
+    paymentMethod: "cash_on_delivery",
+    language: req.locale || "en",
+  });
 
-    const user = req.user
-      ? await User.findById(req.user._id).select("email")
-      : null;
-    const customerEmail = shippingAddress?.email || user?.email || "";
+  const itemsList = enrichedItems
+    .map((item) => `• Produkt ID: ${item.product} – Menge: ${item.quantity}`)
+    .join("<br/>");
 
-    const htmlToCustomer = orderConfirmationTemplate({
-      name: shippingAddress.name,
-      itemsList,
-      totalPrice,
-    });
+  const user = req.user ? await User.findById(req.user._id).select("email") : null;
+  const customerEmail = shippingAddress?.email || user?.email || "";
 
-    const htmlToAdmin = `
+  const htmlToCustomer = orderConfirmationTemplate({
+    name: shippingAddress.name,
+    itemsList,
+    totalPrice,
+  });
+
+  const htmlToAdmin = `
     <h2>Neue Bestellung</h2>
-    <p>Ein Kunde hat eine neue Bestellung aufgegeben:</p>
     <p><strong>Gesamtpreis:</strong> €${totalPrice.toFixed(2)}</p>
     <p><strong>Produkte:</strong><br/>${itemsList}</p>
     <p><strong>Lieferadresse:</strong><br/>
@@ -111,58 +106,93 @@ export const createOrder = asyncHandler(
     </p>
     ${
       criticalStockWarnings.length
-        ? `<p style="color:red;"><strong>⚠️ Kritischer Lagerbestand:</strong><br/>${criticalStockWarnings.join(
-            "<br/>"
-          )}</p>`
+        ? `<p style="color:red;"><strong>⚠️ Kritischer Lagerbestand:</strong><br/>${criticalStockWarnings.join("<br/>")}</p>`
         : ""
     }
   `;
 
-    await Promise.all([
-      sendEmail({
-        to: customerEmail,
-        subject: "Bestellbestätigung – Ensotek",
-        html: htmlToCustomer,
-      }),
-      sendEmail({
-        to: process.env.SMTP_FROM || "admin@ensotek.de",
-        subject: "Neue Bestellung – Ensotek",
-        html: htmlToAdmin,
-      }),
-    ]);
+  await Promise.all([
+    sendEmail({
+      to: customerEmail,
+      subject: "Bestellbestätigung – Ensotek",
+      html: htmlToCustomer,
+    }),
+    sendEmail({
+      to: process.env.SMTP_FROM || "admin@ensotek.de",
+      subject: "Neue Bestellung – Ensotek",
+      html: htmlToAdmin,
+    }),
+  ]);
 
-    // 🔔 Bildirim
-    void Notification.create({
-      title:
-        req.locale === "de"
-          ? "Neue Bestellung erhalten"
-          : req.locale === "tr"
-          ? "Yeni sipariş alındı"
-          : "New order received",
-      message:
-        req.locale === "de"
-          ? `Gesamtpreis: €${totalPrice.toFixed(2)}`
-          : req.locale === "tr"
-          ? `Toplam tutar: €${totalPrice.toFixed(2)}`
-          : `Total price: €${totalPrice.toFixed(2)}`,
-      type: "success",
-      user: req.user?._id || null,
-      language: req.locale || "en",
-    });
+  await Notification.create({
+    title:
+      req.locale === "de"
+        ? "Neue Bestellung erhalten"
+        : req.locale === "tr"
+        ? "Yeni sipariş alındı"
+        : "New order received",
+    message:
+      req.locale === "de"
+        ? `Gesamtpreis: €${totalPrice.toFixed(2)}`
+        : req.locale === "tr"
+        ? `Toplam tutar: €${totalPrice.toFixed(2)}`
+        : `Total price: €${totalPrice.toFixed(2)}`,
+    type: "success",
+    user: req.user?._id || null,
+    language: req.locale || "en",
+  });
 
-    res.status(201).json({
-      success: true,
-      message:
-        req.locale === "de"
-          ? "Bestellung erfolgreich erstellt."
-          : req.locale === "tr"
-          ? "Sipariş başarıyla oluşturuldu."
-          : "Order created successfully.",
-      order,
-      criticalStockWarnings,
-    });
+  res.status(201).json({
+    success: true,
+    message:
+      req.locale === "de"
+        ? "Bestellung erfolgreich erstellt."
+        : req.locale === "tr"
+        ? "Sipariş başarıyla oluşturuldu."
+        : "Order created successfully.",
+    order,
+    criticalStockWarnings,
+  });
+});
+
+// ✅ Sipariş durumunu güncelle
+export const updateOrderStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const { status }: { status: OrderStatus } = req.body;
+
+  const validStatuses: OrderStatus[] = ["pending", "preparing", "shipped", "completed", "cancelled"];
+  if (!validStatuses.includes(status)) {
+    res.status(400).json({ message: "Invalid order status." });
+    return;
   }
-);
+
+  const order = await Order.findById(req.params.id);
+  if (!order) {
+    res.status(404).json({
+      message:
+        req.locale === "de"
+          ? "Bestellung nicht gefunden."
+          : req.locale === "tr"
+          ? "Sipariş bulunamadı."
+          : "Order not found.",
+    });
+    return;
+  }
+
+  order.status = status;
+  await order.save();
+
+  res.json({
+    success: true,
+    message:
+      req.locale === "de"
+        ? "Bestellstatus aktualisiert."
+        : req.locale === "tr"
+        ? "Sipariş durumu güncellendi."
+        : "Order status updated.",
+    order,
+  });
+});
+
 
 // ✅ Tüm siparişleri getir (admin)
 export const getAllOrders = asyncHandler(
@@ -207,40 +237,6 @@ export const markOrderAsDelivered = asyncHandler(
           : req.locale === "tr"
           ? "Sipariş teslim edildi olarak işaretlendi."
           : "Order marked as delivered.",
-    });
-  }
-);
-
-// ✅ Sipariş durumunu güncelle
-export const updateOrderStatus = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const { status } = req.body as { status: OrderStatus };
-
-    const order = await Order.findById(req.params.id);
-    if (!order) {
-      res.status(404).json({
-        message:
-          req.locale === "de"
-            ? "Bestellung nicht gefunden."
-            : req.locale === "tr"
-            ? "Sipariş bulunamadı."
-            : "Order not found.",
-      });
-      return;
-    }
-
-    order.status = status;
-    await order.save();
-
-    res.json({
-      success: true,
-      message:
-        req.locale === "de"
-          ? "Bestellstatus aktualisiert."
-          : req.locale === "tr"
-          ? "Sipariş durumu güncellendi."
-          : "Order status updated.",
-      order,
     });
   }
 );

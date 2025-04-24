@@ -1,5 +1,3 @@
-// src/models/appointment.models.ts
-
 import { Schema, model, Document, Types } from "mongoose";
 
 export interface IAppointment extends Document {
@@ -12,19 +10,16 @@ export interface IAppointment extends Document {
   date: string;
   time: string;
   service: Types.ObjectId;
-  durationMinutes: number; // yeni alan
+  durationMinutes: number;
   status: "pending" | "confirmed" | "cancelled";
+  language: "tr" | "en" | "de"; // ✅ sadece bir dil
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 const appointmentSchema = new Schema<IAppointment>(
   {
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: false,
-    },
+    user: { type: Schema.Types.ObjectId, ref: "User" },
     name: { type: String, required: true, trim: true },
     email: {
       type: String,
@@ -38,16 +33,17 @@ const appointmentSchema = new Schema<IAppointment>(
     note: { type: String, trim: true },
     date: { type: String, required: true },
     time: { type: String, required: true },
-    service: {
-      type: Schema.Types.ObjectId,
-      ref: "Service",
-      required: true,
-    },
-    durationMinutes: { type: Number, default: 60 }, // varsayılan 1 saat
+    service: { type: Schema.Types.ObjectId, ref: "Service", required: true },
+    durationMinutes: { type: Number, default: 60 },
     status: {
       type: String,
       enum: ["pending", "confirmed", "cancelled"],
       default: "pending",
+    },
+    language: {
+      type: String,
+      enum: ["tr", "en", "de"],
+      default: "en",
     },
   },
   { timestamps: true }

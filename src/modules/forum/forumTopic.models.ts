@@ -1,26 +1,44 @@
 import { Schema, model, Document, Types } from "mongoose";
 
 export interface IForumTopic extends Document {
-  title: string;
-  content: string;
+  title: {
+    tr: string;
+    en: string;
+    de: string;
+  };
+  content: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   category: Types.ObjectId;
   user?: Types.ObjectId;
   isPinned: boolean;
   isLocked: boolean;
-  language: "tr" | "en" | "de";
   createdAt: Date;
   updatedAt: Date;
 }
 
 const forumTopicSchema = new Schema<IForumTopic>(
   {
-    title: { type: String, required: true, trim: true },
-    content: { type: String, required: true },
-    category: { type: Schema.Types.ObjectId, ref: "ForumCategory", required: true },
+    title: {
+      tr: { type: String, required: true, trim: true },
+      en: { type: String, required: true, trim: true },
+      de: { type: String, required: true, trim: true },
+    },
+    content: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
+    },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: "ForumCategory",
+      required: true,
+    },
     user: { type: Schema.Types.ObjectId, ref: "User" },
     isPinned: { type: Boolean, default: false },
     isLocked: { type: Boolean, default: false },
-    language: { type: String, enum: ["tr", "en", "de"], default: "en" },
   },
   { timestamps: true }
 );

@@ -1,11 +1,18 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface ILibraryItem extends Document {
-  title: string;
+  title: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
   slug: string;
-  description?: string;
+  description?: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
   category?: string;
-  language?: "tr" | "en" | "de";
   fileUrl: string;
   fileType: "pdf" | "docx" | "pptx" | "image" | "other";
   tags?: string[];
@@ -16,15 +23,18 @@ export interface ILibraryItem extends Document {
 
 const librarySchema: Schema = new Schema<ILibraryItem>(
   {
-    title: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true },
-    description: { type: String },
-    category: { type: String },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
+    title: {
+      tr: { type: String, trim: true },
+      en: { type: String, trim: true },
+      de: { type: String, trim: true },
     },
+    slug: { type: String, required: true, unique: true },
+    description: {
+      tr: { type: String },
+      en: { type: String },
+      de: { type: String },
+    },
+    category: { type: String },
     fileUrl: { type: String, required: true },
     fileType: {
       type: String,
@@ -39,10 +49,12 @@ const librarySchema: Schema = new Schema<ILibraryItem>(
   }
 );
 
-// 🔁 Slug otomatik üretimi
+// 🔁 Slug otomatik üretimi (ilk geçerli başlığa göre)
 librarySchema.pre("validate", function (this: ILibraryItem, next) {
-  if (!this.slug && this.title) {
-    this.slug = this.title
+  const baseTitle =
+    this.title?.en || this.title?.de || this.title?.tr || "untitled";
+  if (!this.slug && baseTitle) {
+    this.slug = baseTitle
       .toLowerCase()
       .replace(/ /g, "-")
       .replace(/[^\w-]+/g, "");

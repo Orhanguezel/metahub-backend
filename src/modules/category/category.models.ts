@@ -6,7 +6,11 @@ export interface ICategory extends Document {
   description?: string;
   image?: string;
   isActive: boolean;
-  language?: "tr" | "en" | "de";
+  label: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,10 +25,10 @@ const categorySchema = new Schema<ICategory>(
       default: "defaults/category.png",
     },
     isActive: { type: Boolean, default: true },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
+    label: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
     },
   },
   { timestamps: true }

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import User from "../users/users.models";
-import Order from "../../modules/order/order.models";
+import {Order} from "../order";
 
 export const getTopProducts = asyncHandler(
   async (_req: Request, res: Response) => {

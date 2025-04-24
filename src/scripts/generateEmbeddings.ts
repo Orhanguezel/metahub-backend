@@ -1,6 +1,6 @@
 import { config } from "dotenv";
 import mongoose from "mongoose";
-import FaqModel from "../modules/faq/faq.models";
+import { FAQ } from "@/modules/faq";
 import OpenAI from "openai";
 
 config();
@@ -14,7 +14,7 @@ async function main() {
     await mongoose.connect(process.env.MONGO_URI!);
     console.log("✅ MongoDB bağlantısı başarılı.");
 
-    const faqs = await FaqModel.find({ embedding: { $exists: false } });
+    const faqs = await FAQ.find({ embedding: { $exists: false } });
 
     if (faqs.length === 0) {
       console.log("🔍 Tüm kayıtların embedding'leri zaten mevcut.");

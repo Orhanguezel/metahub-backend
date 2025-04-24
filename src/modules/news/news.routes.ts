@@ -7,26 +7,31 @@ import {
   updateNews,
   deleteNews,
 } from "./news.controller";
+
 import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
 import upload from "../../core/middleware/uploadMiddleware";
 
 const router = express.Router();
 
-// 🌐 Public
+// 📂 Upload klasörü belirt
+const setUploadType = (type: string) => (req: Request, _res: Response, next: NextFunction) => {
+  req.uploadType = "news";
+  next();
+  
+};
+
+// 🌍 Public Routes
 router.get("/", getAllNews);               // Tüm haberleri getir
 router.get("/slug/:slug", getNewsBySlug);  // Slug ile getir
-router.get("/:id", getNewsById);           // ID ile getir (admin panel için de kullanılabilir)
+router.get("/:id", getNewsById);           // ID ile getir (admin için de kullanılabilir)
 
-// 🔐 Protected (admin / moderator)
+// 🔐 Admin/Mod Routes
 router.post(
   "/",
   authenticate,
   authorizeRoles("admin", "moderator"),
-  (req: Request, _res: Response, next: NextFunction) => {
-    req.uploadType = "news";  // 🔁 upload klasörü belirleniyor
-    next();
-  },
-  upload.array("images", 5), // 📷 form-data alan adı: "image"
+  setUploadType("news"),
+  upload.array("images", 5),
   createNews
 );
 
@@ -34,10 +39,7 @@ router.put(
   "/:id",
   authenticate,
   authorizeRoles("admin", "moderator"),
-  (req: Request, _res: Response, next: NextFunction) => {
-    req.uploadType = "news";
-    next();
-  },
+  setUploadType("news"),
   upload.array("images", 5),
   updateNews
 );

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Article from "./articles.models";
-import { BASE_URL,UPLOAD_BASE_PATH } from "../../core/middleware/uploadMiddleware";
-import { isValidObjectId } from "../../core/utils/validation";
+import { BASE_URL, UPLOAD_BASE_PATH } from "@/core/middleware/uploadMiddleware";
+import { isValidObjectId } from "@/core/utils/validation";
 
 // ✅ Çoklu dilde makale oluştur (çoklu görselli)
 export const createArticle = asyncHandler(
@@ -13,7 +13,6 @@ export const createArticle = asyncHandler(
     const imageUrls =
       files?.map(
         (file) => `${BASE_URL}/${UPLOAD_BASE_PATH}/article-images/${file.filename}`
-
       ) || [];
 
     if (imageUrls.length === 0) {
@@ -33,7 +32,7 @@ export const createArticle = asyncHandler(
     for (const lang of langs) {
       const data = req.body[lang];
 
-      if (!data?.title || !data?.summary || !data?.content || !data?.slug)
+      if (!data?.title || !data?.summary || !data?.content || !data?.slug || !data?.label)
         continue;
 
       const parsedTags =
@@ -46,7 +45,6 @@ export const createArticle = asyncHandler(
         slug: data.slug,
         tags: parsedTags || [],
         category: data.category,
-        language: lang,
         isPublished:
           req.body.isPublished === "true" || req.body.isPublished === true,
         publishedAt: req.body.isPublished
@@ -54,6 +52,7 @@ export const createArticle = asyncHandler(
           : undefined,
         author: req.user?.name,
         images: imageUrls,
+        label: data.label,
       });
 
       createdArticles.push(article);
@@ -90,7 +89,7 @@ export const getAllArticles = asyncHandler(
     const { category, language } = req.query;
     const filter: any = {};
     if (category) filter.category = category;
-    filter.language = language || req.locale || "en";
+    if (language) filter.label = { $exists: true }; // Dummy check, tüm diller var çünkü
 
     const articles = await Article.find(filter)
       .populate("comments")
@@ -145,7 +144,6 @@ export const getArticleById = asyncHandler(
 );
 
 // ✅ Makale güncelle
-
 export const updateArticle = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
@@ -175,58 +173,45 @@ export const updateArticle = asyncHandler(
       slug,
       category,
       tags,
-      language,
+      label,
       isPublished,
       publishedAt,
       removedImages,
     } = req.body;
 
-    // Yeni görseller
     const files = req.files as Express.Multer.File[];
     const newImages =
       files?.map(
         (file) => `${BASE_URL}/${UPLOAD_BASE_PATH}/article-images/${file.filename}`
-
       ) || [];
 
-    // 🧠 Kısmi güncelleme
     if (title) article.title = title;
     if (summary) article.summary = summary;
     if (content) article.content = content;
     if (slug) article.slug = slug;
     if (category) article.category = category;
-    if (language) article.language = language;
+    if (label) article.label = label;
     if (typeof isPublished !== "undefined")
       article.isPublished = isPublished === "true" || isPublished === true;
     if (publishedAt) article.publishedAt = new Date(publishedAt);
 
-    // Etiketler (tags)
     if (tags) {
       try {
         article.tags = typeof tags === "string" ? JSON.parse(tags) : tags;
-      } catch {
-        // Geçersizse güncelleme
-      }
+      } catch {}
     }
 
-    // Silinen görselleri çıkart
     if (removedImages) {
       try {
         const toRemove = JSON.parse(removedImages);
-        article.images = article.images.filter(
-          (img) => !toRemove.includes(img)
-        );
-      } catch {
-        // Geçersiz format
-      }
+        article.images = article.images.filter((img) => !toRemove.includes(img));
+      } catch {}
     }
 
-    // Yeni görselleri ekle
     if (newImages.length > 0) {
       article.images = [...article.images, ...newImages];
     }
 
-    // 💾 Kaydet
     await article.save();
 
     res.status(200).json({

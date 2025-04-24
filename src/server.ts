@@ -6,6 +6,7 @@ import connectDB from "./core/config/connect";
 import cookieParser from "cookie-parser";
 import { initializeSocket } from "./socket/socket";
 import { setLocale } from "./core/middleware/setLocale";
+import 'module-alias/register';
 import { getRouter } from "./routes";
 import { setupSwagger } from "./core/swagger/setupSwagger";
 

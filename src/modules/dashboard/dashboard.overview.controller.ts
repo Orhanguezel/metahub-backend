@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import User from "../users/users.models";
-import Order from "../../modules/order/order.models";
-import Feedback from "../../modules/feedback/feedback.models";
+import {Order} from "../order";
+import {Feedback} from "../feedback";
 
 export const getDailyOverview = asyncHandler(
   async (_req: Request, res: Response) => {

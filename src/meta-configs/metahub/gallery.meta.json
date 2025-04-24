@@ -11,6 +11,12 @@
   "routes": [
     {
       "method": "GET",
+      "path": "/published",
+      "auth": true,
+      "summary": "GET /published"
+    },
+    {
+      "method": "GET",
       "path": "/",
       "auth": true,
       "summary": "GET /"
@@ -20,6 +26,24 @@
       "path": "/upload",
       "auth": true,
       "summary": "POST /upload"
+    },
+    {
+      "method": "PATCH",
+      "path": "/:id/toggle",
+      "auth": true,
+      "summary": "PATCH /:id/toggle"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id",
+      "auth": true,
+      "summary": "PUT /:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/:id/archive",
+      "auth": true,
+      "summary": "PATCH /:id/archive"
     },
     {
       "method": "DELETE",

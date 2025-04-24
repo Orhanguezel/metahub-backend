@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 import mongoose from "mongoose";
 import { Pinecone } from "@pinecone-database/pinecone";
-import FaqModel from "../modules/faq/faq.models";
+import { FAQ } from "@/modules/faq";
 
 config();
 
@@ -16,7 +16,7 @@ async function main() {
     await mongoose.connect(process.env.MONGO_URI!);
     console.log("✅ MongoDB bağlantısı başarılı.");
 
-    const faqs = await FaqModel.find({
+    const faqs = await FAQ.find({
       isActive: true,
       embedding: { $exists: true, $not: { $size: 0 } },
     });
@@ -32,7 +32,6 @@ async function main() {
       metadata: {
         question: faq.question,
         answer: faq.answer,
-        language: faq.language || "en",
       },
     }));
 

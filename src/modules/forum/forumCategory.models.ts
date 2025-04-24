@@ -1,18 +1,32 @@
 import { Schema, model, Document } from "mongoose";
 
 export interface IForumCategory extends Document {
-  name: string;
-  description?: string;
-  language: "tr" | "en" | "de";
+  name: {
+    tr: string;
+    en: string;
+    de: string;
+  };
+  description?: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
 
 const forumCategorySchema = new Schema<IForumCategory>(
   {
-    name: { type: String, required: true, trim: true },
-    description: { type: String, trim: true },
-    language: { type: String, enum: ["tr", "en", "de"], default: "en" },
+    name: {
+      tr: { type: String, required: true, trim: true },
+      en: { type: String, required: true, trim: true },
+      de: { type: String, required: true, trim: true },
+    },
+    description: {
+      tr: { type: String, trim: true },
+      en: { type: String, trim: true },
+      de: { type: String, trim: true },
+    },
   },
   { timestamps: true }
 );

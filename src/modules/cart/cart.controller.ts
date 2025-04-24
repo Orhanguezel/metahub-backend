@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { Types } from "mongoose";
 import asyncHandler from "express-async-handler";
 import Cart, { ICartItem } from "./cart.models";
-import Product, { IProduct } from "../product/product.models";
+import {Product,  IProduct } from "../product";
 
 // Toplam fiyatı hesapla
 const recalculateTotal = (items: ICartItem[]): number =>

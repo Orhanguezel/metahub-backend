@@ -2,10 +2,17 @@ import { Schema, model, Document } from "mongoose";
 
 export interface ISetting extends Document {
   key: string;
-  value: string;
-  description?: string;
+  value: {
+    tr: string;
+    en: string;
+    de: string;
+  };
+  description?: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
   isActive: boolean;
-  language?: "tr" | "en" | "de";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,22 +26,18 @@ const settingSchema = new Schema<ISetting>(
       trim: true,
     },
     value: {
-      type: String,
-      required: true,
-      trim: true,
+      tr: { type: String, required: true, trim: true },
+      en: { type: String, required: true, trim: true },
+      de: { type: String, required: true, trim: true },
     },
     description: {
-      type: String,
-      trim: true,
+      tr: { type: String, trim: true },
+      en: { type: String, trim: true },
+      de: { type: String, trim: true },
     },
     isActive: {
       type: Boolean,
       default: true,
-    },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
     },
   },
   { timestamps: true }

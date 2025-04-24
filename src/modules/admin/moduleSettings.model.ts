@@ -1,6 +1,11 @@
-// src/modules/admin/moduleSettings.model.ts
-
 import mongoose, { Schema, Document } from "mongoose";
+
+// ✅ Çok dilli label tipi
+interface TranslatedLabel {
+  tr: string;
+  en: string;
+  de: string;
+}
 
 export interface IModuleSetting extends Document {
   project: string;
@@ -10,8 +15,7 @@ export interface IModuleSetting extends Document {
   useAnalytics: boolean;
   roles: string[];
   icon: string;
-  label: string;
-  language: "tr" | "en" | "de";
+  label: TranslatedLabel;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,11 +29,10 @@ const moduleSettingsSchema = new Schema<IModuleSetting>(
     useAnalytics: { type: Boolean, default: false },
     roles: { type: [String], default: ["admin"] },
     icon: { type: String, default: "box" },
-    label: { type: String, required: true },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
+    label: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
     },
   },
   { timestamps: true }

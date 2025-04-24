@@ -1,16 +1,27 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IReference extends Document {
-  companyName: string;
+  companyName: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   slug: string;
   url?: string;
   logos: string[];
-  sector: string;
+  sector: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   country?: string;
-  description?: string;
+  description?: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
   year?: number;
   tags?: string[];
-  language?: "tr" | "en" | "de";
   isPublished: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -18,20 +29,27 @@ export interface IReference extends Document {
 
 const referenceSchema: Schema = new Schema<IReference>(
   {
-    companyName: { type: String, required: true, trim: true },
+    companyName: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
+    },
     slug: { type: String, required: true, unique: true },
     url: { type: String },
-    logos: [{ type: String,required: true }],
-    sector: { type: String, required: true },
+    logos: [{ type: String, required: true }],
+    sector: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
+    },
     country: { type: String },
-    description: { type: String },
+    description: {
+      tr: { type: String },
+      en: { type: String },
+      de: { type: String },
+    },
     year: { type: Number },
     tags: [{ type: String }],
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
-    },
     isPublished: { type: Boolean, default: false },
   },
   {
@@ -41,8 +59,8 @@ const referenceSchema: Schema = new Schema<IReference>(
 
 // 🔁 Slug üretimi
 referenceSchema.pre("validate", function (this: IReference, next) {
-  if (!this.slug && this.companyName) {
-    this.slug = this.companyName
+  if (!this.slug && this.companyName && this.companyName.en) {
+    this.slug = this.companyName.en
       .toLowerCase()
       .replace(/ /g, "-")
       .replace(/[^\w-]+/g, "");

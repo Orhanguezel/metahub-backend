@@ -1,16 +1,17 @@
-// src/modules/admin/moduleMeta.model.ts
-
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IModuleMeta extends Document {
   name: string;
-  label: string;
+  label: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   icon: string;
   roles: string[];
   visibleInSidebar: boolean;
   enabled: boolean;
   useAnalytics: boolean;
-  language: "tr" | "en" | "de";
   routes: {
     method: string;
     path: string;
@@ -25,17 +26,16 @@ export interface IModuleMeta extends Document {
 const moduleMetaSchema = new Schema<IModuleMeta>(
   {
     name: { type: String, required: true, unique: true },
-    label: { type: String, required: true },
+    label: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
+    },
     icon: { type: String, default: "box" },
     roles: { type: [String], default: ["admin"] },
     visibleInSidebar: { type: Boolean, default: true },
     enabled: { type: Boolean, default: true },
     useAnalytics: { type: Boolean, default: false },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
-    },
     routes: [
       {
         method: { type: String, required: true },

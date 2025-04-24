@@ -16,7 +16,11 @@ export interface ICart extends Document {
   totalPrice: number;
   status: "open" | "ordered" | "cancelled";
   isActive: boolean;
-  language: "tr" | "en" | "de";
+  label: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -74,11 +78,10 @@ const cartSchema = new Schema<ICart>(
       type: Boolean,
       default: true,
     },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
-      required: true,
+    label: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
     },
   },
   { timestamps: true }

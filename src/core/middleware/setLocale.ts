@@ -1,4 +1,6 @@
 // middleware/setLocale.ts
+/// <reference path="../../types/global.d.ts" />
+
 import { Request, Response, NextFunction } from "express";
 
 export const setLocale = (req: Request, _res: Response, next: NextFunction) => {

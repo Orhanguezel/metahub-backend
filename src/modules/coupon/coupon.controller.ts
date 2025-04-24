@@ -43,12 +43,21 @@ export const createCoupon = asyncHandler(async (req: Request, res: Response): Pr
 
     const coupon = await Coupon.create({
       code: codeUpper,
-      title,
-      description,
+      label: {
+        title: {
+          tr: req.body[`title_tr`] || title,
+          en: req.body[`title_en`] || title,
+          de: req.body[`title_de`] || title,
+        },
+        description: {
+          tr: req.body[`description_tr`] || "",
+          en: req.body[`description_en`] || "",
+          de: req.body[`description_de`] || "",
+        },
+      },
       discount,
       expiresAt,
       isActive: true,
-      language: lang,
     });
 
     createdCoupons.push(coupon);
@@ -81,7 +90,7 @@ export const createCoupon = asyncHandler(async (req: Request, res: Response): Pr
 // 🧾 Tüm kuponları getir (dil filtreli)
 export const getAllCoupons = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const language = (req.query.lang as string) || req.locale || "en";
-  const coupons = await Coupon.find({ language }).sort({ createdAt: -1 });
+  const coupons = await Coupon.find({ [`label.title.${language}`]: { $exists: true } }).sort({ createdAt: -1 });
   res.status(200).json(coupons);
 });
 
@@ -92,8 +101,8 @@ export const getCouponByCode = asyncHandler(async (req: Request, res: Response):
 
   const coupon = await Coupon.findOne({
     code: code.toUpperCase(),
-    language,
     isActive: true,
+    [`label.title.${language}`]: { $exists: true },
   });
 
   if (!coupon) {
@@ -132,17 +141,28 @@ export const updateCoupon = asyncHandler(async (req: Request, res: Response): Pr
     return;
   }
 
-  const { code, title, description, discount, expiresAt, isActive, language } = req.body;
+  const { code, discount, expiresAt, isActive } = req.body;
+  const title_tr = req.body.title_tr;
+  const title_en = req.body.title_en;
+  const title_de = req.body.title_de;
+  const desc_tr = req.body.description_tr;
+  const desc_en = req.body.description_en;
+  const desc_de = req.body.description_de;
 
   if (code) coupon.code = code.toUpperCase().trim();
-  if (title) coupon.title = title;
-  if (description !== undefined) coupon.description = description;
   if (discount !== undefined) coupon.discount = discount;
   if (expiresAt) coupon.expiresAt = new Date(expiresAt);
   if (typeof isActive === "boolean") coupon.isActive = isActive;
-  if (language) coupon.language = language;
+
+  if (title_tr) coupon.label.title.tr = title_tr;
+  if (title_en) coupon.label.title.en = title_en;
+  if (title_de) coupon.label.title.de = title_de;
+  if (desc_tr !== undefined) coupon.label.description.tr = desc_tr;
+  if (desc_en !== undefined) coupon.label.description.en = desc_en;
+  if (desc_de !== undefined) coupon.label.description.de = desc_de;
 
   await coupon.save();
+
   res.status(200).json({
     success: true,
     message:

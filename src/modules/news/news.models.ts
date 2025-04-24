@@ -1,15 +1,26 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface INews extends Document {
-  title: string;
+  title: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
   slug: string;
-  summary: string;
-  content: string;
+  summary: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
+  content: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
   images: string[];
   tags: string[];
   author?: string;
   category?: string;
-  language: "tr" | "en" | "de";
   isPublished: boolean;
   publishedAt?: Date;
   comments: Types.ObjectId[];
@@ -19,19 +30,26 @@ export interface INews extends Document {
 
 const newsSchema: Schema = new Schema<INews>(
   {
-    title: { type: String, required: true, trim: true },
+    title: {
+      tr: { type: String, trim: true },
+      en: { type: String, trim: true },
+      de: { type: String, trim: true },
+    },
     slug: { type: String, required: true, unique: true, lowercase: true },
-    summary: { type: String, required: true, maxlength: 300 },
-    content: { type: String, required: true },
+    summary: {
+      tr: { type: String, maxlength: 300 },
+      en: { type: String, maxlength: 300 },
+      de: { type: String, maxlength: 300 },
+    },
+    content: {
+      tr: { type: String },
+      en: { type: String },
+      de: { type: String },
+    },
     images: [{ type: String, required: true }],
     tags: [{ type: String }],
     author: { type: String },
     category: { type: String },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
-    },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
@@ -43,8 +61,10 @@ const newsSchema: Schema = new Schema<INews>(
 
 // 🔁 Otomatik slug üretimi
 newsSchema.pre("validate", function (this: INews, next) {
-  if (!this.slug && this.title) {
-    this.slug = this.title
+  const baseTitle =
+    this.title?.en || this.title?.de || this.title?.tr || "news";
+  if (!this.slug && baseTitle) {
+    this.slug = baseTitle
       .toLowerCase()
       .replace(/ /g, "-")
       .replace(/[^\w-]+/g, "");

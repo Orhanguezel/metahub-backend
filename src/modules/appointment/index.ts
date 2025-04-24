@@ -1,7 +1,10 @@
 import express from "express";
 import routes from "./appointment.routes";
+
+export { default as Appointment } from "./appointment.models";
+export * from "./appointment.controller";
+
 const router = express.Router();
 router.use("/", routes);
-export * from "./appointment.controller";
-export * from "./appointment.models";
+
 export default router;

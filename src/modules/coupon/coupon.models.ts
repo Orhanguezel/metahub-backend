@@ -2,12 +2,21 @@ import { Schema, model, Document } from "mongoose";
 
 export interface ICoupon extends Document {
   code: string;
-  title: string;
-  description?: string;
+  label: {
+    title: {
+      tr: string;
+      en: string;
+      de: string;
+    };
+    description?: {
+      tr?: string;
+      en?: string;
+      de?: string;
+    };
+  };
   discount: number;
   expiresAt: Date;
   isActive: boolean;
-  language: "tr" | "en" | "de";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,8 +30,18 @@ const couponSchema = new Schema<ICoupon>(
       uppercase: true,
       trim: true,
     },
-    title: { type: String, required: true },
-    description: { type: String },
+    label: {
+      title: {
+        tr: { type: String, required: true },
+        en: { type: String, required: true },
+        de: { type: String, required: true },
+      },
+      description: {
+        tr: { type: String },
+        en: { type: String },
+        de: { type: String },
+      },
+    },
     discount: {
       type: Number,
       required: true,
@@ -34,12 +53,6 @@ const couponSchema = new Schema<ICoupon>(
       required: true,
     },
     isActive: { type: Boolean, default: true },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      required: true,
-      default: "en",
-    },
   },
   { timestamps: true }
 );

@@ -2,7 +2,7 @@ import { Server as HttpServer } from "http";
 import { Server as SocketIOServer, Socket } from "socket.io";
 import { parse } from "cookie";
 import jwt from "jsonwebtoken";
-import Chat from "../modules/chat/chatMessage.model";
+import {ChatMessage} from "@/modules/chat";
 import ChatSession from "../modules/chat/chatSession.model";
 import "dotenv/config";
 import { v4 as uuidv4 } from "uuid";
@@ -85,7 +85,7 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
         if (!message.trim() || !room) return;
 
         try {
-          const adminChat = await Chat.create({
+          const adminChat = await ChatMessage.create({
             sender: userId,
             roomId: room,
             message,

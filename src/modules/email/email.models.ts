@@ -2,12 +2,19 @@ import { Schema, model, Document } from "mongoose";
 
 export interface IMailMessage extends Document {
   from: string;
-  subject: string;
-  body: string;
+  subject: {
+    tr: string;
+    en: string;
+    de: string;
+  };
+  body: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   date: Date;
   isRead: boolean;
   isArchived: boolean;
-  language?: "tr" | "en" | "de";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -15,16 +22,19 @@ export interface IMailMessage extends Document {
 const mailSchema = new Schema<IMailMessage>(
   {
     from: { type: String, required: true },
-    subject: { type: String, required: true },
-    body: { type: String, required: true },
+    subject: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
+    },
+    body: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
+    },
     date: { type: Date, required: true },
     isRead: { type: Boolean, default: false },
     isArchived: { type: Boolean, default: false },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
-    },
   },
   { timestamps: true }
 );

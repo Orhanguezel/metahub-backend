@@ -1,19 +1,20 @@
 import { Schema, model, Types, Document } from "mongoose";
 
-export interface IChatMessage {
+export interface IChatMessage extends Document {
   sender: Types.ObjectId | null;
   roomId: string;
   message: string;
   isFromBot?: boolean;
   isFromAdmin?: boolean;
-  language: "tr" | "en" | "de";
   isRead?: boolean;
+  label: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   createdAt?: Date;
   updatedAt?: Date;
 }
-
-// `Document` ile birleştirme işlemini sadece model tanımlarken yap
-export type ChatMessageDocument = Document & IChatMessage;
 
 const chatMessageSchema = new Schema<IChatMessage>(
   {
@@ -23,14 +24,15 @@ const chatMessageSchema = new Schema<IChatMessage>(
     isFromBot: { type: Boolean, default: false },
     isFromAdmin: { type: Boolean, default: false },
     isRead: { type: Boolean, default: false },
-    language: { type: String, enum: ["tr", "en", "de"], default: "de" },
+    label: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
+    },
   },
   { timestamps: true }
 );
 
-
 export default model<IChatMessage>("ChatMessage", chatMessageSchema);
-
-
 
 

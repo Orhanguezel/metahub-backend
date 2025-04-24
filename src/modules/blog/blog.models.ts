@@ -1,9 +1,9 @@
 import { Schema, model, Document, Types } from "mongoose";
 
 // Blog kategorileri (Almanca)
-export type BlogCategory = "ernaehrung" | "parasiten" | "vegan" | "allgemein";
+type BlogCategory = "ernaehrung" | "parasiten" | "vegan" | "allgemein";
 
-export interface IBlog extends Document {
+interface IBlog extends Document {
   title: string;
   slug: string;
   content: string;
@@ -15,7 +15,11 @@ export interface IBlog extends Document {
   isPublished?: boolean;
   publishedAt?: Date;
   isActive: boolean;
-  language?: "tr" | "en" | "de";
+  label: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   comments: Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
@@ -36,9 +40,7 @@ const blogSchema = new Schema<IBlog>(
         },
         message: "At least one image is required.",
       },
-      default: [
-        "blog.png",
-      ],
+      default: ["blog.png"],
     },
     tags: [{ type: String }],
     category: {
@@ -62,10 +64,10 @@ const blogSchema = new Schema<IBlog>(
       type: Boolean,
       default: true,
     },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "de",
+    label: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
     },
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
   },
@@ -78,9 +80,14 @@ blogSchema.pre("validate", function (this: IBlog, next) {
     this.slug = this.title
       .toLowerCase()
       .replace(/ /g, "-")
-      .replace(/[^\w-]+/g, "");
+      .replace(/[^\w-]+/g, "")
+      .replace(/--+/g, "-")
+      .replace(/^-+|-+$/g, "");
   }
   next();
 });
 
 export default model<IBlog>("Blog", blogSchema);
+export { IBlog, BlogCategory };
+
+

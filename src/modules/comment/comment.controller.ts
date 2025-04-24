@@ -6,7 +6,7 @@ import { isValidObjectId } from "../../core/utils/validation";
 // ✅ Yorum oluştur
 export const createComment = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { name, email, comment, contentType, contentId, language } = req.body;
+    const { name, email, comment, contentType, contentId } = req.body;
 
     if (!name || !email || !comment || !contentType || !contentId) {
       res.status(400).json({
@@ -23,11 +23,14 @@ export const createComment = asyncHandler(
     const newComment = await Comment.create({
       name,
       email,
-      comment,
+      label: {
+        tr: comment,
+        en: comment,
+        de: comment,
+      },
       contentType,
       contentId,
-      language: language || req.locale || "en",
-      isPublished: false, // Onay sonrası gösterilsin
+      isPublished: false,
       isActive: true,
     });
 
@@ -61,7 +64,7 @@ export const getCommentsForContent = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { type, id } = req.params;
 
-    if (!["blog", "product", "service"].includes(type)) {
+    if (!['blog', 'product', 'service'].includes(type)) {
       res.status(400).json({ message: "Invalid content type" });
       return;
     }
@@ -76,7 +79,6 @@ export const getCommentsForContent = asyncHandler(
       contentId: id,
       isPublished: true,
       isActive: true,
-      language: req.locale || "en",
     }).sort({ createdAt: -1 });
 
     res.status(200).json(comments);
@@ -113,13 +115,9 @@ export const togglePublishComment = asyncHandler(
       success: true,
       message:
         req.locale === "de"
-          ? `Kommentar wurde ${
-              comment.isPublished ? "veröffentlicht" : "zurückgezogen"
-            }.`
+          ? `Kommentar wurde ${comment.isPublished ? "veröffentlicht" : "zurückgezogen"}.`
           : req.locale === "tr"
-          ? `Yorum ${
-              comment.isPublished ? "yayınlandı" : "yayından kaldırıldı"
-            }.`
+          ? `Yorum ${comment.isPublished ? "yayınlandı" : "yayından kaldırıldı"}.`
           : `Comment ${comment.isPublished ? "published" : "unpublished"}.`,
       comment,
     });
