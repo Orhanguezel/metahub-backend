@@ -8,6 +8,6 @@ export const getImageSrc = (
   if (url.startsWith("/uploads")) return url;
   if (url.startsWith("uploads")) return `/${url}`;
 
-  // sadece dosya adı verilmişse
+
   return `/uploads/${folder}/${url}`;
 };

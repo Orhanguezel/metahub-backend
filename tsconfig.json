@@ -7,17 +7,14 @@
     "strict": false,
     "skipLibCheck": true,
     "noImplicitAny": false,
-    "types": ["node", "express"],
-    "typeRoots": [
-      "./node_modules/@types",
-      "./src/types"
-    ],
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "types": ["node", "express"]
   },
-  "include": [
-    "src",
-    "src/types/**/*.d.ts",
-    "src/**/*"
-  ]
+  "include": ["src/**/*", "src/types/global.d.ts"]
 }

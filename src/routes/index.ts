@@ -1,8 +1,8 @@
 import express, { Router } from "express";
 import fs from "fs/promises";
 import path from "path";
-import { analyticsLogger } from "../core/middleware/analyticsLogger";
-import "../core/config/env"; // .env yükleme
+import { analyticsLogger } from "@/core/middleware/analyticsLogger";
+import "@/core/config/env"; // .env yükleme
 
 export const getRouter = async (): Promise<Router> => {
   const router = express.Router();

@@ -18,16 +18,16 @@ router.get("/", getAllLibraryItems);
 router.get("/slug/:slug", getLibraryItemBySlug);
 router.get("/:id", getLibraryItemById);
 
-// 🔐 Protected Routes (admin / moderator)
+// 🔐 Protected Routes
 router.post(
   "/",
   authenticate,
   authorizeRoles("admin", "moderator"),
   (req: Request, _res: Response, next: NextFunction) => {
-    req.uploadType = "library"; 
+    req.uploadType = "library";
     next();
   },
-  upload.array("images", 5),
+  upload.array("files", 2), 
   createLibraryItem
 );
 

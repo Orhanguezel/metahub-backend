@@ -16,10 +16,28 @@
       "summary": "GET /"
     },
     {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id"
+    },
+    {
       "method": "POST",
       "path": "/",
       "auth": true,
       "summary": "POST /"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id",
+      "auth": true,
+      "summary": "PUT /:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
     }
   ]
 }

@@ -1,8 +1,16 @@
 import { Schema, model, Document } from "mongoose";
 
 export interface IEducation extends Document {
-  degree: string;
-  institution: string;
+  degree: {
+    tr: string;
+    en: string;
+    de: string;
+  };
+  institution: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   period: string;
   image?: string;
   createdAt: Date;
@@ -11,8 +19,16 @@ export interface IEducation extends Document {
 
 const educationSchema = new Schema<IEducation>(
   {
-    degree: { type: String, required: true, trim: true },
-    institution: { type: String, required: true, trim: true },
+    degree: {
+      tr: { type: String, required: true, trim: true },
+      en: { type: String, required: true, trim: true },
+      de: { type: String, required: true, trim: true },
+    },
+    institution: {
+      tr: { type: String, required: true, trim: true },
+      en: { type: String, required: true, trim: true },
+      de: { type: String, required: true, trim: true },
+    },
     period: { type: String, required: true },
     image: { type: String },
   },

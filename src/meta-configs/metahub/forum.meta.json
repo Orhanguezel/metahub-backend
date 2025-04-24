@@ -11,17 +11,39 @@
   "routes": [
     {
       "method": "POST",
-      "path": "/",
+      "path": "/topics",
       "auth": true,
-      "summary": "POST /",
-      "pathPrefix": "topic"
+      "summary": "POST /topics"
     },
     {
       "method": "GET",
-      "path": "/category/:categoryId",
+      "path": "/topics/category/:categoryId",
       "auth": true,
-      "summary": "GET /category/:categoryId",
-      "pathPrefix": "topic"
+      "summary": "GET /topics/category/:categoryId"
+    },
+    {
+      "method": "POST",
+      "path": "/comments",
+      "auth": true,
+      "summary": "POST /comments"
+    },
+    {
+      "method": "GET",
+      "path": "/comments/topic/:topicId",
+      "auth": true,
+      "summary": "GET /comments/topic/:topicId"
+    },
+    {
+      "method": "POST",
+      "path": "/categories",
+      "auth": true,
+      "summary": "POST /categories"
+    },
+    {
+      "method": "GET",
+      "path": "/categories",
+      "auth": true,
+      "summary": "GET /categories"
     }
   ]
 }

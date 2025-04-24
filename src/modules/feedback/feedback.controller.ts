@@ -3,55 +3,57 @@ import asyncHandler from "express-async-handler";
 import Feedback from "./feedback.models";
 import { isValidObjectId } from "../../core/utils/validation";
 
-// 💬 Yeni geri bildirim oluştur (herkes)
-export const createFeedback = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { name, email, message, rating } = req.body;
+// 💬 Yeni geri bildirim oluştur
+export const createFeedback = asyncHandler(async (req: Request, res: Response) => {
+  const { name, email, message, rating } = req.body;
 
-    if (!name || !email || !message) {
-      res.status(400).json({
-        message:
-          req.locale === "de"
-            ? "Bitte füllen Sie alle Pflichtfelder aus."
-            : req.locale === "tr"
-            ? "Lütfen tüm gerekli alanları doldurun."
-            : "Please fill all required fields.",
-      });
-      return;
-    }
+  const langs: ("tr" | "en" | "de")[] = ["tr", "en", "de"];
+  const isValidMessage = langs.every((l) => message?.[l]);
 
-    const feedback = await Feedback.create({
-      name,
-      email,
-      message,
-      rating,
-      language: req.locale || "en",
-    });
-
-    res.status(201).json({
+  if (!name || !email || !isValidMessage) {
+    res.status(400).json({
       message:
         req.locale === "de"
-          ? "Feedback wurde gesendet."
+          ? "Bitte alle Pflichtfelder ausfüllen."
           : req.locale === "tr"
-          ? "Geri bildirim gönderildi."
-          : "Feedback submitted successfully.",
-      feedback,
+          ? "Tüm zorunlu alanlar doldurulmalıdır."
+          : "All required fields must be filled.",
     });
+    return;
   }
-);
 
-// 🔐 Tüm geri bildirimleri getir (admin, opsiyonel dil filtresi)
-export const getAllFeedbacks = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { lang } = req.query;
-    const filter: any = {};
+  const feedback = await Feedback.create({
+    name,
+    email,
+    message,
+    rating,
+    isPublished: false,
+    isActive: true,
+  });
 
-    if (lang) filter.language = lang;
+  res.status(201).json({
+    message:
+      req.locale === "de"
+        ? "Feedback wurde gesendet."
+        : req.locale === "tr"
+        ? "Geri bildirim başarıyla gönderildi."
+        : "Feedback submitted successfully.",
+    feedback,
+  });
+});
 
-    const feedbacks = await Feedback.find(filter).sort({ createdAt: -1 });
-    res.status(200).json(feedbacks);
-  }
-);
+
+// 🔐 Tüm geri bildirimleri getir (isteğe bağlı dil filtresi)
+export const getAllFeedbacks = asyncHandler(async (req: Request, res: Response) => {
+  const lang = (req.query.lang as string) || req.locale || "en";
+  const filter = {
+    [`message.${lang}`]: { $exists: true },
+  };
+
+  const feedbacks = await Feedback.find(filter).sort({ createdAt: -1 });
+  res.status(200).json(feedbacks);
+});
+
 
 // 🔁 Yayın durumunu değiştir (admin)
 export const togglePublishFeedback = asyncHandler(
@@ -128,3 +130,90 @@ export const deleteFeedback = asyncHandler(
     });
   }
 );
+
+// ✏️ Geri bildirimi güncelle (admin)
+export const updateFeedback = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { name, email, message, rating, isPublished, isActive } = req.body;
+
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ message: "Invalid ID" });
+    return;
+  }
+
+  const feedback = await Feedback.findById(id);
+  if (!feedback) {
+    res.status(404).json({
+      message:
+        req.locale === "de"
+          ? "Feedback nicht gefunden."
+          : req.locale === "tr"
+          ? "Geri bildirim bulunamadı."
+          : "Feedback not found.",
+    });
+    return;
+  }
+
+  if (name) feedback.name = name;
+  if (email) feedback.email = email;
+  if (message) feedback.message = message;
+  if (rating !== undefined) feedback.rating = rating;
+  if (typeof isPublished === "boolean") feedback.isPublished = isPublished;
+  if (typeof isActive === "boolean") feedback.isActive = isActive;
+
+  await feedback.save();
+
+  res.status(200).json({
+    message:
+      req.locale === "de"
+        ? "Feedback aktualisiert."
+        : req.locale === "tr"
+        ? "Geri bildirim güncellendi."
+        : "Feedback updated.",
+    feedback,
+  });
+});
+
+// 🌍 Yayınlanmış geri bildirimleri getir (public)
+export const getPublishedFeedbacks = asyncHandler(async (_req: Request, res: Response) => {
+  const feedbacks = await Feedback.find({ isPublished: true, isActive: true }).sort({ createdAt: -1 });
+  res.status(200).json(feedbacks);
+});
+
+// ❌ Soft delete (isActive: false)
+export const softDeleteFeedback = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ message: "Invalid ID" });
+    return;
+  }
+
+  const feedback = await Feedback.findById(id);
+  if (!feedback) {
+    res.status(404).json({
+      message:
+        req.locale === "de"
+          ? "Feedback wurde nicht gefunden."
+          : req.locale === "tr"
+          ? "Geri bildirim bulunamadı."
+          : "Feedback not found.",
+    });
+    return;
+  }
+
+  feedback.isActive = false;
+  await feedback.save();
+
+  res.status(200).json({
+    message:
+      req.locale === "de"
+        ? "Feedback archiviert."
+        : req.locale === "tr"
+        ? "Geri bildirim arşivlendi."
+        : "Feedback archived.",
+  });
+});
+
+
+

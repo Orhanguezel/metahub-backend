@@ -1,7 +1,10 @@
 import express from "express";
-import routes from "./task.routes";
+import taskRoutes from "./task.routes";
+import Task from "./task.models";
+import * as taskController from "./task.controller";
+
 const router = express.Router();
-router.use("/", routes);
-export * from "./task.controller";
-export * from "./task.models";
+router.use("/", taskRoutes);
+
+export { Task, taskController };
 export default router;

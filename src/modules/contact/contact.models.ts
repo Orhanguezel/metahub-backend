@@ -3,11 +3,20 @@ import { Schema, model, Document } from "mongoose";
 export interface IContactMessage extends Document {
   name: string;
   email: string;
-  subject: string;
-  message: string;
+  label: {
+    subject: {
+      tr: string;
+      en: string;
+      de: string;
+    };
+    message: {
+      tr: string;
+      en: string;
+      de: string;
+    };
+  };
   isRead: boolean;
   isArchived: boolean;
-  language?: "tr" | "en" | "de";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,15 +25,20 @@ const contactMessageSchema = new Schema<IContactMessage>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true },
-    subject: { type: String, required: true },
-    message: { type: String, required: true },
+    label: {
+      subject: {
+        tr: { type: String, required: true },
+        en: { type: String, required: true },
+        de: { type: String, required: true },
+      },
+      message: {
+        tr: { type: String, required: true },
+        en: { type: String, required: true },
+        de: { type: String, required: true },
+      },
+    },
     isRead: { type: Boolean, default: false },
     isArchived: { type: Boolean, default: false },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
-    },
   },
   { timestamps: true }
 );

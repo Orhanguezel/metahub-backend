@@ -1,7 +1,10 @@
 import express from "express";
-import routes from "./skill.routes";
+import skillRoutes from "./skill.routes";
+import Skill from "./skill.models";
+import * as skillController from "./skill.controller";
+
 const router = express.Router();
-router.use("/", routes);
-export * from "./skill.controller";
-export * from "./skill.models";
+router.use("/", skillRoutes);
+
+export { Skill, skillController };
 export default router;

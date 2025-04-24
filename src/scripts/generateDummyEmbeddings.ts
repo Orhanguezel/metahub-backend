@@ -1,6 +1,6 @@
 import { config } from "dotenv";
 import mongoose from "mongoose";
-import FaqModel from "../modules/faq/faq.models";
+import FaqModel from "@/modules/faq/faq.models";
 
 config();
 

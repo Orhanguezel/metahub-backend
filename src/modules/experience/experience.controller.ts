@@ -2,18 +2,28 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Experience from "./experience.models";
 
-// 🔹 Get all experiences (optional lang filter)
+// 🔹 Tüm deneyimleri getir (dil filtreli)
 export const getAllExperiences = asyncHandler(async (req: Request, res: Response) => {
-  const lang = req.query.lang || req.locale || "en";
+  const lang = (req.query.lang as string) || req.locale || "en";
 
-  const experiences = await Experience.find({ language: lang }).sort({ createdAt: -1 });
+  const experiences = await Experience.find({
+    [`position.${lang}`]: { $exists: true },
+    [`company.${lang}`]: { $exists: true },
+  }).sort({ createdAt: -1 });
 
   res.status(200).json(experiences);
 });
 
-// 🔹 Add new experience
+// 🔹 Yeni deneyim ekle
 export const createExperience = asyncHandler(async (req: Request, res: Response) => {
-  const { position, company, period, description, location, image, language } = req.body;
+  const {
+    position,
+    company,
+    period,
+    description,
+    location,
+    image,
+  } = req.body;
 
   if (!position || !company || !period) {
     res.status(400).json({
@@ -35,7 +45,6 @@ export const createExperience = asyncHandler(async (req: Request, res: Response)
     description,
     location,
     image,
-    language: language || req.locale || "en",
   });
 
   res.status(201).json({

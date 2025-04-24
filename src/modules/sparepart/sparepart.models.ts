@@ -1,18 +1,25 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface ISparePart extends Document {
-  name: string;
+  label: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   slug: string;
   code?: string;
-  description?: string;
+  description?: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
   image?: string[];
   category?: string;
   manufacturer?: string;
-  specifications?: Record<string, string>; // teknik detaylar
+  specifications?: Record<string, string>;
   stock?: number;
   price?: number;
   tags?: string[];
-  language?: "tr" | "en" | "de";
   isPublished: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -20,10 +27,18 @@ export interface ISparePart extends Document {
 
 const sparePartSchema: Schema = new Schema<ISparePart>(
   {
-    name: { type: String, required: true, trim: true },
+    label: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
+    },
     slug: { type: String, required: true, unique: true },
     code: { type: String, unique: true, sparse: true },
-    description: { type: String },
+    description: {
+      tr: { type: String },
+      en: { type: String },
+      de: { type: String },
+    },
     image: [{ type: String }],
     category: { type: String },
     manufacturer: { type: String },
@@ -35,11 +50,6 @@ const sparePartSchema: Schema = new Schema<ISparePart>(
     stock: { type: Number, default: 0 },
     price: { type: Number },
     tags: [{ type: String }],
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
-    },
     isPublished: { type: Boolean, default: false },
   },
   {
@@ -49,8 +59,8 @@ const sparePartSchema: Schema = new Schema<ISparePart>(
 
 // 🔁 Slug otomatik üretimi
 sparePartSchema.pre("validate", function (this: ISparePart, next) {
-  if (!this.slug && this.name) {
-    this.slug = this.name
+  if (!this.slug && this.label?.en) {
+    this.slug = this.label.en
       .toLowerCase()
       .replace(/ /g, "-")
       .replace(/[^\w-]+/g, "");

@@ -20,14 +20,15 @@ export const createAppointment = asyncHandler(
       time,
       service,
       durationMinutes = 60,
+      language = "en", // ✅ Frontend seçimiyle gelecek
     } = req.body;
 
     if (!name || !email || !serviceType || !date || !time || !service) {
       res.status(400).json({
         message:
-          req.locale === "de"
+          language === "de"
             ? "Bitte füllen Sie alle erforderlichen Felder aus."
-            : req.locale === "tr"
+            : language === "tr"
             ? "Lütfen gerekli alanları doldurunuz."
             : "Please fill all required fields.",
       });
@@ -37,7 +38,6 @@ export const createAppointment = asyncHandler(
     const start = dayjs(`${date}T${time}`);
     const end = start.add(durationMinutes, "minute");
 
-    // ⛔ Çakışma kontrolü
     const existingAppointment = await Appointment.findOne({
       date,
       $expr: {
@@ -69,16 +69,15 @@ export const createAppointment = asyncHandler(
     if (existingAppointment) {
       res.status(409).json({
         message:
-          req.locale === "de"
+          language === "de"
             ? "Für diese Uhrzeit ist bereits ein Termin vorhanden."
-            : req.locale === "tr"
+            : language === "tr"
             ? "Bu tarih ve saatte zaten bir randevu var."
             : "There is already an appointment for this time.",
       });
       return;
     }
 
-    // ✅ Kayıt
     const appointment = await Appointment.create({
       user: req.user?.id || undefined,
       name,
@@ -90,28 +89,22 @@ export const createAppointment = asyncHandler(
       time,
       service,
       durationMinutes,
+      language, // ✅ kayıt edilir
     });
 
-    // ✅ E-posta
-    const htmlToCustomer = appointmentConfirmationTemplate({
-      name,
-      service: serviceType,
-      date,
-      time,
-    });
+    const htmlToCustomer = appointmentConfirmationTemplate({ name, service: serviceType, date, time });
 
     const htmlToAdmin = `
-    <h2>📬 Yeni Randevu</h2>
-    <ul>
-      <li><strong>Ad Soyad:</strong> ${name}</li>
-      <li><strong>E-Posta:</strong> ${email}</li>
-      <li><strong>Telefon:</strong> ${phone || "-"}</li>
-      <li><strong>Hizmet:</strong> ${serviceType}</li>
-      <li><strong>Tarih:</strong> ${date}</li>
-      <li><strong>Saat:</strong> ${time}</li>
-      <li><strong>Not:</strong> ${note || "-"}</li>
-    </ul>
-  `;
+      <h2>📬 Yeni Randevu</h2>
+      <ul>
+        <li><strong>Ad Soyad:</strong> ${name}</li>
+        <li><strong>E-Posta:</strong> ${email}</li>
+        <li><strong>Telefon:</strong> ${phone || "-"}</li>
+        <li><strong>Hizmet:</strong> ${serviceType}</li>
+        <li><strong>Tarih:</strong> ${date}</li>
+        <li><strong>Saat:</strong> ${time}</li>
+        <li><strong>Not:</strong> ${note || "-"}</li>
+      </ul>`;
 
     await Promise.all([
       sendEmail({
@@ -126,8 +119,7 @@ export const createAppointment = asyncHandler(
       }),
     ]);
 
-    // 🔔 Bildirim
-    void Notification.create({
+    await Notification.create({
       title: "Yeni Randevu",
       message: `${name} adlı kullanıcı ${serviceType} için ${date} ${time} tarihinde randevu aldı.`,
       type: "info",
@@ -137,9 +129,9 @@ export const createAppointment = asyncHandler(
     res.status(201).json({
       success: true,
       message:
-        req.locale === "de"
+        language === "de"
           ? "Termin erfolgreich erstellt."
-          : req.locale === "tr"
+          : language === "tr"
           ? "Randevu başarıyla oluşturuldu."
           : "Appointment created successfully.",
       appointment,
@@ -147,10 +139,17 @@ export const createAppointment = asyncHandler(
   }
 );
 
+
 // ✅ Tüm randevuları getir
 export const getAllAppointments = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const appointments = await Appointment.find()
+    const { language } = req.query;
+
+    const filter = language
+      ? { language: { $eq: language } }
+      : {}; 
+
+    const appointments = await Appointment.find(filter)
       .populate("service")
       .populate("user", "name email")
       .sort({ createdAt: -1 });
@@ -158,6 +157,7 @@ export const getAllAppointments = asyncHandler(
     res.status(200).json(appointments);
   }
 );
+
 
 // ✅ Tek randevuyu getir
 export const getAppointmentById = asyncHandler(
@@ -177,6 +177,7 @@ export const getAppointmentById = asyncHandler(
     }
 
     const appointment = await Appointment.findById(id).populate("service");
+
     if (!appointment) {
       res.status(404).json({
         message:
@@ -192,6 +193,7 @@ export const getAppointmentById = asyncHandler(
     res.status(200).json(appointment);
   }
 );
+
 
 // ✅ Randevu durumunu güncelle
 export const updateAppointmentStatus = asyncHandler(
@@ -211,7 +213,12 @@ export const updateAppointmentStatus = asyncHandler(
       return;
     }
 
-    const appointment = await Appointment.findById(id);
+    const appointment = await Appointment.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
     if (!appointment) {
       res.status(404).json({
         message:
@@ -223,9 +230,6 @@ export const updateAppointmentStatus = asyncHandler(
       });
       return;
     }
-
-    appointment.status = status;
-    await appointment.save();
 
     res.status(200).json({
       success: true,
@@ -258,6 +262,7 @@ export const deleteAppointment = asyncHandler(
     }
 
     const appointment = await Appointment.findByIdAndDelete(id);
+
     if (!appointment) {
       res.status(404).json({
         message:
@@ -267,7 +272,6 @@ export const deleteAppointment = asyncHandler(
             ? "Randevu bulunamadı veya zaten silinmiş."
             : "Appointment not found or already deleted.",
       });
-      return;
     }
 
     res.status(200).json({
@@ -279,5 +283,7 @@ export const deleteAppointment = asyncHandler(
           ? "Randevu başarıyla silindi."
           : "Appointment deleted successfully.",
     });
+    
   }
 );
+

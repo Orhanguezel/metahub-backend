@@ -11,7 +11,6 @@ import {
 import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
 import upload from "../../core/middleware/uploadMiddleware";
 
-
 const router = express.Router();
 
 // 🌐 Public Routes
@@ -20,14 +19,17 @@ router.get("/slug/:slug", getReferenceBySlug);
 router.get("/:id", getReferenceById);
 
 // 🔐 Protected Routes
+const withUploadType = (type: string) =>
+  (req: Request, _res: Response, next: NextFunction) => {
+    req.uploadType = "references";
+    next();
+  };
+
 router.post(
   "/",
   authenticate,
   authorizeRoles("admin", "moderator"),
-  (req: Request, _res: Response, next: NextFunction) => {
-    req.uploadType = "references"; 
-    next();
-  },
+  withUploadType("references"),
   upload.array("images", 5),
   createReference
 );
@@ -36,10 +38,7 @@ router.put(
   "/:id",
   authenticate,
   authorizeRoles("admin", "moderator"),
-  (req: Request, _res: Response, next: NextFunction) => {
-    req.uploadType = "references";
-    next();
-  },
+  withUploadType("references"),
   upload.array("images", 5),
   updateReference
 );

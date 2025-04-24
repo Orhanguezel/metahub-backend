@@ -1,7 +1,5 @@
-import express from "express";
-import routes from "./category.routes";
-const router = express.Router();
-router.use("/", routes);
+import router from "./category.routes";
 export * from "./category.controller";
 export * from "./category.models";
+export { default as Category } from "./category.models"; 
 export default router;

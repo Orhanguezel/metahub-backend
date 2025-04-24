@@ -1,7 +1,10 @@
 import express from "express";
-import routes from "./guestbook.routes";
+import guestbookRoutes from "./guestbook.routes";
+import Guestbook from "./guestbook.models";
+import * as guestbookController from "./guestbook.controller";
+
 const router = express.Router();
-router.use("/", routes);
-export * from "./guestbook.controller";
-export * from "./guestbook.models";
+router.use("/", guestbookRoutes);
+
+export { Guestbook, guestbookController };
 export default router;

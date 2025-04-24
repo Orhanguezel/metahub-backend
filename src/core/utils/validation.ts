@@ -12,7 +12,7 @@ export const isValidObjectId = (id: any): boolean => {
  * ✅ Kullanıcıyı getir, bulunmazsa çok dilli 404 döner
  */
 export const getUserOrFail = async (id: string, res: Response) => {
-  const user = await import("../../modules/users/users.models").then((mod) =>
+  const user = await import("@/modules/users/users.models").then((mod) =>
     mod.default.findById(id.trim())
   );
   if (!user) {

@@ -7,8 +7,8 @@ export interface IPayment extends Document {
   status: "pending" | "paid" | "failed";
   transactionId?: string;
   paidAt?: Date;
+  language?: string;
   isActive: boolean;
-  language?: "tr" | "en" | "de";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,12 +29,9 @@ const paymentSchema = new Schema<IPayment>(
     },
     transactionId: { type: String },
     paidAt: { type: Date },
+    language: { type: String, enum: ["tr", "en", "de"], default: "en" },
+
     isActive: { type: Boolean, default: true },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
-    },
   },
   { timestamps: true }
 );

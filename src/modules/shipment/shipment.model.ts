@@ -1,0 +1,47 @@
+import { Schema, model, Types, Document } from "mongoose";
+
+export interface ICarrierDetails {
+  company?: string;
+  contactNumber?: string;
+}
+
+export interface IShipment extends Document {
+  order: Types.ObjectId;
+  trackingNumber: string;
+  status: "pending" | "shipped" | "delivered" | "returned";
+  estimatedDelivery?: Date;
+  carrier?: string;
+  carrierDetails?: ICarrierDetails;
+  recipientName: string;
+  deliveryType: "standard" | "express" | "same-day";
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const shipmentSchema = new Schema<IShipment>(
+  {
+    order: { type: Schema.Types.ObjectId, ref: "Order", required: true },
+    trackingNumber: { type: String, required: true, unique: true },
+    status: {
+      type: String,
+      enum: ["pending", "shipped", "delivered", "returned"],
+      default: "pending",
+    },
+    estimatedDelivery: { type: Date },
+    carrier: { type: String },
+    carrierDetails: {
+      company: { type: String },
+      contactNumber: { type: String },
+    },
+    recipientName: { type: String, required: true },
+    deliveryType: {
+      type: String,
+      enum: ["standard", "express", "same-day"],
+      default: "standard",
+    },
+  },
+  { timestamps: true }
+);
+
+const Shipment = model<IShipment>("Shipment", shipmentSchema);
+export default Shipment;

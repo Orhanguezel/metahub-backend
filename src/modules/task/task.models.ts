@@ -2,8 +2,11 @@
 import { Schema, model, Document, Types } from "mongoose";
 
 export interface ITask extends Document {
-  description: string;
-  language: "tr" | "en" | "de";
+  description: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   assignedTo: Types.ObjectId;
   apartment: Types.ObjectId;
   status: "pending" | "in-progress" | "completed";
@@ -14,8 +17,11 @@ export interface ITask extends Document {
 
 const taskSchema = new Schema<ITask>(
   {
-    description: { type: String, required: true },
-    language: { type: String, enum: ["tr", "en", "de"], default: "en" },
+    description: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
+    },
     assignedTo: {
       type: Schema.Types.ObjectId,
       ref: "User",

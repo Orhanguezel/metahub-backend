@@ -3,14 +3,11 @@ import { Request, Response, NextFunction, RequestHandler } from "express";
 import User from "../../modules/users/users.models";
 import { getTokenFromRequest } from "../utils/authHelpers";
 import { verifyToken } from "../utils/token";
-import { UserPayload } from "../../types/express"; // Yol doğruysa
+import { UserPayload } from "../../types/userPayload";
 
-// Geçici tip: Express'e uyumlu ama genişletilmiş
 interface AuthRequest extends Request {
   user?: UserPayload;
 }
-
-// ✅ authenticate fonksiyonunu `RequestHandler` olarak tanımla
 export const authenticate: RequestHandler = asyncHandler(
   async (req, res, next) => {
     const token = getTokenFromRequest(req);
@@ -20,7 +17,7 @@ export const authenticate: RequestHandler = asyncHandler(
         success: false,
         message: "Authorization token missing",
       });
-      return; // ✅ sadece return, response'u bitiriyor
+      return;
     }
 
     try {
@@ -53,7 +50,7 @@ export const authenticate: RequestHandler = asyncHandler(
             ? "Token expired"
             : "Invalid or expired token",
       });
-      return; // ✅ yine sadece return
+      return;
     }
   }
 );

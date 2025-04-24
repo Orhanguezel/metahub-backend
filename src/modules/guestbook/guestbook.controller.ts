@@ -1,20 +1,20 @@
-// src/controllers/guestbook.controller.ts
-
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Guestbook from "./guestbook.models";
 import { isValidObjectId } from "../../core/utils/validation";
 
-// 🔸 Yeni yorum veya alt yorum ekle
+// 📝 Yeni yorum veya alt yorum oluştur
 export const createEntry = asyncHandler(async (req: Request, res: Response) => {
-  const { name, email, message, parentId } = req.body;
+  const { name, email, parentId } = req.body;
+  const lang = req.locale || "en";
+  const message = req.body[`message_${lang}`];
 
   if (!name || !message) {
     res.status(400).json({
       message:
-        req.locale === "de"
+        lang === "de"
           ? "Name und Nachricht sind erforderlich."
-          : req.locale === "tr"
+          : lang === "tr"
           ? "İsim ve mesaj zorunludur."
           : "Name and message are required.",
     });
@@ -29,9 +29,8 @@ export const createEntry = asyncHandler(async (req: Request, res: Response) => {
   const entry = await Guestbook.create({
     name,
     email,
-    message,
+    message: { [lang]: message },
     parentId,
-    language: req.locale || "en",
     isPublished: false,
     isActive: true,
   });
@@ -39,45 +38,51 @@ export const createEntry = asyncHandler(async (req: Request, res: Response) => {
   res.status(201).json({
     success: true,
     message:
-      req.locale === "de"
+      lang === "de"
         ? "Kommentar gespeichert. Es wird nach Prüfung veröffentlicht."
-        : req.locale === "tr"
+        : lang === "tr"
         ? "Yorum kaydedildi. Onaylandıktan sonra yayınlanacaktır."
         : "Comment saved. It will be published after review.",
     entry,
   });
 });
 
-// 🔸 Yayınlanan yorumları getir
+// 🌍 Yayınlanan yorumları getir (public)
 export const getPublishedEntries = asyncHandler(async (req: Request, res: Response) => {
   const lang = req.locale || "en";
+
   const entries = await Guestbook.find({
     isPublished: true,
     isActive: true,
-    language: lang,
+    [`message.${lang}`]: { $exists: true },
   })
     .sort({ createdAt: -1 })
     .lean();
 
-  // Alt yorumları grupla
   const topLevel = entries.filter((e) => !e.parentId);
   const replies = entries.filter((e) => e.parentId);
 
   const grouped = topLevel.map((entry) => ({
     ...entry,
-    replies: replies.filter((r) => r.parentId?.toString() === entry._id.toString()),
+    message: entry.message?.[lang],
+    replies: replies
+      .filter((r) => r.parentId?.toString() === entry._id.toString())
+      .map((r) => ({
+        ...r,
+        message: r.message?.[lang],
+      })),
   }));
 
   res.status(200).json(grouped);
 });
 
-// 🔸 Admin: tüm yorumları getir
+// 🔐 Admin: tüm yorumları getir
 export const getAllEntries = asyncHandler(async (_req: Request, res: Response) => {
   const all = await Guestbook.find().sort({ createdAt: -1 });
   res.status(200).json(all);
 });
 
-// 🔸 Admin: yayın durumunu değiştir
+// 🔐 Admin: yayım durumunu değiştir
 export const togglePublishEntry = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   if (!isValidObjectId(id)) {
@@ -95,12 +100,17 @@ export const togglePublishEntry = asyncHandler(async (req: Request, res: Respons
   await entry.save();
 
   res.status(200).json({
-    message: `Entry ${entry.isPublished ? "published" : "unpublished"}`,
+    message:
+      req.locale === "de"
+        ? `Eintrag wurde ${entry.isPublished ? "veröffentlicht" : "depubliziert"}.`
+        : req.locale === "tr"
+        ? `Yorum ${entry.isPublished ? "yayınlandı" : "yayından kaldırıldı"}.`
+        : `Entry ${entry.isPublished ? "published" : "unpublished"}.`,
     entry,
   });
 });
 
-// 🔸 Admin: soft delete
+// 🔐 Admin: soft delete
 export const deleteEntry = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   if (!isValidObjectId(id)) {
@@ -117,5 +127,12 @@ export const deleteEntry = asyncHandler(async (req: Request, res: Response) => {
   entry.isActive = false;
   await entry.save();
 
-  res.status(200).json({ message: "Entry archived successfully" });
+  res.status(200).json({
+    message:
+      req.locale === "de"
+        ? "Eintrag archiviert."
+        : req.locale === "tr"
+        ? "Yorum arşivlendi."
+        : "Entry archived successfully.",
+  });
 });

@@ -1,26 +1,36 @@
 import { Schema, model, Document } from "mongoose";
 
 export interface ISport extends Document {
-  name: string;
-  description?: string;
+  label: {
+    tr: string;
+    en: string;
+    de: string;
+  };
+  description?: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
   category?: string;
   images: string[];
-  language: "tr" | "en" | "de";
   createdAt: Date;
   updatedAt: Date;
 }
 
 const sportSchema = new Schema<ISport>(
   {
-    name: { type: String, required: true, trim: true },
-    description: { type: String, trim: true },
+    label: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
+    },
+    description: {
+      tr: { type: String },
+      en: { type: String },
+      de: { type: String },
+    },
     category: { type: String, trim: true },
     images: [{ type: String }],
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
-    },
   },
   { timestamps: true }
 );

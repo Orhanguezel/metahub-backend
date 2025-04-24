@@ -1,10 +1,16 @@
 import express from "express";
 import routes from "./admin.routes";
+
 const router = express.Router();
 router.use("/", routes);
-export * from "./admin.controller";
-export * from "./admin.models";
-export { default as ModuleSetting } from "./moduleSettings.model";
-export { default as ModuleMetaModel } from "./moduleMeta.model";
 
+// Controller
+export * from "./admin.controller";
+
+// Tip tanımlamaları ve modeller
+export * from "./admin.models";
+export { default as ModuleMetaModel } from "./moduleMeta.model";
+export { default as ModuleSetting } from "./moduleSettings.model";
+
+// Varsayılan export (router)
 export default router;

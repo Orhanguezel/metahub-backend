@@ -1,21 +1,15 @@
-// ─────────────────────────────────────────────
-// Forum - Exports
-// ─────────────────────────────────────────────
-export * from "./forumTopic.controller";
-export * from "./forumTopic.models";
-
-export * from "./forumComment.controller";
-export * from "./forumComment.models";
-
-export * from "./forumCategory.controller";
-export * from "./forumCategory.models";
-
 import express from "express";
-import forumTopicRoutes from "./forumTopic.routes";
+import forumRoutes from "./forum.routes";
+
+export { default as ForumCategory } from "./forumCategory.models";
+export { default as ForumTopic } from "./forumTopic.models";
+export { default as ForumComment } from "./forumComment.models";
+export * from "./forumCategory.controller";
+export * from "./forumComment.controller";
+export * from "./forumTopic.controller";
+
 
 const router = express.Router();
-
-router.use("/topics", forumTopicRoutes);
+router.use("/", forumRoutes);
 
 export default router;
-

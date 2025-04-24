@@ -1,17 +1,32 @@
 import { Schema, model, Document, Model } from "mongoose";
 
 export interface IService extends Document {
-  title: string;
-  shortDescription: string;
-  detailedDescription: string;
+  title: {
+    tr: string;
+    en: string;
+    de: string;
+  };
+  shortDescription: {
+    tr: string;
+    en: string;
+    de: string;
+  };
+  detailedDescription: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   price: number;
-  images: string[];
-  category?: string;
-  tags?: string[];
   durationMinutes: number;
+  images: string[];
+  category?: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
+  tags?: string[];
   isActive: boolean;
   isPublished: boolean;
-  language?: "tr" | "en" | "de";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,19 +34,19 @@ export interface IService extends Document {
 const serviceSchema = new Schema<IService>(
   {
     title: {
-      type: String,
-      required: true,
-      trim: true,
+      tr: { type: String, required: true, trim: true },
+      en: { type: String, required: true, trim: true },
+      de: { type: String, required: true, trim: true },
     },
     shortDescription: {
-      type: String,
-      required: true,
-      maxlength: 300,
-      trim: true,
+      tr: { type: String, required: true, maxlength: 300, trim: true },
+      en: { type: String, required: true, maxlength: 300, trim: true },
+      de: { type: String, required: true, maxlength: 300, trim: true },
     },
     detailedDescription: {
-      type: String,
-      required: true,
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
     },
     price: {
       type: Number,
@@ -48,8 +63,9 @@ const serviceSchema = new Schema<IService>(
       default: [],
     },
     category: {
-      type: String,
-      default: "other",
+      tr: { type: String },
+      en: { type: String },
+      de: { type: String },
     },
     tags: {
       type: [String],
@@ -62,11 +78,6 @@ const serviceSchema = new Schema<IService>(
     isPublished: {
       type: Boolean,
       default: true,
-    },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
     },
   },
   { timestamps: true }

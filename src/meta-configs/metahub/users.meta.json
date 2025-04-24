@@ -10,6 +10,55 @@
   "language": "en",
   "routes": [
     {
+      "method": "GET",
+      "path": "/me",
+      "auth": true,
+      "summary": "GET /me",
+      "pathPrefix": "account"
+    },
+    {
+      "method": "PUT",
+      "path": "/me/update",
+      "auth": true,
+      "summary": "PUT /me/update",
+      "pathPrefix": "account"
+    },
+    {
+      "method": "PUT",
+      "path": "/me/password",
+      "auth": true,
+      "summary": "PUT /me/password",
+      "pathPrefix": "account"
+    },
+    {
+      "method": "PATCH",
+      "path": "/me/notifications",
+      "auth": true,
+      "summary": "PATCH /me/notifications",
+      "pathPrefix": "account"
+    },
+    {
+      "method": "PATCH",
+      "path": "/me/social",
+      "auth": true,
+      "summary": "PATCH /me/social",
+      "pathPrefix": "account"
+    },
+    {
+      "method": "PUT",
+      "path": "/me/addresses",
+      "auth": true,
+      "summary": "PUT /me/addresses",
+      "pathPrefix": "account"
+    },
+    {
+      "method": "PUT",
+      "path": "/me/profile-image",
+      "auth": true,
+      "summary": "PUT /me/profile-image",
+      "pathPrefix": "account"
+    },
+    {
       "method": "POST",
       "path": "/register",
       "auth": true,

@@ -1,24 +1,26 @@
 import { Schema, model, Document } from "mongoose";
 
 export interface ISocialMedia extends Document {
-  platform: string;
+  platform: {
+    tr: string;
+    en: string;
+    de: string;
+  };
   link: string;
   icon?: string;
-  language?: "tr" | "en" | "de";
   createdAt: Date;
   updatedAt: Date;
 }
 
 const socialMediaSchema = new Schema<ISocialMedia>(
   {
-    platform: { type: String, required: true, trim: true },
+    platform: {
+      tr: { type: String, required: true },
+      en: { type: String, required: true },
+      de: { type: String, required: true },
+    },
     link: { type: String, required: true, trim: true },
     icon: { type: String, trim: true },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
-    },
   },
   { timestamps: true }
 );

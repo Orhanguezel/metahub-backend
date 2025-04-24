@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler"; // 📊 Aylık sipariş sayısı (son 12 ay)
-import Order from "../../modules/order/order.models";
+import {Order} from "../order";
 
 export const getMonthlyOrders = asyncHandler(
   async (_req: Request, res: Response) => {
