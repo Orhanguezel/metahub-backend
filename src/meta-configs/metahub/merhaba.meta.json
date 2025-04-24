@@ -1,0 +1,12 @@
+{
+  "name": "merhaba",
+  "icon": "box",
+  "visibleInSidebar": true,
+  "roles": [
+    "admin"
+  ],
+  "enabled": true,
+  "useAnalytics": false,
+  "language": "en",
+  "routes": []
+}

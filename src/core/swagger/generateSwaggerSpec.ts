@@ -1,3 +1,4 @@
+// src/tools/generateSwaggerSpec.ts
 import fs from "fs/promises";
 import fsSync from "fs";
 import path from "path";
@@ -9,7 +10,10 @@ type SwaggerRoute = {
   path: string;
   summary?: string;
   auth?: boolean;
-  requestBody?: any; // 💡 body şeması burada opsiyonel olarak eklenebilir
+  deprecated?: boolean;
+  requestBody?: any;
+  body?: any; // backward-compatible support
+  parameters?: any[]; // e.g. path/query params
 };
 
 type ModuleMeta = {
@@ -19,7 +23,6 @@ type ModuleMeta = {
   routes?: SwaggerRoute[];
 };
 
-// 🌍 Ortama özel .env dosyasını yükle
 const envProfile = process.env.APP_ENV || "metahub";
 const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
 
@@ -29,7 +32,7 @@ if (fsSync.existsSync(envPath)) {
   console.warn(`⚠️ Swagger env file not found at: ${envPath}`);
 }
 
-export async function generateSwaggerSpecFromMeta() {
+export async function generateSwaggerSpecFromMeta(writeToDisk = false) {
   const metaDir = path.resolve(
     process.cwd(),
     process.env.META_CONFIG_PATH || "src/meta-configs/metahub"
@@ -54,10 +57,7 @@ export async function generateSwaggerSpecFromMeta() {
     if (!fileName.endsWith(".meta.json")) continue;
 
     const moduleName = fileName.replace(/\.meta\.json$/, "").toLowerCase();
-
-    if (!enabledModules.includes(moduleName)) {
-      continue;
-    }
+    if (!enabledModules.includes(moduleName)) continue;
 
     const metaPath = path.join(metaDir, fileName);
 
@@ -81,15 +81,25 @@ export async function generateSwaggerSpecFromMeta() {
         const pathSpec: any = {
           tags: [meta.name],
           summary: route.summary || "",
+          deprecated: route.deprecated || false,
           security: route.auth === false ? [] : [{ bearerAuth: [] }],
           responses: {
             200: { description: "Success" },
           },
         };
 
-        // 💡 Eğer requestBody varsa ekle
-        if (route.requestBody) {
-          pathSpec.requestBody = route.requestBody;
+        if (route.body || route.requestBody) {
+          pathSpec.requestBody = {
+            content: {
+              "application/json": {
+                schema: route.requestBody || route.body,
+              },
+            },
+          };
+        }
+
+        if (route.parameters) {
+          pathSpec.parameters = route.parameters;
         }
 
         paths[fullPath][method] = pathSpec;
@@ -99,9 +109,7 @@ export async function generateSwaggerSpecFromMeta() {
     }
   }
 
-  console.log(`✅ Swagger generated for ${tags.length} modules`);
-
-  return {
+  const spec = {
     openapi: "3.0.0",
     info: {
       title: process.env.PROJECT_NAME || "MetaHub API",
@@ -128,4 +136,13 @@ export async function generateSwaggerSpecFromMeta() {
     tags,
     paths,
   };
+
+  if (writeToDisk) {
+    const outputPath = path.join(process.cwd(), "swagger.json");
+    await fs.writeFile(outputPath, JSON.stringify(spec, null, 2));
+    console.log(`📄 Swagger spec written to: ${outputPath}`);
+  }
+
+  console.log(`✅ Swagger generated for ${tags.length} modules`);
+  return spec;
 }
