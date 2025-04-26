@@ -25,7 +25,7 @@ import { Service } from "@/modules/services";
 import { MailMessage } from "@/modules/email";
 import { Address } from "@/modules/address";
 import { ModuleMetaModel } from "@/modules/admin";
-import { Appointment } from "@/modules/appointment";
+import { Appointment } from "@/modules/booking";
 import { Category } from "@/modules/category";
 import { ChatMessage } from "@/modules/chat";
 import { Company } from "@/modules/company";

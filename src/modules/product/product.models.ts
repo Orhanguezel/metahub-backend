@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
 
-// 📦 Product interface
-interface IProduct extends Document {
+// Interface
+export interface IProduct extends Document {
   name: {
     tr: string;
     en: string;
@@ -25,7 +25,7 @@ interface IProduct extends Document {
   updatedAt: Date;
 }
 
-// 🧩 Schema tanımı
+// Schema
 const productSchema = new Schema<IProduct>(
   {
     name: {
@@ -51,8 +51,8 @@ const productSchema = new Schema<IProduct>(
   { timestamps: true }
 );
 
-// 🧠 Slug üretimi
-productSchema.pre("validate", function (next) {
+// Pre-save slug generation
+productSchema.pre<IProduct>("validate", function (next) {
   if (!this.slug && this.name?.en) {
     this.slug = this.name.en
       .toLowerCase()
@@ -62,6 +62,5 @@ productSchema.pre("validate", function (next) {
   next();
 });
 
-// 📤 Model export
-const Product: Model<IProduct> = mongoose.model<IProduct>("Product", productSchema);
-export { Product, IProduct };
+// Model
+export const Product: Model<IProduct> = mongoose.model<IProduct>("Product", productSchema);

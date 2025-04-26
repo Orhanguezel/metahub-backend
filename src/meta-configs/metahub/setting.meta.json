@@ -1,11 +1,9 @@
 {
   "name": "setting",
   "icon": "box",
-  "visibleInSidebar": true,
   "roles": [
     "admin"
   ],
-  "enabled": true,
   "useAnalytics": false,
   "language": "en",
   "routes": [
@@ -32,6 +30,17 @@
       "path": "/:key",
       "auth": true,
       "summary": "DELETE /:key"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": "Orhan Güzel",
+  "lastUpdatedAt": "2025-04-25T20:18:52.832Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "date": "2025-04-25T20:18:52.832Z",
+      "note": "Meta auto-generated"
     }
   ]
 }

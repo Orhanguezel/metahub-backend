@@ -1,6 +1,4 @@
-// src/routes/notification.routes.ts
-
-import express from "express";
+import { Router } from "express";
 import {
   createNotification,
   getAllNotifications,
@@ -8,15 +6,24 @@ import {
   markNotificationAsRead,
   markAllNotificationsAsRead,
 } from "./notification.controller";
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
 
-const router = express.Router();
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { validateRequest } from "@/core/middleware/validateRequest";
+import { createNotificationValidator, idParamValidator } from "./notification.validation";
 
-router.get("/", authenticate, authorizeRoles("admin"), getAllNotifications);
-router.post("/", authenticate, authorizeRoles("admin"), createNotification);
-router.delete("/:id", authenticate, authorizeRoles("admin"), deleteNotification);
+const router = Router();
 
-router.patch("/:id/read", authenticate, authorizeRoles("admin"), markNotificationAsRead);
-router.patch("/mark-all-read", authenticate, authorizeRoles("admin"), markAllNotificationsAsRead);
+// Admin-only routes
+router.use(authenticate, authorizeRoles("admin"));
+
+router.get("/", getAllNotifications);
+
+router.post("/", createNotificationValidator, validateRequest, createNotification);
+
+router.delete("/:id", idParamValidator, validateRequest, deleteNotification);
+
+router.patch("/:id/read", idParamValidator, validateRequest, markNotificationAsRead);
+
+router.patch("/mark-all-read", markAllNotificationsAsRead);
 
 export default router;

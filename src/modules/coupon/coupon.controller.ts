@@ -1,208 +1,137 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import Coupon from "./coupon.models";
-import { isValidObjectId } from "../../core/utils/validation";
+import { isValidObjectId } from "@/core/utils/validation";
 
-// 🎟️ Yeni kupon oluştur (her dil için ayrı kayıt)
-export const createCoupon = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { code, discount, expiresAt } = req.body;
-  const langs: ("tr" | "en" | "de")[] = ["tr", "en", "de"];
-  const createdCoupons = [];
+// ✅ Create Coupon
+export const createCoupon = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { code, discount, expiresAt, label } = req.body;
 
-  if (!code || !discount || !expiresAt) {
-    res.status(400).json({
-      message:
-        req.locale === "de"
-          ? "Erforderliche Felder fehlen."
-          : req.locale === "tr"
-          ? "Gerekli alanlar eksik."
-          : "Required fields are missing.",
-    });
-    return;
-  }
+    const codeUpper = code.toUpperCase().trim();
+    const existing = await Coupon.findOne({ code: codeUpper });
 
-  const codeUpper = code.toUpperCase().trim();
-  const exists = await Coupon.findOne({ code: codeUpper });
-  if (exists) {
-    res.status(400).json({
-      message:
-        req.locale === "de"
-          ? "Gutscheincode ist bereits vorhanden."
-          : req.locale === "tr"
-          ? "Kupon kodu zaten mevcut."
-          : "Coupon code already exists.",
-    });
-    return;
-  }
-
-  for (const lang of langs) {
-    const title = req.body[`title_${lang}`];
-    const description = req.body[`description_${lang}`];
-
-    if (!title) continue;
+    if (existing) {
+      res.status(409).json({ message: "Coupon code already exists." });
+      return;
+    }
 
     const coupon = await Coupon.create({
       code: codeUpper,
-      label: {
-        title: {
-          tr: req.body[`title_tr`] || title,
-          en: req.body[`title_en`] || title,
-          de: req.body[`title_de`] || title,
-        },
-        description: {
-          tr: req.body[`description_tr`] || "",
-          en: req.body[`description_en`] || "",
-          de: req.body[`description_de`] || "",
-        },
-      },
       discount,
       expiresAt,
+      label,
       isActive: true,
     });
 
-    createdCoupons.push(coupon);
-  }
-
-  if (createdCoupons.length === 0) {
-    res.status(400).json({
-      message:
-        req.locale === "de"
-          ? "Keine gültigen Sprachdaten gefunden."
-          : req.locale === "tr"
-          ? "Hiçbir dil için geçerli veri girilmedi."
-          : "No valid data provided for any language.",
+    res.status(201).json({
+      success: true,
+      message: "Coupon created successfully.",
+      coupon,
     });
     return;
+  } catch (error) {
+    next(error);
   }
-
-  res.status(201).json({
-    success: true,
-    message:
-      req.locale === "de"
-        ? "Mehrsprachiger Gutschein erfolgreich erstellt."
-        : req.locale === "tr"
-        ? "Çok dilli kupon başarıyla oluşturuldu."
-        : "Multi-language coupon created successfully.",
-    coupons: createdCoupons,
-  });
 });
 
-// 🧾 Tüm kuponları getir (dil filtreli)
-export const getAllCoupons = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const language = (req.query.lang as string) || req.locale || "en";
-  const coupons = await Coupon.find({ [`label.title.${language}`]: { $exists: true } }).sort({ createdAt: -1 });
-  res.status(200).json(coupons);
+// ✅ Get All Coupons
+export const getAllCoupons = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const language = (req.query.lang as string) || "en";
+    const coupons = await Coupon.find({ [`label.title.${language}`]: { $exists: true } }).sort({ createdAt: -1 });
+
+    res.status(200).json(coupons);
+    return;
+  } catch (error) {
+    next(error);
+  }
 });
 
-// 🔍 Kod ile getir (tek dil)
-export const getCouponByCode = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { code } = req.params;
-  const language = (req.query.lang as string) || req.locale || "en";
+// ✅ Get Coupon By Code
+export const getCouponByCode = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { code } = req.params;
+    const language = (req.query.lang as string) || "en";
 
-  const coupon = await Coupon.findOne({
-    code: code.toUpperCase(),
-    isActive: true,
-    [`label.title.${language}`]: { $exists: true },
-  });
+    const coupon = await Coupon.findOne({
+      code: code.toUpperCase(),
+      isActive: true,
+      [`label.title.${language}`]: { $exists: true },
+    });
 
-  if (!coupon) {
-    res.status(404).json({
-      message:
-        req.locale === "de"
-          ? "Gutschein nicht gefunden."
-          : req.locale === "tr"
-          ? "Kupon bulunamadı."
-          : "Coupon not found.",
+    if (!coupon) {
+      res.status(404).json({ message: "Coupon not found." });
+      return;
+    }
+
+    res.status(200).json(coupon);
+    return;
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ✅ Update Coupon
+export const updateCoupon = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { code, discount, expiresAt, isActive, label } = req.body;
+
+    if (!isValidObjectId(id)) {
+      res.status(400).json({ message: "Invalid coupon ID." });
+      return;
+    }
+
+    const coupon = await Coupon.findById(id);
+
+    if (!coupon) {
+      res.status(404).json({ message: "Coupon not found." });
+      return;
+    }
+
+    if (code) coupon.code = code.toUpperCase().trim();
+    if (discount !== undefined) coupon.discount = discount;
+    if (expiresAt) coupon.expiresAt = new Date(expiresAt);
+    if (typeof isActive === "boolean") coupon.isActive = isActive;
+    if (label) coupon.label = label;
+
+    await coupon.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Coupon updated successfully.",
+      coupon,
     });
     return;
+  } catch (error) {
+    next(error);
   }
-
-  res.status(200).json(coupon);
 });
 
-// ✏️ Kupon güncelle (tek belge)
-export const updateCoupon = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ message: "Invalid coupon ID" });
-    return;
-  }
+// ✅ Delete Coupon
+export const deleteCoupon = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
 
-  const coupon = await Coupon.findById(id);
-  if (!coupon) {
-    res.status(404).json({
-      message:
-        req.locale === "de"
-          ? "Gutschein nicht gefunden."
-          : req.locale === "tr"
-          ? "Kupon bulunamadı."
-          : "Coupon not found.",
+    if (!isValidObjectId(id)) {
+      res.status(400).json({ message: "Invalid coupon ID." });
+      return;
+    }
+
+    const coupon = await Coupon.findByIdAndDelete(id);
+
+    if (!coupon) {
+      res.status(404).json({ message: "Coupon not found." });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Coupon deleted successfully.",
     });
     return;
+  } catch (error) {
+    next(error);
   }
-
-  const { code, discount, expiresAt, isActive } = req.body;
-  const title_tr = req.body.title_tr;
-  const title_en = req.body.title_en;
-  const title_de = req.body.title_de;
-  const desc_tr = req.body.description_tr;
-  const desc_en = req.body.description_en;
-  const desc_de = req.body.description_de;
-
-  if (code) coupon.code = code.toUpperCase().trim();
-  if (discount !== undefined) coupon.discount = discount;
-  if (expiresAt) coupon.expiresAt = new Date(expiresAt);
-  if (typeof isActive === "boolean") coupon.isActive = isActive;
-
-  if (title_tr) coupon.label.title.tr = title_tr;
-  if (title_en) coupon.label.title.en = title_en;
-  if (title_de) coupon.label.title.de = title_de;
-  if (desc_tr !== undefined) coupon.label.description.tr = desc_tr;
-  if (desc_en !== undefined) coupon.label.description.en = desc_en;
-  if (desc_de !== undefined) coupon.label.description.de = desc_de;
-
-  await coupon.save();
-
-  res.status(200).json({
-    success: true,
-    message:
-      req.locale === "de"
-        ? "Gutschein erfolgreich aktualisiert."
-        : req.locale === "tr"
-        ? "Kupon başarıyla güncellendi."
-        : "Coupon updated successfully.",
-    coupon,
-  });
-});
-
-// 🗑️ Kupon sil
-export const deleteCoupon = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ message: "Invalid coupon ID" });
-    return;
-  }
-
-  const coupon = await Coupon.findByIdAndDelete(id);
-  if (!coupon) {
-    res.status(404).json({
-      message:
-        req.locale === "de"
-          ? "Gutschein nicht gefunden."
-          : req.locale === "tr"
-          ? "Kupon bulunamadı."
-          : "Coupon not found.",
-    });
-    return;
-  }
-
-  res.status(200).json({
-    success: true,
-    message:
-      req.locale === "de"
-        ? "Gutschein gelöscht."
-        : req.locale === "tr"
-        ? "Kupon silindi."
-        : "Coupon deleted successfully.",
-  });
 });

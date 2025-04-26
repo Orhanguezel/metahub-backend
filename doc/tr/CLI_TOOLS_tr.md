@@ -1,4 +1,5 @@
 
+---
 
 # 🛠️ CLI Araçları – MetaHub Backend
 
@@ -16,9 +17,7 @@ Yeni bir backend modülü oluşturmak için kullanılır. Modüler yapı sayesin
 bun run scripts/createModule.ts <modul-adi>
 ```
 
-### 📁 Oluşturulan Yapı
-
-Aşağıdaki dosya yapısı otomatik olarak oluşturulur:
+### 📁 Otomatik Oluşturulan Yapı
 
 ```
 src/modules/<modul-adi>/
@@ -31,19 +30,19 @@ src/modules/<modul-adi>/
     └── <modul>.controller.spec.ts # Jest test şablonu
 ```
 
-Ek olarak aşağıdaki meta dosyası oluşturulur:
+Ek olarak şu dosya oluşturulur:
 
 ```
 meta-configs/metahub/<modul-adi>.meta.json
 ```
 
-> `.env.metahub` içine **otomatik kayıt yapılmaz**. `ENABLED_MODULES` listesi manuel güncellenmelidir.
+> `.env.metahub` içindeki `ENABLED_MODULES` listesine **otomatik ekleme yapılmaz**. Bu liste manuel güncellenmelidir.
 
 ---
 
 ## ✅ `metaValidator.ts` – Meta Doğrulama Aracı
 
-Tüm `meta-configs/metahub/*.meta.json` dosyalarını kontrol eder.
+Tüm `meta-configs/metahub/*.meta.json` dosyalarının geçerliliğini kontrol eder.
 
 ### 📌 Komut
 
@@ -51,57 +50,84 @@ Tüm `meta-configs/metahub/*.meta.json` dosyalarını kontrol eder.
 bun run src/scripts/metaValidator.ts
 ```
 
-### 🔍 Kontroller
+### 🔍 Kontrol Edilenler
 
-- JSON geçerliliği
-- Gerekli alanlar: `name`, `icon`, `routes`
-- İlgili modül klasörü mevcut mu?
-- `.env.*` dosyalarında modül aktif mi?
-
-> Çoklu frontend projeleri için kritik bir güvenlik ve tutarlılık katmanıdır.
+- JSON formatı ve geçerliliği
+- Gerekli alanların (örneğin: `name`, `icon`, `routes`) varlığı
+- İlgili modül klasörünün gerçekten var olup olmadığı
+- `.env.*` dosyalarında modülün etkinleştirilmiş olması
 
 ---
 
-## 📘 `generateSwaggerSpec.ts` – Swagger Döküm Üretimi
+## 🔄 `generate:meta` – Modül Dosyalarından Meta Üretimi
 
-Tüm aktif modüllerin `meta.json` dosyalarından otomatik Swagger JSON oluşturur.
+Mevcut `routes`, `controller`, `validation` dosyalarını tarayarak:
 
-### 📌 Fonksiyon
+- Güncel `.meta.json` dosyasını üretir/günceller
+- `ModuleMeta` ve `ModuleSetting` koleksiyonlarına kayıt yapar
+- Orphan (karşılığı olmayan) meta dosyalarını ve DB kayıtlarını siler
+
+### 📌 Kullanım
+
+```bash
+bun run generate:meta
+```
+
+### 🧠 Özellikler
+
+- Yeni veya silinen modülleri algılar
+- `version`, `lastUpdatedAt`, `updatedBy` alanlarını otomatik günceller
+- `authenticate` içeren rotaları `auth: true` olarak işaretler
+- `Zod` şemalarından JSON schema üretimi (`body`) sağlar
+
+---
+
+## 📘 `generateSwaggerSpec.ts` – Swagger JSON Üretimi
+
+Aktif modüllerin meta dosyalarına göre Swagger tanımı oluşturur.
+
+### 📌 Kullanım
 
 ```ts
 await generateSwaggerSpecFromMeta()
 ```
 
-> Swagger UI'de kullanılmak üzere `/swagger.json` dökümanı üretir.
+> Swagger UI tarafından kullanılan `/swagger.json` dökümanını oluşturur.
 
 ---
 
 ## 🧩 `setupSwagger.ts` – Swagger UI Entegrasyonu
 
-Express uygulamasına Swagger UI bağlar.
+Express uygulamasına Swagger UI arayüzünü dahil eder.
 
-### 🚀 Özellikler
+### 🚀 Sağladığı Özellikler
 
-- `/swagger.json` ➤ Otomatik oluşturulan Swagger dökümanı
-- `/api-docs` ➤ Swagger arayüzü
-- `generateSwaggerSpecFromMeta()` ile içerik üretimi
+- `/swagger.json` → Otomatik oluşturulan Swagger verisi
+- `/api-docs` → Swagger kullanıcı arayüzü
+- İçerik: `generateSwaggerSpecFromMeta()` çıktısına dayanır
 
 ### 🌐 Ortam Değişkenleri
 
-| Değişken      | Açıklama                          |
-|---------------|-----------------------------------|
-| `APP_ENV`     | `.env.*` dosyasını seçer          |
-| `PORT`        | Uygulama portu                    |
-| `HOST`        | Swagger UI temel URL'si           |
-| `SWAGGER_BASE_URL` | Swagger `server.url` tanımı |
+| Değişken              | Açıklama                          |
+|-----------------------|-----------------------------------|
+| `APP_ENV`             | Aktif `.env.*` dosyasını seçer    |
+| `PORT`                | Uygulamanın portu                 |
+| `HOST`                | Swagger’ın erişim adresi          |
+| `SWAGGER_BASE_URL`    | Swagger `server.url` değeri       |
 
 ---
 
-## 📌 Geliştirme Fırsatları
+## ⚠️ `watchMeta.ts` (Opsiyonel) – **Gerçek Zamanlı Takip (Durduruldu)**
 
-- `delete:module` → Modülü ve meta dosyasını silme
-- `sync:admin` → Meta'dan DB'ye ayarları güncelleme
-- `generate:form` → Form yapılarını otomatik üretme
-- `create:module --formdata` gibi flag'lerle contentType seçimi
+> Gerçek zamanlı dosya izleme sistemi çok fazla yük ve log oluşturduğu için şu an **devre dışı**. Bunun yerine `generate:meta` sadece sunucu başlangıcında çalıştırılır.
+
+---
+
+## 📌 Gelecek Planları
+
+- `delete:module` → Modül klasörünü, meta dosyasını ve DB kayıtlarını sil
+- `sync:admin` → Meta’dan `ModuleSetting` bilgilerini eşitle
+- `generate:form` → Admin arayüzü için form yapılarını otomatik üret
+- `create:module --formdata` → `multipart/form-data` gibi özel içerik türü destekle
 
 ---

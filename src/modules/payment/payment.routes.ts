@@ -1,4 +1,6 @@
-import express from "express";
+import { Router } from "express";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { validatePaymentCreate, validatePaymentUpdateMethod } from "./payment.validation";
 import {
   createPayment,
   getAllPayments,
@@ -11,21 +13,19 @@ import {
   simulatePayPalPayment,
 } from "./payment.controller";
 
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
+const router = Router();
 
-const router = express.Router();
-
-// 🧪 Simulations (Önce tanımlanmalı!)
+// 🧪 Simulation Routes (admin)
 router.post("/simulate/stripe", authenticate, authorizeRoles("admin"), simulateStripePayment);
-router.post("/simulate/paypal", simulatePayPalPayment);
+router.post("/simulate/paypal", authenticate, authorizeRoles("admin"), simulatePayPalPayment);
 
-// 💳 Payment işlemleri
-router.post("/", authenticate, createPayment);
+// 💳 Payment Actions
+router.post("/", authenticate, validatePaymentCreate, createPayment);
 router.get("/", authenticate, authorizeRoles("admin"), getAllPayments);
 router.get("/user", authenticate, getPaymentsByUser);
+router.get("/order/:orderId", authenticate, getPaymentByOrderId);
 router.put("/:id/mark-paid", authenticate, authorizeRoles("admin"), markPaymentAsPaid);
 router.put("/:id/mark-failed", authenticate, authorizeRoles("admin"), markPaymentAsFailed);
-router.put("/:id/update-method", authenticate, authorizeRoles("admin"), updatePaymentMethod);
-router.get("/order/:orderId", authenticate, getPaymentByOrderId);
+router.put("/:id/update-method", authenticate, authorizeRoles("admin"), validatePaymentUpdateMethod, updatePaymentMethod);
 
 export default router;

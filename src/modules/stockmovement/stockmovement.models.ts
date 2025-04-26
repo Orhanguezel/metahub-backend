@@ -34,4 +34,6 @@ const stockmovementSchema = new Schema<IStockmovement>(
   { timestamps: { createdAt: true, updatedAt: false } }
 );
 
-export default model<IStockmovement>("Stockmovement", stockmovementSchema);
+export const Stockmovement = model<IStockmovement>("Stockmovement", stockmovementSchema);
+
+export default Stockmovement;

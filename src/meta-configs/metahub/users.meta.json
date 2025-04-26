@@ -1,11 +1,9 @@
 {
   "name": "users",
   "icon": "box",
-  "visibleInSidebar": true,
   "roles": [
     "admin"
   ],
-  "enabled": true,
   "useAnalytics": false,
   "language": "en",
   "routes": [
@@ -111,6 +109,17 @@
       "path": "/logout",
       "auth": true,
       "summary": "POST /logout"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": "Orhan Güzel",
+  "lastUpdatedAt": "2025-04-25T20:18:54.260Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "date": "2025-04-25T20:18:54.260Z",
+      "note": "Meta auto-generated"
     }
   ]
 }

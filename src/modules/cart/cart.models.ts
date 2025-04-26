@@ -1,7 +1,6 @@
 import { Schema, model, Types, Document, Model } from "mongoose";
-import { IProduct } from "../product/product.models";
+import { IProduct } from "../product";
 
-// 🔸 Sepet Ürünü
 export interface ICartItem {
   product: Types.ObjectId | IProduct;
   quantity: number;
@@ -9,13 +8,14 @@ export interface ICartItem {
   totalPriceAtAddition: number;
 }
 
-// 🔸 Sepet
 export interface ICart extends Document {
   user: Types.ObjectId;
   items: ICartItem[];
   totalPrice: number;
+  couponCode?: string;
   status: "open" | "ordered" | "cancelled";
   isActive: boolean;
+  discount?: number;
   label: {
     tr: string;
     en: string;
@@ -25,59 +25,25 @@ export interface ICart extends Document {
   updatedAt: Date;
 }
 
-// 🔸 Alt şema: ürünler
 const cartItemSchema = new Schema<ICartItem>(
   {
-    product: {
-      type: Types.ObjectId,
-      ref: "Product",
-      required: true,
-    },
-    quantity: {
-      type: Number,
-      required: true,
-      min: 1,
-      default: 1,
-    },
-    priceAtAddition: {
-      type: Number,
-      required: true,
-    },
-    totalPriceAtAddition: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
+    product: { type: Types.ObjectId, ref: "Product", required: true },
+    quantity: { type: Number, required: true, min: 1, default: 1 },
+    priceAtAddition: { type: Number, required: true },
+    totalPriceAtAddition: { type: Number, required: true, default: 0 },
   },
   { _id: false }
 );
 
-// 🔸 Ana şema: sepet
 const cartSchema = new Schema<ICart>(
   {
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    items: {
-      type: [cartItemSchema],
-      default: [],
-    },
-    totalPrice: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    status: {
-      type: String,
-      enum: ["open", "ordered", "cancelled"],
-      default: "open",
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    items: { type: [cartItemSchema], default: [] },
+    totalPrice: { type: Number, required: true, default: 0 },
+    couponCode: { type: String, default: null },
+    status: { type: String, enum: ["open", "ordered", "cancelled"], default: "open" },
+    isActive: { type: Boolean, default: true },
+    discount: { type: Number, default: 0 },
     label: {
       tr: { type: String, required: true },
       en: { type: String, required: true },

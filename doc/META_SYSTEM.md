@@ -3,37 +3,37 @@
 
 # 🧠 Meta-System – MetaHub Backend
 
-Dieses Dokument erklärt, wie die Struktur `meta-configs/` im **MetaHub Backend** funktioniert und welche Rolle die `meta.json`-Dateien im System spielen.
+Dieses Dokument erklärt, wie das `meta-configs/`-System im **MetaHub Backend** funktioniert und welche Rolle die `*.meta.json`-Dateien im Gesamtprojekt spielen.
 
 ---
 
 ## 🎯 Ziel
 
-Das Meta-System definiert die technischen Eigenschaften jedes Moduls und wird verwendet, um:
+Das Meta-System definiert die technischen Merkmale jedes Moduls und wird verwendet für:
 
-- Swagger-Dokumentation zu generieren,
-- Die Sichtbarkeit von Modulen im Admin-Panel zu steuern,
-- Eine zentrale Struktur für Versionierung und Einstellungen bereitzustellen.
+- ✅ Automatische Generierung von Swagger-Dokumentation
+- ✅ Steuerung der Sichtbarkeit und Berechtigung im Admin-Panel
+- ✅ Einheitliche Verwaltung von Versionierung und projektbasierten Einstellungen
 
 ---
 
 ## 🗂️ Verzeichnisstruktur
 
-Für jedes Projekt gibt es ein separates `meta-config`-Verzeichnis:
+Für jedes Projekt existiert ein eigener Meta-Konfigurationsordner:
 
 ```
 meta-configs/
 └── metahub/
     ├── blog.meta.json
-    ├── cart.meta.json
+    ├── product.meta.json
     └── ...
 ```
 
-Jede `.meta.json`-Datei repräsentiert ein einzelnes Modul.
+Jede `.meta.json`-Datei steht für ein einzelnes Backend-Modul.
 
 ---
 
-## 🧬 Struktur einer Meta-Datei
+## 🧬 Aufbau einer Meta-Datei
 
 ### Beispiel: `blog.meta.json`
 
@@ -46,6 +46,17 @@ Jede `.meta.json`-Datei repräsentiert ein einzelnes Modul.
   "enabled": true,
   "useAnalytics": false,
   "language": "en",
+  "version": "1.3.2",
+  "updatedBy": "orhan",
+  "lastUpdatedAt": "2025-04-23T12:33:21.202Z",
+  "history": [
+    {
+      "version": "1.3.2",
+      "by": "orhan",
+      "date": "2025-04-23T12:33:21.202Z",
+      "note": "Meta auto-generated"
+    }
+  ],
   "routes": [
     {
       "method": "GET",
@@ -57,8 +68,10 @@ Jede `.meta.json`-Datei repräsentiert ein einzelnes Modul.
       "method": "POST",
       "path": "/",
       "auth": true,
-      "summary": "Create new blog",
-      "body": { "$ref": "#/definitions/BlogCreate" }
+      "summary": "Create blog",
+      "body": {
+        "$ref": "#/definitions/BlogCreate"
+      }
     }
   ]
 }
@@ -68,31 +81,36 @@ Jede `.meta.json`-Datei repräsentiert ein einzelnes Modul.
 
 | Feld               | Beschreibung                                                                 |
 |--------------------|------------------------------------------------------------------------------|
-| `name`             | Modulname (erforderlich)                                                     |
-| `icon`             | Icon-Name im Admin-Panel (z. B. `"box"`)                                    |
-| `visibleInSidebar` | Sichtbarkeit im Admin-Menü                                                   |
-| `roles`            | Rollen mit Zugriff auf das Modul (z. B. `["admin"]`)                        |
+| `name`             | Modulname (Pflichtfeld)                                                      |
+| `icon`             | Icon für das Admin-Panel (z. B. `"box"`)                                     |
+| `visibleInSidebar` | Anzeige im Admin-Menü                                                        |
+| `roles`            | Zugriffsbeschränkung für Benutzerrollen (z. B. `["admin"]`)                 |
 | `enabled`          | Aktivierungsstatus                                                           |
-| `useAnalytics`     | Aktivieren, wenn Analyse pro Route nötig ist                                |
-| `language`         | Standardsprache (`"en"`, `"de"`, `"tr"`)                                     |
-| `routes`           | Swagger-Endpunkte mit `method`, `path`, `summary`, `body` usw.              |
+| `useAnalytics`     | Route-bezogene Nutzungserfassung aktivieren                                  |
+| `language`         | Standardinhaltsprache (`"en"`, `"de"`, `"tr"`)                               |
+| `version`          | Automatisch aktualisierte Metadaten-Version                                 |
+| `updatedBy`        | Letzter Bearbeiter                                                           |
+| `lastUpdatedAt`    | Zeitpunkt der letzten Änderung (ISO-Format)                                  |
+| `history`          | Änderungsverlauf inkl. Autor und Kommentar                                   |
+| `routes`           | Liste von API-Endpunkten inkl. Authentifizierung und Beschreibung            |
 
 ---
 
-## 🔄 Meta-Erstellung
+## 🔄 Automatische Meta-Generierung
 
-Die Meta-Dateien aller Module können automatisch generiert werden:
+Alle `.meta.json`-Dateien werden per Script erzeugt:
 
 ```bash
-bun run src/scripts/generateMeta.ts
+bun run generate:meta
 ```
 
-Dieses Skript:
+### Das Script übernimmt:
 
-- Extrahiert Methoden und Pfade aus `*.routes.ts`
-- Schreibt die Daten unter `meta-configs/`
-- Speichert die Infos in MongoDB über `ModuleMetaModel`
-- Legt das `enabled`-Feld anhand der `.env.*`-Dateien fest (`getEnvProfiles()`)
+- Scanning aller `.routes.ts`-Dateien für Routen & Methoden
+- Generierung/Update der zugehörigen `*.meta.json`-Dateien
+- Synchronisation mit MongoDB via `ModuleMetaModel` und `ModuleSetting`
+- Berechnung des `enabled`-Status je nach `.env.*` (`getEnvProfiles()`)
+- Löscht verwaiste Meta-Dateien & zugehörige DB-Einträge automatisch
 
 ---
 
@@ -102,22 +120,24 @@ Dieses Skript:
 bun run src/scripts/metaValidator.ts
 ```
 
-Dieses Tool prüft:
+Dieses Validierungstool prüft:
 
-- Ist die JSON-Struktur gültig?
-- Fehlen erforderliche Felder (`name`, `icon`, `routes`)?
-- Existiert der Modul-Ordner?
-- Ist das Modul in `.env.*` aktiviert?
+- Gültige JSON-Struktur
+- Pflichtfelder vorhanden (`name`, `icon`, `routes`)
+- Modulverzeichnis existiert tatsächlich?
+- Modul in `.env.*` aktiv?
 
 ---
 
-## 💾 Beziehung zur Datenbank
+## 💾 Verbindung zur Datenbank
 
-### `ModuleMetaModel` (Meta-Definition)
-Speichert Meta-Informationen für jedes Modul in MongoDB. Wird vom Admin-Panel verwendet.
+### 📄 `ModuleMetaModel`
 
-### `ModuleSetting` (Projektspezifische Einstellungen)
-Hält projektbezogene Einstellungen für jedes Frontend-Projekt (z. B. `.env.metahub`, `.env.kuhlturm`).
+Speichert zentrale Metadaten zu jedem Modul in MongoDB. Wird vom Admin-Panel geladen.
+
+### 🔧 `ModuleSetting`
+
+Speichert projektabhängige Einstellungen pro Modul:
 
 ```ts
 {
@@ -132,24 +152,25 @@ Hält projektbezogene Einstellungen für jedes Frontend-Projekt (z. B. `.env.m
 
 ## 🔗 Integration mit Swagger
 
-Aus Meta-Dateien wird automatisch Swagger-Dokumentation erstellt:
+Aus den Meta-Dateien wird automatisch OpenAPI-Dokumentation generiert:
 
 ```ts
 generateSwaggerSpecFromMeta()
 ```
 
-- Wenn `routes[].body` gesetzt ist, wird ein Swagger `requestBody` erzeugt.
-- Swagger UI: `/api-docs`
-- Swagger JSON: `/swagger.json`
+- Wenn `routes[].body` vorhanden ist → Swagger `requestBody` wird eingebunden
+- UI: `/api-docs`
+- JSON: `/swagger.json`
 
 ---
 
-## 🚀 Potenziale zur Weiterentwicklung
+## 🚀 Zukünftige Erweiterungen
 
-- [ ] `version`-Feld zur Modul-Versionierung
-- [ ] `formType`: Unterstützung für `json` vs `form-data`
-- [ ] `fields`: Dynamische Formularstrukturen
-- [ ] Beispielhafte `response`-Blöcke für Swagger
-- [ ] UI zur Meta-Aktualisierung im Admin-Panel
+- [x] Automatische Versionierung und Änderungsverlauf
+- [x] Erkennung und Löschung verwaister Module (Datei & DB)
+- [ ] Unterstützung für `formType`: `"json"` vs. `"form-data"`
+- [ ] `fields` für dynamische Formular-Definitionen im Admin-UI
+- [ ] Erweiterte `response`-Definitionen für Swagger
+- [ ] UI-basierte Bearbeitung von Meta-Dateien im Admin-Panel
 
 ---

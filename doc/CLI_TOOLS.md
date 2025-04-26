@@ -9,7 +9,7 @@ Dieses Dokument beschreibt die in MetaHub verwendeten Befehlszeilenwerkzeuge und
 
 ## 📦 `create:module` – Neues Modul erstellen
 
-Wird verwendet, um ein neues Backend-Modul zu generieren. Dank der modularen Struktur gewährleistet es Konsistenz und Wartbarkeit im Projekt.
+Erstellt ein vollständiges Backend-Modul inklusive Meta-Datei und Tests. Es stellt sicher, dass alle Module konsistent aufgebaut sind.
 
 ### 📌 Verwendung
 
@@ -19,32 +19,30 @@ bun run scripts/createModule.ts <modul-name>
 
 ### 📁 Erzeugte Struktur
 
-Folgende Dateistruktur wird automatisch erstellt:
-
 ```
 src/modules/<modul-name>/
-├── <modul>.controller.ts          # CRUD-Logik
+├── <modul>.controller.ts          # CRUD-Logik (Express)
 ├── <modul>.models.ts              # Mongoose-Schema
-├── <modul>.routes.ts              # Express-Routen
-├── <modul>.validation.ts          # Zod-Validierungsschema
-├── index.ts                       # Modulausgabe
+├── <modul>.routes.ts              # Endpunkte
+├── <modul>.validation.ts          # Zod-Validierung
+├── index.ts                       # Export-Schnittstelle
 └── __tests__/
-    └── <modul>.controller.spec.ts # Jest-Testvorlage
+    └── <modul>.controller.spec.ts # Testvorlage
 ```
 
-Zusätzlich wird folgende Meta-Datei erstellt:
+### 🧠 Automatisch erzeugt
 
 ```
 meta-configs/metahub/<modul-name>.meta.json
 ```
 
-> Es erfolgt **keine automatische Eintragung** in `.env.metahub`. Die Liste `ENABLED_MODULES` muss manuell gepflegt werden.
+> ⚠️ Modul wird **nicht automatisch** zu `.env.metahub` ➜ Manuelle Pflege von `ENABLED_MODULES` ist erforderlich.
 
 ---
 
 ## ✅ `metaValidator.ts` – Meta-Validierungswerkzeug
 
-Überprüft alle Dateien unter `meta-configs/metahub/*.meta.json`.
+Prüft alle `.meta.json`-Dateien unter `meta-configs/metahub` auf Struktur und Konsistenz.
 
 ### 📌 Befehl
 
@@ -52,57 +50,82 @@ meta-configs/metahub/<modul-name>.meta.json
 bun run src/scripts/metaValidator.ts
 ```
 
-### 🔍 Prüft:
+### 🔍 Validiert:
 
-- JSON-Struktur und -Gültigkeit
+- JSON-Syntax & Format
 - Erforderliche Felder: `name`, `icon`, `routes`
-- Existenz des Modulordners
-- Ob Modul in `.env.*` aktiviert ist
-
-> Ein wichtiger Bestandteil zur Sicherstellung von Konsistenz bei Multi-Frontend-Setups.
+- Ob zugehöriges Modulverzeichnis existiert
+- Ob das Modul in allen `.env.*` aktiviert ist
 
 ---
 
-## 📘 `generateSwaggerSpec.ts` – Swagger-Dokumentgenerierung
+## 🔄 `generate:meta` – Meta-Dateien aus Modulen ableiten
 
-Erzeugt automatisch eine Swagger-JSON-Datei aus den `meta.json`-Dateien aller aktivierten Module.
+Aktualisiert `.meta.json`-Dateien aus realem Code (`routes`, `controller`, `validation`) und schreibt diese:
 
-### 📌 Funktion
+- In das Dateisystem: `meta-configs/metahub/*.meta.json`
+- In die Datenbank (`ModuleMeta` & `ModuleSetting`)
+
+### 📌 Ausführung
+
+```bash
+bun run generate:meta
+```
+
+### 🧠 Features
+
+- Erkennt gelöschte Module → Entfernt zugehörige Meta-Datei & DB-Einträge
+- Bumped `version`, `lastUpdatedAt`, `updatedBy`
+- Erkennt `authenticate`-Middleware zur Setzung von `auth: true`
+- Unterstützt automatische `Zod`-zu-JSON Schema-Konvertierung (`body`)
+
+---
+
+## 📘 `generateSwaggerSpec.ts` – Swagger-Dokument erzeugen
+
+Erstellt Swagger-Spezifikation (`swagger.json`) basierend auf allen `.meta.json`-Dateien aktivierter Module.
+
+### 📌 Aufrufbar über:
 
 ```ts
 await generateSwaggerSpecFromMeta()
 ```
 
-> Wird zur Bereitstellung von `/swagger.json` für Swagger UI verwendet.
+> Wird von Swagger UI benötigt (`/api-docs`).
 
 ---
 
 ## 🧩 `setupSwagger.ts` – Swagger UI Integration
 
-Bindet Swagger UI in die Express-Anwendung ein.
+Bindet Swagger UI in den Express-Server ein.
 
-### 🚀 Features
+### 🚀 Bereitgestellte Endpunkte
 
-- `/swagger.json` ➤ Automatisch generiertes Swagger-Dokument
-- `/api-docs` ➤ Swagger UI Oberfläche
-- Nutzt `generateSwaggerSpecFromMeta()` zur Inhaltserstellung
+- `/swagger.json` → Maschinell erzeugte Swagger-Daten
+- `/api-docs` → Interaktive Swagger-Oberfläche
 
-### 🌐 Umgebungsvariablen
+### 🌐 Benötigte Umgebungsvariablen
 
 | Variable            | Beschreibung                          |
 |---------------------|----------------------------------------|
-| `APP_ENV`           | Wählt die entsprechende `.env.*` Datei |
+| `APP_ENV`           | Bestimmt `.env.*` Datei                |
 | `PORT`              | Server-Port                            |
-| `HOST`              | Basis-URL für Swagger UI               |
-| `SWAGGER_BASE_URL`  | Definition der Swagger `server.url`   |
+| `HOST`              | Basis-URL                              |
+| `SWAGGER_BASE_URL`  | Setzt `server.url` für Swagger         |
 
 ---
 
-## 📌 Weiterentwicklungsmöglichkeiten
+## ❌ `watchMeta.ts` – **[veraltet]** Automatisches Meta-Watching
 
-- `delete:module` → Löscht Modulverzeichnis und Meta-Datei
-- `sync:admin` → Synchronisiert Einstellungen aus Meta-Dateien in die DB
-- `generate:form` → Automatische Erstellung von Form-Definitionen
-- Unterstützung von Flags wie `--formdata` für Content-Type-Auswahl
+> **Hinweis:** Dieses Feature wurde deaktiviert, um unnötige Systemlast und Log-Spam zu vermeiden. Änderungen werden nur beim Neustart erkannt (via `generate:meta`).
+
+---
+
+## 🛠️ Geplante Erweiterungen
+
+- `delete:module` → Entfernt Modulverzeichnis + zugehörige Meta + DB-Einträge
+- `sync:admin` → Synchronisiert Meta in `ModuleSetting`
+- `generate:form` → Erstellt Admin-Formulare automatisch aus `validation.ts`
+- `--formdata` Flag → Für Uploads und Content-Type-Auswahl
 
 ---

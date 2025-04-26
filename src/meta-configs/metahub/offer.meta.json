@@ -1,11 +1,9 @@
 {
   "name": "offer",
   "icon": "box",
-  "visibleInSidebar": true,
   "roles": [
     "admin"
   ],
-  "enabled": true,
   "useAnalytics": false,
   "language": "en",
   "routes": [
@@ -26,6 +24,17 @@
       "path": "/:id/status",
       "auth": true,
       "summary": "PATCH /:id/status"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": "Orhan Güzel",
+  "lastUpdatedAt": "2025-04-25T20:18:51.710Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "date": "2025-04-25T20:18:51.710Z",
+      "note": "Meta auto-generated"
     }
   ]
 }

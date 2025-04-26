@@ -20,8 +20,8 @@ import {
   toggleUserStatus,
 } from "./status.controller";
 
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
-import upload from "../../core/middleware/uploadMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import upload from "@/core/middleware/uploadMiddleware";
 
 const router = express.Router();
 

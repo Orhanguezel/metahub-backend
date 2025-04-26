@@ -1,11 +1,9 @@
 {
   "name": "invoice",
   "icon": "box",
-  "visibleInSidebar": true,
   "roles": [
     "admin"
   ],
-  "enabled": true,
   "useAnalytics": false,
   "language": "en",
   "routes": [
@@ -26,6 +24,17 @@
       "path": "/:id/pdf",
       "auth": true,
       "summary": "GET /:id/pdf"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": "Orhan Güzel",
+  "lastUpdatedAt": "2025-04-25T20:18:50.921Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "date": "2025-04-25T20:18:50.921Z",
+      "note": "Meta auto-generated"
     }
   ]
 }

@@ -1,11 +1,9 @@
 {
   "name": "payment",
   "icon": "box",
-  "visibleInSidebar": true,
   "roles": [
     "admin"
   ],
-  "enabled": true,
   "useAnalytics": false,
   "language": "en",
   "routes": [
@@ -62,6 +60,17 @@
       "path": "/order/:orderId",
       "auth": true,
       "summary": "GET /order/:orderId"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": "Orhan Güzel",
+  "lastUpdatedAt": "2025-04-25T20:18:52.031Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "date": "2025-04-25T20:18:52.031Z",
+      "note": "Meta auto-generated"
     }
   ]
 }

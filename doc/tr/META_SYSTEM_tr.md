@@ -10,15 +10,18 @@ Bu doküman, **MetaHub Backend** projesindeki `meta-configs/` yapısının nası
 ## 🎯 Amaç
 
 Meta sistemi, her modülün teknik özelliklerini tanımlamak ve bu bilgileri:
-- Swagger dokümantasyonu üretmek,
-- Admin panelde modül görünürlüğünü kontrol etmek,
-- Versiyonlama ve ayarlar için merkezi yapı sağlamak amacıyla kullanır.
+
+- ✅ Swagger dokümantasyonu üretmek
+- ✅ Admin panelde modül görünürlüğünü ve yetkilerini kontrol etmek
+- ✅ Versiyonlama, güncelleme geçmişi ve proje-bazlı ayar yönetimi için kullanmak
+
+amacıyla merkezi bir yapı sunar.
 
 ---
 
 ## 🗂️ Dosya Yapısı
 
-Her proje için bir `meta-config` dizini vardır:
+Her proje için bir `meta-configs/<proje-adı>/` klasörü mevcuttur:
 
 ```
 meta-configs/
@@ -28,7 +31,7 @@ meta-configs/
     └── ...
 ```
 
-Her `.meta.json` dosyası bir modülü temsil eder.
+Her `.meta.json` dosyası bir backend modülünü temsil eder.
 
 ---
 
@@ -45,6 +48,17 @@ Her `.meta.json` dosyası bir modülü temsil eder.
   "enabled": true,
   "useAnalytics": false,
   "language": "en",
+  "version": "1.2.4",
+  "updatedBy": "orhan",
+  "lastUpdatedAt": "2025-04-23T15:12:34.123Z",
+  "history": [
+    {
+      "version": "1.2.4",
+      "by": "orhan",
+      "date": "2025-04-23T15:12:34.123Z",
+      "note": "Meta auto-generated"
+    }
+  ],
   "routes": [
     {
       "method": "GET",
@@ -57,40 +71,47 @@ Her `.meta.json` dosyası bir modülü temsil eder.
       "path": "/",
       "auth": true,
       "summary": "Create new blog",
-      "body": { "$ref": "#/definitions/BlogCreate" }
+      "body": {
+        "$ref": "#/definitions/BlogCreate"
+      }
     }
   ]
 }
 ```
 
-### Alanlar Açıklaması
+### Alan Açıklamaları
 
-| Alan             | Açıklama                                                             |
-|------------------|----------------------------------------------------------------------|
-| `name`           | Modül adı (zorunlu)                                                  |
-| `icon`           | Admin panel ikon adı (örnek: `"box"`)                               |
-| `visibleInSidebar` | Admin menüde görünürlük                                            |
-| `roles`          | Bu modüle erişebilecek roller (örnek: `["admin"]`)                  |
-| `enabled`        | Aktif/pasif durumu                                                  |
-| `useAnalytics`   | Route bazlı analitik takibi gerekiyorsa `true`                      |
-| `language`       | Varsayılan dil (çok dilli içeriklerde `"en"`, `"de"`, `"tr"`)       |
-| `routes`         | Swagger için endpoint tanımları (`method`, `path`, `summary`, `body`)|
+| Alan              | Açıklama                                                                 |
+|-------------------|--------------------------------------------------------------------------|
+| `name`            | Modül adı (zorunlu)                                                      |
+| `icon`            | Admin panelde görüntülenecek ikon adı (örnek: `"box"`)                  |
+| `visibleInSidebar`| Modülün sol menüde görünüp görünmeyeceği                                |
+| `roles`           | Hangi rollerin bu modülü görebileceği (örnek: `["admin"]`)              |
+| `enabled`         | Bu modül aktif mi (`true`/`false`)                                       |
+| `useAnalytics`    | Route bazlı kullanım analitiği aktif mi                                  |
+| `language`        | Varsayılan içerik dili (`"en"`, `"de"`, `"tr"`)                          |
+| `version`         | Meta tanımının versiyonu (otomatik güncellenir)                          |
+| `updatedBy`       | En son kim tarafından güncellendi                                        |
+| `lastUpdatedAt`   | ISO formatında son güncelleme tarihi                                     |
+| `history`         | Versiyon geçmişi (`version`, `by`, `date`, `note`)                      |
+| `routes`          | Swagger endpoint bilgileri (`method`, `path`, `auth`, `summary`, `body`) |
 
 ---
 
-## 🔄 Meta Oluşturma
+## 🔄 Meta Dosyası Oluşturma
 
 Tüm modüller için meta dosyası otomatik oluşturulabilir:
 
 ```bash
-bun run src/scripts/generateMeta.ts
+bun run generate:meta
 ```
 
-Bu script:
-- `routes.ts` dosyalarından path ve method bilgilerini çıkarır
-- `meta-configs/` altına yazma işlemi yapar
-- `ModuleMetaModel` üzerinden veritabanına kaydeder
-- `.env.*` dosyalarına göre `enabled` alanını belirler (`getEnvProfiles()` ile)
+### Bu komut:
+- `routes.ts` dosyalarındaki rotaları tarar
+- `meta-configs/metahub/<modul>.meta.json` dosyasını oluşturur veya günceller
+- MongoDB'deki `ModuleMeta` ve `ModuleSetting` koleksiyonlarını günceller
+- `.env.metahub` içindeki `ENABLED_MODULES` listesine göre `enabled` değerini belirler
+- Silinmiş modüllerin karşılık gelen meta dosyasını ve veritabanı kayıtlarını **otomatik olarak siler**
 
 ---
 
@@ -100,21 +121,23 @@ Bu script:
 bun run src/scripts/metaValidator.ts
 ```
 
-Bu araç şunları kontrol eder:
-- JSON yapısı geçerli mi?
-- Zorunlu alanlar (`name`, `icon`, `routes`) eksik mi?
-- İlgili modül klasörü var mı?
-- `.env.*` dosyasında modül aktif mi?
+Bu doğrulayıcı şunları kontrol eder:
+- JSON yapısı ve şemaya uygunluk
+- Gerekli alanlar: `name`, `icon`, `routes` var mı?
+- İlgili modül klasörü fiziksel olarak var mı?
+- Modül `.env.metahub` içinde etkin mi (`ENABLED_MODULES`)?
 
 ---
 
-## 💾 Meta'nın Veritabanı ile İlişkisi
+## 💾 Veritabanı Yapısı
 
-### `ModuleMetaModel` (meta tanımı)
-MongoDB'de her modül için meta bilgileri saklanır. Admin panel bunu kullanır.
+### 🧱 `ModuleMetaModel`
 
-### `ModuleSetting` (proje-bazlı ayar)
-Her frontend projesi (`.env.metahub`, `.env.kuhlturm` vb.) için ayrı ayarlar tutulur.
+Her modül için meta bilgileri (versiyon, route, dil vb.) burada saklanır.
+
+### 🔧 `ModuleSetting`
+
+Her frontend projesi için modül bazlı ayarları içerir:
 
 ```ts
 {
@@ -127,26 +150,28 @@ Her frontend projesi (`.env.metahub`, `.env.kuhlturm` vb.) için ayrı ayarlar t
 
 ---
 
-## 🔗 Swagger ile Entegrasyon
+## 🔗 Swagger Entegrasyonu
 
-Meta dosyaları üzerinden otomatik Swagger dokümantasyonu üretilir:
+Meta dosyalarından Swagger dokümantasyonu otomatik olarak üretilir:
 
 ```ts
 generateSwaggerSpecFromMeta()
 ```
 
-- `routes[].body` alanı varsa Swagger `requestBody` oluşturulur.
-- Swagger UI: `/api-docs`
-- Swagger JSON: `/swagger.json`
+### Swagger UI
+
+- Swagger UI: `http://localhost:<PORT>/api-docs`
+- Swagger JSON: `http://localhost:<PORT>/swagger.json`
 
 ---
 
-## 🚀 Geliştirmeye Açık Noktalar
+## 🚀 Gelecek Geliştirme Planları
 
-- [ ] `version` alanı ile modül sürüm kontrolü
-- [ ] `formType`: `json` vs `form-data` belirleme
-- [ ] `fields` alanı ile dinamik form yapıları
-- [ ] Swagger için özel `response` örnekleri
-- [ ] Admin panel üzerinden meta güncelleme UI
+- [x] Orphan meta temizliği (`.meta.json` + MongoDB silme)
+- [x] Versiyon geçmişi takibi (`version`, `history`)
+- [ ] `formType`: JSON vs `form-data` olarak belirtme
+- [ ] `fields`: Admin panel için otomatik form üretimi
+- [ ] `responses`: Swagger `response` örnekleri tanımlama
+- [ ] Admin panel üzerinden meta düzenleme UI arayüzü
 
 ---

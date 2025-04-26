@@ -1,11 +1,9 @@
 {
   "name": "favorite",
   "icon": "box",
-  "visibleInSidebar": true,
   "roles": [
     "admin"
   ],
-  "enabled": true,
   "useAnalytics": false,
   "language": "en",
   "routes": [
@@ -26,6 +24,17 @@
       "path": "/remove/:productId",
       "auth": true,
       "summary": "DELETE /remove/:productId"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": "Orhan Güzel",
+  "lastUpdatedAt": "2025-04-25T20:18:50.111Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "date": "2025-04-25T20:18:50.111Z",
+      "note": "Meta auto-generated"
     }
   ]
 }

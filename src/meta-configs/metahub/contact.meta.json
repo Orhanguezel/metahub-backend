@@ -1,11 +1,9 @@
 {
   "name": "contact",
   "icon": "box",
-  "visibleInSidebar": true,
   "roles": [
     "admin"
   ],
-  "enabled": true,
   "useAnalytics": false,
   "language": "en",
   "routes": [
@@ -26,6 +24,17 @@
       "path": "/:id",
       "auth": true,
       "summary": "DELETE /:id"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": "Orhan Güzel",
+  "lastUpdatedAt": "2025-04-25T20:18:48.517Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "date": "2025-04-25T20:18:48.517Z",
+      "note": "Meta auto-generated"
     }
   ]
 }
