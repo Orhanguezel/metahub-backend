@@ -1,3 +1,4 @@
+//src/modules/admin/moduleSettings.model.ts
 import mongoose, { Schema, Document } from "mongoose";
 
 // ✅ Çok dilli label tipi

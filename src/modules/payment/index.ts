@@ -1,4 +1,3 @@
-// src/modules/payment/index.ts
 import express from "express";
 import routes from "./payment.routes";
 import Payment from "./payment.models";

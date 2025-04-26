@@ -1,11 +1,9 @@
 {
   "name": "education",
   "icon": "box",
-  "visibleInSidebar": true,
   "roles": [
     "admin"
   ],
-  "enabled": true,
   "useAnalytics": false,
   "language": "en",
   "routes": [
@@ -20,6 +18,17 @@
       "path": "/",
       "auth": true,
       "summary": "POST /"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": "Orhan Güzel",
+  "lastUpdatedAt": "2025-04-25T20:18:49.481Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "date": "2025-04-25T20:18:49.481Z",
+      "note": "Meta auto-generated"
     }
   ]
 }

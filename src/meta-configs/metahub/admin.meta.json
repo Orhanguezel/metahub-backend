@@ -1,11 +1,9 @@
 {
   "name": "admin",
   "icon": "box",
-  "visibleInSidebar": true,
   "roles": [
     "admin"
   ],
-  "enabled": true,
   "useAnalytics": false,
   "language": "en",
   "routes": [
@@ -16,16 +14,27 @@
       "summary": "GET /modules"
     },
     {
-      "method": "PATCH",
+      "method": "GET",
       "path": "/modules/:name",
       "auth": true,
-      "summary": "PATCH /modules/:name"
+      "summary": "GET /modules/:name"
     },
     {
       "method": "GET",
       "path": "/projects",
       "auth": true,
       "summary": "GET /projects"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": "Orhan Güzel",
+  "lastUpdatedAt": "2025-04-25T20:18:47.061Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "date": "2025-04-25T20:18:47.061Z",
+      "note": "Meta auto-generated"
     }
   ]
 }

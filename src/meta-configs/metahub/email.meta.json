@@ -1,11 +1,9 @@
 {
   "name": "email",
   "icon": "box",
-  "visibleInSidebar": true,
   "roles": [
     "admin"
   ],
-  "enabled": true,
   "useAnalytics": false,
   "language": "en",
   "routes": [
@@ -44,6 +42,17 @@
       "path": "/:id/read",
       "auth": true,
       "summary": "PATCH /:id/read"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": "Orhan Güzel",
+  "lastUpdatedAt": "2025-04-25T20:18:49.638Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "date": "2025-04-25T20:18:49.638Z",
+      "note": "Meta auto-generated"
     }
   ]
 }

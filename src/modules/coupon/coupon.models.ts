@@ -1,3 +1,4 @@
+// src/modules/coupon/coupon.models.ts
 import { Schema, model, Document } from "mongoose";
 
 export interface ICoupon extends Document {
@@ -8,10 +9,10 @@ export interface ICoupon extends Document {
       en: string;
       de: string;
     };
-    description?: {
-      tr?: string;
-      en?: string;
-      de?: string;
+    description: {
+      tr: string;
+      en: string;
+      de: string;
     };
   };
   discount: number;
@@ -37,9 +38,9 @@ const couponSchema = new Schema<ICoupon>(
         de: { type: String, required: true },
       },
       description: {
-        tr: { type: String },
-        en: { type: String },
-        de: { type: String },
+        tr: { type: String, required: true },
+        en: { type: String, required: true },
+        de: { type: String, required: true },
       },
     },
     discount: {
@@ -52,9 +53,14 @@ const couponSchema = new Schema<ICoupon>(
       type: Date,
       required: true,
     },
-    isActive: { type: Boolean, default: true },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );
 
-export default model<ICoupon>("Coupon", couponSchema);
+const Coupon = model<ICoupon>("Coupon", couponSchema);
+
+export default Coupon;

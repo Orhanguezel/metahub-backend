@@ -1,22 +1,18 @@
-// src/routes/order.routes.ts
 import express from "express";
-import {
-  createOrder,
-  getAllOrders,
-  markOrderAsDelivered,
-  updateOrderStatus,
-} from "./order.controller";
-
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
+import { createOrder, getOrderById, updateShippingAddress } from "./order.controller";
+import { authenticate } from "@/core/middleware/authMiddleware";
+import { createOrderValidator, updateShippingAddressValidator } from "./order.validation";
+import { validateRequest } from "@/core/middleware/validateRequest";
 
 const router = express.Router();
 
-// Create order
-router.post("/", authenticate, createOrder);
+// ✅ Sipariş oluştur
+router.post("/", authenticate, createOrderValidator, validateRequest, createOrder);
 
-// Admin endpoints
-router.get("/", authenticate, authorizeRoles("admin"), getAllOrders);
-router.put("/:id/deliver", authenticate, authorizeRoles("admin"), markOrderAsDelivered);
-router.put("/:id/status", authenticate, authorizeRoles("admin"), updateOrderStatus);
+// ✅ Kullanıcının siparişini getir
+router.get("/:id", authenticate, getOrderById);
+
+// ✅ Kullanıcının sipariş adresini güncelle
+router.put("/:id/address", authenticate, updateShippingAddressValidator, validateRequest, updateShippingAddress);
 
 export default router;

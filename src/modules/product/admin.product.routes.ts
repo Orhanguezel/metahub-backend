@@ -1,0 +1,61 @@
+import express, { Request, Response, NextFunction } from "express";
+import {
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  togglePublishStatus,
+} from "./admin.product.controller";
+import { createProductValidator, updateProductValidator } from "./product.validation";
+import { validateRequest } from "@/core/middleware/validateRequest";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import upload from "@/core/middleware/uploadMiddleware";
+
+const router = express.Router();
+
+// POST /admin/products -> Create a product
+router.post(
+  "/",
+  authenticate,
+  authorizeRoles("admin"),
+  (req: Request, _res: Response, next: NextFunction) => {
+    req.uploadType = "product";
+    next();
+  },
+  upload.array("images", 5),
+  createProductValidator,
+  validateRequest,
+  createProduct
+);
+
+// PUT /admin/products/:id -> Update a product
+router.put(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  (req: Request, _res: Response, next: NextFunction) => {
+    req.uploadType = "product";
+    next();
+  },
+  upload.array("images", 5),
+  updateProductValidator,
+  validateRequest,
+  updateProduct
+);
+
+// DELETE /admin/products/:id -> Delete a product
+router.delete(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  deleteProduct
+);
+
+// PUT /admin/products/:id/publish -> Toggle publish status
+router.put(
+  "/:id/publish",
+  authenticate,
+  authorizeRoles("admin"),
+  togglePublishStatus
+);
+
+export default router;

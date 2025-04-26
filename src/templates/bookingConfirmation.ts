@@ -18,7 +18,7 @@ interface AppointmentConfirmationParams {
   locale?: "de" | "tr" | "en";
 }
 
-export const appointmentConfirmationTemplate = ({
+export const BookingConfirmationTemplate = ({
   name,
   service,
   date,

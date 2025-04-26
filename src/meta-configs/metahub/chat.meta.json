@@ -1,11 +1,9 @@
 {
   "name": "chat",
   "icon": "box",
-  "visibleInSidebar": true,
   "roles": [
     "admin"
   ],
-  "enabled": true,
   "useAnalytics": false,
   "language": "en",
   "routes": [
@@ -62,6 +60,17 @@
       "path": "/sessions",
       "auth": true,
       "summary": "GET /sessions"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": "Orhan Güzel",
+  "lastUpdatedAt": "2025-04-25T20:18:48.043Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "date": "2025-04-25T20:18:48.043Z",
+      "note": "Meta auto-generated"
     }
   ]
 }

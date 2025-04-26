@@ -1,6 +1,6 @@
 import { Schema, model, Document, Types } from "mongoose";
 
-export interface IAppointment extends Document {
+export interface IBooking extends Document {
   user?: Types.ObjectId;
   name: string;
   email: string;
@@ -12,22 +12,16 @@ export interface IAppointment extends Document {
   service: Types.ObjectId;
   durationMinutes: number;
   status: "pending" | "confirmed" | "cancelled";
-  language: "tr" | "en" | "de"; // ✅ sadece bir dil
+  language: "tr" | "en" | "de";
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-const appointmentSchema = new Schema<IAppointment>(
+const bookingSchema = new Schema<IBooking>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User" },
     name: { type: String, required: true, trim: true },
-    email: {
-      type: String,
-      required: true,
-      trim: true,
-      lowercase: true,
-      match: [/.+@.+\..+/, "Please provide a valid email"],
-    },
+    email: { type: String, required: true, trim: true, lowercase: true, match: [/.+@.+\..+/, "Invalid email"] },
     phone: { type: String, trim: true },
     serviceType: { type: String, required: true, trim: true },
     note: { type: String, trim: true },
@@ -35,18 +29,10 @@ const appointmentSchema = new Schema<IAppointment>(
     time: { type: String, required: true },
     service: { type: Schema.Types.ObjectId, ref: "Service", required: true },
     durationMinutes: { type: Number, default: 60 },
-    status: {
-      type: String,
-      enum: ["pending", "confirmed", "cancelled"],
-      default: "pending",
-    },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
-    },
+    status: { type: String, enum: ["pending", "confirmed", "cancelled"], default: "pending" },
+    language: { type: String, enum: ["tr", "en", "de"], default: "en" },
   },
   { timestamps: true }
 );
 
-export default model<IAppointment>("Appointment", appointmentSchema);
+export default model<IBooking>("Booking", bookingSchema);

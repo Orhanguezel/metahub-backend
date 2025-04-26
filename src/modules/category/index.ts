@@ -1,5 +1,11 @@
+import express from "express";
 import router from "./category.routes";
+import { Category } from "./category.models";
+
+const appRouter = express.Router();
+appRouter.use("/", router);
+
 export * from "./category.controller";
-export * from "./category.models";
-export { default as Category } from "./category.models"; 
-export default router;
+export * from "./admin.category.controller";
+export { Category };
+export default appRouter;

@@ -1,49 +1,12 @@
-// src/routes/product.routes.ts
-import express, { Request, Response, NextFunction } from "express";
-import {
-  createProduct,
-  getAllProducts,
-  getProductById,
-  updateProduct,
-  deleteProduct,
-  togglePublishStatus,
-} from "./product.controller";
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
-import upload from "../../core/middleware/uploadMiddleware";
+import express from "express";
+import { getAllProducts, getProductById } from "./product.controller";
 
 const router = express.Router();
 
-// Public
+// GET /products -> Get all products
 router.get("/", getAllProducts);
+
+// GET /products/:id -> Get product by id
 router.get("/:id", getProductById);
-
-// Admin
-router.post(
-  "/",
-  authenticate,
-  authorizeRoles("admin"),
-  (req: Request, _res: Response, next: NextFunction) => {
-    req.uploadType = "product";
-    next();
-  },
-  upload.array("images", 5),
-  createProduct
-);
-
-router.put(
-  "/:id",
-  authenticate,
-  authorizeRoles("admin"),
-  (req: Request, _res: Response, next: NextFunction) => {
-    req.uploadType = "product";
-    next();
-  },
-  upload.array("images", 5),
-  updateProduct
-);
-
-router.delete("/:id", authenticate, authorizeRoles("admin"), deleteProduct);
-router.put("/:id/publish", authenticate, authorizeRoles("admin"), togglePublishStatus);
-
 
 export default router;

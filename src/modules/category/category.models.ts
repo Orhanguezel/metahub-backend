@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 
 export interface ICategory extends Document {
   name: string;
@@ -11,6 +11,7 @@ export interface ICategory extends Document {
     en: string;
     de: string;
   };
+  parentCategory?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,21 +21,18 @@ const categorySchema = new Schema<ICategory>(
     name: { type: String, required: true, unique: true, trim: true },
     slug: { type: String, required: true, unique: true, lowercase: true },
     description: { type: String },
-    image: {
-      type: String,
-      default: "defaults/category.png",
-    },
+    image: { type: String, default: "defaults/category.png" },
     isActive: { type: Boolean, default: true },
     label: {
       tr: { type: String, required: true },
       en: { type: String, required: true },
       de: { type: String, required: true },
     },
+    parentCategory: { type: Schema.Types.ObjectId, ref: "Category" }, 
   },
   { timestamps: true }
 );
 
-// 🔁 slug otomatik üretimi
 categorySchema.pre("validate", function (this: ICategory, next) {
   if (!this.slug && this.name) {
     this.slug = this.name
@@ -45,4 +43,6 @@ categorySchema.pre("validate", function (this: ICategory, next) {
   next();
 });
 
-export default model<ICategory>("Category", categorySchema);
+const Category = model<ICategory>("Category", categorySchema);
+
+export { Category };

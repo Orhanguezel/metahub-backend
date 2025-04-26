@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { authenticate } from "@/core/middleware/authMiddleware";
+import { validateRequest } from "@/core/middleware/validateRequest";
 import {
   addToCart,
   getUserCart,
@@ -7,17 +9,20 @@ import {
   removeFromCart,
   clearCart,
 } from "./cart.controller";
-import { authenticate } from "../../core/middleware/authMiddleware";
+import {
+  addToCartValidator,
+  cartItemParamValidator,
+} from "./cart.validation";
 
 const router = Router();
 
-router.use(authenticate); 
+router.use(authenticate);
 
 router.get("/", getUserCart);
-router.post("/add", addToCart);
-router.patch("/increase/:productId", increaseQuantity);
-router.patch("/decrease/:productId", decreaseQuantity);
-router.delete("/remove/:productId", removeFromCart);
+router.post("/add", addToCartValidator, validateRequest, addToCart);
+router.patch("/increase/:productId", cartItemParamValidator, validateRequest, increaseQuantity);
+router.patch("/decrease/:productId", cartItemParamValidator, validateRequest, decreaseQuantity);
+router.delete("/remove/:productId", cartItemParamValidator, validateRequest, removeFromCart);
 router.delete("/clear", clearCart);
 
 export default router;

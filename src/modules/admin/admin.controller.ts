@@ -1,82 +1,89 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
+import { z } from "zod";
 import { getEnvProfiles } from "../../tools/getEnvProfiles";
 import ModuleSetting from "./moduleSettings.model";
+import ModuleMetaModel from "./moduleMeta.model";
+
+// ✅ Ortak Zod şemaları
+const querySchema = z.object({
+  project: z.string().min(1, "Query param 'project' is required."),
+  lang: z.enum(["tr", "en", "de"]).optional(),
+});
 
 // 📥 GET /admin/modules?project=xxx&lang=tr
 export const getAllModules = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const project = req.query.project as string;
-  const lang = (req.query.lang as "tr" | "en" | "de") || "en";
-
-  if (!project) {
-    res.status(400).json({ error: "Project param is required." });
+  const parseResult = querySchema.safeParse(req.query);
+  if (!parseResult.success) {
+    res.status(400).json({ error: parseResult.error.errors[0].message });
     return;
   }
 
-  try {
-    const modules = await ModuleSetting.find({ project }).lean();
+  const { project, lang = "en" } = parseResult.data;
 
-    const result = modules.map((mod) => ({
-      name: mod.module,
-      label: mod.label?.[lang] || mod.module,
-      enabled: mod.enabled,
-      icon: mod.icon,
-      visibleInSidebar: mod.visibleInSidebar,
-      useAnalytics: mod.useAnalytics,
-      roles: mod.roles,
-    }));
+  const settings = await ModuleSetting.find({ project }).lean();
+  const metas = await ModuleMetaModel.find().sort({ name: 1 }).lean();
 
-    res.status(200).json(result);
-  } catch (error) {
-    console.error("❌ getAllModules error:", error);
-    res.status(500).json({
-      error: "Module list could not be fetched.",
-      details: (error as Error).message,
-    });
-  }
+  const result = metas.map((meta) => {
+    const setting = settings.find((s) => s.module === meta.name);
+
+    return {
+      name: meta.name,
+      label: meta.label?.[lang] || meta.label?.["en"] || meta.name,
+      icon: setting?.icon || meta.icon,
+      enabled: setting?.enabled ?? meta.enabled,
+      visibleInSidebar: setting?.visibleInSidebar ?? meta.visibleInSidebar,
+      useAnalytics: setting?.useAnalytics ?? meta.useAnalytics,
+      roles: setting?.roles || meta.roles,
+      version: meta.version,
+      createdAt: meta.createdAt,
+      updatedAt: meta.updatedAt,
+      routes: meta.routes,
+      history: meta.history,
+    };
+  });
+
+  res.status(200).json(result);
 });
 
-// 🔄 PATCH /admin/modules/:name
-export const toggleModule = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+// 📘 GET /admin/modules/:name?project=xxx
+export const getModuleDetail = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { name } = req.params;
-  const { project, ...updates } = req.body;
-
-  if (!project) {
-    res.status(400).json({ error: "Project param is required." });
+  const parseResult = querySchema.safeParse(req.query);
+  if (!parseResult.success) {
+    res.status(400).json({ error: parseResult.error.errors[0].message });
     return;
   }
 
-  try {
-    const updated = await ModuleSetting.findOneAndUpdate(
-      { project, module: name },
-      { $set: updates },
-      { upsert: true, new: true }
-    );
+  const { project, lang = "en" } = parseResult.data;
 
-    res.status(200).json({
-      success: true,
-      message: "Module updated successfully.",
-      module: updated,
-    });
-  } catch (err) {
-    console.error("❌ toggleModule error:", err);
-    res.status(500).json({
-      success: false,
-      message: "Module update failed.",
-      error: (err as Error).message,
-    });
+  const meta = await ModuleMetaModel.findOne({ name }).lean();
+  if (!meta) {
+    res.status(404).json({ error: `Meta not found for module "${name}"` });
+    return;
   }
+
+  const setting = await ModuleSetting.findOne({ project, module: name }).lean();
+
+  res.status(200).json({
+    name: meta.name,
+    label: meta.label?.[lang] || meta.label?.["en"] || meta.name,
+    icon: setting?.icon || meta.icon,
+    enabled: setting?.enabled ?? meta.enabled,
+    visibleInSidebar: setting?.visibleInSidebar ?? meta.visibleInSidebar,
+    useAnalytics: setting?.useAnalytics ?? meta.useAnalytics,
+    roles: setting?.roles || meta.roles,
+    version: meta.version,
+    createdAt: meta.createdAt,
+    updatedAt: meta.updatedAt,
+    routes: meta.routes,
+    history: meta.history,
+  });
 });
+
 
 // 🧾 GET /admin/projects
-export const getAvailableProjects = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
-  try {
-    const profiles = getEnvProfiles();
-    res.status(200).json(profiles);
-  } catch (err) {
-    res.status(500).json({
-      error: "Could not read environment profiles.",
-      details: (err as Error).message,
-    });
-  }
+export const getAvailableProjects = asyncHandler(async (_req: Request, res: Response) => {
+  const profiles = getEnvProfiles();
+  res.status(200).json(profiles);
 });

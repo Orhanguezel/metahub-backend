@@ -1,8 +1,8 @@
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
 import {
   getAllModules,
-  toggleModule,
   getAvailableProjects,
+  getModuleDetail, // ✅ Yeni eklenen fonksiyon
 } from "./admin.controller";
 import {
   authenticate,
@@ -13,22 +13,34 @@ const router = express.Router();
 
 const allowedOrigins = process.env.ALLOWED_ADMIN_ORIGINS?.split(",") || [];
 
-router.use((req: Request, res: Response, next: NextFunction) => {
-  const origin = req.headers.origin as string;
-  if (allowedOrigins.includes(origin)) {
+// ✅ CORS Middleware (TS uyumlu)
+function corsMiddleware(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+): void {
+  const origin = req.headers.origin;
+
+  if (origin && allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  if (req.method === "OPTIONS") {
+    res.sendStatus(200);
+    return; 
+  }
+
   next();
-});
+}
 
-router.options("*", (req: Request, res: Response) => {
-  res.sendStatus(200);
-});
+router.use(corsMiddleware);
 
+// 👮 Yetkili admin işlemleri
 router.get("/modules", authenticate, authorizeRoles("admin"), getAllModules);
-router.patch("/modules/:name", authenticate, authorizeRoles("admin"), toggleModule);
+router.get("/modules/:name", authenticate, authorizeRoles("admin"), getModuleDetail); // ✅ Yeni endpoint
 router.get("/projects", authenticate, authorizeRoles("admin"), getAvailableProjects);
 
 export default router;

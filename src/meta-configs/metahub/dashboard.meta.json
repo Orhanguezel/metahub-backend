@@ -1,11 +1,9 @@
 {
   "name": "dashboard",
   "icon": "box",
-  "visibleInSidebar": true,
   "roles": [
     "admin"
   ],
-  "enabled": true,
   "useAnalytics": false,
   "language": "en",
   "routes": [
@@ -50,6 +48,17 @@
       "path": "/logs",
       "auth": true,
       "summary": "GET /logs"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": "Orhan Güzel",
+  "lastUpdatedAt": "2025-04-25T20:18:49.159Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "date": "2025-04-25T20:18:49.159Z",
+      "note": "Meta auto-generated"
     }
   ]
 }

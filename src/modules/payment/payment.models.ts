@@ -1,13 +1,16 @@
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, Document, Types, Model } from "mongoose";
+
+export type PaymentMethod = "cash_on_delivery" | "credit_card" | "paypal";
+export type PaymentStatus = "pending" | "paid" | "failed";
 
 export interface IPayment extends Document {
   order: Types.ObjectId;
   amount: number;
-  method: "cash_on_delivery" | "credit_card" | "paypal";
-  status: "pending" | "paid" | "failed";
+  method: PaymentMethod;
+  status: PaymentStatus;
   transactionId?: string;
   paidAt?: Date;
-  language?: string;
+  language: "tr" | "en" | "de";
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -15,8 +18,16 @@ export interface IPayment extends Document {
 
 const paymentSchema = new Schema<IPayment>(
   {
-    order: { type: Schema.Types.ObjectId, ref: "Order", required: true },
-    amount: { type: Number, required: true },
+    order: {
+      type: Schema.Types.ObjectId,
+      ref: "Order",
+      required: true,
+    },
+    amount: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
     method: {
       type: String,
       enum: ["cash_on_delivery", "credit_card", "paypal"],
@@ -27,13 +38,26 @@ const paymentSchema = new Schema<IPayment>(
       enum: ["pending", "paid", "failed"],
       default: "pending",
     },
-    transactionId: { type: String },
-    paidAt: { type: Date },
-    language: { type: String, enum: ["tr", "en", "de"], default: "en" },
-
-    isActive: { type: Boolean, default: true },
+    transactionId: {
+      type: String,
+      trim: true,
+    },
+    paidAt: {
+      type: Date,
+    },
+    language: {
+      type: String,
+      enum: ["tr", "en", "de"],
+      default: "en",
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );
 
-export default model<IPayment>("Payment", paymentSchema);
+const Payment: Model<IPayment> = model<IPayment>("Payment", paymentSchema);
+
+export default Payment;

@@ -1,13 +1,11 @@
 import { Schema, model, Document, Types, Model } from "mongoose";
 
-// 🔹 Sipariş Ürün Tipi
 export interface IOrderItem {
   product: Types.ObjectId;
   quantity: number;
-  unitPrice: number; // ✅ EKLENDİ
+  unitPrice: number;
 }
 
-// 🔹 Adres Tipi
 export interface IShippingAddress {
   name: string;
   phone: string;
@@ -18,11 +16,9 @@ export interface IShippingAddress {
   country: string;
 }
 
-// 🔹 Enumlar
 export type PaymentMethod = "cash_on_delivery";
 export type OrderStatus = "pending" | "preparing" | "shipped" | "completed" | "cancelled";
 
-// 🔹 Sipariş Ana Arayüzü
 export interface IOrder extends Document {
   user?: Types.ObjectId;
   items: IOrderItem[];
@@ -38,17 +34,15 @@ export interface IOrder extends Document {
   updatedAt: Date;
 }
 
-// 🔸 Alt Şema – Sipariş Ürünleri
 const orderItemSchema = new Schema<IOrderItem>(
   {
     product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
     quantity: { type: Number, required: true, min: 1 },
-    unitPrice: { type: Number, required: true, min: 0 }, // ✅ EKLENDİ
+    unitPrice: { type: Number, required: true, min: 0 },
   },
   { _id: false }
 );
 
-// 🔸 Alt Şema – Teslimat Adresi
 const shippingAddressSchema = new Schema<IShippingAddress>(
   {
     name: { type: String, required: true },
@@ -62,7 +56,6 @@ const shippingAddressSchema = new Schema<IShippingAddress>(
   { _id: false }
 );
 
-// 🔸 Ana Sipariş Şeması
 const orderSchema = new Schema<IOrder>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User" },
@@ -87,6 +80,6 @@ const orderSchema = new Schema<IOrder>(
   { timestamps: true }
 );
 
-// 🔸 Model Export
 const Order: Model<IOrder> = model<IOrder>("Order", orderSchema);
+
 export default Order;
