@@ -11,41 +11,48 @@
       "method": "GET",
       "path": "/check/:code",
       "auth": true,
-      "summary": "GET /check/:code"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "auth": true,
-      "summary": "POST /"
+      "summary": "GET /check/:code",
+      "validationName": "\"/check/:code\"",
+      "controllerName": "getCouponByCode"
     },
     {
       "method": "GET",
       "path": "/",
       "auth": true,
-      "summary": "GET /"
-    },
-    {
-      "method": "PUT",
-      "path": "/:id",
-      "auth": true,
-      "summary": "PUT /:id"
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllCoupons",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "DELETE",
       "path": "/:id",
       "auth": true,
-      "summary": "DELETE /:id"
+      "summary": "DELETE /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "deleteCoupon",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     }
   ],
   "version": "1.0.1",
-  "updatedBy": "Orhan Güzel",
-  "lastUpdatedAt": "2025-04-25T20:18:48.682Z",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+  "lastUpdatedAt": "2025-04-26T18:47:46.030Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "date": "2025-04-25T20:18:48.682Z",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T18:47:46.030Z",
       "note": "Meta auto-generated"
     }
   ]

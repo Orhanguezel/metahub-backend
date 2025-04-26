@@ -8,6 +8,19 @@
   "language": "en",
   "routes": [
     {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"admin\")",
+      "controllerName": "getAllOrders",
+      "pathPrefix": "admin.",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
       "method": "POST",
       "path": "/",
       "auth": true,
@@ -15,31 +28,30 @@
     },
     {
       "method": "GET",
-      "path": "/",
+      "path": "/:id",
       "auth": true,
-      "summary": "GET /"
+      "summary": "GET /:id"
     },
     {
       "method": "PUT",
-      "path": "/:id/deliver",
+      "path": "/:id/address",
       "auth": true,
-      "summary": "PUT /:id/deliver"
-    },
-    {
-      "method": "PUT",
-      "path": "/:id/status",
-      "auth": true,
-      "summary": "PUT /:id/status"
+      "summary": "PUT /:id/address"
     }
   ],
   "version": "1.0.1",
-  "updatedBy": "Orhan Güzel",
-  "lastUpdatedAt": "2025-04-25T20:18:51.870Z",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+  "lastUpdatedAt": "2025-04-26T18:47:45.801Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "date": "2025-04-25T20:18:51.870Z",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T18:47:45.801Z",
       "note": "Meta auto-generated"
     }
   ]

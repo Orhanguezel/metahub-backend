@@ -1,0 +1,28 @@
+{
+  "name": "test",
+  "icon": "box",
+  "visibleInSidebar": true,
+  "enabled": true,
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [],
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "lastUpdatedAt": "2025-04-26T19:17:35.967Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T19:17:35.967Z",
+      "note": "Meta auto-generated"
+    }
+  ],
+  "version": "1.0.1",
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+}

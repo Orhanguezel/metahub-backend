@@ -11,41 +11,56 @@
       "method": "GET",
       "path": "/",
       "auth": true,
-      "summary": "GET /"
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllSkills"
     },
     {
       "method": "GET",
       "path": "/:id",
       "auth": true,
-      "summary": "GET /:id"
+      "summary": "GET /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "getSkillById"
     },
     {
       "method": "POST",
       "path": "/",
       "auth": true,
-      "summary": "POST /"
+      "summary": "POST /",
+      "validationName": "\"admin\")",
+      "controllerName": "createSkill"
     },
     {
       "method": "PUT",
       "path": "/:id",
       "auth": true,
-      "summary": "PUT /:id"
+      "summary": "PUT /:id",
+      "validationName": "\"admin\")",
+      "controllerName": "updateSkill"
     },
     {
       "method": "DELETE",
       "path": "/:id",
       "auth": true,
-      "summary": "DELETE /:id"
+      "summary": "DELETE /:id",
+      "validationName": "\"admin\")",
+      "controllerName": "deleteSkill"
     }
   ],
   "version": "1.0.1",
-  "updatedBy": "Orhan Güzel",
-  "lastUpdatedAt": "2025-04-25T20:18:53.151Z",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+  "lastUpdatedAt": "2025-04-26T18:47:46.243Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "date": "2025-04-25T20:18:53.151Z",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T18:47:46.243Z",
       "note": "Meta auto-generated"
     }
   ]

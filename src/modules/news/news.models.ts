@@ -20,7 +20,7 @@ export interface INews extends Document {
   images: string[];
   tags: string[];
   author?: string;
-  category?: string;
+  category?: Types.ObjectId; 
   isPublished: boolean;
   publishedAt?: Date;
   comments: Types.ObjectId[];
@@ -49,7 +49,13 @@ const newsSchema: Schema = new Schema<INews>(
     images: [{ type: String, required: true }],
     tags: [{ type: String }],
     author: { type: String },
-    category: { type: String },
+    
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "NewsCategory",
+      required: false,
+    },
+
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
@@ -59,10 +65,8 @@ const newsSchema: Schema = new Schema<INews>(
   }
 );
 
-// 🔁 Otomatik slug üretimi
 newsSchema.pre("validate", function (this: INews, next) {
-  const baseTitle =
-    this.title?.en || this.title?.de || this.title?.tr || "news";
+  const baseTitle = this.title?.en || this.title?.de || this.title?.tr || "news";
   if (!this.slug && baseTitle) {
     this.slug = baseTitle
       .toLowerCase()

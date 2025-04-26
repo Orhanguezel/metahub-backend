@@ -3,11 +3,7 @@ import { Schema, model, Document, Types } from "mongoose";
 export interface IComment extends Document {
   name: string;
   email: string;
-  label: {
-    tr: string;
-    en: string;
-    de: string;
-  };
+  label: { tr: string; en: string; de: string };
   contentType: "blog" | "product" | "service";
   contentId: Types.ObjectId;
   isPublished: boolean;

@@ -11,47 +11,64 @@
       "method": "GET",
       "path": "/",
       "auth": true,
-      "summary": "GET /"
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllArticles"
     },
     {
       "method": "GET",
       "path": "/slug/:slug",
       "auth": true,
-      "summary": "GET /slug/:slug"
+      "summary": "GET /slug/:slug",
+      "validationName": "\"/slug/:slug\"",
+      "controllerName": "getArticleBySlug"
     },
     {
       "method": "GET",
       "path": "/:id",
       "auth": true,
-      "summary": "GET /:id"
+      "summary": "GET /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "getArticleById); // admin panel için de kullanılabilir\n\n// 🔐 Protected Routes (admin ve moderator yetkisi gerekir"
     },
     {
       "method": "POST",
       "path": "/",
       "auth": true,
-      "summary": "POST /"
+      "summary": "POST /",
+      "validationName": "\"admin\"",
+      "controllerName": "\"moderator\""
     },
     {
       "method": "PUT",
       "path": "/:id",
       "auth": true,
-      "summary": "PUT /:id"
+      "summary": "PUT /:id",
+      "validationName": "\"admin\"",
+      "controllerName": "\"moderator\""
     },
     {
       "method": "DELETE",
       "path": "/:id",
       "auth": true,
-      "summary": "DELETE /:id"
+      "summary": "DELETE /:id",
+      "validationName": "\"admin\")",
+      "controllerName": "deleteArticle"
     }
   ],
   "version": "1.0.1",
-  "updatedBy": "Orhan Güzel",
-  "lastUpdatedAt": "2025-04-25T20:18:47.390Z",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+  "lastUpdatedAt": "2025-04-26T18:47:46.265Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "date": "2025-04-25T20:18:47.390Z",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T18:47:46.265Z",
       "note": "Meta auto-generated"
     }
   ]

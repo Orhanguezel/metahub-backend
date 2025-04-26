@@ -11,31 +11,41 @@
       "method": "POST",
       "path": "/send",
       "auth": true,
-      "summary": "POST /send"
+      "summary": "POST /send",
+      "validationName": "\"/send\"",
+      "controllerName": "sendTestEmail"
     },
     {
       "method": "GET",
       "path": "/",
       "auth": true,
-      "summary": "GET /"
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllMails"
     },
     {
       "method": "GET",
       "path": "/fetch",
       "auth": true,
-      "summary": "GET /fetch"
+      "summary": "GET /fetch",
+      "validationName": "\"admin\")",
+      "controllerName": "fetchEmailsManually"
     },
     {
       "method": "GET",
       "path": "/:id",
       "auth": true,
-      "summary": "GET /:id"
+      "summary": "GET /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "getMailById"
     },
     {
       "method": "DELETE",
       "path": "/:id",
       "auth": true,
-      "summary": "DELETE /:id"
+      "summary": "DELETE /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "deleteMail"
     },
     {
       "method": "PATCH",
@@ -45,13 +55,18 @@
     }
   ],
   "version": "1.0.1",
-  "updatedBy": "Orhan Güzel",
-  "lastUpdatedAt": "2025-04-25T20:18:49.638Z",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+  "lastUpdatedAt": "2025-04-26T18:47:46.186Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "date": "2025-04-25T20:18:49.638Z",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T18:47:46.186Z",
       "note": "Meta auto-generated"
     }
   ]

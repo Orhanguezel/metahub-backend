@@ -12,6 +12,8 @@
       "path": "/me",
       "auth": true,
       "summary": "GET /me",
+      "validationName": ");\n  }",
+      "controllerName": "upload.single(\"profileImage\"",
       "pathPrefix": "account"
     },
     {
@@ -19,6 +21,8 @@
       "path": "/me/update",
       "auth": true,
       "summary": "PUT /me/update",
+      "validationName": ");\n  }",
+      "controllerName": "upload.single(\"profileImage\"",
       "pathPrefix": "account"
     },
     {
@@ -26,6 +30,8 @@
       "path": "/me/password",
       "auth": true,
       "summary": "PUT /me/password",
+      "validationName": ");\n  }",
+      "controllerName": "upload.single(\"profileImage\"",
       "pathPrefix": "account"
     },
     {
@@ -33,6 +39,8 @@
       "path": "/me/notifications",
       "auth": true,
       "summary": "PATCH /me/notifications",
+      "validationName": ");\n  }",
+      "controllerName": "upload.single(\"profileImage\"",
       "pathPrefix": "account"
     },
     {
@@ -40,6 +48,8 @@
       "path": "/me/social",
       "auth": true,
       "summary": "PATCH /me/social",
+      "validationName": ");\n  }",
+      "controllerName": "upload.single(\"profileImage\"",
       "pathPrefix": "account"
     },
     {
@@ -47,78 +57,80 @@
       "path": "/me/addresses",
       "auth": true,
       "summary": "PUT /me/addresses",
-      "pathPrefix": "account"
-    },
-    {
-      "method": "PUT",
-      "path": "/me/profile-image",
-      "auth": true,
-      "summary": "PUT /me/profile-image",
+      "validationName": ");\n  }",
+      "controllerName": "upload.single(\"profileImage\"",
       "pathPrefix": "account"
     },
     {
       "method": "POST",
       "path": "/register",
       "auth": true,
-      "summary": "POST /register"
+      "summary": "POST /register",
+      "validationName": "\"/register\"",
+      "controllerName": "registerUser"
     },
     {
       "method": "POST",
       "path": "/login",
       "auth": true,
-      "summary": "POST /login"
+      "summary": "POST /login",
+      "validationName": "\"/login\"",
+      "controllerName": "loginUser"
     },
     {
       "method": "POST",
       "path": "/change-password",
       "auth": true,
-      "summary": "POST /change-password"
+      "summary": "POST /change-password",
+      "validationName": "\"/forgot-password\"",
+      "controllerName": "forgotPassword"
     },
     {
       "method": "POST",
       "path": "/forgot-password",
       "auth": true,
-      "summary": "POST /forgot-password"
+      "summary": "POST /forgot-password",
+      "validationName": "\"/forgot-password\"",
+      "controllerName": "forgotPassword"
     },
     {
       "method": "POST",
       "path": "/reset-password/:token",
       "auth": true,
-      "summary": "POST /reset-password/:token"
+      "summary": "POST /reset-password/:token",
+      "validationName": "\"/reset-password/:token\"",
+      "controllerName": "resetPassword);\n\n// 👤 Profile\nrouter\n  .route(\"/profile\""
     },
     {
       "method": "GET",
       "path": "/users",
       "auth": true,
-      "summary": "GET /users"
-    },
-    {
-      "method": "PUT",
-      "path": "/users/:id/role",
-      "auth": true,
-      "summary": "PUT /users/:id/role"
-    },
-    {
-      "method": "PUT",
-      "path": "/users/:id/status",
-      "auth": true,
-      "summary": "PUT /users/:id/status"
+      "summary": "GET /users",
+      "validationName": "\"admin\")",
+      "controllerName": "getUsers);\n\nrouter\n  .route(\"/users/:id\""
     },
     {
       "method": "POST",
       "path": "/logout",
       "auth": true,
-      "summary": "POST /logout"
+      "summary": "POST /logout",
+      "validationName": "\"/logout\"",
+      "controllerName": "logoutUser"
     }
   ],
   "version": "1.0.1",
-  "updatedBy": "Orhan Güzel",
-  "lastUpdatedAt": "2025-04-25T20:18:54.260Z",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+  "lastUpdatedAt": "2025-04-26T18:47:46.374Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "date": "2025-04-25T20:18:54.260Z",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T18:47:46.374Z",
       "note": "Meta auto-generated"
     }
   ]

@@ -11,65 +11,88 @@
       "method": "GET",
       "path": "/:roomId",
       "auth": true,
-      "summary": "GET /:roomId"
+      "summary": "GET /:roomId",
+      "validationName": "\"admin\")",
+      "controllerName": "getAllRoomsLastMessages"
     },
     {
       "method": "GET",
       "path": "/",
       "auth": true,
-      "summary": "GET /"
+      "summary": "GET /",
+      "validationName": "\"admin\")",
+      "controllerName": "getAllRoomsLastMessages"
     },
     {
       "method": "DELETE",
       "path": "/:id",
       "auth": true,
-      "summary": "DELETE /:id"
+      "summary": "DELETE /:id",
+      "validationName": "\"admin\")",
+      "controllerName": "deleteMessage"
     },
     {
       "method": "POST",
       "path": "/bulk",
       "auth": true,
-      "summary": "POST /bulk"
+      "summary": "POST /bulk",
+      "validationName": "\"admin\")",
+      "controllerName": "deleteMessagesBulk);\n\n// 🧑‍💼 Admin: Manuel mesaj gönder (isteğe bağlı `lang` parametresi desteklenir"
     },
     {
       "method": "POST",
       "path": "/manual",
       "auth": true,
-      "summary": "POST /manual"
+      "summary": "POST /manual",
+      "validationName": "\"admin\")",
+      "controllerName": "sendManualMessage"
     },
     {
       "method": "PATCH",
       "path": "/read/:roomId",
       "auth": true,
-      "summary": "PATCH /read/:roomId"
+      "summary": "PATCH /read/:roomId",
+      "validationName": "\"admin\")",
+      "controllerName": "markMessagesAsRead"
     },
     {
       "method": "GET",
       "path": "/archived",
       "auth": true,
-      "summary": "GET /archived"
+      "summary": "GET /archived",
+      "validationName": "\"admin\")",
+      "controllerName": "getArchivedSessions"
     },
     {
       "method": "GET",
       "path": "/sessions/active",
       "auth": true,
-      "summary": "GET /sessions/active"
+      "summary": "GET /sessions/active",
+      "validationName": "\"admin\")",
+      "controllerName": "getActiveChatSessions"
     },
     {
       "method": "GET",
       "path": "/sessions",
       "auth": true,
-      "summary": "GET /sessions"
+      "summary": "GET /sessions",
+      "validationName": "\"admin\")",
+      "controllerName": "getAllChatSessions"
     }
   ],
   "version": "1.0.1",
-  "updatedBy": "Orhan Güzel",
-  "lastUpdatedAt": "2025-04-25T20:18:48.043Z",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+  "lastUpdatedAt": "2025-04-26T18:47:46.355Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "date": "2025-04-25T20:18:48.043Z",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T18:47:46.355Z",
       "note": "Meta auto-generated"
     }
   ]

@@ -1,4 +1,5 @@
 // src/tools/generateSwaggerSpec.ts
+
 import fs from "fs/promises";
 import fsSync from "fs";
 import path from "path";
@@ -12,8 +13,8 @@ type SwaggerRoute = {
   auth?: boolean;
   deprecated?: boolean;
   requestBody?: any;
-  body?: any; // backward-compatible support
-  parameters?: any[]; // e.g. path/query params
+  body?: any;
+  parameters?: any[];
 };
 
 type ModuleMeta = {
@@ -38,9 +39,7 @@ export async function generateSwaggerSpecFromMeta(writeToDisk = false) {
     process.env.META_CONFIG_PATH || "src/meta-configs/metahub"
   );
 
-  const enabledModules = (await getEnabledModules()).map((m) =>
-    m.toLowerCase()
-  );
+  const enabledModules = (await getEnabledModules()).map((m) => m.toLowerCase());
   const paths: Record<string, any> = {};
   const tags: any[] = [];
 
@@ -51,6 +50,17 @@ export async function generateSwaggerSpecFromMeta(writeToDisk = false) {
   } catch (err) {
     console.error(`❌ Failed to read meta directory at ${metaDir}`, err);
     return;
+  }
+
+  const availableModules = metaFiles
+    .filter((file) => file.endsWith(".meta.json"))
+    .map((file) => file.replace(/\.meta\.json$/, "").toLowerCase());
+
+  // Enabled olup meta dosyası eksik olanları raporla
+  for (const moduleName of enabledModules) {
+    if (!availableModules.includes(moduleName)) {
+      console.warn(`⚠️ Enabled module "${moduleName}" has no corresponding meta file.`);
+    }
   }
 
   for (const fileName of metaFiles) {
@@ -65,7 +75,10 @@ export async function generateSwaggerSpecFromMeta(writeToDisk = false) {
       const metaRaw = await fs.readFile(metaPath, "utf-8");
       const meta: ModuleMeta = JSON.parse(metaRaw);
 
-      if (!meta.routes || meta.routes.length === 0) continue;
+      if (!meta.routes || meta.routes.length === 0) {
+        console.warn(`⚠️ Module "${moduleName}" has no routes defined.`);
+        continue;
+      }
 
       tags.push({
         name: meta.label?.en || meta.name,
@@ -136,6 +149,10 @@ export async function generateSwaggerSpecFromMeta(writeToDisk = false) {
     tags,
     paths,
   };
+
+  if (tags.length === 0) {
+    console.warn("⚠️ No valid modules found for Swagger. Empty spec generated.");
+  }
 
   if (writeToDisk) {
     const outputPath = path.join(process.cwd(), "swagger.json");

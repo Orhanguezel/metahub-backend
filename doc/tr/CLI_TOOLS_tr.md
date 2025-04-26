@@ -14,7 +14,7 @@ Yeni bir backend modülü oluşturmak için kullanılır. Modüler yapı sayesin
 ### 📌 Kullanım
 
 ```bash
-bun run scripts/createModule.ts <modul-adi>
+bun run src/tools/createModule.ts <modul-adi>
 ```
 
 ### 📁 Otomatik Oluşturulan Yapı

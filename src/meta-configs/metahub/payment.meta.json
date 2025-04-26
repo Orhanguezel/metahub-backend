@@ -11,65 +11,94 @@
       "method": "POST",
       "path": "/simulate/stripe",
       "auth": true,
-      "summary": "POST /simulate/stripe"
+      "summary": "POST /simulate/stripe",
+      "validationName": "\"admin\")",
+      "controllerName": "simulateStripePayment"
     },
     {
       "method": "POST",
       "path": "/simulate/paypal",
       "auth": true,
-      "summary": "POST /simulate/paypal"
+      "summary": "POST /simulate/paypal",
+      "validationName": "\"admin\")",
+      "controllerName": "simulatePayPalPayment"
     },
     {
       "method": "POST",
       "path": "/",
       "auth": true,
-      "summary": "POST /"
+      "summary": "POST /",
+      "validationName": "\"admin\")",
+      "controllerName": "getAllPayments",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "GET",
       "path": "/",
       "auth": true,
-      "summary": "GET /"
+      "summary": "GET /",
+      "validationName": "\"admin\")",
+      "controllerName": "getAllPayments",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "GET",
       "path": "/user",
       "auth": true,
-      "summary": "GET /user"
+      "summary": "GET /user",
+      "validationName": "\"admin\")",
+      "controllerName": "markPaymentAsPaid"
+    },
+    {
+      "method": "GET",
+      "path": "/order/:orderId",
+      "auth": true,
+      "summary": "GET /order/:orderId",
+      "validationName": "\"admin\")",
+      "controllerName": "markPaymentAsPaid"
     },
     {
       "method": "PUT",
       "path": "/:id/mark-paid",
       "auth": true,
-      "summary": "PUT /:id/mark-paid"
+      "summary": "PUT /:id/mark-paid",
+      "validationName": "\"admin\")",
+      "controllerName": "markPaymentAsPaid"
     },
     {
       "method": "PUT",
       "path": "/:id/mark-failed",
       "auth": true,
-      "summary": "PUT /:id/mark-failed"
+      "summary": "PUT /:id/mark-failed",
+      "validationName": "\"admin\")",
+      "controllerName": "markPaymentAsFailed"
     },
     {
       "method": "PUT",
       "path": "/:id/update-method",
       "auth": true,
       "summary": "PUT /:id/update-method"
-    },
-    {
-      "method": "GET",
-      "path": "/order/:orderId",
-      "auth": true,
-      "summary": "GET /order/:orderId"
     }
   ],
   "version": "1.0.1",
-  "updatedBy": "Orhan Güzel",
-  "lastUpdatedAt": "2025-04-25T20:18:52.031Z",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+  "lastUpdatedAt": "2025-04-26T18:47:46.333Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "date": "2025-04-25T20:18:52.031Z",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T18:47:46.333Z",
       "note": "Meta auto-generated"
     }
   ]

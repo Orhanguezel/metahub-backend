@@ -11,47 +11,64 @@
       "method": "POST",
       "path": "/topics",
       "auth": true,
-      "summary": "POST /topics"
+      "summary": "POST /topics",
+      "validationName": "\"/topics/category/:categoryId\"",
+      "controllerName": "getTopicsByCategory"
     },
     {
       "method": "GET",
       "path": "/topics/category/:categoryId",
       "auth": true,
-      "summary": "GET /topics/category/:categoryId"
+      "summary": "GET /topics/category/:categoryId",
+      "validationName": "\"/topics/category/:categoryId\"",
+      "controllerName": "getTopicsByCategory"
     },
     {
       "method": "POST",
       "path": "/comments",
       "auth": true,
-      "summary": "POST /comments"
+      "summary": "POST /comments",
+      "validationName": "\"/comments/topic/:topicId\"",
+      "controllerName": "getCommentsByTopic"
     },
     {
       "method": "GET",
       "path": "/comments/topic/:topicId",
       "auth": true,
-      "summary": "GET /comments/topic/:topicId"
+      "summary": "GET /comments/topic/:topicId",
+      "validationName": "\"/comments/topic/:topicId\"",
+      "controllerName": "getCommentsByTopic"
     },
     {
       "method": "POST",
       "path": "/categories",
       "auth": true,
-      "summary": "POST /categories"
+      "summary": "POST /categories",
+      "validationName": "\"/categories\"",
+      "controllerName": "getAllCategories"
     },
     {
       "method": "GET",
       "path": "/categories",
       "auth": true,
-      "summary": "GET /categories"
+      "summary": "GET /categories",
+      "validationName": "\"/categories\"",
+      "controllerName": "getAllCategories"
     }
   ],
   "version": "1.0.1",
-  "updatedBy": "Orhan Güzel",
-  "lastUpdatedAt": "2025-04-25T20:18:50.430Z",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+  "lastUpdatedAt": "2025-04-26T18:47:46.280Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "date": "2025-04-25T20:18:50.430Z",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T18:47:46.280Z",
       "note": "Meta auto-generated"
     }
   ]

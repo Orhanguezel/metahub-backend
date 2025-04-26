@@ -11,29 +11,40 @@
       "method": "GET",
       "path": "/modules",
       "auth": true,
-      "summary": "GET /modules"
+      "summary": "GET /modules",
+      "validationName": "\"admin\")",
+      "controllerName": "getAllModules"
     },
     {
       "method": "GET",
       "path": "/modules/:name",
       "auth": true,
-      "summary": "GET /modules/:name"
+      "summary": "GET /modules/:name",
+      "validationName": "\"admin\")",
+      "controllerName": "getModuleDetail"
     },
     {
       "method": "GET",
       "path": "/projects",
       "auth": true,
-      "summary": "GET /projects"
+      "summary": "GET /projects",
+      "validationName": "\"admin\")",
+      "controllerName": "getAvailableProjects"
     }
   ],
   "version": "1.0.1",
-  "updatedBy": "Orhan Güzel",
-  "lastUpdatedAt": "2025-04-25T20:18:47.061Z",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+  "lastUpdatedAt": "2025-04-26T18:47:45.966Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "date": "2025-04-25T20:18:47.061Z",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T18:47:45.966Z",
       "note": "Meta auto-generated"
     }
   ]
