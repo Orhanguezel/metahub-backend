@@ -10,48 +10,41 @@
     {
       "method": "GET",
       "path": "/",
-      "auth": true,
-      "summary": "GET /"
+      "auth": false,
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllProducts",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "GET",
       "path": "/:id",
-      "auth": true,
-      "summary": "GET /:id"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "auth": true,
-      "summary": "POST /"
-    },
-    {
-      "method": "PUT",
-      "path": "/:id",
-      "auth": true,
-      "summary": "PUT /:id"
-    },
-    {
-      "method": "DELETE",
-      "path": "/:id",
-      "auth": true,
-      "summary": "DELETE /:id"
-    },
-    {
-      "method": "PUT",
-      "path": "/:id/publish",
-      "auth": true,
-      "summary": "PUT /:id/publish"
+      "auth": false,
+      "summary": "GET /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "getProductById",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     }
   ],
   "version": "1.0.1",
-  "updatedBy": "Orhan Güzel",
-  "lastUpdatedAt": "2025-04-25T20:18:52.189Z",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+  "lastUpdatedAt": "2025-04-26T18:47:45.932Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "date": "2025-04-25T20:18:52.189Z",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T18:47:45.932Z",
       "note": "Meta auto-generated"
     }
   ]

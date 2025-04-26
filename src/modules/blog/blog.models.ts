@@ -1,16 +1,13 @@
 import { Schema, model, Document, Types } from "mongoose";
 
-// Blog kategorileri (Almanca)
-type BlogCategory = "ernaehrung" | "parasiten" | "vegan" | "allgemein";
-
-interface IBlog extends Document {
+export interface IBlog extends Document {
   title: string;
   slug: string;
   content: string;
   summary: string;
   images: string[];
   tags: string[];
-  category: BlogCategory;
+  category: Types.ObjectId; 
   author: string;
   isPublished?: boolean;
   publishedAt?: Date;
@@ -35,18 +32,16 @@ const blogSchema = new Schema<IBlog>(
       type: [String],
       required: true,
       validate: {
-        validator: function (v: string[]) {
-          return v.length > 0;
-        },
+        validator: (v: string[]) => v.length > 0,
         message: "At least one image is required.",
       },
       default: ["blog.png"],
     },
     tags: [{ type: String }],
     category: {
-      type: String,
-      enum: ["ernaehrung", "parasiten", "vegan", "allgemein"],
-      default: "allgemein",
+      type: Schema.Types.ObjectId,
+      ref: "BlogCategory", // ✅ BlogCategory modeline bağlandı
+      required: true,
     },
     author: {
       type: String,
@@ -87,7 +82,6 @@ blogSchema.pre("validate", function (this: IBlog, next) {
   next();
 });
 
-export default model<IBlog>("Blog", blogSchema);
-export { IBlog, BlogCategory };
+const Blog = model<IBlog>("Blog", blogSchema);
 
-
+export default Blog;

@@ -1,0 +1,59 @@
+{
+  "name": "wishlist",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getUserWishlist"
+    },
+    {
+      "method": "POST",
+      "path": "/add/:productId",
+      "auth": true,
+      "summary": "POST /add/:productId",
+      "validationName": "\"/add/:productId\"",
+      "controllerName": "validateObjectId(\"productId\""
+    },
+    {
+      "method": "DELETE",
+      "path": "/remove/:productId",
+      "auth": true,
+      "summary": "DELETE /remove/:productId",
+      "validationName": "\"/remove/:productId\"",
+      "controllerName": "validateObjectId(\"productId\""
+    },
+    {
+      "method": "DELETE",
+      "path": "/clear",
+      "auth": true,
+      "summary": "DELETE /clear",
+      "validationName": "\"/clear\"",
+      "controllerName": "clearWishlist"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+  "lastUpdatedAt": "2025-04-26T18:47:46.130Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T18:47:46.130Z",
+      "note": "Meta auto-generated"
+    }
+  ]
+}

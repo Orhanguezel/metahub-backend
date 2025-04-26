@@ -11,47 +11,101 @@
       "method": "GET",
       "path": "/",
       "auth": true,
-      "summary": "GET /"
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllCarts",
+      "pathPrefix": "admin."
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id",
+      "pathPrefix": "admin."
+    },
+    {
+      "method": "PUT",
+      "path": "/:id",
+      "auth": true,
+      "summary": "PUT /:id",
+      "pathPrefix": "admin."
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id",
+      "pathPrefix": "admin."
+    },
+    {
+      "method": "PATCH",
+      "path": "/:id/toggle-active",
+      "auth": true,
+      "summary": "PATCH /:id/toggle-active",
+      "pathPrefix": "admin."
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getUserCart"
     },
     {
       "method": "POST",
       "path": "/add",
       "auth": true,
-      "summary": "POST /add"
+      "summary": "POST /add",
+      "validationName": "\"/clear\"",
+      "controllerName": "clearCart"
     },
     {
       "method": "PATCH",
       "path": "/increase/:productId",
       "auth": true,
-      "summary": "PATCH /increase/:productId"
+      "summary": "PATCH /increase/:productId",
+      "validationName": "\"/clear\"",
+      "controllerName": "clearCart"
     },
     {
       "method": "PATCH",
       "path": "/decrease/:productId",
       "auth": true,
-      "summary": "PATCH /decrease/:productId"
+      "summary": "PATCH /decrease/:productId",
+      "validationName": "\"/clear\"",
+      "controllerName": "clearCart"
     },
     {
       "method": "DELETE",
       "path": "/remove/:productId",
       "auth": true,
-      "summary": "DELETE /remove/:productId"
+      "summary": "DELETE /remove/:productId",
+      "validationName": "\"/clear\"",
+      "controllerName": "clearCart"
     },
     {
       "method": "DELETE",
       "path": "/clear",
       "auth": true,
-      "summary": "DELETE /clear"
+      "summary": "DELETE /clear",
+      "validationName": "\"/clear\"",
+      "controllerName": "clearCart"
     }
   ],
   "version": "1.0.1",
-  "updatedBy": "Orhan Güzel",
-  "lastUpdatedAt": "2025-04-25T20:18:47.720Z",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+  "lastUpdatedAt": "2025-04-26T18:47:46.308Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "date": "2025-04-25T20:18:47.720Z",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T18:47:46.308Z",
       "note": "Meta auto-generated"
     }
   ]

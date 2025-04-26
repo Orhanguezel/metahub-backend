@@ -1,6 +1,4 @@
-// src/routes/comment.routes.ts
-
-import express from "express";
+import { Router } from "express";
 import {
   createComment,
   getAllComments,
@@ -8,17 +6,19 @@ import {
   togglePublishComment,
   deleteComment,
 } from "./comment.controller";
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { validateObjectId } from "@/core/middleware/validateRequest";
 
-const router = express.Router();
+const router = Router();
 
-// 💬 Public
+// 🌍 Public Routes
 router.post("/", createComment);
-router.get("/:type/:id", getCommentsForContent); // blog, product, service vs.
+router.get("/:type/:id", validateObjectId("id"), getCommentsForContent);
 
-// 🔐 Admin Panel
-router.get("/", authenticate, authorizeRoles("admin", "moderator"), getAllComments);
-router.put("/:id/toggle", authenticate, authorizeRoles("admin", "moderator"), togglePublishComment);
-router.delete("/:id", authenticate, authorizeRoles("admin", "moderator"), deleteComment);
+// 🔐 Admin Routes
+router.use(authenticate, authorizeRoles("admin", "moderator"));
+router.get("/", getAllComments);
+router.put("/:id/toggle", validateObjectId("id"), togglePublishComment);
+router.delete("/:id", validateObjectId("id"), deleteComment);
 
 export default router;

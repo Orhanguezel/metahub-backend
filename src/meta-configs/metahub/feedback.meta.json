@@ -11,53 +11,72 @@
       "method": "POST",
       "path": "/",
       "auth": true,
-      "summary": "POST /"
+      "summary": "POST /",
+      "validationName": "\"/\"",
+      "controllerName": "createFeedback"
     },
     {
       "method": "GET",
       "path": "/",
       "auth": true,
-      "summary": "GET /"
+      "summary": "GET /",
+      "validationName": "\"admin\")",
+      "controllerName": "getAllFeedbacks"
     },
     {
       "method": "GET",
       "path": "/published",
       "auth": true,
-      "summary": "GET /published"
+      "summary": "GET /published",
+      "validationName": "\"/published\"",
+      "controllerName": "getPublishedFeedbacks"
     },
     {
       "method": "PATCH",
       "path": "/:id/toggle",
       "auth": true,
-      "summary": "PATCH /:id/toggle"
+      "summary": "PATCH /:id/toggle",
+      "validationName": "\"admin\")",
+      "controllerName": "togglePublishFeedback"
     },
     {
       "method": "PUT",
       "path": "/:id",
       "auth": true,
-      "summary": "PUT /:id"
+      "summary": "PUT /:id",
+      "validationName": "\"admin\")",
+      "controllerName": "updateFeedback"
     },
     {
       "method": "DELETE",
       "path": "/:id",
       "auth": true,
-      "summary": "DELETE /:id"
+      "summary": "DELETE /:id",
+      "validationName": "\"admin\")",
+      "controllerName": "deleteFeedback"
     },
     {
       "method": "PATCH",
       "path": "/:id/archive",
       "auth": true,
-      "summary": "PATCH /:id/archive"
+      "summary": "PATCH /:id/archive",
+      "validationName": "\"admin\")",
+      "controllerName": "softDeleteFeedback"
     }
   ],
   "version": "1.0.1",
-  "updatedBy": "Orhan Güzel",
-  "lastUpdatedAt": "2025-04-25T20:18:50.269Z",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+  "lastUpdatedAt": "2025-04-26T18:47:46.321Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "date": "2025-04-25T20:18:50.269Z",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T18:47:46.321Z",
       "note": "Meta auto-generated"
     }
   ]

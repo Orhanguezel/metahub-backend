@@ -8,26 +8,27 @@
   "language": "en",
   "routes": [
     {
-      "method": "POST",
-      "path": "/",
-      "auth": true,
-      "summary": "POST /"
-    },
-    {
       "method": "GET",
       "path": "/",
       "auth": true,
-      "summary": "GET /"
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllSports);\n\n// 🔍 ID ile getir / ✏️ Güncelle / 🗑️ Sil\nrouter\n  .route(\"/:id\")\n  .get(getSportById"
     }
   ],
   "version": "1.0.1",
-  "updatedBy": "Orhan Güzel",
-  "lastUpdatedAt": "2025-04-25T20:18:53.630Z",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+  "lastUpdatedAt": "2025-04-26T18:47:45.829Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "date": "2025-04-25T20:18:53.630Z",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T18:47:45.829Z",
       "note": "Meta auto-generated"
     }
   ]

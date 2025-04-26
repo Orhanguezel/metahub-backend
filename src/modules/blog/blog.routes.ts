@@ -1,4 +1,3 @@
-// src/routes/blog.routes.ts
 import express, { Request, Response, NextFunction } from "express";
 import {
   createBlog,
@@ -7,41 +6,41 @@ import {
   updateBlog,
   deleteBlog,
 } from "./blog.controller";
-
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
-import upload from "../../core/middleware/uploadMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import upload from "@/core/middleware/uploadMiddleware";
+import { validateCreateBlog, validateUpdateBlog, validateObjectId } from "./blog.validation";
 
 const router = express.Router();
 
-// 🌍 Public Routes
 router.get("/", getAllBlogs);
-router.get("/slug/:slug", getBlogBySlug); 
+router.get("/slug/:slug", getBlogBySlug);
 
+
+router.use(authenticate, authorizeRoles("admin"));
 
 router.post(
   "/",
-  authenticate,
-  authorizeRoles("admin"),
   (req: Request, _res: Response, next: NextFunction) => {
-    req.uploadType = "blog"; 
+    req.uploadType = "blog";
     next();
   },
-  upload.array("images", 5), 
+  upload.array("images", 5),
+  validateCreateBlog,
   createBlog
 );
 
 router.put(
   "/:id",
-  authenticate,
-  authorizeRoles("admin"),
+  validateObjectId("id"),
   (req: Request, _res: Response, next: NextFunction) => {
-    req.uploadType = "blog"; 
+    req.uploadType = "blog";
     next();
   },
-  upload.array("images", 5), 
+  upload.array("images", 5),
+  validateUpdateBlog,
   updateBlog
 );
 
-router.delete("/:id", authenticate, authorizeRoles("admin"), deleteBlog);
+router.delete("/:id", validateObjectId("id"), deleteBlog);
 
 export default router;

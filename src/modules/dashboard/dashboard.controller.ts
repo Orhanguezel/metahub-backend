@@ -25,7 +25,7 @@ import { Service } from "@/modules/services";
 import { MailMessage } from "@/modules/email";
 import { Address } from "@/modules/address";
 import { ModuleMetaModel } from "@/modules/admin";
-import { Appointment } from "@/modules/booking";
+import { Booking } from "@/modules/booking";
 import { Category } from "@/modules/category";
 import { ChatMessage } from "@/modules/chat";
 import { Company } from "@/modules/company";
@@ -47,6 +47,7 @@ import { SocialMedia } from "@/modules/social";
 import { Sport } from "@/modules/sport";
 import { Stockmovement } from "@/modules/stockmovement";
 import { Task } from "@/modules/task";
+import { Wishlist } from "@/modules/wishlist";
 
 export const getDashboardStats = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
   const counts = await Promise.all([
@@ -72,7 +73,7 @@ export const getDashboardStats = asyncHandler(async (_req: Request, res: Respons
     MailMessage.countDocuments(),
     Address.countDocuments(),
     ModuleMetaModel.countDocuments(),
-    Appointment.countDocuments(),
+    Booking.countDocuments(),
     Category.countDocuments(),
     ChatMessage.countDocuments(),
     Company.countDocuments(),
@@ -96,6 +97,7 @@ export const getDashboardStats = asyncHandler(async (_req: Request, res: Respons
     Sport.countDocuments(),
     Stockmovement.countDocuments(),
     Task.countDocuments(),
+    Wishlist.countDocuments(),
   ]);
 
   const revenueAgg = await Order.aggregate([
@@ -130,7 +132,7 @@ export const getDashboardStats = asyncHandler(async (_req: Request, res: Respons
       emails: counts[19],
       addresses: counts[20],
       admins: counts[21],
-      appointments: counts[22],
+      booking: counts[22],
       categories: counts[23],
       chats: counts[24],
       companies: counts[25],
@@ -152,6 +154,7 @@ export const getDashboardStats = asyncHandler(async (_req: Request, res: Respons
       sports: counts[41],
       stockMovements: counts[42],
       tasks: counts[43],
+      wishlists: counts[44],
       revenue: totalRevenue,
     },
   });

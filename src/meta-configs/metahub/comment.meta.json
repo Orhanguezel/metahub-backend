@@ -11,41 +11,64 @@
       "method": "POST",
       "path": "/",
       "auth": true,
-      "summary": "POST /"
+      "summary": "POST /",
+      "validationName": "\"/\"",
+      "controllerName": "createComment",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "GET",
       "path": "/:type/:id",
       "auth": true,
-      "summary": "GET /:type/:id"
+      "summary": "GET /:type/:id",
+      "validationName": "\"/:type/:id\"",
+      "controllerName": "validateObjectId(\"id\""
     },
     {
       "method": "GET",
       "path": "/",
       "auth": true,
-      "summary": "GET /"
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllComments",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "PUT",
       "path": "/:id/toggle",
       "auth": true,
-      "summary": "PUT /:id/toggle"
+      "summary": "PUT /:id/toggle",
+      "validationName": "\"/:id/toggle\"",
+      "controllerName": "validateObjectId(\"id\""
     },
     {
       "method": "DELETE",
       "path": "/:id",
       "auth": true,
-      "summary": "DELETE /:id"
+      "summary": "DELETE /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "validateObjectId(\"id\""
     }
   ],
   "version": "1.0.1",
-  "updatedBy": "Orhan Güzel",
-  "lastUpdatedAt": "2025-04-25T20:18:48.201Z",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+  },
+  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+  "lastUpdatedAt": "2025-04-26T18:47:46.158Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "date": "2025-04-25T20:18:48.201Z",
+      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
+      "date": "2025-04-26T18:47:46.158Z",
       "note": "Meta auto-generated"
     }
   ]
