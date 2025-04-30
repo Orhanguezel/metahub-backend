@@ -8,43 +8,71 @@
   "language": "en",
   "routes": [
     {
+      "method": "POST",
+      "path": "/modules",
+      "auth": true,
+      "summary": "POST /modules",
+      "validationName": "\"/modules\"",
+      "controllerName": "getModules"
+    },
+    {
       "method": "GET",
       "path": "/modules",
       "auth": true,
       "summary": "GET /modules",
-      "validationName": "\"admin\")",
-      "controllerName": "getAllModules"
-    },
-    {
-      "method": "GET",
-      "path": "/modules/:name",
-      "auth": true,
-      "summary": "GET /modules/:name",
-      "validationName": "\"admin\")",
-      "controllerName": "getModuleDetail"
+      "validationName": "\"/modules\"",
+      "controllerName": "getModules"
     },
     {
       "method": "GET",
       "path": "/projects",
       "auth": true,
       "summary": "GET /projects",
-      "validationName": "\"admin\")",
-      "controllerName": "getAvailableProjects"
+      "validationName": "\"/projects\"",
+      "controllerName": "getProjects"
+    },
+    {
+      "method": "GET",
+      "path": "/module/:name",
+      "auth": true,
+      "summary": "GET /module/:name",
+      "validationName": "\"/modules/analytics\"",
+      "controllerName": "getModuleAnalytics"
+    },
+    {
+      "method": "GET",
+      "path": "/modules/analytics",
+      "auth": true,
+      "summary": "GET /modules/analytics",
+      "validationName": "\"/modules/analytics\"",
+      "controllerName": "getModuleAnalytics"
+    },
+    {
+      "method": "PATCH",
+      "path": "/module/:name",
+      "auth": true,
+      "summary": "PATCH /module/:name"
+    },
+    {
+      "method": "DELETE",
+      "path": "/module/:name",
+      "auth": true,
+      "summary": "DELETE /module/:name"
     }
   ],
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9"
+    "commitHash": "0662102b3cb0d4d946e27c7f2d3bbb3549dae13d"
   },
-  "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
-  "lastUpdatedAt": "2025-04-26T18:47:45.966Z",
+  "commitHash": "0662102b3cb0d4d946e27c7f2d3bbb3549dae13d",
+  "lastUpdatedAt": "2025-04-30T11:34:25.247Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "44ed3e6217d393c0c9df2d9d4815da61c331e9a9",
-      "date": "2025-04-26T18:47:45.966Z",
+      "commitHash": "0662102b3cb0d4d946e27c7f2d3bbb3549dae13d",
+      "date": "2025-04-30T11:34:25.247Z",
       "note": "Meta auto-generated"
     }
   ]

@@ -1,46 +1,42 @@
+// src/modules/admin/admin.routes.ts
 import express from "express";
 import {
-  getAllModules,
-  getAvailableProjects,
-  getModuleDetail, // ✅ Yeni eklenen fonksiyon
+  getModules,
+  getModuleByName,
+  updateModule,
+  deleteModule,
+  getProjects,
+  createModule,
+  getModuleAnalytics,
 } from "./admin.controller";
-import {
-  authenticate,
-  authorizeRoles,
-} from "../../core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { validateUpdateModule, validateModuleNameParam,validateCreateModule} from "./admin.validation";
 
 const router = express.Router();
 
-const allowedOrigins = process.env.ALLOWED_ADMIN_ORIGINS?.split(",") || [];
+// 🎯 Admin modülleri - Protected
+router.use(authenticate, authorizeRoles("admin"));
 
-// ✅ CORS Middleware (TS uyumlu)
-function corsMiddleware(
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-): void {
-  const origin = req.headers.origin;
+router.post("/modules", authenticate, authorizeRoles("admin"), validateCreateModule, createModule);
 
-  if (origin && allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
 
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+// 📋 Tüm modülleri listele
+router.get("/modules", getModules);
 
-  if (req.method === "OPTIONS") {
-    res.sendStatus(200);
-    return; 
-  }
+// 📋 Tüm projeleri listele
+router.get("/projects", getProjects);
 
-  next();
-}
+// 🔍 Belirli modülü getir
+router.get("/module/:name", validateModuleNameParam, getModuleByName);
 
-router.use(corsMiddleware);
+router.get("/modules/analytics", getModuleAnalytics);
 
-// 👮 Yetkili admin işlemleri
-router.get("/modules", authenticate, authorizeRoles("admin"), getAllModules);
-router.get("/modules/:name", authenticate, authorizeRoles("admin"), getModuleDetail); // ✅ Yeni endpoint
-router.get("/projects", authenticate, authorizeRoles("admin"), getAvailableProjects);
+// ✏️ Belirli modülü güncelle
+router.patch("/module/:name", validateModuleNameParam, validateUpdateModule, updateModule);
+
+// 🗑️ Belirli modülü sil
+router.delete("/module/:name", validateModuleNameParam, deleteModule);
+
+
 
 export default router;

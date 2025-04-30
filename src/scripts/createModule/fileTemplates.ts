@@ -6,7 +6,6 @@ export const capitalize = (str: string) =>
   export const getControllerContent = (CapName: string) => `
   import { Request, Response } from "express";
   import asyncHandler from "express-async-handler";
-  import ${CapName} from "./${CapName}.models";
   
   // ➕ Create
   export const create${CapName} = asyncHandler(async (req: Request, res: Response): Promise<void> => {

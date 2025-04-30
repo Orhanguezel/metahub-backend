@@ -74,6 +74,4 @@ const seedSettings = async () => {
 
 seedSettings();
 
-
 //ts-node src/seeders/settingsSeeder.ts
-

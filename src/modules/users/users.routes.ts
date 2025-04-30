@@ -22,22 +22,23 @@ import {
 
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import upload from "@/core/middleware/uploadMiddleware";
+import { validateApiKey } from "@/core/middleware/validateApiKey";
 
 const router = express.Router();
 
 // 🔐 Auth
 router.post("/register", registerUser);
-router.post("/login", loginUser);
-router.post("/change-password", authenticate, changePassword);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password/:token", resetPassword);
+router.post("/login", validateApiKey,loginUser);
+router.post("/change-password", authenticate, validateApiKey,changePassword);
+router.post("/forgot-password", validateApiKey,forgotPassword);
+router.post("/reset-password/:token", validateApiKey,resetPassword);
 
 // 👤 Profile
 router
   .route("/profile")
 
 // 📋 Admin Routes
-router.get("/users", authenticate, authorizeRoles("admin"), getUsers);
+router.get("/users", authenticate, authorizeRoles("admin"), validateApiKey,getUsers);
 
 router
   .route("/users/:id")
@@ -52,19 +53,21 @@ router
     upload.single("profileImage"),
     updateUser
   )
-  .delete(authenticate, authorizeRoles("admin"), deleteUser);
+  .delete(authenticate, authorizeRoles("admin"), validateApiKey,deleteUser);
 
 router.put(
   "/users/:id/role",
   authenticate,
   authorizeRoles("admin"),
-  updateUserRole
+  updateUserRole,
+  validateApiKey
 );
 
 router.put(
   "/users/:id/status",
   authenticate,
   authorizeRoles("admin"),
+  validateApiKey,
   toggleUserStatus
 );
 

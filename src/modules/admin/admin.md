@@ -1,9 +1,13 @@
+Tabii! Aşağıda **güncellenmiş ve bizim son yaptığımız geliştirmelere tamamen uyumlu**  
+yeni **Admin Modülü Dokümantasyonu** hazır:  
+_(sadece Zod kısmı çıkarıldı, express-validator kullanımı doğru anlatıldı ve tüm yeni işlevler eklendi)_
 
 ---
 
 # 🧩 Admin Modülü – MetaHub Backend
 
-`/src/modules/admin/` klasörü, MetaHub sisteminde modül yapılandırmalarını ve görünürlük ayarlarını yöneten merkezî bir yapı sağlar. Swagger üretimi, admin görünürlüğü ve proje profili bazlı modül yönetimi gibi birçok temel işlev burada tanımlıdır.
+`/src/modules/admin/` klasörü, MetaHub sisteminde modül yönetimi, meta dosya oluşturma ve görünürlük ayarlarını merkezi şekilde yöneten yapıdır.  
+Swagger üretimi, proje profiline göre modül aktivasyonu ve Admin Panel işlevleri bu modül üzerinden yürütülür.
 
 ---
 
@@ -11,31 +15,55 @@
 
 ### 1. `/admin.controller.ts`
 
-Modülün API endpoint’lerini tanımlar:
+Admin işlemlerini yöneten ana controller'dır:
 
-| Endpoint                         | Açıklama                                                                 |
-|----------------------------------|--------------------------------------------------------------------------|
-| `GET /admin/modules?project=...` | Belirli bir proje için tüm modülleri listeler                           |
-| `PATCH /admin/modules/:name`     | Belirli bir modülün görünürlük, ikon, rol gibi ayarlarını günceller     |
-| `GET /admin/projects`            | `.env.*` dosyalarına göre tüm mevcut projeleri döner (`getEnvProfiles`) |
+| Endpoint | Açıklama |
+|:---------|:---------|
+| `GET /admin/modules?project=...` | Belirli projedeki tüm modülleri listeler. |
+| `GET /admin/module/:name` | Belirli bir modülün meta detayını döner. |
+| `POST /admin/modules` | Yeni bir modül oluşturur. (meta dosyası + klasör) |
+| `PATCH /admin/module/:name` | Mevcut bir modülün bilgilerini günceller. |
+| `DELETE /admin/module/:name` | Mevcut bir modülü ve meta dosyasını siler. |
+| `GET /admin/projects` | `.env.*` dosyalarına göre tüm projeleri listeler. |
 
-> **Not:** `PATCH` endpoint'inde gelen veriler `admin.validation.ts` dosyası ile doğrulanır.
+> Tüm işlemler `authenticate` ve `authorizeRoles("admin")` middleware'leri ile korunur.
 
 ---
 
 ### 2. `/admin.routes.ts`
 
-Express yönlendirme dosyasıdır. Yetkilendirme ve CORS kontrolü içerir:
+Express yönlendirme dosyasıdır.
 
-- `authenticate` + `authorizeRoles("admin")` middleware’leri ile koruma sağlar.
-- Belirli admin panellerden gelen CORS isteklerini sadece izinli `origin`’lere açar.
+- **POST /modules** ➔ Yeni modül oluşturur (`validateCreateModule`)
+- **GET /modules** ➔ Tüm modülleri listeler
+- **GET /module/:name** ➔ Modül detayını getirir (`validateModuleNameParam`)
+- **PATCH /module/:name** ➔ Modül günceller (`validateUpdateModule`)
+- **DELETE /module/:name** ➔ Modül siler (`validateModuleNameParam`)
+- **GET /projects** ➔ Proje listesini döner
 
 ---
 
-### 3. `/admin.models.ts`
+### 3. `/admin.validation.ts`
 
-Sadece `type` ve `interface` tanımlarını içerir. Zod, Swagger ya da diğer katmanlar için tür desteği sağlar.
+**express-validator** ile yazılmıştır.
 
+| Validation Fonksiyonu | Açıklama |
+|:----------------------|:---------|
+| `validateCreateModule` | Modül oluştururken gerekli alanları doğrular. |
+| `validateUpdateModule` | Modül güncellemesi sırasında opsiyonel alanları doğrular. |
+| `validateModuleNameParam` | Modül isminin `params` içinde doğru geldiğini doğrular. |
+| `validateProjectQuery` | `project` query parametresini doğrular. |
+
+> `validateRequest` middleware kullanılarak hatalı istekler anında kesilir.
+
+---
+
+### 4. `/admin.models.ts`
+
+- Sadece TypeScript tipi tanımlarını içerir.
+- `ModuleMeta`, `ModuleSetting` tiplerini export eder.
+
+Örnek:
 ```ts
 export type ModuleMeta = {
   name: string;
@@ -45,104 +73,104 @@ export type ModuleMeta = {
 };
 ```
 
-> Gerçek veritabanı modelleri `moduleMeta.model.ts` ve `moduleSettings.model.ts` dosyalarında yer alır.
+---
+
+### 5. `/moduleMeta.model.ts`
+
+Veritabanında modüllerin meta verilerini tutar.
+
+| Alan | Açıklama |
+|:-----|:---------|
+| `name` | Modül ismi |
+| `label` | Çok dilli modül adı (`tr`, `en`, `de`) |
+| `icon` | Admin menüdeki ikon |
+| `roles` | Hangi roller erişebilir |
+| `routes` | Swagger için tanımlı rotalar |
+| `useAnalytics` | İstatistik kullanımı |
+| `history` | Versiyon günlüğü |
+| `updatedBy` | Son düzenleyen kullanıcı ve commitHash bilgisi |
+
+> JSON dosyaları (`meta-configs/`) ile birebir uyumludur.
 
 ---
 
-### 4. `/moduleMeta.model.ts`
+### 6. `/moduleSettings.model.ts`
 
-Veritabanında her modülün tanımlandığı yapıdır. Meta JSON dosyalarının MongoDB karşılığıdır.
+Proje bazlı modül ayarlarını tutar.
 
-- `name`, `icon`, `roles`, `routes`, `version`, `history`, `language` gibi alanları içerir.
-- `generateMeta.ts` script’i çalıştığında buraya otomatik veri yazılır.
-- Admin panel Swagger UI görünürlüğü ve Swagger üretimi bu model üzerinden yapılır.
+| Alan | Açıklama |
+|:-----|:---------|
+| `project` | Hangi proje (`metahub`, `kuhlturm`, vs.) |
+| `module` | Modül adı |
+| `enabled` | Aktif/pasif |
+| `visibleInSidebar` | Admin menüde görünürlük |
+| `useAnalytics` | İstatistik kullanımı |
+| `roles` | Roller bazlı görünürlük |
+| `label` | Çok dilli adlandırma |
 
-> Tekil ve modül bazlı meta bilgilerini temsil eder.
-
----
-
-### 5. `/moduleSettings.model.ts`
-
-Frontend projeleri (örnek: `metahub`, `kuhlturm`) bazında modüllerin görünürlüğünü ve durumunu yönetir.
-
-| Alan         | Açıklama                                                        |
-|--------------|------------------------------------------------------------------|
-| `project`    | Proje adı (`metahub`, `kuhlturm`, vs)                            |
-| `module`     | Modül adı                                                       |
-| `enabled`    | Modül aktif mi?                                                 |
-| `visibleInSidebar` | Admin menüsünde görünür mü?                               |
-| `label`      | Çok dilli etiket tanımı (`tr`, `en`, `de`)                      |
-| `roles`      | Hangi roller bu modülü görebilir?                               |
-
-> Bu model, admin panel konfigürasyonu içindir ve dinamik olarak güncellenebilir.
-
----
-
-### 6. `/admin.validation.ts`
-
-Zod ile yazılmış bir doğrulama (validation) dosyasıdır. Özellikle `PATCH` işlemlerinde `body` verisinin doğruluğunu garanti eder.
-
-#### Şema:
-
-```ts
-export const updateModuleSchema = z.object({
-  project: z.string(),
-  enabled: z.boolean().optional(),
-  visibleInSidebar: z.boolean().optional(),
-  useAnalytics: z.boolean().optional(),
-  roles: z.array(z.string()).optional(),
-  icon: z.string().optional(),
-  label: z
-    .object({
-      tr: z.string(),
-      en: z.string(),
-      de: z.string(),
-    })
-    .optional(),
-});
-```
-
-> Eğer `label` eksik ya da hatalı ise, controller’da otomatik silinir (`delete updates.label`).
+> `.env` dosyasındaki `ENABLED_MODULES` ile senkronize çalışır.
 
 ---
 
 ### 7. `/index.ts`
 
-Admin modülünü dış dünyaya **tek giriş noktası** olarak açar.
+Admin modülünü **tek giriş** olarak dışa aktarır.
 
-- `admin.routes.ts` içeriğini default router olarak export eder.
-- `admin.controller.ts` içeriğini dışa aktarır.
-- `admin.models.ts` içeriğini tipler için export eder.
-- `moduleMeta.model.ts` ve `moduleSettings.model.ts` modellerini dışa aktarır.
+- `admin.routes.ts` → router
+- `admin.controller.ts`, `admin.models.ts`
+- `moduleMeta.model.ts`, `moduleSettings.model.ts`
 
-#### Kullanım:
+Kullanım:
 ```ts
-import adminModule from "./modules/admin";
+import adminModule from "@/modules/admin";
 app.use("/admin", adminModule);
 ```
 
 ---
 
+## ⚙️ Teknik Detaylar
+
+- ✅ **Modül eklerken**: 
+  - Veritabanına kayıt.
+  - `src/meta-configs/metahub/` içinde `.meta.json` dosyası oluşturulur.
+  - `src/modules/` altında Express yapısına uygun modül dosyaları oluşturulur.
+- ✅ **Modül silerken**:
+  - Veritabanından kayıt silinir.
+  - İlgili `.meta.json` dosyası silinir.
+- ✅ **Yapılandırmalar**:
+  - `commitHash` ve `username` bilgileri otomatik eklenir.
+  - Versiyonlama (`version: 1.0.1`, `history`) her zaman güncellenir.
+  - Çoklu dil desteği (`tr`, `en`, `de`) her modül label'ında zorunludur.
+- ✅ **Swagger Entegrasyonu**:
+  - Tüm modüller Swagger UI içinde dinamik görünür.
+  - Swagger JSON'unda her modül `tags` ve `paths` olarak yer alır.
+
+---
+
 ## 🧠 Sistem Akışı (Özet)
 
-```
+```plaintext
 Frontend Admin Panel ⟷ /admin endpoint ⟶
-  |--> controller.ts ➝ veritabanı
-                    ➝ moduleSettings.model.ts
-                    ➝ moduleMeta.model.ts
+    createModule ➝ Veritabanına kayıt ➝ Meta JSON ➝ Modül klasörü
+    updateModule ➝ Veritabanı ve Meta güncelleme
+    deleteModule ➝ Veritabanı + Meta dosya silme
+    getModules ➝ Modül ve ayar listesini döner
+    getProjects ➝ .env profillerini listeler
 ```
-
-- `generateMeta.ts`: Tüm modüller için JSON + DB güncellemesi yapar
-- `metaValidator.ts`: `meta-configs` dosyalarını kontrol eder
-- `admin` modülü: Bu yapıları admin panelden görüntüler, düzenler
 
 ---
 
 ## ✅ Bu Modül Ne İşe Yarar?
 
-- 🔧 Modül yapılandırmalarını yönetir
-- 🧩 Admin menüsü görünürlüğünü sağlar
-- 🌐 Swagger UI üretimi için temel veriyi sağlar
-- 🧪 Zod validasyon ile güvenli veri girişi sunar
+- 🔧 Yeni modül oluşturmayı sağlar (tam otomasyonlu).
+- 🧩 Admin menü görünürlüğü ve rol bazlı erişimi kontrol eder.
+- 🌐 Swagger üretimini destekler.
+- 🗂️ Proje profiline göre modül yapılandırması yapar (`metahub`, `kuhlturm`, vs).
+- 🧪 express-validator ile sağlam ve güvenli veri doğrulaması yapar.
+- 🧠 Git bilgileri (username + commitHash) ve versiyon kontrolü sağlar.
 
 ---
+
+Bu formatta **eksiksiz ve doğru** şekilde Admin modülünün son versiyonuna uygun dökümantasyon yazdım.  
+İstersen aynı yapıyı Swagger dokümantasyonu için de otomatik olarak türetelim mi? (her endpoint için örnek response'lar ile) 🚀  
+İster misin? 🔥
