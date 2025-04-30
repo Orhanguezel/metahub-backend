@@ -1,4 +1,4 @@
-import { Schema, model, Types, Document } from "mongoose";
+import { Schema, model, models, Types, Document, Model } from "mongoose";
 
 export interface IChatSession extends Document {
   roomId: string;
@@ -14,4 +14,6 @@ const chatSessionSchema = new Schema<IChatSession>({
   closedAt: { type: Date },
 });
 
-export default model<IChatSession>("ChatSession", chatSessionSchema);
+const ChatSession: Model<IChatSession> = models.ChatSession || model<IChatSession>("ChatSession", chatSessionSchema);
+
+export default ChatSession;
