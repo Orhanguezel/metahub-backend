@@ -6,10 +6,10 @@ import { Apikey, IApikey, ApiKeyLog, IApiKeyLog } from "./apikey.models";
 const router = express.Router();
 router.use("/", routes);
 
-// Route Export (default)
+// ✅ Route Export (default)
 export default router;
 
-// Named exports – centrally accessible
+// ✅ Named exports
 export * from "./apikey.controller";
 export * from "./apikey.validation";
 export { Apikey, IApikey, ApiKeyLog, IApiKeyLog };

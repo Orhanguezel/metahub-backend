@@ -1,7 +1,8 @@
-import { RequestHandler } from "express";
+import { Request, Response, NextFunction } from "express";
+import asyncHandler from "express-async-handler";
 import { Apikey, ApiKeyLog } from "@/modules/apikey";
 
-export const validateApiKey: RequestHandler = (req, res, next) => {
+export const validateApiKey = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const key = req.headers["x-api-key"] as string;
 
   if (!key) {
@@ -9,42 +10,38 @@ export const validateApiKey: RequestHandler = (req, res, next) => {
       success: false,
       message: "API key is missing.",
     });
-    return; // ✅ void döndürür
+    return;
   }
 
-  Apikey.findOne({ key, status: "active" })
-    .then(apiKey => {
-      if (!apiKey) {
-        res.status(403).json({
-          success: false,
-          message: "Invalid or revoked API key.",
-        });
-        return;
-      }
+  const apiKey = await Apikey.findOne({ key, status: "active" });
 
-      res.once("finish", async () => {
-        try {
-          await ApiKeyLog.create({
-            apiKey: apiKey._id,
-            route: req.originalUrl,
-            method: req.method,
-            statusCode: res.statusCode,
-            ip: req.ip,
-            userAgent: req.headers["user-agent"] || "",
-          });
-        } catch (err) {
-          console.error("API key log error:", err);
-        }
-      });
-
-      apiKey.lastUsedAt = new Date();
-      apiKey.save().catch(console.error);
-
-      (req as any).apiKey = apiKey;
-      next(); // ✅ void
-    })
-    .catch(error => {
-      console.error("API key validation error:", error);
-      res.status(500).json({ success: false, message: "Internal server error." });
+  if (!apiKey) {
+    res.status(403).json({
+      success: false,
+      message: "Invalid or revoked API key.",
     });
-};
+    return;
+  }
+
+  res.once("finish", async () => {
+    try {
+      await ApiKeyLog.create({
+        apiKey: apiKey._id,
+        route: req.originalUrl,
+        method: req.method,
+        statusCode: res.statusCode,
+        ip: req.ip,
+        userAgent: req.headers["user-agent"] || "",
+      });
+    } catch (error) {
+      console.error("API key log error:", error);
+    }
+  });
+
+  apiKey.lastUsedAt = new Date();
+  await apiKey.save().catch(console.error);
+
+  (req as any).apiKey = apiKey;
+
+  next();
+});
