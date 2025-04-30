@@ -6,20 +6,61 @@
   ],
   "useAnalytics": false,
   "language": "en",
-  "routes": [],
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"admin\")",
+      "controllerName": "getShipments"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /",
+      "validationName": "\"admin\")",
+      "controllerName": "addShipment"
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id",
+      "validationName": "\"admin\")",
+      "controllerName": "getShipmentById"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id",
+      "auth": true,
+      "summary": "PUT /:id",
+      "validationName": "\"admin\")",
+      "controllerName": "updateShipment"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id",
+      "validationName": "\"admin\")",
+      "controllerName": "deleteShipment"
+    }
+  ],
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "0662102b3cb0d4d946e27c7f2d3bbb3549dae13d"
+    "commitHash": "e8a6ae3bed398ecf0651b76a4b40982e94feb17f"
   },
-  "commitHash": "0662102b3cb0d4d946e27c7f2d3bbb3549dae13d",
-  "lastUpdatedAt": "2025-04-30T11:34:23.303Z",
+  "commitHash": "e8a6ae3bed398ecf0651b76a4b40982e94feb17f",
+  "lastUpdatedAt": "2025-04-30T17:26:00.941Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "0662102b3cb0d4d946e27c7f2d3bbb3549dae13d",
-      "date": "2025-04-30T11:34:23.303Z",
+      "commitHash": "e8a6ae3bed398ecf0651b76a4b40982e94feb17f",
+      "date": "2025-04-30T17:26:00.941Z",
       "note": "Meta auto-generated"
     }
   ]

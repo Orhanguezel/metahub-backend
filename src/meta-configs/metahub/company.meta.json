@@ -6,20 +6,45 @@
   ],
   "useAnalytics": false,
   "language": "en",
-  "routes": [],
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"admin\")",
+      "controllerName": "createCompany);\n\n// PUT /company/:id -> Update company info (admin only"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /",
+      "validationName": "\"admin\")",
+      "controllerName": "createCompany);\n\n// PUT /company/:id -> Update company info (admin only"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id",
+      "auth": true,
+      "summary": "PUT /:id",
+      "validationName": "\"admin\")",
+      "controllerName": "updateCompanyInfo"
+    }
+  ],
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "0662102b3cb0d4d946e27c7f2d3bbb3549dae13d"
+    "commitHash": "e8a6ae3bed398ecf0651b76a4b40982e94feb17f"
   },
-  "commitHash": "0662102b3cb0d4d946e27c7f2d3bbb3549dae13d",
-  "lastUpdatedAt": "2025-04-30T11:34:23.229Z",
+  "commitHash": "e8a6ae3bed398ecf0651b76a4b40982e94feb17f",
+  "lastUpdatedAt": "2025-04-30T17:26:01.118Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "0662102b3cb0d4d946e27c7f2d3bbb3549dae13d",
-      "date": "2025-04-30T11:34:23.229Z",
+      "commitHash": "e8a6ae3bed398ecf0651b76a4b40982e94feb17f",
+      "date": "2025-04-30T17:26:01.118Z",
       "note": "Meta auto-generated"
     }
   ]

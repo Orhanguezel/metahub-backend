@@ -4,17 +4,17 @@ import {
   createCompany,
   updateCompanyInfo,
 } from "./company.controller";
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 
 const router = express.Router();
 
-router
-  .route("/")
-  .get(authenticate, getCompanyInfo)
-  .post(authenticate, authorizeRoles("admin"), createCompany);
+// GET /company -> Get company info
+router.get("/", authenticate, getCompanyInfo);
 
-router
-  .route("/:id")
-  .put(authenticate, authorizeRoles("admin"), updateCompanyInfo);
+// POST /company -> Create company (admin only)
+router.post("/", authenticate, authorizeRoles("admin"), createCompany);
+
+// PUT /company/:id -> Update company info (admin only)
+router.put("/:id", authenticate, authorizeRoles("admin"), updateCompanyInfo);
 
 export default router;
