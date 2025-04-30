@@ -7,7 +7,7 @@ import mongoose, {
   Model
 } from "mongoose";
 
-// ✅ Apikey interface
+// 🔐 Apikey interface
 export interface IApikey extends Document {
   name: string;
   key: string;
@@ -17,7 +17,7 @@ export interface IApikey extends Document {
   updatedAt: Date;
 }
 
-// ✅ Apikey schema
+// 🔐 Apikey schema
 const apikeySchema = new Schema<IApikey>(
   {
     name: { type: String, required: true },
@@ -28,11 +28,11 @@ const apikeySchema = new Schema<IApikey>(
   { timestamps: true }
 );
 
-// ✅ Apikey model with explicit type
+// 🔐 Apikey model
 export const Apikey: Model<IApikey> =
   models.Apikey || model<IApikey>("Apikey", apikeySchema);
 
-// ✅ ApiKeyLog interface
+// 📊 ApiKeyLog interface
 export interface IApiKeyLog extends Document {
   apiKey: Types.ObjectId;
   route: string;
@@ -43,7 +43,7 @@ export interface IApiKeyLog extends Document {
   createdAt: Date;
 }
 
-// ✅ ApiKeyLog schema
+// 📊 ApiKeyLog schema
 const apiKeyLogSchema = new Schema<IApiKeyLog>(
   {
     apiKey: { type: Schema.Types.ObjectId, ref: "Apikey", required: true },
@@ -56,6 +56,6 @@ const apiKeyLogSchema = new Schema<IApiKeyLog>(
   { timestamps: { createdAt: true, updatedAt: false } }
 );
 
-// ✅ ApiKeyLog model with explicit type
+// 📊 ApiKeyLog model
 export const ApiKeyLog: Model<IApiKeyLog> =
   models.ApiKeyLog || model<IApiKeyLog>("ApiKeyLog", apiKeyLogSchema);
