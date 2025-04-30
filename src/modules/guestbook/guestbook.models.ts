@@ -31,6 +31,8 @@ const guestbookSchema = new Schema<IGuestbookEntry>(
   { timestamps: true }
 );
 
-export default mongoose.models.Guestbook || model<IGuestbookEntry>("Guestbook", guestbookSchema);
+const Guestbook: mongoose.Model<IGuestbookEntry> = mongoose.models.Guestbook || model<IGuestbookEntry>("Guestbook", guestbookSchema);
+export default Guestbook;
+export { Guestbook };
 
 

@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IReference extends Document {
   companyName: {
@@ -27,7 +27,7 @@ export interface IReference extends Document {
   updatedAt: Date;
 }
 
-const referenceSchema: Schema = new Schema<IReference>(
+const referenceSchema = new Schema<IReference>(
   {
     companyName: {
       tr: { type: String, required: true },
@@ -52,22 +52,19 @@ const referenceSchema: Schema = new Schema<IReference>(
     tags: [{ type: String }],
     isPublished: { type: Boolean, default: false },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 // 🔁 Slug üretimi
 referenceSchema.pre("validate", function (this: IReference, next) {
-  if (!this.slug && this.companyName && this.companyName.en) {
+  if (!this.slug && this.companyName?.en) {
     this.slug = this.companyName.en
       .toLowerCase()
-      .replace(/ /g, "-")
+      .replace(/\s+/g, "-")
       .replace(/[^\w-]+/g, "");
   }
   next();
 });
 
-const Reference = mongoose.models.Reference || mongoose.model<IReference>("Reference", referenceSchema);
-export default Reference;
-
+export const Reference: Model<IReference> =
+  mongoose.models.Reference || mongoose.model<IReference>("Reference", referenceSchema);
