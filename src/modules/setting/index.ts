@@ -1,10 +1,10 @@
-// src/modules/setting/index.ts
 import express from "express";
-import routes from "./setting.routes";
+import settingRoutes from "./setting.routes";
 import Setting from "./setting.models";
 
 const router = express.Router();
-router.use("/", routes);
+
+router.use("/", settingRoutes);
 
 export * from "./setting.controller";
 export { Setting };

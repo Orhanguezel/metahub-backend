@@ -1,12 +1,13 @@
 import express from "express";
 import { getAllProducts, getProductById } from "./product.controller";
+import { validateApiKey } from "@/core/middleware/validateApiKey";
 
 const router = express.Router();
 
 // GET /products -> Get all products
-router.get("/", getAllProducts);
+router.get("/", validateApiKey,getAllProducts);
 
 // GET /products/:id -> Get product by id
-router.get("/:id", getProductById);
+router.get("/:id", validateApiKey,getProductById);
 
 export default router;

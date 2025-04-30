@@ -1,5 +1,3 @@
-// src/tools/createModule/writeModuleFiles.ts
-
 import fs from "fs";
 import path from "path";
 import {
@@ -24,10 +22,13 @@ export const writeModuleFiles = (basePath: string, moduleName: string) => {
   };
 
   for (const [filename, content] of Object.entries(files)) {
-    fs.writeFileSync(path.join(basePath, filename), content);
+    const filePath = path.join(basePath, filename);
+    fs.writeFileSync(filePath, content);
   }
 
   const testPath = path.join(basePath, "__tests__");
-  fs.mkdirSync(testPath, { recursive: true });
+  if (!fs.existsSync(testPath)) {
+    fs.mkdirSync(testPath, { recursive: true });
+  }
   fs.writeFileSync(path.join(testPath, `${moduleName}.controller.spec.ts`), getTestContent(CapName, moduleName));
 };

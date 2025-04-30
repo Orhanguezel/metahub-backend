@@ -9,11 +9,12 @@ import {
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import upload from "@/core/middleware/uploadMiddleware";
 import { validateCreateBlog, validateUpdateBlog, validateObjectId } from "./blog.validation";
+import { validateApiKey } from "@/core/middleware/validateApiKey";
 
 const router = express.Router();
 
-router.get("/", getAllBlogs);
-router.get("/slug/:slug", getBlogBySlug);
+router.get("/", validateApiKey,getAllBlogs);
+router.get("/slug/:slug", validateApiKey,getBlogBySlug);
 
 
 router.use(authenticate, authorizeRoles("admin"));
@@ -26,7 +27,7 @@ router.post(
   },
   upload.array("images", 5),
   validateCreateBlog,
-  createBlog
+  validateApiKey,createBlog
 );
 
 router.put(
@@ -38,9 +39,9 @@ router.put(
   },
   upload.array("images", 5),
   validateUpdateBlog,
-  updateBlog
+  validateApiKey,updateBlog
 );
 
-router.delete("/:id", validateObjectId("id"), deleteBlog);
+router.delete("/:id", validateObjectId("id"), validateApiKey,deleteBlog);
 
 export default router;

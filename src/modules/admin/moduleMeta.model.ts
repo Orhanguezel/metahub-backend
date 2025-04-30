@@ -25,6 +25,9 @@ export interface IModuleMeta extends Document {
   useAnalytics: boolean;
   language: "tr" | "en" | "de";
   version: string;
+  showInDashboard: boolean;  // ✅ EKLENDİ
+  order: number;  // ✅ EKLENDİ
+  statsKey?: string;
   history: {
     version: string;
     by: string;
@@ -51,6 +54,9 @@ const moduleMetaSchema = new Schema<IModuleMeta>(
     useAnalytics: { type: Boolean, default: false },
     language: { type: String, enum: ["tr", "en", "de"], default: "en" },
     version: { type: String, default: "1.0.0" },
+    showInDashboard: { type: Boolean, default: true },  // ✅ EKLENDİ
+    order: { type: Number, default: 0 },  // ✅ EKLENDİ
+    statsKey: { type: String }, 
     history: [
       {
         version: { type: String, required: true },

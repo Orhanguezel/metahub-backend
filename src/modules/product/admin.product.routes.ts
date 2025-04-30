@@ -9,6 +9,7 @@ import { createProductValidator, updateProductValidator } from "./product.valida
 import { validateRequest } from "@/core/middleware/validateRequest";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import upload from "@/core/middleware/uploadMiddleware";
+import { validateApiKey } from "@/core/middleware/validateApiKey";
 
 const router = express.Router();
 
@@ -24,6 +25,7 @@ router.post(
   upload.array("images", 5),
   createProductValidator,
   validateRequest,
+  validateApiKey,
   createProduct
 );
 
@@ -39,6 +41,7 @@ router.put(
   upload.array("images", 5),
   updateProductValidator,
   validateRequest,
+  validateApiKey,
   updateProduct
 );
 
@@ -47,6 +50,7 @@ router.delete(
   "/:id",
   authenticate,
   authorizeRoles("admin"),
+  validateApiKey,
   deleteProduct
 );
 
@@ -55,6 +59,7 @@ router.put(
   "/:id/publish",
   authenticate,
   authorizeRoles("admin"),
+  validateApiKey,
   togglePublishStatus
 );
 
