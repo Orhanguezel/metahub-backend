@@ -54,9 +54,8 @@ articleSchema.pre("validate", function (this: IArticle, next) {
   next();
 });
 
-const Article = model<IArticle>("Article", articleSchema);
-
-export default Article; 
+const Article = mongoose.models.Article || model<IArticle>("Article", articleSchema);
+export default Article;
 export { Article };
 
 

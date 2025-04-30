@@ -1,4 +1,5 @@
-import { Schema, model, Document } from "mongoose";
+import mongoose, { Schema, model, Document } from "mongoose";
+
 
 export interface IDemo extends Document {
   name: string;
@@ -13,4 +14,6 @@ const demoSchema = new Schema<IDemo>(
   { timestamps: true }
 );
 
-export const Demo = model<IDemo>("Demo", demoSchema);
+export const Demo = mongoose.models.Demo || model<IDemo>("Demo", demoSchema);
+
+
