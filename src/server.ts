@@ -1,3 +1,4 @@
+import 'module-alias/register';
 import express, { Express } from "express";
 import http from "http";
 import cors from "cors";
@@ -6,7 +7,6 @@ import connectDB from "./core/config/connect";
 import cookieParser from "cookie-parser";
 import { initializeSocket } from "./socket/socket";
 import { setLocale } from "./core/middleware/setLocale";
-import 'module-alias/register';
 import { getRouter } from "./routes";
 import { setupSwagger } from "./core/swagger/setupSwagger";
 import { errorHandler } from "./core/middleware/errorMiddleware";

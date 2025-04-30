@@ -1,5 +1,3 @@
-// src/tools/generateSwaggerSpec.ts
-
 import fs from "fs/promises";
 import fsSync from "fs";
 import path from "path";
@@ -36,8 +34,14 @@ if (fsSync.existsSync(envPath)) {
 export async function generateSwaggerSpecFromMeta(writeToDisk = false) {
   const metaDir = path.resolve(
     process.cwd(),
-    process.env.META_CONFIG_PATH || "src/meta-configs/metahub"
+    process.env.META_CONFIG_PATH || "dist/meta-configs/metahub"
   );
+
+  // ✅ HATA KONTROLÜ: klasör mevcut mu?
+  if (!fsSync.existsSync(metaDir)) {
+    console.error(`❌ Meta-config folder not found: ${metaDir}`);
+    return undefined;
+  }
 
   const enabledModules = (await getEnabledModules()).map((m) => m.toLowerCase());
   const paths: Record<string, any> = {};
@@ -56,7 +60,6 @@ export async function generateSwaggerSpecFromMeta(writeToDisk = false) {
     .filter((file) => file.endsWith(".meta.json"))
     .map((file) => file.replace(/\.meta\.json$/, "").toLowerCase());
 
-  // Enabled olup meta dosyası eksik olanları raporla
   for (const moduleName of enabledModules) {
     if (!availableModules.includes(moduleName)) {
       console.warn(`⚠️ Enabled module "${moduleName}" has no corresponding meta file.`);

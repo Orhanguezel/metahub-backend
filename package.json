@@ -2,11 +2,14 @@
   "name": "start-repo-project",
   "version": "1.0.0",
   "main": "index.js",
+  "_moduleAliases": {
+    "@": "dist"
+  },
   "scripts": {
-    "start": "node dist/server.js",
+    "start": "node -r module-alias/register dist/server.js",
     "generate:meta": "bun src/generateMeta.ts",
     "dev": "bun src/generateMeta.ts && ts-node -r tsconfig-paths/register src/server.ts",
-    "build": "tsc"
+    "build": "tsc && cp -r src/meta-configs dist/meta-configs"
   },
   "keywords": [],
   "author": "",

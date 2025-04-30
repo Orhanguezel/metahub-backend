@@ -17,13 +17,13 @@ const settingSchema = new Schema<ISetting>(
     key: {
       type: String,
       required: [true, "Key is required."],
-      unique: true,
+      unique: true, 
       trim: true,
       minlength: [2, "Key must be at least 2 characters."],
       maxlength: [100, "Key cannot exceed 100 characters."],
     },
     value: {
-      type: Schema.Types.Mixed, // ✅ supports string | array | object
+      type: Schema.Types.Mixed,
       required: [true, "Value is required."],
     },
     isActive: {
@@ -34,7 +34,6 @@ const settingSchema = new Schema<ISetting>(
   { timestamps: true }
 );
 
-// 🔒 Index for faster queries
-settingSchema.index({ key: 1 });
+
 
 export default model<ISetting>("Setting", settingSchema);
