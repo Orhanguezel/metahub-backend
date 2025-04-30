@@ -14,5 +14,6 @@ const analyticsEventSchema = new mongoose.Schema({
   eventType: String,     // 👈 e.g. "view", "create", "update"
 });
 
-export default mongoose.models.AnalyticsEvent || mongoose.model("AnalyticsEvent", analyticsEventSchema);
+const AnalyticsEvent: mongoose.Model<any> = mongoose.models.AnalyticsEvent || mongoose.model("AnalyticsEvent", analyticsEventSchema);
+export default AnalyticsEvent;
 

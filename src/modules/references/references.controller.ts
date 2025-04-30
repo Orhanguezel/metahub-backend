@@ -1,7 +1,7 @@
 // src/controllers/references.controller.ts
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import Reference from "./references.models";
+import {Reference} from "./references.models";
 import { BASE_URL, UPLOAD_BASE_PATH } from "../../core/middleware/uploadMiddleware";
 import fs from "fs";
 import path from "path";
