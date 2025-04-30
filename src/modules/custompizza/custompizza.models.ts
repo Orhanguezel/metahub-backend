@@ -84,5 +84,6 @@ const customPizzaSchema = new Schema<ICustomPizza>(
   { timestamps: true }
 );
 
-const CustomPizza: Model<ICustomPizza> = mongoose.model<ICustomPizza>("CustomPizza", customPizzaSchema);
+const CustomPizza: Model<ICustomPizza> = mongoose.models.CustomPizza || mongoose.model<ICustomPizza>("CustomPizza", customPizzaSchema);
 export default CustomPizza;
+

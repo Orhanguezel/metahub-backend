@@ -152,5 +152,6 @@ userSchema.methods.isPasswordHashed = function (this: IUser): boolean {
   return isPasswordHashed(this.password);
 };
 
-const User = mongoose.model<IUser, IUserModel>("User", userSchema);
+const User: IUserModel = mongoose.models.User || mongoose.model<IUser, IUserModel>("User", userSchema);
 export default User;
+

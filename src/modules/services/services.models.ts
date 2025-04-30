@@ -1,4 +1,4 @@
-import { Schema, model, Document, Model } from "mongoose";
+import mongoose, { Schema, model, Document, Model } from "mongoose";
 
 export interface IService extends Document {
   title: {
@@ -83,5 +83,6 @@ const serviceSchema = new Schema<IService>(
   { timestamps: true }
 );
 
-const Service: Model<IService> = model<IService>("Service", serviceSchema);
+const Service: Model<IService> = mongoose.models.Service || model<IService>("Service", serviceSchema);
 export default Service;
+

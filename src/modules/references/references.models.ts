@@ -68,5 +68,6 @@ referenceSchema.pre("validate", function (this: IReference, next) {
   next();
 });
 
-const Reference = mongoose.model<IReference>("Reference", referenceSchema);
+const Reference = mongoose.models.Reference || mongoose.model<IReference>("Reference", referenceSchema);
 export default Reference;
+
