@@ -8,7 +8,7 @@ import {
   deleteOffer,
 } from "./offer.controller";
 
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 
 const router = express.Router();
 

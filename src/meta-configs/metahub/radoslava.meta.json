@@ -1,5 +1,5 @@
 {
-  "name": "services",
+  "name": "radoslava",
   "icon": "box",
   "roles": [
     "admin"
@@ -8,28 +8,44 @@
   "language": "en",
   "routes": [
     {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllRadoslava",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
       "method": "GET",
       "path": "/",
       "auth": true,
       "summary": "GET /",
       "validationName": "\"/\"",
-      "controllerName": "getAllServices"
+      "controllerName": "getAllRadoslava",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
-      "method": "GET",
+      "method": "PUT",
       "path": "/:id",
       "auth": true,
-      "summary": "GET /:id",
+      "summary": "PUT /:id",
       "validationName": "\"/:id\"",
-      "controllerName": "getServiceById"
+      "controllerName": "deleteRadoslava"
     },
     {
       "method": "DELETE",
       "path": "/:id",
       "auth": true,
       "summary": "DELETE /:id",
-      "validationName": "\"admin\")",
-      "controllerName": "deleteService"
+      "validationName": "\"/:id\"",
+      "controllerName": "deleteRadoslava"
     }
   ],
   "version": "1.0.1",
@@ -38,13 +54,13 @@
     "commitHash": "e8a6ae3bed398ecf0651b76a4b40982e94feb17f"
   },
   "commitHash": "e8a6ae3bed398ecf0651b76a4b40982e94feb17f",
-  "lastUpdatedAt": "2025-04-30T17:26:01.204Z",
+  "lastUpdatedAt": "2025-04-30T17:26:01.205Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
       "commitHash": "e8a6ae3bed398ecf0651b76a4b40982e94feb17f",
-      "date": "2025-04-30T17:26:01.204Z",
+      "date": "2025-04-30T17:26:01.205Z",
       "note": "Meta auto-generated"
     }
   ]

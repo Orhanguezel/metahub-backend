@@ -3,12 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
     "start": "node dist/server.js",
-    "embed-faqs": "ts-node src/scripts/embedFaqs.ts",
-    "generate:meta": "ts-node -r tsconfig-paths/register src/generateMeta.ts",
-    "watch:meta": "bun run src/scripts/watchMeta.ts",
-    "dev": "bun run generate:meta && ts-node -r tsconfig-paths/register src/server.ts"
+    "generate:meta": "bun src/generateMeta.ts",
+    "dev": "bun src/generateMeta.ts && ts-node -r tsconfig-paths/register src/server.ts",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
