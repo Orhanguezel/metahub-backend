@@ -10,8 +10,24 @@ router.use(authenticate, authorizeRoles("admin"));
 
 // 🔥 CRUD Endpoints
 router.get("/", getAllSettings);
-router.get("/:key", validateSettingKeyParam, getSettingByKey);
-router.post("/", validateUpsertSetting, upsertSetting);
-router.delete("/:key", validateSettingKeyParam, deleteSetting);
+
+router.get(
+  "/:key",
+  validateSettingKeyParam,
+  getSettingByKey
+);
+
+router.post(
+  "/",
+  validateUpsertSetting,
+  upsertSetting
+);
+
+router.delete(
+  "/:key",
+  validateSettingKeyParam,
+  deleteSetting
+);
+
 
 export default router;

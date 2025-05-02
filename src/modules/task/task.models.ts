@@ -1,5 +1,4 @@
-// src/models/task.models.ts
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, Document, Types, models, Model } from "mongoose";
 
 export interface ITask extends Document {
   description: {
@@ -46,4 +45,9 @@ const taskSchema = new Schema<ITask>(
   { timestamps: true }
 );
 
-export default model<ITask>("Task", taskSchema);
+// ✅ Guard + Model Tipi
+const Task: Model<ITask> =
+  models.Task || model<ITask>("Task", taskSchema);
+
+export default Task;
+export { Task };

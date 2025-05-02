@@ -1,12 +1,15 @@
 import express from "express";
-import settingRoutes from "./setting.routes";
+import routes from "./setting.routes";
 import Setting from "./setting.models";
+import * as settingController from "./setting.controller";
 
 const router = express.Router();
+router.use("/", routes);
 
-router.use("/", settingRoutes);
-
-export * from "./setting.controller";
+// ✅ Guard + Export (standart)
 export { Setting };
+export * from "./setting.controller";
+export * from "./setting.validation";
 export * from "./setting.models";
+
 export default router;

@@ -24,53 +24,95 @@ import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import upload from "@/core/middleware/uploadMiddleware";
 import { validateApiKey } from "@/core/middleware/validateApiKey";
 
+// ✅ Validations
+import {
+  validateRegister,
+  validateLogin,
+  validateChangePassword,
+  validateForgotPassword,
+  validateResetPassword,
+  validateUserIdParam,
+  validateUpdateUser,
+  validateUpdateUserRole,
+  validateToggleUserStatus,
+} from "./users.admin.validation";
+
 const router = express.Router();
 
-// 🔐 Auth
-router.post("/register", registerUser);
-router.post("/login", validateApiKey,loginUser);
-router.post("/change-password", authenticate, validateApiKey,changePassword);
-router.post("/forgot-password", validateApiKey,forgotPassword);
-router.post("/reset-password/:token", validateApiKey,resetPassword);
-
-// 👤 Profile
-router
-  .route("/profile")
+// 🔐 Auth Routes
+router.post("/register", validateRegister, registerUser);
+router.post("/login", validateApiKey, validateLogin, loginUser);
+router.post(
+  "/change-password",
+  authenticate,
+  validateApiKey,
+  validateChangePassword,
+  changePassword
+);
+router.post("/forgot-password", validateApiKey, validateForgotPassword, forgotPassword);
+router.post(
+  "/reset-password/:token",
+  validateApiKey,
+  validateResetPassword,
+  resetPassword
+);
 
 // 📋 Admin Routes
-router.get("/users", authenticate, authorizeRoles("admin"), validateApiKey,getUsers);
+router.get(
+  "/users",
+  authenticate,
+  authorizeRoles("admin"),
+  validateApiKey,
+  getUsers
+);
 
 router
   .route("/users/:id")
-  .get(authenticate, authorizeRoles("admin"), getUserById)
+  .get(
+    authenticate,
+    authorizeRoles("admin"),
+    validateUserIdParam,
+    getUserById
+  )
   .put(
     authenticate,
     authorizeRoles("admin"),
+    validateUserIdParam,
     (req, res, next) => {
       req.uploadType = "profile";
       next();
     },
     upload.single("profileImage"),
+    validateUpdateUser,
     updateUser
   )
-  .delete(authenticate, authorizeRoles("admin"), validateApiKey,deleteUser);
+  .delete(
+    authenticate,
+    authorizeRoles("admin"),
+    validateApiKey,
+    validateUserIdParam,
+    deleteUser
+  );
 
 router.put(
   "/users/:id/role",
   authenticate,
   authorizeRoles("admin"),
-  updateUserRole,
-  validateApiKey
+  validateUpdateUserRole,
+  validateApiKey,
+  updateUserRole
 );
 
 router.put(
   "/users/:id/status",
   authenticate,
   authorizeRoles("admin"),
+  validateToggleUserStatus,
   validateApiKey,
   toggleUserStatus
 );
 
+// 🔓 Logout (genel)
 router.post("/logout", logoutUser);
 
 export default router;

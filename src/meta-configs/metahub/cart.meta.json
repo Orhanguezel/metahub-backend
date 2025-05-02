@@ -11,49 +11,37 @@
       "method": "GET",
       "path": "/",
       "auth": true,
-      "summary": "GET /",
-      "validationName": "\"/clear\"",
-      "controllerName": "clearCart"
+      "summary": "GET /"
     },
     {
       "method": "POST",
       "path": "/add",
       "auth": true,
-      "summary": "POST /add",
-      "validationName": "\"/clear\"",
-      "controllerName": "clearCart"
+      "summary": "POST /add"
     },
     {
       "method": "PATCH",
       "path": "/increase/:productId",
       "auth": true,
-      "summary": "PATCH /increase/:productId",
-      "validationName": "\"/clear\"",
-      "controllerName": "clearCart"
+      "summary": "PATCH /increase/:productId"
     },
     {
       "method": "PATCH",
       "path": "/decrease/:productId",
       "auth": true,
-      "summary": "PATCH /decrease/:productId",
-      "validationName": "\"/clear\"",
-      "controllerName": "clearCart"
+      "summary": "PATCH /decrease/:productId"
     },
     {
       "method": "DELETE",
       "path": "/remove/:productId",
       "auth": true,
-      "summary": "DELETE /remove/:productId",
-      "validationName": "\"/clear\"",
-      "controllerName": "clearCart"
+      "summary": "DELETE /remove/:productId"
     },
     {
       "method": "DELETE",
       "path": "/clear",
       "auth": true,
-      "summary": "DELETE /clear",
-      "validationName": "\"/clear\"",
-      "controllerName": "clearCart"
+      "summary": "DELETE /clear"
     },
     {
       "method": "GET",
@@ -62,7 +50,11 @@
       "summary": "GET /",
       "validationName": "\"/\"",
       "controllerName": "getAllCarts",
-      "pathPrefix": "admin."
+      "pathPrefix": "admin.",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "GET",
@@ -96,16 +88,16 @@
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145"
+    "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b"
   },
-  "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-  "lastUpdatedAt": "2025-04-30T18:05:47.097Z",
+  "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+  "lastUpdatedAt": "2025-05-01T23:27:18.480Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-      "date": "2025-04-30T18:05:47.097Z",
+      "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+      "date": "2025-05-01T23:27:18.480Z",
       "note": "Meta auto-generated"
     }
   ]

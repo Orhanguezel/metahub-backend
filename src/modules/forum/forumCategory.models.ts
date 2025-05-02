@@ -1,6 +1,6 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, models, Model } from "mongoose";
 
-export interface IForumCategory extends Document {
+interface IForumCategory extends Document {
   name: {
     tr: string;
     en: string;
@@ -31,4 +31,9 @@ const forumCategorySchema = new Schema<IForumCategory>(
   { timestamps: true }
 );
 
-export default model<IForumCategory>("ForumCategory", forumCategorySchema);
+// ✅ Guard + Model Type
+const ForumCategory: Model<IForumCategory> =
+  models.ForumCategory || model<IForumCategory>("ForumCategory", forumCategorySchema);
+
+export { IForumCategory };
+export default ForumCategory;

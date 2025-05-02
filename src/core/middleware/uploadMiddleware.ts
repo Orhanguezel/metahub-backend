@@ -29,6 +29,7 @@ export const UPLOAD_FOLDERS = {
   library: "library",
   references: "references",
   sport: "sport-images",
+  spareparts: "spareparts-images",
   default: "misc",
 } as const;
 

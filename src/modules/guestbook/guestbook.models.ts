@@ -1,6 +1,6 @@
-import mongoose, { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, Document, Types, Model, models } from "mongoose";
 
-export interface IGuestbookEntry extends Document {
+interface IGuestbookEntry extends Document {
   name: string;
   email?: string;
   message: {
@@ -31,8 +31,9 @@ const guestbookSchema = new Schema<IGuestbookEntry>(
   { timestamps: true }
 );
 
-const Guestbook: mongoose.Model<IGuestbookEntry> = mongoose.models.Guestbook || model<IGuestbookEntry>("Guestbook", guestbookSchema);
+// ✅ Guard + Model Type
+const Guestbook: Model<IGuestbookEntry> =
+  models.Guestbook || model<IGuestbookEntry>("Guestbook", guestbookSchema);
+
 export default Guestbook;
-export { Guestbook };
-
-
+export { IGuestbookEntry };

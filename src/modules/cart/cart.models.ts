@@ -1,14 +1,16 @@
-import { Schema, model, Types, Document, Model } from "mongoose";
+import { Schema, model, Types, Document, Model, models } from "mongoose";
 import { IProduct } from "../product";
 
-export interface ICartItem {
+// 🛒 Cart Item Interface
+interface ICartItem {
   product: Types.ObjectId | IProduct;
   quantity: number;
   priceAtAddition: number;
   totalPriceAtAddition: number;
 }
 
-export interface ICart extends Document {
+// 🛒 Cart Interface
+interface ICart extends Document {
   user: Types.ObjectId;
   items: ICartItem[];
   totalPrice: number;
@@ -53,5 +55,9 @@ const cartSchema = new Schema<ICart>(
   { timestamps: true }
 );
 
-const Cart: Model<ICart> = model<ICart>("Cart", cartSchema);
+// ✅ Guard + Model Type (This module has been updated and is now standardized)
+const Cart: Model<ICart> = models.Cart || model<ICart>("Cart", cartSchema);
+
+// ✅ Guard + Model Type (This module has been updated and is now standardized)
+export { Cart, ICart, ICartItem };
 export default Cart;

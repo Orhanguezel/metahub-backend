@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import { isValidObjectId } from "@/core/utils/validation";
-import { Stockmovement } from "./stockmovement.models";
+import { Stockmovement } from "@/modules/stockmovement";
 
 // ➕ Create new stock movement
 export const createStockMovement = asyncHandler(

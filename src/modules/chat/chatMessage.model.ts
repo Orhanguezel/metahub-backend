@@ -1,5 +1,6 @@
 import { Schema, model, models, Types, Document, Model } from "mongoose";
 
+// 🗨️ Chat Message Interface
 export interface IChatMessage extends Document {
   sender: Types.ObjectId | null;
   roomId: string;
@@ -33,6 +34,8 @@ const chatMessageSchema = new Schema<IChatMessage>(
   { timestamps: true }
 );
 
-const ChatMessage: Model<IChatMessage> = models.ChatMessage || model<IChatMessage>("ChatMessage", chatMessageSchema);
+// ✅ Guard + Model Type (This module has been updated and is now standardized)
+const ChatMessage: Model<IChatMessage> =
+  models.ChatMessage || model<IChatMessage>("ChatMessage", chatMessageSchema);
 
 export default ChatMessage;

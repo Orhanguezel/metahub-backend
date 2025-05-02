@@ -9,22 +9,6 @@
   "routes": [
     {
       "method": "POST",
-      "path": "/simulate/stripe",
-      "auth": true,
-      "summary": "POST /simulate/stripe",
-      "validationName": "\"admin\")",
-      "controllerName": "simulateStripePayment"
-    },
-    {
-      "method": "POST",
-      "path": "/simulate/paypal",
-      "auth": true,
-      "summary": "POST /simulate/paypal",
-      "validationName": "\"admin\")",
-      "controllerName": "simulatePayPalPayment"
-    },
-    {
-      "method": "POST",
       "path": "/",
       "auth": true,
       "summary": "POST /",
@@ -51,54 +35,28 @@
       "method": "GET",
       "path": "/user",
       "auth": true,
-      "summary": "GET /user",
-      "validationName": "\"admin\")",
-      "controllerName": "markPaymentAsPaid"
+      "summary": "GET /user"
     },
     {
       "method": "GET",
       "path": "/order/:orderId",
       "auth": true,
-      "summary": "GET /order/:orderId",
-      "validationName": "\"admin\")",
-      "controllerName": "markPaymentAsPaid"
-    },
-    {
-      "method": "PUT",
-      "path": "/:id/mark-paid",
-      "auth": true,
-      "summary": "PUT /:id/mark-paid",
-      "validationName": "\"admin\")",
-      "controllerName": "markPaymentAsPaid"
-    },
-    {
-      "method": "PUT",
-      "path": "/:id/mark-failed",
-      "auth": true,
-      "summary": "PUT /:id/mark-failed",
-      "validationName": "\"admin\")",
-      "controllerName": "markPaymentAsFailed"
-    },
-    {
-      "method": "PUT",
-      "path": "/:id/update-method",
-      "auth": true,
-      "summary": "PUT /:id/update-method"
+      "summary": "GET /order/:orderId"
     }
   ],
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145"
+    "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b"
   },
-  "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-  "lastUpdatedAt": "2025-04-30T18:05:47.111Z",
+  "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+  "lastUpdatedAt": "2025-05-01T23:27:18.513Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-      "date": "2025-04-30T18:05:47.111Z",
+      "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+      "date": "2025-05-01T23:27:18.513Z",
       "note": "Meta auto-generated"
     }
   ]

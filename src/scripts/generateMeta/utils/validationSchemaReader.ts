@@ -2,19 +2,32 @@
 
 import { ValidationChain } from "express-validator";
 
-export async function getValidationBodySchema(moduleName: string, routePath: string): Promise<any | null> {
+export async function getValidationBodySchema(
+  moduleName: string,
+  routePath: string,
+  method: string = "post" // varsayılan post
+): Promise<any | null> {
   try {
     const validationModule = await import(`@/modules/${moduleName}/${moduleName}.validation`);
-    
+    const isEmptyModule = Object.keys(validationModule).length === 0;
+
+    // Eğer tamamen boş dosya ise hiç uyarı verme
+    if (isEmptyModule) {
+      return null;
+    }
+
     const matchedValidation = findMatchingValidation(validationModule, routePath);
     if (!matchedValidation) {
-      console.warn(`⚠️ No validation found for ${moduleName} ${routePath}`);
+      // Sadece GET metotları için uyarı basma (validasyon gerekmez)
+      if (method.toLowerCase() !== "get") {
+        console.warn(`⚠️ No validation found for ${moduleName} ${routePath}`);
+      }
       return null;
     }
 
     return transformExpressValidatorToJsonSchema(matchedValidation);
   } catch (err) {
-    console.warn(`⚠️ Validation import failed for ${moduleName}:`);
+    console.warn(`⚠️ Validation import failed for ${moduleName}:`, err.message);
     return null;
   }
 }
@@ -22,14 +35,32 @@ export async function getValidationBodySchema(moduleName: string, routePath: str
 function findMatchingValidation(validationModule: any, routePath: string) {
   const keys = Object.keys(validationModule);
 
+  const normalize = (str: string) =>
+    str.toLowerCase().replace(/[:/]/g, "").replace(/-/g, "");
+
+  const normalizedRoute = normalize(routePath);
+
   for (const key of keys) {
-    if (key.toLowerCase().includes("create") && routePath === "/") {
+    const normalizedKey = normalize(key);
+
+    // 1️⃣ Tam eşleşme
+    if (normalizedRoute === normalizedKey) {
       return validationModule[key];
     }
-    if (key.toLowerCase().includes("update") && routePath === "/:id") {
+
+    // 2️⃣ Parçalı eşleşme (örn: forgotpassword vs /forgot-password)
+    if (
+      normalizedRoute.includes(normalizedKey) ||
+      normalizedKey.includes(normalizedRoute)
+    ) {
       return validationModule[key];
     }
-    if (key.toLowerCase().includes("keyparam") && routePath.includes(":key")) {
+
+    // 3️⃣ create / update fallback
+    if (normalizedKey.includes("create") && routePath === "/") {
+      return validationModule[key];
+    }
+    if (normalizedKey.includes("update") && routePath === "/:id") {
       return validationModule[key];
     }
   }
@@ -38,7 +69,9 @@ function findMatchingValidation(validationModule: any, routePath: string) {
 }
 
 // 🛠️ Güvenli JSON Schema çevirici
-function transformExpressValidatorToJsonSchema(validationArray: ValidationChain[]): any {
+function transformExpressValidatorToJsonSchema(
+  validationArray: ValidationChain[]
+): any {
   const properties: Record<string, any> = {};
 
   for (const rule of validationArray) {
@@ -55,7 +88,11 @@ function transformExpressValidatorToJsonSchema(validationArray: ValidationChain[
 
     if (validators.includes("isBoolean")) {
       type = "boolean";
-    } else if (validators.includes("isNumeric") || validators.includes("isInt") || validators.includes("isFloat")) {
+    } else if (
+      validators.includes("isNumeric") ||
+      validators.includes("isInt") ||
+      validators.includes("isFloat")
+    ) {
       type = "number";
     } else if (validators.includes("isArray")) {
       type = "array";
@@ -69,5 +106,3 @@ function transformExpressValidatorToJsonSchema(validationArray: ValidationChain[
     properties,
   };
 }
-
-

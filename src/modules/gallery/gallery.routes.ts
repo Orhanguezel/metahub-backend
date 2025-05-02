@@ -9,22 +9,26 @@ import {
   updateGalleryItem,
 } from "./gallery.controller";
 
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
-import upload from "../../core/middleware/uploadMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import upload from "@/core/middleware/uploadMiddleware";
+import {
+  validateUploadGallery,
+  validateGalleryIdParam,
+} from "./gallery.validation";
 
 const router = express.Router();
 
-// 🔓 Public: Yayınlanmış medya
+// 🔓 Public
 router.get("/published", getPublishedGalleryItems);
 
-// 🔐 Admin: Tüm medya öğeleri
-router.get("/", authenticate, authorizeRoles("admin"), getAllGalleryItems);
+// 🔐 Admin
+router.use(authenticate, authorizeRoles("admin"));
 
-// 🔐 Admin: Medya yükle
+router.get("/", getAllGalleryItems);
+
 router.post(
   "/upload",
-  authenticate,
-  authorizeRoles("admin"),
+  validateUploadGallery,
   (req, _res, next) => {
     req.uploadType = "gallery";
     next();
@@ -33,36 +37,9 @@ router.post(
   uploadGalleryItem
 );
 
-// 🔐 Admin: Yayın durumunu değiştir
-router.patch(
-  "/:id/toggle",
-  authenticate,
-  authorizeRoles("admin"),
-  togglePublishGalleryItem
-);
-
-// 🔐 Admin: Medya güncelle
-router.put(
-  "/:id",
-  authenticate,
-  authorizeRoles("admin"),
-  updateGalleryItem
-);
-
-// 🔐 Admin: Soft delete (arşivle)
-router.patch(
-  "/:id/archive",
-  authenticate,
-  authorizeRoles("admin"),
-  softDeleteGalleryItem
-);
-
-// 🔐 Admin: Kalıcı silme
-router.delete(
-  "/:id",
-  authenticate,
-  authorizeRoles("admin"),
-  deleteGalleryItem
-);
+router.patch("/:id/toggle", validateGalleryIdParam, togglePublishGalleryItem);
+router.put("/:id", validateGalleryIdParam, updateGalleryItem);
+router.patch("/:id/archive", validateGalleryIdParam, softDeleteGalleryItem);
+router.delete("/:id", validateGalleryIdParam, deleteGalleryItem);
 
 export default router;

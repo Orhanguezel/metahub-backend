@@ -13,23 +13,27 @@
       "auth": true,
       "summary": "GET /",
       "validationName": "\"/\"",
-      "controllerName": "getUserWishlist"
+      "controllerName": "getUserWishlist",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "POST",
       "path": "/add/:productId",
       "auth": true,
       "summary": "POST /add/:productId",
-      "validationName": "\"/add/:productId\"",
-      "controllerName": "validateObjectId(\"productId\""
+      "validationName": "\"/clear\"",
+      "controllerName": "clearWishlist"
     },
     {
       "method": "DELETE",
       "path": "/remove/:productId",
       "auth": true,
       "summary": "DELETE /remove/:productId",
-      "validationName": "\"/remove/:productId\"",
-      "controllerName": "validateObjectId(\"productId\""
+      "validationName": "\"/clear\"",
+      "controllerName": "clearWishlist"
     },
     {
       "method": "DELETE",
@@ -43,16 +47,16 @@
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145"
+    "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b"
   },
-  "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-  "lastUpdatedAt": "2025-04-30T18:05:46.867Z",
+  "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+  "lastUpdatedAt": "2025-05-01T23:27:18.415Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-      "date": "2025-04-30T18:05:46.867Z",
+      "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+      "date": "2025-05-01T23:27:18.415Z",
       "note": "Meta auto-generated"
     }
   ]

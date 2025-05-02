@@ -1,12 +1,11 @@
 import express from "express";
-import routes from "./stockmovement.routes";
-import Stockmovement from "./stockmovement.models";
+import stockmovementRoutes from "./stockmovement.routes";
+import Stockmovement, { IStockmovement } from "./stockmovement.models";
+import * as stockmovementController from "./stockmovement.controller";
 
 const router = express.Router();
 
-router.use("/", routes);
+router.use("/", stockmovementRoutes);
 
-export * from "./stockmovement.controller";
-export * from "./stockmovement.models";
-export { Stockmovement };
+export { Stockmovement, IStockmovement, stockmovementController };
 export default router;

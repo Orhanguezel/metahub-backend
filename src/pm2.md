@@ -1,6 +1,12 @@
 Harika! Kodları düzenlediysen şimdi PM2 sürecini yeniden başlatmak için şu adımları sırayla uygulayabilirsin:
 
 ---
+#### 1️⃣. PM2 Logları Temizle:
+
+```bash
+pm2 flush
+```
+
 
 ### ✅ 1. Mevcut Süreci Durdur (Eğer açık ise):
 ```bash

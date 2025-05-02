@@ -1,10 +1,11 @@
-// src/modules/invoice/index.ts
 import express from "express";
 import routes from "./feedback.routes";
+import { Feedback } from "./feedback.models";
 
 const router = express.Router();
 router.use("/", routes);
 
 export * from "./feedback.controller";
-export { default as Feedback} from "./feedback.models";
+export * from "./feedback.validation";
+export { Feedback };
 export default router;

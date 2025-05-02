@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
-import Feedback from "./feedback.models";
-import { isValidObjectId } from "../../core/utils/validation";
+import { Feedback } from "@/modules/feedback";
+import { isValidObjectId } from "@/core/utils/validation";
 
-// 💬 Yeni geri bildirim oluştur
-export const createFeedback = asyncHandler(async (req: Request, res: Response) => {
+// 💬 Create Feedback
+export const createFeedback = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { name, email, message, rating } = req.body;
 
   const langs: ("tr" | "en" | "de")[] = ["tr", "en", "de"];
@@ -12,12 +12,8 @@ export const createFeedback = asyncHandler(async (req: Request, res: Response) =
 
   if (!name || !email || !isValidMessage) {
     res.status(400).json({
-      message:
-        req.locale === "de"
-          ? "Bitte alle Pflichtfelder ausfüllen."
-          : req.locale === "tr"
-          ? "Tüm zorunlu alanlar doldurulmalıdır."
-          : "All required fields must be filled.",
+      success: false,
+      message: "All required fields must be filled.",
     });
     return;
   }
@@ -32,124 +28,94 @@ export const createFeedback = asyncHandler(async (req: Request, res: Response) =
   });
 
   res.status(201).json({
-    message:
-      req.locale === "de"
-        ? "Feedback wurde gesendet."
-        : req.locale === "tr"
-        ? "Geri bildirim başarıyla gönderildi."
-        : "Feedback submitted successfully.",
-    feedback,
+    success: true,
+    message: "Feedback submitted successfully.",
+    data: feedback,
   });
 });
 
-
-// 🔐 Tüm geri bildirimleri getir (isteğe bağlı dil filtresi)
-export const getAllFeedbacks = asyncHandler(async (req: Request, res: Response) => {
+// 🔐 Get All Feedbacks (Admin)
+export const getAllFeedbacks = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const lang = (req.query.lang as string) || req.locale || "en";
   const filter = {
     [`message.${lang}`]: { $exists: true },
   };
 
   const feedbacks = await Feedback.find(filter).sort({ createdAt: -1 });
-  res.status(200).json(feedbacks);
+
+  res.status(200).json({
+    success: true,
+    data: feedbacks,
+  });
 });
 
-
-// 🔁 Yayın durumunu değiştir (admin)
-export const togglePublishFeedback = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-
-    if (!isValidObjectId(id)) {
-      res.status(400).json({ message: "Invalid ID" });
-      return;
-    }
-
-    const feedback = await Feedback.findById(id);
-    if (!feedback) {
-      res.status(404).json({
-        message:
-          req.locale === "de"
-            ? "Feedback nicht gefunden."
-            : req.locale === "tr"
-            ? "Geri bildirim bulunamadı."
-            : "Feedback not found.",
-      });
-      return;
-    }
-
-    feedback.isPublished = !feedback.isPublished;
-    await feedback.save();
-
-    res.status(200).json({
-      message:
-        req.locale === "de"
-          ? `Feedback wurde ${
-              feedback.isPublished ? "veröffentlicht" : "entfernt"
-            }.`
-          : req.locale === "tr"
-          ? `Geri bildirim ${
-              feedback.isPublished ? "yayınlandı" : "yayından kaldırıldı"
-            }.`
-          : `Feedback ${feedback.isPublished ? "published" : "unpublished"}.`,
-      feedback,
-    });
-  }
-);
-
-// ❌ Geri bildirimi sil (admin)
-export const deleteFeedback = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-
-    if (!isValidObjectId(id)) {
-      res.status(400).json({ message: "Invalid ID" });
-      return;
-    }
-
-    const feedback = await Feedback.findByIdAndDelete(id);
-    if (!feedback) {
-      res.status(404).json({
-        message:
-          req.locale === "de"
-            ? "Feedback wurde nicht gefunden."
-            : req.locale === "tr"
-            ? "Geri bildirim bulunamadı."
-            : "Feedback not found.",
-      });
-      return;
-    }
-
-    res.status(200).json({
-      message:
-        req.locale === "de"
-          ? "Feedback wurde gelöscht."
-          : req.locale === "tr"
-          ? "Geri bildirim silindi."
-          : "Feedback deleted successfully.",
-    });
-  }
-);
-
-// ✏️ Geri bildirimi güncelle (admin)
-export const updateFeedback = asyncHandler(async (req: Request, res: Response) => {
+// 🔁 Toggle Publish
+export const togglePublishFeedback = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { id } = req.params;
-  const { name, email, message, rating, isPublished, isActive } = req.body;
 
   if (!isValidObjectId(id)) {
-    res.status(400).json({ message: "Invalid ID" });
+    res.status(400).json({ success: false, message: "Invalid ID" });
     return;
   }
 
   const feedback = await Feedback.findById(id);
   if (!feedback) {
     res.status(404).json({
-      message:
-        req.locale === "de"
-          ? "Feedback nicht gefunden."
-          : req.locale === "tr"
-          ? "Geri bildirim bulunamadı."
-          : "Feedback not found.",
+      success: false,
+      message: "Feedback not found.",
+    });
+    return;
+  }
+
+  feedback.isPublished = !feedback.isPublished;
+  await feedback.save();
+
+  res.status(200).json({
+    success: true,
+    message: `Feedback ${feedback.isPublished ? "published" : "unpublished"}.`,
+    data: feedback,
+  });
+});
+
+// ❌ Delete Feedback
+export const deleteFeedback = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const { id } = req.params;
+
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid ID" });
+    return;
+  }
+
+  const feedback = await Feedback.findByIdAndDelete(id);
+  if (!feedback) {
+    res.status(404).json({
+      success: false,
+      message: "Feedback not found.",
+    });
+    return;
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Feedback deleted successfully.",
+  });
+});
+
+// ✏️ Update Feedback
+export const updateFeedback = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const { id } = req.params;
+  const { name, email, message, rating, isPublished, isActive } = req.body;
+
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid ID" });
+    return;
+  }
+
+  const feedback = await Feedback.findById(id);
+  if (!feedback) {
+    res.status(404).json({
+      success: false,
+      message: "Feedback not found.",
     });
     return;
   }
@@ -164,40 +130,35 @@ export const updateFeedback = asyncHandler(async (req: Request, res: Response) =
   await feedback.save();
 
   res.status(200).json({
-    message:
-      req.locale === "de"
-        ? "Feedback aktualisiert."
-        : req.locale === "tr"
-        ? "Geri bildirim güncellendi."
-        : "Feedback updated.",
-    feedback,
+    success: true,
+    message: "Feedback updated.",
+    data: feedback,
   });
 });
 
-// 🌍 Yayınlanmış geri bildirimleri getir (public)
-export const getPublishedFeedbacks = asyncHandler(async (_req: Request, res: Response) => {
+// 🌍 Get Published Feedbacks (Public)
+export const getPublishedFeedbacks = asyncHandler(async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
   const feedbacks = await Feedback.find({ isPublished: true, isActive: true }).sort({ createdAt: -1 });
-  res.status(200).json(feedbacks);
+  res.status(200).json({
+    success: true,
+    data: feedbacks,
+  });
 });
 
-// ❌ Soft delete (isActive: false)
-export const softDeleteFeedback = asyncHandler(async (req: Request, res: Response) => {
+// ❌ Soft Delete (isActive: false)
+export const softDeleteFeedback = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { id } = req.params;
 
   if (!isValidObjectId(id)) {
-    res.status(400).json({ message: "Invalid ID" });
+    res.status(400).json({ success: false, message: "Invalid ID" });
     return;
   }
 
   const feedback = await Feedback.findById(id);
   if (!feedback) {
     res.status(404).json({
-      message:
-        req.locale === "de"
-          ? "Feedback wurde nicht gefunden."
-          : req.locale === "tr"
-          ? "Geri bildirim bulunamadı."
-          : "Feedback not found.",
+      success: false,
+      message: "Feedback not found.",
     });
     return;
   }
@@ -206,14 +167,7 @@ export const softDeleteFeedback = asyncHandler(async (req: Request, res: Respons
   await feedback.save();
 
   res.status(200).json({
-    message:
-      req.locale === "de"
-        ? "Feedback archiviert."
-        : req.locale === "tr"
-        ? "Geri bildirim arşivlendi."
-        : "Feedback archived.",
+    success: true,
+    message: "Feedback archived.",
   });
 });
-
-
-

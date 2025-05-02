@@ -1,7 +1,7 @@
-// src/models/customer.model.ts
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Model, models } from "mongoose";
 
-export interface ICustomer extends Document {
+// ✅ Customer Interface
+interface ICustomer extends Document {
   companyName: string;
   contactName: string;
   email: string;
@@ -16,6 +16,7 @@ export interface ICustomer extends Document {
   updatedAt: Date;
 }
 
+// ✅ Customer Schema
 const customerSchema = new Schema<ICustomer>(
   {
     companyName: { type: String, required: true, unique: true },
@@ -32,4 +33,9 @@ const customerSchema = new Schema<ICustomer>(
   { timestamps: true }
 );
 
-export default model<ICustomer>("Customer", customerSchema);
+// ✅ Guard + Model Type (This module has been updated and is now standardized)
+const Customer: Model<ICustomer> =
+  models.Customer || model<ICustomer>("Customer", customerSchema);
+
+export { Customer, ICustomer };
+export default Customer;

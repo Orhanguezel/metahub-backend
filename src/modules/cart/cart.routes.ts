@@ -2,6 +2,8 @@ import { Router } from "express";
 import { authenticate } from "@/core/middleware/authMiddleware";
 import { validateRequest } from "@/core/middleware/validateRequest";
 import { validateApiKey } from "@/core/middleware/validateApiKey";
+import { analyticsLogger } from "@/core/middleware/analyticsLogger"; // ✅ Added
+
 import {
   addToCart,
   getUserCart,
@@ -10,6 +12,7 @@ import {
   removeFromCart,
   clearCart,
 } from "./cart.controller";
+
 import {
   addToCartValidator,
   cartItemParamValidator,
@@ -17,13 +20,18 @@ import {
 
 const router = Router();
 
-router.use(authenticate);
+router.use(authenticate, analyticsLogger); // ✅ Logger added here
 
-router.get("/", validateApiKey,getUserCart);
-router.post("/add", addToCartValidator, validateRequest, validateApiKey,addToCart);
-router.patch("/increase/:productId", cartItemParamValidator, validateRequest, validateApiKey,increaseQuantity);
-router.patch("/decrease/:productId", cartItemParamValidator, validateRequest, validateApiKey,decreaseQuantity);
-router.delete("/remove/:productId", cartItemParamValidator, validateRequest, validateApiKey,removeFromCart);
-router.delete("/clear", clearCart);
+router.get("/", validateApiKey, getUserCart);
+
+router.post("/add", addToCartValidator, validateRequest, validateApiKey, addToCart);
+
+router.patch("/increase/:productId", cartItemParamValidator, validateRequest, validateApiKey, increaseQuantity);
+
+router.patch("/decrease/:productId", cartItemParamValidator, validateRequest, validateApiKey, decreaseQuantity);
+
+router.delete("/remove/:productId", cartItemParamValidator, validateRequest, validateApiKey, removeFromCart);
+
+router.delete("/clear", validateApiKey, clearCart);
 
 export default router;

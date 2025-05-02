@@ -8,17 +8,21 @@ import {
   deleteLibraryItem,
 } from "./library.controller";
 
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
-import upload from "../../core/middleware/uploadMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import upload from "@/core/middleware/uploadMiddleware";
+import {
+  validateCreateLibrary,
+  validateLibraryIdParam,
+} from "./library.validation";
 
 const router = express.Router();
 
 // 🌐 Public Routes
 router.get("/", getAllLibraryItems);
 router.get("/slug/:slug", getLibraryItemBySlug);
-router.get("/:id", getLibraryItemById);
+router.get("/:id", validateLibraryIdParam, getLibraryItemById);
 
-// 🔐 Protected Routes
+// 🔐 Admin/Moderator Routes
 router.post(
   "/",
   authenticate,
@@ -27,7 +31,8 @@ router.post(
     req.uploadType = "library";
     next();
   },
-  upload.array("files", 2), 
+  upload.array("files", 2),
+  validateCreateLibrary,
   createLibraryItem
 );
 
@@ -40,6 +45,7 @@ router.put(
     next();
   },
   upload.single("file"),
+  validateLibraryIdParam,
   updateLibraryItem
 );
 
@@ -47,6 +53,7 @@ router.delete(
   "/:id",
   authenticate,
   authorizeRoles("admin"),
+  validateLibraryIdParam,
   deleteLibraryItem
 );
 

@@ -1,4 +1,5 @@
-import { Schema, model, Document, Types } from "mongoose";
+// ✅ Guard + Model Typing 
+import mongoose, { Schema, model, models, Document, Types, Model } from "mongoose";
 
 export interface IBlog extends Document {
   title: string;
@@ -7,7 +8,7 @@ export interface IBlog extends Document {
   summary: string;
   images: string[];
   tags: string[];
-  category: Types.ObjectId; 
+  category: Types.ObjectId;
   author: string;
   isPublished?: boolean;
   publishedAt?: Date;
@@ -40,7 +41,7 @@ const blogSchema = new Schema<IBlog>(
     tags: [{ type: String }],
     category: {
       type: Schema.Types.ObjectId,
-      ref: "BlogCategory", // ✅ BlogCategory modeline bağlandı
+      ref: "BlogCategory",
       required: true,
     },
     author: {
@@ -69,7 +70,7 @@ const blogSchema = new Schema<IBlog>(
   { timestamps: true }
 );
 
-// 🔁 Slug otomatik üretimi
+// 🔁 Automatic slug generation
 blogSchema.pre("validate", function (this: IBlog, next) {
   if (!this.slug && this.title) {
     this.slug = this.title
@@ -82,6 +83,7 @@ blogSchema.pre("validate", function (this: IBlog, next) {
   next();
 });
 
-const Blog = model<IBlog>("Blog", blogSchema);
+// ✅ Guard + Model Type
+const Blog: Model<IBlog> = models.Blog || model<IBlog>("Blog", blogSchema);
 
-export default Blog;
+export { Blog };

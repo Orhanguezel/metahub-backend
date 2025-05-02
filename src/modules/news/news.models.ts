@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Types } from "mongoose";
+import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
 
 export interface INews extends Document {
   title: {
@@ -20,7 +20,7 @@ export interface INews extends Document {
   images: string[];
   tags: string[];
   author?: string;
-  category?: Types.ObjectId; 
+  category?: Types.ObjectId;
   isPublished: boolean;
   publishedAt?: Date;
   comments: Types.ObjectId[];
@@ -49,13 +49,10 @@ const newsSchema: Schema = new Schema<INews>(
     images: [{ type: String, required: true }],
     tags: [{ type: String }],
     author: { type: String },
-    
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "NewsCategory",
-      required: false,
     },
-
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
@@ -65,6 +62,7 @@ const newsSchema: Schema = new Schema<INews>(
   }
 );
 
+// ✅ Slug oluşturucu middleware
 newsSchema.pre("validate", function (this: INews, next) {
   const baseTitle = this.title?.en || this.title?.de || this.title?.tr || "news";
   if (!this.slug && baseTitle) {
@@ -76,5 +74,9 @@ newsSchema.pre("validate", function (this: INews, next) {
   next();
 });
 
-const News = mongoose.model<INews>("News", newsSchema);
+// ✅ Guard + Model Type
+const News: Model<INews> =
+  (models.News as Model<INews>) || mongoose.model<INews>("News", newsSchema);
+
 export default News;
+export { News };

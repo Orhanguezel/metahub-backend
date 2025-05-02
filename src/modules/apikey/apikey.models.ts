@@ -1,4 +1,5 @@
-// src/modules/apikey/apikey.models.ts
+// ✅ Guard + Model Type
+
 import mongoose, {
   Schema,
   model,
@@ -17,13 +18,19 @@ export interface IApikey extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
-const apikeySchema = new Schema<IApikey>({
-  name: { type: String, required: true },
-  key: { type: String, required: true, unique: true },
-  status: { type: String, enum: ["active", "revoked"], default: "active" },
-  lastUsedAt: { type: Date },
-}, { timestamps: true });
-export const Apikey: Model<IApikey> = models.Apikey || model<IApikey>("Apikey", apikeySchema);
+
+const apikeySchema = new Schema<IApikey>(
+  {
+    name: { type: String, required: true },
+    key: { type: String, required: true, unique: true },
+    status: { type: String, enum: ["active", "revoked"], default: "active" },
+    lastUsedAt: { type: Date },
+  },
+  { timestamps: true }
+);
+
+export const Apikey: Model<IApikey> =
+  models.Apikey || model<IApikey>("Apikey", apikeySchema);
 
 // 📊 ApiKeyLog
 export interface IApiKeyLog extends Document {
@@ -35,12 +42,18 @@ export interface IApiKeyLog extends Document {
   userAgent: string;
   createdAt: Date;
 }
-const apiKeyLogSchema = new Schema<IApiKeyLog>({
-  apiKey: { type: Schema.Types.ObjectId, ref: "Apikey", required: true },
-  route: { type: String, required: true },
-  method: { type: String, required: true },
-  statusCode: { type: Number, required: true },
-  ip: { type: String },
-  userAgent: { type: String },
-}, { timestamps: { createdAt: true, updatedAt: false } });
-export const ApiKeyLog: Model<IApiKeyLog> = models.ApiKeyLog || model<IApiKeyLog>("ApiKeyLog", apiKeyLogSchema);
+
+const apiKeyLogSchema = new Schema<IApiKeyLog>(
+  {
+    apiKey: { type: Schema.Types.ObjectId, ref: "Apikey", required: true },
+    route: { type: String, required: true },
+    method: { type: String, required: true },
+    statusCode: { type: Number, required: true },
+    ip: { type: String },
+    userAgent: { type: String },
+  },
+  { timestamps: { createdAt: true, updatedAt: false } }
+);
+
+export const ApiKeyLog: Model<IApiKeyLog> =
+  models.ApiKeyLog || model<IApiKeyLog>("ApiKeyLog", apiKeyLogSchema);

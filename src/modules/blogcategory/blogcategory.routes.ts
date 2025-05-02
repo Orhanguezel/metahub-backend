@@ -8,19 +8,25 @@ import {
 } from "./blogcategory.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import { validateCreateBlogCategory, validateUpdateBlogCategory, validateObjectIdParam } from "./blogcategory.validation";
+import { analyticsLogger } from "@/core/middleware/analyticsLogger"; // ✅ Eklendi
 
 const router = express.Router();
 
 router.use(authenticate, authorizeRoles("admin"));
 
-router.post("/", validateCreateBlogCategory, createBlogCategory);
+// ➕ Create Category
+router.post("/", analyticsLogger, validateCreateBlogCategory, createBlogCategory);
 
-router.get("/", getAllBlogCategories);
+// 📝 Get All Categories
+router.get("/", analyticsLogger, getAllBlogCategories);
 
-router.get("/:id", validateObjectIdParam, getBlogCategoryById);
+// 🔍 Get Single Category
+router.get("/:id", analyticsLogger, validateObjectIdParam, getBlogCategoryById);
 
-router.put("/:id", validateObjectIdParam, validateUpdateBlogCategory, updateBlogCategory);
+// ✏️ Update Category
+router.put("/:id", analyticsLogger, validateObjectIdParam, validateUpdateBlogCategory, updateBlogCategory);
 
-router.delete("/:id", validateObjectIdParam, deleteBlogCategory);
+// 🗑️ Delete Category
+router.delete("/:id", analyticsLogger, validateObjectIdParam, deleteBlogCategory);
 
 export default router;

@@ -1,10 +1,14 @@
+// ✅ index.ts (güncel hali)
 import express from "express";
 import routes from "./experience.routes";
 
-export { default as Experience } from "./experience.models";
-export * from "./experience.controller";
+import { Experience, IExperience } from "./experience.models";
 
 const router = express.Router();
 router.use("/", routes);
+
+export { Experience, IExperience };
+export * from "./experience.controller";
+export * from "./experience.validation";
 
 export default router;

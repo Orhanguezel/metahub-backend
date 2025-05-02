@@ -1,4 +1,4 @@
-import { Schema, model, Document, Types, Model } from "mongoose";
+import { Schema, Document, Model, Types, models, model } from "mongoose";
 
 export type PaymentMethod = "cash_on_delivery" | "credit_card" | "paypal";
 export type PaymentStatus = "pending" | "paid" | "failed";
@@ -18,16 +18,8 @@ export interface IPayment extends Document {
 
 const paymentSchema = new Schema<IPayment>(
   {
-    order: {
-      type: Schema.Types.ObjectId,
-      ref: "Order",
-      required: true,
-    },
-    amount: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
+    order: { type: Schema.Types.ObjectId, ref: "Order", required: true },
+    amount: { type: Number, required: true, min: 0 },
     method: {
       type: String,
       enum: ["cash_on_delivery", "credit_card", "paypal"],
@@ -38,26 +30,20 @@ const paymentSchema = new Schema<IPayment>(
       enum: ["pending", "paid", "failed"],
       default: "pending",
     },
-    transactionId: {
-      type: String,
-      trim: true,
-    },
-    paidAt: {
-      type: Date,
-    },
+    transactionId: { type: String, trim: true },
+    paidAt: { type: Date },
     language: {
       type: String,
       enum: ["tr", "en", "de"],
       default: "en",
     },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-const Payment: Model<IPayment> = model<IPayment>("Payment", paymentSchema);
+// ✅ Guard + Model
+const Payment: Model<IPayment> =
+  models.Payment || model<IPayment>("Payment", paymentSchema);
 
-export default Payment;
+export { Payment };

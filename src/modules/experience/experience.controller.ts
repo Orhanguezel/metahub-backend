@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import Experience from "./experience.models";
+import { isValidObjectId } from "@/core/utils/validation";
+import { Experience } from "@/modules/experience";
 
-// 🔹 Tüm deneyimleri getir (dil filtreli)
+// 🔹 Get all experiences (optional lang filter)
 export const getAllExperiences = asyncHandler(async (req: Request, res: Response) => {
   const lang = (req.query.lang as string) || req.locale || "en";
 
@@ -11,32 +12,36 @@ export const getAllExperiences = asyncHandler(async (req: Request, res: Response
     [`company.${lang}`]: { $exists: true },
   }).sort({ createdAt: -1 });
 
-  res.status(200).json(experiences);
+  res.status(200).json({
+    success: true,
+    data: experiences,
+  });
 });
 
-// 🔹 Yeni deneyim ekle
-export const createExperience = asyncHandler(async (req: Request, res: Response) => {
-  const {
-    position,
-    company,
-    period,
-    description,
-    location,
-    image,
-  } = req.body;
+// 🔹 Get single experience by ID
+export const getExperienceById = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
 
-  if (!position || !company || !period) {
-    res.status(400).json({
-      success: false,
-      message:
-        req.locale === "de"
-          ? "Position, Unternehmen und Zeitraum sind erforderlich."
-          : req.locale === "tr"
-          ? "Pozisyon, şirket ve dönem alanları zorunludur."
-          : "Position, company and period are required.",
-    });
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid experience ID." });
     return;
   }
+
+  const experience = await Experience.findById(id);
+  if (!experience) {
+    res.status(404).json({ success: false, message: "Experience not found." });
+    return;
+  }
+
+  res.status(200).json({
+    success: true,
+    data: experience,
+  });
+});
+
+// ➕ Create experience
+export const createExperience = asyncHandler(async (req: Request, res: Response) => {
+  const { position, company, period, description, location, image } = req.body;
 
   const newExperience = await Experience.create({
     position,
@@ -49,12 +54,51 @@ export const createExperience = asyncHandler(async (req: Request, res: Response)
 
   res.status(201).json({
     success: true,
-    message:
-      req.locale === "de"
-        ? "Berufserfahrung erfolgreich hinzugefügt."
-        : req.locale === "tr"
-        ? "Deneyim başarıyla eklendi."
-        : "Experience created successfully.",
-    experience: newExperience,
+    message: "Experience created successfully.",
+    data: newExperience,
+  });
+});
+
+// ✏️ Update experience
+export const updateExperience = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const updates = req.body;
+
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid experience ID." });
+    return;
+  }
+
+  const experience = await Experience.findByIdAndUpdate(id, updates, { new: true });
+  if (!experience) {
+    res.status(404).json({ success: false, message: "Experience not found." });
+    return;
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Experience updated successfully.",
+    data: experience,
+  });
+});
+
+// 🗑️ Delete experience
+export const deleteExperience = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid experience ID." });
+    return;
+  }
+
+  const experience = await Experience.findByIdAndDelete(id);
+  if (!experience) {
+    res.status(404).json({ success: false, message: "Experience not found." });
+    return;
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Experience deleted successfully.",
   });
 });

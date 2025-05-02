@@ -1,16 +1,11 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import Comment from "./comment.models";
+import { Comment } from "@/modules/comment";
 import { isValidObjectId } from "@/core/utils/validation";
 
 // ✅ Create new comment (public)
 export const createComment = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { name, email, comment, contentType, contentId } = req.body;
-
-  if (!name || !email || !comment || !contentType || !contentId) {
-    res.status(400).json({ success: false, message: "All fields are required." });
-    return;
-  }
 
   const newComment = await Comment.create({
     name,
@@ -48,11 +43,6 @@ export const getCommentsForContent = asyncHandler(async (req: Request, res: Resp
     return;
   }
 
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ success: false, message: "Invalid content ID." });
-    return;
-  }
-
   const comments = await Comment.find({
     contentType: type,
     contentId: id,
@@ -70,11 +60,6 @@ export const getCommentsForContent = asyncHandler(async (req: Request, res: Resp
 // ✅ Admin - Toggle publish/unpublish comment
 export const togglePublishComment = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ success: false, message: "Invalid comment ID." });
-    return;
-  }
 
   const comment = await Comment.findById(id);
   if (!comment) {
@@ -95,11 +80,6 @@ export const togglePublishComment = asyncHandler(async (req: Request, res: Respo
 // ✅ Admin - Soft delete comment
 export const deleteComment = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ success: false, message: "Invalid comment ID." });
-    return;
-  }
 
   const comment = await Comment.findById(id);
   if (!comment) {

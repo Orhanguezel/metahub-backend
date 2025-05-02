@@ -1,5 +1,12 @@
-import offerRoutes from "./offer.routes";
-export { default as Offer } from "./offer.model";
-export * from "./offer.controller";
+import express from "express";
+import routes from "./offer.routes";
+import Offer from "./offer.model";
+import * as offerController from "./offer.controller";
 
-export default offerRoutes;
+const router = express.Router();
+router.use("/", routes);
+
+// ✅ Guard + Export (standart)
+export { Offer, offerController };
+export * from "./offer.validation"; 
+export default router;

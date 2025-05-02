@@ -86,5 +86,8 @@ const addressSchema = new Schema<IAddress>(
   }
 );
 
-const Address: Model<IAddress> = mongoose.model<IAddress>("Address", addressSchema);
+// ✅ Guardlı model tanımı
+const Address: Model<IAddress> =
+  mongoose.models.Address || mongoose.model<IAddress>("Address", addressSchema);
+
 export default Address;

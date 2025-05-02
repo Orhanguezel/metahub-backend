@@ -8,18 +8,42 @@ import {
   deleteArticle,
 } from "./articles.controller";
 
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import {
+  validateCreateArticle,
+  validateUpdateArticle,
+  validateArticleId,
+} from "./articles.validation";
 
 const router = express.Router();
 
 // 🌐 Public Routes
 router.get("/", getAllArticles);
 router.get("/slug/:slug", getArticleBySlug);
-router.get("/:id", getArticleById); // admin panel için de kullanılabilir
+router.get("/:id", validateArticleId, getArticleById);
 
-// 🔐 Protected Routes (admin ve moderator yetkisi gerekir)
-router.post("/", authenticate, authorizeRoles("admin", "moderator"), createArticle);
-router.put("/:id", authenticate, authorizeRoles("admin", "moderator"), updateArticle);
-router.delete("/:id", authenticate, authorizeRoles("admin"), deleteArticle);
+// 🔐 Protected Routes 
+router.post(
+  "/",
+  authenticate,
+  authorizeRoles("admin", "moderator"),
+  validateCreateArticle,
+  createArticle
+);
+router.put(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin", "moderator"),
+  validateArticleId,
+  validateUpdateArticle,
+  updateArticle
+);
+router.delete(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateArticleId,
+  deleteArticle
+);
 
 export default router;

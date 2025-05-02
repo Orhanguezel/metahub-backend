@@ -1,5 +1,6 @@
 import { Schema, model, models, Types, Document, Model } from "mongoose";
 
+// 💬 Chat Session Interface
 export interface IChatSession extends Document {
   roomId: string;
   user?: Types.ObjectId;
@@ -14,6 +15,8 @@ const chatSessionSchema = new Schema<IChatSession>({
   closedAt: { type: Date },
 });
 
-const ChatSession: Model<IChatSession> = models.ChatSession || model<IChatSession>("ChatSession", chatSessionSchema);
+// ✅ Guard + Model Type (This module has been updated and is now standardized)
+const ChatSession: Model<IChatSession> =
+  models.ChatSession || model<IChatSession>("ChatSession", chatSessionSchema);
 
 export default ChatSession;

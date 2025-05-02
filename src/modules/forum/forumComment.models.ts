@@ -1,6 +1,6 @@
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, Document, Types, models, Model } from "mongoose";
 
-export interface IForumComment extends Document {
+interface IForumComment extends Document {
   content: {
     tr: string;
     en: string;
@@ -31,4 +31,9 @@ const forumCommentSchema = new Schema<IForumComment>(
   { timestamps: true }
 );
 
-export default model<IForumComment>("ForumComment", forumCommentSchema);
+// ✅ Guard + Model Type
+const ForumComment: Model<IForumComment> =
+  models.ForumComment || model<IForumComment>("ForumComment", forumCommentSchema);
+
+export { IForumComment };
+export default ForumComment;

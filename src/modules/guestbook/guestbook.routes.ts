@@ -1,5 +1,3 @@
-// src/routes/guestbook.routes.ts
-
 import express from "express";
 import {
   createEntry,
@@ -8,16 +6,23 @@ import {
   togglePublishEntry,
   deleteEntry,
 } from "./guestbook.controller";
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import {
+  validateGuestbookIdParam,
+  validateCreateGuestbookEntry,
+} from "./guestbook.validation";
 
 const router = express.Router();
 
-router.post("/", createEntry);
+// Public
+router.post("/", validateCreateGuestbookEntry, createEntry);
 router.get("/", getPublishedEntries);
 
 // Admin Routes
-router.get("/admin", authenticate, authorizeRoles("admin"), getAllEntries);
-router.put("/:id/toggle", authenticate, authorizeRoles("admin"), togglePublishEntry);
-router.delete("/:id", authenticate, authorizeRoles("admin"), deleteEntry);
+router.use(authenticate, authorizeRoles("admin"));
+
+router.get("/admin", getAllEntries);
+router.put("/:id/toggle", validateGuestbookIdParam, togglePublishEntry);
+router.delete("/:id", validateGuestbookIdParam, deleteEntry);
 
 export default router;

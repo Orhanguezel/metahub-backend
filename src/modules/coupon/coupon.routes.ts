@@ -1,6 +1,7 @@
 import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import { validateRequest } from "@/core/middleware/validateRequest";
+import { analyticsLogger } from "@/core/middleware/analyticsLogger";
 import {
   createCoupon,
   getAllCoupons,
@@ -8,17 +9,21 @@ import {
   updateCoupon,
   deleteCoupon,
 } from "./coupon.controller";
-import { createCouponValidator, updateCouponValidator } from "./coupon.validation";
+import {
+  createCouponValidator,
+  updateCouponValidator,
+} from "./coupon.validation";
+import { validateObjectId } from "@/core/middleware/validateRequest";
 
 const router = express.Router();
 
 // ✅ Public - Check valid coupon by code
-router.get("/check/:code", getCouponByCode);
+router.get("/check/:code", analyticsLogger, getCouponByCode);
 
 // ✅ Admin routes
 router.use(authenticate, authorizeRoles("admin"));
 
-router.get("/", getAllCoupons);
+router.get("/", analyticsLogger, getAllCoupons);
 
 router.post(
   "/",
@@ -34,6 +39,11 @@ router.put(
   updateCoupon
 );
 
-router.delete("/:id", deleteCoupon);
+router.delete(
+  "/:id",
+  validateObjectId("id"),
+  validateRequest,
+  deleteCoupon
+);
 
 export default router;

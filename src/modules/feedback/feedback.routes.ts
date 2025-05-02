@@ -8,16 +8,25 @@ import {
   getPublishedFeedbacks,
   softDeleteFeedback,
 } from "./feedback.controller";
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import {
+  validateCreateFeedback,
+  validateUpdateFeedback,
+  validateFeedbackId,
+} from "./feedback.validation";
 
 const router = express.Router();
 
-router.post("/", createFeedback);
-router.get("/", authenticate, authorizeRoles("admin"), getAllFeedbacks);
+// Public
+router.post("/", validateCreateFeedback, createFeedback);
 router.get("/published", getPublishedFeedbacks);
-router.patch("/:id/toggle", authenticate, authorizeRoles("admin"), togglePublishFeedback);
-router.put("/:id", authenticate, authorizeRoles("admin"), updateFeedback);
-router.delete("/:id", authenticate, authorizeRoles("admin"), deleteFeedback);
-router.patch("/:id/archive", authenticate, authorizeRoles("admin"), softDeleteFeedback);
+
+// Admin
+router.use(authenticate, authorizeRoles("admin"));
+router.get("/", getAllFeedbacks);
+router.patch("/:id/toggle", validateFeedbackId, togglePublishFeedback);
+router.put("/:id", validateFeedbackId, validateUpdateFeedback, updateFeedback);
+router.delete("/:id", validateFeedbackId, deleteFeedback);
+router.patch("/:id/archive", validateFeedbackId, softDeleteFeedback);
 
 export default router;

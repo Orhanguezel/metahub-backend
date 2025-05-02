@@ -1,6 +1,7 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Model, models } from "mongoose";
 
-export interface IFeedback extends Document {
+// ✅ Interface
+interface IFeedback extends Document {
   name: string;
   email: string;
   message: {
@@ -15,6 +16,7 @@ export interface IFeedback extends Document {
   updatedAt: Date;
 }
 
+// ✅ Schema
 const feedbackSchema = new Schema<IFeedback>(
   {
     name: { type: String, required: true, trim: true },
@@ -31,4 +33,8 @@ const feedbackSchema = new Schema<IFeedback>(
   { timestamps: true }
 );
 
-export default model<IFeedback>("Feedback", feedbackSchema);
+// ✅ Guard + Model Type
+const Feedback: Model<IFeedback> = models.Feedback || model<IFeedback>("Feedback", feedbackSchema);
+
+export { Feedback, IFeedback };
+export default Feedback;

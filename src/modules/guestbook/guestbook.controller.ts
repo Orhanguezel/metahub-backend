@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import Guestbook from "./guestbook.models";
-import { isValidObjectId } from "../../core/utils/validation";
+import {Guestbook} from "../guestbook";
+import { isValidObjectId } from "@/core/utils/validation";
 
 // 📝 Yeni yorum veya alt yorum oluştur
 export const createEntry = asyncHandler(async (req: Request, res: Response) => {

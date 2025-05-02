@@ -1,6 +1,6 @@
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, Document, Types, models, Model } from "mongoose";
 
-export interface IForumTopic extends Document {
+interface IForumTopic extends Document {
   title: {
     tr: string;
     en: string;
@@ -43,4 +43,9 @@ const forumTopicSchema = new Schema<IForumTopic>(
   { timestamps: true }
 );
 
-export default model<IForumTopic>("ForumTopic", forumTopicSchema);
+// ✅ Guard + Model Type
+const ForumTopic: Model<IForumTopic> =
+  models.ForumTopic || model<IForumTopic>("ForumTopic", forumTopicSchema);
+
+export { IForumTopic };
+export default ForumTopic;

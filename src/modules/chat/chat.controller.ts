@@ -1,7 +1,6 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
-import ChatMessage from "./chatMessage.model";
-import ChatSession from "./chatSession.model";
+import { ChatMessage, ChatSession } from "../chat";
 import mongoose from "mongoose";
 
 // Kullanıcı tipi (opsiyonel)
@@ -13,21 +12,23 @@ type AuthenticatedRequest = Request & {
   };
 };
 
-// ✅ Oda mesajlarını getir
-export const getMessagesByRoom = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+// ✅ Get messages by room
+export const getMessagesByRoom = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
     const { roomId } = req.params;
     const messages = await ChatMessage.find({ roomId })
       .populate("sender", "name email")
       .sort({ createdAt: 1 });
 
     res.status(200).json(messages);
+  } catch (error) {
+    next(error);
   }
-);
+});
 
-// ✅ Tüm odalardaki son mesajları getir
-export const getAllRoomsLastMessages = asyncHandler(
-  async (_req: Request, res: Response): Promise<void> => {
+// ✅ Get last message of all rooms
+export const getAllRoomsLastMessages = asyncHandler(async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
     const latestMessages = await ChatMessage.aggregate([
       { $sort: { createdAt: -1 } },
       { $group: { _id: "$roomId", latestMessage: { $first: "$$ROOT" } } },
@@ -40,46 +41,52 @@ export const getAllRoomsLastMessages = asyncHandler(
     });
 
     res.status(200).json(populated);
+  } catch (error) {
+    next(error);
   }
-);
+});
 
-// ✅ Tek mesaj sil
-export const deleteMessage = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+// ✅ Delete single message
+export const deleteMessage = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
     const message = await ChatMessage.findByIdAndDelete(req.params.id);
     if (!message) {
-      res.status(404).json({ message: "Mesaj bulunamadı." });
+      res.status(404).json({ message: "Message not found." });
       return;
     }
 
-    res.status(200).json({ message: "Mesaj silindi." });
+    res.status(200).json({ message: "Message deleted." });
+  } catch (error) {
+    next(error);
   }
-);
+});
 
-// ✅ Çoklu mesaj sil
-export const deleteMessagesBulk = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+// ✅ Delete messages in bulk
+export const deleteMessagesBulk = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
     const { ids } = req.body;
 
     if (!Array.isArray(ids) || !ids.every((id) => mongoose.Types.ObjectId.isValid(id))) {
-      res.status(400).json({ message: "Geçersiz mesaj ID'leri." });
+      res.status(400).json({ message: "Invalid message IDs." });
       return;
     }
 
     const result = await ChatMessage.deleteMany({ _id: { $in: ids } });
-    res.status(200).json({ message: `${result.deletedCount} mesaj silindi.` });
+    res.status(200).json({ message: `${result.deletedCount} messages deleted.` });
+  } catch (error) {
+    next(error);
   }
-);
+});
 
-// ✅ Manuel mesaj gönder
-export const sendManualMessage = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { roomId, message, lang = "de", close } = req.body;
+// ✅ Send manual message
+export const sendManualMessage = asyncHandler(async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { roomId, message, close } = req.body;
     const senderId = req.user?.id;
     const io = req.app.get("io");
 
     if (!roomId || !message || !senderId) {
-      res.status(400).json({ message: "Eksik parametreler." });
+      res.status(400).json({ message: "Missing parameters." });
       return;
     }
 
@@ -113,13 +120,15 @@ export const sendManualMessage = asyncHandler(
       await ChatSession.findOneAndUpdate({ roomId }, { closedAt: new Date() });
     }
 
-    res.status(201).json({ message: "Mesaj gönderildi.", data: newMessage });
+    res.status(201).json({ message: "Message sent.", data: newMessage });
+  } catch (error) {
+    next(error);
   }
-);
+});
 
-// ✅ Mesajları okundu olarak işaretle
-export const markMessagesAsRead = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+// ✅ Mark messages as read
+export const markMessagesAsRead = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
     const { roomId } = req.params;
 
     await ChatMessage.updateMany(
@@ -127,13 +136,15 @@ export const markMessagesAsRead = asyncHandler(
       { $set: { isRead: true } }
     );
 
-    res.status(200).json({ message: "Mesajlar okundu olarak işaretlendi." });
+    res.status(200).json({ message: "Messages marked as read." });
+  } catch (error) {
+    next(error);
   }
-);
+});
 
-// ✅ Arşivlenmiş oturumları getir
-export const getArchivedSessions = asyncHandler(
-  async (_req: Request, res: Response): Promise<void> => {
+// ✅ Get archived sessions
+export const getArchivedSessions = asyncHandler(async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
     const sessions = await ChatMessage.aggregate([
       { $match: { isRead: true, isFromAdmin: true } },
       { $sort: { createdAt: -1 } },
@@ -154,27 +165,33 @@ export const getArchivedSessions = asyncHandler(
     }));
 
     res.status(200).json(formatted);
+  } catch (error) {
+    next(error);
   }
-);
+});
 
-// ✅ Aktif sohbet oturumlarını getir
-export const getActiveChatSessions = asyncHandler(
-  async (_req: Request, res: Response): Promise<void> => {
+// ✅ Get active chat sessions
+export const getActiveChatSessions = asyncHandler(async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
     const sessions = await ChatSession.find({ closedAt: { $exists: false } })
       .sort({ createdAt: -1 })
       .populate("user", "name email");
 
     res.status(200).json(sessions);
+  } catch (error) {
+    next(error);
   }
-);
+});
 
-// ✅ Tüm sohbet oturumlarını getir
-export const getAllChatSessions = asyncHandler(
-  async (_req: Request, res: Response): Promise<void> => {
+// ✅ Get all chat sessions
+export const getAllChatSessions = asyncHandler(async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
     const sessions = await ChatSession.find()
       .sort({ createdAt: -1 })
       .populate("user", "name email");
 
     res.status(200).json(sessions);
+  } catch (error) {
+    next(error);
   }
-);
+});

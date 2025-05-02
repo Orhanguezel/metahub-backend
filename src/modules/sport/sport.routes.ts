@@ -6,40 +6,49 @@ import {
   updateSport,
   deleteSport,
 } from "./sport.controller";
-import upload from "../../core/middleware/uploadMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import upload from "@/core/middleware/uploadMiddleware";
+import {
+  validateCreateSport,
+  validateUpdateSport,
+  validateSportId,
+} from "./sport.validation";
 
 const router = express.Router();
 
-
-// ➕ Yeni spor oluştur
+// ➕ Create sport
 router.post(
   "/",
-  // authenticate, authorizeRoles("admin"),
+  authenticate,
+  authorizeRoles("admin"),
   (req: Request, _res: Response, next: NextFunction) => {
-    req.uploadType = "sport"; // Klasör tanımı
+    req.uploadType = "sport";
     next();
   },
   upload.array("images", 5),
+  validateCreateSport,
   createSport
 );
 
-// 📄 Tüm sporları getir
+// 📄 Get all sports
 router.get("/", getAllSports);
 
-// 🔍 ID ile getir / ✏️ Güncelle / 🗑️ Sil
+// 🔍 ID routes
 router
   .route("/:id")
-  .get(getSportById)
-  .put(    (req: Request, _res: Response, next: NextFunction) => {
+  .get(validateSportId, getSportById)
+  .put(
+    authenticate,
+    authorizeRoles("admin"),
+    validateSportId,
+    (req: Request, _res: Response, next: NextFunction) => {
       req.uploadType = "sport";
       next();
     },
     upload.array("images", 5),
+    validateUpdateSport,
     updateSport
   )
-  .delete(
-    // authenticate, authorizeRoles("admin"),
-    deleteSport
-  );
+  .delete(authenticate, authorizeRoles("admin"), validateSportId, deleteSport);
 
 export default router;

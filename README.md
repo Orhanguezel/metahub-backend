@@ -1,21 +1,27 @@
 
+---
 
 # 🚀 MetaHub Backend – Modulares API-System
 
-MetaHub ist eine moderne, modulare Backend-Architektur auf Basis von **Node.js**, **Express**, **TypeScript** und **MongoDB**, die dynamisch erweiterbar ist. Sie dient mehreren Frontend-Projekten als API-Backend.
+MetaHub ist ein hochmodernes, modulares Backend-System auf Basis von **Node.js**, **Express**, **TypeScript** und **MongoDB**. Es wurde speziell dafür entwickelt, **multi-project-fähig** und **vollständig erweiterbar** zu sein, mit automatisierter Meta-Generierung und erstklassigem Swagger-Support.
 
 ---
 
 ## 📦 Hauptfunktionen
 
-✅ Unterstützung für mehrere Projekte (via `.env.metahub`, `.env.kuhlturm`, ...)  
-✅ Vollständig modulare Struktur (jedes Modul unabhängig)  
-✅ Automatische Swagger-Dokumentation  
-✅ Meta-System mit Versionierung & Git-Tracking  
-✅ CLI-Tool zur schnellen Modulerstellung  
-✅ Mehrsprachige Labels (DE, EN, TR)  
-✅ Deployment mit PM2, Git Webhook, CI/CD  
-✅ Unit- & Integrationstests mit Jest + Supertest  
+✅ Unterstützung für mehrere Projekte (z.B. `.env.metahub`, `.env.kuhlturm`, ...)  
+✅ Vollständig modulare Struktur (jedes Modul ist autonom)  
+✅ Automatische Swagger-Dokumentation (basierend auf Meta-Daten)  
+✅ Dynamisches Meta-System (mit Versionierung & Git-Tracking)  
+✅ **CLI-Generator** für Module, inkl. Tests, Validierung & mehr  
+✅ Mehrsprachigkeit (Labels in DE, EN, TR)  
+✅ Integration mit Pinecone, OpenAI, Ollama & mehr  
+✅ Deployment mit **PM2**, Git Webhooks & CI/CD Pipelines  
+✅ **Unit- & Integrationstests** (Jest + Supertest)  
+✅ Logging & Monitoring (Analytics-Events, Logs via Dashboard)  
+✅ WebSockets & Echtzeit-Features  
+✅ Token-basierte Auth (secure httpOnly Cookies)  
+✅ Dateiuploads (mit Upload-Typ & dynamischem Routing)
 
 ---
 
@@ -23,12 +29,14 @@ MetaHub ist eine moderne, modulare Backend-Architektur auf Basis von **Node.js**
 
 ```bash
 src/
-├── modules/             # Jedes Modul im eigenen Verzeichnis
-├── core/                # Auth, Middleware, Error-Handling, Logger
-├── tools/               # Hilfsfunktionen
-├── scripts/             # createModule, metaValidator etc.
-├── meta-configs/        # Meta-Dateien für Swagger & Admin
+├── modules/             # Jedes Modul hat: models, routes, controller, validation, tests
+├── core/                # Globale Middleware, Auth, Error-Handler, Logger
+├── tools/               # Utils: Token, File-Upload, DB-Utils, uvm.
+├── scripts/             # CLI-Tools: createModule, generateMeta, Cleanup, Embeddings etc.
+├── meta-configs/        # Meta-Dateien für Swagger & Admin-Panel
 ├── server.ts            # Einstiegspunkt Express App
+├── socket.ts            # WebSocket-Initialisierung
+└── swagger/             # Swagger Setup & Utils
 ```
 
 ---
@@ -51,7 +59,14 @@ bun run dev
 npm run dev
 ```
 
-> Die Umgebungsvariable `APP_ENV` bestimmt welches Projekt geladen wird.
+> **Achtung:** Die Umgebungsvariable `APP_ENV` bestimmt das aktive Projekt (z.B. `metahub` oder `kuhlturm`).
+
+### 🚀 Build & Deploy
+
+```bash
+bun run build
+pm2 restart metahup-backend
+```
 
 ---
 
@@ -64,6 +79,11 @@ MONGO_URI=mongodb://localhost:27017/metahub
 SWAGGER_BASE_URL=http://localhost:5014/api
 PROJECT_NAME=MetaHub API
 PROJECT_DESCRIPTION=Dokumentiertes REST API System für MetaHub
+PINECONE_API_KEY=xxx
+OPENAI_API_KEY=xxx
+SMTP_HOST=smtp.hostinger.com
+SMTP_USER=info@deine-domain.de
+SMTP_PASS=securepassword
 ```
 
 ---
@@ -72,13 +92,13 @@ PROJECT_DESCRIPTION=Dokumentiertes REST API System für MetaHub
 
 Das Meta-System liest automatisch:
 
-- Alle Module & deren Routen (`*.routes.ts`)
-- Validierungen (`*.validation.ts`)
-- und erstellt daraus `.meta.json` Dateien mit:
+- **Alle Module & deren Routen (`*.routes.ts`)**
+- **Validierungen (`*.validation.ts`)**
+- und generiert Meta-Dateien (`.meta.json`), die u.a. enthalten:
 
 ```json
 {
-  "version": "1.0.2",
+  "version": "1.2.0",
   "updatedBy": {
     "username": "orhan",
     "commitHash": "a12b34..."
@@ -86,14 +106,16 @@ Das Meta-System liest automatisch:
   "routes": [
     {
       "method": "POST",
-      "path": "/",
+      "path": "/create",
       "auth": true,
-      "summary": "Neuen Benutzer erstellen"
+      "summary": "Neues Produkt erstellen"
     }
   ],
   "history": [...]
 }
 ```
+
+✅ **Vollautomatisch für Swagger & Admin-Panel integriert.**
 
 ### ➕ Meta generieren
 
@@ -103,39 +125,26 @@ bun run generate:meta
 
 ---
 
-## 🧹 Modul hinzufügen
+## 🛠 Modul-Generator (CLI)
 
-Ein neues Modul wird **nicht** manuell erstellt.  
-Verwende stattdessen den Generator:
+Ein neues Modul wird **nicht manuell** erstellt, sondern **per CLI**:
 
 ```bash
 bun run scripts/createModule.ts modulname
 ```
 
-✅ Dies erzeugt automatisch:
+✅ Es werden automatisch erstellt:
 
-- `modulname.controller.ts`  
-- `modulname.routes.ts`  
-- `modulname.validation.ts`  
-- `modulname.models.ts`  
-- `index.ts`  
-- `__tests__/modulname.controller.spec.ts`  
+- `modulname.controller.ts`
+- `modulname.routes.ts`
+- `modulname.validation.ts`
+- `modulname.models.ts`
+- `index.ts`
+- `__tests__/modulname.controller.spec.ts`
+- Dynamische Einträge in `meta-configs/`
+- MongoDB-Einträge (`ModuleMeta`, `ModuleSetting`)
 
-...und:
-
-- Ein Eintrag in `meta-configs/metahub/modulname.meta.json`
-- MongoDB-Einträge in `ModuleMeta` und `ModuleSetting`
-
-> **Kein manuelles Setup mehr erforderlich!**  
-> Das CLI übernimmt alle Struktur- und Meta-Standards.
-
----
-
-## 🔄 Module Updaten / Entfernen
-
-Modulnamen, Label, Sichtbarkeit und Rollen können im **Admin-Modul** geändert oder gelöscht werden.
-
-> Änderungen werden automatisch in Meta & DB übernommen.
+> **Selbst Frontend-Generator ist integriert!**
 
 ---
 
@@ -145,97 +154,120 @@ Modulnamen, Label, Sichtbarkeit und Rollen können im **Admin-Modul** geändert 
 bun test
 ```
 
-Supertest + Jest werden automatisch geladen.  
-Tests befinden sich im `__tests__/` Verzeichnis jedes Moduls.
+- Tests werden **pro Modul** in `__tests__/` abgelegt.
+- Supertest + Jest Setup **out of the box**.
+- Tests werden **automatisch beim Modul-Create generiert** (Basis-Test).
 
 ---
 
 ## 📘 Swagger
 
-- Swagger UI: [`http://localhost:5014/api-docs`](http://localhost:5014/api-docs)  
+- Swagger UI: [`http://localhost:5014/api-docs`](http://localhost:5014/api-docs)
 - Swagger JSON: [`http://localhost:5014/swagger.json`](http://localhost:5014/swagger.json)
 
-> Nur **aktivierte Module** (laut `ModuleSetting`) erscheinen im Swagger.
+> **Nur aktivierte Module** erscheinen (laut `ModuleSetting`).
+
+**Features:**
+- Automatischer Import von Validierung
+- Auto-Versionierung aus Meta
+- Unterstützung für verschiedene Sprachen
 
 ---
 
-## 🧠 Nützliche Befehle
+## 🧠 Wichtige Tools & Scripts
 
 | Befehl                        | Beschreibung                             |
 |-------------------------------|-------------------------------------------|
-| `bun run dev`                | Startet lokalen Server + lädt Metas      |
-| `bun run build`              | Transpiliert Code (TS ➝ JS)              |
-| `bun run start`              | Startet Build über PM2                   |
-| `bun run generate:meta`     | Führt Meta-Analyse & Schreibprozess aus  |
-| `bun test`                  | Führt Unit- & Integrationstests aus      |
+| `bun run dev`                | Startet Server + Meta + Socket + Swagger |
+| `bun run build`              | Baut TS ➝ JS + kopiert Meta-Dateien      |
+| `pm2 restart metahup-backend`| Neustart für Deployment                  |
+| `bun run generate:meta`     | Neue Meta-Daten generieren               |
+| `bun run generate:embeddings`| Pinecone Embeddings generieren           |
+| `bun run cleanup:api-logs`   | Alte API-Logs bereinigen                 |
+| `bun test`                   | Jest + Supertest                         |
 
 ---
 
-## 🧠 Git & Versionierung
+## 🔄 Meta & Git-Tracking
 
-Jede Änderung an einem Modul speichert:
+Jede Meta-Datei enthält:
 
-- Git-Benutzername (`git config user.name`)
-- Letzter Commit (`git rev-parse HEAD`)
-- Zeitstempel & Patch-Version
+- Aktuelle **Version**
+- Letzten **Commit**
+- Den **Benutzer**, der zuletzt Änderungen gemacht hat
+- **Timestamp**
 
-Diese Informationen erscheinen in:
-- Meta-Datei (`version`, `updatedBy`)
-- Swagger-Dokumentation
-- Admin-UI
+Diese Infos werden:
 
----
-
-## 🧩 Admin-UI
-
-Admin-Panel unter `/admin`:
-
-- Module verwalten (anzeigen, aktivieren, bearbeiten, löschen)
-- Projekte umschalten (`metahub`, `kuhlturm`, ...)
-- Multi-Language Labels editieren
-- History & Versionen sichtbar
+- In Swagger angezeigt
+- Im Admin-Panel genutzt
+- Für CI/CD History genutzt
 
 ---
 
-## 📌 Sonstiges
+## 💡 Architektur-Highlights
 
-- Datenbank: MongoDB (via Mongoose)
-- Authentifizierung: JWT Middleware
-- Validierung: express-validator (kein Zod im Controller)
-- Token-Management: secure httpOnly cookies
-
----
-
-## 🧠 Beiträge
-
-Wir freuen uns über jeden Beitrag:  
-- Neue Module via `createModule.ts`  
-- Swagger-Spezifikationen einhalten  
-- Unit Tests mit Supertest  
-- Klar beschriebene Commits  
-- Meta vor jedem PR aktualisieren!
-
-```bash
-bun run generate:meta
-```
+- **100% Modulares Design:** Kein Modul hängt von einem anderen ab.
+- **Dynamic Imports:** Validierungen werden automatisch geladen.
+- **Optimiert für Skalierung:** Pinecone + OpenAI + Ollama + Websockets.
+- **Swagger & Meta automatisch synchronisiert**
+- **Standardisierter Modulaufbau:** Einheitliche Struktur enforced
+- **Dashboard & Admin-Panel:** Echtzeit-Daten + Steuerung
 
 ---
 
-## 🧠 Status
+## 🚀 DevOps
+
+- PM2 Deployment mit:
+  ```bash
+  pm2 start ecosystem.config.js
+  ```
+- Git Webhook für **Auto-Deploy**
+- Logs:
+  ```bash
+  pm2 logs metahup-backend
+  ```
+
+---
+
+## 🔐 Sicherheit
+
+- **Auth:** JWT Tokens + httpOnly Cookies
+- **Validation:** 100% via express-validator (keine leeren Routen!)
+- **CORS, Helmet, Rate Limiter** inkludiert
+- **Secure Uploads:** Multer + Upload-Typ-Management
+
+---
+
+## ✅ Status
 
 | Modul         | Status  |
 |---------------|---------|
 | Auth          | ✅       |
 | Admin         | ✅       |
 | Products      | ✅       |
-| Orders        | 🔄       |
+| Orders        | ✅       |
 | Coupons       | ✅       |
-| E-Mail        | ✅       |
+| Payments      | ✅       |
+| Dashboard     | ✅       |
+| ...           | 🚀       |
 
 ---
 
-## 🧠 Kontakt
+## 📫 Kontakt
+
 
 Wenn du Fragen oder Wünsche hast, wende dich an:  
 **Orhan G. – [@github.com/orhang](https://github.com/Orhanguezel)**  
 > Mit Herz für modulare Architektur. ❤️
+
+---
+
+## 💬 Letzte Anmerkung
+
+✨ **Pro-Tipp:** Nutze den Modul-Generator konsequent – er ist goldwert! Jede neue Funktion (z.B. Pinecone, Ollama, Embeddings etc.) ist **plug & play** integrierbar.
+
+---
+
+➡️ **Wenn du weitere Details (z.B. Swagger Deep Dive, Pinecone Setup etc.) im README haben willst, sag einfach! 🚀**
+

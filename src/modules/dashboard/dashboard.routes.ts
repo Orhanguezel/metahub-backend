@@ -1,80 +1,66 @@
 import express from "express";
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import { getAnalyticsLogs } from "./dashboard.log.controller";
-
-
-// Ana istatistikler
 import { getDashboardStats } from "./dashboard.controller";
-
-// Grafik verileri
-import {
-  getMonthlyOrders,
-  getMonthlyRevenue,
-} from "./dashboard.chart.controller";
-
-// Rapor verileri
-import {
-  getTopProducts,
-  getUserRoleStats,
-} from "./dashboard.report.controller";
-
-// Günlük özet
+import { getMonthlyOrders, getMonthlyRevenue } from "./dashboard.chart.controller";
+import { getTopProducts, getUserRoleStats } from "./dashboard.report.controller";
 import { getDailyOverview } from "./dashboard.overview.controller";
+
+// ✅ VALIDATION
+import {
+  validateGetAnalyticsLogs,
+  validateChartQuery,
+  validateReportQuery,
+} from "./dashboard.validation";
 
 const router = express.Router();
 
-// 🔐 Admin yetkisi gerektiren tüm dashboard verileri
+// 🔐 Tüm dashboard endpointleri admin yetkisi ister
 
-// Genel istatistikler
 router.get("/", authenticate, authorizeRoles("admin"), getDashboardStats);
 
-// Grafik: Aylık sipariş sayısı
+// Grafikler
 router.get(
   "/charts/orders",
   authenticate,
   authorizeRoles("admin"),
+  validateChartQuery, // ✅ optional tarih filtresi
   getMonthlyOrders
 );
-
-// Grafik: Aylık gelir
 router.get(
   "/charts/revenue",
   authenticate,
   authorizeRoles("admin"),
+  validateChartQuery,
   getMonthlyRevenue
 );
 
-// Rapor: En çok satılan ürünler
+// Raporlar
 router.get(
   "/reports/top-products",
   authenticate,
   authorizeRoles("admin"),
+  validateReportQuery,
   getTopProducts
 );
-
-// Rapor: Kullanıcı rol dağılımı
 router.get(
   "/reports/user-roles",
   authenticate,
   authorizeRoles("admin"),
+  validateReportQuery,
   getUserRoleStats
 );
 
 // Günlük özet
-router.get(
-  "/daily-overview",
-  authenticate,
-  authorizeRoles("admin"),
-  getDailyOverview
-);
+router.get("/daily-overview", authenticate, authorizeRoles("admin"), getDailyOverview);
 
-// Günlük kayıtlar
+// Analytics logları
 router.get(
   "/logs",
   authenticate,
   authorizeRoles("admin"),
+  validateGetAnalyticsLogs,
   getAnalyticsLogs
 );
-
 
 export default router;

@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Model, models } from "mongoose";
 
 export interface IGalleryItem extends Document {
   title?: {
@@ -33,4 +33,8 @@ const gallerySchema = new Schema<IGalleryItem>(
   { timestamps: true }
 );
 
-export default model<IGalleryItem>("Gallery", gallerySchema);
+// ✅ Guard + Model Type (standarda uygun)
+const Gallery: Model<IGalleryItem> =
+  models.Gallery || model<IGalleryItem>("Gallery", gallerySchema);
+
+export default Gallery;

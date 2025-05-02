@@ -1,5 +1,4 @@
-// src/modules/invoice/invoice.model.ts
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, models, Document, Types, Model } from "mongoose";
 
 interface InvoiceItem {
   product: Types.ObjectId;
@@ -8,7 +7,7 @@ interface InvoiceItem {
   unitPrice: number;
 }
 
-export interface IInvoice extends Document {
+interface IInvoice extends Document {
   order: Types.ObjectId;
   user: Types.ObjectId;
   company: Types.ObjectId;
@@ -50,4 +49,9 @@ const invoiceSchema = new Schema<IInvoice>(
   { timestamps: true }
 );
 
-export default model<IInvoice>("Invoice", invoiceSchema);
+// ✅ Guard + Model Type
+const Invoice: Model<IInvoice> =
+  models.Invoice || model<IInvoice>("Invoice", invoiceSchema);
+
+export default Invoice;
+export { IInvoice };

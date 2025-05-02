@@ -8,22 +8,20 @@ import {
 } from "./notification.controller";
 
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { validateRequest } from "@/core/middleware/validateRequest";
-import { createNotificationValidator, idParamValidator } from "./notification.validation";
+import {
+  createNotificationValidator,
+  idParamValidator,
+} from "./notification.validation";
 
 const router = Router();
 
-// Admin-only routes
+// 🔐 Admin Routes
 router.use(authenticate, authorizeRoles("admin"));
 
 router.get("/", getAllNotifications);
-
-router.post("/", createNotificationValidator, validateRequest, createNotification);
-
-router.delete("/:id", idParamValidator, validateRequest, deleteNotification);
-
-router.patch("/:id/read", idParamValidator, validateRequest, markNotificationAsRead);
-
+router.post("/", createNotificationValidator, createNotification);
+router.delete("/:id", idParamValidator, deleteNotification);
+router.patch("/:id/read", idParamValidator, markNotificationAsRead);
 router.patch("/mark-all-read", markAllNotificationsAsRead);
 
 export default router;

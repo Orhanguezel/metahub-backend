@@ -1,6 +1,6 @@
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, Types, Document, Model, models } from "mongoose";
 
-export interface IComment extends Document {
+interface IComment extends Document {
   name: string;
   email: string;
   label: { tr: string; en: string; de: string };
@@ -37,4 +37,8 @@ const commentSchema = new Schema<IComment>(
   { timestamps: true }
 );
 
-export default model<IComment>("Comment", commentSchema);
+// ✅ Guard + Model Type (This module has been updated and is now standardized)
+const Comment: Model<IComment> = models.Comment || model<IComment>("Comment", commentSchema);
+
+export { Comment, IComment };
+export default Comment;

@@ -1,13 +1,14 @@
 // src/controllers/services.controller.ts
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import Service from "./services.models";
-import { BASE_URL } from "../../core/middleware/uploadMiddleware";
+import { Service } from "@/modules/services";
+import { BASE_URL } from "@/core/middleware/uploadMiddleware";
 import fs from "fs";
 import path from "path";
+import { isValidObjectId } from "@/core/utils/validation";
 
-// ✅ Hizmet oluştur
-export const createService = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+// ✅ Create Service
+export const createService = asyncHandler(async (req: Request, res: Response) => {
   const {
     title,
     shortDescription,
@@ -18,17 +19,6 @@ export const createService = asyncHandler(async (req: Request, res: Response): P
     tags = [],
     isPublished = false,
   } = req.body;
-
-  if (!title || !price || !durationMinutes) {
-    res.status(400).json({
-      message: req.locale === "de"
-        ? "Titel, Preis und Dauer sind erforderlich."
-        : req.locale === "tr"
-        ? "Başlık, fiyat ve süre gereklidir."
-        : "Title, price and duration are required."
-    });
-    return;
-  }
 
   const images = Array.isArray(req.files)
     ? req.files.map((file: Express.Multer.File) => `${BASE_URL}/uploads/service-images/${file.filename}`)
@@ -48,61 +38,67 @@ export const createService = asyncHandler(async (req: Request, res: Response): P
 
   res.status(201).json({
     success: true,
-    message: req.locale === "de"
-      ? "Dienstleistung erfolgreich erstellt."
-      : req.locale === "tr"
-      ? "Hizmet başarıyla oluşturuldu."
-      : "Service created successfully",
-    service,
+    message: "Service created successfully.",
+    data: service,
   });
 });
 
-// ✅ Tüm hizmetleri getir
-export const getAllServices = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
+// ✅ Get All Services
+export const getAllServices = asyncHandler(async (_req: Request, res: Response) => {
   const services = await Service.find().sort({ createdAt: -1 });
-  res.status(200).json(services);
+  res.status(200).json({
+    success: true,
+    message: "Services fetched successfully.",
+    data: services,
+  });
 });
 
-// ✅ Tek hizmet getir
-export const getServiceById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const service = await Service.findById(req.params.id);
+// ✅ Get Single Service
+export const getServiceById = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
 
-  if (!service) {
-    res.status(404).json({
-      message: req.locale === "de"
-        ? "Dienstleistung nicht gefunden."
-        : req.locale === "tr"
-        ? "Hizmet bulunamadı."
-        : "Service not found",
-    });
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid service ID." });
     return;
   }
 
-  res.status(200).json(service);
+  const service = await Service.findById(id);
+  if (!service) {
+    res.status(404).json({ success: false, message: "Service not found." });
+    return;
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Service fetched successfully.",
+    data: service,
+  });
 });
 
-// ✅ Hizmet güncelle
-export const updateService = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const service = await Service.findById(req.params.id);
+// ✅ Update Service
+export const updateService = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid service ID." });
+    return;
+  }
+
+  const service = await Service.findById(id);
   if (!service) {
-    res.status(404).json({
-      message: req.locale === "de"
-        ? "Dienstleistung nicht gefunden."
-        : req.locale === "tr"
-        ? "Hizmet bulunamadı."
-        : "Service not found",
-    });
+    res.status(404).json({ success: false, message: "Service not found." });
     return;
   }
 
   const updates = req.body;
-
   Object.assign(service, updates);
 
   if (updates.tags) {
     try {
       service.tags = typeof updates.tags === "string" ? JSON.parse(updates.tags) : updates.tags;
-    } catch {}
+    } catch {
+      // silently fail if invalid JSON, no crash
+    }
   }
 
   const files = req.files as Express.Multer.File[];
@@ -119,37 +115,36 @@ export const updateService = asyncHandler(async (req: Request, res: Response): P
         const localPath = path.join("uploads", "service-images", path.basename(imgUrl));
         if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
       });
-    } catch {}
+    } catch {
+      // fail silently
+    }
   }
 
   await service.save();
 
   res.status(200).json({
     success: true,
-    message: req.locale === "de"
-      ? "Dienstleistung aktualisiert."
-      : req.locale === "tr"
-      ? "Hizmet başarıyla güncellendi."
-      : "Service updated successfully",
-    service,
+    message: "Service updated successfully.",
+    data: service,
   });
 });
 
-// ✅ Hizmet sil
-export const deleteService = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const service = await Service.findById(req.params.id);
+// ✅ Delete Service
+export const deleteService = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
 
-  if (!service) {
-    res.status(404).json({
-      message: req.locale === "de"
-        ? "Dienstleistung nicht gefunden."
-        : req.locale === "tr"
-        ? "Hizmet bulunamadı."
-        : "Service not found",
-    });
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid service ID." });
     return;
   }
 
+  const service = await Service.findById(id);
+  if (!service) {
+    res.status(404).json({ success: false, message: "Service not found." });
+    return;
+  }
+
+  // Delete images from disk
   service.images.forEach((imgPath) => {
     const localPath = path.join("uploads", "service-images", path.basename(imgPath));
     if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
@@ -159,10 +154,6 @@ export const deleteService = asyncHandler(async (req: Request, res: Response): P
 
   res.status(200).json({
     success: true,
-    message: req.locale === "de"
-      ? "Dienstleistung gelöscht."
-      : req.locale === "tr"
-      ? "Hizmet silindi."
-      : "Service deleted successfully",
+    message: "Service deleted successfully.",
   });
 });

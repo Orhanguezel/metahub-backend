@@ -1,11 +1,17 @@
 import express from "express";
 import routes from "./references.routes";
-import { Reference } from "./references.models";
 
+// ✅ Model & Controller importları
+import Reference from "./references.models";
+import * as referencesController from "./references.controller";
+
+// ✅ Router
 const router = express.Router();
 router.use("/", routes);
 
-export * from "./references.controller";
-export * from "./references.models"; // IReference, Reference
-export { Reference };
+// ✅ Guard + Export (standart)
+export { Reference, referencesController };
+export * from "./references.validation";
+export type { IReference } from "./references.models";
+
 export default router;

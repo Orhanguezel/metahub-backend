@@ -1,4 +1,5 @@
 import { body, param } from "express-validator";
+import { validateRequest } from "@/core/middleware/validateRequest";
 
 export const createNotificationValidator = [
   body("title.tr").notEmpty().withMessage("Title (tr) is required."),
@@ -11,11 +12,10 @@ export const createNotificationValidator = [
     .notEmpty()
     .isIn(["info", "success", "warning", "error"])
     .withMessage("Type must be one of: info, success, warning, error."),
+  validateRequest,
 ];
 
 export const idParamValidator = [
-  param("id")
-    .notEmpty()
-    .isMongoId()
-    .withMessage("Invalid ID format."),
+  param("id").notEmpty().isMongoId().withMessage("Invalid ID format."),
+  validateRequest,
 ];

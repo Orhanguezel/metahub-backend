@@ -1,7 +1,7 @@
 // src/modules/news/admin.news.controller.ts
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import News from "./news.models";
+import {News} from "../news";
 import { isValidObjectId } from "@/core/utils/validation";
 
 // ✅ Admin - Get All News (Advanced filter)

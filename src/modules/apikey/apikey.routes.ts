@@ -1,7 +1,12 @@
 import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import { validateCreateApikey } from "./apikey.validation";
-import { createApikey, getAllApikey, updateApikey, deleteApikey } from "./apikey.controller";
+import {
+  createApikey,
+  getAllApikey,
+  updateApikey,
+  deleteApikey,
+} from "./apikey.controller";
 import { getApiKeyLogs } from "./apiKeyLog.controller";
 
 const router = express.Router();
@@ -20,8 +25,7 @@ router.put("/:id", validateCreateApikey, updateApikey);
 // 🗑️ Delete
 router.delete("/:id", deleteApikey);
 
-
-// ➕ Log 
+// ➕ Logs
 router.get("/:keyId/logs", getApiKeyLogs);
 
 export default router;

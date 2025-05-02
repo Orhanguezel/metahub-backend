@@ -1,6 +1,7 @@
-import { Schema, model, Document } from "mongoose";
+import mongoose, { Schema, model, Document, Model, models } from "mongoose";
 
-export interface IEducation extends Document {
+// ✅ Education Interface
+interface IEducation extends Document {
   degree: {
     tr: string;
     en: string;
@@ -17,6 +18,7 @@ export interface IEducation extends Document {
   updatedAt: Date;
 }
 
+// ✅ Education Schema
 const educationSchema = new Schema<IEducation>(
   {
     degree: {
@@ -35,4 +37,9 @@ const educationSchema = new Schema<IEducation>(
   { timestamps: true }
 );
 
-export default model<IEducation>("Education", educationSchema);
+// ✅ Guard + Model Type (This module has been updated and is now standardized)
+const Education: Model<IEducation> =
+  models.Education || model<IEducation>("Education", educationSchema);
+
+export default Education;
+export { IEducation };

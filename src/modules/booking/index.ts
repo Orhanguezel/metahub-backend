@@ -1,11 +1,13 @@
 import express from "express";
 import routes from "./booking.routes";
-import Booking from "./booking.models";
+import { Booking, IBooking } from "./booking.models";
+import * as bookingController from "./booking.controller";
 
 const router = express.Router();
 router.use("/", routes);
 
-export * from "./booking.controller";
+// ✅ Named Exports
+export { Booking, IBooking, bookingController };
+export * from "./booking.validation";
 export * from "./booking.models";
-export { Booking };
 export default router;

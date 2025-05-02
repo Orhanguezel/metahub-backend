@@ -1,14 +1,13 @@
-
-// src/modules/faq/index.ts
 import express from "express";
-import routes from "./chat.routes";
-import ChatMessage from "./chatMessage.model";
+import chatRoutes from "./chat.routes";
+import { ChatMessage, ChatSession } from "./chat.models";
 
 const router = express.Router();
-router.use("/", routes);
+router.use("/", chatRoutes);
 
+// ✅ Guard + Export (This module has been updated and is now standardized)
+export { ChatMessage, ChatSession };
 export * from "./chat.controller";
-export { ChatMessage };
-export * from "./chatMessage.model";
-export default router;
+export * from "./chat.validation";
 
+export default router;

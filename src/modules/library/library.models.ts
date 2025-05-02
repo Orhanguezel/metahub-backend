@@ -1,5 +1,6 @@
-import mongoose, { Schema, Document } from "mongoose";
+import { Schema, Document, Model, models, model } from "mongoose";
 
+// ✅ Interface
 export interface ILibraryItem extends Document {
   title: {
     tr?: string;
@@ -21,7 +22,8 @@ export interface ILibraryItem extends Document {
   updatedAt: Date;
 }
 
-const librarySchema: Schema = new Schema<ILibraryItem>(
+// ✅ Schema
+const librarySchema = new Schema<ILibraryItem>(
   {
     title: {
       tr: { type: String, trim: true },
@@ -49,7 +51,7 @@ const librarySchema: Schema = new Schema<ILibraryItem>(
   }
 );
 
-// 🔁 Slug otomatik üretimi (ilk geçerli başlığa göre)
+// ✅ Slug middleware
 librarySchema.pre("validate", function (this: ILibraryItem, next) {
   const baseTitle =
     this.title?.en || this.title?.de || this.title?.tr || "untitled";
@@ -62,5 +64,11 @@ librarySchema.pre("validate", function (this: ILibraryItem, next) {
   next();
 });
 
-const LibraryItem = mongoose.model<ILibraryItem>("LibraryItem", librarySchema);
+// ✅ Guard + Model Type
+const LibraryItem: Model<ILibraryItem> =
+  (models.LibraryItem as Model<ILibraryItem>) ||
+  model<ILibraryItem>("LibraryItem", librarySchema);
+
+// ✅ Export
 export default LibraryItem;
+export { LibraryItem }; // named export

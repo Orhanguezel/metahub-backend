@@ -9,58 +9,66 @@
   "routes": [
     {
       "method": "GET",
-      "path": "/:roomId",
-      "auth": true,
-      "summary": "GET /:roomId",
-      "validationName": "\"admin\")",
-      "controllerName": "getAllRoomsLastMessages"
-    },
-    {
-      "method": "GET",
       "path": "/",
       "auth": true,
       "summary": "GET /",
-      "validationName": "\"admin\")",
-      "controllerName": "getAllRoomsLastMessages"
+      "validationName": "\"/\"",
+      "controllerName": "getAllRoomsLastMessages",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "DELETE",
       "path": "/:id",
       "auth": true,
       "summary": "DELETE /:id",
-      "validationName": "\"admin\")",
-      "controllerName": "deleteMessage"
+      "validationName": "\"/archived\"",
+      "controllerName": "getArchivedSessions",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "POST",
       "path": "/bulk",
       "auth": true,
       "summary": "POST /bulk",
-      "validationName": "\"admin\")",
-      "controllerName": "deleteMessagesBulk);\n\n// 🧑‍💼 Admin: Manuel mesaj gönder (isteğe bağlı `lang` parametresi desteklenir"
+      "validationName": "\"/archived\"",
+      "controllerName": "getArchivedSessions",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "POST",
       "path": "/manual",
       "auth": true,
       "summary": "POST /manual",
-      "validationName": "\"admin\")",
-      "controllerName": "sendManualMessage"
+      "validationName": "\"/archived\"",
+      "controllerName": "getArchivedSessions",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "PATCH",
       "path": "/read/:roomId",
       "auth": true,
       "summary": "PATCH /read/:roomId",
-      "validationName": "\"admin\")",
-      "controllerName": "markMessagesAsRead"
+      "validationName": "\"/archived\"",
+      "controllerName": "getArchivedSessions"
     },
     {
       "method": "GET",
       "path": "/archived",
       "auth": true,
       "summary": "GET /archived",
-      "validationName": "\"admin\")",
+      "validationName": "\"/archived\"",
       "controllerName": "getArchivedSessions"
     },
     {
@@ -68,7 +76,7 @@
       "path": "/sessions/active",
       "auth": true,
       "summary": "GET /sessions/active",
-      "validationName": "\"admin\")",
+      "validationName": "\"/sessions/active\"",
       "controllerName": "getActiveChatSessions"
     },
     {
@@ -76,23 +84,23 @@
       "path": "/sessions",
       "auth": true,
       "summary": "GET /sessions",
-      "validationName": "\"admin\")",
+      "validationName": "\"/sessions\"",
       "controllerName": "getAllChatSessions"
     }
   ],
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145"
+    "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b"
   },
-  "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-  "lastUpdatedAt": "2025-04-30T18:05:46.457Z",
+  "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+  "lastUpdatedAt": "2025-05-01T23:27:17.972Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-      "date": "2025-04-30T18:05:46.457Z",
+      "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+      "date": "2025-05-01T23:27:17.972Z",
       "note": "Meta auto-generated"
     }
   ]

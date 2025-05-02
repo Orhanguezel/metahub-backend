@@ -15,22 +15,12 @@ import {
 
 const router = express.Router();
 
-
 router.use(authenticate);
 
-
 router.get("/", getUserAddresses);
-
-
 router.post("/", validateAddressCreation, createAddress);
-
-
 router.get("/:id", validateAddressId, getAddressById);
-
-
 router.put("/:id", validateAddressId, validateAddressUpdate, updateAddress);
-
-
 router.delete("/:id", validateAddressId, deleteAddress);
 
 export default router;

@@ -1,14 +1,12 @@
-//src/modules/admin/moduleSettings.model.ts
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Model, models } from "mongoose";
 
-// ✅ Çok dilli label tipi
 interface TranslatedLabel {
   tr: string;
   en: string;
   de: string;
 }
 
-export interface IModuleSetting extends Document {
+export interface IModuleSetting extends Document {  
   project: string;
   module: string;
   enabled: boolean;
@@ -39,7 +37,7 @@ const moduleSettingsSchema = new Schema<IModuleSetting>(
   { timestamps: true }
 );
 
-// 🔒 Aynı projede aynı modül tekrar eklenemesin
-moduleSettingsSchema.index({ project: 1, module: 1 }, { unique: true });
+const ModuleSetting: Model<IModuleSetting> =
+  models.ModuleSetting || mongoose.model<IModuleSetting>("ModuleSetting", moduleSettingsSchema);
 
-export default mongoose.model<IModuleSetting>("ModuleSetting", moduleSettingsSchema);
+export default ModuleSetting;

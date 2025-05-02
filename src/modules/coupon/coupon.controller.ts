@@ -1,39 +1,35 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
-import Coupon from "./coupon.models";
+import { Coupon } from "@/modules/coupon";
 import { isValidObjectId } from "@/core/utils/validation";
 
 // ✅ Create Coupon
 export const createCoupon = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { code, discount, expiresAt, label } = req.body;
+  const { code, discount, expiresAt, label } = req.body;
 
-    const codeUpper = code.toUpperCase().trim();
-    const existing = await Coupon.findOne({ code: codeUpper });
+  const codeUpper = code.toUpperCase().trim();
+  const existing = await Coupon.findOne({ code: codeUpper });
 
-    if (existing) {
-      res.status(409).json({ message: "Coupon code already exists." });
-      return;
-    }
-
-    const coupon = await Coupon.create({
-      code: codeUpper,
-      discount,
-      expiresAt,
-      label,
-      isActive: true,
-    });
-
-    res.status(201).json({
-      success: true,
-      message: "Coupon created successfully.",
-      coupon,
-    });
+  if (existing) {
+    res.status(409).json({ success: false, message: "Coupon code already exists." });
     return;
-  } catch (error) {
-    next(error);
   }
+
+  const coupon = await Coupon.create({
+    code: codeUpper,
+    discount,
+    expiresAt,
+    label,
+    isActive: true,
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Coupon created successfully.",
+    data: coupon,
+  });
 });
+
 
 // ✅ Get All Coupons
 export const getAllCoupons = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {

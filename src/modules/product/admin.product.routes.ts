@@ -10,8 +10,12 @@ import { validateRequest } from "@/core/middleware/validateRequest";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import upload from "@/core/middleware/uploadMiddleware";
 import { validateApiKey } from "@/core/middleware/validateApiKey";
+import { analyticsLogger } from "@/core/middleware/analyticsLogger"; // ✅ ADDED
 
 const router = express.Router();
+
+// ✅ Apply analyticsLogger middleware to all routes in this router
+router.use(analyticsLogger); // 👈 EKLEDİK
 
 // POST /admin/products -> Create a product
 router.post(

@@ -1,14 +1,13 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
+import { isValidObjectId } from "@/core/utils/validation";
 import Article from "./articles.models";
 import { BASE_URL, UPLOAD_BASE_PATH } from "@/core/middleware/uploadMiddleware";
-import { isValidObjectId } from "@/core/utils/validation";
 
-// ✅ Çoklu dilde makale oluştur (çoklu görselli)
-export const createArticle = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+// ✅ Create Article (Multi-language & Multi-image)
+export const createArticle = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
     const langs: ("tr" | "en" | "de")[] = ["tr", "en", "de"];
-
     const files = req.files as Express.Multer.File[];
     const imageUrls =
       files?.map(
@@ -16,14 +15,7 @@ export const createArticle = asyncHandler(
       ) || [];
 
     if (imageUrls.length === 0) {
-      res.status(400).json({
-        message:
-          req.locale === "de"
-            ? "Mindestens ein Bild ist erforderlich."
-            : req.locale === "tr"
-            ? "En az bir görsel gereklidir."
-            : "At least one image is required.",
-      });
+      res.status(400).json({ success: false, message: "At least one image is required." });
       return;
     }
 
@@ -60,109 +52,104 @@ export const createArticle = asyncHandler(
 
     if (createdArticles.length === 0) {
       res.status(400).json({
-        message:
-          req.locale === "de"
-            ? "Keine gültigen Artikel zum Erstellen gefunden."
-            : req.locale === "tr"
-            ? "Geçerli makale verisi girilmedi."
-            : "No valid article data provided.",
+        success: false,
+        message: "No valid article data provided.",
       });
       return;
     }
 
     res.status(201).json({
       success: true,
-      message:
-        req.locale === "de"
-          ? "Mehrsprachige Artikel erfolgreich erstellt."
-          : req.locale === "tr"
-          ? "Çok dilli makale(ler) başarıyla oluşturuldu."
-          : "Multi-language articles created successfully.",
-      articles: createdArticles,
+      message: "Multi-language articles created successfully.",
+      data: createdArticles,
     });
+  } catch (error) {
+    next(error);
   }
-);
+});
 
-// ✅ Tüm makaleleri getir (kategori ve dil filtresi destekli)
-export const getAllArticles = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+// ✅ Get All Articles (with category & language filter)
+export const getAllArticles = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
     const { category, language } = req.query;
     const filter: any = {};
     if (category) filter.category = category;
-    if (language) filter.label = { $exists: true }; // Dummy check, tüm diller var çünkü
+    if (language) filter.label = { $exists: true }; // dummy: all articles have label
 
     const articles = await Article.find(filter)
       .populate("comments")
       .sort({ publishedAt: -1 });
 
-    res.status(200).json(articles);
+    res.status(200).json({
+      success: true,
+      message: "Articles fetched successfully.",
+      data: articles,
+    });
+  } catch (error) {
+    next(error);
   }
-);
+});
 
-// ✅ Slug ile tek makale getir
-export const getArticleBySlug = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const article = await Article.findOne({ slug: req.params.slug }).populate(
-      "comments"
-    );
+// ✅ Get Article by Slug
+export const getArticleBySlug = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const article = await Article.findOne({ slug: req.params.slug }).populate("comments");
 
     if (!article) {
-      res.status(404).json({
-        message:
-          req.locale === "de"
-            ? "Artikel nicht gefunden."
-            : req.locale === "tr"
-            ? "Makale bulunamadı."
-            : "Article not found.",
-      });
+      res.status(404).json({ success: false, message: "Article not found." });
       return;
     }
 
-    res.status(200).json(article);
+    res.status(200).json({
+      success: true,
+      message: "Article fetched successfully.",
+      data: article,
+    });
+  } catch (error) {
+    next(error);
   }
-);
+});
 
-// ✅ ID ile makale getir
-export const getArticleById = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const article = await Article.findById(req.params.id).populate("comments");
-
-    if (!article) {
-      res.status(404).json({
-        message:
-          req.locale === "de"
-            ? "Artikel nicht gefunden."
-            : req.locale === "tr"
-            ? "Makale bulunamadı."
-            : "Article not found.",
-      });
-      return;
-    }
-
-    res.status(200).json(article);
-  }
-);
-
-// ✅ Makale güncelle
-export const updateArticle = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+// ✅ Get Article by ID
+export const getArticleById = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      res.status(400).json({ message: "Invalid article ID" });
+      res.status(400).json({ success: false, message: "Invalid article ID." });
+      return;
+    }
+
+    const article = await Article.findById(id).populate("comments");
+
+    if (!article) {
+      res.status(404).json({ success: false, message: "Article not found." });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Article fetched successfully.",
+      data: article,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ✅ Update Article
+export const updateArticle = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      res.status(400).json({ success: false, message: "Invalid article ID." });
       return;
     }
 
     const article = await Article.findById(id);
     if (!article) {
-      res.status(404).json({
-        message:
-          req.locale === "de"
-            ? "Artikel nicht gefunden."
-            : req.locale === "tr"
-            ? "Makale bulunamadı."
-            : "Article not found.",
-      });
+      res.status(404).json({ success: false, message: "Article not found." });
       return;
     }
 
@@ -216,41 +203,35 @@ export const updateArticle = asyncHandler(
 
     res.status(200).json({
       success: true,
-      message:
-        req.locale === "de"
-          ? "Artikel erfolgreich aktualisiert."
-          : req.locale === "tr"
-          ? "Makale başarıyla güncellendi."
-          : "Article updated successfully.",
-      article: await article.populate("comments"),
+      message: "Article updated successfully.",
+      data: await article.populate("comments"),
     });
+  } catch (error) {
+    next(error);
   }
-);
+});
 
-// ✅ Makale sil
-export const deleteArticle = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const deleted = await Article.findByIdAndDelete(req.params.id);
+// ✅ Delete Article
+export const deleteArticle = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      res.status(400).json({ success: false, message: "Invalid article ID." });
+      return;
+    }
+
+    const deleted = await Article.findByIdAndDelete(id);
     if (!deleted) {
-      res.status(404).json({
-        message:
-          req.locale === "de"
-            ? "Artikel nicht gefunden."
-            : req.locale === "tr"
-            ? "Makale bulunamadı."
-            : "Article not found.",
-      });
+      res.status(404).json({ success: false, message: "Article not found." });
       return;
     }
 
     res.status(200).json({
       success: true,
-      message:
-        req.locale === "de"
-          ? "Artikel erfolgreich gelöscht."
-          : req.locale === "tr"
-          ? "Makale başarıyla silindi."
-          : "Article deleted successfully.",
+      message: "Article deleted successfully.",
     });
+  } catch (error) {
+    next(error);
   }
-);
+});

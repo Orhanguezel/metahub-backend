@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import { Schema, Document, Model, models, model } from "mongoose";
 
 export interface ISparePart extends Document {
   label: {
@@ -25,7 +25,7 @@ export interface ISparePart extends Document {
   updatedAt: Date;
 }
 
-const sparePartSchema: Schema = new Schema<ISparePart>(
+const sparePartSchema = new Schema<ISparePart>(
   {
     label: {
       tr: { type: String, required: true },
@@ -57,16 +57,20 @@ const sparePartSchema: Schema = new Schema<ISparePart>(
   }
 );
 
-// 🔁 Slug otomatik üretimi
+// 🔁 Slug generator middleware
 sparePartSchema.pre("validate", function (this: ISparePart, next) {
   if (!this.slug && this.label?.en) {
     this.slug = this.label.en
       .toLowerCase()
-      .replace(/ /g, "-")
+      .replace(/\s+/g, "-")
       .replace(/[^\w-]+/g, "");
   }
   next();
 });
 
-const SparePart = mongoose.model<ISparePart>("SparePart", sparePartSchema);
+// ✅ Guard + Model Type (standart)
+const SparePart: Model<ISparePart> =
+  models.SparePart || model<ISparePart>("SparePart", sparePartSchema);
+
 export default SparePart;
+export { SparePart };
