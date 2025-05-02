@@ -1,37 +1,29 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import Task from "./task.models";
-import { isValidObjectId } from "../../core/utils/validation";
+import { Task } from "@/modules/task";
+import { isValidObjectId } from "@/core/utils/validation";
 
-// ➕ Çok dilli görev oluştur
+// ✅ Create Task (multilingual)
 export const createTask = asyncHandler(async (req: Request, res: Response) => {
   const { assignedTo, apartment, period } = req.body;
 
   if (!assignedTo || !apartment || !period) {
     res.status(400).json({
-      message:
-        req.locale === "de"
-          ? "Zugewiesener Benutzer, Wohnung und Zeitraum sind erforderlich."
-          : req.locale === "tr"
-          ? "Atanan kişi, daire ve periyot zorunludur."
-          : "Assigned user, apartment and period are required.",
+      success: false,
+      message: "Assigned user, apartment, and period are required.",
     });
     return;
   }
 
   const langs: ("tr" | "en" | "de")[] = ["tr", "en", "de"];
-  const description: any = {};
+  const description: Record<string, string> = {};
 
   for (const lang of langs) {
     const desc = req.body[`description_${lang}`];
     if (!desc) {
       res.status(400).json({
-        message:
-          req.locale === "de"
-            ? `Beschreibung (${lang}) fehlt.`
-            : req.locale === "tr"
-            ? `Açıklama (${lang}) eksik.`
-            : `Description (${lang}) is missing.`,
+        success: false,
+        message: `Description (${lang}) is required.`,
       });
       return;
     }
@@ -47,66 +39,76 @@ export const createTask = asyncHandler(async (req: Request, res: Response) => {
 
   res.status(201).json({
     success: true,
-    message:
-      req.locale === "de"
-        ? "Aufgabe erfolgreich erstellt."
-        : req.locale === "tr"
-        ? "Görev başarıyla oluşturuldu."
-        : "Task created successfully.",
-    task,
+    message: "Task created successfully.",
+    data: task,
   });
 });
 
-// 📋 Tüm görevleri getir (opsiyonel dil filtresi)
-export const getAllTasks = asyncHandler(async (req: Request, res: Response) => {
+// ✅ Get All Tasks
+export const getAllTasks = asyncHandler(async (_req: Request, res: Response) => {
   const tasks = await Task.find()
     .populate("assignedTo", "name email")
     .populate("apartment", "name address")
     .sort({ createdAt: -1 });
 
-  res.status(200).json(tasks);
+  res.status(200).json({
+    success: true,
+    message: "Tasks fetched successfully.",
+    data: tasks,
+  });
 });
 
-
-// 🔍 Tek görev getir
+// ✅ Get Single Task
 export const getTaskById = asyncHandler(async (req: Request, res: Response) => {
-  const task = await Task.findById(req.params.id)
+  const { id } = req.params;
+
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid task ID." });
+    return;
+  }
+
+  const task = await Task.findById(id)
     .populate("assignedTo", "name email")
     .populate("apartment", "name address");
 
   if (!task) {
-    res.status(404).json({
-      message:
-        req.locale === "de"
-          ? "Aufgabe nicht gefunden."
-          : req.locale === "tr"
-          ? "Görev bulunamadı."
-          : "Task not found.",
-    });
+    res.status(404).json({ success: false, message: "Task not found." });
     return;
   }
 
-  res.status(200).json(task);
+  res.status(200).json({
+    success: true,
+    message: "Task fetched successfully.",
+    data: task,
+  });
 });
 
-// ✏️ Güncelle
+// ✅ Update Task
 export const updateTask = asyncHandler(async (req: Request, res: Response) => {
-  const task = await Task.findById(req.params.id);
-  if (!task) {
-    res.status(404).json({
-      message:
-        req.locale === "de"
-          ? "Aufgabe nicht gefunden."
-          : req.locale === "tr"
-          ? "Görev bulunamadı."
-          : "Task not found.",
-    });
+  const { id } = req.params;
+
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid task ID." });
     return;
   }
 
-  const { description, assignedTo, apartment, status, period } = req.body;
+  const task = await Task.findById(id);
+  if (!task) {
+    res.status(404).json({ success: false, message: "Task not found." });
+    return;
+  }
 
-  task.description = description ?? task.description;
+  const { description, description_tr, description_en, description_de, assignedTo, apartment, status, period } = req.body;
+
+  // Destek: Hem tüm description obje olarak hem tek tek girilenler desteklenir.
+  if (description) {
+    task.description = description;
+  } else {
+    task.description.tr = description_tr ?? task.description.tr;
+    task.description.en = description_en ?? task.description.en;
+    task.description.de = description_de ?? task.description.de;
+  }
+
   task.assignedTo = assignedTo ?? task.assignedTo;
   task.apartment = apartment ?? task.apartment;
   task.status = status ?? task.status;
@@ -116,42 +118,29 @@ export const updateTask = asyncHandler(async (req: Request, res: Response) => {
 
   res.status(200).json({
     success: true,
-    message:
-      req.locale === "de"
-        ? "Aufgabe aktualisiert."
-        : req.locale === "tr"
-        ? "Görev güncellendi."
-        : "Task updated successfully.",
-    task,
+    message: "Task updated successfully.",
+    data: task,
   });
 });
 
-// 🗑️ Sil
+// ✅ Delete Task
 export const deleteTask = asyncHandler(async (req: Request, res: Response) => {
-  const task = await Task.findByIdAndDelete(req.params.id);
+  const { id } = req.params;
+
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid task ID." });
+    return;
+  }
+
+  const task = await Task.findByIdAndDelete(id);
 
   if (!task) {
-    res.status(404).json({
-      message:
-        req.locale === "de"
-          ? "Aufgabe nicht gefunden."
-          : req.locale === "tr"
-          ? "Görev bulunamadı."
-          : "Task not found.",
-    });
+    res.status(404).json({ success: false, message: "Task not found." });
     return;
   }
 
   res.status(200).json({
     success: true,
-    message:
-      req.locale === "de"
-        ? "Aufgabe gelöscht."
-        : req.locale === "tr"
-        ? "Görev silindi."
-        : "Task deleted successfully.",
+    message: "Task deleted successfully.",
   });
 });
-
-
-

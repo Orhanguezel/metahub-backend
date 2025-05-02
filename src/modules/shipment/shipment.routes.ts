@@ -7,6 +7,11 @@ import {
   deleteShipment,
 } from "./shipment.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import {
+  validateCreateShipment,
+  validateUpdateShipment,
+  validateShipmentId,
+} from "./shipment.validation";
 
 const router = express.Router();
 
@@ -14,15 +19,15 @@ const router = express.Router();
 router.get("/", authenticate, authorizeRoles("admin"), getShipments);
 
 // POST /shipments -> Add a new shipment
-router.post("/", authenticate, authorizeRoles("admin"), addShipment);
+router.post("/", authenticate, authorizeRoles("admin"), validateCreateShipment, addShipment);
 
 // GET /shipments/:id -> Get shipment by ID
-router.get("/:id", authenticate, authorizeRoles("admin"), getShipmentById);
+router.get("/:id", authenticate, authorizeRoles("admin"), validateShipmentId, getShipmentById);
 
 // PUT /shipments/:id -> Update shipment
-router.put("/:id", authenticate, authorizeRoles("admin"), updateShipment);
+router.put("/:id", authenticate, authorizeRoles("admin"), validateShipmentId, validateUpdateShipment, updateShipment);
 
 // DELETE /shipments/:id -> Delete shipment
-router.delete("/:id", authenticate, authorizeRoles("admin"), deleteShipment);
+router.delete("/:id", authenticate, authorizeRoles("admin"), validateShipmentId, deleteShipment);
 
 export default router;

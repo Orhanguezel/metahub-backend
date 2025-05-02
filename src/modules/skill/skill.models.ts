@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, models, Model } from "mongoose";
 
 export interface ISkill extends Document {
   category: {
@@ -33,4 +33,8 @@ const skillSchema = new Schema<ISkill>(
   { timestamps: true }
 );
 
-export default model<ISkill>("Skill", skillSchema);
+const Skill: Model<ISkill> =
+  models.Skill || model<ISkill>("Skill", skillSchema);
+
+export default Skill;
+export { Skill };

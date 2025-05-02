@@ -1,4 +1,4 @@
-import { Schema, model, Types, Document, Model } from "mongoose";
+import { Schema, model, Types, Document, Model, models } from "mongoose";
 
 export interface IReview extends Document {
   user: Types.ObjectId;
@@ -10,7 +10,7 @@ export interface IReview extends Document {
   updatedAt: Date;
 }
 
-interface ReviewModel extends Model<IReview> {
+export interface ReviewModel extends Model<IReview> {
   calculateAverageRating(productId: Types.ObjectId): Promise<{ averageRating: number; totalReviews: number }>;
 }
 
@@ -43,5 +43,7 @@ reviewSchema.statics.calculateAverageRating = async function (productId: Types.O
     : { averageRating: 0, totalReviews: 0 };
 };
 
-const Review = model<IReview, ReviewModel>("Review", reviewSchema);
+const Review = (models.Review as ReviewModel) || model<IReview, ReviewModel>("Review", reviewSchema);
+
 export default Review;
+export { Review };

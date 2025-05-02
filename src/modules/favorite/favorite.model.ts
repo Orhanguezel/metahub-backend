@@ -1,13 +1,14 @@
-// src/modules/favorite/favorite.model.ts
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, Document, Types, Model, models } from "mongoose";
 
-export interface IFavorite extends Document {
+// ✅ Favorite Interface
+interface IFavorite extends Document {
   userId: Types.ObjectId;
   productId: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
 
+// ✅ Favorite Schema
 const favoriteSchema = new Schema<IFavorite>(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
@@ -16,4 +17,9 @@ const favoriteSchema = new Schema<IFavorite>(
   { timestamps: true }
 );
 
-export default model<IFavorite>("Favorite", favoriteSchema);
+// ✅ Guard + Model Type
+const Favorite: Model<IFavorite> =
+  models.Favorite || model<IFavorite>("Favorite", favoriteSchema);
+
+export { IFavorite, Favorite };
+export default Favorite;

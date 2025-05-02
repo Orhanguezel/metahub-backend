@@ -12,38 +12,14 @@
       "path": "/topics",
       "auth": true,
       "summary": "POST /topics",
-      "validationName": "\"/topics/category/:categoryId\"",
-      "controllerName": "getTopicsByCategory"
-    },
-    {
-      "method": "GET",
-      "path": "/topics/category/:categoryId",
-      "auth": true,
-      "summary": "GET /topics/category/:categoryId",
-      "validationName": "\"/topics/category/:categoryId\"",
-      "controllerName": "getTopicsByCategory"
+      "validationName": "\"/categories\"",
+      "controllerName": "getAllCategories"
     },
     {
       "method": "POST",
       "path": "/comments",
       "auth": true,
       "summary": "POST /comments",
-      "validationName": "\"/comments/topic/:topicId\"",
-      "controllerName": "getCommentsByTopic"
-    },
-    {
-      "method": "GET",
-      "path": "/comments/topic/:topicId",
-      "auth": true,
-      "summary": "GET /comments/topic/:topicId",
-      "validationName": "\"/comments/topic/:topicId\"",
-      "controllerName": "getCommentsByTopic"
-    },
-    {
-      "method": "POST",
-      "path": "/categories",
-      "auth": true,
-      "summary": "POST /categories",
       "validationName": "\"/categories\"",
       "controllerName": "getAllCategories"
     },
@@ -59,16 +35,16 @@
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145"
+    "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b"
   },
-  "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-  "lastUpdatedAt": "2025-04-30T18:05:46.370Z",
+  "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+  "lastUpdatedAt": "2025-05-01T23:27:17.801Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-      "date": "2025-04-30T18:05:46.370Z",
+      "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+      "date": "2025-05-01T23:27:17.801Z",
       "note": "Meta auto-generated"
     }
   ]

@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
-import Order from "./order.models";
-import { Product } from "../product";
-import { User } from "../users";
+import {Order} from "@/modules/order";
+import { Product } from "@/modules/product";
+import { User } from "@/modules/users";
 import { sendEmail } from "@/services/emailService";
-import { orderConfirmationTemplate } from "../../templates/orderConfirmation";
+import { orderConfirmationTemplate } from "@/templates/orderConfirmation";
 import { Types } from "mongoose";
 
 // ✅ Sipariş oluştur

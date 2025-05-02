@@ -1,10 +1,13 @@
 import express from "express";
-import taskRoutes from "./task.routes";
-import Task from "./task.models";
+import routes from "./task.routes";
+import Task, { ITask } from "./task.models";
 import * as taskController from "./task.controller";
 
 const router = express.Router();
-router.use("/", taskRoutes);
+router.use("/", routes);
 
-export { Task, taskController };
+// ✅ Guard + Export (standart yapı)
+export { Task, ITask, taskController };
+export * from "./task.validation";
+
 export default router;

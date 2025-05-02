@@ -1,6 +1,7 @@
-import { Schema, model, Types, Document, Model } from "mongoose";
+// src/modules/wishlist/wishlist.models.ts
+import { Schema, model, Types, Document, Model, models } from "mongoose";
 
-// 📌 Wishlist Item Interface
+// ✅ Interface
 export interface IWishlist extends Document {
   user: Types.ObjectId;
   products: Types.ObjectId[];
@@ -10,7 +11,7 @@ export interface IWishlist extends Document {
   updatedAt: Date;
 }
 
-// 📌 Wishlist Schema
+// ✅ Schema
 const wishlistSchema = new Schema<IWishlist>(
   {
     user: {
@@ -38,7 +39,9 @@ const wishlistSchema = new Schema<IWishlist>(
   { timestamps: true }
 );
 
-// 📌 Wishlist Model
-const Wishlist: Model<IWishlist> = model<IWishlist>("Wishlist", wishlistSchema);
+// ✅ Guard + Model Tipi
+const Wishlist: Model<IWishlist> =
+  models.Wishlist || model<IWishlist>("Wishlist", wishlistSchema);
 
 export default Wishlist;
+export { Wishlist }; 

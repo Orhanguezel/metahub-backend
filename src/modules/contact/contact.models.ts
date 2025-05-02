@@ -1,6 +1,7 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Model, models } from "mongoose";
 
-export interface IContactMessage extends Document {
+// ✅ Contact Message Interface
+interface IContactMessage extends Document {
   name: string;
   email: string;
   label: {
@@ -21,6 +22,7 @@ export interface IContactMessage extends Document {
   updatedAt: Date;
 }
 
+// ✅ Contact Message Schema
 const contactMessageSchema = new Schema<IContactMessage>(
   {
     name: { type: String, required: true },
@@ -43,4 +45,9 @@ const contactMessageSchema = new Schema<IContactMessage>(
   { timestamps: true }
 );
 
-export default model<IContactMessage>("ContactMessage", contactMessageSchema);
+// ✅ Guard + Model Type (This module has been updated and is now standardized)
+const ContactMessage: Model<IContactMessage> =
+  models.ContactMessage || model<IContactMessage>("ContactMessage", contactMessageSchema);
+
+export { ContactMessage, IContactMessage };
+export default ContactMessage;

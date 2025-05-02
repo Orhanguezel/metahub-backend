@@ -1,7 +1,8 @@
-// src/models/discount.model.ts
-import { Schema, model, Document, Types } from "mongoose";
+// src/modules/discount/discount.model.ts
+import { Schema, model, Document, Types, Model, models } from "mongoose";
 
-export interface IDiscount extends Document {
+// ✅ Discount Interface
+interface IDiscount extends Document {
   code: string;
   discountPercentage: number;
   validFrom: Date;
@@ -13,6 +14,7 @@ export interface IDiscount extends Document {
   updatedAt: Date;
 }
 
+// ✅ Discount Schema
 const discountSchema = new Schema<IDiscount>(
   {
     code: { type: String, required: true, unique: true },
@@ -26,4 +28,8 @@ const discountSchema = new Schema<IDiscount>(
   { timestamps: true }
 );
 
-export default model<IDiscount>("Discount", discountSchema);
+// ✅ Guard + Model Type
+const Discount: Model<IDiscount> = models.Discount || model<IDiscount>("Discount", discountSchema);
+
+export default Discount;
+export type { IDiscount };

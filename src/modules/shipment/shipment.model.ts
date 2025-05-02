@@ -1,4 +1,4 @@
-import { Schema, model, Types, Document } from "mongoose";
+import { Schema, model, models, Types, Document, Model } from "mongoose";
 
 export interface ICarrierDetails {
   company?: string;
@@ -43,5 +43,9 @@ const shipmentSchema = new Schema<IShipment>(
   { timestamps: true }
 );
 
-const Shipment = model<IShipment>("Shipment", shipmentSchema);
+// ✅ Guard + Model Tipi (standart yapı)
+const Shipment: Model<IShipment> =
+  models.Shipment || model<IShipment>("Shipment", shipmentSchema);
+
 export default Shipment;
+export { Shipment };

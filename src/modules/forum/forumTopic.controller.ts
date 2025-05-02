@@ -1,22 +1,16 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import ForumTopic from "./forumTopic.models";
+import {ForumTopic} from "../forum";
 import { isValidObjectId } from "@/core/utils/validation";
 
-// ➕ Yeni başlık oluştur
+// ➕ Create new topic
 export const createTopic = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { title, content, category } = req.body;
-  const locale = req.locale || "en";
 
-  if (!title || !content || !category) {
+  if (!title?.en || !content?.en || !category) {
     res.status(400).json({
       success: false,
-      message:
-        locale === "de"
-          ? "Pflichtfelder fehlen."
-          : locale === "tr"
-          ? "Zorunlu alanlar eksik."
-          : "Required fields are missing.",
+      message: "Title (English), content (English), and category ID are required.",
     });
     return;
   }
@@ -24,12 +18,7 @@ export const createTopic = asyncHandler(async (req: Request, res: Response): Pro
   if (!isValidObjectId(category)) {
     res.status(400).json({
       success: false,
-      message:
-        locale === "de"
-          ? "Ungültige Kategorie-ID."
-          : locale === "tr"
-          ? "Geçersiz kategori ID'si."
-          : "Invalid category ID.",
+      message: "Invalid category ID.",
     });
     return;
   }
@@ -43,30 +32,19 @@ export const createTopic = asyncHandler(async (req: Request, res: Response): Pro
 
   res.status(201).json({
     success: true,
-    message:
-      locale === "de"
-        ? "Thema erfolgreich erstellt."
-        : locale === "tr"
-        ? "Başlık başarıyla oluşturuldu."
-        : "Topic created successfully.",
-    topic,
+    message: "Topic created successfully.",
+    data: topic,
   });
 });
 
-// 📄 Kategoriye göre başlıkları getir
+// 📄 Get topics by category
 export const getTopicsByCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { categoryId } = req.params;
-  const locale = req.locale || "en";
 
   if (!isValidObjectId(categoryId)) {
     res.status(400).json({
       success: false,
-      message:
-        locale === "de"
-          ? "Ungültige Kategorie-ID."
-          : locale === "tr"
-          ? "Geçersiz kategori ID'si."
-          : "Invalid category ID.",
+      message: "Invalid category ID.",
     });
     return;
   }
@@ -77,12 +55,7 @@ export const getTopicsByCategory = asyncHandler(async (req: Request, res: Respon
 
   res.status(200).json({
     success: true,
-    message:
-      locale === "de"
-        ? "Themen erfolgreich geladen."
-        : locale === "tr"
-        ? "Başlıklar başarıyla yüklendi."
-        : "Topics fetched successfully.",
-    topics,
+    message: "Topics fetched successfully.",
+    data: topics,
   });
 });

@@ -1,5 +1,12 @@
+import express from "express";
 import shipmentRoutes from "./shipment.routes";
-export { default as Shipment } from "./shipment.model";
-export * from "./shipment.controller";
+import Shipment, { IShipment } from "./shipment.model";
+import * as shipmentController from "./shipment.controller";
 
-export default shipmentRoutes;
+const router = express.Router();
+router.use("/", shipmentRoutes);
+
+export { Shipment, IShipment, shipmentController };
+export * from "./shipment.validation";
+
+export default router;

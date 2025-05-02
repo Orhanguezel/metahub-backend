@@ -1,10 +1,12 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import SparePart from "./sparepart.models";
+import { SparePart } from "@/modules/sparepart";
 import fs from "fs";
 import path from "path";
+import { BASE_URL } from "@/core/middleware/uploadMiddleware";
+import { isValidObjectId } from "@/core/utils/validation";
 
-// 🧱 Yedek Parça Oluştur
+// ✅ Create Spare Part
 export const createSparePart = asyncHandler(async (req: Request, res: Response) => {
   const {
     label,
@@ -20,20 +22,8 @@ export const createSparePart = asyncHandler(async (req: Request, res: Response) 
     isPublished = false,
   } = req.body;
 
-  if (!label || !label.en || !label.tr || !label.de || !slug || !price) {
-    res.status(400).json({
-      message: req.locale === "de"
-        ? "Pflichtfelder fehlen."
-        : req.locale === "tr"
-        ? "Gerekli alanlar eksik."
-        : "Required fields are missing",
-    });
-    return;
-  }
-
-  const imageFiles = req.files as Express.Multer.File[];
-  const imageUrls = imageFiles?.length
-    ? imageFiles.map(file => `${process.env.BASE_URL}/uploads/spareparts/${file.filename}`)
+  const images = Array.isArray(req.files)
+    ? req.files.map((file: Express.Multer.File) => `${BASE_URL}/uploads/spareparts/${file.filename}`)
     : [];
 
   const sparePart = await SparePart.create({
@@ -48,85 +38,74 @@ export const createSparePart = asyncHandler(async (req: Request, res: Response) 
     price,
     tags: typeof tags === "string" ? JSON.parse(tags) : tags,
     isPublished,
-    image: imageUrls,
+    image: images,
   });
 
   res.status(201).json({
     success: true,
-    message: req.locale === "de"
-      ? "Ersatzteil erfolgreich erstellt."
-      : req.locale === "tr"
-      ? "Yedek parça başarıyla oluşturuldu."
-      : "Spare part created successfully",
-    sparePart,
+    message: "Spare part created successfully.",
+    data: sparePart,
   });
 });
 
-// 📋 Tüm Yedek Parçaları Getir
-export const getAllSpareParts = asyncHandler(async (req: Request, res: Response) => {
-  const lang = req.query.language || req.locale || "en";
-  const parts = await SparePart.find({ [`label.${lang}`]: { $exists: true } }).sort({ createdAt: -1 });
-  res.status(200).json(parts);
+// ✅ Get All Spare Parts
+export const getAllSpareParts = asyncHandler(async (_req: Request, res: Response) => {
+  const parts = await SparePart.find().sort({ createdAt: -1 });
+  res.status(200).json({
+    success: true,
+    message: "Spare parts fetched successfully.",
+    data: parts,
+  });
 });
 
-// 🔍 Slug ile Getir
+// ✅ Get by Slug
 export const getSparePartBySlug = asyncHandler(async (req: Request, res: Response) => {
   const part = await SparePart.findOne({ slug: req.params.slug });
   if (!part) {
-    res.status(404).json({
-      message: req.locale === "de"
-        ? "Ersatzteil nicht gefunden."
-        : req.locale === "tr"
-        ? "Yedek parça bulunamadı."
-        : "Spare part not found",
-    });
+    res.status(404).json({ success: false, message: "Spare part not found." });
     return;
   }
-  res.status(200).json(part);
+  res.status(200).json({
+    success: true,
+    message: "Spare part fetched successfully.",
+    data: part,
+  });
 });
 
-// 🔍 ID ile Getir
+// ✅ Get by ID
 export const getSparePartById = asyncHandler(async (req: Request, res: Response) => {
-  const part = await SparePart.findById(req.params.id);
-  if (!part) {
-    res.status(404).json({
-      message: req.locale === "de"
-        ? "Ersatzteil nicht gefunden."
-        : req.locale === "tr"
-        ? "Yedek parça bulunamadı."
-        : "Spare part not found",
-    });
+  const { id } = req.params;
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid spare part ID." });
     return;
   }
-  res.status(200).json(part);
+  const part = await SparePart.findById(id);
+  if (!part) {
+    res.status(404).json({ success: false, message: "Spare part not found." });
+    return;
+  }
+  res.status(200).json({
+    success: true,
+    message: "Spare part fetched successfully.",
+    data: part,
+  });
 });
 
-// ✏️ Güncelle
+// ✅ Update Spare Part
 export const updateSparePart = asyncHandler(async (req: Request, res: Response) => {
-  const part = await SparePart.findById(req.params.id);
+  const { id } = req.params;
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid spare part ID." });
+    return;
+  }
+  const part = await SparePart.findById(id);
   if (!part) {
-    res.status(404).json({
-      message: req.locale === "de"
-        ? "Ersatzteil nicht gefunden."
-        : req.locale === "tr"
-        ? "Yedek parça bulunamadı."
-        : "Spare part not found",
-    });
+    res.status(404).json({ success: false, message: "Spare part not found." });
     return;
   }
 
   const updates = req.body;
-
-  part.label = updates.label ?? part.label;
-  part.slug = updates.slug ?? part.slug;
-  part.code = updates.code ?? part.code;
-  part.description = updates.description ?? part.description;
-  part.category = updates.category ?? part.category;
-  part.manufacturer = updates.manufacturer ?? part.manufacturer;
-  part.specifications = updates.specifications ?? part.specifications;
-  part.stock = updates.stock ?? part.stock;
-  part.price = updates.price ?? part.price;
-  part.isPublished = typeof updates.isPublished === "boolean" ? updates.isPublished : part.isPublished;
+  Object.assign(part, updates);
 
   if (updates.tags) {
     try {
@@ -136,7 +115,7 @@ export const updateSparePart = asyncHandler(async (req: Request, res: Response) 
 
   if (req.files && Array.isArray(req.files)) {
     const newImages = (req.files as Express.Multer.File[]).map(file =>
-      `${process.env.BASE_URL}/uploads/spareparts/${file.filename}`
+      `${BASE_URL}/uploads/spareparts/${file.filename}`
     );
     part.image = [...(part.image || []), ...newImages];
   }
@@ -156,40 +135,32 @@ export const updateSparePart = asyncHandler(async (req: Request, res: Response) 
 
   res.status(200).json({
     success: true,
-    message: req.locale === "de"
-      ? "Ersatzteil aktualisiert."
-      : req.locale === "tr"
-      ? "Yedek parça güncellendi."
-      : "Spare part updated successfully",
-    sparePart: part,
+    message: "Spare part updated successfully.",
+    data: part,
   });
 });
 
-// ❌ Sil
+// ✅ Delete Spare Part
 export const deleteSparePart = asyncHandler(async (req: Request, res: Response) => {
-  const deleted = await SparePart.findByIdAndDelete(req.params.id);
-  if (!deleted) {
-    res.status(404).json({
-      message: req.locale === "de"
-        ? "Ersatzteil nicht gefunden."
-        : req.locale === "tr"
-        ? "Yedek parça bulunamadı."
-        : "Spare part not found",
-    });
+  const { id } = req.params;
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid spare part ID." });
     return;
   }
 
-  deleted.image?.forEach((imgPath) => {
+  const part = await SparePart.findByIdAndDelete(id);
+  if (!part) {
+    res.status(404).json({ success: false, message: "Spare part not found." });
+    return;
+  }
+
+  part.image?.forEach((imgPath) => {
     const localPath = path.join("uploads", "spareparts", path.basename(imgPath));
     if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
   });
 
   res.status(200).json({
     success: true,
-    message: req.locale === "de"
-      ? "Ersatzteil gelöscht."
-      : req.locale === "tr"
-      ? "Yedek parça silindi."
-      : "Spare part deleted successfully",
+    message: "Spare part deleted successfully.",
   });
 });

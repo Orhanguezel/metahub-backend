@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import { isValidObjectId } from "@/core/utils/validation";
-import Notification from "./notification.models";
+import {Notification} from "@/modules/notification";
 
 const getLocaleMessage = (locale: string | undefined, tr: string, en: string, de: string): string => {
   switch (locale) {

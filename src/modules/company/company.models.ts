@@ -1,6 +1,6 @@
-import { Schema, model, Document } from "mongoose";
+import mongoose, { Schema, Document, Model, models } from "mongoose";
 
-export interface ICompany extends Document {
+interface ICompany extends Document {
   companyName: string;
   taxNumber: string;
   handelsregisterNumber?: string;
@@ -45,4 +45,8 @@ const companySchema = new Schema<ICompany>(
   { timestamps: true }
 );
 
-export default model<ICompany>("Company", companySchema);
+// ✅ Guard + Model Type (This module has been updated and is now standardized)
+const Company: Model<ICompany> = models.Company || mongoose.model<ICompany>("Company", companySchema);
+
+export { Company, ICompany };
+export default Company;

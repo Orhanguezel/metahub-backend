@@ -1,3 +1,4 @@
+// ✅ Router (analyticsLogger middleware added)
 import express, { Request, Response, NextFunction } from "express";
 import {
   createBlog,
@@ -8,15 +9,21 @@ import {
 } from "./blog.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import upload from "@/core/middleware/uploadMiddleware";
-import { validateCreateBlog, validateUpdateBlog, validateObjectId } from "./blog.validation";
+import {
+  validateCreateBlog,
+  validateUpdateBlog,
+  validateObjectId,
+} from "./blog.validation";
 import { validateApiKey } from "@/core/middleware/validateApiKey";
+import { analyticsLogger } from "@/core/middleware/analyticsLogger";
 
 const router = express.Router();
 
-router.get("/", validateApiKey,getAllBlogs);
-router.get("/slug/:slug", validateApiKey,getBlogBySlug);
+// 🌐 Public Routes
+router.get("/", analyticsLogger, validateApiKey, getAllBlogs);
+router.get("/slug/:slug", analyticsLogger, validateApiKey, getBlogBySlug);
 
-
+// 🔐 Admin Routes
 router.use(authenticate, authorizeRoles("admin"));
 
 router.post(
@@ -27,7 +34,9 @@ router.post(
   },
   upload.array("images", 5),
   validateCreateBlog,
-  validateApiKey,createBlog
+  validateApiKey,
+  analyticsLogger,
+  createBlog
 );
 
 router.put(
@@ -39,9 +48,17 @@ router.put(
   },
   upload.array("images", 5),
   validateUpdateBlog,
-  validateApiKey,updateBlog
+  validateApiKey,
+  analyticsLogger,
+  updateBlog
 );
 
-router.delete("/:id", validateObjectId("id"), validateApiKey,deleteBlog);
+router.delete(
+  "/:id",
+  validateObjectId("id"),
+  validateApiKey,
+  analyticsLogger,
+  deleteBlog
+);
 
 export default router;

@@ -13,18 +13,17 @@ import { validateCreateNews, validateUpdateNews, validateObjectId } from "./news
 
 const router = express.Router();
 
-
 const setUploadType = (type: string) => (req: Request, _res: Response, next: NextFunction) => {
   req.uploadType = "news";
   next();
 };
 
+// Public
+router.get("/", getAllNews);
+router.get("/slug/:slug", getNewsBySlug);
+router.get("/:id", validateObjectId("id"), getNewsById);
 
-router.get("/", getAllNews);           
-router.get("/slug/:slug", getNewsBySlug); 
-router.get("/:id", validateObjectId("id"), getNewsById); 
-
-
+// Admin
 router.post(
   "/",
   authenticate,

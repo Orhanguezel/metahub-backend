@@ -18,6 +18,7 @@ declare global {
         | "news"
         | "article"
         | "sport"
+        | "spareparts"
         | "default";
     }
   }

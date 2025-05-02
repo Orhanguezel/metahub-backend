@@ -1,6 +1,7 @@
-import { Schema, model, Document } from "mongoose";
+import mongoose, { Schema, model, Document, Model, models } from "mongoose";
 
-export interface IMailMessage extends Document {
+// ✅ MailMessage Interface
+interface IMailMessage extends Document {
   from: string;
   subject: {
     tr: string;
@@ -19,6 +20,7 @@ export interface IMailMessage extends Document {
   updatedAt: Date;
 }
 
+// ✅ MailMessage Schema
 const mailSchema = new Schema<IMailMessage>(
   {
     from: { type: String, required: true },
@@ -39,4 +41,9 @@ const mailSchema = new Schema<IMailMessage>(
   { timestamps: true }
 );
 
-export default model<IMailMessage>("MailMessage", mailSchema);
+// ✅ Guard + Model Type (This module has been updated and is now standardized)
+const MailMessage: Model<IMailMessage> =
+  models.MailMessage || model<IMailMessage>("MailMessage", mailSchema);
+
+export default MailMessage;
+export { IMailMessage };

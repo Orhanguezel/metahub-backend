@@ -13,10 +13,8 @@ const router = express.Router();
 
 
 router.get("/", getAllNewsCategories);
-
 router.get("/:id", validateObjectId("id"), getNewsCategoryById);
 
-// 🎯 Admin Routes
 router.post(
   "/",
   authenticate,
@@ -41,5 +39,6 @@ router.delete(
   validateObjectId("id"),
   deleteNewsCategory
 );
+
 
 export default router;

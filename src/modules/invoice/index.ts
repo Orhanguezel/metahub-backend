@@ -1,10 +1,12 @@
-// src/modules/invoice/index.ts
 import express from "express";
-import routes from "./invoice.routes";
+import invoiceRoutes from "./invoice.routes";
+import Invoice, { IInvoice } from "./invoice.model";
+import * as invoiceController from "./invoice.controller";
 
 const router = express.Router();
-router.use("/", routes);
+router.use("/", invoiceRoutes);
 
-export * from "./invoice.controller";
-export { default as Invoice, IInvoice } from "./invoice.model";
+export { Invoice, IInvoice, invoiceController };
+export * from "./invoice.validation";
+
 export default router;

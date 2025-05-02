@@ -1,7 +1,7 @@
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 
-// ✅ ID validation
+// ✅ Param ID kontrolü
 export const validateObjectId = (field: string) => [
   param(field)
     .isMongoId()

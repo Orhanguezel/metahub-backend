@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, models, Model } from "mongoose";
 
 export interface ISport extends Document {
   label: {
@@ -30,9 +30,13 @@ const sportSchema = new Schema<ISport>(
       de: { type: String },
     },
     category: { type: String, trim: true },
-    images: [{ type: String }],
+    images: [{ type: String, required: true }],
   },
   { timestamps: true }
 );
 
-export default model<ISport>("Sport", sportSchema);
+const Sport: Model<ISport> = models.Sport || model<ISport>("Sport", sportSchema);
+
+export default Sport;
+export { Sport };
+

@@ -46,6 +46,11 @@ export const validateUpsertSetting = [
 
 // 🎯 Param validation
 export const validateSettingKeyParam = [
-  param("key").isString().notEmpty().withMessage("Key parameter is required."),
+  param("key")
+    .isString()
+    .trim()
+    .notEmpty()
+    .withMessage("Key parameter is required."),
   validateRequest,
 ];
+

@@ -8,23 +8,42 @@ import {
   getReviewsByUser,
   deleteAllReviewsByProduct,
 } from "./review.controller";
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { validateCreateReview, validateUpdateReview, validateObjectIdParam } from "./review.validation";
 
 const router = express.Router();
 
-router.route("/")
-  .get(authenticate, authorizeRoles("admin"), fetchReviews)
-  .post(authenticate, addReview);
+// ✅ Admin tüm yorumları getir
+router.get("/", authenticate, authorizeRoles("admin"), fetchReviews);
 
-router.route("/product/:productId")
-  .get(fetchProductReviews)
-  .delete(authenticate, authorizeRoles("admin"), deleteAllReviewsByProduct);
+// ✅ Yeni yorum oluştur
+router.post("/", authenticate, validateCreateReview, addReview);
 
-router.route("/user/:userId")
-  .get(authenticate, authorizeRoles("admin"), getReviewsByUser);
+// ✅ Ürünün tüm yorumları
+router.get("/product/:productId", validateObjectIdParam("productId"), fetchProductReviews);
 
-router.route("/:id")
-  .put(authenticate, updateReview)
-  .delete(authenticate, deleteReview);
+// ✅ Admin ürüne ait tüm yorumları sil
+router.delete(
+  "/product/:productId",
+  authenticate,
+  authorizeRoles("admin"),
+  validateObjectIdParam("productId"),
+  deleteAllReviewsByProduct
+);
+
+// ✅ Admin kullanıcının yorumları
+router.get(
+  "/user/:userId",
+  authenticate,
+  authorizeRoles("admin"),
+  validateObjectIdParam("userId"),
+  getReviewsByUser
+);
+
+// ✅ Yorumu güncelle + sil
+router
+  .route("/:id")
+  .put(authenticate, validateObjectIdParam("id"), validateUpdateReview, updateReview)
+  .delete(authenticate, validateObjectIdParam("id"), deleteReview);
 
 export default router;

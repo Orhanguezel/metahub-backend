@@ -1,15 +1,16 @@
+
 import { Request, Response, NextFunction } from "express";
 import AnalyticsEvent from "@/modules/dashboard/analyticsEvent.models";
 
-export const analyticsLogger = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const analyticsLogger = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const pathParts = req.originalUrl.split("/").filter(Boolean); // e.g. ["api", "products", "123"]
+    // Split path: e.g., /api/products/123 → ["api", "products", "123"]
+    const pathParts = req.originalUrl.split("/").filter(Boolean);
 
-    const module = pathParts[1] || "unknown"; // "products", "orders", "cart"
+    // Detect module name (products, orders, etc.), default to "unknown"
+    const moduleName = pathParts[1] || "unknown";
+
+    // Determine event type based on HTTP method
     const eventType =
       req.method === "GET"
         ? "view"
@@ -21,20 +22,21 @@ export const analyticsLogger = async (
         ? "delete"
         : "other";
 
+    // Create log entry
     await AnalyticsEvent.create({
-      userId: (req as any).user?.id || null,
+      userId: (req as any).user?._id || null,
       path: req.originalUrl,
       method: req.method,
       ip: req.ip,
       userAgent: req.headers["user-agent"],
-      timestamp: new Date(),
       query: req.query,
       body: req.method !== "GET" ? req.body : undefined,
-      module,
+      module: moduleName,
       eventType,
     });
   } catch (error) {
-    console.error("Loglama hatası:", error);
+    console.error("Analytics logging failed:", error);
+    // Never block the request even if logging fails
   }
 
   next();

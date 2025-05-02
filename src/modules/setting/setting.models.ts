@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, models, Document, Model } from "mongoose";
 
 export interface ISetting extends Document {
   key: string;
@@ -17,7 +17,7 @@ const settingSchema = new Schema<ISetting>(
     key: {
       type: String,
       required: [true, "Key is required."],
-      unique: true, 
+      unique: true,
       trim: true,
       minlength: [2, "Key must be at least 2 characters."],
       maxlength: [100, "Key cannot exceed 100 characters."],
@@ -34,6 +34,10 @@ const settingSchema = new Schema<ISetting>(
   { timestamps: true }
 );
 
+// ✅ Tip garantili + guardlı model
+const Setting: Model<ISetting> =
+  models.Setting || model<ISetting>("Setting", settingSchema);
 
+export default Setting; // default export
+export { Setting };     // named export (standart için)
 
-export default model<ISetting>("Setting", settingSchema);

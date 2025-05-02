@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import Shipment from "./shipment.model";
-import {Order} from "../order";
+import { Shipment } from "@/modules/shipment";
+import { Order } from "@/modules/order";
 
-// ➕ Yeni kargo oluştur
+// ➕ Create shipment
 export const addShipment = asyncHandler(async (req: Request, res: Response) => {
   const {
     order,
@@ -16,15 +16,10 @@ export const addShipment = asyncHandler(async (req: Request, res: Response) => {
     deliveryType,
   } = req.body;
 
-  if (!trackingNumber) {
-    res.status(400).json({ error: "Tracking number is required." });
-    return;
-  }
-
   const existingOrder = await Order.findById(order);
   if (!existingOrder) {
-    res.status(400).json({ message: "Geçersiz sipariş ID." });
-    return;
+    res.status(400);
+    throw new Error("Invalid order ID.");
   }
 
   const newShipment = await Shipment.create({
@@ -38,69 +33,66 @@ export const addShipment = asyncHandler(async (req: Request, res: Response) => {
     deliveryType,
   });
 
-  res.status(201).json(newShipment);
+  res.status(201).json({
+    success: true,
+    message: "Shipment created successfully.",
+    data: newShipment,
+  });
 });
 
-// 📦 Tüm kargolar
+// 📦 Get all shipments
 export const getShipments = asyncHandler(async (_req: Request, res: Response) => {
   const shipments = await Shipment.find().populate("order", "totalPrice status createdAt");
-  res.status(200).json(shipments);
+  res.status(200).json({
+    success: true,
+    message: "All shipments fetched successfully.",
+    data: shipments,
+  });
 });
 
-// 📦 Tek kargo
+// 📦 Get single shipment
 export const getShipmentById = asyncHandler(async (req: Request, res: Response) => {
   const shipment = await Shipment.findById(req.params.id).populate("order", "totalPrice status createdAt");
 
   if (!shipment) {
-    res.status(404).json({ message: "Kargo bulunamadı." });
-    return;
+    res.status(404);
+    throw new Error("Shipment not found.");
   }
 
-  res.status(200).json(shipment);
+  res.status(200).json({
+    success: true,
+    message: "Shipment fetched successfully.",
+    data: shipment,
+  });
 });
 
-// ✏️ Kargo güncelle
+// ✏️ Update shipment
 export const updateShipment = asyncHandler(async (req: Request, res: Response) => {
-  const {
-    trackingNumber,
-    status,
-    estimatedDelivery,
-    carrier,
-    carrierDetails,
-    recipientName,
-    deliveryType,
-  } = req.body;
-
-  const updated = await Shipment.findByIdAndUpdate(
-    req.params.id,
-    {
-      trackingNumber,
-      status,
-      estimatedDelivery,
-      carrier,
-      carrierDetails,
-      recipientName,
-      deliveryType,
-    },
-    { new: true }
-  );
+  const updated = await Shipment.findByIdAndUpdate(req.params.id, req.body, { new: true });
 
   if (!updated) {
-    res.status(404).json({ message: "Kargo bulunamadı." });
-    return;
+    res.status(404);
+    throw new Error("Shipment not found.");
   }
 
-  res.status(200).json(updated);
+  res.status(200).json({
+    success: true,
+    message: "Shipment updated successfully.",
+    data: updated,
+  });
 });
 
-// ❌ Kargo sil
+// ❌ Delete shipment
 export const deleteShipment = asyncHandler(async (req: Request, res: Response) => {
   const shipment = await Shipment.findByIdAndDelete(req.params.id);
 
   if (!shipment) {
-    res.status(404).json({ message: "Kargo bulunamadı." });
-    return;
+    res.status(404);
+    throw new Error("Shipment not found.");
   }
 
-  res.status(200).json({ message: "Kargo başarıyla silindi." });
+  res.status(200).json({
+    success: true,
+    message: "Shipment deleted successfully.",
+  });
 });

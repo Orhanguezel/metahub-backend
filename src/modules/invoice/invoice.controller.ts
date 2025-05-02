@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import Invoice from "./invoice.model";
-import { Order } from "../order";
+import { Invoice } from "@/modules/invoice";
+import { Order } from "@/modules/order";
 import { getCompanyInfo, calculateTax, generateInvoicePDF } from "../../core/utils/invoice.helper";
 
 // ➕ Fatura oluştur

@@ -1,5 +1,6 @@
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, Document, Types, Model, models } from "mongoose";
 
+// ✅ Interface
 export interface INotification extends Document {
   user?: Types.ObjectId;
   title: {
@@ -19,6 +20,7 @@ export interface INotification extends Document {
   updatedAt: Date;
 }
 
+// ✅ Schema
 const notificationSchema = new Schema<INotification>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: false },
@@ -43,4 +45,10 @@ const notificationSchema = new Schema<INotification>(
   { timestamps: true }
 );
 
-export default model<INotification>("Notification", notificationSchema);
+// ✅ Guard + Model Type (standart yapı)
+const Notification: Model<INotification> =
+  models.Notification || model<INotification>("Notification", notificationSchema);
+
+// ✅ Export
+export default Notification;
+export { Notification }; // named export (standart)

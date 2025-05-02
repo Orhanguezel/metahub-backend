@@ -1,6 +1,6 @@
-import { Schema, model, Document, Types } from "mongoose";
+import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
 
-export interface IBooking extends Document {
+interface IBooking extends Document {
   user?: Types.ObjectId;
   name: string;
   email: string;
@@ -35,4 +35,9 @@ const bookingSchema = new Schema<IBooking>(
   { timestamps: true }
 );
 
-export default model<IBooking>("Booking", bookingSchema);
+// ✅ Guard + Model Type
+const Booking: Model<IBooking> =
+  models.Booking || mongoose.model<IBooking>("Booking", bookingSchema);
+
+export default Booking;
+export { Booking, IBooking };

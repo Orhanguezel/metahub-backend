@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
-import { Product } from "./product.models";
+import { Product } from "@/modules/product";
 import { BASE_URL, UPLOAD_BASE_PATH } from "@/core/middleware/uploadMiddleware";
 import { Stockmovement } from "@/modules/stockmovement";
 import sharp from "sharp";

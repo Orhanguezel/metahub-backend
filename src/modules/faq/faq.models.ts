@@ -1,6 +1,7 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Model, models } from "mongoose";
 
-export interface IFAQ extends Document {
+// ✅ FAQ Interface
+interface IFAQ extends Document {
   question: {
     tr: string;
     en: string;
@@ -19,6 +20,7 @@ export interface IFAQ extends Document {
   updatedAt: Date;
 }
 
+// ✅ FAQ Schema
 const faqSchema = new Schema<IFAQ>(
   {
     question: {
@@ -39,4 +41,8 @@ const faqSchema = new Schema<IFAQ>(
   { timestamps: true }
 );
 
-export default model<IFAQ>("FAQ", faqSchema);
+// ✅ Guard + Model Type (This module has been updated and is now standardized)
+const FAQ: Model<IFAQ> = models.FAQ || model<IFAQ>("FAQ", faqSchema);
+
+export { IFAQ, FAQ };
+export default FAQ;

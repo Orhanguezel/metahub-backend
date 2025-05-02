@@ -1,10 +1,12 @@
-import mongoose, { Schema, Document, Types, Model } from "mongoose";
+// src/modules/users/users.models.ts
+import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
 import {
   hashPassword,
   isPasswordHashed,
   comparePasswords,
-} from "../../core/utils/authUtils";
+} from "@/core/utils/authUtils";
 
+// ✅ Subtypes
 interface Notifications {
   emailNotifications?: boolean;
   smsNotifications?: boolean;
@@ -16,6 +18,7 @@ interface SocialMedia {
   instagram?: string;
 }
 
+// ✅ User Interface
 export interface IUser extends Document {
   name: string;
   email: string;
@@ -51,7 +54,8 @@ export interface IUser extends Document {
 
 interface IUserModel extends Model<IUser> {}
 
-const userSchema: Schema<IUser> = new Schema(
+// ✅ Schema
+const userSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
     email: {
@@ -67,30 +71,11 @@ const userSchema: Schema<IUser> = new Schema(
       default: "user",
     },
 
-    profile: {
-      type: Schema.Types.ObjectId,
-      ref: "Profile",
-    },
-    addresses: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Address",
-      },
-    ],
-    payment: {
-      type: Schema.Types.ObjectId,
-      ref: "Payment",
-    },
-    cart: {
-      type: Schema.Types.ObjectId,
-      ref: "Cart",
-    },
-    orders: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Order",
-      },
-    ],
+    profile: { type: Schema.Types.ObjectId, ref: "Profile" },
+    addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }],
+    payment: { type: Schema.Types.ObjectId, ref: "Payment" },
+    cart: { type: Schema.Types.ObjectId, ref: "Cart" },
+    orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
 
     phone: { type: String },
     bio: { type: String, default: "" },
@@ -128,7 +113,7 @@ const userSchema: Schema<IUser> = new Schema(
   { timestamps: true }
 );
 
-// Parola hash
+// ✅ Password Hash
 userSchema.pre<IUser>("save", async function (next) {
   try {
     if (this.isModified("password") && !isPasswordHashed(this.password)) {
@@ -140,7 +125,7 @@ userSchema.pre<IUser>("save", async function (next) {
   }
 });
 
-// Metod
+// ✅ Methods
 userSchema.methods.comparePassword = async function (
   this: IUser,
   candidatePassword: string
@@ -152,6 +137,9 @@ userSchema.methods.isPasswordHashed = function (this: IUser): boolean {
   return isPasswordHashed(this.password);
 };
 
-const User: IUserModel = mongoose.models.User || mongoose.model<IUser, IUserModel>("User", userSchema);
-export default User;
+// ✅ Guard + Model
+const User: IUserModel =
+  models.User || mongoose.model<IUser, IUserModel>("User", userSchema);
 
+export default User;
+export { User };

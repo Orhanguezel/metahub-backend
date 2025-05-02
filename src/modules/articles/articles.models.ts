@@ -1,4 +1,6 @@
-import mongoose, { Schema, model, Document, Types } from "mongoose";
+// ✅ Guard + Model Type
+
+import mongoose, { Schema, model, Document, Types, Model } from "mongoose";
 
 export interface IArticle extends Document {
   title: string;
@@ -43,7 +45,7 @@ const articleSchema: Schema<IArticle> = new Schema(
   { timestamps: true }
 );
 
-// 🔁 Slug üretimi
+// 🔁 Slug generator
 articleSchema.pre("validate", function (this: IArticle, next) {
   if (!this.slug && this.title) {
     this.slug = this.title
@@ -54,8 +56,9 @@ articleSchema.pre("validate", function (this: IArticle, next) {
   next();
 });
 
-const Article: mongoose.Model<IArticle> = mongoose.models.Article || model<IArticle>("Article", articleSchema);
+// ✅ Guard + Model Type
+const Article: Model<IArticle> =
+  mongoose.models.Article || model<IArticle>("Article", articleSchema);
+
 export default Article;
 export { Article };
-
-

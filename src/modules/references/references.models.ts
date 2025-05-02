@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import { Schema, Document, Model, Types, models, model } from "mongoose";
 
 export interface IReference extends Document {
   companyName: {
@@ -66,5 +66,9 @@ referenceSchema.pre("validate", function (this: IReference, next) {
   next();
 });
 
-export const Reference: Model<IReference> =
-  mongoose.models.Reference || mongoose.model<IReference>("Reference", referenceSchema);
+// ✅ Guard + Tip
+const Reference: Model<IReference> =
+  models.Reference || model<IReference>("Reference", referenceSchema);
+
+export default Reference;  // default export
+export { Reference };      // named export

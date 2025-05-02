@@ -1,6 +1,6 @@
-import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import { Schema, Document, Model, Types, models, model } from "mongoose";
 
-// Interface
+// ✅ Interface (zaten export'lu!)
 export interface IProduct extends Document {
   name: {
     tr: string;
@@ -25,7 +25,7 @@ export interface IProduct extends Document {
   updatedAt: Date;
 }
 
-// Schema
+// ✅ Schema
 const productSchema = new Schema<IProduct>(
   {
     name: {
@@ -51,7 +51,7 @@ const productSchema = new Schema<IProduct>(
   { timestamps: true }
 );
 
-// Pre-save slug generation
+// ✅ Slug middleware
 productSchema.pre<IProduct>("validate", function (next) {
   if (!this.slug && this.name?.en) {
     this.slug = this.name.en
@@ -62,5 +62,10 @@ productSchema.pre<IProduct>("validate", function (next) {
   next();
 });
 
-// Model
-export const Product: Model<IProduct> = mongoose.model<IProduct>("Product", productSchema);
+// ✅ Guard + Model yapısı
+const Product: Model<IProduct> =
+  models.Product || model<IProduct>("Product", productSchema);
+
+// ✅ Export
+export default Product;      
+export { Product };    

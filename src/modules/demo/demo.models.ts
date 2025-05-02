@@ -1,11 +1,14 @@
-import mongoose, { Schema, model, Document, Model } from "mongoose";
+// src/modules/demo/demo.models.ts
+import mongoose, { Schema, model, Document, Model, models } from "mongoose";
 
-export interface IDemo extends Document {
+// ✅ Demo interface
+interface IDemo extends Document {
   name: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
+// ✅ Schema definition
 const demoSchema = new Schema<IDemo>(
   {
     name: { type: String, required: true },
@@ -13,11 +16,8 @@ const demoSchema = new Schema<IDemo>(
   { timestamps: true }
 );
 
-// Model: hem named hem default export
-export const Demo: Model<IDemo> =
-  mongoose.models.Demo || model<IDemo>("Demo", demoSchema);
+// ✅ Guard + Model Type (This module has been updated and is now standardized)
+const Demo: Model<IDemo> = models.Demo || model<IDemo>("Demo", demoSchema);
 
 export default Demo;
-
-
-
+export type { IDemo };

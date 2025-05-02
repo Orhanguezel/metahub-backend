@@ -6,23 +6,28 @@ import {
   updateTask,
   deleteTask,
 } from "./task.controller";
+import {
+  validateCreateTask,
+  validateUpdateTask,
+  validateTaskId,
+} from "./task.validation";
 import { authenticate } from "@/core/middleware/authMiddleware";
 
 const router = express.Router();
 
-// GET /tasks -> Get all tasks
+// 🌿 Public/Admin: Get all tasks
 router.get("/", authenticate, getAllTasks);
 
-// POST /tasks -> Create a task
-router.post("/", authenticate, createTask);
+// ➕ Create task
+router.post("/", authenticate, validateCreateTask, createTask);
 
-// GET /tasks/:id -> Get task by ID
-router.get("/:id", authenticate, getTaskById);
+// 🔍 Get single task
+router.get("/:id", authenticate, validateTaskId, getTaskById);
 
-// PUT /tasks/:id -> Update task
-router.put("/:id", authenticate, updateTask);
+// ✏️ Update task
+router.put("/:id", authenticate, validateTaskId, validateUpdateTask, updateTask);
 
-// DELETE /tasks/:id -> Delete task
-router.delete("/:id", authenticate, deleteTask);
+// 🗑️ Delete task
+router.delete("/:id", authenticate, validateTaskId, deleteTask);
 
 export default router;

@@ -1,6 +1,6 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Model, models } from "mongoose";
 
-export interface IExperience extends Document {
+interface IExperience extends Document {
   position: {
     tr: string;
     en: string;
@@ -35,7 +35,7 @@ const experienceSchema = new Schema<IExperience>(
       en: { type: String, required: true, trim: true },
       de: { type: String, required: true, trim: true },
     },
-    period: { type: String, required: true, trim: true }, // örn: "2020 - 2022"
+    period: { type: String, required: true, trim: true },
     description: {
       tr: { type: String, trim: true },
       en: { type: String, trim: true },
@@ -47,4 +47,8 @@ const experienceSchema = new Schema<IExperience>(
   { timestamps: true }
 );
 
-export default model<IExperience>("Experience", experienceSchema);
+// ✅ Guard + Model Type
+const Experience: Model<IExperience> = models.Experience || model<IExperience>("Experience", experienceSchema);
+
+export { Experience, IExperience };
+export default Experience;

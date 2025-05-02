@@ -1,4 +1,5 @@
-import { Schema, model, Document } from "mongoose";
+// ✅ Guard + Model Type (ensures the model is properly typed and prevents recompilation issues)
+import mongoose, { Schema, model, Document, Model, models } from "mongoose";
 
 export interface IBlogCategory extends Document {
   name: {
@@ -44,7 +45,6 @@ const blogCategorySchema = new Schema<IBlogCategory>(
   { timestamps: true }
 );
 
-
 blogCategorySchema.pre("validate", function (next) {
   if (!this.slug && this.name?.en) {
     this.slug = this.name.en
@@ -57,7 +57,8 @@ blogCategorySchema.pre("validate", function (next) {
   next();
 });
 
-
-const BlogCategory = model<IBlogCategory>("BlogCategory", blogCategorySchema);
+const BlogCategory: Model<IBlogCategory> =
+  models.BlogCategory || model<IBlogCategory>("BlogCategory", blogCategorySchema);
 
 export default BlogCategory;
+export { BlogCategory };

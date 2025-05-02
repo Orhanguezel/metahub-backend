@@ -1,5 +1,6 @@
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, Document, Types, Model, models } from "mongoose";
 
+// ✅ Interface
 export interface ICategory extends Document {
   name: string;
   slug: string;
@@ -16,6 +17,7 @@ export interface ICategory extends Document {
   updatedAt: Date;
 }
 
+// ✅ Schema
 const categorySchema = new Schema<ICategory>(
   {
     name: { type: String, required: true, unique: true, trim: true },
@@ -28,11 +30,12 @@ const categorySchema = new Schema<ICategory>(
       en: { type: String, required: true },
       de: { type: String, required: true },
     },
-    parentCategory: { type: Schema.Types.ObjectId, ref: "Category" }, 
+    parentCategory: { type: Schema.Types.ObjectId, ref: "Category" },
   },
   { timestamps: true }
 );
 
+// ✅ Slug middleware
 categorySchema.pre("validate", function (this: ICategory, next) {
   if (!this.slug && this.name) {
     this.slug = this.name
@@ -43,6 +46,10 @@ categorySchema.pre("validate", function (this: ICategory, next) {
   next();
 });
 
-const Category = model<ICategory>("Category", categorySchema);
+// ✅ Guard + Model Type (standart yapı)
+const Category: Model<ICategory> =
+  models.Category || model<ICategory>("Category", categorySchema);
 
-export { Category };
+// ✅ Exportlar
+export default Category; 
+export { Category };   

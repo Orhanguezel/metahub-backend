@@ -1,4 +1,3 @@
-// src/routes/customer.routes.ts
 import express from "express";
 import {
   getAllCustomers,
@@ -7,14 +6,32 @@ import {
   updateCustomer,
   deleteCustomer,
 } from "./customer.controller";
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { analyticsLogger } from "@/core/middleware/analyticsLogger";
+import {
+  createCustomerValidator,
+  updateCustomerValidator,
+  validateCustomerIdParam,
+} from "./customer.validation";
 
 const router = express.Router();
 
-router.get("/", authenticate, authorizeRoles("admin"), getAllCustomers);
-router.get("/:id", authenticate, authorizeRoles("admin"), getCustomerById);
-router.post("/", authenticate, authorizeRoles("admin"), createCustomer);
-router.put("/:id", authenticate, authorizeRoles("admin"), updateCustomer);
-router.delete("/:id", authenticate, authorizeRoles("admin"), deleteCustomer);
+// ✅ Admin Routes (all protected)
+router.use(authenticate, authorizeRoles("admin"));
+
+router.get("/", analyticsLogger, getAllCustomers);
+
+router.get("/:id", validateCustomerIdParam, analyticsLogger, getCustomerById);
+
+router.post("/", createCustomerValidator, createCustomer);
+
+router.put(
+  "/:id",
+  validateCustomerIdParam,
+  updateCustomerValidator,
+  updateCustomer
+);
+
+router.delete("/:id", validateCustomerIdParam, deleteCustomer);
 
 export default router;

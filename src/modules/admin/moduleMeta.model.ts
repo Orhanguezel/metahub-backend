@@ -1,5 +1,4 @@
-// src/modules/admin/moduleMeta.models.ts
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Model, models } from "mongoose";
 
 interface TranslatedLabel {
   tr: string;
@@ -16,6 +15,7 @@ export interface IRouteMeta {
 }
 
 export interface IModuleMeta extends Document {
+
   name: string;
   label: TranslatedLabel;
   icon: string;
@@ -25,8 +25,8 @@ export interface IModuleMeta extends Document {
   useAnalytics: boolean;
   language: "tr" | "en" | "de";
   version: string;
-  showInDashboard: boolean;  // ✅ EKLENDİ
-  order: number;  // ✅ EKLENDİ
+  showInDashboard: boolean;
+  order: number;
   statsKey?: string;
   history: {
     version: string;
@@ -54,9 +54,9 @@ const moduleMetaSchema = new Schema<IModuleMeta>(
     useAnalytics: { type: Boolean, default: false },
     language: { type: String, enum: ["tr", "en", "de"], default: "en" },
     version: { type: String, default: "1.0.0" },
-    showInDashboard: { type: Boolean, default: true },  // ✅ EKLENDİ
-    order: { type: Number, default: 0 },  // ✅ EKLENDİ
-    statsKey: { type: String }, 
+    showInDashboard: { type: Boolean, default: true },
+    order: { type: Number, default: 0 },
+    statsKey: { type: String },
     history: [
       {
         version: { type: String, required: true },
@@ -78,4 +78,9 @@ const moduleMetaSchema = new Schema<IModuleMeta>(
   { timestamps: true }
 );
 
-export default mongoose.model<IModuleMeta>("ModuleMeta", moduleMetaSchema);
+// ✅ Guard + Model Tipi
+const ModuleMeta: Model<IModuleMeta> =
+  models.ModuleMeta || mongoose.model<IModuleMeta>("ModuleMeta", moduleMetaSchema);
+
+export default ModuleMeta;
+

@@ -1,6 +1,6 @@
-import { Schema, model, Types, Document, Model } from "mongoose";
+import { Schema, model, Types, Document, Model, models } from "mongoose";
 
-// 🔸 Alt Tip: Teklif Ürünleri
+// ✅ Alt Tip: Teklif Ürünleri
 export interface IOfferItem {
   product: Types.ObjectId;
   quantity: number;
@@ -8,7 +8,7 @@ export interface IOfferItem {
   customPrice: number;
 }
 
-// 🔸 Ana Arayüz
+// ✅ Ana Interface
 export interface IOffer extends Document {
   offerNumber: string;
   user: Types.ObjectId;
@@ -29,7 +29,7 @@ export interface IOffer extends Document {
   updatedAt: Date;
 }
 
-// 🔸 Alt Şema: Ürünler
+// ✅ Alt Şema
 const offerItemSchema = new Schema<IOfferItem>(
   {
     product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
@@ -40,78 +40,38 @@ const offerItemSchema = new Schema<IOfferItem>(
   { _id: false }
 );
 
-// 🔸 Ana Şema: Teklif
+// ✅ Ana Şema
 const offerSchema = new Schema<IOffer>(
   {
-    offerNumber: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    company: {
-      type: Schema.Types.ObjectId,
-      ref: "Company",
-      required: true,
-    },
-    customer: {
-      type: Schema.Types.ObjectId,
-      ref: "Customer",
-      required: true,
-    },
+    offerNumber: { type: String, required: true, unique: true },
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    company: { type: Schema.Types.ObjectId, ref: "Company", required: true },
+    customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
     items: {
       type: [offerItemSchema],
       validate: (items: IOfferItem[]) => items.length > 0,
     },
-    totalAmount: {
-      type: Number,
-      required: true,
-    },
-    taxAmount: {
-      type: Number,
-      default: 0,
-    },
-    taxRate: {
-      type: Number,
-      enum: [7, 19],
-      default: 19,
-    },
-    shippingCost: {
-      type: Number,
-      default: 0,
-    },
-    paymentTerms: {
-      type: String,
-      default: "30 gün içinde ödeme",
-    },
+    totalAmount: { type: Number, required: true },
+    taxAmount: { type: Number, default: 0 },
+    taxRate: { type: Number, enum: [7, 19], default: 19 },
+    shippingCost: { type: Number, default: 0 },
+    paymentTerms: { type: String, default: "30 gün içinde ödeme" },
     status: {
       type: String,
       enum: ["draft", "preparing", "sent", "pending", "approved", "rejected"],
       default: "draft",
     },
-    validUntil: {
-      type: Date,
-      required: true,
-    },
-    notes: {
-      type: String,
-      default: "",
-    },
-    sentByEmail: {
-      type: Boolean,
-      default: false,
-    },
-    pdfLink: {
-      type: String,
-      default: "",
-    },
+    validUntil: { type: Date, required: true },
+    notes: { type: String, default: "" },
+    sentByEmail: { type: Boolean, default: false },
+    pdfLink: { type: String, default: "" },
   },
   { timestamps: true }
 );
 
-const Offer: Model<IOffer> = model<IOffer>("Offer", offerSchema);
+// ✅ Guard + Model Type (standart)
+const Offer: Model<IOffer> =
+  models.Offer || model<IOffer>("Offer", offerSchema);
+
 export default Offer;
+export { Offer }; // named export (standart)

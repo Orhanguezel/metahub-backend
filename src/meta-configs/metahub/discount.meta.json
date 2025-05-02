@@ -8,22 +8,6 @@
   "language": "en",
   "routes": [
     {
-      "method": "GET",
-      "path": "/",
-      "auth": true,
-      "summary": "GET /",
-      "validationName": "\"admin\")",
-      "controllerName": "getAllDiscounts"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "auth": true,
-      "summary": "POST /",
-      "validationName": "\"admin\")",
-      "controllerName": "createDiscount"
-    },
-    {
       "method": "POST",
       "path": "/apply",
       "auth": true,
@@ -32,27 +16,31 @@
       "controllerName": "applyDiscount"
     },
     {
-      "method": "DELETE",
-      "path": "/:id",
+      "method": "GET",
+      "path": "/",
       "auth": true,
-      "summary": "DELETE /:id",
-      "validationName": "\"admin\")",
-      "controllerName": "deleteDiscount"
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllDiscounts",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     }
   ],
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145"
+    "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b"
   },
-  "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-  "lastUpdatedAt": "2025-04-30T18:05:46.756Z",
+  "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+  "lastUpdatedAt": "2025-05-01T23:27:18.205Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-      "date": "2025-04-30T18:05:46.756Z",
+      "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+      "date": "2025-05-01T23:27:18.205Z",
       "note": "Meta auto-generated"
     }
   ]

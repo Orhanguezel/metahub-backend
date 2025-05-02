@@ -27,7 +27,9 @@ declare global {
         | "news"
         | "article"
         | "sport"
+        | "spareparts"
         | "default";
+
       locale?: "tr" | "en" | "de"; // 🌍 Çok dilli destek (i18n)
     }
   }

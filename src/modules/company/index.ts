@@ -1,10 +1,13 @@
-// src/modules/invoice/index.ts
 import express from "express";
-import routes from "./company.routes";
+import companyRoutes from "./company.routes";
+import { Company, ICompany } from "./company.models";
+import * as companyController from "./company.controller";
 
 const router = express.Router();
-router.use("/", routes);
+router.use("/", companyRoutes);
 
-export * from "./company.controller";
-export { default as Company } from "./company.models";
+// ✅ Guard + Export (This module has been updated and is now standardized)
+export { Company, ICompany, companyController };
+export * from "./company.validation";
+
 export default router;

@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, models, Model } from "mongoose";
 
 export interface ISocialMedia extends Document {
   platform: {
@@ -25,4 +25,8 @@ const socialMediaSchema = new Schema<ISocialMedia>(
   { timestamps: true }
 );
 
-export default model<ISocialMedia>("SocialMedia", socialMediaSchema);
+const SocialMedia: Model<ISocialMedia> =
+  models.SocialMedia || model<ISocialMedia>("SocialMedia", socialMediaSchema);
+
+export default SocialMedia;
+export { SocialMedia };

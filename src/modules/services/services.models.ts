@@ -1,29 +1,13 @@
 import mongoose, { Schema, model, Document, Model } from "mongoose";
 
 export interface IService extends Document {
-  title: {
-    tr: string;
-    en: string;
-    de: string;
-  };
-  shortDescription: {
-    tr: string;
-    en: string;
-    de: string;
-  };
-  detailedDescription: {
-    tr: string;
-    en: string;
-    de: string;
-  };
+  title: { tr: string; en: string; de: string };
+  shortDescription: { tr: string; en: string; de: string };
+  detailedDescription: { tr: string; en: string; de: string };
   price: number;
   durationMinutes: number;
   images: string[];
-  category?: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
+  category?: { tr?: string; en?: string; de?: string };
   tags?: string[];
   isActive: boolean;
   isPublished: boolean;
@@ -48,41 +32,23 @@ const serviceSchema = new Schema<IService>(
       en: { type: String, required: true },
       de: { type: String, required: true },
     },
-    price: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    durationMinutes: {
-      type: Number,
-      default: 60,
-      min: 1,
-    },
-    images: {
-      type: [String],
-      default: [],
-    },
+    price: { type: Number, required: true, min: 0 },
+    durationMinutes: { type: Number, default: 60, min: 1 },
+    images: { type: [String], default: [] },
     category: {
       tr: { type: String },
       en: { type: String },
       de: { type: String },
     },
-    tags: {
-      type: [String],
-      default: [],
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    isPublished: {
-      type: Boolean,
-      default: true,
-    },
+    tags: { type: [String], default: [] },
+    isActive: { type: Boolean, default: true },
+    isPublished: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-const Service: Model<IService> = mongoose.models.Service || model<IService>("Service", serviceSchema);
-export default Service;
+const Service: Model<IService> =
+  mongoose.models.Service || model<IService>("Service", serviceSchema);
 
+export default Service;
+export { Service };

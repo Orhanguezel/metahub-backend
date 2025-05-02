@@ -1,11 +1,10 @@
-// src/tools/createModule/fileTemplates.ts
-
 export const capitalize = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1);
 
 export const getControllerContent = (CapName: string) => `
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
+import { ${CapName} } from "@/modules/${CapName.toLowerCase()}";
 
 // ➕ Create
 export const create${CapName} = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -69,7 +68,7 @@ export const validateCreate${CapName} = [
 `;
 
 export const getModelContent = (CapName: string) => `
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Schema, Document, Model, models } from "mongoose";
 
 export interface I${CapName} extends Document {
   name: string;
@@ -81,26 +80,30 @@ const ${CapName}Schema = new Schema<I${CapName}>({
   name: { type: String, required: true },
 }, { timestamps: true });
 
-export const ${CapName}: Model<I${CapName}> =
-  mongoose.models.${CapName} || mongoose.model<I${CapName}>("${CapName}", ${CapName}Schema);
+// ✅ Guard + Tip garantisi
+const ${CapName}: Model<I${CapName}> =
+  models.${CapName} || mongoose.model<I${CapName}>("${CapName}", ${CapName}Schema);
+
+export default ${CapName};
 `;
 
 export const getIndexContent = (moduleName: string) => `
 import express from "express";
-import routes from "./${moduleName}.routes";
-import { ${capitalize(moduleName)}, I${capitalize(moduleName)} } from "./${moduleName}.models";
+import ${moduleName}Routes from "./${moduleName}.routes";
+import ${capitalize(moduleName)}, { I${capitalize(moduleName)} } from "./${moduleName}.model";
 import * as ${moduleName}Controller from "./${moduleName}.controller";
+import * as ${moduleName}Validation from "./${moduleName}.validation";
 
 const router = express.Router();
-router.use("/", routes);
+router.use("/", ${moduleName}Routes);
 
 export {
   ${capitalize(moduleName)},
   I${capitalize(moduleName)},
-  ${moduleName}Controller
+  ${moduleName}Controller,
+  ${moduleName}Validation,
 };
 
-export * from "./${moduleName}.validation";
 export default router;
 `;
 

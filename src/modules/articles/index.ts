@@ -1,11 +1,18 @@
-// src/modules/articles/index.ts
+// ✅ Guard + Model Type
+
 import express from "express";
 import routes from "./articles.routes";
-import Article from "./articles.models";
+import { Article, IArticle } from "./articles.models";
+import * as articlesController from "./articles.controller";
 
 const router = express.Router();
 router.use("/", routes);
 
-export * from "./articles.controller";
-export { Article };
+export {
+  Article,
+  IArticle,
+  articlesController
+};
+
+export * from "./articles.validation";
 export default router;

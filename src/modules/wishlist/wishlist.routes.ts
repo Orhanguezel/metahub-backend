@@ -6,23 +6,23 @@ import {
   clearWishlist,
 } from "./wishlist.controller";
 import { authenticate } from "@/core/middleware/authMiddleware";
-import { validateObjectId } from "@/core/middleware/validateRequest";
+import { validateProductIdParam } from "./wishlist.validation";
 
 const router = Router();
 
-// 🔒 Tüm wishlist işlemleri için authentication zorunlu
+// 🔐 All wishlist actions require auth
 router.use(authenticate);
 
-// 📋 Kullanıcının wishlist'ini getir
+// 📋 Get user's wishlist
 router.get("/", getUserWishlist);
 
-// ➕ Ürün ekle
-router.post("/add/:productId", validateObjectId("productId"), addToWishlist);
+// ➕ Add product to wishlist
+router.post("/add/:productId", validateProductIdParam, addToWishlist);
 
-// ❌ Ürün çıkar
-router.delete("/remove/:productId", validateObjectId("productId"), removeFromWishlist);
+// ❌ Remove product from wishlist
+router.delete("/remove/:productId", validateProductIdParam, removeFromWishlist);
 
-// 🧹 Tüm wishlist'i temizle
+// 🧹 Clear the entire wishlist
 router.delete("/clear", clearWishlist);
 
 export default router;

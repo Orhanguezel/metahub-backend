@@ -12,28 +12,16 @@
       "path": "/check/:code",
       "auth": true,
       "summary": "GET /check/:code",
-      "validationName": "\"/check/:code\"",
-      "controllerName": "getCouponByCode"
+      "validationName": "authenticate",
+      "controllerName": "authorizeRoles(\"admin\")"
     },
     {
       "method": "GET",
       "path": "/",
       "auth": true,
       "summary": "GET /",
-      "validationName": "\"/\"",
-      "controllerName": "getAllCoupons",
-      "body": {
-        "type": "object",
-        "properties": {}
-      }
-    },
-    {
-      "method": "DELETE",
-      "path": "/:id",
-      "auth": true,
-      "summary": "DELETE /:id",
       "validationName": "\"/:id\"",
-      "controllerName": "deleteCoupon",
+      "controllerName": "validateObjectId(\"id\"",
       "body": {
         "type": "object",
         "properties": {}
@@ -43,16 +31,16 @@
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145"
+    "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b"
   },
-  "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-  "lastUpdatedAt": "2025-04-30T18:05:46.830Z",
+  "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+  "lastUpdatedAt": "2025-05-01T23:27:18.227Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-      "date": "2025-04-30T18:05:46.830Z",
+      "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+      "date": "2025-05-01T23:27:18.227Z",
       "note": "Meta auto-generated"
     }
   ]

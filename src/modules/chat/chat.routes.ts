@@ -1,4 +1,3 @@
-// routes/chat.routes.ts
 import express from "express";
 import {
   getMessagesByRoom,
@@ -11,39 +10,51 @@ import {
   getActiveChatSessions,
   getAllChatSessions,
 } from "./chat.controller";
-import { authenticate, authorizeRoles } from "../../core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { analyticsLogger } from "@/core/middleware/analyticsLogger";
+import {
+  validateManualMessage,
+  validateBulkDelete,
+  validateIdParam,
+  validateRoomIdParam,
+} from "./chat.validation";
 
 const router = express.Router();
 
-// 💬 Kullanıcı ve admin: Belirli odaya ait tüm mesajları getir
-// Örn: GET /chat/room123
-router.get("/:roomId", authenticate, getMessagesByRoom);
+// ✅ Public + Auth: Get all messages for a room
+router.get(
+  "/:roomId",
+  authenticate,
+  analyticsLogger,
+  validateRoomIdParam,
+  getMessagesByRoom
+);
 
-// 🔐 Admin: Tüm son sohbetleri (odalar bazında) listele
-router.get("/", authenticate, authorizeRoles("admin"), getAllRoomsLastMessages);
+// ✅ Admin-only routes
+router.use(authenticate, authorizeRoles("admin"));
 
-// 🔐 Admin: Tekil mesaj silme
-router.delete("/:id", authenticate, authorizeRoles("admin"), deleteMessage);
+// ✅ Admin: Get last messages (grouped by rooms)
+router.get("/", getAllRoomsLastMessages);
 
-// 🔐 Admin: Çoklu mesaj silme
-router.post("/bulk", authenticate, authorizeRoles("admin"), deleteMessagesBulk);
+// ✅ Admin: Delete a single message
+router.delete("/:id", validateIdParam, deleteMessage);
 
-// 🧑‍💼 Admin: Manuel mesaj gönder (isteğe bağlı `lang` parametresi desteklenir)
-// Body örneği:
-// {
-//   "roomId": "abc123",
-//   "message": "Merhaba, size nasıl yardımcı olabilirim?",
-//   "lang": "tr" // optional: tr | en | de
-// }
-router.post("/manual", authenticate, authorizeRoles("admin"), sendManualMessage);
+// ✅ Admin: Bulk delete messages
+router.post("/bulk", validateBulkDelete, deleteMessagesBulk);
 
-router.patch("/read/:roomId", authenticate, authorizeRoles("admin"), markMessagesAsRead);
+// ✅ Admin: Send manual message
+router.post("/manual", validateManualMessage, sendManualMessage);
 
-router.get("/archived", authenticate, authorizeRoles("admin"), getArchivedSessions);
-router.get("/sessions/active", authenticate, authorizeRoles("admin"), getActiveChatSessions);
-router.get("/sessions", authenticate, authorizeRoles("admin"), getAllChatSessions);
+// ✅ Admin: Mark all messages in a room as read
+router.patch("/read/:roomId", validateRoomIdParam, markMessagesAsRead);
 
+// ✅ Admin: Get archived sessions
+router.get("/archived", getArchivedSessions);
 
+// ✅ Admin: Get active chat sessions
+router.get("/sessions/active", getActiveChatSessions);
 
+// ✅ Admin: Get all chat sessions
+router.get("/sessions", getAllChatSessions);
 
 export default router;

@@ -1,4 +1,4 @@
-import { Schema, model, Document, Types } from "mongoose";
+import mongoose, { Schema, model, models, Document, Types, Model } from "mongoose";
 
 export type MovementType = "increase" | "decrease" | "adjust" | "order" | "return" | "manual";
 
@@ -34,6 +34,8 @@ const stockmovementSchema = new Schema<IStockmovement>(
   { timestamps: { createdAt: true, updatedAt: false } }
 );
 
-export const Stockmovement = model<IStockmovement>("Stockmovement", stockmovementSchema);
+// ✅ Guard + Tip belirleme
+const Stockmovement: Model<IStockmovement> =
+  models.Stockmovement || model<IStockmovement>("Stockmovement", stockmovementSchema);
 
 export default Stockmovement;

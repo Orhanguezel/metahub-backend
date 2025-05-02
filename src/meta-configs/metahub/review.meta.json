@@ -12,63 +12,47 @@
       "path": "/",
       "auth": true,
       "summary": "GET /",
-      "validationName": "authenticate",
-      "controllerName": "authorizeRoles(\"admin\""
+      "validationName": "\"admin\")",
+      "controllerName": "fetchReviews",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "POST",
       "path": "/",
       "auth": true,
       "summary": "POST /",
-      "validationName": "authenticate",
-      "controllerName": "addReview"
+      "validationName": "\"/product/:productId\"",
+      "controllerName": "validateObjectIdParam(\"productId\"",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "GET",
       "path": "/product/:productId",
       "auth": true,
       "summary": "GET /product/:productId",
-      "validationName": "fetchProductReviews)\n  .delete(authenticate",
-      "controllerName": "authorizeRoles(\"admin\""
-    },
-    {
-      "method": "GET",
-      "path": "/user/:userId",
-      "auth": true,
-      "summary": "GET /user/:userId",
-      "validationName": "authenticate",
-      "controllerName": "authorizeRoles(\"admin\""
-    },
-    {
-      "method": "PUT",
-      "path": "/:id",
-      "auth": true,
-      "summary": "PUT /:id",
-      "validationName": "authenticate",
-      "controllerName": "updateReview"
-    },
-    {
-      "method": "DELETE",
-      "path": "/:id",
-      "auth": true,
-      "summary": "DELETE /:id",
-      "validationName": "authenticate",
-      "controllerName": "deleteReview"
+      "validationName": "\"/product/:productId\"",
+      "controllerName": "validateObjectIdParam(\"productId\""
     }
   ],
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145"
+    "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b"
   },
-  "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-  "lastUpdatedAt": "2025-04-30T18:05:46.868Z",
+  "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+  "lastUpdatedAt": "2025-05-01T23:27:18.311Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-      "date": "2025-04-30T18:05:46.868Z",
+      "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+      "date": "2025-05-01T23:27:18.311Z",
       "note": "Meta auto-generated"
     }
   ]

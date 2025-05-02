@@ -1,10 +1,15 @@
-// src/modules/invoice/index.ts
 import express from "express";
-import routes from "./gallery.routes";
+import galleryRoutes from "./gallery.routes";
+
+// ✅ Model & Controller importları
+import Gallery, { IGalleryItem } from "./gallery.models";
+import * as galleryController from "./gallery.controller";
 
 const router = express.Router();
-router.use("/", routes);
+router.use("/", galleryRoutes);
 
-export * from "./gallery.controller";
-export { default as Gallery} from "./gallery.models";
+// ✅ Guard + Export (standart)
+export { Gallery, IGalleryItem, galleryController };
+export * from "./gallery.validation";
+
 export default router;

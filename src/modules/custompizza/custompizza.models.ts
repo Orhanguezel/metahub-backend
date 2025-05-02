@@ -1,7 +1,8 @@
-import mongoose, { Schema, Document, Model, Types } from "mongoose";
+// src/modules/custompizza/custompizza.models.ts
+import { Schema, model, Document, Model, models, Types } from "mongoose";
 
-// 🔹 Alt model: Extra
-export interface ICustomExtra {
+// 🔹 Extra type
+interface ICustomExtra {
   label: {
     tr: string;
     en: string;
@@ -10,24 +11,12 @@ export interface ICustomExtra {
   price: number;
 }
 
-// 🔹 Ana model: CustomPizza
-export interface ICustomPizza extends Document {
+// 🔹 CustomPizza type
+interface ICustomPizza extends Document {
   size: "klein" | "mittel" | "groß";
-  base: {
-    tr: string;
-    en: string;
-    de: string;
-  };
-  sauce: {
-    tr: string;
-    en: string;
-    de: string;
-  };
-  toppings: {
-    tr: string;
-    en: string;
-    de: string;
-  }[];
+  base: { tr: string; en: string; de: string };
+  sauce: { tr: string; en: string; de: string };
+  toppings: { tr: string; en: string; de: string }[];
   extras?: ICustomExtra[];
   note?: string;
   totalPrice: number;
@@ -50,7 +39,7 @@ const customExtraSchema = new Schema<ICustomExtra>(
   { _id: false }
 );
 
-// 🔸 Ana schema
+// 🔸 Main schema
 const customPizzaSchema = new Schema<ICustomPizza>(
   {
     size: {
@@ -84,6 +73,9 @@ const customPizzaSchema = new Schema<ICustomPizza>(
   { timestamps: true }
 );
 
-const CustomPizza: Model<ICustomPizza> = mongoose.models.CustomPizza || mongoose.model<ICustomPizza>("CustomPizza", customPizzaSchema);
-export default CustomPizza;
+// ✅ Guard + Model Type (This module has been updated and is now standardized)
+const CustomPizza: Model<ICustomPizza> =
+  models.CustomPizza || model<ICustomPizza>("CustomPizza", customPizzaSchema);
 
+export default CustomPizza;
+export type { ICustomPizza, ICustomExtra };

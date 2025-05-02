@@ -1,19 +1,37 @@
-// src/models/AnalyticsEvent.ts
-import mongoose from "mongoose";
+import mongoose, { Schema, Document, Model, Types } from "mongoose";
 
-const analyticsEventSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
-  path: String,
-  method: String,
-  ip: String,
-  userAgent: String,
-  timestamp: { type: Date, default: Date.now },
-  query: Object,
-  body: Object,
-  module: String,        // 👈 e.g. "products", "orders", "cart"
-  eventType: String,     // 👈 e.g. "view", "create", "update"
-});
+export interface IAnalyticsEvent extends Document {
+  userId?: Types.ObjectId | null;
+  path: string;
+  method: string;
+  ip: string;
+  userAgent: string;
+  timestamp: Date;
+  query?: Record<string, any>;
+  body?: Record<string, any>;
+  module: string;
+  eventType: string;
+}
 
-const AnalyticsEvent: mongoose.Model<any> = mongoose.models.AnalyticsEvent || mongoose.model("AnalyticsEvent", analyticsEventSchema);
+const analyticsEventSchema = new Schema<IAnalyticsEvent>(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    path: { type: String, required: true },
+    method: { type: String, required: true },
+    ip: { type: String },
+    userAgent: { type: String },
+    timestamp: { type: Date, default: Date.now },
+    query: { type: Object },
+    body: { type: Object },
+    module: { type: String, required: true },      // 👈 örn: "products"
+    eventType: { type: String, required: true },   // 👈 örn: "view"
+  },
+  { timestamps: false }
+);
+
+const AnalyticsEvent: Model<IAnalyticsEvent> =
+  mongoose.models.AnalyticsEvent ||
+  mongoose.model<IAnalyticsEvent>("AnalyticsEvent", analyticsEventSchema);
+
 export default AnalyticsEvent;
-
+export { AnalyticsEvent };

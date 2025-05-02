@@ -12,16 +12,12 @@
       "path": "/",
       "auth": true,
       "summary": "POST /",
-      "validationName": "\"/\"",
-      "controllerName": "createFeedback"
-    },
-    {
-      "method": "GET",
-      "path": "/",
-      "auth": true,
-      "summary": "GET /",
-      "validationName": "\"admin\")",
-      "controllerName": "getAllFeedbacks"
+      "validationName": "\"/published\"",
+      "controllerName": "getPublishedFeedbacks",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "GET",
@@ -32,51 +28,55 @@
       "controllerName": "getPublishedFeedbacks"
     },
     {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllFeedbacks",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
       "method": "PATCH",
       "path": "/:id/toggle",
       "auth": true,
-      "summary": "PATCH /:id/toggle",
-      "validationName": "\"admin\")",
-      "controllerName": "togglePublishFeedback"
+      "summary": "PATCH /:id/toggle"
     },
     {
       "method": "PUT",
       "path": "/:id",
       "auth": true,
-      "summary": "PUT /:id",
-      "validationName": "\"admin\")",
-      "controllerName": "updateFeedback"
+      "summary": "PUT /:id"
     },
     {
       "method": "DELETE",
       "path": "/:id",
       "auth": true,
-      "summary": "DELETE /:id",
-      "validationName": "\"admin\")",
-      "controllerName": "deleteFeedback"
+      "summary": "DELETE /:id"
     },
     {
       "method": "PATCH",
       "path": "/:id/archive",
       "auth": true,
-      "summary": "PATCH /:id/archive",
-      "validationName": "\"admin\")",
-      "controllerName": "softDeleteFeedback"
+      "summary": "PATCH /:id/archive"
     }
   ],
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145"
+    "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b"
   },
-  "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-  "lastUpdatedAt": "2025-04-30T18:05:46.868Z",
+  "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+  "lastUpdatedAt": "2025-05-01T23:27:18.330Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-      "date": "2025-04-30T18:05:46.868Z",
+      "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+      "date": "2025-05-01T23:27:18.330Z",
       "note": "Meta auto-generated"
     }
   ]

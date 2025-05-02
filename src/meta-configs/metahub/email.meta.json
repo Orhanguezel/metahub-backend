@@ -13,7 +13,11 @@
       "auth": true,
       "summary": "POST /send",
       "validationName": "\"/send\"",
-      "controllerName": "sendTestEmail"
+      "controllerName": "sendTestEmail",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "GET",
@@ -21,14 +25,18 @@
       "auth": true,
       "summary": "GET /",
       "validationName": "\"/\"",
-      "controllerName": "getAllMails"
+      "controllerName": "getAllMails",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "GET",
       "path": "/fetch",
       "auth": true,
       "summary": "GET /fetch",
-      "validationName": "\"admin\")",
+      "validationName": "\"/fetch\"",
       "controllerName": "fetchEmailsManually"
     },
     {
@@ -37,7 +45,11 @@
       "auth": true,
       "summary": "GET /:id",
       "validationName": "\"/:id\"",
-      "controllerName": "getMailById"
+      "controllerName": "getMailById",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "DELETE",
@@ -45,28 +57,34 @@
       "auth": true,
       "summary": "DELETE /:id",
       "validationName": "\"/:id\"",
-      "controllerName": "deleteMail"
+      "controllerName": "deleteMail",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "PATCH",
       "path": "/:id/read",
       "auth": true,
-      "summary": "PATCH /:id/read"
+      "summary": "PATCH /:id/read",
+      "validationName": "\"/:id/read\"",
+      "controllerName": "markAsReadOrUnread"
     }
   ],
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145"
+    "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b"
   },
-  "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-  "lastUpdatedAt": "2025-04-30T18:05:46.605Z",
+  "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+  "lastUpdatedAt": "2025-05-01T23:27:18.056Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "f4be8f5598c188b0d23f84a4eb693f0de4ee1145",
-      "date": "2025-04-30T18:05:46.605Z",
+      "commitHash": "0cec9744e7652ca7e15aa80a113a57ed9f26819b",
+      "date": "2025-05-01T23:27:18.056Z",
       "note": "Meta auto-generated"
     }
   ]

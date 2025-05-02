@@ -11,10 +11,9 @@ import { metaConfig } from "./generateMeta.config";
 import { getValidationBodySchema } from "./utils/validationSchemaReader";
 
 import {
-  ModuleMeta as ModuleMetaType,
-  ModuleMetaModel,
+  ModuleMeta,
   ModuleSetting,
-} from "@/modules/admin";
+} from "../../modules/admin";
 
 export const generateMeta = async () => {
   await connectDB();
@@ -49,7 +48,7 @@ export const generateMeta = async () => {
         console.error(`❌ Failed to delete meta file for ${modName}:`, err);
       }
       try {
-        await ModuleMetaModel.deleteOne({ name: modName });
+        await ModuleMeta.deleteOne({ name: modName });
         await ModuleSetting.deleteMany({ module: modName });
         console.log(`🧹 Deleted DB records for module: ${modName}`);
       } catch (err) {
@@ -106,7 +105,7 @@ export const generateMeta = async () => {
       }
     }
 
-    const meta: ModuleMetaType = updateMetaVersionLog({
+    const meta = updateMetaVersionLog({
       name: mod,
       icon: (existing as any).icon || "box",
       roles: (existing as any).roles || ["admin"],
@@ -123,7 +122,7 @@ export const generateMeta = async () => {
     }
 
     try {
-      await ModuleMetaModel.updateOne({ name: mod }, { $set: meta }, { upsert: true });
+      await ModuleMeta.updateOne({ name: mod }, { $set: meta }, { upsert: true });
     } catch (err) {
       console.error(`❌ DB update failed for ${mod}:`, err);
     }

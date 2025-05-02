@@ -5,16 +5,30 @@ import {
   updateCompanyInfo,
 } from "./company.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { analyticsLogger } from "@/core/middleware/analyticsLogger";
+import { validateCreateCompany, validateUpdateCompany, validateCompanyId } from "./company.validation";
 
 const router = express.Router();
 
-// GET /company -> Get company info
-router.get("/", authenticate, getCompanyInfo);
+// ✅ Public route to get company info
+router.get("/", analyticsLogger, authenticate, getCompanyInfo);
 
-// POST /company -> Create company (admin only)
-router.post("/", authenticate, authorizeRoles("admin"), createCompany);
+// ✅ Admin-only routes
+router.post(
+  "/",
+  authenticate,
+  authorizeRoles("admin"),
+  validateCreateCompany,
+  createCompany
+);
 
-// PUT /company/:id -> Update company info (admin only)
-router.put("/:id", authenticate, authorizeRoles("admin"), updateCompanyInfo);
+router.put(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateCompanyId,
+  validateUpdateCompany,
+  updateCompanyInfo
+);
 
 export default router;

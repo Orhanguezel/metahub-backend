@@ -1,7 +1,7 @@
-// src/modules/coupon/coupon.models.ts
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Model, models } from "mongoose";
 
-export interface ICoupon extends Document {
+// ✅ Coupon Interface
+interface ICoupon extends Document {
   code: string;
   label: {
     title: {
@@ -22,6 +22,7 @@ export interface ICoupon extends Document {
   updatedAt: Date;
 }
 
+// ✅ Coupon Schema
 const couponSchema = new Schema<ICoupon>(
   {
     code: {
@@ -61,6 +62,9 @@ const couponSchema = new Schema<ICoupon>(
   { timestamps: true }
 );
 
-const Coupon = model<ICoupon>("Coupon", couponSchema);
+// ✅ Guard + Model Type (This module has been updated and is now standardized)
+const Coupon: Model<ICoupon> =
+  models.Coupon || model<ICoupon>("Coupon", couponSchema);
 
+export { Coupon, ICoupon };
 export default Coupon;

@@ -1,15 +1,19 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import Setting from "./setting.models";
+import { Setting } from "@/modules/setting";
 
 // 🎯 Create or Update Setting
 export const upsertSetting = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { key, value, isActive = true } = req.body;
 
   if (!key || value === undefined || value === null) {
-    res.status(400);
-    throw new Error("Key and value are required.");
+    res.status(400).json({
+      success: false,
+      message: "Key and value are required.",
+    });
+    return 
   }
+  
 
   const trimmedKey = key.trim();
 
