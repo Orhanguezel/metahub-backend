@@ -1,12 +1,11 @@
 import { Schema, model, models, Document, Model } from "mongoose";
 
+type LogoSettingValue = { light?: string; dark?: string };
+
+
 export interface ISetting extends Document {
   key: string;
-  value: string | string[] | {
-    tr: string;
-    en: string;
-    de: string;
-  };
+  value: string | string[] | { tr: string; en: string; de: string } | Record<string, any>;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;

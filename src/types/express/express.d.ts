@@ -28,6 +28,7 @@ declare global {
         | "article"
         | "sport"
         | "spareparts"
+        | "setting"
         | "default";
 
       locale?: "tr" | "en" | "de"; // 🌍 Çok dilli destek (i18n)

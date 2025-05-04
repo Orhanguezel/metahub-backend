@@ -11,5 +11,6 @@ export { Setting };
 export * from "./setting.controller";
 export * from "./setting.validation";
 export * from "./setting.models";
+export * from "./setting.routes";
 
 export default router;

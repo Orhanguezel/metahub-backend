@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
 
 export interface INewsCategory extends Document {
   name: {
@@ -46,6 +46,11 @@ newsCategorySchema.pre("validate", function (next) {
   next();
 });
 
-const NewsCategory = model<INewsCategory>("NewsCategory", newsCategorySchema);
+
+// ✅ Guard + Model Type
+const NewsCategory: Model<INewsCategory>=
+(models.NewsCategory as Model<INewsCategory>) || mongoose.model<INewsCategory>("NewsCategory", newsCategorySchema);
 
 export default NewsCategory;
+export { NewsCategory };
+
