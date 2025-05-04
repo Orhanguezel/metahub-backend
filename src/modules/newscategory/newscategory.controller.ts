@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import NewsCategory from "./newscategory.models";
+import {NewsCategory} from "@/modules/newscategory";
 import { isValidObjectId } from "@/core/utils/validation";
 
 // ✅ Create News Category

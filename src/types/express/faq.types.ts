@@ -1,4 +1,0 @@
-// types/faq.types.types
-
-
-

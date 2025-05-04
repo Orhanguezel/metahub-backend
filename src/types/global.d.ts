@@ -19,6 +19,7 @@ declare global {
         | "article"
         | "sport"
         | "spareparts"
+        | "setting"
         | "default";
     }
   }
