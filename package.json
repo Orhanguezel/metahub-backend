@@ -39,7 +39,6 @@
     "@types/mailparser": "^3.4.5",
     "@types/nodemailer": "^6.4.17",
     "axios": "^1.8.4",
-    "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "chokidar": "^4.0.3",
     "cloudinary": "^1.41.3",
