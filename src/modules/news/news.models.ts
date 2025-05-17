@@ -1,5 +1,12 @@
 import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
 
+export interface INewsImage {
+  url: string;
+  thumbnail: string;
+  webp?: string;
+  publicId?: string;
+}
+
 export interface INews extends Document {
   title: {
     tr?: string;
@@ -17,16 +24,27 @@ export interface INews extends Document {
     en?: string;
     de?: string;
   };
-  images: string[];
+  images: INewsImage[];
   tags: string[];
   author?: string;
   category?: Types.ObjectId;
   isPublished: boolean;
   publishedAt?: Date;
   comments: Types.ObjectId[];
+  isActive: boolean; // soft delete desteği
   createdAt: Date;
   updatedAt: Date;
 }
+
+const newsImageSchema = new Schema<INewsImage>(
+  {
+    url: { type: String, required: true },
+    thumbnail: { type: String, required: true },
+    webp: { type: String },
+    publicId: { type: String },
+  },
+  { _id: false }
+);
 
 const newsSchema: Schema = new Schema<INews>(
   {
@@ -46,7 +64,7 @@ const newsSchema: Schema = new Schema<INews>(
       en: { type: String },
       de: { type: String },
     },
-    images: [{ type: String, required: true }],
+    images: { type: [newsImageSchema], default: [] },
     tags: [{ type: String }],
     author: { type: String },
     category: {
@@ -56,6 +74,7 @@ const newsSchema: Schema = new Schema<INews>(
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
+    isActive: { type: Boolean, default: true }, // soft delete desteği
   },
   {
     timestamps: true,
@@ -80,3 +99,5 @@ const News: Model<INews> =
 
 export default News;
 export { News };
+
+

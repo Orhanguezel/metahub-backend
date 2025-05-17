@@ -1,26 +1,37 @@
 import express from "express";
+import {
+  getUserAddresses,
+  createAddress,
+  getAddressById,
+  updateAddress,
+  deleteAddress,
+  updateAllUserAddresses,
+} from "./address.controller";
+
 import { authenticate } from "@/core/middleware/authMiddleware";
 import {
-  createAddress,
-  deleteAddress,
-  getAddressById,
-  getUserAddresses,
-  updateAddress,
-} from "./address.controller";
-import {
-  validateAddressCreation,
-  validateAddressUpdate,
-  validateAddressId,
+  validateAddress,
+  validateUpdateAddresses,
 } from "./address.validation";
 
 const router = express.Router();
 
-router.use(authenticate);
+// 🗺️ Tüm adresleri getir
+router.get("/", authenticate, getUserAddresses);
 
-router.get("/", getUserAddresses);
-router.post("/", validateAddressCreation, createAddress);
-router.get("/:id", validateAddressId, getAddressById);
-router.put("/:id", validateAddressId, validateAddressUpdate, updateAddress);
-router.delete("/:id", validateAddressId, deleteAddress);
+// ➕ Yeni adres ekle
+router.post("/", authenticate, validateAddress, createAddress);
+
+// 🔎 Tek adres getir
+router.get("/:id", authenticate, getAddressById);
+
+// 🛠️ Tek adresi güncelle
+router.put("/:id", authenticate, validateAddress, updateAddress);
+
+// 🗑️ Tek adresi sil
+router.delete("/:id", authenticate, deleteAddress);
+
+// 🔄 Tüm adresleri topluca güncelle (replace)
+router.put("/all/replace", authenticate, validateUpdateAddresses, updateAllUserAddresses);
 
 export default router;

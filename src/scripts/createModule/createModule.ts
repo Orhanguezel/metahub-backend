@@ -13,7 +13,7 @@ if (!moduleName) {
 }
 
 const modulesPath = path.resolve(__dirname, "../modules");
-const metaPath = path.resolve(__dirname, "../meta-configs/metahub");
+const metaPath = path.resolve(__dirname, "../meta-configs/ensotek");
 const modulePath = path.join(modulesPath, moduleName);
 
 if (fs.existsSync(modulePath)) {

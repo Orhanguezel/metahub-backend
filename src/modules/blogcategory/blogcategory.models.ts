@@ -1,5 +1,4 @@
-// ✅ Guard + Model Type (ensures the model is properly typed and prevents recompilation issues)
-import mongoose, { Schema, model, Document, Model, models } from "mongoose";
+import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
 
 export interface IBlogCategory extends Document {
   name: {
@@ -8,17 +7,12 @@ export interface IBlogCategory extends Document {
     de: string;
   };
   slug: string;
-  description?: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const blogCategorySchema = new Schema<IBlogCategory>(
+const BlogCategorySchema = new Schema<IBlogCategory>(
   {
     name: {
       tr: { type: String, required: true, trim: true },
@@ -29,13 +23,8 @@ const blogCategorySchema = new Schema<IBlogCategory>(
       type: String,
       required: true,
       unique: true,
-      trim: true,
       lowercase: true,
-    },
-    description: {
-      tr: { type: String, trim: true },
-      en: { type: String, trim: true },
-      de: { type: String, trim: true },
+      trim: true,
     },
     isActive: {
       type: Boolean,
@@ -45,7 +34,7 @@ const blogCategorySchema = new Schema<IBlogCategory>(
   { timestamps: true }
 );
 
-blogCategorySchema.pre("validate", function (next) {
+BlogCategorySchema.pre("validate", function (next) {
   if (!this.slug && this.name?.en) {
     this.slug = this.name.en
       .toLowerCase()
@@ -57,8 +46,11 @@ blogCategorySchema.pre("validate", function (next) {
   next();
 });
 
-const BlogCategory: Model<IBlogCategory> =
-  models.BlogCategory || model<IBlogCategory>("BlogCategory", blogCategorySchema);
+
+// ✅ Guard + Model Type
+const BlogCategory: Model<IBlogCategory>=
+(models.BlogCategory as Model<IBlogCategory>) || mongoose.model<IBlogCategory>("BlogCategory", BlogCategorySchema);
 
 export default BlogCategory;
 export { BlogCategory };
+

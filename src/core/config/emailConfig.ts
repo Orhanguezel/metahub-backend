@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 
 // 📁 Ortama göre .env dosyasını yükle
-const envProfile = process.env.APP_ENV || "metahub";
+const envProfile = process.env.APP_ENV || "ensotek";
 const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
 
 // 🛡️ Güvenli yükleme

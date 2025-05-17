@@ -15,10 +15,7 @@ import {
   deleteUser,
 } from "./crud.controller";
 
-import {
-  updateUserRole,
-  toggleUserStatus,
-} from "./status.controller";
+import { updateUserRole, toggleUserStatus } from "./status.controller";
 
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import upload from "@/core/middleware/uploadMiddleware";
@@ -40,22 +37,30 @@ import {
 const router = express.Router();
 
 // 🔐 Auth Routes
-router.post("/register", validateRegister, registerUser);
-router.post("/login", validateApiKey, validateLogin, loginUser);
+router.post(
+  "/register", 
+  validateRegister, 
+  registerUser);
+
+router.post(
+  "/login", 
+  validateLogin, 
+  loginUser);
+
 router.post(
   "/change-password",
   authenticate,
-  validateApiKey,
   validateChangePassword,
-  changePassword
-);
-router.post("/forgot-password", validateApiKey, validateForgotPassword, forgotPassword);
+  changePassword);
+router.post(
+  "/forgot-password",
+  validateForgotPassword,
+  forgotPassword);
+
 router.post(
   "/reset-password/:token",
-  validateApiKey,
   validateResetPassword,
-  resetPassword
-);
+  resetPassword);
 
 // 📋 Admin Routes
 router.get(
@@ -66,33 +71,33 @@ router.get(
   getUsers
 );
 
-router
-  .route("/users/:id")
-  .get(
-    authenticate,
-    authorizeRoles("admin"),
-    validateUserIdParam,
-    getUserById
-  )
-  .put(
-    authenticate,
-    authorizeRoles("admin"),
-    validateUserIdParam,
-    (req, res, next) => {
-      req.uploadType = "profile";
-      next();
-    },
-    upload.single("profileImage"),
-    validateUpdateUser,
-    updateUser
-  )
-  .delete(
-    authenticate,
-    authorizeRoles("admin"),
-    validateApiKey,
-    validateUserIdParam,
-    deleteUser
-  );
+router.get(
+  "/users/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateUserIdParam,
+  getUserById);
+
+router.put(
+  "/users/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateUserIdParam,
+  (req, res, next) => {
+    req.uploadType = "profile";
+    next();
+  },
+  upload.single("profileImage"),
+  validateUpdateUser,
+  updateUser);
+
+router.delete(
+  "/users/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateApiKey,
+  validateUserIdParam,
+  deleteUser);
 
 router.put(
   "/users/:id/role",
@@ -100,8 +105,7 @@ router.put(
   authorizeRoles("admin"),
   validateUpdateUserRole,
   validateApiKey,
-  updateUserRole
-);
+  updateUserRole);
 
 router.put(
   "/users/:id/status",
@@ -109,10 +113,11 @@ router.put(
   authorizeRoles("admin"),
   validateToggleUserStatus,
   validateApiKey,
-  toggleUserStatus
-);
+  toggleUserStatus);
 
 // 🔓 Logout (genel)
-router.post("/logout", logoutUser);
+router.post(
+  "/logout", 
+  logoutUser);
 
 export default router;

@@ -69,11 +69,3 @@ export const validateUpdateSocialLinks = [
   body("twitter").optional().isString().withMessage("Twitter must be a string."),
   validateRequest,
 ];
-
-// 📦 Adresler validasyonu (me/addresses)
-export const validateUpdateAddresses = [
-  body("addresses")
-    .isArray({ min: 1 })
-    .withMessage("Addresses must be an array with at least 1 item."),
-  validateRequest,
-];

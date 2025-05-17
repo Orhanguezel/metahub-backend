@@ -2,19 +2,19 @@ import fs from "fs";
 import path from "path";
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
-import {ModuleMeta} from "@/modules/admin";
-import {ModuleSetting} from "@/modules/admin";
+import { ModuleMeta } from "@/modules/admin";
+import { ModuleSetting } from "@/modules/admin";
 import { updateMetaVersionLog } from "@/scripts/generateMeta/utils/versionHelpers";
 import { getGitUser, getGitCommitHash } from "@/scripts/generateMeta/utils/gitHelpers";
 import { writeModuleFiles } from "@/scripts/createModule/writeModuleFiles";
 
-// Helper function
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
-// ✅ Create a new module
+const PROJECT_ENV = process.env.APP_ENV || process.env.NEXT_PUBLIC_APP_ENV || "ensotek";
+
 export const createModule = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { 
+    const {
       name,
       icon = "box",
       roles = ["admin"],
@@ -47,7 +47,6 @@ export const createModule = asyncHandler(async (req: Request, res: Response, nex
       ? label
       : { tr: capitalize(name), en: capitalize(name), de: capitalize(name) };
 
-    // 1️⃣ Create meta file
     const metaContent = updateMetaVersionLog({
       name,
       icon,
@@ -66,13 +65,16 @@ export const createModule = asyncHandler(async (req: Request, res: Response, nex
       statsKey,
     });
 
-    const metaPath = path.resolve(process.cwd(), "src/meta-configs/metahub", `${name}.meta.json`);
+    const metaDir = path.resolve(process.cwd(), "src/meta-configs", PROJECT_ENV);
+    if (!fs.existsSync(metaDir)) {
+      fs.mkdirSync(metaDir, { recursive: true });
+    }
+    const metaPath = path.join(metaDir, `${name}.meta.json`);
     fs.writeFileSync(metaPath, JSON.stringify(metaContent, null, 2));
 
-    // 2️⃣ Save to database
     await ModuleMeta.create(metaContent);
     await ModuleSetting.create({
-      project: process.env.APP_ENV || "metahub",
+      project: PROJECT_ENV,
       module: name,
       enabled,
       visibleInSidebar,
@@ -82,7 +84,6 @@ export const createModule = asyncHandler(async (req: Request, res: Response, nex
       label: finalLabel,
     });
 
-    // 3️⃣ Generate module files
     const moduleDir = path.resolve(process.cwd(), "src/modules", name);
     if (!fs.existsSync(moduleDir)) {
       fs.mkdirSync(moduleDir, { recursive: true });
@@ -195,7 +196,7 @@ export const deleteModule = asyncHandler(async (req: Request, res: Response, nex
       return;
     }
 
-    const metaPath = path.resolve(process.cwd(), "src/meta-configs/metahub", `${name}.meta.json`);
+    const metaPath = path.resolve(process.cwd(), "src/meta-configs", PROJECT_ENV, `${name}.meta.json`);
     if (fs.existsSync(metaPath)) {
       fs.unlinkSync(metaPath);
     }
@@ -209,12 +210,11 @@ export const deleteModule = asyncHandler(async (req: Request, res: Response, nex
     next(error);
   }
 });
-
 // ✅ Get distinct projects
 export const getProjects = asyncHandler(async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const distinctProjects = await ModuleSetting.distinct("project");
-    const projects = distinctProjects.length > 0 ? distinctProjects : ["metahub"];
+    const projects = distinctProjects.length > 0 ? distinctProjects : ["ensotek"];
 
     res.status(200).json({
       success: true,

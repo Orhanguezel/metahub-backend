@@ -22,7 +22,7 @@ type ModuleMeta = {
   routes?: SwaggerRoute[];
 };
 
-const envProfile = process.env.APP_ENV || "metahub";
+const envProfile = process.env.APP_ENV || "ensotek";
 const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
 
 if (fsSync.existsSync(envPath)) {
@@ -34,7 +34,7 @@ if (fsSync.existsSync(envPath)) {
 export async function generateSwaggerSpecFromMeta(writeToDisk = false) {
   const metaDir = path.resolve(
     process.cwd(),
-    process.env.META_CONFIG_PATH || "dist/meta-configs/metahub"
+    process.env.META_CONFIG_PATH || "dist/meta-configs/ensotek"
   );
 
   // ✅ HATA KONTROLÜ: klasör mevcut mu?
@@ -128,11 +128,11 @@ export async function generateSwaggerSpecFromMeta(writeToDisk = false) {
   const spec = {
     openapi: "3.0.0",
     info: {
-      title: process.env.PROJECT_NAME || "MetaHub API",
+      title: process.env.PROJECT_NAME || "ensotek API",
       version: "1.0.0",
       description:
         process.env.PROJECT_DESCRIPTION ||
-        "API documentation for MetaHub Backend project.",
+        "API documentation for ensotek Backend project.",
     },
     servers: [
       {

@@ -7,7 +7,7 @@ import path from "path";
 import fs from "fs";
 
 // 🌍 .env.{envProfile} dosyasını dinamik yükle
-const envProfile = process.env.APP_ENV || "metahub";
+const envProfile = process.env.APP_ENV || "ensotek";
 const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
 
 if (fs.existsSync(envPath)) {

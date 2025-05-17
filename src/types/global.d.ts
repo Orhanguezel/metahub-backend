@@ -9,17 +9,22 @@ declare global {
       uploadType?:
         | "profile"
         | "product"
+        | "ensotekprod"
+        | "radonarprod"
         | "category"
         | "blog"
         | "gallery"
-        | "service"
+        | "services"
+        | "activity"
         | "library"
         | "references"
         | "news"
-        | "article"
+        | "articles"
         | "sport"
         | "spareparts"
         | "setting"
+        | "company"
+        | "about"
         | "default";
     }
   }

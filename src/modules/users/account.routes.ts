@@ -1,4 +1,3 @@
-
 import express from "express";
 import {
   getMyProfile,
@@ -7,29 +6,48 @@ import {
   updateNotificationSettings,
   updateSocialMediaLinks,
   updateProfileImage,
-} from "../users/account.controller";
-import { updateAllUserAddresses } from "../users/address.controller";
+  deleteMyAccount,
+} from "./account.controller";
 
 import {
   validateUpdateMyProfile,
   validateUpdateMyPassword,
   validateUpdateNotificationSettings,
   validateUpdateSocialLinks,
-  validateUpdateAddresses,
-} from "../users/users.validation";
+} from "./users.validation";
 
-import { authenticate } from "../../core/middleware/authMiddleware";
-import upload from "../../core/middleware/uploadMiddleware";
+import { authenticate } from "@/core/middleware/authMiddleware";
+import upload from "@/core/middleware/uploadMiddleware";
 
 const router = express.Router();
 
 // 🧾 Kullanıcı kendi hesabı
 router.get("/me", authenticate, getMyProfile);
-router.put("/me/update", authenticate, validateUpdateMyProfile, updateMyProfile);
-router.put("/me/password", authenticate, validateUpdateMyPassword, updateMyPassword);
-router.patch("/me/notifications", authenticate, validateUpdateNotificationSettings, updateNotificationSettings);
-router.patch("/me/social", authenticate, validateUpdateSocialLinks, updateSocialMediaLinks);
-router.put("/me/addresses", authenticate, validateUpdateAddresses, updateAllUserAddresses);
+router.put(
+  "/me/update",
+  authenticate,
+  validateUpdateMyProfile,
+  updateMyProfile
+);
+router.put(
+  "/me/password",
+  authenticate,
+  validateUpdateMyPassword,
+  updateMyPassword
+);
+router.patch(
+  "/me/notifications",
+  authenticate,
+  validateUpdateNotificationSettings,
+  updateNotificationSettings
+);
+router.patch(
+  "/me/social",
+  authenticate,
+  validateUpdateSocialLinks,
+  updateSocialMediaLinks
+);
+router.delete("/me/delete", authenticate, deleteMyAccount);
 
 // 📷 Profil fotoğrafı güncelleme
 router.put(

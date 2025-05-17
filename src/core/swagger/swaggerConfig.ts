@@ -2,12 +2,12 @@ import path from "path";
 import dotenv from "dotenv";
 
 // Ortama özel .env dosyasını yükle
-const envProfile = process.env.APP_ENV || "metahub";
+const envProfile = process.env.APP_ENV || "ensotek";
 dotenv.config({
   path: path.resolve(process.cwd(), `.env.${envProfile}`),
 });
 
-const BRAND_NAME = process.env.BRAND_NAME || "MetaHub";
+const BRAND_NAME = process.env.BRAND_NAME || "Ensotek";
 const API_VERSION = process.env.API_VERSION || "1.0.0";
 const BASE_URL = process.env.SWAGGER_BASE_URL || "http://localhost:5014/api";
 

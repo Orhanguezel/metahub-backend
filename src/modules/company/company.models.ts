@@ -18,6 +18,13 @@ interface ICompany extends Document {
     swiftCode: string;
   };
   logoUrl?: string;
+  socialLinks?: {
+    facebook?: string;
+    instagram?: string;
+    twitter?: string;
+    linkedin?: string;
+    youtube?: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,12 +48,19 @@ const companySchema = new Schema<ICompany>(
       swiftCode: { type: String, required: true },
     },
     logoUrl: { type: String },
+    socialLinks: {
+      facebook: { type: String },
+      instagram: { type: String },
+      twitter: { type: String },
+      linkedin: { type: String },
+      youtube: { type: String },
+    },
   },
   { timestamps: true }
 );
 
-// ✅ Guard + Model Type (This module has been updated and is now standardized)
-const Company: Model<ICompany> = models.Company || mongoose.model<ICompany>("Company", companySchema);
+const Company: Model<ICompany> =
+  models.Company || mongoose.model<ICompany>("Company", companySchema);
 
 export { Company, ICompany };
 export default Company;

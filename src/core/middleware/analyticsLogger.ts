@@ -1,16 +1,11 @@
-
 import { Request, Response, NextFunction } from "express";
 import AnalyticsEvent from "@/modules/dashboard/analyticsEvent.models";
 
 export const analyticsLogger = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Split path: e.g., /api/products/123 → ["api", "products", "123"]
     const pathParts = req.originalUrl.split("/").filter(Boolean);
-
-    // Detect module name (products, orders, etc.), default to "unknown"
     const moduleName = pathParts[1] || "unknown";
 
-    // Determine event type based on HTTP method
     const eventType =
       req.method === "GET"
         ? "view"
@@ -22,7 +17,11 @@ export const analyticsLogger = async (req: Request, res: Response, next: NextFun
         ? "delete"
         : "other";
 
-    // Create log entry
+    const files = (req.files as Express.Multer.File[]) || [];
+
+    // Collect filenames if any
+    const uploadedFiles = files.map((file) => file.filename);
+
     await AnalyticsEvent.create({
       userId: (req as any).user?._id || null,
       path: req.originalUrl,
@@ -33,10 +32,10 @@ export const analyticsLogger = async (req: Request, res: Response, next: NextFun
       body: req.method !== "GET" ? req.body : undefined,
       module: moduleName,
       eventType,
+      uploadedFiles: uploadedFiles.length > 0 ? uploadedFiles : undefined, // ← add this field in DB
     });
   } catch (error) {
     console.error("Analytics logging failed:", error);
-    // Never block the request even if logging fails
   }
 
   next();

@@ -1,0 +1,54 @@
+{
+  "name": "ensotekprod",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"/:id\"",
+      "controllerName": "validateObjectId(\"id\"",
+      "pathPrefix": "admin.ensotek.prod"
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "validateObjectId(\"id\"",
+      "pathPrefix": "admin.ensotek.prod"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "validateObjectId(\"id\"",
+      "pathPrefix": "admin.ensotek.prod"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "e011aa42ed8453b4e2face563628132a1f565587"
+  },
+  "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
+  "lastUpdatedAt": "2025-05-17T13:43:13.898Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
+      "date": "2025-05-17T13:43:13.898Z",
+      "note": "Meta auto-generated"
+    }
+  ]
+}

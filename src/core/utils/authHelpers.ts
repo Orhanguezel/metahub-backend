@@ -12,3 +12,9 @@ export const getTokenFromRequest = (req: Request): string | null => {
 
   return tokenFromHeader || tokenFromCookie;
 };
+
+
+
+
+
+

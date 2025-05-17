@@ -7,26 +7,38 @@ import {
   deleteBlogCategory,
 } from "./blogcategory.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { validateCreateBlogCategory, validateUpdateBlogCategory, validateObjectIdParam } from "./blogcategory.validation";
-import { analyticsLogger } from "@/core/middleware/analyticsLogger"; // ✅ Eklendi
+import { validateCreateBlogCategory, validateUpdateBlogCategory, validateObjectId } from "./blogcategory.validation";
 
 const router = express.Router();
 
-router.use(authenticate, authorizeRoles("admin"));
 
-// ➕ Create Category
-router.post("/", analyticsLogger, validateCreateBlogCategory, createBlogCategory);
+router.get("/", getAllBlogCategories);
+router.get("/:id", validateObjectId("id"), getBlogCategoryById);
 
-// 📝 Get All Categories
-router.get("/", analyticsLogger, getAllBlogCategories);
+router.post(
+  "/",
+  authenticate,
+  authorizeRoles("admin"),
+  validateCreateBlogCategory,
+  createBlogCategory
+);
 
-// 🔍 Get Single Category
-router.get("/:id", analyticsLogger, validateObjectIdParam, getBlogCategoryById);
+router.put(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateObjectId("id"),
+  validateUpdateBlogCategory,
+  updateBlogCategory
+);
 
-// ✏️ Update Category
-router.put("/:id", analyticsLogger, validateObjectIdParam, validateUpdateBlogCategory, updateBlogCategory);
+router.delete(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateObjectId("id"),
+  deleteBlogCategory
+);
 
-// 🗑️ Delete Category
-router.delete("/:id", analyticsLogger, validateObjectIdParam, deleteBlogCategory);
 
 export default router;

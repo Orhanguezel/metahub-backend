@@ -168,7 +168,7 @@ export const updateSettingImage = asyncHandler(async (req: Request, res: Respons
   oldFilesToDelete.forEach((fileName) => {
     const filePath = path.join(
       "uploads",
-      process.env.APP_ENV || "metahub",
+      process.env.APP_ENV || "ensotek",
       "setting-images",
       fileName
     );
@@ -263,7 +263,7 @@ export const deleteSetting = asyncHandler(async (req: Request, res: Response): P
     filePaths.forEach((fileName) => {
       const filePath = path.join(
         "uploads",
-        process.env.APP_ENV || "metahub",
+        process.env.APP_ENV || "ensotek",
         "setting-images",
         fileName
       );

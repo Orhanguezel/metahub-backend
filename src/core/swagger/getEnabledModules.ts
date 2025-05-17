@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 import fsSync from "fs";
 
 // 🌍 Ortama özel .env dosyasını yükle
-const envProfile = process.env.APP_ENV || "metahub";
+const envProfile = process.env.APP_ENV || "ensotek";
 const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
 
 if (fsSync.existsSync(envPath)) {
@@ -17,7 +17,7 @@ if (fsSync.existsSync(envPath)) {
 }
 
 export const getEnabledModules = async (): Promise<string[]> => {
-  const metaConfigsPath = path.resolve(__dirname, "../../meta-configs/metahub");
+  const metaConfigsPath = path.resolve(__dirname, "../../meta-configs/", envProfile);
 
   const enabledModulesEnv =
     process.env.ENABLED_MODULES?.split(",").map((m) => m.trim()) || [];
