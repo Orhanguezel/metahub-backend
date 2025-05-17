@@ -10,7 +10,7 @@ import mongoose, {
 } from "mongoose";
 
 // 🔐 Apikey
-export interface IApikey extends Document {
+export interface IApikey  {
   name: string;
   key: string;
   status: "active" | "revoked";
@@ -33,7 +33,7 @@ export const Apikey: Model<IApikey> =
   models.Apikey || model<IApikey>("Apikey", apikeySchema);
 
 // 📊 ApiKeyLog
-export interface IApiKeyLog extends Document {
+export interface IApiKeyLog  {
   apiKey: Types.ObjectId;
   route: string;
   method: string;

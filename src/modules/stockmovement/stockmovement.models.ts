@@ -1,8 +1,8 @@
-import mongoose, { Schema, model, models, Document, Types, Model } from "mongoose";
+import mongoose, { Schema, model, models, Types, Model } from "mongoose";
 
 export type MovementType = "increase" | "decrease" | "adjust" | "order" | "return" | "manual";
 
-export interface IStockmovement extends Document {
+export interface IStockmovement  {
   product: Types.ObjectId;
   type: MovementType;
   quantity: number;

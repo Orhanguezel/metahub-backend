@@ -9,7 +9,7 @@ export interface IRadonarProdImage {
 }
 
 // ✅ Ana interface
-export interface IRadonarProd extends Document {
+export interface IRadonarProd  {
   name: {
     tr?: string;
     en?: string;

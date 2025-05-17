@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Model, Types } from "mongoose";
 import { onlyLetters as names } from "@/core/utils/regex";
 
 // 📌 TypeScript Interface
-export interface IAddress extends Document {
+export interface IAddress  {
   userId: Types.ObjectId;
   street: string;
   houseNumber: string;

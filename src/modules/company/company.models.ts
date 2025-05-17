@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model, models } from "mongoose";
 
-interface ICompany extends Document {
+interface ICompany  {
   companyName: string;
   taxNumber: string;
   handelsregisterNumber?: string;

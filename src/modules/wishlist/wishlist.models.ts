@@ -1,8 +1,8 @@
 // src/modules/wishlist/wishlist.models.ts
-import { Schema, model, Types, Document, Model, models } from "mongoose";
+import { Schema, model, Types, Model, models } from "mongoose";
 
 // ✅ Interface
-export interface IWishlist extends Document {
+export interface IWishlist  {
   user: Types.ObjectId;
   products: Types.ObjectId[];
   language?: "tr" | "en" | "de";

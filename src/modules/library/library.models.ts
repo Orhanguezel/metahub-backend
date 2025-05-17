@@ -1,7 +1,7 @@
 import { Schema, Document, Model, models, model } from "mongoose";
 
 // ✅ Interface
-export interface ILibraryItem extends Document {
+export interface ILibraryItem  {
   title: {
     tr?: string;
     en?: string;

@@ -1,7 +1,7 @@
 import { Schema, model, models, Types, Document, Model } from "mongoose";
 
 // 💬 Chat Session Interface
-export interface IChatSession extends Document {
+export interface IChatSession  {
   roomId: string;
   user?: Types.ObjectId;
   createdAt: Date;

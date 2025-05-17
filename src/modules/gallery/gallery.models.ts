@@ -28,7 +28,7 @@ export interface IGallerySubItem {
 }
 
 // ✅ Main Item interface
-export interface IGalleryItem extends Document {
+export interface IGalleryItem  {
   items: IGallerySubItem[];
   category: GalleryCategory;
   type: "image" | "video";

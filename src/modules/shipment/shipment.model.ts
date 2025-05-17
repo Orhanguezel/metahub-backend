@@ -1,11 +1,11 @@
-import { Schema, model, models, Types, Document, Model } from "mongoose";
+import { Schema, model, models, Types, Model } from "mongoose";
 
 export interface ICarrierDetails {
   company?: string;
   contactNumber?: string;
 }
 
-export interface IShipment extends Document {
+export interface IShipment  {
   order: Types.ObjectId;
   trackingNumber: string;
   status: "pending" | "shipped" | "delivered" | "returned";

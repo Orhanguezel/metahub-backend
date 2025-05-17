@@ -19,7 +19,7 @@ interface SocialMedia {
 }
 
 // ✅ User Interface
-export interface IUser extends Document {
+export interface IUser  {
   name: string;
   email: string;
   password: string;
@@ -114,16 +114,15 @@ const userSchema = new Schema<IUser>(
 );
 
 // ✅ Password Hash
-userSchema.pre<IUser>("save", async function (next) {
-  try {
-    if (this.isModified("password") && !isPasswordHashed(this.password)) {
-      this.password = await hashPassword(this.password);
-    }
-    next();
-  } catch (error) {
-    next(error as Error);
+userSchema.pre("save", async function (next) {
+  const user = this as mongoose.Document & IUser;
+
+  if (user.isModified("password") && !isPasswordHashed(user.password)) {
+    user.password = await hashPassword(user.password);
   }
+  next();
 });
+
 
 // ✅ Methods
 userSchema.methods.comparePassword = async function (

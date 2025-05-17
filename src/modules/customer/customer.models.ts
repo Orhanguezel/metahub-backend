@@ -1,7 +1,7 @@
 import { Schema, model, Document, Model, models } from "mongoose";
 
 // ✅ Customer Interface
-interface ICustomer extends Document {
+interface ICustomer  {
   companyName: string;
   contactName: string;
   email: string;

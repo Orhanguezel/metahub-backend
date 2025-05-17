@@ -1,6 +1,6 @@
-import { Schema, Document, Model, models, model } from "mongoose";
+import { Schema, Model, models, model } from "mongoose";
 
-export interface ISparePart extends Document {
+export interface ISparePart  {
   label: {
     tr: string;
     en: string;

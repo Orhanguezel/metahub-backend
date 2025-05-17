@@ -3,7 +3,7 @@ import { Schema, model, models, Document, Model } from "mongoose";
 type LogoSettingValue = { light?: string; dark?: string };
 
 
-export interface ISetting extends Document {
+export interface ISetting  {
   key: string;
   value: string | string[] | { tr: string; en: string; de: string } | Record<string, any>;
   isActive: boolean;

@@ -19,7 +19,7 @@ export interface IShippingAddress {
 export type PaymentMethod = "cash_on_delivery";
 export type OrderStatus = "pending" | "preparing" | "shipped" | "completed" | "cancelled";
 
-export interface IOrder extends Document {
+export interface IOrder  {
   user?: Types.ObjectId;
   items: IOrderItem[];
   shippingAddress: IShippingAddress;
