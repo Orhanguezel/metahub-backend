@@ -1,5 +1,5 @@
 // src/utils/authUtils.ts
-import * as bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 
 const saltRounds = parseInt(process.env.SALT_ROUNDS || "10", 10);

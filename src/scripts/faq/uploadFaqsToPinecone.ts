@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 import mongoose from "mongoose";
 import { Pinecone } from "@pinecone-database/pinecone";
-import { FAQ } from "@/modules/faq";
+import { FAQ } from "../../modules/faq";
 
 config();
 
@@ -28,10 +28,14 @@ async function main() {
 
     const vectors = faqs.map((faq) => ({
       id: faq._id.toString(),
-      values: faq.embedding,
+      values: faq.embedding!,
       metadata: {
-        question: faq.question,
-        answer: faq.answer,
+        question_tr: faq.question.tr,
+        question_en: faq.question.en,
+        question_de: faq.question.de,
+        answer_tr: faq.answer.tr,
+        answer_en: faq.answer.en,
+        answer_de: faq.answer.de,
       },
     }));
 
@@ -48,3 +52,4 @@ async function main() {
 }
 
 main();
+
