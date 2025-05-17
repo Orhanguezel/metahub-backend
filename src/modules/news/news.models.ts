@@ -7,7 +7,7 @@ export interface INewsImage {
   publicId?: string;
 }
 
-export interface INews extends Document {
+export interface INews  {
   title: {
     tr?: string;
     en?: string;

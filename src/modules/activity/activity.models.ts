@@ -8,7 +8,7 @@ export interface IActivityImage {
   publicId?: string;
 }
 
-export interface IActivity extends Document {
+export interface IActivity  {
   title: {
     tr?: string;
     en?: string;

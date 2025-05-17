@@ -1,6 +1,6 @@
 import { Schema, Document, Model, Types, models, model } from "mongoose";
 
-export interface IReference extends Document {
+export interface IReference  {
   companyName: {
     tr: string;
     en: string;

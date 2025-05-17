@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
 
-export interface IArticlesCategory extends Document {
+export interface IArticlesCategory  {
   name: {
     tr: string;
     en: string;

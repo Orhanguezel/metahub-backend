@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
 
-export interface INewsCategory extends Document {
+export interface INewsCategory  {
   name: {
     tr: string;
     en: string;

@@ -1,7 +1,7 @@
 import mongoose, { Schema, model, Document, Model, models } from "mongoose";
 
 // ✅ MailMessage Interface
-interface IMailMessage extends Document {
+interface IMailMessage  {
   from: string;
   subject: {
     tr: string;

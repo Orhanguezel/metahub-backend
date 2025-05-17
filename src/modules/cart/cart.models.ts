@@ -10,7 +10,7 @@ interface ICartItem {
 }
 
 // 🛒 Cart Interface
-interface ICart extends Document {
+interface ICart  {
   user: Types.ObjectId;
   items: ICartItem[];
   totalPrice: number;

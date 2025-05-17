@@ -1,7 +1,7 @@
 import { Schema, model, models, Types, Document, Model } from "mongoose";
 
 // 🗨️ Chat Message Interface
-export interface IChatMessage extends Document {
+export interface IChatMessage  {
   sender: Types.ObjectId | null;
   roomId: string;
   message: string;

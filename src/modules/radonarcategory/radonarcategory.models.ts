@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
 
-export interface IRadonarCategory extends Document {
+export interface IRadonarCategory  {
   name: {
     tr: string;
     en: string;

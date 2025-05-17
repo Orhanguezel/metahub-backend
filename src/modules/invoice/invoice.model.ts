@@ -7,7 +7,7 @@ interface InvoiceItem {
   unitPrice: number;
 }
 
-interface IInvoice extends Document {
+interface IInvoice  {
   order: Types.ObjectId;
   user: Types.ObjectId;
   company: Types.ObjectId;

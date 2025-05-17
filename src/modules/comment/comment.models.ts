@@ -4,7 +4,7 @@ import {
   CommentContentType,
 } from "@/core/utils/constants";
 
-interface IComment extends Document {
+interface IComment  {
   userId?: Types.ObjectId;
   name?: string;
   email?: string;

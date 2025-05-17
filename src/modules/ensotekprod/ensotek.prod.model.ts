@@ -7,7 +7,7 @@ export interface IEnsotekProdImage {
   publicId?: string;
 }
 
-export interface IEnsotekProd extends Document {
+export interface IEnsotekProd  {
   name: {
     tr?: string;
     en?: string;

@@ -7,7 +7,7 @@ export interface IBlogImage {
   publicId?: string;
 }
 
-export interface IBlog extends Document {
+export interface IBlog  {
   title: {
     tr?: string;
     en?: string;

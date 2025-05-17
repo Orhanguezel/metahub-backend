@@ -7,7 +7,7 @@ export interface IArticlesImage {
   publicId?: string;
 }
 
-export interface IArticles extends Document {
+export interface IArticles  {
   title: {
     tr?: string;
     en?: string;

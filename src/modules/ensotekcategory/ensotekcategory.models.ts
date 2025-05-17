@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
 
-export interface IEnsotekCategory extends Document {
+export interface IEnsotekCategory  {
   name: {
     tr: string;
     en: string;

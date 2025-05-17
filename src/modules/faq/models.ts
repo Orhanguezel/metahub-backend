@@ -1,7 +1,7 @@
 import { Schema, model, Document, Model, models } from "mongoose";
 
 // ✅ Interface
-export interface IFAQ extends Document {
+export interface IFAQ  {
   question: {
     tr: string;
     en: string;

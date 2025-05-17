@@ -1,7 +1,7 @@
 import { Schema, model, Document, Model, models } from "mongoose";
 
 // ✅ Contact Message Interface
-interface IContactMessage extends Document {
+interface IContactMessage  {
   name: string;
   email: string;
   label: {

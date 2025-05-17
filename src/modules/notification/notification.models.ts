@@ -1,7 +1,7 @@
 import { Schema, model, Document, Types, Model, models } from "mongoose";
 
 // ✅ Interface
-export interface INotification extends Document {
+export interface INotification  {
   user?: Types.ObjectId;
   title: {
     tr?: string;

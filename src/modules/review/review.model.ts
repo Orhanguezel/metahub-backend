@@ -1,6 +1,6 @@
 import { Schema, model, Types, Document, Model, models } from "mongoose";
 
-export interface IReview extends Document {
+export interface IReview  {
   user: Types.ObjectId;
   product: Types.ObjectId;
   rating: number;

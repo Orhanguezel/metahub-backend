@@ -8,7 +8,7 @@ export interface IAboutImage {
   publicId?: string;
 }
 
-export interface IAbout extends Document {
+export interface IAbout  {
   title: {
     tr?: string;
     en?: string;

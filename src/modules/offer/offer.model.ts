@@ -9,7 +9,7 @@ export interface IOfferItem {
 }
 
 // ✅ Ana Interface
-export interface IOffer extends Document {
+export interface IOffer  {
   offerNumber: string;
   user: Types.ObjectId;
   company: Types.ObjectId;

@@ -8,7 +8,7 @@ export interface IServicesImage {
   publicId?: string;
 }
 
-export interface IServices extends Document {
+export interface IServices  {
   title: {
     tr?: string;
     en?: string;

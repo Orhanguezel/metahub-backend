@@ -1,7 +1,7 @@
 import { Schema, model, Document, Model, models } from "mongoose";
 
 // ✅ Interface
-interface IFeedback extends Document {
+interface IFeedback  {
   name: string;
   email: string;
   message: {
