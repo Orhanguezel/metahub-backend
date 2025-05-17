@@ -8,8 +8,10 @@ import { UserPayload } from "../../types/userPayload";
 interface AuthRequest extends Request {
   user?: UserPayload;
 }
-export const authenticate: RequestHandler = asyncHandler(
-  async (req, res, next) => {
+
+// ✅ GÜNCELLENMİŞ authenticate
+export const authenticate = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const token = getTokenFromRequest(req);
 
     if (!token) {
@@ -55,8 +57,9 @@ export const authenticate: RequestHandler = asyncHandler(
   }
 );
 
+// ✅ GÜNCELLENMİŞ authorizeRoles
 export const authorizeRoles = (...roles: string[]): RequestHandler => {
-  return (req, res, next) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     const user = (req as AuthRequest).user;
 
     if (!user) {
@@ -78,3 +81,4 @@ export const authorizeRoles = (...roles: string[]): RequestHandler => {
     next();
   };
 };
+
