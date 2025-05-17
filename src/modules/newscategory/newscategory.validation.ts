@@ -1,7 +1,6 @@
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 
-
 export const validateObjectId = (field: string) => [
   param(field)
     .isMongoId()
@@ -9,28 +8,17 @@ export const validateObjectId = (field: string) => [
   validateRequest,
 ];
 
-
 export const validateCreateNewsCategory = [
-  body("name")
-    .notEmpty()
-    .withMessage("Name is required.")
-    .isString()
-    .withMessage("Name must be a string."),
-  body("slug")
-    .optional()
-    .isString()
-    .withMessage("Slug must be a string."),
+  body("name.tr").notEmpty().withMessage("Name (TR) is required."),
+  body("name.en").notEmpty().withMessage("Name (EN) is required."),
+  body("name.de").notEmpty().withMessage("Name (DE) is required."),
   validateRequest,
 ];
 
 export const validateUpdateNewsCategory = [
-  body("name")
-    .optional()
-    .isString()
-    .withMessage("Name must be a string."),
-  body("slug")
-    .optional()
-    .isString()
-    .withMessage("Slug must be a string."),
+  body("name.tr").optional().isString().withMessage("Name (TR) must be a string."),
+  body("name.en").optional().isString().withMessage("Name (EN) must be a string."),
+  body("name.de").optional().isString().withMessage("Name (DE) must be a string."),
+
   validateRequest,
 ];

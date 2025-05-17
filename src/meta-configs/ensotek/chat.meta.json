@@ -1,0 +1,107 @@
+{
+  "name": "chat",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllRoomsLastMessages",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id",
+      "validationName": "\"/archived\"",
+      "controllerName": "getArchivedSessions",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/bulk",
+      "auth": true,
+      "summary": "POST /bulk",
+      "validationName": "\"/archived\"",
+      "controllerName": "getArchivedSessions",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/manual",
+      "auth": true,
+      "summary": "POST /manual",
+      "validationName": "\"/archived\"",
+      "controllerName": "getArchivedSessions",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/read/:roomId",
+      "auth": true,
+      "summary": "PATCH /read/:roomId",
+      "validationName": "\"/archived\"",
+      "controllerName": "getArchivedSessions"
+    },
+    {
+      "method": "GET",
+      "path": "/archived",
+      "auth": true,
+      "summary": "GET /archived",
+      "validationName": "\"/archived\"",
+      "controllerName": "getArchivedSessions"
+    },
+    {
+      "method": "GET",
+      "path": "/sessions/active",
+      "auth": true,
+      "summary": "GET /sessions/active",
+      "validationName": "\"/sessions/active\"",
+      "controllerName": "getActiveChatSessions"
+    },
+    {
+      "method": "GET",
+      "path": "/sessions",
+      "auth": true,
+      "summary": "GET /sessions",
+      "validationName": "\"/sessions\"",
+      "controllerName": "getAllChatSessions"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "e011aa42ed8453b4e2face563628132a1f565587"
+  },
+  "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
+  "lastUpdatedAt": "2025-05-17T13:43:13.800Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
+      "date": "2025-05-17T13:43:13.800Z",
+      "note": "Meta auto-generated"
+    }
+  ]
+}

@@ -1,11 +1,25 @@
 import { Schema, model, Types, Document, Model, models } from "mongoose";
+import {
+  ALLOWED_COMMENT_CONTENT_TYPES,
+  CommentContentType,
+} from "@/core/utils/constants";
 
 interface IComment extends Document {
-  name: string;
-  email: string;
+  userId?: Types.ObjectId;
+  name?: string;
+  email?: string;
   label: { tr: string; en: string; de: string };
-  contentType: "blog" | "product" | "service";
+  contentType: CommentContentType;
   contentId: Types.ObjectId;
+  reply?: {
+    text: {
+      tr: string;
+      en: string;
+      de: string;
+    };
+    createdAt: Date;
+  };
+
   isPublished: boolean;
   isActive: boolean;
   createdAt: Date;
@@ -14,22 +28,48 @@ interface IComment extends Document {
 
 const commentSchema = new Schema<IComment>(
   {
-    name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, trim: true },
+    userId: { type: Schema.Types.ObjectId, ref: "User" },
+
+    name: {
+      type: String,
+      trim: true,
+      required: function () {
+        return !this.userId;
+      },
+    },
+
+    email: {
+      type: String,
+      trim: true,
+      required: function () {
+        return !this.userId;
+      },
+    },
+
     label: {
       tr: { type: String, required: true },
       en: { type: String, required: true },
       de: { type: String, required: true },
     },
+
     contentType: {
       type: String,
-      enum: ["blog", "product", "service"],
+      enum: ALLOWED_COMMENT_CONTENT_TYPES,
       required: true,
     },
+
     contentId: {
       type: Schema.Types.ObjectId,
       required: true,
       refPath: "contentType",
+    },
+    reply: {
+      text: {
+        tr: { type: String, default: "" },
+        en: { type: String, default: "" },
+        de: { type: String, default: "" },
+      },
+      createdAt: { type: Date },
     },
     isPublished: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
@@ -37,8 +77,9 @@ const commentSchema = new Schema<IComment>(
   { timestamps: true }
 );
 
-// ✅ Guard + Model Type (This module has been updated and is now standardized)
-const Comment: Model<IComment> = models.Comment || model<IComment>("Comment", commentSchema);
+// ✅ Guard + Model Type
+const Comment: Model<IComment> =
+  models.Comment || model<IComment>("Comment", commentSchema);
 
 export { Comment, IComment };
 export default Comment;

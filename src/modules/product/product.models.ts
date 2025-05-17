@@ -1,6 +1,5 @@
 import { Schema, Document, Model, Types, models, model } from "mongoose";
 
-// ✅ Interface (zaten export'lu!)
 export interface IProduct extends Document {
   name: {
     tr: string;

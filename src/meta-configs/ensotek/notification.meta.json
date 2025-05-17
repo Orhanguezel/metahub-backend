@@ -1,0 +1,79 @@
+{
+  "name": "notification",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllNotifications",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /",
+      "validationName": "\"/mark-all-read\"",
+      "controllerName": "markAllNotificationsAsRead",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id",
+      "validationName": "\"/mark-all-read\"",
+      "controllerName": "markAllNotificationsAsRead",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/:id/read",
+      "auth": true,
+      "summary": "PATCH /:id/read",
+      "validationName": "\"/mark-all-read\"",
+      "controllerName": "markAllNotificationsAsRead"
+    },
+    {
+      "method": "PATCH",
+      "path": "/mark-all-read",
+      "auth": true,
+      "summary": "PATCH /mark-all-read",
+      "validationName": "\"/mark-all-read\"",
+      "controllerName": "markAllNotificationsAsRead"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "e011aa42ed8453b4e2face563628132a1f565587"
+  },
+  "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
+  "lastUpdatedAt": "2025-05-17T13:43:13.840Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
+      "date": "2025-05-17T13:43:13.840Z",
+      "note": "Meta auto-generated"
+    }
+  ]
+}

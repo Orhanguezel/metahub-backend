@@ -1,33 +1,47 @@
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 
-// ✅ Company create validation
 export const validateCreateCompany = [
-  body("companyName").notEmpty().withMessage("Company name is required."),
-  body("taxNumber").notEmpty().withMessage("Tax number is required."),
-  body("email").isEmail().withMessage("Valid email is required."),
-  body("phone").notEmpty().withMessage("Phone is required."),
-  body("address.street").notEmpty().withMessage("Street is required."),
-  body("address.city").notEmpty().withMessage("City is required."),
-  body("address.postalCode").notEmpty().withMessage("Postal code is required."),
-  body("address.country").notEmpty().withMessage("Country is required."),
-  body("bankDetails.bankName").notEmpty().withMessage("Bank name is required."),
-  body("bankDetails.iban").notEmpty().withMessage("IBAN is required."),
-  body("bankDetails.swiftCode").notEmpty().withMessage("SWIFT code is required."),
+  body("companyName").notEmpty(),
+  body("taxNumber").notEmpty(),
+  body("email").isEmail(),
+  body("phone").notEmpty(),
+  body("address.street").notEmpty(),
+  body("address.city").notEmpty(),
+  body("address.postalCode").notEmpty(),
+  body("address.country").notEmpty(),
+  body("bankDetails.bankName").notEmpty(),
+  body("bankDetails.iban").notEmpty(),
+  body("bankDetails.swiftCode").notEmpty(),
+  body("socialLinks.facebook").optional().isString(),
+  body("socialLinks.instagram").optional().isString(),
+  body("socialLinks.twitter").optional().isString(),
+  body("socialLinks.linkedin").optional().isString(),
+  body("socialLinks.youtube").optional().isString(),
   validateRequest,
 ];
 
-// ✅ Company update validation
 export const validateUpdateCompany = [
   body("companyName").optional().isString(),
   body("taxNumber").optional().isString(),
   body("email").optional().isEmail(),
   body("phone").optional().isString(),
+  body("address.street").optional().isString(),
+  body("address.city").optional().isString(),
+  body("address.postalCode").optional().isString(),
+  body("address.country").optional().isString(),
+  body("bankDetails.bankName").optional().isString(),
+  body("bankDetails.iban").optional().isString(),
+  body("bankDetails.swiftCode").optional().isString(),
+  body("socialLinks.facebook").optional().isString(),
+  body("socialLinks.instagram").optional().isString(),
+  body("socialLinks.twitter").optional().isString(),
+  body("socialLinks.linkedin").optional().isString(),
+  body("socialLinks.youtube").optional().isString(),
   validateRequest,
 ];
 
-// ✅ ID validation
 export const validateCompanyId = [
-  param("id").isMongoId().withMessage("Company ID must be a valid MongoDB ObjectId."),
+  param("id").isMongoId().withMessage("Company ID must be valid MongoDB ObjectId."),
   validateRequest,
 ];

@@ -1,0 +1,83 @@
+{
+  "name": "admin",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/modules",
+      "auth": true,
+      "summary": "POST /modules",
+      "validationName": "\"/modules\"",
+      "controllerName": "getModules"
+    },
+    {
+      "method": "GET",
+      "path": "/modules",
+      "auth": true,
+      "summary": "GET /modules",
+      "validationName": "\"/modules\"",
+      "controllerName": "getModules"
+    },
+    {
+      "method": "GET",
+      "path": "/projects",
+      "auth": true,
+      "summary": "GET /projects",
+      "validationName": "\"/projects\"",
+      "controllerName": "getProjects"
+    },
+    {
+      "method": "GET",
+      "path": "/module/:name",
+      "auth": true,
+      "summary": "GET /module/:name",
+      "validationName": "\"/modules/analytics\"",
+      "controllerName": "getModuleAnalytics",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/modules/analytics",
+      "auth": true,
+      "summary": "GET /modules/analytics",
+      "validationName": "\"/modules/analytics\"",
+      "controllerName": "getModuleAnalytics"
+    },
+    {
+      "method": "PATCH",
+      "path": "/module/:name",
+      "auth": true,
+      "summary": "PATCH /module/:name"
+    },
+    {
+      "method": "DELETE",
+      "path": "/module/:name",
+      "auth": true,
+      "summary": "DELETE /module/:name"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "e011aa42ed8453b4e2face563628132a1f565587"
+  },
+  "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
+  "lastUpdatedAt": "2025-05-17T13:43:13.983Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
+      "date": "2025-05-17T13:43:13.983Z",
+      "note": "Meta auto-generated"
+    }
+  ]
+}

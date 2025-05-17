@@ -7,7 +7,7 @@ interface OrderConfirmationParams {
   locale?: "de" | "tr" | "en";
 }
 
-const BRAND_NAME = process.env.BRAND_NAME || "Ensotek";
+const BRAND_NAME = process.env.BRAND_NAME || "ensotek";
 const BRAND_TEAM = process.env.BRAND_TEAM_NAME || `${BRAND_NAME} Team`;
 
 export const orderConfirmationTemplate = ({

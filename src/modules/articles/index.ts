@@ -1,18 +1,30 @@
-// ✅ Guard + Model Type
+// src/modules/articles/index.ts
 
 import express from "express";
-import routes from "./articles.routes";
-import { Article, IArticle } from "./articles.models";
-import * as articlesController from "./articles.controller";
+import adminRoutes from "./admin.articles.routes";
+import publicRoutes from "./public.articles.routes";
+import Articles, { IArticles } from "./articles.models";
+import * as adminController from "./admin.articles.controller";
+import * as publicController from "./public.articles.controller";
+import * as validation from "./articles.validation";
 
 const router = express.Router();
-router.use("/", routes);
 
+// 🔐 Admin Routes
+router.use("/admin", adminRoutes);
+
+// 🌍 Public Routes
+router.use("/", publicRoutes);
+
+
+
+// ✅ Exports (standardized)
 export {
-  Article,
-  IArticle,
-  articlesController
+  Articles,
+  IArticles,
+  adminController,
+  publicController,
+  validation,
 };
 
-export * from "./articles.validation";
 export default router;

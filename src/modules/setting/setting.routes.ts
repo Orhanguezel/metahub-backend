@@ -12,14 +12,13 @@ import {
   validateUpsertSetting, 
   validateSettingKeyParam,
 } from "./setting.validation";
-import upload, { uploadTypeWrapper } from "@/core/middleware/uploadMiddleware";
+import upload from "@/core/middleware/uploadMiddleware";
+import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
+
 
 const router = express.Router();
 
-// 🔒 Admin auth kontrolü
-router.use(authenticate, authorizeRoles("admin"));
 
-// 🔥 CRUD Endpoints
 router.get("/", getAllSettings);
 
 router.get(
@@ -28,6 +27,10 @@ router.get(
   getSettingByKey
 );
 
+// 🔒 2️⃣ Aşağısı Admin korumalı
+router.use(authenticate, authorizeRoles("admin"));
+
+// 🔥 CRUD Endpoints (korumalı)
 router.post(
   "/",
   validateUpsertSetting,
@@ -48,9 +51,14 @@ router.post(
     { name: "lightFile", maxCount: 1 },
     { name: "darkFile", maxCount: 1 },
   ]),
+  (req, res, next) => {
+    console.log("📸 Uploaded Files:", req.files);
+    next();
+  },
   validateSettingKeyParam,
   upsertSettingImage
 );
+
 
 // 🆕 UPDATE Logo Upload (PUT)
 router.put(
@@ -63,8 +71,5 @@ router.put(
   validateSettingKeyParam,
   updateSettingImage
 );
-
-
-
 
 export default router;

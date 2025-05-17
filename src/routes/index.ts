@@ -2,7 +2,6 @@ import express, { Router } from "express";
 import fs from "fs/promises";
 import path from "path";
 import { analyticsLogger } from "@/core/middleware/analyticsLogger";
-import "@/core/config/env"; // .env yükleme
 
 export const getRouter = async (): Promise<Router> => {
   const router = express.Router();
@@ -11,7 +10,7 @@ export const getRouter = async (): Promise<Router> => {
   const enabledModules =
     process.env.ENABLED_MODULES?.split(",").map((m) => m.trim().toLowerCase()) ?? [];
 
-  const metaConfigPath = path.resolve(process.cwd(), process.env.META_CONFIG_PATH || "src/meta-configs/metahub");
+  const metaConfigPath = path.resolve(process.cwd(), process.env.META_CONFIG_PATH || "src/meta-configs/ensotek");
   const modules = await fs.readdir(modulesPath, { withFileTypes: true });
 
   for (const mod of modules) {

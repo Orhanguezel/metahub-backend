@@ -18,19 +18,24 @@ declare global {
       uploadType?:
         | "profile"
         | "product"
+        | "ensotekprod"
+        | "radonarprod"
         | "category"
         | "blog"
         | "gallery"
-        | "service"
+        | "services"
+        | "activity"
         | "library"
         | "references"
         | "news"
-        | "article"
+        | "articles"
+        | "about"
         | "sport"
         | "spareparts"
         | "setting"
+        | "company"
         | "default";
-
+      uploadSizeLimit?: number; // 💥 ✅ New: uploadSizeLimit
       locale?: "tr" | "en" | "de"; // 🌍 Çok dilli destek (i18n)
     }
   }

@@ -1,45 +1,47 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { BlogCategory } from "../blogcategory"; 
+import {BlogCategory} from ".";
 import { isValidObjectId } from "@/core/utils/validation";
 
 // ✅ Create Blog Category
-export const createBlogCategory = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const { name, description } = req.body;
+export const createBlogCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const { name } = req.body;
 
   if (!name?.tr || !name?.en || !name?.de) {
-    res.status(400).json({ success: false, message: "Name (tr, en, de) is required." });
+    res.status(400).json({ success: false, message: "Name in all languages is required." });
     return;
   }
 
-  const blogCategory = await BlogCategory.create({
+  const category = await BlogCategory.create({
     name,
-    description,
+    slug: name.en
+      .toLowerCase()
+      .replace(/ /g, "-")
+      .replace(/[^\w-]+/g, "")
+      .replace(/--+/g, "-")
+      .replace(/^-+|-+$/g, ""),
   });
 
   res.status(201).json({
     success: true,
     message: "Blog category created successfully.",
-    data: blogCategory,
+    data: category,
   });
-
-  return;
 });
 
 // ✅ Get All Blog Categories
-export const getAllBlogCategories = asyncHandler(async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const categories = await BlogCategory.find({}).sort({ createdAt: -1 });
+export const getAllBlogCategories = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
+  const categories = await BlogCategory.find().sort({ createdAt: -1 });
 
   res.status(200).json({
     success: true,
+    message: "Blog categories fetched successfully.",
     data: categories,
   });
-
-  return;
 });
 
-// ✅ Get Blog Category by ID
-export const getBlogCategoryById = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+// ✅ Get Single Blog Category
+export const getBlogCategoryById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
 
   if (!isValidObjectId(id)) {
@@ -56,16 +58,15 @@ export const getBlogCategoryById = asyncHandler(async (req: Request, res: Respon
 
   res.status(200).json({
     success: true,
+    message: "Blog category fetched successfully.",
     data: category,
   });
-
-  return;
 });
 
 // ✅ Update Blog Category
-export const updateBlogCategory = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const updateBlogCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-  const updates = req.body;
+  const { name, isActive } = req.body;
 
   if (!isValidObjectId(id)) {
     res.status(400).json({ success: false, message: "Invalid category ID." });
@@ -79,9 +80,22 @@ export const updateBlogCategory = asyncHandler(async (req: Request, res: Respons
     return;
   }
 
-  category.name = updates.name ?? category.name;
-  category.description = updates.description ?? category.description;
-  category.isActive = typeof updates.isActive === "boolean" ? updates.isActive : category.isActive;
+  if (name?.tr) category.name.tr = name.tr;
+  if (name?.en) category.name.en = name.en;
+  if (name?.de) category.name.de = name.de;
+
+  if (typeof isActive === "boolean") {
+    category.isActive = isActive;
+  }
+
+  if (name?.en) {
+    category.slug = name.en
+      .toLowerCase()
+      .replace(/ /g, "-")
+      .replace(/[^\w-]+/g, "")
+      .replace(/--+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
 
   await category.save();
 
@@ -90,12 +104,10 @@ export const updateBlogCategory = asyncHandler(async (req: Request, res: Respons
     message: "Blog category updated successfully.",
     data: category,
   });
-
-  return;
 });
 
 // ✅ Delete Blog Category
-export const deleteBlogCategory = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const deleteBlogCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
 
   if (!isValidObjectId(id)) {
@@ -114,6 +126,4 @@ export const deleteBlogCategory = asyncHandler(async (req: Request, res: Respons
     success: true,
     message: "Blog category deleted successfully.",
   });
-
-  return;
 });

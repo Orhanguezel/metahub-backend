@@ -1,0 +1,71 @@
+{
+  "name": "comment",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /",
+      "validationName": "\"admin\"",
+      "controllerName": "\"moderator\")",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/:type/:id",
+      "auth": true,
+      "summary": "GET /:type/:id",
+      "validationName": "\"admin\"",
+      "controllerName": "\"moderator\")"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id/toggle",
+      "auth": true,
+      "summary": "PUT /:id/toggle"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id/reply",
+      "auth": true,
+      "summary": "PUT /:id/reply"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "e011aa42ed8453b4e2face563628132a1f565587"
+  },
+  "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
+  "lastUpdatedAt": "2025-05-17T13:43:13.813Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
+      "date": "2025-05-17T13:43:13.813Z",
+      "note": "Meta auto-generated"
+    }
+  ]
+}

@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import ModuleSetting from "@/modules/admin/moduleSettings.model";
 import connectDB from "@/core/config/connect";
 
-dotenv.config({ path: `.env.metahub` });
+dotenv.config({ path: `.env.ensotek` });
 
 const runMigration = async () => {
   await connectDB();

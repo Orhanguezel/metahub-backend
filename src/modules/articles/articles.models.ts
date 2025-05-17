@@ -1,54 +1,91 @@
-// ✅ Guard + Model Type
+import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
 
-import mongoose, { Schema, model, Document, Types, Model } from "mongoose";
+export interface IArticlesImage {
+  url: string;
+  thumbnail: string;
+  webp?: string;
+  publicId?: string;
+}
 
-export interface IArticle extends Document {
-  title: string;
+export interface IArticles extends Document {
+  title: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
   slug: string;
-  summary: string;
-  content: string;
-  images: string[];
-  category?: string;
+  summary: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
+  content: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
+  images: IArticlesImage[];
   tags: string[];
+  author?: string;
+  category?: Types.ObjectId;
   isPublished: boolean;
   publishedAt?: Date;
-  author?: string;
   comments: Types.ObjectId[];
-  label: {
-    tr: string;
-    en: string;
-    de: string;
-  };
+  isActive: boolean; // soft delete desteği
   createdAt: Date;
   updatedAt: Date;
 }
 
-const articleSchema: Schema<IArticle> = new Schema(
+const ArticlesImageSchema = new Schema<IArticlesImage>(
   {
-    title: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true },
-    summary: { type: String, required: true, maxlength: 300 },
-    content: { type: String, required: true },
-    images: [{ type: String, required: true }],
-    category: { type: String },
-    tags: [{ type: String }],
-    isPublished: { type: Boolean, default: false },
-    publishedAt: { type: Date },
-    author: { type: String },
-    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
-    label: {
-      tr: { type: String, required: true },
-      en: { type: String, required: true },
-      de: { type: String, required: true },
-    },
+    url: { type: String, required: true },
+    thumbnail: { type: String, required: true },
+    webp: { type: String },
+    publicId: { type: String },
   },
-  { timestamps: true }
+  { _id: false }
 );
 
-// 🔁 Slug generator
-articleSchema.pre("validate", function (this: IArticle, next) {
-  if (!this.slug && this.title) {
-    this.slug = this.title
+const ArticlesSchema: Schema = new Schema<IArticles>(
+  {
+    title: {
+      tr: { type: String, trim: true },
+      en: { type: String, trim: true },
+      de: { type: String, trim: true },
+    },
+    slug: { type: String, required: true, unique: true, lowercase: true },
+    summary: {
+      tr: { type: String, maxlength: 300 },
+      en: { type: String, maxlength: 300 },
+      de: { type: String, maxlength: 300 },
+    },
+    content: {
+      tr: { type: String },
+      en: { type: String },
+      de: { type: String },
+    },
+    images: { type: [ArticlesImageSchema], default: [] },
+    tags: [{ type: String }],
+    author: { type: String },
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ArticlesCategory",
+    },
+    isPublished: { type: Boolean, default: false },
+    publishedAt: { type: Date },
+    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
+    isActive: { type: Boolean, default: true }, // soft delete desteği
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// ✅ Slug oluşturucu middleware
+ArticlesSchema.pre("validate", function (this: IArticles, next) {
+  const baseTitle = this.title?.en || this.title?.de || this.title?.tr || "Articles";
+  if (!this.slug && baseTitle) {
+    this.slug = baseTitle
       .toLowerCase()
       .replace(/ /g, "-")
       .replace(/[^\w-]+/g, "");
@@ -57,8 +94,10 @@ articleSchema.pre("validate", function (this: IArticle, next) {
 });
 
 // ✅ Guard + Model Type
-const Article: Model<IArticle> =
-  mongoose.models.Article || model<IArticle>("Article", articleSchema);
+const Articles: Model<IArticles> =
+  (models.Articles as Model<IArticles>) || mongoose.model<IArticles>("Articles", ArticlesSchema);
 
-export default Article;
-export { Article };
+export default Articles;
+export { Articles };
+
+

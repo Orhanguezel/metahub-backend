@@ -1,13 +1,28 @@
-// src/modules/faq/index.ts
 import express from "express";
-import routes from "./faq.routes";
-import FAQ, { IFAQ } from "./faq.models";
+
+// Admin & Public Router'ları
+import adminRoutes from "./admin.routes";
+import publicRoutes from "./public.routes";
+
+// Model & Interface
+import FAQ, { IFAQ } from "./models";
+
+// Controller export
+import * as adminController from "./admin.controller";
+import * as publicController from "./public.controller";
+
+// Validation export
+import * as validation from "./validation";
 
 const router = express.Router();
-router.use("/", routes);
 
-export { FAQ, IFAQ };
-export * from "./faq.controller";
-export * from "./faq.validation"; // ✔️ Validasyon export'u da ekliyoruz
+// Admin panel erişimi
+router.use("/admin", adminRoutes);
 
+// Public erişim
+router.use("/", publicRoutes);
+
+
+
+export { FAQ, IFAQ, adminController, publicController, validation };
 export default router;

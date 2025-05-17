@@ -18,8 +18,13 @@ import {
 export const generateMeta = async () => {
   await connectDB();
 
+  const envProfile = process.env.ACTIVE_META_PROFILE || process.env.APP_ENV || "ensotek";
+console.log(`🛠 Using meta profile: ${envProfile}`);
+
+
   const modulesPath = path.join(__dirname, "../../modules");
-  const metaProjectDir = path.join(__dirname, "../../meta-configs/metahub");
+  const metaProjectDir = path.join(__dirname, `../../meta-configs/${envProfile}`);
+
 
   if (!fs.existsSync(metaProjectDir)) {
     fs.mkdirSync(metaProjectDir, { recursive: true });

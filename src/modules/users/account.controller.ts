@@ -217,23 +217,52 @@ export const updateFullProfile = asyncHandler(async (req: Request, res: Response
   });
 });
 
-// ✅ Adresleri güncelle
-export const updateUserAddresses = asyncHandler(async (req: Request, res: Response) => {
+// ✅ Kendi hesabını sil
+export const deleteMyAccount = asyncHandler(async (req: Request, res: Response) => {
+  const { password } = req.body;
+
+  // 1️⃣ Kullanıcıyı bul
   const user = await User.findById(req.user!.id);
   if (!user) {
     res.status(404).json({
       success: false,
       message: getMessage(req.locale, "Benutzer nicht gefunden.", "Kullanıcı bulunamadı.", "User not found."),
     });
-    return;
+    return 
   }
 
-  user.addresses = req.body.addresses;
-  await user.save();
+  // 2️⃣ Şifre kontrolü
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) {
+    res.status(400).json({
+      success: false,
+      message: getMessage(req.locale, "Ungültiges Passwort.", "Geçersiz şifre.", "Invalid password."),
+    });
+    return 
+  }
 
+  // 3️⃣ Profil fotoğrafını sil
+  if (user.profileImage) {
+    const profileDir = path.join(__dirname, "../../../uploads/profile-images");
+    const oldImagePath = path.join(profileDir, user.profileImage);
+    try {
+      await fs.unlink(path.resolve(oldImagePath));
+    } catch (error) {
+      console.warn("Profile image could not be deleted (maybe already gone).");
+    }
+  }
+
+  // 4️⃣ Hesabı sil
+  await User.findByIdAndDelete(req.user!.id);
+
+  // 5️⃣ Response
   res.status(200).json({
     success: true,
-    message: getMessage(req.locale, "Adressen erfolgreich aktualisiert.", "Adresler başarıyla güncellendi.", "Addresses updated successfully."),
-    addresses: user.addresses,
+    message: getMessage(
+      req.locale,
+      "Konto erfolgreich gelöscht.",
+      "Hesap başarıyla silindi.",
+      "Account deleted successfully."
+    ),
   });
 });

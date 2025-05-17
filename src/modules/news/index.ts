@@ -1,18 +1,17 @@
 import express from "express";
-import publicRoutes from "./news.routes";
+import publicRoutes from "./public.news.routes";
 import adminRoutes from "./admin.news.routes";
-import News from "./news.models";
-import * as newsController from "./news.controller";
+import { News, INews } from "./news.models";
+import * as publicNewsController from "./public.news.controller";
 import * as adminNewsController from "./admin.news.controller";
+import * as newsValidation from "./news.validation";
 
 const router = express.Router();
 
-router.use("/", publicRoutes);
 router.use("/admin", adminRoutes);
+router.use("/", publicRoutes);
 
-// ✅ Guard + Export (standart)
-export { News, newsController, adminNewsController };
-export * from "./news.models";
-export * from "./news.validation";
 
+// 🌟 
+export { News, INews, publicNewsController, adminNewsController, newsValidation };
 export default router;

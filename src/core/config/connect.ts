@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 
 // Aktif profil belirle (.env.admin gibi)
-const envProfile = process.env.APP_ENV || "metahub";
+const envProfile = process.env.APP_ENV || "ensotek";
 const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
 
 // Eğer config daha önce yüklenmediyse burada yükle

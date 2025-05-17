@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 import MailMessage from "../modules/email/email.models";
 
 // 🌍 Ortama özel .env dosyasını yükle
-const envProfile = process.env.APP_ENV || "metahub";
+const envProfile = process.env.APP_ENV || "ensotek";
 const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
 if (fs.existsSync(envPath)) {
   dotenv.config({ path: envPath });
