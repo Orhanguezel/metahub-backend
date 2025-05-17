@@ -1,20 +1,21 @@
-import "./types/express/express";
-
-export interface UserPayload {
-  id: string;
-  _id?: string;
-  role: "admin" | "user" | "customer" | "moderator" | "staff";
-  email?: string;
-  name?: string;
-  isActive?: boolean;
-  iat?: number;
-  exp?: number;
-}
+// src/types/express/index.d.ts
+import { File as MulterFile } from "multer";
 
 declare global {
   namespace Express {
     interface Request {
-      user?: UserPayload;
+      file?: MulterFile;
+      files?: MulterFile[];
+      user?: {
+        id: string;
+        _id?: string;
+        role: "admin" | "user" | "customer" | "moderator" | "staff";
+        email?: string;
+        name?: string;
+        isActive?: boolean;
+        iat?: number;
+        exp?: number;
+      };
       uploadType?:
         | "profile"
         | "product"
@@ -35,12 +36,12 @@ declare global {
         | "setting"
         | "company"
         | "default";
-      uploadSizeLimit?: number; // 💥 ✅ New: uploadSizeLimit
-      locale?: "tr" | "en" | "de"; // 🌍 Çok dilli destek (i18n)
+      uploadSizeLimit?: number;
+      locale?: "tr" | "en" | "de";
     }
   }
 
-  interface IUserToken extends UserPayload {}
+  interface IUserToken extends Express.Request["user"] {}
 }
 
 export {};

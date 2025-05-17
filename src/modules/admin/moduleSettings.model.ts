@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model, models } from "mongoose";
+import mongoose, { Schema, Model, models } from "mongoose";
 
 interface TranslatedLabel {
   tr: string;
@@ -6,7 +6,7 @@ interface TranslatedLabel {
   de: string;
 }
 
-export interface IModuleSetting extends Document {  
+export interface IModuleSetting {
   project: string;
   module: string;
   enabled: boolean;
@@ -15,8 +15,8 @@ export interface IModuleSetting extends Document {
   roles: string[];
   icon: string;
   label: TranslatedLabel;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const moduleSettingsSchema = new Schema<IModuleSetting>(
@@ -41,3 +41,4 @@ const ModuleSetting: Model<IModuleSetting> =
   models.ModuleSetting || mongoose.model<IModuleSetting>("ModuleSetting", moduleSettingsSchema);
 
 export default ModuleSetting;
+export { ModuleSetting };

@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model, models } from "mongoose";
+import mongoose, { Schema, Model, models } from "mongoose";
 
 interface TranslatedLabel {
   tr: string;
@@ -14,8 +14,7 @@ export interface IRouteMeta {
   body?: any;
 }
 
-export interface IModuleMeta extends Document {
-
+export interface IModuleMeta {
   name: string;
   label: TranslatedLabel;
   icon: string;
@@ -35,8 +34,8 @@ export interface IModuleMeta extends Document {
     note: string;
   }[];
   routes: IRouteMeta[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const moduleMetaSchema = new Schema<IModuleMeta>(
@@ -83,4 +82,4 @@ const ModuleMeta: Model<IModuleMeta> =
   models.ModuleMeta || mongoose.model<IModuleMeta>("ModuleMeta", moduleMetaSchema);
 
 export default ModuleMeta;
-
+export { ModuleMeta };
