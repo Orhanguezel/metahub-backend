@@ -1,7 +1,7 @@
 import { Response, Request } from "express";
 import asyncHandler from "express-async-handler";
 import { isValidObjectId } from "@/core/utils/validation";
-import FAQ, { IFAQ } from "./models";
+import  {FAQ} from "@/modules/faq";
 
 // ✅ GET /admin/faqs
 export const getAllFAQs = asyncHandler(

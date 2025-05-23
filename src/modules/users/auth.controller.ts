@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { User } from "@/modules/users";
+import { User } from "@/modules/users/users.models";
 import crypto from "crypto";
 import { passwordResetTemplate } from "@/templates/passwordReset";
 import { sendEmail } from "@/services/emailService";

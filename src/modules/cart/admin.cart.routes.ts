@@ -12,11 +12,10 @@ import {
   updateCartValidator,
   cartIdParamValidator,
 } from "./cart.validation";
-import { analyticsLogger } from "@/core/middleware/analyticsLogger"; // ✅ Added
 
 const router = Router();
 
-router.use(authenticate, authorizeRoles("admin"), analyticsLogger); // ✅ Logger added
+router.use(authenticate, authorizeRoles("admin")); // ✅ Logger added
 
 // ✅ Admin routes
 router.get("/", getAllCarts);

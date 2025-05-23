@@ -12,7 +12,6 @@ import {
   validateObjectIdParam,
 } from "./activitycategory.validation";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { analyticsLogger } from "@/core/middleware/analyticsLogger";
 
 const router = express.Router();
 
@@ -25,7 +24,6 @@ router.use(authenticate, authorizeRoles("admin"));
  */
 router.post(
   "/",
-  analyticsLogger,
   validateCreateActivityCategory,
   createActivityCategory
 );
@@ -34,7 +32,7 @@ router.post(
  * @route   GET /admin/Activity-categories
  * @desc    Get all categories
  */
-router.get("/", analyticsLogger, getAllActivityCategories);
+router.get("/", getAllActivityCategories);
 
 /**
  * @route   GET /admin/Activity-categories/:id
@@ -42,7 +40,6 @@ router.get("/", analyticsLogger, getAllActivityCategories);
  */
 router.get(
   "/:id",
-  analyticsLogger,
   validateObjectIdParam,
   getActivityCategoryById
 );
@@ -53,7 +50,6 @@ router.get(
  */
 router.put(
   "/:id",
-  analyticsLogger,
   validateObjectIdParam,
   validateUpdateActivityCategory,
   updateActivityCategory
@@ -65,7 +61,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  analyticsLogger,
   validateObjectIdParam,
   deleteActivityCategory
 );

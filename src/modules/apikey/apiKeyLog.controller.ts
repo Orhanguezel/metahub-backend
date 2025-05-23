@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
-import { ApiKeyLog } from "./apikey.models";
+import { ApiKeyLog } from "@/modules/apikey";
 
 // GET /apikey/:keyId/logs
 export const getApiKeyLogs = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {

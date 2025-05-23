@@ -1,7 +1,7 @@
-import { Schema, model, Document, Model, models } from "mongoose";
+import { Schema, model, Model, models } from "mongoose";
 
 // ✅ Category enum (daha merkezi ve temiz yönetim)
-export enum GalleryCategory {
+enum GalleryCategory {
   Hero = "hero",
   About = "about",
   Products = "products",
@@ -10,7 +10,7 @@ export enum GalleryCategory {
 }
 
 // ✅ SubItem interface
-export interface IGallerySubItem {
+interface IGallerySubItem {
   image: string;
   thumbnail: string;
   webp?: string;
@@ -88,4 +88,5 @@ gallerySchema.index({ category: 1, isPublished: 1, isActive: 1 });
 const Gallery: Model<IGalleryItem> =
   models.Gallery || model<IGalleryItem>("Gallery", gallerySchema);
 
-export default Gallery;
+// ✅ Export
+export { Gallery, GalleryCategory };

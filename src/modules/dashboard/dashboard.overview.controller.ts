@@ -1,12 +1,14 @@
+// src/modules/dashboard/dashboard.overview.controller.ts
+
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { User } from "@/modules/users";
-import { Order } from "@/modules/order";
-import { Feedback } from "@/modules/feedback";
+import { User } from "@/modules/users/users.models";
+import { Order } from "@/modules/order/order.models";
+import { Feedback } from "@/modules/feedback/feedback.models";
 
 export const getDailyOverview = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
   const today = new Date();
-  today.setHours(0, 0, 0, 0); 
+  today.setHours(0, 0, 0, 0);
 
   const [newUsers, newOrders, revenueAgg, feedbacksToday] = await Promise.all([
     User.countDocuments({ createdAt: { $gte: today } }),

@@ -1,6 +1,6 @@
 import express from "express";
 import routes from "./notification.routes";
-import Notification from "./notification.models";
+import {Notification} from "./notification.models";
 import * as notificationController from "./notification.controller";
 
 const router = express.Router();

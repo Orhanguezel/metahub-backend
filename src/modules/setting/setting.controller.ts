@@ -74,10 +74,7 @@ export const upsertSettingImage = asyncHandler(async (req: Request, res: Respons
   }
 
   const trimmedKey = key.trim();
-
-  const files = req.files as {
-    [fieldname: string]: Express.Multer.File[];
-  };
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
   const lightFile = files?.lightFile?.[0];
   const darkFile = files?.darkFile?.[0];
@@ -87,21 +84,48 @@ export const upsertSettingImage = asyncHandler(async (req: Request, res: Respons
     throw new Error("At least one of lightFile or darkFile is required.");
   }
 
+  // Eski kayıt varsa, eski dosyayı sil
+  let setting = await Setting.findOne({ key: trimmedKey });
+  let oldFiles: string[] = [];
+
+  // 💡 Sadece object ise eski dosyaları ekle
+  if (
+    setting &&
+    setting.value &&
+    typeof setting.value === "object" &&
+    !Array.isArray(setting.value)
+  ) {
+    const val = setting.value as LogoSettingValue;
+    if (lightFile && val.light) oldFiles.push(val.light);
+    if (darkFile && val.dark) oldFiles.push(val.dark);
+  }
+
+  // Sil
+  const env = process.env.APP_ENV || "ensotek";
+  const folder = "setting-images";
+  for (const fileName of oldFiles) {
+    const absPath = path.join("uploads", env, folder, path.basename(fileName));
+    if (fs.existsSync(absPath)) fs.unlinkSync(absPath);
+  }
+
+  // Yeni dosya pathlerini ayarla (sadece filename DB'de tutulur)
   const toUpdate: LogoSettingValue = {};
   if (lightFile) toUpdate.light = lightFile.filename;
   if (darkFile) toUpdate.dark = darkFile.filename;
 
-  let setting = await Setting.findOne({ key: trimmedKey });
-
   if (setting) {
-    // ✅ Eğer eski kayıt string ise object'e dönüştür
-    if (typeof setting.value === "string") {
-      setting.value = {};
+    // Eğer eski value bir object ise merge et, değilse direkt toUpdate ile değiştir
+    let merged: LogoSettingValue = { ...toUpdate };
+    if (
+      setting.value &&
+      typeof setting.value === "object" &&
+      !Array.isArray(setting.value)
+    ) {
+      merged = { ...(setting.value as LogoSettingValue), ...toUpdate };
     }
-    setting.value = { ...setting.value, ...toUpdate };
+    setting.value = merged;
     await setting.save();
   } else {
-    // Yeni oluştur
     setting = await Setting.create({
       key: trimmedKey,
       value: toUpdate,
@@ -116,6 +140,7 @@ export const upsertSettingImage = asyncHandler(async (req: Request, res: Respons
   });
 });
 
+
 // 🎯 Update Setting Image (PUT)
 export const updateSettingImage = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { key } = req.params;
@@ -126,10 +151,7 @@ export const updateSettingImage = asyncHandler(async (req: Request, res: Respons
   }
 
   const trimmedKey = key.trim();
-
-  const files = req.files as {
-    [fieldname: string]: Express.Multer.File[];
-  };
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
   const lightFile = files?.lightFile?.[0];
   const darkFile = files?.darkFile?.[0];
@@ -146,21 +168,13 @@ export const updateSettingImage = asyncHandler(async (req: Request, res: Respons
     throw new Error("Setting not found for the provided key.");
   }
 
-  // ✅ Eski dosyaları sil
+  // Eski dosyaları sil
   const oldFilesToDelete: string[] = [];
 
-  if (
-    setting.value &&
-    typeof setting.value === "object" &&
-    !Array.isArray(setting.value)
-  ) {
+  if (setting.value && typeof setting.value === "object" && !Array.isArray(setting.value)) {
     const val = setting.value as LogoSettingValue;
-    if (lightFile && val.light) {
-      oldFilesToDelete.push(val.light);
-    }
-    if (darkFile && val.dark) {
-      oldFilesToDelete.push(val.dark);
-    }
+    if (lightFile && val.light) oldFilesToDelete.push(val.light);
+    if (darkFile && val.dark) oldFilesToDelete.push(val.dark);
   } else if (typeof setting.value === "string") {
     oldFilesToDelete.push(setting.value);
   }
@@ -177,14 +191,10 @@ export const updateSettingImage = asyncHandler(async (req: Request, res: Respons
     }
   });
 
-  // ✅ Yeni değerler object'e dönüştürülüyor
+  // Yeni değerler object'e dönüştürülüyor
   let newValues: LogoSettingValue = {};
 
-  if (
-    setting.value &&
-    typeof setting.value === "object" &&
-    !Array.isArray(setting.value)
-  ) {
+  if (setting.value && typeof setting.value === "object" && !Array.isArray(setting.value)) {
     newValues = { ...(setting.value as LogoSettingValue) };
   }
 
@@ -200,6 +210,8 @@ export const updateSettingImage = asyncHandler(async (req: Request, res: Respons
     data: setting,
   });
 });
+
+
 
 // 🎯 Get All Settings
 export const getAllSettings = asyncHandler(async (_req: Request, res: Response): Promise<void> => {

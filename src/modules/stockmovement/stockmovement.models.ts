@@ -38,4 +38,4 @@ const stockmovementSchema = new Schema<IStockmovement>(
 const Stockmovement: Model<IStockmovement> =
   models.Stockmovement || model<IStockmovement>("Stockmovement", stockmovementSchema);
 
-export default Stockmovement;
+export { Stockmovement };

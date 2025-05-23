@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
-import { getGitUser, getGitCommitHash } from "@/scripts/generateMeta/utils/gitHelpers";
-import { updateMetaVersionLog } from "@/scripts/generateMeta/utils/versionHelpers";
+import { getGitUser, getGitCommitHash } from "../generateMeta/utils/gitHelpers";
+import { updateMetaVersionLog } from "../generateMeta/utils/versionHelpers";
 
 export const createMetaFile = async (moduleName: string, metaDir: string) => {
   const username = await getGitUser();

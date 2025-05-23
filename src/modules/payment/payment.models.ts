@@ -1,4 +1,4 @@
-import { Schema, Document, Model, Types, models, model } from "mongoose";
+import { Schema, Model, Types, models, model } from "mongoose";
 
 export type PaymentMethod = "cash_on_delivery" | "credit_card" | "paypal";
 export type PaymentStatus = "pending" | "paid" | "failed";

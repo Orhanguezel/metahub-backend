@@ -43,5 +43,4 @@ const wishlistSchema = new Schema<IWishlist>(
 const Wishlist: Model<IWishlist> =
   models.Wishlist || model<IWishlist>("Wishlist", wishlistSchema);
 
-export default Wishlist;
-export { Wishlist }; 
+export { Wishlist };

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Blog, IBlog } from ".";
+import { Blog } from "@/modules/blog";
+import { IBlog } from "@/modules/blog/blog.models";
 import { Comment } from "@/modules/comment";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";

@@ -2,7 +2,7 @@
 import express from "express";
 import publicRoutes from "./public.activity.routes";
 import adminRoutes from "./admin.activity.routes";
-import Activity, { IActivity } from "./activity.models";
+import  {Activity } from "./activity.models";
 import * as publicActivityController from "./public.activity.controller";
 import * as adminActivityController from "./admin.activity.controller";
 import * as ActivityValidation from "./activity.validation";
@@ -14,7 +14,6 @@ router.use("/", publicRoutes);
 
 export {
   Activity,
-  IActivity,
   publicActivityController,
   adminActivityController,
   ActivityValidation,

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { Invoice } from "@/modules/invoice";
 import { Order } from "@/modules/order";
-import { getCompanyInfo, calculateTax, generateInvoicePDF } from "../../core/utils/invoice.helper";
+import { getCompanyInfo, calculateTax, generateInvoicePDF } from "@/core/utils/invoice.helper";
 
 // ➕ Fatura oluştur
 export const createInvoice = asyncHandler(async (req: Request, res: Response) => {

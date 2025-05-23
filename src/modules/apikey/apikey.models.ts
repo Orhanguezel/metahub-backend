@@ -1,16 +1,6 @@
-// ✅ Guard + Model Type
+import mongoose, { Schema, model, models, Types, Model } from "mongoose";
 
-import mongoose, {
-  Schema,
-  model,
-  models,
-  Types,
-  Document,
-  Model,
-} from "mongoose";
-
-// 🔐 Apikey
-export interface IApikey  {
+export interface IApikey {
   name: string;
   key: string;
   status: "active" | "revoked";
@@ -29,11 +19,11 @@ const apikeySchema = new Schema<IApikey>(
   { timestamps: true }
 );
 
-export const Apikey: Model<IApikey> =
+const Apikey: Model<IApikey> =
   models.Apikey || model<IApikey>("Apikey", apikeySchema);
 
 // 📊 ApiKeyLog
-export interface IApiKeyLog  {
+export interface IApiKeyLog {
   apiKey: Types.ObjectId;
   route: string;
   method: string;
@@ -55,5 +45,9 @@ const apiKeyLogSchema = new Schema<IApiKeyLog>(
   { timestamps: { createdAt: true, updatedAt: false } }
 );
 
-export const ApiKeyLog: Model<IApiKeyLog> =
+const ApiKeyLog: Model<IApiKeyLog> =
   models.ApiKeyLog || model<IApiKeyLog>("ApiKeyLog", apiKeyLogSchema);
+
+export { Apikey, ApiKeyLog};
+
+

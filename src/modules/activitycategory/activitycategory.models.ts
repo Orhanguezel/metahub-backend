@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, models, Document, Model } from "mongoose";
+import mongoose, { Schema, model, models, Model } from "mongoose";
 
 export interface IActivityCategory  {
   name: {
@@ -55,5 +55,4 @@ ActivityCategorySchema.pre("validate", function (next) {
 const ActivityCategory: Model<IActivityCategory> =
   models.ActivityCategory || model<IActivityCategory>("ActivityCategory", ActivityCategorySchema);
 
-export default ActivityCategory;
 export { ActivityCategory };

@@ -1,7 +1,7 @@
-import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
+import mongoose, { Schema, Types, Model, models } from "mongoose";
 import slugify from "slugify";
 
-export interface IServicesImage {
+interface IServicesImage {
   url: string;
   thumbnail: string;
   webp?: string;
@@ -111,5 +111,4 @@ servicesSchema.pre("validate", async function (next) {
 const Services: Model<IServices> =
   models.Services || mongoose.model<IServices>("Services", servicesSchema);
 
-export default Services;
 export { Services };

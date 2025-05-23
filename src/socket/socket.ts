@@ -2,8 +2,7 @@ import { Server as HttpServer } from "http";
 import { Server as SocketIOServer, Socket } from "socket.io";
 import { parse } from "cookie";
 import jwt from "jsonwebtoken";
-import {ChatMessage} from "@/modules/chat";
-import ChatSession from "../modules/chat/chatSession.model";
+import {ChatMessage,ChatSession} from "@/modules/chat";
 import "dotenv/config";
 import { v4 as uuidv4 } from "uuid";
 

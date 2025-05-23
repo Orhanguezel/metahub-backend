@@ -1,7 +1,6 @@
 import express, { Router } from "express";
 import fs from "fs/promises";
 import path from "path";
-import { analyticsLogger } from "@/core/middleware/analyticsLogger";
 
 export const getRouter = async (): Promise<Router> => {
   const router = express.Router();
@@ -42,7 +41,7 @@ export const getRouter = async (): Promise<Router> => {
       const prefix = meta.prefix || `/${moduleNameLower}`;
 
       if (meta.useAnalytics) {
-        router.use(prefix, analyticsLogger, modRouter);
+        router.use(prefix, modRouter);
       } else {
         router.use(prefix, modRouter);
       }

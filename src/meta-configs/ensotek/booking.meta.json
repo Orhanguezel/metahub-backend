@@ -1,0 +1,82 @@
+{
+  "name": "booking",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllBookings",
+      "pathPrefix": "admin",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "validateObjectId(\"id\"",
+      "pathPrefix": "admin",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/:id/status",
+      "auth": true,
+      "summary": "PUT /:id/status",
+      "validationName": "\"/:id/status\"",
+      "controllerName": "validateObjectId(\"id\"",
+      "pathPrefix": "admin"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "validateObjectId(\"id\"",
+      "pathPrefix": "admin",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": false,
+      "summary": "POST /",
+      "pathPrefix": "public"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "bf73f6e8be2c2baedf22060b0ff62abd697e68bc"
+  },
+  "commitHash": "bf73f6e8be2c2baedf22060b0ff62abd697e68bc",
+  "lastUpdatedAt": "2025-05-23T09:04:56.148Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "bf73f6e8be2c2baedf22060b0ff62abd697e68bc",
+      "date": "2025-05-23T09:04:56.148Z",
+      "note": "Meta auto-generated"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { News } from ".";
+import { News } from "@/modules/news";
 import { isValidObjectId } from "@/core/utils/validation";
 
 // ✅ Get All News (public)

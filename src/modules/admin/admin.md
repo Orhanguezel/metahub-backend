@@ -1,6 +1,3 @@
-Tabii! Aşağıda **güncellenmiş ve bizim son yaptığımız geliştirmelere tamamen uyumlu**  
-yeni **Admin Modülü Dokümantasyonu** hazır:  
-_(sadece Zod kısmı çıkarıldı, express-validator kullanımı doğru anlatıldı ve tüm yeni işlevler eklendi)_
 
 ---
 
@@ -170,7 +167,3 @@ Frontend Admin Panel ⟷ /admin endpoint ⟶
 - 🧠 Git bilgileri (username + commitHash) ve versiyon kontrolü sağlar.
 
 ---
-
-Bu formatta **eksiksiz ve doğru** şekilde Admin modülünün son versiyonuna uygun dökümantasyon yazdım.  
-İstersen aynı yapıyı Swagger dokümantasyonu için de otomatik olarak türetelim mi? (her endpoint için örnek response'lar ile) 🚀  
-İster misin? 🔥

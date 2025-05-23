@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
+import mongoose, { Schema, Types, Model, models } from "mongoose";
 
 export interface INewsCategory  {
   name: {
@@ -51,6 +51,5 @@ newsCategorySchema.pre("validate", function (next) {
 const NewsCategory: Model<INewsCategory>=
 (models.NewsCategory as Model<INewsCategory>) || mongoose.model<INewsCategory>("NewsCategory", newsCategorySchema);
 
-export default NewsCategory;
 export { NewsCategory };
 

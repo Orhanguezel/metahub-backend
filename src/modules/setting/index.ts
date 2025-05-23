@@ -1,6 +1,6 @@
 import express from "express";
 import routes from "./setting.routes";
-import Setting from "./setting.models";
+import {Setting} from "./setting.models";
 import * as settingController from "./setting.controller";
 
 const router = express.Router();

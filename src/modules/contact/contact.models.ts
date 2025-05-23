@@ -1,7 +1,7 @@
-import { Schema, model, Document, Model, models } from "mongoose";
+import { Schema, model, Model, models } from "mongoose";
 
 // ✅ Contact Message Interface
-interface IContactMessage  {
+export interface IContactMessage  {
   name: string;
   email: string;
   label: {
@@ -49,5 +49,4 @@ const contactMessageSchema = new Schema<IContactMessage>(
 const ContactMessage: Model<IContactMessage> =
   models.ContactMessage || model<IContactMessage>("ContactMessage", contactMessageSchema);
 
-export { ContactMessage, IContactMessage };
-export default ContactMessage;
+export { ContactMessage };

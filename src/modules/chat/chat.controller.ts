@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
-import { ChatMessage, ChatSession } from ".";
+import { ChatMessage, ChatSession } from "@/modules/chat";
 import mongoose from "mongoose";
 
 // Kullanıcı tipi (opsiyonel)

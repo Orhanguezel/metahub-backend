@@ -1,6 +1,6 @@
 import { config } from "dotenv";
 import mongoose from "mongoose";
-import FaqModel from "../../modules/faq";
+import { FAQ } from "../../modules/faq";
 
 config();
 
@@ -13,7 +13,7 @@ async function main() {
     await mongoose.connect(process.env.MONGO_URI!);
     console.log("✅ MongoDB bağlantısı başarılı.");
 
-    const faqs = await FaqModel.find({
+    const faqs = await FAQ.find({
       $or: [{ embedding: { $exists: false } }, { embedding: { $size: 0 } }],
     });
 

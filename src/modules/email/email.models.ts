@@ -1,7 +1,7 @@
-import mongoose, { Schema, model, Document, Model, models } from "mongoose";
+import mongoose, { Schema, model, Model, models } from "mongoose";
 
 // ✅ MailMessage Interface
-interface IMailMessage  {
+export interface IMailMessage  {
   from: string;
   subject: {
     tr: string;
@@ -45,5 +45,4 @@ const mailSchema = new Schema<IMailMessage>(
 const MailMessage: Model<IMailMessage> =
   models.MailMessage || model<IMailMessage>("MailMessage", mailSchema);
 
-export default MailMessage;
-export { IMailMessage };
+export { MailMessage };

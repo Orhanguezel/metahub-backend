@@ -1,4 +1,3 @@
-// src/modules/admin/admin.routes.ts
 import express from "express";
 import {
   getModules,
@@ -6,19 +5,22 @@ import {
   updateModule,
   deleteModule,
   getProjects,
-  createModule,
-  getModuleAnalytics,
+  createModule
 } from "./admin.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { validateUpdateModule, validateModuleNameParam,validateCreateModule} from "./admin.validation";
+import {
+  validateUpdateModule,
+  validateModuleNameParam,
+  validateCreateModule
+} from "./admin.validation";
 
 const router = express.Router();
 
-// 🎯 Admin modülleri - Protected
+// 🎯 Tüm admin işlemleri korunur
 router.use(authenticate, authorizeRoles("admin"));
 
-router.post("/modules", authenticate, authorizeRoles("admin"), validateCreateModule, createModule);
-
+// ➕ Yeni modül oluştur
+router.post("/modules", validateCreateModule, createModule);
 
 // 📋 Tüm modülleri listele
 router.get("/modules", getModules);
@@ -29,14 +31,10 @@ router.get("/projects", getProjects);
 // 🔍 Belirli modülü getir
 router.get("/module/:name", validateModuleNameParam, getModuleByName);
 
-router.get("/modules/analytics", getModuleAnalytics);
-
 // ✏️ Belirli modülü güncelle
 router.patch("/module/:name", validateModuleNameParam, validateUpdateModule, updateModule);
 
 // 🗑️ Belirli modülü sil
 router.delete("/module/:name", validateModuleNameParam, deleteModule);
-
-
 
 export default router;

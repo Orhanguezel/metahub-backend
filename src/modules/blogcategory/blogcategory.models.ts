@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
+import mongoose, { Schema, Types, Model, models } from "mongoose";
 
 export interface IBlogCategory  {
   name: {
@@ -51,6 +51,5 @@ BlogCategorySchema.pre("validate", function (next) {
 const BlogCategory: Model<IBlogCategory>=
 (models.BlogCategory as Model<IBlogCategory>) || mongoose.model<IBlogCategory>("BlogCategory", BlogCategorySchema);
 
-export default BlogCategory;
 export { BlogCategory };
 

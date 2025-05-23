@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Response } from "express";
 
+
 /**
  * ✅ ObjectId geçerlilik kontrolü
  */
@@ -12,9 +13,9 @@ export const isValidObjectId = (id: any): boolean => {
  * ✅ Kullanıcıyı getir, bulunmazsa çok dilli 404 döner
  */
 export const getUserOrFail = async (id: string, res: Response) => {
-  const user = await import("@/modules/users/users.models").then((mod) =>
-    mod.default.findById(id.trim())
-  );
+  // Named export ile User modelini alın
+  const mod = await import("@/modules/users/users.models");
+  const user = await mod.User.findById(id.trim());
   if (!user) {
     res.status(404).json({
       success: false,
@@ -29,6 +30,7 @@ export const getUserOrFail = async (id: string, res: Response) => {
   }
   return user;
 };
+
 
 /**
  * ✅ Geçerli rol kontrolü

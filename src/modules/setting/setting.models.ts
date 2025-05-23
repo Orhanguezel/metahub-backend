@@ -1,9 +1,11 @@
-import { Schema, model, models, Document, Model } from "mongoose";
+// src/modules/setting/setting.models.ts
 
-type LogoSettingValue = { light?: string; dark?: string };
+import { Schema, model, models, Model } from "mongoose";
 
+// LOGO setting değeri için yardımcı tip
+export type LogoSettingValue = { light?: string; dark?: string };
 
-export interface ISetting  {
+export interface ISetting {
   key: string;
   value: string | string[] | { tr: string; en: string; de: string } | Record<string, any>;
   isActive: boolean;
@@ -34,9 +36,7 @@ const settingSchema = new Schema<ISetting>(
 );
 
 // ✅ Tip garantili + guardlı model
-const Setting: Model<ISetting> =
-  models.Setting || model<ISetting>("Setting", settingSchema);
+const Setting: Model<ISetting> = models.Setting || model<ISetting>("Setting", settingSchema);
 
-export default Setting; // default export
-export { Setting };     // named export (standart için)
+export { Setting };
 

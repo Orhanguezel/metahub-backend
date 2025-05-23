@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import MailMessage, { IMailMessage } from "./email.models";
-import { sendEmail } from "../../services/emailService";
-import { readInboxEmails } from "../../services/emailReader";
-import { isValidObjectId } from "../../core/utils/validation";
+import  { MailMessage} from "@/modules/email";
+import { sendEmail } from "@/services/emailService";
+import { readInboxEmails } from "@/services/emailReader";
+import { isValidObjectId } from "@/core/utils/validation";
 
 // ✅ Test e-posta gönder (Admin)
 export const sendTestEmail = asyncHandler(async (req: Request, res: Response): Promise<void> => {

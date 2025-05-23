@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Services } from ".";
+import { Services } from "@/modules/services";
 import { isValidObjectId } from "@/core/utils/validation";
 
 // ✅ Public - Get all services (optional: filter by category, language)

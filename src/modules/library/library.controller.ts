@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { LibraryItem } from ".";
+import { LibraryItem } from "@/modules/library";
 import { BASE_URL, UPLOAD_BASE_PATH } from "@/core/middleware/uploadMiddleware";
 import { isValidObjectId } from "@/core/utils/validation";
 

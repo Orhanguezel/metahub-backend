@@ -1,6 +1,6 @@
-import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
+import mongoose, { Schema, Types, Model, models } from "mongoose";
 
-export interface IRadonarCategory  {
+interface IRadonarCategory  {
   name: {
     tr: string;
     en: string;
@@ -51,6 +51,6 @@ RadonarCategorySchema.pre("validate", function (next) {
 const RadonarCategory: Model<IRadonarCategory>=
 (models.RadonarCategory as Model<IRadonarCategory>) || mongoose.model<IRadonarCategory>("RadonarCategory", RadonarCategorySchema);
 
-export default RadonarCategory;
+// ✅ Export
 export { RadonarCategory };
 

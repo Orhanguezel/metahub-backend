@@ -1,12 +1,12 @@
-import mongoose, { Schema, model, models, Document, Types, Model } from "mongoose";
+import mongoose, { Schema, model, models, Types, Model } from "mongoose";
 
-export interface IOrderItem {
+interface IOrderItem {
   product: Types.ObjectId;
   quantity: number;
   unitPrice: number;
 }
 
-export interface IShippingAddress {
+interface IShippingAddress {
   name: string;
   phone: string;
   email: string;
@@ -84,4 +84,4 @@ const orderSchema = new Schema<IOrder>(
 const Order: Model<IOrder> =
   models.Order || model<IOrder>("Order", orderSchema);
 
-export default Order;
+export { Order };

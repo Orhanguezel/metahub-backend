@@ -1,4 +1,4 @@
-import { Schema, model, Types, Document, Model, models } from "mongoose";
+import { Schema, model, Types, Model, models } from "mongoose";
 import {
   ALLOWED_COMMENT_CONTENT_TYPES,
   CommentContentType,
@@ -81,5 +81,4 @@ const commentSchema = new Schema<IComment>(
 const Comment: Model<IComment> =
   models.Comment || model<IComment>("Comment", commentSchema);
 
-export { Comment, IComment };
-export default Comment;
+export { Comment };

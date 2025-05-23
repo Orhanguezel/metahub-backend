@@ -78,4 +78,4 @@ const upload = multer({
 export const serveUploads = express.static(BASE_UPLOAD_DIR);
 export const UPLOAD_BASE_PATH = `${BASE_UPLOAD_DIR}/${envProfile}`;
 export { BASE_URL_VALUE as BASE_URL }; // 💥 renamed to avoid default export conflict
-export default upload;
+export {upload};

@@ -1,17 +1,21 @@
+// src/modules/references/index.ts
 import express from "express";
-import routes from "./references.routes";
+import publicRoutes from "./public.routes";
+import adminRoutes from "./admin.routes";
+import { Reference } from "./models";
+import * as publicReferencesController from "./public.controller";
+import * as adminReferencesController from "./admin.controller";
+import * as ReferencesValidation from "./validation";
 
-// ✅ Model & Controller importları
-import Reference from "./references.models";
-import * as referencesController from "./references.controller";
-
-// ✅ Router
 const router = express.Router();
-router.use("/", routes);
 
-// ✅ Guard + Export (standart)
-export { Reference, referencesController };
-export * from "./references.validation";
-export type { IReference } from "./references.models";
+router.use("/admin", adminRoutes);
+router.use("/", publicRoutes);
 
+export {
+  Reference,
+  publicReferencesController,
+  adminReferencesController,
+  ReferencesValidation,
+};
 export default router;

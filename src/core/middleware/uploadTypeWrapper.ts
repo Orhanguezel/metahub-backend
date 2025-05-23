@@ -21,6 +21,7 @@ export const uploadSizeLimits: Record<UploadFolderKeys, number> = {
   default: 20 * 1024 * 1024,
   activity: 10 * 1024 * 1024,
   about: 10 * 1024 * 1024,
+  
 };
 
 export const uploadTypeWrapper = (type: UploadFolderKeys) => {

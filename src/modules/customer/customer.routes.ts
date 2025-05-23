@@ -7,7 +7,6 @@ import {
   deleteCustomer,
 } from "./customer.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { analyticsLogger } from "@/core/middleware/analyticsLogger";
 import {
   createCustomerValidator,
   updateCustomerValidator,
@@ -19,9 +18,9 @@ const router = express.Router();
 // ✅ Admin Routes (all protected)
 router.use(authenticate, authorizeRoles("admin"));
 
-router.get("/", analyticsLogger, getAllCustomers);
+router.get("/", getAllCustomers);
 
-router.get("/:id", validateCustomerIdParam, analyticsLogger, getCustomerById);
+router.get("/:id", validateCustomerIdParam, getCustomerById);
 
 router.post("/", createCustomerValidator, createCustomer);
 

@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, models, Document, Model } from "mongoose";
+import mongoose, { Schema, model, models, Model } from "mongoose";
 
 export interface IServicesCategory  {
   name: {
@@ -55,5 +55,4 @@ ServicesCategorySchema.pre("validate", function (next) {
 const ServicesCategory: Model<IServicesCategory> =
   models.ServicesCategory || model<IServicesCategory>("ServicesCategory", ServicesCategorySchema);
 
-export default ServicesCategory;
 export { ServicesCategory };

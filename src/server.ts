@@ -3,7 +3,7 @@ import express, { Express } from "express";
 import http from "http";
 import cors from "cors";
 import "./core/config/env";
-import connectDB from "./core/config/connect";
+import {connectDB} from "./core/config/connect";
 import cookieParser from "cookie-parser";
 import { initializeSocket } from "./socket/socket";
 import { setLocale } from "./core/middleware/setLocale";

@@ -1,0 +1,59 @@
+{
+  "name": "referencescategory",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllReferenceCategories",
+      "pathPrefix": "category"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllReferenceCategories",
+      "pathPrefix": "category"
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id",
+      "pathPrefix": "category"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id",
+      "pathPrefix": "category"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "bf73f6e8be2c2baedf22060b0ff62abd697e68bc"
+  },
+  "commitHash": "bf73f6e8be2c2baedf22060b0ff62abd697e68bc",
+  "lastUpdatedAt": "2025-05-23T09:04:55.969Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "bf73f6e8be2c2baedf22060b0ff62abd697e68bc",
+      "date": "2025-05-23T09:04:55.969Z",
+      "note": "Meta auto-generated"
+    }
+  ]
+}

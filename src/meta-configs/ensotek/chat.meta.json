@@ -91,16 +91,16 @@
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "49a17c15f3863286ef0c64b090b0d7ba70aeed0c"
+    "commitHash": "bf73f6e8be2c2baedf22060b0ff62abd697e68bc"
   },
-  "commitHash": "49a17c15f3863286ef0c64b090b0d7ba70aeed0c",
-  "lastUpdatedAt": "2025-05-17T23:36:07.450Z",
+  "commitHash": "bf73f6e8be2c2baedf22060b0ff62abd697e68bc",
+  "lastUpdatedAt": "2025-05-23T09:04:55.813Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "49a17c15f3863286ef0c64b090b0d7ba70aeed0c",
-      "date": "2025-05-17T23:36:07.450Z",
+      "commitHash": "bf73f6e8be2c2baedf22060b0ff62abd697e68bc",
+      "date": "2025-05-23T09:04:55.813Z",
       "note": "Meta auto-generated"
     }
   ]

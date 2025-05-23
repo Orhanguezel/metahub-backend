@@ -11,7 +11,7 @@ import {
   authenticate,
   authorizeRoles,
 } from "@/core/middleware/authMiddleware";
-import upload from "@/core/middleware/uploadMiddleware";
+import {upload} from "@/core/middleware/uploadMiddleware";
 import {
   validateCreateSparePart,
   validateUpdateSparePart,

@@ -1,7 +1,7 @@
-import { Schema, model, Document, Model, models } from "mongoose";
+import { Schema, model, Model, models } from "mongoose";
 
 // ✅ Interface
-interface IFeedback  {
+export interface IFeedback  {
   name: string;
   email: string;
   message: {
@@ -36,5 +36,4 @@ const feedbackSchema = new Schema<IFeedback>(
 // ✅ Guard + Model Type
 const Feedback: Model<IFeedback> = models.Feedback || model<IFeedback>("Feedback", feedbackSchema);
 
-export { Feedback, IFeedback };
-export default Feedback;
+export { Feedback };

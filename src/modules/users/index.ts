@@ -6,7 +6,7 @@ import userRoutes from "./users.routes";
 import accountRoutes from "./account.routes";
 
 // 👤 Modeller
-import User, { IUser } from "./users.models";
+import  {User } from "./users.models";
 
 // 🛠️ Controller'lar
 import * as authController from "./auth.controller";
@@ -30,7 +30,6 @@ router.use("/account", accountRoutes);
 // ✅ Tek noktadan export
 export {
   User,
-  IUser,
   authController,
   accountController,
   statusController,
