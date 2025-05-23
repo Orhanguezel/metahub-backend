@@ -1,4 +1,4 @@
-import { Schema, Document, Model, models, model } from "mongoose";
+import { Schema, Model, models, model } from "mongoose";
 
 // ✅ Interface
 export interface ILibraryItem  {
@@ -70,5 +70,4 @@ const LibraryItem: Model<ILibraryItem> =
   model<ILibraryItem>("LibraryItem", librarySchema);
 
 // ✅ Export
-export default LibraryItem;
-export { LibraryItem }; // named export
+export { LibraryItem };

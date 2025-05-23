@@ -1,6 +1,6 @@
-import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
+import mongoose, { Schema, Types, Model, models } from "mongoose";
 
-export interface INewsImage {
+interface INewsImage {
   url: string;
   thumbnail: string;
   webp?: string;
@@ -97,7 +97,6 @@ newsSchema.pre("validate", function (this: INews, next) {
 const News: Model<INews> =
   (models.News as Model<INews>) || mongoose.model<INews>("News", newsSchema);
 
-export default News;
 export { News };
 
 

@@ -104,5 +104,4 @@ AboutSchema.pre("validate", async function (next) {
 const About: Model<IAbout> =
   models.About || mongoose.model<IAbout>("About", AboutSchema);
 
-export default About;
-export { About };
+export { About};

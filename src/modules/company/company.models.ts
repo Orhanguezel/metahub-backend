@@ -1,6 +1,13 @@
-import mongoose, { Schema, Document, Model, models } from "mongoose";
+import mongoose, { Schema, Model, models } from "mongoose";
 
-interface ICompany  {
+export interface ICompanyImage {
+  url: string;
+  thumbnail: string;
+  webp?: string;
+  publicId?: string;
+}
+
+export interface ICompany {
   companyName: string;
   taxNumber: string;
   handelsregisterNumber?: string;
@@ -17,7 +24,7 @@ interface ICompany  {
     iban: string;
     swiftCode: string;
   };
-  logoUrl?: string;
+  logos?: ICompanyImage[];
   socialLinks?: {
     facebook?: string;
     instagram?: string;
@@ -28,6 +35,16 @@ interface ICompany  {
   createdAt: Date;
   updatedAt: Date;
 }
+
+const CompanyImageSchema = new Schema<ICompanyImage>(
+  {
+    url: { type: String, required: true },
+    thumbnail: { type: String, required: true },
+    webp: { type: String },
+    publicId: { type: String },
+  },
+  { _id: false }
+);
 
 const companySchema = new Schema<ICompany>(
   {
@@ -47,7 +64,7 @@ const companySchema = new Schema<ICompany>(
       iban: { type: String, required: true },
       swiftCode: { type: String, required: true },
     },
-    logoUrl: { type: String },
+    logos: { type: [CompanyImageSchema], default: [] },
     socialLinks: {
       facebook: { type: String },
       instagram: { type: String },
@@ -62,5 +79,4 @@ const companySchema = new Schema<ICompany>(
 const Company: Model<ICompany> =
   models.Company || mongoose.model<ICompany>("Company", companySchema);
 
-export { Company, ICompany };
-export default Company;
+export { Company };

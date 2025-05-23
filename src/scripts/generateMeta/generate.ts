@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import mongoose from "mongoose";
 
-import connectDB from "@/core/config/connect";
+import {connectDB} from "@/core/config/connect";
 import { extractRoutesFromFile, getAllRouteFiles } from "./utils/extractRoutes";
 import { updateMetaVersionLog } from "./utils/versionHelpers";
 import { getEnvProfiles } from "@/tools/getEnvProfiles";

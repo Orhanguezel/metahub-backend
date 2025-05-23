@@ -17,7 +17,7 @@ import {
 } from "./users.validation";
 
 import { authenticate } from "@/core/middleware/authMiddleware";
-import upload from "@/core/middleware/uploadMiddleware";
+import {upload} from "@/core/middleware/uploadMiddleware";
 
 const router = express.Router();
 

@@ -1,6 +1,6 @@
 import express from "express";
 import routes from "./newscategory.routes";
-import NewsCategory from "./newscategory.models";
+import {NewsCategory} from "./newscategory.models";
 import * as newscategoryController from "./newscategory.controller";
 
 const router = express.Router();

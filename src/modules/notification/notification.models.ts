@@ -1,4 +1,4 @@
-import { Schema, model, Document, Types, Model, models } from "mongoose";
+import { Schema, model, Types, Model, models } from "mongoose";
 
 // ✅ Interface
 export interface INotification  {
@@ -50,5 +50,4 @@ const Notification: Model<INotification> =
   models.Notification || model<INotification>("Notification", notificationSchema);
 
 // ✅ Export
-export default Notification;
-export { Notification }; // named export (standart)
+export { Notification};

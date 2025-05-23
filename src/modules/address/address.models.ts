@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import mongoose, { Schema, Model, Types } from "mongoose";
 import { onlyLetters as names } from "@/core/utils/regex";
 
 // 📌 TypeScript Interface
@@ -80,4 +80,4 @@ const addressSchema = new Schema<IAddress>(
 const Address: Model<IAddress> =
   mongoose.models.Address || mongoose.model<IAddress>("Address", addressSchema);
 
-export default Address;
+export { Address};

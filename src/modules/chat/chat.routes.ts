@@ -11,7 +11,6 @@ import {
   getAllChatSessions,
 } from "./chat.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { analyticsLogger } from "@/core/middleware/analyticsLogger";
 import {
   validateManualMessage,
   validateBulkDelete,
@@ -25,7 +24,6 @@ const router = express.Router();
 router.get(
   "/:roomId",
   authenticate,
-  analyticsLogger,
   validateRoomIdParam,
   getMessagesByRoom
 );

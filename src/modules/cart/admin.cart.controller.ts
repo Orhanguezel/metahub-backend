@@ -1,7 +1,8 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response, NextFunction } from "express";
 import { isValidObjectId } from "@/core/utils/validation";
-import { Cart, ICartItem } from "@/modules/cart";
+import { Cart} from "@/modules/cart";
+import { ICartItem } from "@/modules/cart/cart.models";
 
 // ✅ Get all carts (with optional filters)
 export const getAllCarts = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {

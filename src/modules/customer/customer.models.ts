@@ -1,7 +1,7 @@
-import { Schema, model, Document, Model, models } from "mongoose";
+import { Schema, model, Model, models } from "mongoose";
 
 // ✅ Customer Interface
-interface ICustomer  {
+export interface ICustomer  {
   companyName: string;
   contactName: string;
   email: string;
@@ -37,5 +37,4 @@ const customerSchema = new Schema<ICustomer>(
 const Customer: Model<ICustomer> =
   models.Customer || model<ICustomer>("Customer", customerSchema);
 
-export { Customer, ICustomer };
-export default Customer;
+export { Customer };

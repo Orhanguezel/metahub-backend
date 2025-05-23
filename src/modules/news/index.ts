@@ -1,7 +1,7 @@
 import express from "express";
 import publicRoutes from "./public.news.routes";
 import adminRoutes from "./admin.news.routes";
-import { News, INews } from "./news.models";
+import { News } from "./news.models";
 import * as publicNewsController from "./public.news.controller";
 import * as adminNewsController from "./admin.news.controller";
 import * as newsValidation from "./news.validation";
@@ -13,5 +13,5 @@ router.use("/", publicRoutes);
 
 
 // 🌟 
-export { News, INews, publicNewsController, adminNewsController, newsValidation };
+export { News, publicNewsController, adminNewsController, newsValidation };
 export default router;

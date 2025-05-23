@@ -106,5 +106,4 @@ ActivitySchema.pre("validate", async function (next) {
 const Activity: Model<IActivity> =
   models.Activity || mongoose.model<IActivity>("Activity", ActivitySchema);
 
-export default Activity;
 export { Activity };

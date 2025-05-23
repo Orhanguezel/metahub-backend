@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Activity, IActivity } from ".";
+import { Activity } from "@/modules/activity";
+import { IActivity } from "@/modules/activity/activity.models";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
 import path from "path";

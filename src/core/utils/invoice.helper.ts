@@ -3,7 +3,7 @@ import path from "path";
 import PDFDocument from "pdfkit";
 
 import { Company } from "@/modules/company";
-import { IInvoice } from "@/modules/invoice";
+import { IInvoice } from "@/modules/invoice/invoice.models";
 
 // 📌 Vergi Hesaplama Fonksiyonu
 export const calculateTax = (totalAmount: number, taxRate = 19) => {
@@ -27,7 +27,10 @@ export const generateInvoicePDF = async (
   const fileName = `invoice-${invoice.invoiceNumber}.pdf`;
 
   // Ortam değişkeni destekli PDF kaydetme dizini
-  const invoicesDir = path.join(process.cwd(), process.env.INVOICE_PATH || "public/invoices");
+  const invoicesDir = path.join(
+    process.cwd(),
+    process.env.INVOICE_PATH || "public/invoices"
+  );
 
   // 📁 Klasör yoksa oluştur
   if (!fs.existsSync(invoicesDir)) {
@@ -40,7 +43,8 @@ export const generateInvoicePDF = async (
 
   // 🔹 Başlık ve temel bilgiler
   doc.fontSize(20).text("INVOICE", { align: "center" }).moveDown();
-  doc.fontSize(12)
+  doc
+    .fontSize(12)
     .text(`Invoice No: ${invoice.invoiceNumber}`)
     .text(`Date: ${new Date(invoice.issuedAt).toLocaleDateString()}`)
     .text(`Customer: ${invoice.user?.name || "-"}`)
@@ -49,8 +53,16 @@ export const generateInvoicePDF = async (
 
   // 🔹 Şirket bilgileri
   if (invoice.company) {
-    const { companyName, address, phone, email, taxNumber, handelsregisterNumber } = invoice.company;
-    doc.text(`Company: ${companyName}`)
+    const {
+      companyName,
+      address,
+      phone,
+      email,
+      taxNumber,
+      handelsregisterNumber,
+    } = invoice.company;
+    doc
+      .text(`Company: ${companyName}`)
       .text(`Address: ${address?.street}, ${address?.city}`)
       .text(`Phone: ${phone}`)
       .text(`Email: ${email}`)

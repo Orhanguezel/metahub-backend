@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import ModuleSetting from "@/modules/admin/moduleSettings.model";
-import connectDB from "@/core/config/connect";
+import {ModuleSetting} from "@/modules/admin";
+import {connectDB} from "@/core/config/connect";
 
 dotenv.config({ path: `.env.ensotek` });
 

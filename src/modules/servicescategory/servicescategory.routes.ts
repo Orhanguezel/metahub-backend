@@ -12,7 +12,6 @@ import {
   validateObjectIdParam,
 } from "./servicescategory.validation";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { analyticsLogger } from "@/core/middleware/analyticsLogger";
 
 const router = express.Router();
 
@@ -23,30 +22,30 @@ router.use(authenticate, authorizeRoles("admin"));
  * @route   POST /admin/services-categories
  * @desc    Create new category
  */
-router.post("/", analyticsLogger, validateCreateServicesCategory, createServicesCategory);
+router.post("/", validateCreateServicesCategory, createServicesCategory);
 
 /**
  * @route   GET /admin/services-categories
  * @desc    Get all categories
  */
-router.get("/", analyticsLogger, getAllServicesCategories);
+router.get("/", getAllServicesCategories);
 
 /**
  * @route   GET /admin/services-categories/:id
  * @desc    Get category by ID
  */
-router.get("/:id", analyticsLogger, validateObjectIdParam, getServicesCategoryById);
+router.get("/:id", validateObjectIdParam, getServicesCategoryById);
 
 /**
  * @route   PUT /admin/services-categories/:id
  * @desc    Update category
  */
-router.put("/:id", analyticsLogger, validateObjectIdParam, validateUpdateServicesCategory, updateServicesCategory);
+router.put("/:id", validateObjectIdParam, validateUpdateServicesCategory, updateServicesCategory);
 
 /**
  * @route   DELETE /admin/services-categories/:id
  * @desc    Delete category
  */
-router.delete("/:id", analyticsLogger, validateObjectIdParam, deleteServicesCategory);
+router.delete("/:id", validateObjectIdParam, deleteServicesCategory);
 
 export default router;

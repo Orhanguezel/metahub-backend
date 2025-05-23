@@ -1,56 +1,35 @@
-// src/modules/dashboard/dashboard.validation.ts
-// src/modules/dashboard/dashboard.validation.ts
 import { query } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 
-// 📊 Logs query validation
+// 📊 Analytics Logs Query Validation
 export const validateGetAnalyticsLogs = [
-  query("limit")
-    .optional()
-    .isInt({ min: 1, max: 1000 })
+  query("limit").optional().isInt({ min: 1, max: 1000 })
     .withMessage("Limit must be an integer between 1 and 1000."),
-  query("module")
-    .optional()
-    .isString()
+  query("module").optional().isString()
     .withMessage("Module must be a string."),
-  query("eventType")
-    .optional()
-    .isString()
+  query("eventType").optional().isString()
     .withMessage("Event type must be a string."),
-  query("userId")
-    .optional()
-    .isMongoId()
-    .withMessage("User ID must be a valid Mongo ID."),
-  query("startDate")
-    .optional()
-    .isISO8601()
+  query("userId").optional().isMongoId()
+    .withMessage("User ID must be a valid MongoDB ObjectId."),
+  query("startDate").optional().isISO8601()
     .withMessage("Start date must be a valid ISO8601 date."),
-  query("endDate")
-    .optional()
-    .isISO8601()
+  query("endDate").optional().isISO8601()
     .withMessage("End date must be a valid ISO8601 date."),
   validateRequest,
 ];
 
-// 🗓️ Optional: charts/revenue ve charts/orders için tarih filtresi eklemek isterseniz
+// 📈 Charts (orders, revenue) Query Validation - Tarih aralığı desteği
 export const validateChartQuery = [
-  query("startDate")
-    .optional()
-    .isISO8601()
+  query("startDate").optional().isISO8601()
     .withMessage("Start date must be a valid ISO8601 date."),
-  query("endDate")
-    .optional()
-    .isISO8601()
+  query("endDate").optional().isISO8601()
     .withMessage("End date must be a valid ISO8601 date."),
   validateRequest,
 ];
 
-// 📈 Genel: raporlar için (ileride kullanılabilir)
+// 📑 Raporlar için (ileride genişletilebilir)
 export const validateReportQuery = [
-  query("limit")
-    .optional()
-    .isInt({ min: 1, max: 100 })
+  query("limit").optional().isInt({ min: 1, max: 100 })
     .withMessage("Limit must be an integer between 1 and 100."),
   validateRequest,
 ];
-

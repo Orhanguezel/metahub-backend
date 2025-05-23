@@ -12,7 +12,6 @@ import {
   validateObjectIdParam,
 } from "./aboutcategory.validation";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { analyticsLogger } from "@/core/middleware/analyticsLogger";
 
 const router = express.Router();
 
@@ -25,7 +24,6 @@ router.use(authenticate, authorizeRoles("admin"));
  */
 router.post(
   "/",
-  analyticsLogger,
   validateCreateAboutCategory,
   createAboutCategory
 );
@@ -34,7 +32,7 @@ router.post(
  * @route   GET /admin/About-categories
  * @desc    Get all categories
  */
-router.get("/", analyticsLogger, getAllAboutCategories);
+router.get("/", getAllAboutCategories);
 
 /**
  * @route   GET /admin/About-categories/:id
@@ -42,7 +40,6 @@ router.get("/", analyticsLogger, getAllAboutCategories);
  */
 router.get(
   "/:id",
-  analyticsLogger,
   validateObjectIdParam,
   getAboutCategoryById
 );
@@ -53,7 +50,6 @@ router.get(
  */
 router.put(
   "/:id",
-  analyticsLogger,
   validateObjectIdParam,
   validateUpdateAboutCategory,
   updateAboutCategory
@@ -65,7 +61,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  analyticsLogger,
   validateObjectIdParam,
   deleteAboutCategory
 );

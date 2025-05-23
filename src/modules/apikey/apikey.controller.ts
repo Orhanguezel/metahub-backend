@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import { isValidObjectId } from "mongoose";
 import crypto from "crypto";
-import { Apikey } from "./apikey.models";
+import { Apikey } from "@/modules/apikey";
 
 // ➕ Create API Key
 export const createApikey = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {

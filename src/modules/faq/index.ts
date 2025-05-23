@@ -5,7 +5,7 @@ import adminRoutes from "./admin.routes";
 import publicRoutes from "./public.routes";
 
 // Model & Interface
-import FAQ, { IFAQ } from "./models";
+import {FAQ} from "./faq.models";
 
 // Controller export
 import * as adminController from "./admin.controller";
@@ -24,5 +24,5 @@ router.use("/", publicRoutes);
 
 
 
-export { FAQ, IFAQ, adminController, publicController, validation };
+export { FAQ, adminController, publicController, validation };
 export default router;

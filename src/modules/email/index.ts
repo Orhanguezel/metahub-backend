@@ -1,6 +1,6 @@
 import express from "express";
 import routes from "./email.routes";
-import MailMessage from "./email.models";
+import {MailMessage} from "./email.models";
 
 const router = express.Router();
 router.use("/", routes);

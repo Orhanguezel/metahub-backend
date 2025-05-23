@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Gallery } from "../gallery";
+import { Gallery } from "@/modules/gallery";
 import { isValidObjectId } from "@/core/utils/validation";
 
 // ✅ Get published gallery items

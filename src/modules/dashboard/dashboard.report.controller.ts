@@ -1,9 +1,11 @@
+// src/modules/dashboard/dashboard.report.controller.ts
+
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { User } from "@/modules/users";
-import { Order } from "@/modules/order";
+import { User } from "@/modules/users/users.models";
+import { Order } from "@/modules/order/order.models";
 
-// ✅ Get Top 5 Selling Products
+// 📈 Get Top 5 Selling Products
 export const getTopProducts = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
   const topProducts = await Order.aggregate([
     { $unwind: "$items" },
@@ -41,7 +43,7 @@ export const getTopProducts = asyncHandler(async (_req: Request, res: Response):
   });
 });
 
-// ✅ Get User Role Statistics
+// 👥 Get User Role Statistics
 export const getUserRoleStats = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
   const userRoles = await User.aggregate([
     {

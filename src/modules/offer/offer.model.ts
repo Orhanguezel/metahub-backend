@@ -1,7 +1,7 @@
-import { Schema, model, Types, Document, Model, models } from "mongoose";
+import { Schema, model, Types, Model, models } from "mongoose";
 
 // ✅ Alt Tip: Teklif Ürünleri
-export interface IOfferItem {
+interface IOfferItem {
   product: Types.ObjectId;
   quantity: number;
   unitPrice: number;
@@ -73,5 +73,5 @@ const offerSchema = new Schema<IOffer>(
 const Offer: Model<IOffer> =
   models.Offer || model<IOffer>("Offer", offerSchema);
 
-export default Offer;
-export { Offer }; // named export (standart)
+// ✅ Export
+export { Offer };

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { About, IAbout } from ".";
+import { About } from ".";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
 import path from "path";

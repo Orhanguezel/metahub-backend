@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import upload from "@/core/middleware/uploadMiddleware";
+import {upload} from "@/core/middleware/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 import { checkFileSizeMiddleware } from "@/core/middleware/checkFileSizeMiddleware";
 import { validateUploadGallery, validateGalleryIdParam } from "./gallery.validation";

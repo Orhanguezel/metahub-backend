@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { FAQ } from ".";
+import  {FAQ} from "@/modules/faq";
 import { pinecone } from "@/scripts/faq/pinecone";
 import { askWithOllama } from "@/scripts/faq/askWithOllama";
 

@@ -1,4 +1,5 @@
 import express from "express";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
   registerUser,
   loginUser,
@@ -17,8 +18,8 @@ import {
 
 import { updateUserRole, toggleUserStatus } from "./status.controller";
 
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import upload from "@/core/middleware/uploadMiddleware";
+
+import {upload} from "@/core/middleware/uploadMiddleware";
 import { validateApiKey } from "@/core/middleware/validateApiKey";
 
 // ✅ Validations

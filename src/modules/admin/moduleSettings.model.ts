@@ -40,5 +40,4 @@ const moduleSettingsSchema = new Schema<IModuleSetting>(
 const ModuleSetting: Model<IModuleSetting> =
   models.ModuleSetting || mongoose.model<IModuleSetting>("ModuleSetting", moduleSettingsSchema);
 
-export default ModuleSetting;
 export { ModuleSetting };

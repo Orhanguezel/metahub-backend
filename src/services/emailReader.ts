@@ -4,7 +4,7 @@ import { Readable } from "stream";
 import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
-import MailMessage from "../modules/email/email.models";
+import {MailMessage} from "@/modules/email";
 
 // 🌍 Ortama özel .env dosyasını yükle
 const envProfile = process.env.APP_ENV || "ensotek";

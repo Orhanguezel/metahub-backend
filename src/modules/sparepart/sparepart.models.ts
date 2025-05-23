@@ -72,5 +72,4 @@ sparePartSchema.pre("validate", function (this: ISparePart, next) {
 const SparePart: Model<ISparePart> =
   models.SparePart || model<ISparePart>("SparePart", sparePartSchema);
 
-export default SparePart;
 export { SparePart };

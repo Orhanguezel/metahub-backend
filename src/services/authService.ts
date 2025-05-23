@@ -1,8 +1,8 @@
 // src/services/authService.ts
 import { Response } from "express";
-import { generateToken } from "../core/utils/token";
-import { setTokenCookie, clearTokenCookie } from "../core/utils/cookie";
-import { comparePasswords, hashPassword } from "../core/utils/authUtils";
+import { generateToken } from "@/core/utils/token";
+import { setTokenCookie, clearTokenCookie } from "@/core/utils/cookie";
+import { comparePasswords, hashPassword } from "@/core/utils/authUtils";
 
 export const loginAndSetToken = async (
   res: Response,

@@ -16,51 +16,23 @@ import {
 const router = express.Router();
 
 // 🔐 Tüm dashboard endpointleri admin yetkisi ister
+router.use(authenticate, authorizeRoles("admin"));
 
-router.get("/", authenticate, authorizeRoles("admin"), getDashboardStats);
+// Dashboard ana kartlar/statistik
+router.get("/", getDashboardStats);
 
 // Grafikler
-router.get(
-  "/charts/orders",
-  authenticate,
-  authorizeRoles("admin"),
-  validateChartQuery, // ✅ optional tarih filtresi
-  getMonthlyOrders
-);
-router.get(
-  "/charts/revenue",
-  authenticate,
-  authorizeRoles("admin"),
-  validateChartQuery,
-  getMonthlyRevenue
-);
+router.get("/charts/orders", validateChartQuery, getMonthlyOrders);
+router.get("/charts/revenue", validateChartQuery, getMonthlyRevenue);
 
 // Raporlar
-router.get(
-  "/reports/top-products",
-  authenticate,
-  authorizeRoles("admin"),
-  validateReportQuery,
-  getTopProducts
-);
-router.get(
-  "/reports/user-roles",
-  authenticate,
-  authorizeRoles("admin"),
-  validateReportQuery,
-  getUserRoleStats
-);
+router.get("/reports/top-products", validateReportQuery, getTopProducts);
+router.get("/reports/user-roles", validateReportQuery, getUserRoleStats);
 
 // Günlük özet
-router.get("/daily-overview", authenticate, authorizeRoles("admin"), getDailyOverview);
+router.get("/daily-overview", getDailyOverview);
 
 // Analytics logları
-router.get(
-  "/logs",
-  authenticate,
-  authorizeRoles("admin"),
-  validateGetAnalyticsLogs,
-  getAnalyticsLogs
-);
+router.get("/logs", validateGetAnalyticsLogs, getAnalyticsLogs);
 
 export default router;

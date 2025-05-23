@@ -1,6 +1,6 @@
-import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
+import mongoose, { Schema, Types, Model, models } from "mongoose";
 
-export interface IArticlesImage {
+interface IArticlesImage {
   url: string;
   thumbnail: string;
   webp?: string;
@@ -97,7 +97,7 @@ ArticlesSchema.pre("validate", function (this: IArticles, next) {
 const Articles: Model<IArticles> =
   (models.Articles as Model<IArticles>) || mongoose.model<IArticles>("Articles", ArticlesSchema);
 
-export default Articles;
-export { Articles };
+
+export { Articles,ArticlesImageSchema, ArticlesSchema };
 
 

@@ -1,5 +1,5 @@
 // src/modules/users/users.models.ts
-import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
+import mongoose, { Schema, Types, Model, models } from "mongoose";
 import {
   hashPassword,
   isPasswordHashed,
@@ -7,12 +7,12 @@ import {
 } from "@/core/utils/authUtils";
 
 // ✅ Subtypes
-interface Notifications {
+export interface Notifications {
   emailNotifications?: boolean;
   smsNotifications?: boolean;
 }
 
-interface SocialMedia {
+export interface SocialMedia {
   facebook?: string;
   twitter?: string;
   instagram?: string;
@@ -140,5 +140,4 @@ userSchema.methods.isPasswordHashed = function (this: IUser): boolean {
 const User: IUserModel =
   models.User || mongoose.model<IUser, IUserModel>("User", userSchema);
 
-export default User;
 export { User };

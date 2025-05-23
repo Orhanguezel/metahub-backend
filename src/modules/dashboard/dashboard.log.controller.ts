@@ -1,6 +1,8 @@
+// src/modules/dashboard/dashboard.log.controller.ts
+
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import {AnalyticsEvent} from "@/modules/dashboard";
+import { Analytics } from "@/modules/analytics"; // Model adını kontrol et!
 
 // /api/dashboard/logs
 export const getAnalyticsLogs = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -25,9 +27,12 @@ export const getAnalyticsLogs = asyncHandler(async (req: Request, res: Response)
     if (endDate) filter.timestamp.$lte = new Date(endDate as string);
   }
 
-  const logs = await AnalyticsEvent.find(filter)
+  // Parse limit as integer and set max limit (ör: 1000)
+  const parsedLimit = Math.min(parseInt(limit as string, 10) || 100, 1000);
+
+  const logs = await Analytics.find(filter)
     .sort({ timestamp: -1 })
-    .limit(parseInt(limit as string, 10));
+    .limit(parsedLimit);
 
   res.status(200).json({
     success: true,

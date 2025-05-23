@@ -1,8 +1,8 @@
-import { Schema, model, Types, Document, Model, models } from "mongoose";
-import { IProduct } from "../product";
+import { Schema, model, Types, Model, models } from "mongoose";
+import { IProduct } from "@/modules/product/product.models";
 
 // 🛒 Cart Item Interface
-interface ICartItem {
+export interface ICartItem {
   product: Types.ObjectId | IProduct;
   quantity: number;
   priceAtAddition: number;
@@ -10,7 +10,7 @@ interface ICartItem {
 }
 
 // 🛒 Cart Interface
-interface ICart  {
+export interface ICart  {
   user: Types.ObjectId;
   items: ICartItem[];
   totalPrice: number;
@@ -59,5 +59,4 @@ const cartSchema = new Schema<ICart>(
 const Cart: Model<ICart> = models.Cart || model<ICart>("Cart", cartSchema);
 
 // ✅ Guard + Model Type (This module has been updated and is now standardized)
-export { Cart, ICart, ICartItem };
-export default Cart;
+export { Cart };

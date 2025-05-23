@@ -1,6 +1,6 @@
 import express from "express";
 import routes from "./offer.routes";
-import Offer from "./offer.model";
+import {Offer} from "./offer.model";
 import * as offerController from "./offer.controller";
 
 const router = express.Router();

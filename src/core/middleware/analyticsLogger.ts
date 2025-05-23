@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import AnalyticsEvent from "@/modules/dashboard/analyticsEvent.models";
+import {Analytics} from "@/modules/analytics/analytics.models"; // Adjust the import path as necessary
 
 export const analyticsLogger = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -22,7 +22,7 @@ export const analyticsLogger = async (req: Request, res: Response, next: NextFun
     // Collect filenames if any
     const uploadedFiles = files.map((file) => file.filename);
 
-    await AnalyticsEvent.create({
+    await Analytics.create({
       userId: (req as any).user?._id || null,
       path: req.originalUrl,
       method: req.method,

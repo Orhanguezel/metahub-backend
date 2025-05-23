@@ -1,6 +1,6 @@
-import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
+import mongoose, { Schema, Types, Model, models } from "mongoose";
 
-export interface IBlogImage {
+interface IBlogImage {
   url: string;
   thumbnail: string;
   webp?: string;
@@ -97,7 +97,6 @@ BlogSchema.pre("validate", function (this: IBlog, next) {
 const Blog: Model<IBlog> =
   (models.Blog as Model<IBlog>) || mongoose.model<IBlog>("Blog", BlogSchema);
 
-export default Blog;
-export { Blog };
+export { Blog};
 
 

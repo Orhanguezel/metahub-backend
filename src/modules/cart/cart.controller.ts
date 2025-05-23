@@ -1,8 +1,10 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response, NextFunction } from "express";
 import { Types } from "mongoose";
-import { Cart, ICartItem } from ".";
-import { Product, IProduct } from "../product";
+import { Cart } from "@/modules/cart";
+import { ICartItem } from "@/modules/cart/cart.models";
+import { Product} from "@/modules/product";
+import { IProduct } from "@/modules/product/product.models";
 
 // Helper to recalculate total
 const recalculateTotal = (items: ICartItem[]): number =>

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import Review from "./review.model";
+import {Review} from "@/modules/review";
 import { Types } from "mongoose";
 
 // ✅ Tüm yorumları getir (Admin)

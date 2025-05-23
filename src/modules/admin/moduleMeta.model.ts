@@ -6,7 +6,7 @@ interface TranslatedLabel {
   de: string;
 }
 
-export interface IRouteMeta {
+interface IRouteMeta {
   method: string;
   path: string;
   auth?: boolean;
@@ -14,7 +14,7 @@ export interface IRouteMeta {
   body?: any;
 }
 
-export interface IModuleMeta {
+interface IModuleMeta {
   name: string;
   label: TranslatedLabel;
   icon: string;
@@ -81,5 +81,4 @@ const moduleMetaSchema = new Schema<IModuleMeta>(
 const ModuleMeta: Model<IModuleMeta> =
   models.ModuleMeta || mongoose.model<IModuleMeta>("ModuleMeta", moduleMetaSchema);
 
-export default ModuleMeta;
 export { ModuleMeta };

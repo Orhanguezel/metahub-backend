@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { News, INews } from ".";
-import { Comment } from "@/modules/comment";
+import { News } from "@/modules/news";
+import { INews } from "@/modules/news/news.models";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
 import path from "path";

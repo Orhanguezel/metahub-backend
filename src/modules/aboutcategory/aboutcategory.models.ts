@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, models, Document, Model } from "mongoose";
+import mongoose, { Schema, model, models, Model } from "mongoose";
 
 export interface IAboutCategory  {
   name: {
@@ -55,5 +55,4 @@ AboutCategorySchema.pre("validate", function (next) {
 const AboutCategory: Model<IAboutCategory> =
   models.AboutCategory || model<IAboutCategory>("AboutCategory", AboutCategorySchema);
 
-export default AboutCategory;
 export { AboutCategory };

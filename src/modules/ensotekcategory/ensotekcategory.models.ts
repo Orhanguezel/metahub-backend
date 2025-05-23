@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
+import mongoose, { Schema, Types, Model, models } from "mongoose";
 
 export interface IEnsotekCategory  {
   name: {
@@ -51,6 +51,5 @@ EnsotekCategorySchema.pre("validate", function (next) {
 const EnsotekCategory: Model<IEnsotekCategory>=
 (models.EnsotekCategory as Model<IEnsotekCategory>) || mongoose.model<IEnsotekCategory>("EnsotekCategory", EnsotekCategorySchema);
 
-export default EnsotekCategory;
 export { EnsotekCategory };
 

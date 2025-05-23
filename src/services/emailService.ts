@@ -1,4 +1,4 @@
-import transporter from "../core/config/emailConfig";
+import {transporter} from "@/core/config/emailConfig";
 
 interface EmailOptions {
   to: string;

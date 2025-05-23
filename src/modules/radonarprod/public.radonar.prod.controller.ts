@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { RadonarProd } from ".";
+import { RadonarProd } from "@/modules/radonarprod";
 import { isValidObjectId } from "@/core/utils/validation";
 
 // ✅ Get All Published Products (Public)
