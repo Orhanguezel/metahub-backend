@@ -4,7 +4,7 @@ import { Readable } from "stream";
 import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
-import {MailMessage} from "@/modules/email";
+import { MailMessage } from "@/modules/email";
 
 // 🌍 Ortama özel .env dosyasını yükle
 const envProfile = process.env.APP_ENV || "ensotek";
@@ -87,8 +87,16 @@ export const readInboxEmails = (): void => {
               try {
                 await MailMessage.create({
                   from: parsed.from?.text || "Unknown Sender",
-                  subject: parsed.subject || "(No Subject)",
-                  body: parsed.text || parsed.html || "(No Content)",
+                  subject: {
+                    de: parsed.subject || "(No Subject)",
+                    en: parsed.subject || "(No Subject)",
+                    tr: parsed.subject || "(No Subject)",
+                  },
+                  body: {
+                    de: parsed.text || parsed.html || "(No Content)",
+                    en: parsed.text || parsed.html || "(No Content)",
+                    tr: parsed.text || parsed.html || "(No Content)",
+                  },
                   date: parsed.date || new Date(),
                   isRead: false,
                 });

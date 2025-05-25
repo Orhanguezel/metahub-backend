@@ -1,13 +1,30 @@
-// src/modules/setting/setting.models.ts
-
 import { Schema, model, models, Model } from "mongoose";
 
-// LOGO setting değeri için yardımcı tip
-export type LogoSettingValue = { light?: string; dark?: string };
+// Logo için özel value tipi
+export interface ILogoSettingValue {
+  light?: {
+    url: string;
+    publicId?: string;      // Cloudinary dosya silme için
+    thumbnail?: string;     // (Varsa) Thumbnail adresi
+    webp?: string;          // (Varsa) Webp adresi
+  };
+  dark?: {
+    url: string;
+    publicId?: string;
+    thumbnail?: string;
+    webp?: string;
+  };
+}
 
+// Diğer setting türleriyle birlikte logo tipi
 export interface ISetting {
   key: string;
-  value: string | string[] | { tr: string; en: string; de: string } | Record<string, any>;
+  value:
+    | string
+    | string[]
+    | { tr: string; en: string; de: string }
+    | Record<string, any>
+    | ILogoSettingValue;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -35,8 +52,7 @@ const settingSchema = new Schema<ISetting>(
   { timestamps: true }
 );
 
-// ✅ Tip garantili + guardlı model
+// Model guard
 const Setting: Model<ISetting> = models.Setting || model<ISetting>("Setting", settingSchema);
 
 export { Setting };
-
