@@ -1,11 +1,171 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Setting } from "@/modules/setting";
+import { Setting, ILogoSettingValue } from "@/modules/setting";
+import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 import path from "path";
+import { getImagePath } from "@/core/utils/uploadUtils";
 
-// ✅ LOGO TYPE (navbar_logos, footer_logos için ortak yapı)
-type LogoSettingValue = { light?: string; dark?: string };
+const ENV = process.env.APP_ENV || "ensotek";
+const FOLDER_KEY = "setting";
+const FOLDER = "setting-images";
+
+// 🔗 Eski logo dosyalarını hem localden hem Cloudinary'den siler
+async function cleanupLogoFiles(logoObj?: ILogoSettingValue) {
+  for (const mode of ["light", "dark"] as const) {
+    const logo = logoObj?.[mode];
+    if (!logo) continue;
+
+    // Local dosya ise
+    if (logo.url && logo.url.startsWith("uploads")) {
+      const absPath = path.join(process.cwd(), logo.url);
+      if (fs.existsSync(absPath)) {
+        fs.unlinkSync(absPath);
+      }
+    }
+    // Cloudinary ise
+    if (logo.publicId) {
+      try {
+        await cloudinary.uploader.destroy(logo.publicId);
+      } catch (err) {
+        console.error(`[Cloudinary Delete] ${logo.publicId}:`, err);
+      }
+    }
+  }
+}
+
+// 🎯 Upload (POST): /setting/upload/:key
+export const upsertSettingImage = asyncHandler(async (req: Request, res: Response) => {
+  const { key } = req.params;
+  if (!key) throw new Error("Key param is required.");
+
+  // Multer field'ları: lightFile/darkFile şeklinde (cloudinary ise .path, .filename yok!)
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+  const light = files?.lightFile?.[0];
+  const dark = files?.darkFile?.[0];
+
+  if (!light && !dark) throw new Error("At least one of lightFile or darkFile is required.");
+
+  let setting = await Setting.findOne({ key });
+
+  // 🔴 Önce eski dosyaları temizle!
+  if (setting && setting.value && typeof setting.value === "object") {
+    await cleanupLogoFiles(setting.value as ILogoSettingValue);
+  }
+
+  // Yeni logoları kaydet
+  const newLogo: ILogoSettingValue = {};
+
+  if (light) {
+    newLogo.light = {
+      url: getImagePath(light), // Cloudinary ise path, local ise dosya yolu
+      publicId: (light as any).public_id || undefined,
+      thumbnail: undefined, // İstersen burada otomatik üretebilirsin
+      webp: undefined,      // Aynı şekilde
+    };
+  }
+
+  if (dark) {
+    newLogo.dark = {
+      url: getImagePath(dark),
+      publicId: (dark as any).public_id || undefined,
+      thumbnail: undefined,
+      webp: undefined,
+    };
+  }
+
+  if (setting) {
+    setting.value = newLogo;
+    await setting.save();
+  } else {
+    setting = await Setting.create({
+      key,
+      value: newLogo,
+      isActive: true,
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Logos uploaded and setting saved successfully.",
+    data: setting,
+  });
+});
+
+// 🎯 Update (PUT): /setting/upload/:key
+export const updateSettingImage = asyncHandler(async (req: Request, res: Response) => {
+  const { key } = req.params;
+  if (!key) throw new Error("Key param is required.");
+
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+  const light = files?.lightFile?.[0];
+  const dark = files?.darkFile?.[0];
+
+  if (!light && !dark) throw new Error("At least one of lightFile or darkFile is required.");
+
+  const setting = await Setting.findOne({ key });
+  if (!setting) throw new Error("Setting not found for the provided key.");
+
+  // 🔴 Eski dosyaları temizle (sadece değişenler için)
+  if (setting.value && typeof setting.value === "object") {
+    const val = setting.value as ILogoSettingValue;
+    if (light && val.light) await cleanupLogoFiles({ light: val.light });
+    if (dark && val.dark) await cleanupLogoFiles({ dark: val.dark });
+  }
+
+  const newLogo: ILogoSettingValue = { ...(setting.value as ILogoSettingValue) };
+
+  if (light) {
+    newLogo.light = {
+      url: getImagePath(light),
+      publicId: (light as any).public_id || undefined,
+      thumbnail: undefined,
+      webp: undefined,
+    };
+  }
+  if (dark) {
+    newLogo.dark = {
+      url: getImagePath(dark),
+      publicId: (dark as any).public_id || undefined,
+      thumbnail: undefined,
+      webp: undefined,
+    };
+  }
+
+  setting.value = newLogo;
+  await setting.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Logos updated successfully.",
+    data: setting,
+  });
+});
+
+// 🎯 Delete Setting by Key
+export const deleteSetting = asyncHandler(async (req: Request, res: Response) => {
+  const { key } = req.params;
+  if (!key) throw new Error("Key parameter is required for deletion.");
+
+  const setting = await Setting.findOneAndDelete({ key });
+
+  if (!setting) {
+    res.status(404);
+    throw new Error("Setting not found with the provided key.");
+  }
+
+  // Eğer value bir logo ise, logoları da sil!
+  if (setting.value && typeof setting.value === "object") {
+    await cleanupLogoFiles(setting.value as ILogoSettingValue);
+  }
+
+  res.status(200).json({
+    success: true,
+    message: `Setting '${key}' has been deleted successfully.`,
+  });
+});
+
+
 
 // 🎯 Create or Update Setting (JSON)
 export const upsertSetting = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -64,153 +224,6 @@ export const upsertSetting = asyncHandler(async (req: Request, res: Response): P
   }
 });
 
-// 🎯 Upload & Create Setting Image (POST)
-export const upsertSettingImage = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { key } = req.params;
-
-  if (!key?.trim()) {
-    res.status(400);
-    throw new Error("Key parameter is required.");
-  }
-
-  const trimmedKey = key.trim();
-  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-
-  const lightFile = files?.lightFile?.[0];
-  const darkFile = files?.darkFile?.[0];
-
-  if (!lightFile && !darkFile) {
-    res.status(400);
-    throw new Error("At least one of lightFile or darkFile is required.");
-  }
-
-  // Eski kayıt varsa, eski dosyayı sil
-  let setting = await Setting.findOne({ key: trimmedKey });
-  let oldFiles: string[] = [];
-
-  // 💡 Sadece object ise eski dosyaları ekle
-  if (
-    setting &&
-    setting.value &&
-    typeof setting.value === "object" &&
-    !Array.isArray(setting.value)
-  ) {
-    const val = setting.value as LogoSettingValue;
-    if (lightFile && val.light) oldFiles.push(val.light);
-    if (darkFile && val.dark) oldFiles.push(val.dark);
-  }
-
-  // Sil
-  const env = process.env.APP_ENV || "ensotek";
-  const folder = "setting-images";
-  for (const fileName of oldFiles) {
-    const absPath = path.join("uploads", env, folder, path.basename(fileName));
-    if (fs.existsSync(absPath)) fs.unlinkSync(absPath);
-  }
-
-  // Yeni dosya pathlerini ayarla (sadece filename DB'de tutulur)
-  const toUpdate: LogoSettingValue = {};
-  if (lightFile) toUpdate.light = lightFile.filename;
-  if (darkFile) toUpdate.dark = darkFile.filename;
-
-  if (setting) {
-    // Eğer eski value bir object ise merge et, değilse direkt toUpdate ile değiştir
-    let merged: LogoSettingValue = { ...toUpdate };
-    if (
-      setting.value &&
-      typeof setting.value === "object" &&
-      !Array.isArray(setting.value)
-    ) {
-      merged = { ...(setting.value as LogoSettingValue), ...toUpdate };
-    }
-    setting.value = merged;
-    await setting.save();
-  } else {
-    setting = await Setting.create({
-      key: trimmedKey,
-      value: toUpdate,
-      isActive: true,
-    });
-  }
-
-  res.status(200).json({
-    success: true,
-    message: "Logos uploaded and setting saved successfully.",
-    data: setting,
-  });
-});
-
-
-// 🎯 Update Setting Image (PUT)
-export const updateSettingImage = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { key } = req.params;
-
-  if (!key?.trim()) {
-    res.status(400);
-    throw new Error("Key parameter is required.");
-  }
-
-  const trimmedKey = key.trim();
-  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-
-  const lightFile = files?.lightFile?.[0];
-  const darkFile = files?.darkFile?.[0];
-
-  if (!lightFile && !darkFile) {
-    res.status(400);
-    throw new Error("At least one of lightFile or darkFile is required.");
-  }
-
-  const setting = await Setting.findOne({ key: trimmedKey });
-
-  if (!setting) {
-    res.status(404);
-    throw new Error("Setting not found for the provided key.");
-  }
-
-  // Eski dosyaları sil
-  const oldFilesToDelete: string[] = [];
-
-  if (setting.value && typeof setting.value === "object" && !Array.isArray(setting.value)) {
-    const val = setting.value as LogoSettingValue;
-    if (lightFile && val.light) oldFilesToDelete.push(val.light);
-    if (darkFile && val.dark) oldFilesToDelete.push(val.dark);
-  } else if (typeof setting.value === "string") {
-    oldFilesToDelete.push(setting.value);
-  }
-
-  oldFilesToDelete.forEach((fileName) => {
-    const filePath = path.join(
-      "uploads",
-      process.env.APP_ENV || "ensotek",
-      "setting-images",
-      fileName
-    );
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-  });
-
-  // Yeni değerler object'e dönüştürülüyor
-  let newValues: LogoSettingValue = {};
-
-  if (setting.value && typeof setting.value === "object" && !Array.isArray(setting.value)) {
-    newValues = { ...(setting.value as LogoSettingValue) };
-  }
-
-  if (lightFile) newValues.light = lightFile.filename;
-  if (darkFile) newValues.dark = darkFile.filename;
-
-  setting.value = newValues;
-  await setting.save();
-
-  res.status(200).json({
-    success: true,
-    message: "Logos updated successfully.",
-    data: setting,
-  });
-});
-
 
 
 // 🎯 Get All Settings
@@ -241,52 +254,5 @@ export const getSettingByKey = asyncHandler(async (req: Request, res: Response):
   res.status(200).json({
     success: true,
     data: setting,
-  });
-});
-
-// 🎯 Delete Setting by Key
-export const deleteSetting = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { key } = req.params;
-
-  if (!key?.trim()) {
-    res.status(400);
-    throw new Error("Key parameter is required for deletion.");
-  }
-
-  const setting = await Setting.findOneAndDelete({ key: key.trim() });
-
-  if (!setting) {
-    res.status(404);
-    throw new Error("Setting not found with the provided key.");
-  }
-
-  // 🗑 Dosyalar silinecek (hem string hem object destekli)
-  if (setting.value) {
-    const filePaths: string[] = [];
-
-    if (typeof setting.value === "string") {
-      filePaths.push(setting.value);
-    } else if (typeof setting.value === "object") {
-      Object.values(setting.value).forEach((val) => {
-        if (typeof val === "string") filePaths.push(val);
-      });
-    }
-
-    filePaths.forEach((fileName) => {
-      const filePath = path.join(
-        "uploads",
-        process.env.APP_ENV || "ensotek",
-        "setting-images",
-        fileName
-      );
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-    });
-  }
-
-  res.status(200).json({
-    success: true,
-    message: `Setting '${key}' has been deleted successfully.`,
   });
 });

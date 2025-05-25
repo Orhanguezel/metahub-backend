@@ -17,47 +17,55 @@ import {
 } from "./users.validation";
 
 import { authenticate } from "@/core/middleware/authMiddleware";
-import {upload} from "@/core/middleware/uploadMiddleware";
+import { upload } from "@/core/middleware/uploadMiddleware";
+import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 
 const router = express.Router();
 
-// 🧾 Kullanıcı kendi hesabı
+// 🧾 Profil Bilgisi
 router.get("/me", authenticate, getMyProfile);
+
+// 🔄 Profil Bilgilerini Güncelle
 router.put(
   "/me/update",
   authenticate,
   validateUpdateMyProfile,
   updateMyProfile
 );
+
+// 🔑 Şifre Güncelle
 router.put(
   "/me/password",
   authenticate,
   validateUpdateMyPassword,
   updateMyPassword
 );
+
+// 🔔 Bildirim Ayarlarını Güncelle
 router.patch(
   "/me/notifications",
   authenticate,
   validateUpdateNotificationSettings,
   updateNotificationSettings
 );
+
+// 🌐 Sosyal Medya Linklerini Güncelle
 router.patch(
   "/me/social",
   authenticate,
   validateUpdateSocialLinks,
   updateSocialMediaLinks
 );
+
+// 🗑️ Hesabı Sil
 router.delete("/me/delete", authenticate, deleteMyAccount);
 
-// 📷 Profil fotoğrafı güncelleme
+
 router.put(
   "/me/profile-image",
   authenticate,
-  (req, res, next) => {
-    req.uploadType = "profile";
-    next();
-  },
-  upload.single("profileImage"),
+  uploadTypeWrapper("profile"),   
+  upload.single("profileImage"),  
   updateProfileImage
 );
 

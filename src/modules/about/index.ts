@@ -1,4 +1,4 @@
-// src/modules/About/index.ts
+// src/modules/about/index.ts
 import express from "express";
 import publicRoutes from "./public.about.routes";
 import adminRoutes from "./admin.about.routes";

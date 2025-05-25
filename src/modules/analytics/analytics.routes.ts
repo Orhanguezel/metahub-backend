@@ -1,5 +1,11 @@
 import express from "express";
-import * as analyticsController from "./analytics.controller";
+import {
+  createAnalyticsEvent,
+  getAnalyticsEvents,
+  getAnalyticsCount,
+  getEventTrends,
+  deleteAnalyticsEvents,
+} from "./analytics.controller";
 import {
   validateCreateAnalyticsEvent,
   validateGetAnalyticsEvents,
@@ -10,39 +16,31 @@ import {
 
 const router = express.Router();
 
-// Yeni event kaydı (track)
 router.post(
   "/events",
-  validateCreateAnalyticsEvent,
-  analyticsController.createAnalyticsEvent
+  validateCreateAnalyticsEvent,createAnalyticsEvent
 );
 
-// Event listesi (filtreli/liste)
 router.get(
   "/events",
-  validateGetAnalyticsEvents,
-  analyticsController.getAnalyticsEvents
+  validateGetAnalyticsEvents,getAnalyticsEvents
 );
 
-// Event count (filtreyle say)
 router.get(
   "/count",
-  validateGetAnalyticsCount,
-  analyticsController.getAnalyticsCount
+  validateGetAnalyticsCount,getAnalyticsCount
 );
 
 // Event trends (günlük/aylık breakdown)
 router.get(
   "/trends",
-  validateGetEventTrends,
-  analyticsController.getEventTrends
+  validateGetEventTrends,getEventTrends
 );
 
 // Event silme (temizlik için, opsiyonel)
 router.delete(
   "/events",
-  validateDeleteAnalyticsEvents,
-  analyticsController.deleteAnalyticsEvents
+  validateDeleteAnalyticsEvents,deleteAnalyticsEvents
 );
 
 export default router;

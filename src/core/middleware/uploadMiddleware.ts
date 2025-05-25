@@ -40,7 +40,7 @@ export type UploadFolderKeys = keyof typeof UPLOAD_FOLDERS;
 export const resolveUploadPath = (type: string): string =>
   path.join(BASE_UPLOAD_DIR, CURRENT_PROJECT, type);
 
-// 💥 Fix: ensure folder is a string
+// Klasörleri otomatik oluştur
 Object.values(UPLOAD_FOLDERS).forEach((folder) => {
   const fullPath = resolveUploadPath(String(folder));
   if (!fs.existsSync(fullPath)) {
@@ -60,10 +60,8 @@ const allowedMimeTypes = [
 
 const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
   const fileExtension = path.extname(file.originalname).toLowerCase();
-  console.log("Checking file:", file.originalname, file.mimetype, fileExtension);
-
   if (!allowedMimeTypes.includes(file.mimetype) || !allowedExtensions.includes(fileExtension)) {
-    console.warn(`Unsupported file type or extension: ${file.originalname}`);
+    console.warn(`[UPLOAD] Unsupported file type or extension: ${file.originalname}`);
     return cb(new Error(`Unsupported file type or extension: ${file.originalname}`));
   }
   cb(null, true);
@@ -77,5 +75,4 @@ const upload = multer({
 
 export const serveUploads = express.static(BASE_UPLOAD_DIR);
 export const UPLOAD_BASE_PATH = `${BASE_UPLOAD_DIR}/${envProfile}`;
-export { BASE_URL_VALUE as BASE_URL }; // 💥 renamed to avoid default export conflict
-export {upload};
+export { BASE_URL_VALUE as BASE_URL, upload };

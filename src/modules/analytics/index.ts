@@ -6,10 +6,10 @@ import * as validation from "./analytics.validation";
 
 const router = express.Router();
 
-// 🌍 Analytics Routes (Tüm endpointler burada birleşir)
+
 router.use("/", analyticsRoutes);
 
-// ✅ Exports (standardized)
+
 export {
   Analytics,
   analyticsController,
