@@ -40,7 +40,7 @@ app.use(cors({
 
 (async () => {
   const router = await getRouter();
-  app.use("/api", router);
+  app.use("", router);
 
   await setupSwagger(app);
 
@@ -53,8 +53,10 @@ app.use(cors({
   }
 
   server.listen(Number(port), () => {
-    console.log(`🚀 Server running at http://localhost:${port}`);
-  });
+  const baseUrl = process.env.BASE_URL || `http://localhost:${port}`;
+  console.log(`🚀 Server running at ${baseUrl}`);
+});
+
 
   initializeSocket(server);
 })();
