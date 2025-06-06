@@ -53,7 +53,7 @@ app.use(cors({
   }
 
   server.listen(Number(port), () => {
-  const baseUrl = process.env.BASE_URL || `http://localhost:${port}`;
+  const baseUrl = process.env.BASE_URL;
   console.log(`🚀 Server running at ${baseUrl}`);
 });
 
