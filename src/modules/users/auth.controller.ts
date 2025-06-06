@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { User } from "@/modules/users/users.models";
+import { User,IUserProfileImage } from "@/modules/users/users.models";
 import crypto from "crypto";
 import { passwordResetTemplate } from "@/templates/passwordReset";
 import { sendEmail } from "@/services/emailService";
@@ -20,7 +20,7 @@ import {
 } from "@/core/utils/validation";
 
 
-// ✅ Register
+// ✅ Register (ProfileImage Obje!)
 export const registerUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const {
     name,
@@ -69,8 +69,34 @@ export const registerUser = asyncHandler(async (req: Request, res: Response): Pr
     return;
   }
 
-  // --- User Create ---
-  const profileImage = req.file ? req.file.filename : "profile.png";
+  // --- ProfileImage Obje Formatı ---
+  let profileImageObj: IUserProfileImage = {
+    url: "/defaults/profile.png",
+    thumbnail: "/defaults/profile-thumbnail.png",
+    webp: "/defaults/profile.webp",
+    publicId: "",
+  };
+
+  if (req.file) {
+    // Cloudinary ise:
+    if ((req.file as any).cloudinary === true || (req.file as any).public_id) {
+      profileImageObj = {
+        url: (req.file as any).path || (req.file as any).url,
+        thumbnail: (req.file as any).thumbnail || (req.file as any).url,
+        webp: (req.file as any).webp || "",
+        publicId: (req.file as any).public_id || "",
+      };
+    } else {
+      // Lokal (multer) ise
+      profileImageObj = {
+        url: `/uploads/profile-images/${req.file.filename}`,
+        thumbnail: `/uploads/profile-images/${req.file.filename}`,
+        webp: "",
+        publicId: "",
+      };
+    }
+  }
+
   const hashedPassword = await hashNewPassword(password);
   let user;
   try {
@@ -81,7 +107,7 @@ export const registerUser = asyncHandler(async (req: Request, res: Response): Pr
       role: normalizedRole,
       phone,
       addresses: parsedAddresses,
-      profileImage,
+      profileImage: profileImageObj, // Dikkat!
       bio,
       birthDate,
       socialMedia: parsedSocialMedia,
@@ -115,8 +141,6 @@ export const registerUser = asyncHandler(async (req: Request, res: Response): Pr
       `,
     });
   } catch (err) {
-    // Gerekirse burada rollback (user sil) veya sadece log
-    // await User.findByIdAndDelete(user._id);
     res.status(500).json({
       success: false,
       message: getMessage(req.locale, "Bestätigungs-E-Mail konnte nicht gesendet werden.", "Doğrulama e-postası gönderilemedi.", "Verification email could not be sent."),
@@ -124,7 +148,6 @@ export const registerUser = asyncHandler(async (req: Request, res: Response): Pr
     return;
   }
 
-  // --- Response ---
   res.status(201).json({
     success: true,
     emailVerificationRequired: true,

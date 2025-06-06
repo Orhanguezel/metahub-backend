@@ -1,3 +1,5 @@
+// src/core/ai/askWithOllama.ts
+
 import axios from "axios";
 
 interface AskWithOllamaOptions {
@@ -25,29 +27,35 @@ const langText = {
   },
 };
 
+const OLLAMA_HOST = process.env.OLLAMA_HOST;
+
+if (!OLLAMA_HOST) {
+  throw new Error("❌ OLLAMA_HOST is not defined in environment.");
+}
+
 export const askWithOllama = async ({
   question,
   context = "",
   model = "tinyllama",
   lang = "en",
 }: AskWithOllamaOptions): Promise<string> => {
-  if (!question?.trim()) return "❗ Soru girilmedi.";
+  if (!question?.trim()) return "❗ Question is missing.";
 
   const l = langText[lang] || langText.en;
 
   const prompt = `${l.question}: ${question}\n\n${l.context}:\n${context}\n\n${l.answer}:`;
 
   try {
-    const response = await axios.post("http://localhost:11434/api/generate", {
+    const response = await axios.post(`${OLLAMA_HOST}/api/generate`, {
       model,
       prompt,
       stream: false,
     });
 
     const result = response?.data?.response?.trim();
-    return result || "❌ Cevap alınamadı.";
+    return result || "❌ No response received.";
   } catch (error: any) {
-    console.error("❌ Ollama API Hatası:", error.message);
-    return "❌ Cevap üretme sırasında bir hata oluştu.";
+    console.error("❌ Ollama API error:", error.message);
+    return "❌ An error occurred while generating a response.";
   }
 };

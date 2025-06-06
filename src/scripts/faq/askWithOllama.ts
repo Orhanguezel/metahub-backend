@@ -30,7 +30,7 @@ interface AskWithOllamaOptions {
   model?: string;
 }
 
-const OLLAMA_HOST = process.env.OLLAMA_HOST || "http://localhost:11434";
+const OLLAMA_HOST = process.env.OLLAMA_HOST;
 
 /**
  * Sends multilingual prompt to Ollama and gets response.

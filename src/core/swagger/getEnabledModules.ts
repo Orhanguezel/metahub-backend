@@ -1,29 +1,30 @@
 // src/core/swagger/getEnabledModules.ts
 
 import fs from "fs/promises";
-import path from "path";
-import dotenv from "dotenv";
 import fsSync from "fs";
+import path from "path";
 
-// 🌍 Ortama özel .env dosyasını yükle
-const envProfile = process.env.APP_ENV || "ensotek";
-const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
-
-if (fsSync.existsSync(envPath)) {
-  dotenv.config({ path: envPath });
-  console.log(`✅ Loaded environment: ${envPath}`);
-} else {
-  console.warn(`⚠️ No env file found for profile: ${envPath}`);
-}
-
+/**
+ * Reads enabled modules from environment and validates their meta files.
+ */
 export const getEnabledModules = async (): Promise<string[]> => {
-  const metaConfigsPath = path.resolve(__dirname, "../../meta-configs/", envProfile);
+  const envProfile = process.env.APP_ENV;
+  const enabledModulesRaw = process.env.ENABLED_MODULES;
 
-  const enabledModulesEnv =
-    process.env.ENABLED_MODULES?.split(",").map((m) => m.trim()) || [];
+  if (!envProfile) {
+    throw new Error("❌ APP_ENV is not defined. Cannot resolve meta-config path.");
+  }
 
-  if (enabledModulesEnv.length === 0) {
-    console.warn("⚠️ No modules enabled in the environment. Please set ENABLED_MODULES.");
+  if (!enabledModulesRaw) {
+    console.warn("⚠️ ENABLED_MODULES is not defined in environment.");
+    return [];
+  }
+
+  const enabledModules = enabledModulesRaw.split(",").map((m) => m.trim());
+  const metaConfigsPath = path.resolve(process.cwd(), "src/meta-configs", envProfile);
+
+  if (!fsSync.existsSync(metaConfigsPath)) {
+    console.warn(`⚠️ Meta-config path not found: ${metaConfigsPath}`);
     return [];
   }
 
@@ -33,5 +34,6 @@ export const getEnabledModules = async (): Promise<string[]> => {
     .filter((file) => file.endsWith(".meta.json"))
     .map((file) => file.replace(".meta.json", ""));
 
-  return enabledModulesEnv.filter((mod) => availableModules.includes(mod));
+  return enabledModules.filter((mod) => availableModules.includes(mod));
 };
+

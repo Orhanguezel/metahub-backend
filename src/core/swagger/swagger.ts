@@ -1,18 +1,25 @@
+// src/core/swagger/setupSwagger.ts
+
 import { Express } from "express";
 import swaggerUi from "swagger-ui-express";
 import { generateSwaggerSpecFromMeta } from "./generateSwaggerSpec";
-import path from "path";
-import dotenv from "dotenv";
 
-// 🌍 Ortama özel .env dosyasını yükle
-const envProfile = process.env.APP_ENV || "ensotek";
-dotenv.config({
-  path: path.resolve(process.cwd(), `.env.${envProfile}`),
-});
-
+/**
+ * Initializes Swagger UI with generated specification.
+ */
 export const setupSwagger = (app: Express): void => {
+  const swaggerRoute = process.env.SWAGGER_ROUTE;
+  const brand = process.env.BRAND_NAME;
+
+  if (!swaggerRoute) {
+    throw new Error("❌ SWAGGER_ROUTE is not defined in environment.");
+  }
+
+  if (!brand) {
+    throw new Error("❌ BRAND_NAME is not defined in environment.");
+  }
+
   const swaggerSpec = generateSwaggerSpecFromMeta();
-  const swaggerPath = process.env.SWAGGER_ROUTE || "/api-docs";
-  const brand = process.env.BRAND_NAME || "Ensotek";
-  app.use(swaggerPath, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+  app.use(swaggerRoute, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 };

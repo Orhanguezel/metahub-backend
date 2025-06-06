@@ -6,7 +6,7 @@ interface PasswordResetTemplateParams {
   locale?: "tr" | "en" | "de";
 }
 
-const BRAND_NAME = process.env.BRAND_NAME || "Anastasia Massage";
+const BRAND_NAME = process.env.BRAND_NAME || "metahub";
 const BRAND_TEAM_NAME = process.env.BRAND_TEAM_NAME || `${BRAND_NAME} Team`;
 
 export const passwordResetTemplate = ({

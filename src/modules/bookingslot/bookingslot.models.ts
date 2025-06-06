@@ -1,29 +1,33 @@
-// @/modules/bookingslot/bookingslot.model.ts
+import mongoose, { Schema, Model, models, Document } from "mongoose";
 
-import mongoose, { Schema, Model, models } from "mongoose";
-
-// 📌 Slot Rule: Weekly-based time logic (e.g., every Monday 09:00–23:00)
-interface IBookingSlotRule extends Document {
-  dayOfWeek: number; // 0 = Sunday, 6 = Saturday
-  startTime: string; // e.g. "09:00"
-  endTime: string;   // e.g. "23:00"
-  intervalMinutes: number; // e.g. 60 (appointment duration)
-  breakBetweenAppointments: number; // e.g. 15 (in minutes)
+/**
+ * Slot Rule: Haftalık tek bir genel çalışma kuralı tanımlayabilirsin.
+ * appliesToAll: true ise tüm günlere uygulanır (varsayılan kural).
+ * dayOfWeek: Spesifik gün (0 = Pazar, 6 = Cumartesi). 
+ * İkisi birlikte varsa: dayOfWeek önceliklidir (override mantığı).
+ */
+export interface IBookingSlotRule extends Document {
+  appliesToAll?: boolean;              // true: tüm günler için geçerli (default weekly rule)
+  dayOfWeek?: number;                  // 0 = Sunday, 6 = Saturday (opsiyonel)
+  startTime: string;                   // e.g. "09:00"
+  endTime: string;                     // e.g. "23:00"
+  intervalMinutes: number;             // randevu süresi (örn: 60)
+  breakBetweenAppointments: number;    // aradaki boşluk (örn: 15)
   isActive: boolean;
 }
 
-// 📌 Slot Override: Specific date adjustments
-interface IBookingSlotOverride extends Document {
-  date: string; // ISO date: "2025-06-20"
-  disabledTimes: string[]; // e.g. ["12:00", "13:00"]
-  fullDayOff?: boolean;
+export interface IBookingSlotOverride extends Document {
+  date: string;           // "2025-06-20"
+  disabledTimes: string[];// ["12:00", "13:00"]
+  fullDayOff?: boolean;   // O gün tamamen kapalı mı?
 }
 
-// 🎯 Schema: Slot Rule
+// 🎯 Slot Rule Schema
 const bookingSlotRuleSchema = new Schema<IBookingSlotRule>(
   {
-    dayOfWeek: { type: Number, required: true, min: 0, max: 6 },
-    startTime: { type: String, required: true }, // "HH:mm"
+    appliesToAll: { type: Boolean, default: false },            // Tüm günlere mi?
+    dayOfWeek: { type: Number, min: 0, max: 6, required: false }, // Sadece belirli bir gün için mi?
+    startTime: { type: String, required: true },  // "HH:mm"
     endTime: { type: String, required: true },
     intervalMinutes: { type: Number, required: true, default: 60 },
     breakBetweenAppointments: { type: Number, default: 15 },
@@ -32,17 +36,17 @@ const bookingSlotRuleSchema = new Schema<IBookingSlotRule>(
   { timestamps: true }
 );
 
-// 🎯 Schema: Slot Override
+// 🎯 Slot Override Schema
 const bookingSlotOverrideSchema = new Schema<IBookingSlotOverride>(
   {
-    date: { type: String, required: true }, // ISO date format
-    disabledTimes: [{ type: String }], // e.g. "14:00"
-    fullDayOff: { type: Boolean, default: false },
+    date: { type: String, required: true },      // ISO date
+    disabledTimes: [{ type: String }],           // ["14:00", ...]
+    fullDayOff: { type: Boolean, default: false }
   },
   { timestamps: true }
 );
 
-// 🛡️ Guarded Model Exports
+// 🛡️ Models
 const BookingSlotRule: Model<IBookingSlotRule> =
   models.BookingSlotRule || mongoose.model<IBookingSlotRule>("BookingSlotRule", bookingSlotRuleSchema);
 

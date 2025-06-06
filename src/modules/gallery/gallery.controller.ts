@@ -398,16 +398,6 @@ export const getGalleryStats = asyncHandler(async (_req: Request, res: Response)
   });
 });
 
-// GET /gallery/categories
-export const getGalleryCategories = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
-  const categories = await Gallery.distinct("category");
-
-  res.status(200).json({
-    success: true,
-    message: "Gallery categories fetched successfully.",
-    data: categories,
-  });
-});
 
 // GET /gallery/:id
 export const getGalleryItemById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -429,27 +419,6 @@ export const getGalleryItemById = asyncHandler(async (req: Request, res: Respons
     success: true,
     message: "Gallery item fetched successfully.",
     data: item,
-  });
-});
-
-export const getPublishedGalleryItemsByCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { category } = req.params;
-
-  if (!category) {
-    res.status(400).json({ success: false, message: "Category parameter is required." });
-    return;
-  }
-
-  const items = await Gallery.find({
-    category,
-    isPublished: true,
-    isActive: true,
-  }).sort({ priority: -1, createdAt: -1 });
-
-  res.status(200).json({
-    success: true,
-    message: "Published gallery items by category fetched successfully.",
-    data: items,
   });
 });
 

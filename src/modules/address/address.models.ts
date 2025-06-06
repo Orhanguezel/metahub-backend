@@ -1,17 +1,19 @@
 import mongoose, { Schema, Model, Types } from "mongoose";
 import { onlyLetters as names } from "@/core/utils/regex";
 
-// 📌 TypeScript Interface
-export interface IAddress  {
+
+export interface IAddress {
   userId: Types.ObjectId;
   street: string;
   houseNumber: string;
   city: string;
   zipCode: string;
   country?: string;
+  phone: string;
+  email: string;
   isDefault?: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const addressSchema = new Schema<IAddress>(
@@ -66,6 +68,30 @@ const addressSchema = new Schema<IAddress>(
       trim: true,
       default: "Germany",
     },
+    phone: {
+      type: String,
+      required: true,
+      trim: true,
+      maxLength: 20,
+      validate: {
+        validator: function (val: string) {
+          return /^[0-9+\s()-]+$/.test(val); 
+        },
+        message: "Phone must be a valid phone number",
+      },
+    },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      validate: {
+        validator: function (val: string) {
+          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+        },
+        message: "Email must be a valid email address",
+      },
+    },
     isDefault: {
       type: Boolean,
       default: false,
@@ -76,8 +102,8 @@ const addressSchema = new Schema<IAddress>(
   }
 );
 
-// ✅ Guardlı model tanımı
+// 📌 Model Guard
 const Address: Model<IAddress> =
   mongoose.models.Address || mongoose.model<IAddress>("Address", addressSchema);
 
-export { Address};
+export { Address };

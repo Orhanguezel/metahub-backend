@@ -1,0 +1,81 @@
+{
+  "name": "task",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/admin",
+      "auth": true,
+      "summary": "POST /admin",
+      "validationName": "\"/admin\"",
+      "controllerName": "getAllTasks"
+    },
+    {
+      "method": "GET",
+      "path": "/admin",
+      "auth": true,
+      "summary": "GET /admin",
+      "validationName": "\"/admin\"",
+      "controllerName": "getAllTasks"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/:id",
+      "auth": true,
+      "summary": "GET /admin/:id",
+      "validationName": "\"/me\"",
+      "controllerName": "authenticate"
+    },
+    {
+      "method": "PUT",
+      "path": "/admin/:id",
+      "auth": true,
+      "summary": "PUT /admin/:id",
+      "validationName": "\"/me\"",
+      "controllerName": "authenticate"
+    },
+    {
+      "method": "DELETE",
+      "path": "/admin/:id",
+      "auth": true,
+      "summary": "DELETE /admin/:id",
+      "validationName": "\"/me\"",
+      "controllerName": "authenticate"
+    },
+    {
+      "method": "GET",
+      "path": "/me",
+      "auth": true,
+      "summary": "GET /me",
+      "validationName": "\"/me\"",
+      "controllerName": "getMyTasks"
+    },
+    {
+      "method": "PATCH",
+      "path": "/me/:id",
+      "auth": true,
+      "summary": "PATCH /me/:id"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013"
+  },
+  "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
+  "lastUpdatedAt": "2025-06-02T07:22:03.990Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
+      "date": "2025-06-02T07:22:03.990Z",
+      "note": "Meta auto-generated"
+    }
+  ]
+}

@@ -1,23 +1,24 @@
-import { config } from "dotenv";
+import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
 
-const envProfile = process.env.APP_ENV;
+const envProfile = process.env.APP_ENV || "default";
+const envFile = `.env.${envProfile}`;
+const envPath = path.resolve(process.cwd(), envFile);
 
-if (envProfile) {
-  const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
-
-  if (!fs.existsSync(envPath)) {
-    console.warn(`⚠️ Environment file "${envPath}" not found. Using default .env`);
-    config(); // fallback: .env dosyası yükle
-  } else {
-    config({ path: envPath });
-    console.log(`✅ Loaded environment: ${envPath}`);
-  }
-
-  process.env.ACTIVE_META_PROFILE = envProfile;
+if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+  console.log(`✅ Loaded environment from ${envFile}`);
 } else {
-  // Hiç profile yoksa doğrudan .env yükle
-  console.log("✅ No APP_ENV set. Using default .env file.");
-  config();
+  console.warn(`⚠️ ${envFile} not found. Trying fallback .env...`);
+  const fallbackPath = path.resolve(process.cwd(), ".env");
+  if (fs.existsSync(fallbackPath)) {
+    dotenv.config({ path: fallbackPath });
+    console.log("✅ Loaded fallback .env");
+  } else {
+    console.warn("⚠️ No .env file found. Environment variables may be undefined.");
+  }
 }
+
+process.env.ACTIVE_META_PROFILE = envProfile;
+console.log(`🌐 Active profile: ${envProfile}`);

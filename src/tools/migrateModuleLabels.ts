@@ -1,9 +1,24 @@
 import mongoose from "mongoose";
+import fs from "fs";
+import path from "path";
 import dotenv from "dotenv";
-import {ModuleSetting} from "@/modules/admin";
-import {connectDB} from "@/core/config/connect";
+import { connectDB } from "@/core/config/connect";
+import { ModuleSetting } from "@/modules/admin";
 
-dotenv.config({ path: `.env.ensotek` });
+
+const envProfile = process.env.APP_ENV;
+if (!envProfile) {
+  throw new Error("❌ APP_ENV is not defined. Please set it before running this script.");
+}
+
+const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
+
+if (!fs.existsSync(envPath)) {
+  throw new Error(`❌ Environment file not found: ${envPath}`);
+}
+
+dotenv.config({ path: envPath });
+console.log(`🌱 Loaded env from: ${envPath}`);
 
 const runMigration = async () => {
   await connectDB();

@@ -1,0 +1,63 @@
+{
+  "name": "invoice",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"admin\")",
+      "controllerName": "getAllInvoices",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /"
+    },
+    {
+      "method": "GET",
+      "path": "/user",
+      "auth": true,
+      "summary": "GET /user"
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id"
+    },
+    {
+      "method": "GET",
+      "path": "/:id/pdf",
+      "auth": true,
+      "summary": "GET /:id/pdf"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013"
+  },
+  "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
+  "lastUpdatedAt": "2025-06-04T22:17:09.627Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
+      "date": "2025-06-04T22:17:09.627Z",
+      "note": "Meta auto-generated"
+    }
+  ]
+}

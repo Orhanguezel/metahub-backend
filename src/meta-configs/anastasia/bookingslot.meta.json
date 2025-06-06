@@ -1,0 +1,110 @@
+{
+  "name": "bookingslot",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/rule",
+      "auth": true,
+      "summary": "GET /rule",
+      "validationName": "\"/rule\"",
+      "controllerName": "getAllSlotRules",
+      "pathPrefix": "admin",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/override",
+      "auth": true,
+      "summary": "GET /override",
+      "validationName": "\"/override\"",
+      "controllerName": "getAllSlotOverrides);\n\n// 🎯 Slot Rule - create/delete (weekly recurrence",
+      "pathPrefix": "admin",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/rule",
+      "auth": true,
+      "summary": "POST /rule",
+      "validationName": "\"/rule/:id\"",
+      "controllerName": "validateObjectId(\"id\"",
+      "pathPrefix": "admin",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/rule/:id",
+      "auth": true,
+      "summary": "DELETE /rule/:id",
+      "validationName": "\"/rule/:id\"",
+      "controllerName": "validateObjectId(\"id\"",
+      "pathPrefix": "admin"
+    },
+    {
+      "method": "POST",
+      "path": "/override",
+      "auth": true,
+      "summary": "POST /override",
+      "validationName": "\"/override/:id\"",
+      "controllerName": "validateObjectId(\"id\"",
+      "pathPrefix": "admin",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/override/:id",
+      "auth": true,
+      "summary": "DELETE /override/:id",
+      "validationName": "\"/override/:id\"",
+      "controllerName": "validateObjectId(\"id\"",
+      "pathPrefix": "admin"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": false,
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getSlotsByDate",
+      "pathPrefix": "public",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013"
+  },
+  "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
+  "lastUpdatedAt": "2025-06-04T22:17:10.375Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
+      "date": "2025-06-04T22:17:10.375Z",
+      "note": "Meta auto-generated"
+    }
+  ]
+}

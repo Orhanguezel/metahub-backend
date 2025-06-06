@@ -1,34 +1,22 @@
 import mongoose from "mongoose";
-import dotenv from "dotenv";
-import path from "path";
-import fs from "fs";
 
-// Aktif profil belirle (.env.admin gibi)
-const envProfile = process.env.APP_ENV || "ensotek";
-const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
-
-// Eğer config daha önce yüklenmediyse burada yükle
-if (!fs.existsSync(envPath)) {
-  console.warn(`⚠️ .env.${envProfile} not found, using defaults`);
-} else {
-  dotenv.config({ path: envPath });
-  console.log(`✅ Loaded DB environment from ${envPath}`);
-}
-
+/**
+ * Connects to MongoDB using MONGO_URI from .env
+ */
 const connectDB = async (): Promise<void> => {
-  const uri = process.env.MONGO_URI as string;
+  const uri = process.env.MONGO_URI;
 
   if (!uri) {
-    console.error("❌ MONGO_URI is not defined in the current environment file.");
+    console.error("❌ MONGO_URI not defined.");
     return;
   }
 
   try {
     await mongoose.connect(uri);
-    console.log("✅ Connected to MongoDB!");
+    console.log("✅ MongoDB connected.");
   } catch (error) {
-    console.error("❌ Error connecting to MongoDB:", error);
+    console.error("❌ MongoDB connection error:", error);
   }
 };
 
-export {connectDB};
+export { connectDB };

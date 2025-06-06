@@ -3,19 +3,22 @@ import { createOrder, getOrderById, updateShippingAddress } from "./order.contro
 import { authenticate } from "@/core/middleware/authMiddleware";
 import { createOrderValidator, updateShippingAddressValidator } from "./order.validation";
 import { validateRequest } from "@/core/middleware/validateRequest";
-import { validateApiKey } from "@/core/middleware/validateApiKey";
 
 const router = express.Router();
 
-// ✅ Sipariş oluştur
-router.post("/", authenticate, createOrderValidator, validateRequest, validateApiKey,createOrder);
 
-// ✅ Kullanıcının siparişini getir
+router.post("/", authenticate, createOrderValidator, validateRequest, createOrder);
+
+
 router.get("/:id", authenticate, getOrderById);
 
-// ✅ Kullanıcının sipariş adresini güncelle
-router.put("/:id/address", authenticate, updateShippingAddressValidator, validateRequest, validateApiKey,updateShippingAddress);
 
-  
+router.put(
+  "/:id/address",
+  authenticate,
+  updateShippingAddressValidator,
+  validateRequest,
+  updateShippingAddress
+);
 
 export default router;

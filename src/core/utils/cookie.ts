@@ -1,23 +1,31 @@
+// src/core/utils/cookie.ts
 import { Response } from "express";
 
-const cookieDomain =
-  process.env.NODE_ENV === "production" ? ".ensotek.de" : undefined;
+const isProduction = process.env.NODE_ENV === "production";
 
-  export const setTokenCookie = (res: Response, token: string): void => {
-    res.cookie("accessToken", token, {
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV === "production" ? "lax" : "lax",
-      secure: process.env.NODE_ENV === "production",    
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 gün
-    });
-  };
-  
+const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN;
+const COOKIE_NAME = process.env.COOKIE_NAME || "accessToken";
+const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+if (isProduction && !COOKIE_DOMAIN) {
+  throw new Error("❌ COOKIE_DOMAIN must be defined in production.");
+}
+
+export const setTokenCookie = (res: Response, token: string): void => {
+  res.cookie(COOKIE_NAME, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: isProduction,
+    domain: isProduction ? COOKIE_DOMAIN : undefined,
+    maxAge: COOKIE_MAX_AGE,
+  });
+};
 
 export const clearTokenCookie = (res: Response): void => {
-  res.clearCookie("accessToken", {
+  res.clearCookie(COOKIE_NAME, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    domain: cookieDomain,
+    secure: isProduction,
+    domain: isProduction ? COOKIE_DOMAIN : undefined,
   });
 };

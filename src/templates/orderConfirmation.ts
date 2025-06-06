@@ -7,14 +7,14 @@ interface OrderConfirmationParams {
   locale?: "de" | "tr" | "en";
 }
 
-const BRAND_NAME = process.env.BRAND_NAME || "ensotek";
+const BRAND_NAME = process.env.BRAND_NAME || "metahub";
 const BRAND_TEAM = process.env.BRAND_TEAM_NAME || `${BRAND_NAME} Team`;
 
 export const orderConfirmationTemplate = ({
   name,
   itemsList,
   totalPrice,
-  locale = "de",
+  locale = "en",
 }: OrderConfirmationParams): string => {
   const translations = {
     de: {

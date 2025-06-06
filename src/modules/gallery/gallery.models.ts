@@ -1,13 +1,5 @@
-import { Schema, model, Model, models } from "mongoose";
-
-// ✅ Category enum (daha merkezi ve temiz yönetim)
-enum GalleryCategory {
-  Hero = "hero",
-  About = "about",
-  Products = "products",
-  Testimonials = "testimonials",
-  Team = "team"
-}
+import { Schema, model, Model, models, Types } from "mongoose";
+import { GalleryCategory } from "@/modules/gallerycategory";
 
 // ✅ SubItem interface
 interface IGallerySubItem {
@@ -28,9 +20,9 @@ interface IGallerySubItem {
 }
 
 // ✅ Main Item interface
-export interface IGalleryItem  {
+export interface IGalleryItem {
   items: IGallerySubItem[];
-  category: GalleryCategory;
+  category: Types.ObjectId;
   type: "image" | "video";
   isPublished: boolean;
   isActive: boolean;
@@ -65,8 +57,8 @@ const gallerySchema = new Schema<IGalleryItem>(
   {
     items: [gallerySubItemSchema],
     category: {
-      type: String,
-      enum: Object.values(GalleryCategory), 
+      type: Schema.Types.ObjectId,
+      ref: "GalleryCategory",
       required: true,
     },
     type: {
@@ -81,12 +73,11 @@ const gallerySchema = new Schema<IGalleryItem>(
   { timestamps: true }
 );
 
-
 gallerySchema.index({ category: 1, isPublished: 1, isActive: 1 });
 
-// ✅ Guarded model tanımı
+// ✅ Model
 const Gallery: Model<IGalleryItem> =
   models.Gallery || model<IGalleryItem>("Gallery", gallerySchema);
 
 // ✅ Export
-export { Gallery, GalleryCategory };
+export { Gallery };

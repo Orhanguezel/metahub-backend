@@ -1,5 +1,6 @@
 import { body } from "express-validator";
 
+// Sipariş oluşturma validasyonu
 export const createOrderValidator = [
   body("items")
     .isArray({ min: 1 })
@@ -36,12 +37,14 @@ export const createOrderValidator = [
     .withMessage("Total price must be a positive number."),
 ];
 
+// Sipariş durumu güncelleme validasyonu
 export const updateOrderStatusValidator = [
   body("status")
     .isIn(["pending", "preparing", "shipped", "completed", "cancelled"])
     .withMessage("Invalid order status."),
 ];
 
+// Sipariş adresi güncelleme validasyonu
 export const updateShippingAddressValidator = [
   body("shippingAddress.name")
     .optional()

@@ -1,49 +1,31 @@
-import { Schema, Model, Types, models, model } from "mongoose";
+import { Schema, model, models, Types, Model } from "mongoose";
+import type { IPayment } from "./types";
 
-export type PaymentMethod = "cash_on_delivery" | "credit_card" | "paypal";
-export type PaymentStatus = "pending" | "paid" | "failed";
-
-export interface IPayment  {
-  order: Types.ObjectId;
-  amount: number;
-  method: PaymentMethod;
-  status: PaymentStatus;
-  transactionId?: string;
-  paidAt?: Date;
-  language: "tr" | "en" | "de";
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const paymentSchema = new Schema<IPayment>(
-  {
-    order: { type: Schema.Types.ObjectId, ref: "Order", required: true },
-    amount: { type: Number, required: true, min: 0 },
-    method: {
-      type: String,
-      enum: ["cash_on_delivery", "credit_card", "paypal"],
-      default: "cash_on_delivery",
-    },
-    status: {
-      type: String,
-      enum: ["pending", "paid", "failed"],
-      default: "pending",
-    },
-    transactionId: { type: String, trim: true },
-    paidAt: { type: Date },
-    language: {
-      type: String,
-      enum: ["tr", "en", "de"],
-      default: "en",
-    },
-    isActive: { type: Boolean, default: true },
+const paymentSchema = new Schema<IPayment>({
+  order: { type: Schema.Types.ObjectId, ref: "Order", required: true },
+  amount: { type: Number, required: true, min: 0 },
+  method: {
+    type: String,
+    enum: ["cash_on_delivery", "credit_card", "paypal"],
+    required: true,
   },
-  { timestamps: true }
-);
+  status: {
+    type: String,
+    enum: ["pending", "paid", "failed", "refunded", "cancelled"],
+    default: "pending",
+    required: true,
+  },
+  transactionId: { type: String, trim: true },
+  paidAt: { type: Date },
+  currency: { type: String, default: "EUR", required: true },
+  details: { type: Schema.Types.Mixed }, // e.g. stripe/paypal JSON response
+  language: {
+    type: String,
+    enum: ["tr", "en", "de"],
+    default: "en",
+  },
+  isActive: { type: Boolean, default: true },
+}, { timestamps: true });
 
-// ✅ Guard + Model
-const Payment: Model<IPayment> =
+export const Payment: Model<IPayment> =
   models.Payment || model<IPayment>("Payment", paymentSchema);
-
-export { Payment };

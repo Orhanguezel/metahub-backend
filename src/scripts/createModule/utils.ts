@@ -1,3 +1,5 @@
+// src/tools/utils/getPaths.ts
+
 import path from "path";
 
 export function capitalize(str: string): string {
@@ -5,8 +7,14 @@ export function capitalize(str: string): string {
 }
 
 export function getPaths(moduleName: string) {
-  const modulesPath = path.resolve(__dirname, "../../modules");
-  const metaPath = path.resolve(__dirname, "../../meta-configs/ensotek", `${moduleName}.meta.json`);
+  const metaConfigPath = process.env.META_CONFIG_PATH;
+
+  if (!metaConfigPath) {
+    throw new Error("❌ META_CONFIG_PATH is not defined in environment.");
+  }
+
+  const modulesPath = path.resolve(process.cwd(), "src/modules");
+  const metaPath = path.resolve(process.cwd(), metaConfigPath, `${moduleName}.meta.json`);
   const modulePath = path.join(modulesPath, moduleName);
 
   return { modulesPath, metaPath, modulePath };

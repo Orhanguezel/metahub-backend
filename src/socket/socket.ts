@@ -2,8 +2,7 @@ import { Server as HttpServer } from "http";
 import { Server as SocketIOServer, Socket } from "socket.io";
 import { parse } from "cookie";
 import jwt from "jsonwebtoken";
-import {ChatMessage,ChatSession} from "@/modules/chat";
-import "dotenv/config";
+import { ChatMessage, ChatSession } from "@/modules/chat";
 import { v4 as uuidv4 } from "uuid";
 
 interface ChatMessagePayload {
@@ -19,9 +18,16 @@ interface IUserToken {
 }
 
 export const initializeSocket = (server: HttpServer): SocketIOServer => {
+  const corsOrigins = process.env.CORS_ORIGIN?.split(",").map((o) => o.trim());
+  const jwtSecret = process.env.JWT_SECRET;
+
+  if (!corsOrigins || !jwtSecret) {
+    throw new Error("❌ CORS_ORIGIN and JWT_SECRET must be defined in .env");
+  }
+
   const io = new SocketIOServer(server, {
     cors: {
-      origin: process.env.CORS_ORIGIN?.split(",") || [],
+      origin: corsOrigins,
       credentials: true,
     },
   });
@@ -33,15 +39,14 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
       const token = cookies["accessToken"];
 
       if (token) {
-        const secret = process.env.JWT_SECRET as string;
-        const decoded = jwt.verify(token, secret) as IUserToken;
+        const decoded = jwt.verify(token, jwtSecret) as IUserToken;
         socket.data.user = decoded;
       }
 
       next();
     } catch (err) {
-      console.error("❌ Socket auth error:", err);
-      next();
+      console.error("❌ [Socket Auth] Token parsing error:", err);
+      next(); 
     }
   });
 
@@ -56,7 +61,7 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
     socket.join(roomId);
     socket.emit("room-assigned", roomId);
 
-    // ✅ ChatSession kaydı
+
     try {
       await ChatSession.findOneAndUpdate(
         { roomId },
@@ -68,7 +73,7 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
         { upsert: true, new: true }
       );
     } catch (err) {
-      console.error("❌ ChatSession kaydı yapılamadı:", err);
+      console.error("❌ [Socket] ChatSession save error:", err);
     }
 
     if (userId) {
@@ -76,12 +81,12 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
       io.emit("online-users", Array.from(onlineUsers.entries()));
     }
 
-    console.log(`🟢 Connected: ${userId ?? "Guest"} | Room: ${roomId}`);
+    console.log(`🟢 [Socket] Connected: ${userId ?? "Guest"} | Room: ${roomId}`);
 
     socket.on(
       "admin-message",
       async ({ room, message, language }: ChatMessagePayload) => {
-        if (!message.trim() || !room) return;
+        if (!message?.trim() || !room) return;
 
         try {
           const adminChat = await ChatMessage.create({
@@ -110,9 +115,9 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
             language: populated.get("language"),
           });
 
-          console.log("✅ Admin message sent:", populated.get("message"));
+          console.log(`✅ [Admin Message] ${sender.email} → ${room}`);
         } catch (err) {
-          console.error("❌ Admin message error:", err);
+          console.error("❌ [Socket] Admin message error:", err);
         }
       }
     );
@@ -122,7 +127,7 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
         onlineUsers.delete(userId);
         io.emit("online-users", Array.from(onlineUsers.entries()));
       }
-      console.log(`🔴 Disconnected: ${userId ?? "Guest"}`);
+      console.log(`🔴 [Socket] Disconnected: ${userId ?? "Guest"}`);
     });
   });
 

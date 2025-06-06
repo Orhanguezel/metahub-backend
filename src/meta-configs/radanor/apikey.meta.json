@@ -1,0 +1,83 @@
+{
+  "name": "apikey",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": false,
+      "summary": "POST /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllApikey",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": false,
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllApikey",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/:id",
+      "auth": false,
+      "summary": "PUT /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "deleteApikey",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": false,
+      "summary": "DELETE /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "deleteApikey",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/:keyId/logs",
+      "auth": false,
+      "summary": "GET /:keyId/logs",
+      "validationName": "\"/:keyId/logs\"",
+      "controllerName": "getApiKeyLogs"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013"
+  },
+  "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
+  "lastUpdatedAt": "2025-06-02T07:22:03.585Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
+      "date": "2025-06-02T07:22:03.585Z",
+      "note": "Meta auto-generated"
+    }
+  ]
+}

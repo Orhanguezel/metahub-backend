@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { RadonarProd } from "@/modules/radonarprod";
-import { IRadonarProd } from "@/modules/radonarprod/radonarprod.model";
+import { IRadonarProd } from "@/modules/radonarprod/types";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
 import path from "path";
@@ -23,7 +23,6 @@ const parseIfJson = (value: any) => {
   }
 };
 
-// ✅ CREATE
 export const createRadonarProd = asyncHandler(
   async (req: Request, res: Response) => {
     let {
@@ -48,15 +47,17 @@ export const createRadonarProd = asyncHandler(
       isPublished,
     } = req.body;
 
+    // ✅ Parse JSON fields
     name = parseIfJson(name);
     description = parseIfJson(description);
     tags = parseIfJson(tags);
     color = parseIfJson(color);
+    const altTexts = parseIfJson(req.body.altTexts); // 👈 Alt metinleri al
 
     const images: IRadonarProd["images"] = [];
 
     if (Array.isArray(req.files)) {
-      for (const file of req.files as Express.Multer.File[]) {
+      for (const [index, file] of (req.files as Express.Multer.File[]).entries()) {
         let imageUrl = getImagePath(file);
         let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
 
@@ -75,16 +76,14 @@ export const createRadonarProd = asyncHandler(
           thumbnail,
           webp,
           publicId: (file as any).public_id,
+          altText: altTexts?.[index] || {}, // 👈 Alt metin ekleniyor
         });
       }
     }
 
     const slug = slugify(
       name?.en || name?.tr || name?.de || brand || "radonar-product",
-      {
-        lower: true,
-        strict: true,
-      }
+      { lower: true, strict: true }
     );
 
     const product = await RadonarProd.create({
@@ -112,17 +111,14 @@ export const createRadonarProd = asyncHandler(
       isActive: true,
     });
 
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "Product created successfully.",
-        data: product,
-      });
+    res.status(201).json({
+      success: true,
+      message: "Product created successfully.",
+      data: product,
+    });
   }
 );
 
-// ✅ UPDATE
 export const updateRadonarProd = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -130,13 +126,13 @@ export const updateRadonarProd = asyncHandler(
 
     if (!isValidObjectId(id)) {
       res.status(400).json({ success: false, message: "Invalid product ID." });
-      return;
+      return 
     }
 
     const product = await RadonarProd.findById(id);
     if (!product) {
-      res.status(404).json({ success: false, message: "Product not found." });
-      return;
+       res.status(404).json({ success: false, message: "Product not found." });
+       return
     }
 
     const updatableFields: (keyof IRadonarProd)[] = [
@@ -161,6 +157,17 @@ export const updateRadonarProd = asyncHandler(
       "isPublished",
     ];
 
+    const parseIfJson = (value: any) => {
+      try {
+        return typeof value === "string" ? JSON.parse(value) : value;
+      } catch {
+        return value;
+      }
+    };
+
+    const altTexts = parseIfJson(updates.altTexts); // 🆕 Alt metinler
+
+    // Güncellenebilir alanlar
     updatableFields.forEach((field) => {
       if (updates[field] !== undefined) {
         (product as any)[field] = parseIfJson(updates[field]);
@@ -169,8 +176,9 @@ export const updateRadonarProd = asyncHandler(
 
     if (!Array.isArray(product.images)) product.images = [];
 
+    // Yeni görseller varsa işle
     if (Array.isArray(req.files)) {
-      for (const file of req.files as Express.Multer.File[]) {
+      for (const [index, file] of (req.files as Express.Multer.File[]).entries()) {
         const imageUrl = getImagePath(file);
         let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
 
@@ -189,10 +197,12 @@ export const updateRadonarProd = asyncHandler(
           thumbnail,
           webp,
           publicId: (file as any).public_id,
+          altText: altTexts?.[index] || {}, // 🆕 altText ekleniyor
         });
       }
     }
 
+    // Silinecek görseller varsa kaldır
     if (updates.removedImages) {
       try {
         const removed = JSON.parse(updates.removedImages);
@@ -201,11 +211,7 @@ export const updateRadonarProd = asyncHandler(
         );
 
         for (const img of removed) {
-          const localPath = path.join(
-            "uploads",
-            "radonarprod-images",
-            path.basename(img.url)
-          );
+          const localPath = path.join("uploads", "radonarprod-images", path.basename(img.url));
           if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
           if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
         }
@@ -216,15 +222,14 @@ export const updateRadonarProd = asyncHandler(
 
     await product.save();
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Product updated successfully.",
-        data: product,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Product updated successfully.",
+      data: product,
+    });
   }
 );
+
 
 // ✅ DELETE
 export const deleteRadonarProd = asyncHandler(

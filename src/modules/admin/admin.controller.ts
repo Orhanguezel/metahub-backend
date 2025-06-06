@@ -1,3 +1,4 @@
+import "@/core/config/envLoader";
 import fs from "fs";
 import path from "path";
 import { Request, Response, NextFunction } from "express";
@@ -7,13 +8,15 @@ import { ModuleSetting } from "@/modules/admin";
 import { updateMetaVersionLog } from "@/scripts/generateMeta/utils/versionHelpers";
 import { getGitUser, getGitCommitHash } from "@/scripts/generateMeta/utils/gitHelpers";
 import { writeModuleFiles } from "@/scripts/createModule/writeModuleFiles";
+import { getPaths } from "@/scripts/createModule/utils";
 
+const PROJECT_ENV = process.env.APP_ENV;
+if (!PROJECT_ENV) {
+  throw new Error("❌ APP_ENV is not defined. Please set the environment before running the server.");
+}
+
+// 🔠 Label dönüşüm
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-
-const PROJECT_ENV =
-  process.env.APP_ENV ||
-  process.env.NEXT_PUBLIC_APP_ENV ||
-  "ensotek";
 
 // ✅ Yeni modül oluştur
 export const createModule = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -33,22 +36,20 @@ export const createModule = asyncHandler(async (req: Request, res: Response, nex
     } = req.body;
 
     if (!name) {
-      res.status(400).json({ success: false, message: "Module name is required." });
-      return 
+      res.status(400).json({ success: false, message: "Module name is required." }); 
+      return
     }
 
-    // Aynı isimde modül varsa hata
     const existing = await ModuleMeta.findOne({ name });
     if (existing) {
-      res.status(400).json({ success: false, message: "Module already exists." });
-      return 
+       res.status(400).json({ success: false, message: "Module already exists." });
+       return
     }
 
     const username = await getGitUser();
     const commitHash = await getGitCommitHash();
     const now = new Date().toISOString();
 
-    // Çoklu dil label zorunluluğu
     const finalLabel =
       label?.tr && label?.en && label?.de
         ? label
@@ -58,7 +59,6 @@ export const createModule = asyncHandler(async (req: Request, res: Response, nex
             de: capitalize(name),
           };
 
-    // Meta içeriği oluştur
     const metaContent = updateMetaVersionLog({
       name,
       icon,
@@ -77,15 +77,13 @@ export const createModule = asyncHandler(async (req: Request, res: Response, nex
       statsKey,
     });
 
-    // Meta JSON dosyasını kaydet
-    const metaDir = path.resolve(process.cwd(), "src/meta-configs", PROJECT_ENV);
-    if (!fs.existsSync(metaDir)) {
-      fs.mkdirSync(metaDir, { recursive: true });
-    }
-    const metaPath = path.join(metaDir, `${name}.meta.json`);
+    const { metaPath, modulePath } = getPaths(name);
+
+    // Meta klasörü oluştur ve yaz
+    fs.mkdirSync(path.dirname(metaPath), { recursive: true });
     fs.writeFileSync(metaPath, JSON.stringify(metaContent, null, 2));
 
-    // Veritabanına kaydet
+    // DB kayıtları
     await ModuleMeta.create(metaContent);
     await ModuleSetting.create({
       project: PROJECT_ENV,
@@ -98,12 +96,9 @@ export const createModule = asyncHandler(async (req: Request, res: Response, nex
       label: finalLabel,
     });
 
-    // Modül dosya/folder'ını oluştur
-    const moduleDir = path.resolve(process.cwd(), "src/modules", name);
-    if (!fs.existsSync(moduleDir)) {
-      fs.mkdirSync(moduleDir, { recursive: true });
-    }
-    await writeModuleFiles(moduleDir, name);
+    // Modül klasörü oluştur
+    fs.mkdirSync(modulePath, { recursive: true });
+    await writeModuleFiles(modulePath, name);
 
     res.status(201).json({
       success: true,
@@ -114,6 +109,7 @@ export const createModule = asyncHandler(async (req: Request, res: Response, nex
     next(error);
   }
 });
+
 
 // ✅ Tüm modülleri getir (opsiyonel project query)
 export const getModules = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -215,12 +211,18 @@ export const deleteModule = asyncHandler(async (req: Request, res: Response, nex
     next(error);
   }
 });
-
-// ✅ Mevcut projeleri getir
+// ✅ Mevcut projeleri getir (dinamik DEFAULT_PROJECT ile)
 export const getProjects = asyncHandler(async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const distinctProjects = await ModuleSetting.distinct("project");
-    const projects = distinctProjects.length > 0 ? distinctProjects : ["ensotek"];
+
+    const DEFAULT_PROJECT = process.env.DEFAULT_PROJECT;
+    if (!DEFAULT_PROJECT) {
+      throw new Error("❌ DEFAULT_PROJECT env variable is not defined.");
+    }
+
+    const projects = distinctProjects.length > 0 ? distinctProjects : [DEFAULT_PROJECT];
+
     res.status(200).json({
       success: true,
       message: "Projects fetched successfully.",

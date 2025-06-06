@@ -1,35 +1,10 @@
 import { Schema, model, Types, Model, models } from "mongoose";
-import { IProduct } from "@/modules/product/product.models";
+import { ICart, ICartItem } from "@/modules/cart/types";
 
-// 🛒 Cart Item Interface
-export interface ICartItem {
-  product: Types.ObjectId | IProduct;
-  quantity: number;
-  priceAtAddition: number;
-  totalPriceAtAddition: number;
-}
-
-// 🛒 Cart Interface
-export interface ICart  {
-  user: Types.ObjectId;
-  items: ICartItem[];
-  totalPrice: number;
-  couponCode?: string;
-  status: "open" | "ordered" | "cancelled";
-  isActive: boolean;
-  discount?: number;
-  label: {
-    tr: string;
-    en: string;
-    de: string;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-}
-
+// 🛒 Sepet Ürün Alt Şeması
 const cartItemSchema = new Schema<ICartItem>(
   {
-    product: { type: Types.ObjectId, ref: "Product", required: true },
+    product: { type: Types.ObjectId, ref: "RadonarProd", required: true },
     quantity: { type: Number, required: true, min: 1, default: 1 },
     priceAtAddition: { type: Number, required: true },
     totalPriceAtAddition: { type: Number, required: true, default: 0 },
@@ -37,6 +12,7 @@ const cartItemSchema = new Schema<ICartItem>(
   { _id: false }
 );
 
+// 🛒 Ana Sepet Şeması
 const cartSchema = new Schema<ICart>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
@@ -46,17 +22,11 @@ const cartSchema = new Schema<ICart>(
     status: { type: String, enum: ["open", "ordered", "cancelled"], default: "open" },
     isActive: { type: Boolean, default: true },
     discount: { type: Number, default: 0 },
-    label: {
-      tr: { type: String, required: true },
-      en: { type: String, required: true },
-      de: { type: String, required: true },
-    },
   },
   { timestamps: true }
 );
 
-// ✅ Guard + Model Type (This module has been updated and is now standardized)
+// 🛒 Model Guard (Tekrarlı create engellenir)
 const Cart: Model<ICart> = models.Cart || model<ICart>("Cart", cartSchema);
 
-// ✅ Guard + Model Type (This module has been updated and is now standardized)
 export { Cart };
