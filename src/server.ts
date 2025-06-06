@@ -5,7 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import "./core/config/env";
-console.log("🟢 Loaded env from", envPath, "PORT:", process.env.PORT, "APP_ENV:", process.env.APP_ENV);
+console.log("🟢 ENV PORT:", process.env.PORT, "APP_ENV:", process.env.APP_ENV);
 
 
 import { connectDB } from "./core/config/connect";
