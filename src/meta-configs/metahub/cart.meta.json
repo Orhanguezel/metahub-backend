@@ -1,0 +1,124 @@
+{
+  "name": "cart",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getUserCart",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/add",
+      "auth": true,
+      "summary": "POST /add",
+      "validationName": "\"/clear\"",
+      "controllerName": "clearCart",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/increase/:productId",
+      "auth": true,
+      "summary": "PATCH /increase/:productId",
+      "validationName": "\"/clear\"",
+      "controllerName": "clearCart"
+    },
+    {
+      "method": "PATCH",
+      "path": "/decrease/:productId",
+      "auth": true,
+      "summary": "PATCH /decrease/:productId",
+      "validationName": "\"/clear\"",
+      "controllerName": "clearCart"
+    },
+    {
+      "method": "DELETE",
+      "path": "/remove/:productId",
+      "auth": true,
+      "summary": "DELETE /remove/:productId",
+      "validationName": "\"/clear\"",
+      "controllerName": "clearCart"
+    },
+    {
+      "method": "DELETE",
+      "path": "/clear",
+      "auth": true,
+      "summary": "DELETE /clear",
+      "validationName": "\"/clear\"",
+      "controllerName": "clearCart"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllCarts",
+      "pathPrefix": "admin.",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id",
+      "pathPrefix": "admin."
+    },
+    {
+      "method": "PUT",
+      "path": "/:id",
+      "auth": true,
+      "summary": "PUT /:id",
+      "pathPrefix": "admin."
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id",
+      "pathPrefix": "admin."
+    },
+    {
+      "method": "PATCH",
+      "path": "/:id/toggle-active",
+      "auth": true,
+      "summary": "PATCH /:id/toggle-active",
+      "pathPrefix": "admin."
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013"
+  },
+  "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
+  "lastUpdatedAt": "2025-06-06T09:24:40.624Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
+      "date": "2025-06-06T09:24:40.624Z",
+      "note": "Meta auto-generated"
+    }
+  ]
+}

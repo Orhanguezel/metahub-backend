@@ -1,0 +1,63 @@
+{
+  "name": "favorite",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/user",
+      "auth": true,
+      "summary": "GET /user",
+      "validationName": "\"admin\")",
+      "controllerName": "getAllFavorites"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /",
+      "validationName": "\"admin\")",
+      "controllerName": "getAllFavorites",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/remove/:productId",
+      "auth": true,
+      "summary": "DELETE /remove/:productId",
+      "validationName": "\"admin\")",
+      "controllerName": "getAllFavorites"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/all",
+      "auth": true,
+      "summary": "GET /admin/all",
+      "validationName": "\"admin\")",
+      "controllerName": "getAllFavorites"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013"
+  },
+  "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
+  "lastUpdatedAt": "2025-06-06T09:24:40.024Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
+      "date": "2025-06-06T09:24:40.024Z",
+      "note": "Meta auto-generated"
+    }
+  ]
+}

@@ -1,30 +1,35 @@
+// src/scripts/generateMeta.ts
+
 import fs from "fs";
 import path from "path";
 import mongoose from "mongoose";
 
-import {connectDB} from "@/core/config/connect";
+import { connectDB } from "@/core/config/connect";
 import { extractRoutesFromFile, getAllRouteFiles } from "./utils/extractRoutes";
 import { updateMetaVersionLog } from "./utils/versionHelpers";
 import { getEnvProfiles } from "@/tools/getEnvProfiles";
 import { readAllEnvFiles } from "./utils/envHelpers";
 import { metaConfig } from "./generateMeta.config";
 import { getValidationBodySchema } from "./utils/validationSchemaReader";
+import { enforceEnabledModulesFromEnv } from "./utils/enforceEnabledModules";
+import { cleanupDisabledModules } from "./utils/cleanupDisabledModules";
 
-import {
-  ModuleMeta,
-  ModuleSetting,
-} from "../../modules/admin";
+import { ModuleMeta, ModuleSetting } from "@/modules/admin";
+
+// 🧠 Env profile must be defined
+const envProfile = process.env.ACTIVE_META_PROFILE || process.env.APP_ENV;
+
+if (!envProfile) {
+  throw new Error("❌ APP_ENV or ACTIVE_META_PROFILE is not defined in environment.");
+}
+
+console.log(`🛠 Using meta profile: ${envProfile}`);
 
 export const generateMeta = async () => {
   await connectDB();
 
-  const envProfile = process.env.ACTIVE_META_PROFILE || process.env.APP_ENV || "ensotek";
-console.log(`🛠 Using meta profile: ${envProfile}`);
-
-
-  const modulesPath = path.join(__dirname, "../../modules");
-  const metaProjectDir = path.join(__dirname, `../../meta-configs/${envProfile}`);
-
+  const modulesPath = path.resolve(process.cwd(), "src/modules");
+  const metaProjectDir = path.resolve(process.cwd(), `src/meta-configs/${envProfile}`);
 
   if (!fs.existsSync(metaProjectDir)) {
     fs.mkdirSync(metaProjectDir, { recursive: true });
@@ -33,15 +38,17 @@ console.log(`🛠 Using meta profile: ${envProfile}`);
   const allModules = fs
     .readdirSync(modulesPath)
     .filter((mod) => fs.statSync(path.join(modulesPath, mod)).isDirectory());
+
   const existingMetaFiles = fs
     .readdirSync(metaProjectDir)
     .filter((f) => f.endsWith(".meta.json"));
+
   const modulesInFs = new Set(allModules);
 
   const envProfiles = getEnvProfiles();
   const envConfigs = readAllEnvFiles(envProfiles);
 
-  // 🧹 Orphan Meta Cleanup
+  // 🧹 Clean orphan meta files
   await Promise.all(existingMetaFiles.map(async (file) => {
     const modName = file.replace(".meta.json", "");
     if (!modulesInFs.has(modName)) {
@@ -62,7 +69,7 @@ console.log(`🛠 Using meta profile: ${envProfile}`);
     }
   }));
 
-  // 📦 Meta generate
+  // 📦 Generate meta for each module
   await Promise.all(allModules.map(async (mod) => {
     if (metaConfig.ignoreModules.includes(mod)) {
       console.warn(`🚫 Skipped ignored module: ${mod}`);
@@ -95,14 +102,14 @@ console.log(`🛠 Using meta profile: ${envProfile}`);
       return fileRoutes.map((route) => ({ ...route, pathPrefix: prefix || undefined }));
     });
 
-    // ✨ Validation şemalarını otomatik bağla
     for (const route of routes) {
       if (route.validationName) {
         try {
-            const bodySchema = await getValidationBodySchema(mod, route.path);
-
+          const bodySchema = await getValidationBodySchema(mod, route.path);
           if (bodySchema) {
-            route.body = bodySchema.definitions?.[Object.keys(bodySchema.definitions || {})[0]] || bodySchema;
+            route.body =
+              bodySchema.definitions?.[Object.keys(bodySchema.definitions || {})[0]] ||
+              bodySchema;
           }
         } catch (err) {
           console.warn(`⚠️ Failed to attach validation schema for route: ${route.summary}`);
@@ -132,7 +139,6 @@ console.log(`🛠 Using meta profile: ${envProfile}`);
       console.error(`❌ DB update failed for ${mod}:`, err);
     }
 
-    // 🌍 Update per profile
     await Promise.all(envProfiles.map(async (profile) => {
       const envVars = envConfigs[profile];
       if (!envVars) return;
@@ -151,9 +157,11 @@ console.log(`🛠 Using meta profile: ${envProfile}`);
       }
     }));
 
-    // ✅ Konsolda her modülün kaç route ürettiğini göster
     console.log(`✅ ${mod} (${routes.length} routes)`);
   }));
+
+  await enforceEnabledModulesFromEnv();
+  await cleanupDisabledModules();
 
   mongoose.connection.close();
 };

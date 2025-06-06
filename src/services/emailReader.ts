@@ -1,27 +1,39 @@
+// src/core/email/readInboxEmails.ts
+
 import Imap from "imap";
 import { simpleParser, ParsedMail } from "mailparser";
 import { Readable } from "stream";
-import path from "path";
-import fs from "fs";
-import dotenv from "dotenv";
 import { MailMessage } from "@/modules/email";
 
-// 🌍 Ortama özel .env dosyasını yükle
-const envProfile = process.env.APP_ENV || "ensotek";
-const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
-if (fs.existsSync(envPath)) {
-  dotenv.config({ path: envPath });
-  console.log(`📨 ENV loaded: ${envPath}`);
-} else {
-  console.warn(`⚠️ ENV file not found for: ${envProfile}`);
+// 🌐 Environment variables
+const {
+  IMAP_USER,
+  IMAP_PASS,
+  IMAP_HOST,
+  IMAP_PORT,
+  APP_ENV,
+  ACTIVE_META_PROFILE,
+} = process.env;
+
+if (!IMAP_USER || !IMAP_PASS || !IMAP_HOST || !IMAP_PORT) {
+  throw new Error("❌ IMAP_* environment variables are not properly set.");
 }
 
-// 🛠️ IMAP yapılandırması
+const profile = ACTIVE_META_PROFILE || APP_ENV;
+
+if (!profile) {
+  throw new Error("❌ APP_ENV or ACTIVE_META_PROFILE must be defined.");
+}
+
+// 🌐 Determine language for logs
+const lang = profile === "tr" ? "tr" : profile === "de" ? "de" : "en";
+
+// 📬 IMAP config
 const imap = new Imap({
-  user: process.env.IMAP_USER || "",
-  password: process.env.IMAP_PASS || "",
-  host: process.env.IMAP_HOST || "",
-  port: Number(process.env.IMAP_PORT) || 993,
+  user: IMAP_USER,
+  password: IMAP_PASS,
+  host: IMAP_HOST,
+  port: Number(IMAP_PORT),
   tls: true,
   tlsOptions: { rejectUnauthorized: false },
 });
@@ -31,9 +43,9 @@ export const readInboxEmails = (): void => {
     imap.openBox("INBOX", true, (err, _box) => {
       if (err) {
         console.error(
-          envProfile === "de"
+          lang === "de"
             ? "📦 Fehler beim Öffnen des Posteingangs:"
-            : envProfile === "tr"
+            : lang === "tr"
             ? "📦 INBOX açılırken hata:"
             : "📦 Error opening inbox:",
           err
@@ -44,9 +56,9 @@ export const readInboxEmails = (): void => {
       imap.search(["UNSEEN"], (err, results = []) => {
         if (err) {
           console.error(
-            envProfile === "de"
+            lang === "de"
               ? "🔍 Suchfehler:"
-              : envProfile === "tr"
+              : lang === "tr"
               ? "🔍 Arama hatası:"
               : "🔍 Search error:",
             err
@@ -57,9 +69,9 @@ export const readInboxEmails = (): void => {
 
         if (!results.length) {
           console.log(
-            envProfile === "de"
+            lang === "de"
               ? "📭 Keine neuen E-Mails."
-              : envProfile === "tr"
+              : lang === "tr"
               ? "📭 Yeni e-posta yok."
               : "📭 No new emails."
           );
@@ -74,9 +86,9 @@ export const readInboxEmails = (): void => {
             simpleParser(stream, async (err, parsed: ParsedMail) => {
               if (err) {
                 console.error(
-                  envProfile === "de"
+                  lang === "de"
                     ? "📨 Fehler beim Parsen der E-Mail:"
-                    : envProfile === "tr"
+                    : lang === "tr"
                     ? "📨 E-posta ayrıştırma hatası:"
                     : "📨 Email parse error:",
                   err
@@ -102,17 +114,17 @@ export const readInboxEmails = (): void => {
                 });
 
                 console.log(
-                  envProfile === "de"
+                  lang === "de"
                     ? "✅ E-Mail erfolgreich gespeichert."
-                    : envProfile === "tr"
+                    : lang === "tr"
                     ? "✅ E-posta başarıyla kaydedildi."
                     : "✅ Email saved successfully."
                 );
               } catch (dbErr) {
                 console.error(
-                  envProfile === "de"
+                  lang === "de"
                     ? "❌ Fehler beim Speichern der E-Mail:"
-                    : envProfile === "tr"
+                    : lang === "tr"
                     ? "❌ E-posta veritabanına kaydedilemedi:"
                     : "❌ Failed to save email:",
                   dbErr
@@ -124,9 +136,9 @@ export const readInboxEmails = (): void => {
 
         fetch.once("end", () => {
           console.log(
-            envProfile === "de"
+            lang === "de"
               ? "📬 Alle neuen E-Mails wurden verarbeitet."
-              : envProfile === "tr"
+              : lang === "tr"
               ? "📬 Tüm yeni e-postalar işlendi."
               : "📬 All new emails processed."
           );
@@ -138,9 +150,9 @@ export const readInboxEmails = (): void => {
 
   imap.once("error", (err: Error) =>
     console.error(
-      envProfile === "de"
+      lang === "de"
         ? "❌ IMAP-Verbindungsfehler:"
-        : envProfile === "tr"
+        : lang === "tr"
         ? "❌ IMAP bağlantı hatası:"
         : "❌ IMAP connection error:",
       err
@@ -149,9 +161,9 @@ export const readInboxEmails = (): void => {
 
   imap.once("end", () =>
     console.log(
-      envProfile === "de"
+      lang === "de"
         ? "📴 Verbindung zum Mailserver beendet."
-        : envProfile === "tr"
+        : lang === "tr"
         ? "📴 Mail sunucusu bağlantısı kapatıldı."
         : "📴 IMAP connection closed."
     )

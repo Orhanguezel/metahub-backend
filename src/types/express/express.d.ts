@@ -35,6 +35,7 @@ declare global {
         | "spareparts"
         | "setting"
         | "company"
+        | "apartment"
         | "default";
       uploadSizeLimit?: number;
       locale?: "tr" | "en" | "de";

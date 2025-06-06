@@ -1,50 +1,5 @@
 import { Schema, Model, Types, models, model } from "mongoose";
-
-// ✅ Image interface
-interface IRadonarProdImage {
-  url: string;
-  thumbnail: string;
-  webp?: string;
-  publicId?: string;
-}
-
-// ✅ Ana interface
-export interface IRadonarProd  {
-  name: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  slug: string;
-  description?: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  brand: string;
-  price: number;
-  stock: number;
-  stockThreshold?: number;
-  category: Types.ObjectId;
-  tags?: string[];
-  images: IRadonarProdImage[];
-  frameMaterial?: string;
-  brakeType?: string;
-  wheelSize?: number;
-  gearCount?: number;
-  suspensionType?: string;
-  color?: string[];
-  weightKg?: number;
-  isElectric?: boolean;
-  batteryRangeKm?: number;
-  motorPowerW?: number;
-  comments?: Types.ObjectId[];
-  likes?: number;
-  isActive: boolean;
-  isPublished: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { IRadonarProd, IRadonarProdImage } from "@/modules/radonarprod/types";
 
 // ✅ Image schema
 const RadonarProdImageSchema = new Schema<IRadonarProdImage>(
@@ -53,11 +8,16 @@ const RadonarProdImageSchema = new Schema<IRadonarProdImage>(
     thumbnail: { type: String, required: true },
     webp: { type: String },
     publicId: { type: String },
+    altText: {
+      tr: { type: String },
+      en: { type: String },
+      de: { type: String },
+    },
   },
   { _id: false }
 );
 
-
+// ✅ Main schema
 const RadonarProdSchema = new Schema<IRadonarProd>(
   {
     name: {
@@ -97,8 +57,10 @@ const RadonarProdSchema = new Schema<IRadonarProd>(
 );
 
 // ✅ Slug middleware
-RadonarProdSchema.pre<IRadonarProd>("validate", function (next) {
+RadonarProdSchema.pre("validate", function (next) {
+  // @ts-ignore
   if (!this.slug && this.name?.en) {
+    // @ts-ignore
     this.slug = this.name.en
       .toLowerCase()
       .replace(/\s+/g, "-")
@@ -109,7 +71,6 @@ RadonarProdSchema.pre<IRadonarProd>("validate", function (next) {
   next();
 });
 
-// ✅ Guarded model
 const RadonarProd: Model<IRadonarProd> =
   models.RadonarProd || model<IRadonarProd>("RadonarProd", RadonarProdSchema);
 

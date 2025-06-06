@@ -11,10 +11,8 @@ import { validateRequest } from "@/core/middleware/validateRequest";
 
 const router = express.Router();
 
-// ✅ Tüm siparişleri getir
 router.get("/", authenticate, authorizeRoles("admin"), getAllOrders);
 
-// ✅ Sipariş durumunu güncelle
 router.put(
   "/:id/status",
   authenticate,
@@ -24,7 +22,6 @@ router.put(
   updateOrderStatus
 );
 
-// ✅ Siparişi teslim edildi olarak işaretle
 router.put(
   "/:id/deliver",
   authenticate,
@@ -32,7 +29,6 @@ router.put(
   markOrderAsDelivered
 );
 
-// ✅ Siparişi sil
 router.delete(
   "/:id",
   authenticate,

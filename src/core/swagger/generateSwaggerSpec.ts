@@ -1,7 +1,8 @@
+// src/scripts/generateSwaggerSpecFromMeta.ts
+
 import fs from "fs/promises";
 import fsSync from "fs";
 import path from "path";
-import dotenv from "dotenv";
 import { getEnabledModules } from "./getEnabledModules";
 
 type SwaggerRoute = {
@@ -22,22 +23,20 @@ type ModuleMeta = {
   routes?: SwaggerRoute[];
 };
 
-const envProfile = process.env.APP_ENV || "ensotek";
-const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
-
-if (fsSync.existsSync(envPath)) {
-  dotenv.config({ path: envPath });
-} else {
-  console.warn(`⚠️ Swagger env file not found at: ${envPath}`);
-}
-
 export async function generateSwaggerSpecFromMeta(writeToDisk = false) {
-  const metaDir = path.resolve(
-    process.cwd(),
-    process.env.META_CONFIG_PATH || "dist/meta-configs/ensotek"
-  );
+  const profile = process.env.APP_ENV;
+  const metaPathFromEnv = process.env.META_CONFIG_PATH;
 
-  // ✅ HATA KONTROLÜ: klasör mevcut mu?
+  if (!profile) {
+    throw new Error("❌ APP_ENV is not defined. Please set it before running this script.");
+  }
+
+  if (!metaPathFromEnv) {
+    throw new Error("❌ META_CONFIG_PATH is not defined in environment.");
+  }
+
+  const metaDir = path.resolve(process.cwd(), metaPathFromEnv);
+
   if (!fsSync.existsSync(metaDir)) {
     console.error(`❌ Meta-config folder not found: ${metaDir}`);
     return undefined;
@@ -128,15 +127,14 @@ export async function generateSwaggerSpecFromMeta(writeToDisk = false) {
   const spec = {
     openapi: "3.0.0",
     info: {
-      title: process.env.PROJECT_NAME || "ensotek API",
+      title: process.env.PROJECT_NAME || profile + " API",
       version: "1.0.0",
       description:
-        process.env.PROJECT_DESCRIPTION ||
-        "API documentation for ensotek Backend project.",
+        process.env.PROJECT_DESCRIPTION || `API documentation for ${profile} backend.`,
     },
     servers: [
       {
-        url: process.env.SWAGGER_BASE_URL || "http://localhost:5014/api",
+        url: process.env.SWAGGER_BASE_URL,
       },
     ],
     components: {

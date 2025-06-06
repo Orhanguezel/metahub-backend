@@ -2,31 +2,29 @@
 import { Express } from "express";
 import swaggerUi from "swagger-ui-express";
 import { generateSwaggerSpecFromMeta } from "./generateSwaggerSpec";
-import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
 
-// 🌍 .env.{envProfile} dosyasını dinamik yükle
-const envProfile = process.env.APP_ENV || "ensotek";
-const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
-
-if (fs.existsSync(envPath)) {
-  dotenv.config({ path: envPath });
-  console.log(`✅ Loaded environment: ${envPath}`);
-} else {
-  console.warn(`⚠️ Environment file "${envPath}" not found. Using defaults.`);
-}
-
-process.env.ACTIVE_META_PROFILE = envProfile;
-
-// 🚀 Swagger setup
+/**
+ * Sets up Swagger UI using meta-config based specification.
+ */
 export const setupSwagger = async (app: Express): Promise<void> => {
   try {
-    // ✅ Meta-configs klasörü kontrolü
-    const swaggerDir = path.resolve(
-      process.cwd(),
-      `dist/meta-configs/${envProfile}`
-    );
+    const envProfile = process.env.APP_ENV;
+    const port = process.env.PORT;
+    const host = process.env.HOST;
+    const metaConfigPath = process.env.META_CONFIG_PATH;
+
+    if (!envProfile) {
+      throw new Error("❌ APP_ENV is not defined.");
+    }
+
+    if (!metaConfigPath) {
+      console.warn("⚠️ META_CONFIG_PATH is not defined. Swagger might not be available.");
+      return;
+    }
+
+    const swaggerDir = path.resolve(process.cwd(), metaConfigPath);
 
     if (!fs.existsSync(swaggerDir)) {
       console.warn(`⚠️ Swagger config folder not found: ${swaggerDir}`);
@@ -53,11 +51,12 @@ export const setupSwagger = async (app: Express): Promise<void> => {
       })
     );
 
-    const port = process.env.PORT || "5014";
-    const host = process.env.HOST || "http://localhost";
-    const swaggerUrl = `${host}:${port}/api-docs`;
-
-    console.log(`📘 Swagger UI available at: ${swaggerUrl}`);
+    if (host && port) {
+      const swaggerUrl = `${host}:${port}/api-docs`;
+      console.log(`📘 Swagger UI available at: ${swaggerUrl}`);
+    } else {
+      console.log(`📘 Swagger UI available at: /api-docs`);
+    }
   } catch (err) {
     console.error("❌ Failed to setup Swagger:", err);
   }

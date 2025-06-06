@@ -1,11 +1,13 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { isValidObjectId } from "@/core/utils/validation";
-import { Payment, PaymentMethod } from "@/modules/payment";
+import { Payment} from "@/modules/payment";
+import type { paymentTypes } from "@/modules/payment";
+import { Order } from "@/modules/order";
 
 // ✅ Yeni ödeme oluştur
 export const createPayment = asyncHandler(async (req: Request, res: Response) => {
-  const { order, amount, method }: { order: string; amount: number; method: PaymentMethod } = req.body;
+  const { order, amount, method, currency = "EUR", details } = req.body;
 
   if (!order || !amount || !method) {
     res.status(400).json({ success: false, message: "Order, amount, and payment method are required." });
@@ -21,8 +23,14 @@ export const createPayment = asyncHandler(async (req: Request, res: Response) =>
     order,
     amount,
     method,
+    currency,
     status: "pending",
     language: req.locale || "en",
+    details,
+  });
+
+  await Order.findByIdAndUpdate(order, {
+    $push: { payments: payment._id }
   });
 
   res.status(201).json({
@@ -124,14 +132,14 @@ export const markPaymentAsFailed = asyncHandler(async (req: Request, res: Respon
 // ✅ Ödeme yöntemini güncelle
 export const updatePaymentMethod = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { method }: { method: PaymentMethod } = req.body;
+  const { method }: { method: paymentTypes.PaymentMethod } = req.body;
 
   if (!isValidObjectId(id)) {
     res.status(400).json({ success: false, message: "Invalid payment ID." });
     return;
   }
 
-  const validMethods: PaymentMethod[] = ["cash_on_delivery", "credit_card", "paypal"];
+  const validMethods: paymentTypes.PaymentMethod[] = ["cash_on_delivery", "credit_card", "paypal"];
   if (!validMethods.includes(method)) {
     res.status(400).json({ success: false, message: "Invalid payment method." });
     return;
@@ -163,7 +171,7 @@ export const getPaymentsByUser = asyncHandler(async (req: Request, res: Response
     return;
   }
 
-  const payments = await Payment.find({})
+  const payments = await Payment.find()
     .populate({
       path: "order",
       match: { user: userId },
@@ -178,7 +186,7 @@ export const getPaymentsByUser = asyncHandler(async (req: Request, res: Response
   });
 });
 
-// 🧪 Stripe ödeme simülasyonu
+// 🧪 Stripe/PayPal Ödeme Simülasyonu
 export const simulateStripePayment = asyncHandler(async (_req: Request, res: Response) => {
   res.status(200).json({
     success: true,
@@ -186,7 +194,6 @@ export const simulateStripePayment = asyncHandler(async (_req: Request, res: Res
   });
 });
 
-// 🧪 PayPal ödeme simülasyonu
 export const simulatePayPalPayment = asyncHandler(async (_req: Request, res: Response) => {
   res.status(200).json({
     success: true,

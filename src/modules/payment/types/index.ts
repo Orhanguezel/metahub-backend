@@ -1,0 +1,19 @@
+import { Types } from "mongoose";
+
+export type PaymentMethod = "cash_on_delivery" | "credit_card" | "paypal";
+export type PaymentStatus = "pending" | "paid" | "failed" | "refunded" | "cancelled";
+
+export interface IPayment {
+  order: Types.ObjectId;
+  amount: number;
+  method: PaymentMethod;
+  status: PaymentStatus;
+  transactionId?: string;
+  paidAt?: Date;
+  currency: string;
+  details?: Record<string, any>;
+  language: "tr" | "en" | "de";
+  isActive: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}

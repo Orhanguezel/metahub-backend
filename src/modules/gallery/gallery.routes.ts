@@ -12,8 +12,6 @@ const router = express.Router();
 
 // 🔓 Public routes
 router.get("/published", publicController.getPublishedGalleryItems);
-router.get("/published/category/:category", publicController.getPublishedGalleryItemsByCategory);
-router.get("/categories", publicController.getGalleryCategories);
 router.get("/search", publicController.searchGalleryItems);
 router.get("/stats", publicController.getGalleryStats);
 

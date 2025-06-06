@@ -2,17 +2,17 @@ import asyncHandler from "express-async-handler";
 import { Request, Response, NextFunction } from "express";
 import { Types } from "mongoose";
 import { Cart } from "@/modules/cart";
-import { ICartItem } from "@/modules/cart/cart.models";
-import { Product} from "@/modules/product";
-import { IProduct } from "@/modules/product/product.models";
+import { ICartItem } from "@/modules/cart/types";
+import { RadonarProd, radonarprodTypes } from "@/modules/radonarprod"; 
+import { IRadonarProd } from "@/modules/radonarprod/types";
 
 // Helper to recalculate total
 const recalculateTotal = (items: ICartItem[]): number =>
   items.reduce((sum, item) => sum + item.quantity * item.priceAtAddition, 0);
 
-// Helper to get product
-const getProduct = async (productId: string): Promise<IProduct | null> =>
-  Product.findById(productId);
+
+const getProduct = async (productId: string): Promise<radonarprodTypes.IRadonarProd | null> =>
+  RadonarProd.findById(productId);
 
 // Helper to get user's cart
 const getCartForUser = async (userId: string, populate = false) => {
@@ -28,9 +28,7 @@ export const getUserCart = asyncHandler(
       const userId = req.user?.id;
 
       if (!userId) {
-        res
-          .status(400)
-          .json({ success: false, message: "User ID is required." });
+        res.status(400).json({ success: false, message: "User ID is required." });
         return;
       }
 
@@ -76,12 +74,11 @@ export const addToCart = asyncHandler(
       const { productId, quantity } = req.body;
 
       if (!userId || !productId || quantity <= 0) {
-        res
-          .status(400)
-          .json({ success: false, message: "Invalid product or quantity." });
+        res.status(400).json({ success: false, message: "Invalid product or quantity." });
         return;
       }
 
+      // --- RADONAR PRODUCT ---
       const product = await getProduct(productId);
       if (!product) {
         res.status(404).json({ success: false, message: "Product not found." });
@@ -89,12 +86,10 @@ export const addToCart = asyncHandler(
       }
 
       if (product.stock < quantity) {
-        res
-          .status(400)
-          .json({
-            success: false,
-            message: `Only ${product.stock} items in stock.`,
-          });
+        res.status(400).json({
+          success: false,
+          message: `Only ${product.stock} items in stock.`,
+        });
         return;
       }
 
@@ -147,6 +142,8 @@ export const addToCart = asyncHandler(
   }
 );
 
+// --- Increase, Decrease, Remove, Clear işlemlerinde de product yerine RadonarProd kullanılacak ---
+
 // ✅ Increase item quantity
 export const increaseQuantity = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -155,12 +152,10 @@ export const increaseQuantity = asyncHandler(
       const { productId } = req.params;
 
       if (!userId || !productId) {
-        res
-          .status(400)
-          .json({
-            success: false,
-            message: "User ID and Product ID are required.",
-          });
+        res.status(400).json({
+          success: false,
+          message: "User ID and Product ID are required.",
+        });
         return;
       }
 
@@ -174,12 +169,11 @@ export const increaseQuantity = asyncHandler(
         (item) => (item.product as any)._id?.toString() === productId
       );
       if (itemIndex === -1) {
-        res
-          .status(404)
-          .json({ success: false, message: "Item not found in cart." });
+        res.status(404).json({ success: false, message: "Item not found in cart." });
         return;
       }
 
+      // RADONAR PRODUCT
       const product = await getProduct(productId);
       if (!product) {
         res.status(404).json({ success: false, message: "Product not found." });
@@ -187,9 +181,7 @@ export const increaseQuantity = asyncHandler(
       }
 
       if (cart.items[itemIndex].quantity >= product.stock) {
-        res
-          .status(400)
-          .json({ success: false, message: "Stock limit reached." });
+        res.status(400).json({ success: false, message: "Stock limit reached." });
         return;
       }
 
@@ -227,12 +219,10 @@ export const decreaseQuantity = asyncHandler(
       const { productId } = req.params;
 
       if (!userId || !productId) {
-        res
-          .status(400)
-          .json({
-            success: false,
-            message: "User ID and Product ID are required.",
-          });
+        res.status(400).json({
+          success: false,
+          message: "User ID and Product ID are required.",
+        });
         return;
       }
 
@@ -246,9 +236,7 @@ export const decreaseQuantity = asyncHandler(
         (item) => (item.product as any)._id?.toString() === productId
       );
       if (itemIndex === -1) {
-        res
-          .status(404)
-          .json({ success: false, message: "Item not found in cart." });
+        res.status(404).json({ success: false, message: "Item not found in cart." });
         return;
       }
 
@@ -284,12 +272,10 @@ export const removeFromCart = asyncHandler(
       const { productId } = req.params;
 
       if (!userId || !productId) {
-        res
-          .status(400)
-          .json({
-            success: false,
-            message: "User ID and Product ID are required.",
-          });
+        res.status(400).json({
+          success: false,
+          message: "User ID and Product ID are required.",
+        });
         return;
       }
 
@@ -303,9 +289,7 @@ export const removeFromCart = asyncHandler(
         (item) => (item.product as any)._id?.toString() === productId
       );
       if (itemIndex === -1) {
-        res
-          .status(404)
-          .json({ success: false, message: "Item not found in cart." });
+        res.status(404).json({ success: false, message: "Item not found in cart." });
         return;
       }
 
@@ -338,9 +322,7 @@ export const clearCart = asyncHandler(
       }
 
       if (!cart.items.length) {
-        res
-          .status(400)
-          .json({ success: false, message: "Cart is already empty." });
+        res.status(400).json({ success: false, message: "Cart is already empty." });
         return;
       }
 

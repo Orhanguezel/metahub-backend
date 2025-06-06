@@ -5,8 +5,8 @@ interface WelcomeTemplateParams {
   locale?: "de" | "tr" | "en";
 }
 
-const BRAND_NAME = process.env.BRAND_NAME || "Ensotek";
-const BRAND_FULL_NAME = process.env.BRAND_FULL_NAME || `${BRAND_NAME} Cooling Systems`;
+const BRAND_NAME = process.env.BRAND_NAME || "metahub";
+const BRAND_FULL_NAME = process.env.BRAND_FULL_NAME || `${BRAND_NAME} `;
 const BRAND_TEAM_NAME = process.env.BRAND_TEAM_NAME || `${BRAND_NAME} Team`;
 
 export const welcomeTemplate = ({

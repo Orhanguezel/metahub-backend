@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import { Booking } from "@/modules/booking";
 import { Notification } from "@/modules/notification";
 import { sendEmail } from "@/services/emailService";
-import { BookingConfirmationTemplate } from "@/templates/bookingConfirmation";
+import { BookingReceivedTemplate } from "@/templates/bookingReceived";
 import { getSettingValue } from "@/core/utils/settingUtils";
 
 export const createBooking = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -85,11 +85,12 @@ export const createBooking = asyncHandler(async (req: Request, res: Response, ne
   });
 
   // ✅ name[language] kullanılmalı
-  const htmlToCustomer = BookingConfirmationTemplate({
+  const htmlToCustomer = BookingReceivedTemplate({
     name: name[language],
     service: serviceType,
     date,
     time,
+    locale: language,
   });
 
   const htmlToAdmin = `
@@ -107,7 +108,7 @@ export const createBooking = asyncHandler(async (req: Request, res: Response, ne
   await Promise.all([
     sendEmail({
       to: email,
-      subject: "🗓️ Booking Confirmation – Anastasia Massage",
+      subject: "📬 Booking Request Received – Anastasia Massage",
       html: htmlToCustomer,
     }),
     sendEmail({

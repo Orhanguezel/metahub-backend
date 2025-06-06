@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 import mongoose from "mongoose";
 import { Pinecone } from "@pinecone-database/pinecone";
-import { FAQ } from "../../modules/faq";
+import { FAQ } from "@/modules/faq";
 
 config();
 

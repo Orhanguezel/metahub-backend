@@ -1,6 +1,6 @@
 import { config } from "dotenv";
 import mongoose from "mongoose";
-import { FAQ } from "../../modules/faq";
+import { FAQ } from "@/modules/faq";
 import OpenAI from "openai";
 
 config();

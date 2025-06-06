@@ -1,0 +1,39 @@
+import { Types } from "mongoose";
+
+export type PaymentMethod = "cash_on_delivery" | "credit_card" | "paypal";
+export type OrderStatus = "pending" | "preparing" | "shipped" | "completed" | "cancelled";
+
+export interface IOrderItem {
+  product: Types.ObjectId;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface IShippingAddress {
+  name: string;
+  phone: string;
+  email: string;
+  street: string;
+  city: string;
+  postalCode: string;
+  country: string;
+}
+
+export interface IOrder {
+  user: Types.ObjectId;
+  addressId?: Types.ObjectId;
+  items: IOrderItem[];
+  shippingAddress: IShippingAddress;
+  totalPrice: number;
+  discount?: number;
+  coupon?: Types.ObjectId;
+  paymentMethod: PaymentMethod;
+  payments?: Types.ObjectId[];
+  status: OrderStatus;
+  isDelivered: boolean;
+  isPaid: boolean;
+  deliveredAt?: Date;
+  language?: "tr" | "en" | "de";
+  createdAt?: Date;
+  updatedAt?: Date;
+}

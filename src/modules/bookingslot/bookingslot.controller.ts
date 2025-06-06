@@ -1,5 +1,3 @@
-// @/modules/bookingSlot/bookingSlot.controller.ts
-
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import { Booking } from "@/modules/booking";
@@ -10,23 +8,43 @@ import {
 import { isValidObjectId } from "@/core/utils/validation";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-dayjs.extend(customParseFormat);
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-
-// Plugin’i dayjs’e tanıt
+dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrBefore);
 
-// 🔐 Admin: Create slot rule (e.g., Monday 09:00–23:00 every week)
-export const createSlotRule = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { dayOfWeek, startTime, endTime, intervalMinutes, breakBetweenAppointments } = req.body;
+// ✨ Default Slot Rule (en genel fallback)
+const DEFAULT_RULE = {
+  startTime: "09:00",
+  endTime: "18:00",
+  intervalMinutes: 60,
+  breakBetweenAppointments: 15,
+  isActive: true,
+};
 
-  const exists = await BookingSlotRule.findOne({ dayOfWeek });
+// 🔐 Admin: Create slot rule (e.g., Monday 09:00–23:00 every week)
+export const createSlotRule = asyncHandler(async (req: Request, res: Response) => {
+  const {
+    appliesToAll,
+    dayOfWeek,
+    startTime,
+    endTime,
+    intervalMinutes,
+    breakBetweenAppointments,
+  } = req.body;
+
+  // Aynı gün için veya appliesToAll varsa tekrar eklenmesini engelle
+  const exists = await BookingSlotRule.findOne(
+    appliesToAll
+      ? { appliesToAll: true }
+      : { dayOfWeek }
+  );
   if (exists) {
-    res.status(409).json({ message: "Rule for this day already exists." });
+    res.status(409).json({ message: "Rule for this day (or global) already exists." });
     return;
   }
 
   const rule = await BookingSlotRule.create({
+    appliesToAll: !!appliesToAll,
     dayOfWeek,
     startTime,
     endTime,
@@ -38,7 +56,7 @@ export const createSlotRule = asyncHandler(async (req: Request, res: Response): 
 });
 
 // 🔐 Admin: Create override for specific date
-export const createSlotOverride = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const createSlotOverride = asyncHandler(async (req: Request, res: Response) => {
   const { date, disabledTimes = [], fullDayOff = false } = req.body;
 
   const existing = await BookingSlotOverride.findOne({ date });
@@ -52,7 +70,7 @@ export const createSlotOverride = asyncHandler(async (req: Request, res: Respons
 });
 
 // 🔓 Public: Get available slots for a date
-export const getAvailableSlots = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const getAvailableSlots = asyncHandler(async (req, res) => {
   const { date } = req.query;
 
   if (!date || typeof date !== "string") {
@@ -61,22 +79,35 @@ export const getAvailableSlots = asyncHandler(async (req: Request, res: Response
   }
 
   const day = dayjs(date, "YYYY-MM-DD").day();
-  const rule = await BookingSlotRule.findOne({ dayOfWeek: day, isActive: true });
 
-  if (!rule) {
-    res.status(200).json({ success: true, slots: [] }); // No working hours that day
-    return;
-  }
+  // 1. Özel gün kuralı? (dayOfWeek)
+  let ruleDoc = await BookingSlotRule.findOne({ dayOfWeek: day, isActive: true });
+  // 2. Haftalık genel kural? (appliesToAll)
+  if (!ruleDoc) ruleDoc = await BookingSlotRule.findOne({ appliesToAll: true, isActive: true });
 
+  // 3. Kural bulunamazsa en genel default (memory'den)
+  const ruleData = ruleDoc
+    ? {
+        startTime: ruleDoc.startTime,
+        endTime: ruleDoc.endTime,
+        intervalMinutes: ruleDoc.intervalMinutes,
+        breakBetweenAppointments: ruleDoc.breakBetweenAppointments,
+      }
+    : {
+        ...DEFAULT_RULE,
+        dayOfWeek: day,
+      };
+
+  // 4. Override (tatil vb)
   const override = await BookingSlotOverride.findOne({ date });
   if (override?.fullDayOff) {
-    res.status(200).json({ success: true, slots: [] }); // Whole day off
+    res.status(200).json({ success: true, slots: [] });
     return;
   }
 
-  // Slot oluştur
-  const start = dayjs(`${date} ${rule.startTime}`, "YYYY-MM-DD HH:mm");
-  const end = dayjs(`${date} ${rule.endTime}`, "YYYY-MM-DD HH:mm");
+  // 5. Slotları oluştur
+  const start = dayjs(`${date} ${ruleData.startTime}`, "YYYY-MM-DD HH:mm");
+  const end = dayjs(`${date} ${ruleData.endTime}`, "YYYY-MM-DD HH:mm");
   const disabledTimes = override?.disabledTimes || [];
 
   const bookings = await Booking.find({ date, status: "confirmed" });
@@ -84,9 +115,8 @@ export const getAvailableSlots = asyncHandler(async (req: Request, res: Response
   const slots: string[] = [];
   let pointer = start;
 
-  while (pointer.add(rule.intervalMinutes, "minute").isBefore(end)) {
+  while (pointer.add(ruleData.intervalMinutes, "minute").isBefore(end)) {
     const timeStr = pointer.format("HH:mm");
-
     const isDisabled = disabledTimes.includes(timeStr);
     const isBooked = bookings.some((b) => b.time === timeStr);
 
@@ -94,14 +124,18 @@ export const getAvailableSlots = asyncHandler(async (req: Request, res: Response
       slots.push(timeStr);
     }
 
-    pointer = pointer.add(rule.intervalMinutes + rule.breakBetweenAppointments, "minute");
+    pointer = pointer.add(
+      ruleData.intervalMinutes + ruleData.breakBetweenAppointments,
+      "minute"
+    );
   }
 
   res.status(200).json({ success: true, slots });
+  return;
 });
 
 // 🔐 Admin: Delete slot rule by ID
-export const deleteSlotRule = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const deleteSlotRule = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
 
   if (!isValidObjectId(id)) {
@@ -119,7 +153,7 @@ export const deleteSlotRule = asyncHandler(async (req: Request, res: Response): 
 });
 
 // 🔐 Admin: Delete override by ID
-export const deleteSlotOverride = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const deleteSlotOverride = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
 
   if (!isValidObjectId(id)) {
@@ -136,9 +170,8 @@ export const deleteSlotOverride = asyncHandler(async (req: Request, res: Respons
   res.status(200).json({ success: true, message: "Override deleted." });
 });
 
-
-// 📅 Public: Get slots by specific date
-export const getSlotsByDate = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+// 📅 Public: Get slots by specific date (Klasik getSlotsByDate)
+export const getSlotsByDate = asyncHandler(async (req: Request, res: Response) => {
   const { date } = req.query;
 
   if (!date || typeof date !== "string") {
@@ -146,16 +179,18 @@ export const getSlotsByDate = asyncHandler(async (req: Request, res: Response): 
     return;
   }
 
-  const dayOfWeek = dayjs(date).day(); // 0 = Sunday ... 6 = Saturday
+  const dayOfWeek = dayjs(date).day();
 
-  // 1. Slot kurallarını getir
-  const rule = await BookingSlotRule.findOne({ dayOfWeek, isActive: true });
+  // 1. Önce spesifik gün kuralı, sonra appliesToAll, en sonda default
+  let rule = await BookingSlotRule.findOne({ dayOfWeek, isActive: true });
+  if (!rule) rule = await BookingSlotRule.findOne({ appliesToAll: true, isActive: true });
+
   if (!rule) {
     res.status(200).json({ success: true, slots: [] });
     return;
   }
 
-  // 2. Override kontrol et (tatil günleri vs.)
+  // 2. Override kontrolü
   const override = await BookingSlotOverride.findOne({ date });
 
   if (override?.fullDayOff) {
@@ -163,7 +198,7 @@ export const getSlotsByDate = asyncHandler(async (req: Request, res: Response): 
     return;
   }
 
-  // 3. Saatleri oluştur
+  // 3. Slotları oluştur
   const availableSlots: string[] = [];
   const interval = rule.intervalMinutes;
   const breakTime = rule.breakBetweenAppointments;
@@ -184,10 +219,7 @@ export const getSlotsByDate = asyncHandler(async (req: Request, res: Response): 
   }).select("time durationMinutes");
 
   const bookedTimes = new Set<string>();
-
-  confirmedBookings.forEach((b) => {
-    bookedTimes.add(b.time);
-  });
+  confirmedBookings.forEach((b) => bookedTimes.add(b.time));
 
   // 5. Override edilen saatleri çıkar
   const disabledTimes = new Set(override?.disabledTimes || []);
@@ -214,4 +246,3 @@ export const getAllSlotOverrides = asyncHandler(async (req: Request, res: Respon
   const overrides = await BookingSlotOverride.find().sort("-date");
   res.status(200).json({ success: true, data: overrides });
 });
-

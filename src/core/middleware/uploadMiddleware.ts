@@ -6,11 +6,25 @@ import { Request } from "express";
 import slugify from "slugify";
 import { storageAdapter } from "./storageAdapter";
 
-const envProfile = process.env.APP_ENV || "ensotek";
-const provider = process.env.STORAGE_PROVIDER as "local" | "cloudinary" || "local";
+// 🌍 Environment-based values (already loaded via env.ts)
+const envProfile = process.env.APP_ENV;
+const provider = process.env.STORAGE_PROVIDER as "local" | "cloudinary";
+const baseUrl = process.env.BASE_URL;
+const uploadRoot = process.env.UPLOAD_ROOT || "uploads";
 
-export const BASE_UPLOAD_DIR = "uploads";
-export const BASE_URL_VALUE = process.env.BASE_URL || "http://localhost:5014";
+// ❗ Required variable check
+if (!envProfile) {
+  throw new Error("APP_ENV is not defined. Please set it via your environment configuration.");
+}
+if (!provider) {
+  throw new Error("STORAGE_PROVIDER is not defined in your environment.");
+}
+if (!baseUrl) {
+  throw new Error("BASE_URL is not defined in your environment.");
+}
+
+export const BASE_UPLOAD_DIR = uploadRoot;
+export const BASE_URL_VALUE = baseUrl;
 export const CURRENT_PROJECT = envProfile;
 
 export const UPLOAD_FOLDERS = {
@@ -32,6 +46,7 @@ export const UPLOAD_FOLDERS = {
   setting: "setting-images",
   company: "company-images",
   about: "about-images",
+  apartment: "apartment-images",
   default: "misc",
 } as const;
 
@@ -40,7 +55,7 @@ export type UploadFolderKeys = keyof typeof UPLOAD_FOLDERS;
 export const resolveUploadPath = (type: string): string =>
   path.join(BASE_UPLOAD_DIR, CURRENT_PROJECT, type);
 
-// Klasörleri otomatik oluştur
+// 📁 Auto-create directories if not exist
 Object.values(UPLOAD_FOLDERS).forEach((folder) => {
   const fullPath = resolveUploadPath(String(folder));
   if (!fs.existsSync(fullPath)) {

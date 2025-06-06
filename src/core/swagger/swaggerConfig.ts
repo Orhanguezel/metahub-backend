@@ -1,27 +1,35 @@
+// src/core/swagger/swaggerOptions.ts
+
 import path from "path";
-import dotenv from "dotenv";
 
-// Ortama özel .env dosyasını yükle
-const envProfile = process.env.APP_ENV || "ensotek";
-dotenv.config({
-  path: path.resolve(process.cwd(), `.env.${envProfile}`),
-});
+/**
+ * Swagger configuration for OpenAPI 3.
+ */
+const envProfile = process.env.APP_ENV;
+const brand = process.env.BRAND_NAME;
+const apiVersion = process.env.API_VERSION;
+const baseUrl = process.env.SWAGGER_BASE_URL;
+const contactEmail = process.env.CONTACT_EMAIL;
+const contactUrl = process.env.CONTACT_URL;
 
-const BRAND_NAME = process.env.BRAND_NAME || "Ensotek";
-const API_VERSION = process.env.API_VERSION || "1.0.0";
-const BASE_URL = process.env.SWAGGER_BASE_URL || "http://localhost:5014/api";
+if (!envProfile) throw new Error("❌ APP_ENV is not defined.");
+if (!brand) throw new Error("❌ BRAND_NAME is not defined.");
+if (!apiVersion) throw new Error("❌ API_VERSION is not defined.");
+if (!baseUrl) throw new Error("❌ SWAGGER_BASE_URL is not defined.");
+if (!contactEmail) throw new Error("❌ CONTACT_EMAIL is not defined.");
+if (!contactUrl) throw new Error("❌ CONTACT_URL is not defined.");
 
 export const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: `${BRAND_NAME} Backend API`,
-      version: API_VERSION,
-      description: `📘 API documentation for the ${BRAND_NAME} backend project.`,
+      title: `${brand} Backend API`,
+      version: apiVersion,
+      description: `📘 API documentation for the ${brand} backend project.`,
       contact: {
-        name: `${BRAND_NAME} Support`,
-        email: process.env.CONTACT_EMAIL || "support@example.com",
-        url: process.env.CONTACT_URL || "https://example.com",
+        name: `${brand} Support`,
+        email: contactEmail,
+        url: contactUrl,
       },
       license: {
         name: "MIT",
@@ -30,7 +38,7 @@ export const swaggerOptions = {
     },
     servers: [
       {
-        url: BASE_URL,
+        url: baseUrl,
         description: `Base URL for ${envProfile} environment`,
       },
     ],

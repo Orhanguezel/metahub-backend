@@ -1,0 +1,85 @@
+{
+  "name": "dashboard",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getDashboardStats",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/charts/orders",
+      "auth": true,
+      "summary": "GET /charts/orders",
+      "validationName": "\"/daily-overview\"",
+      "controllerName": "getDailyOverview"
+    },
+    {
+      "method": "GET",
+      "path": "/charts/revenue",
+      "auth": true,
+      "summary": "GET /charts/revenue",
+      "validationName": "\"/daily-overview\"",
+      "controllerName": "getDailyOverview"
+    },
+    {
+      "method": "GET",
+      "path": "/reports/top-products",
+      "auth": true,
+      "summary": "GET /reports/top-products",
+      "validationName": "\"/daily-overview\"",
+      "controllerName": "getDailyOverview"
+    },
+    {
+      "method": "GET",
+      "path": "/reports/user-roles",
+      "auth": true,
+      "summary": "GET /reports/user-roles",
+      "validationName": "\"/daily-overview\"",
+      "controllerName": "getDailyOverview"
+    },
+    {
+      "method": "GET",
+      "path": "/daily-overview",
+      "auth": true,
+      "summary": "GET /daily-overview",
+      "validationName": "\"/daily-overview\"",
+      "controllerName": "getDailyOverview"
+    },
+    {
+      "method": "GET",
+      "path": "/logs",
+      "auth": true,
+      "summary": "GET /logs"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013"
+  },
+  "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
+  "lastUpdatedAt": "2025-06-06T09:24:40.667Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
+      "date": "2025-06-06T09:24:40.667Z",
+      "note": "Meta auto-generated"
+    }
+  ]
+}

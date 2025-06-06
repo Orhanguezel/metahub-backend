@@ -7,9 +7,14 @@ export const getRouter = async (): Promise<Router> => {
 
   const modulesPath = path.join(__dirname, "..", "modules");
   const enabledModules =
-    process.env.ENABLED_MODULES?.split(",").map((m) => m.trim().toLowerCase()) ?? [];
+    process.env.ENABLED_MODULES?.split(",").map((m) =>
+      m.trim().toLowerCase()
+    ) ?? [];
 
-  const metaConfigPath = path.resolve(process.cwd(), process.env.META_CONFIG_PATH || "src/meta-configs/ensotek");
+  const metaConfigPath = path.resolve(
+    process.cwd(),
+    process.env.META_CONFIG_PATH
+  );
   const modules = await fs.readdir(modulesPath, { withFileTypes: true });
 
   for (const mod of modules) {
@@ -30,11 +35,15 @@ export const getRouter = async (): Promise<Router> => {
       const metaRaw = await fs.readFile(metaFile, "utf-8");
       const meta = JSON.parse(metaRaw);
 
-      const indexImport = await import(path.join(moduleDir, "index.ts").replace(".ts", ""));
+      const indexImport = await import(
+        path.join(moduleDir, "index.ts").replace(".ts", "")
+      );
       const modRouter = indexImport.default;
 
       if (!modRouter) {
-        console.warn(`⚠️  [WARN] ${moduleName}/index.ts has no default export.`);
+        console.warn(
+          `⚠️  [WARN] ${moduleName}/index.ts has no default export.`
+        );
         continue;
       }
 
@@ -45,10 +54,16 @@ export const getRouter = async (): Promise<Router> => {
       } else {
         router.use(prefix, modRouter);
       }
+      if (!process.env.META_CONFIG_PATH) {
+        throw new Error("❌ META_CONFIG_PATH is not defined in environment.");
+      }
 
       console.log(`✅ [OK] Mounted ${prefix} (${moduleName})`);
     } catch (err: any) {
-      console.error(`❌ [FAIL] Failed to load module "${moduleName}":`, err.message);
+      console.error(
+        `❌ [FAIL] Failed to load module "${moduleName}":`,
+        err.message
+      );
     }
   }
 

@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import { writeModuleFiles } from "./writeModuleFiles";
 import { createMetaFile } from "./createMetaFile";
+import { getEnabledModulesFromEnv } from "../../core/utils/envHelpers";
 
 const moduleName = process.argv[2];
 
@@ -12,8 +13,23 @@ if (!moduleName) {
   process.exit(1);
 }
 
-const modulesPath = path.resolve(__dirname, "../modules");
-const metaPath = path.resolve(__dirname, "../meta-configs/ensotek");
+// 🔐 Check if module is enabled in .env
+const enabledModules = getEnabledModulesFromEnv();
+
+if (!enabledModules.includes(moduleName)) {
+  console.error(`❌ Module "${moduleName}" is not listed in ENABLED_MODULES`);
+  process.exit(1);
+}
+
+const modulesPath = path.resolve(process.cwd(), "src/modules");
+
+const metaConfigRelativePath = process.env.META_CONFIG_PATH;
+if (!metaConfigRelativePath) {
+  console.error("❌ META_CONFIG_PATH is not defined in environment.");
+  process.exit(1);
+}
+
+const metaPath = path.resolve(process.cwd(), metaConfigRelativePath);
 const modulePath = path.join(modulesPath, moduleName);
 
 if (fs.existsSync(modulePath)) {
@@ -21,12 +37,13 @@ if (fs.existsSync(modulePath)) {
   process.exit(1);
 }
 
+// 📄 Create module folder
 fs.mkdirSync(modulePath, { recursive: true });
 
-// 📄 Write initial files
+// 🧱 Generate initial boilerplate files
 writeModuleFiles(modulePath, moduleName);
 
-// 🧠 Create meta file
+// 🧠 Generate meta file
 createMetaFile(moduleName, metaPath)
   .then(() => {
     console.log(`✅ Module "${moduleName}" created successfully!`);

@@ -1,0 +1,127 @@
+{
+  "name": "gallery",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/published",
+      "auth": true,
+      "summary": "GET /published",
+      "validationName": "\"/published\"",
+      "controllerName": "publicController.getPublishedGalleryItems"
+    },
+    {
+      "method": "GET",
+      "path": "/search",
+      "auth": true,
+      "summary": "GET /search",
+      "validationName": "\"/search\"",
+      "controllerName": "publicController.searchGalleryItems"
+    },
+    {
+      "method": "GET",
+      "path": "/stats",
+      "auth": true,
+      "summary": "GET /stats",
+      "validationName": "\"/stats\"",
+      "controllerName": "publicController.getGalleryStats"
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "publicController.getGalleryItemById",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "adminController.getAllGalleryItems",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/:id/toggle",
+      "auth": true,
+      "summary": "PATCH /:id/toggle",
+      "validationName": "\"/batch/publish\"",
+      "controllerName": "adminController.batchPublishGalleryItems"
+    },
+    {
+      "method": "PATCH",
+      "path": "/:id/archive",
+      "auth": true,
+      "summary": "PATCH /:id/archive",
+      "validationName": "\"/batch/publish\"",
+      "controllerName": "adminController.batchPublishGalleryItems"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id",
+      "validationName": "\"/batch/publish\"",
+      "controllerName": "adminController.batchPublishGalleryItems",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/:id/restore",
+      "auth": true,
+      "summary": "PATCH /:id/restore",
+      "validationName": "\"/batch/publish\"",
+      "controllerName": "adminController.batchPublishGalleryItems"
+    },
+    {
+      "method": "PATCH",
+      "path": "/batch/publish",
+      "auth": true,
+      "summary": "PATCH /batch/publish",
+      "validationName": "\"/batch/publish\"",
+      "controllerName": "adminController.batchPublishGalleryItems"
+    },
+    {
+      "method": "DELETE",
+      "path": "/batch",
+      "auth": true,
+      "summary": "DELETE /batch",
+      "validationName": "\"/batch\"",
+      "controllerName": "adminController.batchDeleteGalleryItems"
+    }
+  ],
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013"
+  },
+  "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
+  "lastUpdatedAt": "2025-06-06T09:24:40.396Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
+      "date": "2025-06-06T09:24:40.396Z",
+      "note": "Meta auto-generated"
+    }
+  ]
+}
