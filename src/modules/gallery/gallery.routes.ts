@@ -14,6 +14,7 @@ const router = express.Router();
 router.get("/published", publicController.getPublishedGalleryItems);
 router.get("/search", publicController.searchGalleryItems);
 router.get("/stats", publicController.getGalleryStats);
+router.get("/categories", publicController.getPublishedGalleryCategories);
 
 // 🛡️ Important: place this at the END to avoid route collisions
 router.get("/:id", publicController.getGalleryItemById);
@@ -22,6 +23,7 @@ router.get("/:id", publicController.getGalleryItemById);
 router.use(authenticate, authorizeRoles("admin"));
 
 router.get("/", adminController.getAllGalleryItems);
+
 
 router.post(
   "/upload",
