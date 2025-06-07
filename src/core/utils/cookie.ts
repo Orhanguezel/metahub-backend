@@ -14,18 +14,21 @@ if (isProduction && !COOKIE_DOMAIN) {
 export const setTokenCookie = (res: Response, token: string): void => {
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
-    sameSite: "lax",
-    secure: isProduction,
+    sameSite: "none",                // 🔥 kritik değişiklik
+    secure: true,                    // 🔒 şart çünkü SameSite=None için HTTPS gerekir
     domain: isProduction ? COOKIE_DOMAIN : undefined,
     maxAge: COOKIE_MAX_AGE,
+    path: "/",                       // ✅ her yere erişsin
   });
 };
 
 export const clearTokenCookie = (res: Response): void => {
   res.clearCookie(COOKIE_NAME, {
     httpOnly: true,
-    sameSite: "lax",
-    secure: isProduction,
+    sameSite: "none",                // 🔥 aynı şekilde burada da olmalı
+    secure: true,
     domain: isProduction ? COOKIE_DOMAIN : undefined,
+    path: "/",                       // ✅ şart
   });
 };
+
