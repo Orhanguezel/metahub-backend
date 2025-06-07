@@ -4,7 +4,6 @@ import {User} from "@/modules/users/users.models";
 import { getTokenFromRequest } from "@/core/utils/authHelpers";
 import { verifyToken } from "@/core/utils/token";
 import { UserPayload } from "@/types/userPayload";
-console.log("authMiddleware loaded!");
 
 
 interface AuthRequest extends Request {

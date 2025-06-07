@@ -1,28 +1,29 @@
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "strict": false,
-    "skipLibCheck": true,
-    "noImplicitAny": false,
 
-    "types": ["node", "express", "multer"]
-,
-    "typeRoots": ["./src/types", "./node_modules/@types"],
+ {
+   "compilerOptions": {
+     "target": "ES2022",
+     "module": "CommonJS",
+     "moduleResolution": "node",
+     "esModuleInterop": true,
+     "strict": false,
+     "skipLibCheck": true,
+     "noImplicitAny": false,
 
-    "outDir": "dist",
-    "rootDir": "src",
+    "types": ["node", "express", "multer"],
+    "typeRoots": ["src/types", "node_modules/@types"],
+ 
+     "outDir": "dist",
+     "rootDir": "src",
+ 
+     "baseUrl": ".",
+     "paths": {
+       "@/*": ["src/*"]
+     }
+   },
+   "include": ["src","types"],
+   "exclude": [
+     "node_modules",
+     "dist"
+   ]
+ }
 
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
-  },
-  "include": ["src","types"],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
-}

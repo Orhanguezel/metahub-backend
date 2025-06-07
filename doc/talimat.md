@@ -144,7 +144,7 @@ app.use(cors({
 
 (async () => {
   const router = await getRouter();
-  app.use("/api", router);
+  app.use("", router);
 
   await setupSwagger(app);
 

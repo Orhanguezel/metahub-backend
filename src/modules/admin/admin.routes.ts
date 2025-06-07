@@ -5,7 +5,8 @@ import {
   updateModule,
   deleteModule,
   getProjects,
-  createModule
+  createModule,
+  getEnabledModules
 } from "./admin.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
@@ -18,6 +19,8 @@ const router = express.Router();
 
 // 🎯 Tüm admin işlemleri korunur
 router.use(authenticate, authorizeRoles("admin"));
+
+router.get("/enabled-modules", getEnabledModules);
 
 // ➕ Yeni modül oluştur
 router.post("/modules", validateCreateModule, createModule);

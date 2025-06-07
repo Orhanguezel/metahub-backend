@@ -30,35 +30,37 @@ app.use("/uploads", express.static("uploads"));
 const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [];
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn("❌ Not allowed by CORS:", origin);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-}));
 
-(async () => {
-  const router = await getRouter();
-  app.use("", router);
+     if (!origin || allowedOrigins.includes(origin)) {
+       callback(null, true);
+     } else {
+       console.warn("❌ Not allowed by CORS:", origin);
+       callback(new Error("Not allowed by CORS"));
+     }
+   },
+   credentials: true,
+ }));
+ 
+ (async () => {
+   const router = await getRouter();
+   app.use("", router);
+ 
+   await setupSwagger(app);
+ 
+   app.use(errorHandler);
+ 
+   const port = process.env.PORT;
+   if (!port) {
+     console.error("❌ PORT not defined in environment file.");
+     process.exit(1);
+   }
+ 
+   server.listen(Number(port), () => {
+     const baseUrl = process.env.BASE_URL || `http://localhost:${Number(port)}`;
+     console.log(`🚀 Server running at ${baseUrl}`);
+   });
 
-  await setupSwagger(app);
 
-  app.use(errorHandler);
+   initializeSocket(server);
+ })();
 
-  const port = process.env.PORT;
-  if (!port) {
-    console.error("❌ PORT not defined in environment file.");
-    process.exit(1);
-  }
-
-  server.listen(Number(port), () => {
-  const baseUrl = process.env.BASE_URL;
-  console.log(`🚀 Server running at ${baseUrl}`);
-});
-
-
-  initializeSocket(server);
-})();

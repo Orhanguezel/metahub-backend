@@ -232,3 +232,32 @@ export const getProjects = asyncHandler(async (_req: Request, res: Response, nex
     next(error);
   }
 });
+
+// Fetch enabled modules for a project
+export const getEnabledModules = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const project = req.query.project as string | undefined;
+
+    if (!project) {
+      res.status(400).json({ success: false, message: "Project query parameter is required." });
+      return;
+    }
+
+    const settings = await ModuleSetting.find({ project, enabled: true });  // Fetch only enabled modules
+
+    if (!settings || settings.length === 0) {
+      res.status(200).json({ success: true, message: "No enabled modules found for this project.", data: [] });
+      return;
+    }
+
+    const moduleNames = settings.map((s) => s.module);
+    res.status(200).json({
+      success: true,
+      message: "Enabled modules fetched successfully.",
+      data: moduleNames,  // Return the enabled module names
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+

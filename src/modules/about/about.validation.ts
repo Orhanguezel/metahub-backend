@@ -7,57 +7,58 @@ export const validateObjectId = (field: string) => [
     .isMongoId()
     .withMessage(`${field} must be a valid MongoDB ObjectId.`),
   validateRequest,
-];
+ ];
+ 
+ // ✅ Create About Validation
+ export const validateCreateAbout = [
+   body("title")
+     .custom((value) => {
+       try {
+         const parsed = typeof value === "string" ? JSON.parse(value) : value;
+         return ["tr", "en", "de"].every(
+           (lang) => parsed[lang] && parsed[lang].trim()
+         );
+       } catch {
+         throw new Error("title must be an array or a JSON stringified array.");
+       }
+     })
+     .withMessage("Title must be a valid JSON with tr, en, de."),
+ 
+   body("summary")
+     .custom((value) => {
+       try {
+         const parsed = typeof value === "string" ? JSON.parse(value) : value;
+         return ["tr", "en", "de"].every(
+           (lang) => parsed[lang] && parsed[lang].trim()
+         );
+       } catch {
+         throw new Error("Summary must be an array or a JSON stringified array.");
+       }
+     })
+     .withMessage("Summary must be a valid JSON with tr, en, de."),
+ 
+   body("content")
+     .custom((value) => {
+       try {
+         const parsed = typeof value === "string" ? JSON.parse(value) : value;
+         return ["tr", "en", "de"].every(
+           (lang) => parsed[lang] && parsed[lang].trim()
+         );
+       } catch {
+         throw new Error(
+           "Content must be an array or a JSON stringified array."
+         );
+       }
+     })
+     .withMessage("Content must be a valid JSON with tr, en, de."),
+ 
+   body("category")
+     .optional()
+     .isMongoId()
+     .withMessage("Category must be a valid MongoDB ObjectId."),
+ 
+   body("tags")
 
-// ✅ Create About Validation
-export const validateCreateAbout = [
-  body("title")
-    .custom((value) => {
-      try {
-        const parsed = typeof value === "string" ? JSON.parse(value) : value;
-        return ["tr", "en", "de"].every(
-          (lang) => parsed[lang] && parsed[lang].trim()
-        );
-      } catch {
-        throw new Error("title must be an array or a JSON stringified array.");
-      }
-    })
-    .withMessage("Title must be a valid JSON with tr, en, de."),
-
-  body("summary")
-    .custom((value) => {
-      try {
-        const parsed = typeof value === "string" ? JSON.parse(value) : value;
-        return ["tr", "en", "de"].every(
-          (lang) => parsed[lang] && parsed[lang].trim()
-        );
-      } catch {
-        throw new Error("Summry must be an array or a JSON stringified array.");
-      }
-    })
-    .withMessage("Summary must be a valid JSON with tr, en, de."),
-
-  body("content")
-    .custom((value) => {
-      try {
-        const parsed = typeof value === "string" ? JSON.parse(value) : value;
-        return ["tr", "en", "de"].every(
-          (lang) => parsed[lang] && parsed[lang].trim()
-        );
-      } catch {
-        throw new Error(
-          "Content must be an array or a JSON stringified array."
-        );
-      }
-    })
-    .withMessage("Content must be a valid JSON with tr, en, de."),
-
-  body("category")
-    .optional()
-    .isMongoId()
-    .withMessage("Category must be a valid MongoDB ObjectId."),
-
-  body("tags")
     .optional()
     .custom((value) => {
       if (Array.isArray(value)) return true;
