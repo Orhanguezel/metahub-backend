@@ -1,57 +1,58 @@
 import { body, param, query } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 
-// ✅ Param ID kontrolü
-export const validateObjectId = (field: string) => [
-  param(field).isMongoId().withMessage(`${field} must be a valid MongoDB ObjectId.`),
-  validateRequest,
-];
+ // ✅ Param ID kontrolü
+ export const validateObjectId = (field: string) => [
+   param(field).isMongoId().withMessage(`${field} must be a valid MongoDB ObjectId.`),
+   validateRequest,
+ ];
+ 
+ // ✅ Create Articles Validation
+ export const validateCreateArticles = [
+   body("title")
+     .custom((value) => {
+       try {
+         const parsed = typeof value === "string" ? JSON.parse(value) : value;
+         return ["tr", "en", "de"].every((lang) => parsed[lang] && parsed[lang].trim());
+       } catch {
+         throw new Error("title must be an array or a JSON stringified array.");
+       }
+     })
+     .withMessage("Title must be a valid JSON with tr, en, de."),
+ 
+   body("summary")
+     .custom((value) => {
+       try {
+         const parsed = typeof value === "string" ? JSON.parse(value) : value;
+         return ["tr", "en", "de"].every((lang) => parsed[lang] && parsed[lang].trim());
+       } catch {
+         throw new Error("Summary must be an array or a JSON stringified array.");
+       }
+     })
+     .withMessage("Summary must be a valid JSON with tr, en, de."),
+ 
+   body("content")
+     .custom((value) => {
+       try {
+         const parsed = typeof value === "string" ? JSON.parse(value) : value;
+         return ["tr", "en", "de"].every((lang) => parsed[lang] && parsed[lang].trim());
+       } catch {
+         throw new Error("Content must be an array or a JSON stringified array.");
+       }
+     })
+     .withMessage("Content must be a valid JSON with tr, en, de."),
+ 
+   body("category")
+     .optional()
+     .isMongoId()
+     .withMessage("Category must be a valid MongoDB ObjectId."),
+ 
+   body("tags")
+     .optional()
+     .custom((value) => {
+       if (Array.isArray(value)) return true;
+       if (typeof value === "string") {
 
-// ✅ Create Articles Validation
-export const validateCreateArticles = [
-  body("title")
-    .custom((value) => {
-      try {
-        const parsed = typeof value === "string" ? JSON.parse(value) : value;
-        return ["tr", "en", "de"].every((lang) => parsed[lang] && parsed[lang].trim());
-      } catch {
-        throw new Error("title must be an array or a JSON stringified array.");
-      }
-    })
-    .withMessage("Title must be a valid JSON with tr, en, de."),
-
-  body("summary")
-    .custom((value) => {
-      try {
-        const parsed = typeof value === "string" ? JSON.parse(value) : value;
-        return ["tr", "en", "de"].every((lang) => parsed[lang] && parsed[lang].trim());
-      } catch {
-        throw new Error("Summry must be an array or a JSON stringified array.");
-      }
-    })
-    .withMessage("Summary must be a valid JSON with tr, en, de."),
-
-  body("content")
-    .custom((value) => {
-      try {
-        const parsed = typeof value === "string" ? JSON.parse(value) : value;
-        return ["tr", "en", "de"].every((lang) => parsed[lang] && parsed[lang].trim());
-      } catch {
-        throw new Error("Content must be an array or a JSON stringified array.");
-      }
-    })
-    .withMessage("Content must be a valid JSON with tr, en, de."),
-
-  body("category")
-    .optional()
-    .isMongoId()
-    .withMessage("Category must be a valid MongoDB ObjectId."),
-
-  body("tags")
-    .optional()
-    .custom((value) => {
-      if (Array.isArray(value)) return true;
-      if (typeof value === "string") {
         try {
           const parsed = JSON.parse(value);
           return Array.isArray(parsed);

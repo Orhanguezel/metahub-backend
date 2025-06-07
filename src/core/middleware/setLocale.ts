@@ -1,6 +1,5 @@
 
 // middleware/setLocale.ts
-/// <reference path="../../types/global.d.ts" />
 
 import { Request, Response, NextFunction } from "express";
 

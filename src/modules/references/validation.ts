@@ -32,7 +32,7 @@ export const validateCreateReferences = [
           (lang) => parsed[lang] && parsed[lang].trim()
         );
       } catch {
-        throw new Error("Summry must be an array or a JSON stringified array.");
+        throw new Error("Summary must be an array or a JSON stringified array.");
       }
     })
     .withMessage("Summary must be a valid JSON with tr, en, de."),
