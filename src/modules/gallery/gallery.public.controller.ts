@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { Gallery } from "@/modules/gallery";
+import { GalleryCategory } from "@/modules/gallerycategory";
 import { isValidObjectId } from "@/core/utils/validation";
 
 // ✅ Get published gallery items
@@ -137,5 +138,16 @@ export const getGalleryItemById = asyncHandler(async (req: Request, res: Respons
     success: true,
     message: "Gallery item fetched successfully.",
     data: item,
+  });
+});
+
+// ✅ Get published gallery categories (only isActive: true)
+export const getPublishedGalleryCategories = asyncHandler(async (_req: Request, res: Response) => {
+  const categories = await GalleryCategory.find({ isActive: true }).sort({ createdAt: -1 }).lean();
+
+  res.status(200).json({
+    success: true,
+    message: "Published gallery categories fetched successfully.",
+    data: categories,
   });
 });
