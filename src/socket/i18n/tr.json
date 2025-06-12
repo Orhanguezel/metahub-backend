@@ -1,0 +1,10 @@
+{
+  "socket.env.error": "❌ CORS_ORIGIN ve JWT_SECRET .env'de tanımlanmalı.",
+  "socket.auth.tokenParseError": "❌ [Socket Auth] Token çözümlemesi hatası:",
+  "socket.session.saveError": "❌ [Socket] ChatSession kaydı hatası:",
+  "socket.connection": "🟢 [Socket] Bağlandı: {user} | Oda: {room}",
+  "socket.adminMessage.success": "✅ [Admin Message] {email} → {room}",
+  "socket.adminMessage.error": "❌ [Socket] Admin mesajı hatası:",
+  "socket.disconnect": "🔴 [Socket] Bağlantı kesildi: {user}"
+}
+

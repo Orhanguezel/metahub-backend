@@ -1,0 +1,10 @@
+{
+  "create.success": "Bike category created successfully.",
+  "update.success": "Bike category updated successfully.",
+  "delete.success": "Bike category deleted successfully.",
+  "fetch.success": "Bike category fetched successfully.",
+  "fetchAll.success": "Bike categories fetched successfully.",
+  "error.notFound": "Bike category not found.",
+  "error.invalidId": "Invalid category ID.",
+  "validation.missingLocales": "All supported locales must be provided in name."
+}

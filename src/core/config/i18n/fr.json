@@ -1,0 +1,36 @@
+{
+  "env.loaded": "✅ Fichier d'environnement {file} chargé.",
+  "env.notFound": "❌ {file} introuvable. Veuillez le créer avant de démarrer le serveur.",
+  "env.fallbackLoaded": "✅ Fichier .env de secours chargé.",
+  "env.noEnvFile": "⚠️ Aucun fichier .env trouvé. Les variables d'environnement peuvent manquer.",
+  "env.profile.active": "🌐 Profil actif : {profile}",
+  "env.activeProfile": "🌐 Profil actif : {profile}",
+
+  "email.missingConfig": "⚠️ Configuration SMTP manquante : {vars}",
+  "email.smtp.success": "✅ Connexion SMTP réussie.",
+  "email.smtp.failed": "❌ Échec de la connexion SMTP : {error}",
+
+  "connect.success": "✅ Connexion MongoDB réussie.",
+  "connect.failed": "❌ Erreur de connexion MongoDB : {error}",
+
+  "mongo.connected": "✅ Connexion MongoDB établie.",
+  "mongo.error.notDefined": "❌ Variable d'environnement MONGO_URI non définie.",
+  "mongo.connectionError": "❌ Erreur de connexion à MongoDB : {error}",
+
+  "smtp.connectionSuccess": "✅ Connexion SMTP réussie.",
+  "smtp.connectionFailed": "❌ Échec de la connexion SMTP : {error}",
+  "smtp.missingConfig": "⚠️ Configuration SMTP manquante : {vars}",
+
+  "migration.noAppEnv": "❌ APP_ENV n'est pas défini. Veuillez le définir avant d'exécuter ce script.",
+  "migration.envNotFound": "❌ Fichier d'environnement introuvable : {envPath}",
+  "migration.envLoaded": "🌱 Fichier d'environnement chargé : {envPath}",
+  "migration.migrated": "✅ Module migré : {module}",
+  "migration.alreadyMigrated": "✔️ Déjà migré : {module}",
+  "migration.error": "❌ Erreur de migration : {error}",
+
+  "server.cors.notAllowed": "❌ CORS non autorisé : {origin}",
+  "server.error.noPort": "❌ PORT non défini dans le fichier d'environnement.",
+  "server.started": "🚀 Serveur démarré : {baseUrl}"
+}
+
+

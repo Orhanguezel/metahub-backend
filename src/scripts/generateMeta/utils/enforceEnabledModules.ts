@@ -1,18 +1,25 @@
-// src/scripts/generateMeta/utils/enforceEnabledModules.ts
 import { ModuleSetting } from "@/modules/admin";
 import { getEnvProfiles } from "@/tools/getEnvProfiles";
 import { readAllEnvFiles } from "./envHelpers";
 
+import logger from "@/core/middleware/logger/logger";
+import { t } from "@/core/utils/i18n/translate";
+import translations from "@/scripts/generateMeta/i18n";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+
 /**
  * Silinmeyen ama devre dışı bırakılacak modülleri işaretler.
+ * (Sadece enabled/deaktif flag'ini günceller.)
  */
 export const enforceEnabledModulesFromEnv = async () => {
   const profiles = getEnvProfiles();
   const envConfigs = readAllEnvFiles(profiles);
 
   for (const profile of profiles) {
+    const lang = getLogLocale();
     const envVars = envConfigs[profile];
-    const enabledModules = envVars.ENABLED_MODULES?.split(",").map((m) => m.trim()) || [];
+    const enabledModules =
+      envVars.ENABLED_MODULES?.split(",").map((m) => m.trim()) || [];
 
     const allSettings = await ModuleSetting.find({ project: profile });
 
@@ -23,8 +30,12 @@ export const enforceEnabledModulesFromEnv = async () => {
           { project: profile, module: setting.module },
           { $set: { enabled: isEnabled } }
         );
-        console.log(
-          `🔁 Updated "${setting.module}" in profile "${profile}" → enabled: ${isEnabled}`
+        logger.info(
+          t("meta.enforce.updated", lang, translations, {
+            module: setting.module,
+            profile,
+            enabled: String(isEnabled),
+          })
         );
       }
     }

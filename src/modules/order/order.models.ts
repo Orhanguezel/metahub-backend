@@ -1,5 +1,6 @@
 import { Schema, model, models, Types, Model } from "mongoose";
 import type { IOrder, IOrderItem, IShippingAddress } from "./types";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
 const orderItemSchema = new Schema<IOrderItem>({
   product: { type: Schema.Types.ObjectId, ref: "RadonarProd", required: true },
@@ -38,7 +39,11 @@ const orderSchema = new Schema<IOrder>({
     default: "pending",
     required: true,
   },
-  language: { type: String, enum: ["tr", "en", "de"], default: "en" },
+  language: {
+  type: String,
+  enum: SUPPORTED_LOCALES,
+  default: "en",
+},
   isDelivered: { type: Boolean, default: false },
   isPaid: { type: Boolean, default: false },
   deliveredAt: { type: Date },

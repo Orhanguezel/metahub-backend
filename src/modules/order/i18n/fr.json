@@ -1,0 +1,19 @@
+{
+  "error.orderNotFound": "Commande introuvable.",
+  "error.notAuthorizedViewOrder": "Vous n'êtes pas autorisé à consulter cette commande.",
+  "error.notAuthorizedUpdateOrder": "Vous n'êtes pas autorisé à mettre à jour cette commande.",
+  "error.shippingAddressRequired": "L'adresse de livraison est requise.",
+  "order.fetched.success": "Commande récupérée avec succès.",
+  "order.addressUpdated.success": "Adresse de livraison mise à jour avec succès.",
+  "order.fetched.all": "Toutes les commandes ont été récupérées avec succès.",
+  "order.status.updated": "Statut de la commande mis à jour avec succès.",
+  "order.delivered.success": "Commande marquée comme livrée.",
+  "order.delivered": "Votre commande a été livrée.",
+  "order.deleted.success": "Commande supprimée avec succès.",
+  "error.invalidOrderStatus": "Statut de commande invalide.",
+  "order.status.pending": "Commande en attente.",
+  "order.status.preparing": "Commande en préparation.",
+  "order.status.shipped": "Commande expédiée.",
+  "order.status.completed": "Commande terminée.",
+  "order.status.cancelled": "Commande annulée."
+}

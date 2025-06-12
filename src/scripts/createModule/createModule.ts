@@ -1,5 +1,3 @@
-// src/tools/createModule.ts
-
 import fs from "fs";
 import path from "path";
 import { writeModuleFiles } from "./writeModuleFiles";
@@ -7,6 +5,7 @@ import { createMetaFile } from "./createMetaFile";
 import { getEnabledModulesFromEnv } from "../../core/utils/envHelpers";
 
 const moduleName = process.argv[2];
+const useAnalyticsFlag = process.argv.includes("--analytics"); // ✅ flag desteği
 
 if (!moduleName) {
   console.error("❌ Please provide a module name");
@@ -44,7 +43,7 @@ fs.mkdirSync(modulePath, { recursive: true });
 writeModuleFiles(modulePath, moduleName);
 
 // 🧠 Generate meta file
-createMetaFile(moduleName, metaPath)
+createMetaFile(moduleName, metaPath, { useAnalytics: useAnalyticsFlag }) // ✅ flag ekleniyor
   .then(() => {
     console.log(`✅ Module "${moduleName}" created successfully!`);
   })

@@ -13,27 +13,38 @@
       "auth": true,
       "summary": "GET /",
       "validationName": "\"/\"",
-      "controllerName": "publicGetAllSport",
-      "body": {
-        "type": "object",
-        "properties": {}
-      }
+      "controllerName": "publicGetAllSport"
     }
   ],
-  "version": "1.0.1",
+  "version": "1.0.2",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013"
+    "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7"
   },
-  "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
-  "lastUpdatedAt": "2025-06-06T09:24:40.152Z",
+  "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+  "lastUpdatedAt": "2025-06-12T08:39:01.211Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
-      "date": "2025-06-06T09:24:40.152Z",
+      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+      "date": "2025-06-12T08:33:25.000Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.2",
+      "by": "Orhan Güzel",
+      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+      "date": "2025-06-12T08:39:01.211Z",
       "note": "Meta auto-generated"
     }
-  ]
+  ],
+  "label": {
+    "tr": "sport",
+    "en": "sport",
+    "de": "sport",
+    "pl": "sport",
+    "fr": "sport",
+    "es": "sport"
+  }
 }

@@ -6,21 +6,27 @@ import {
   deleteModule,
   getProjects,
   createModule,
-  getEnabledModules
+  getEnabledModules,
+  getAnalyticsModules,
+  toggleUseAnalytics,
 } from "./admin.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
   validateUpdateModule,
   validateModuleNameParam,
-  validateCreateModule
+  validateCreateModule,
 } from "./admin.validation";
 
 const router = express.Router();
 
-// 🎯 Tüm admin işlemleri korunur
-router.use(authenticate, authorizeRoles("admin"));
-
+// 🔓 Public - Projeye özel enabled modüller
 router.get("/enabled-modules", getEnabledModules);
+
+// 🔓 Public - Projeye özel analytics modülleri
+router.get("/analytics-modules", getAnalyticsModules);
+
+// --- Bundan sonrası ADMIN/AUTH korumalı! ---
+router.use(authenticate, authorizeRoles("admin"));
 
 // ➕ Yeni modül oluştur
 router.post("/modules", validateCreateModule, createModule);
@@ -39,5 +45,8 @@ router.patch("/module/:name", validateModuleNameParam, validateUpdateModule, upd
 
 // 🗑️ Belirli modülü sil
 router.delete("/module/:name", validateModuleNameParam, deleteModule);
+
+// 🔁 Analytics toggle işlemi
+router.patch("/modules/:name/toggle-analytics", toggleUseAnalytics);
 
 export default router;

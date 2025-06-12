@@ -1,0 +1,35 @@
+{
+  "env.loaded": "✅ Umgebung von {file} geladen.",
+  "env.notFound": "❌ {file} nicht gefunden. Bitte erst erstellen, bevor der Server gestartet wird.",
+  "env.fallbackLoaded": "✅ Fallback-.env-Datei geladen.",
+  "env.noEnvFile": "⚠️ Keine .env-Datei gefunden. Umgebungsvariablen könnten fehlen.",
+  "env.profile.active": "🌐 Aktives Profil: {profile}",
+  "env.activeProfile": "🌐 Aktives Profil: {profile}",
+
+  "email.missingConfig": "⚠️ Fehlende SMTP-Konfiguration: {vars}",
+  "email.smtp.success": "✅ SMTP-Verbindung erfolgreich.",
+  "email.smtp.failed": "❌ SMTP-Verbindung fehlgeschlagen: {error}",
+
+  "connect.success": "✅ MongoDB-Verbindung erfolgreich.",
+  "connect.failed": "❌ MongoDB-Verbindungsfehler: {error}",
+
+  "mongo.connected": "✅ MongoDB verbunden.",
+  "mongo.error.notDefined": "❌ MONGO_URI Umgebungsvariable ist nicht definiert.",
+  "mongo.connectionError": "❌ MongoDB-Verbindungsfehler: {error}",
+
+  "smtp.connectionSuccess": "✅ SMTP-Verbindung erfolgreich.",
+  "smtp.connectionFailed": "❌ SMTP-Verbindung fehlgeschlagen: {error}",
+  "smtp.missingConfig": "⚠️ Fehlende SMTP-Konfiguration: {vars}",
+
+  "migration.noAppEnv": "❌ APP_ENV ist nicht definiert. Bitte vor dem Ausführen dieses Skripts setzen.",
+  "migration.envNotFound": "❌ Umgebungsdatei nicht gefunden: {envPath}",
+  "migration.envLoaded": "🌱 Umgebungsdatei geladen: {envPath}",
+  "migration.migrated": "✅ Modul migriert: {module}",
+  "migration.alreadyMigrated": "✔️ Bereits migriert: {module}",
+  "migration.error": "❌ Migrationsfehler: {error}",
+
+  "server.cors.notAllowed": "❌ CORS von {origin} nicht erlaubt.",
+  "server.error.noPort": "❌ PORT nicht in der Umgebungsdatei definiert.",
+  "server.started": "🚀 Server gestartet: {baseUrl}"
+}
+

@@ -1,6 +1,15 @@
 import nodemailer from "nodemailer";
+import logger from "@/core/middleware/logger/logger";
+import { t } from "@/core/utils/i18n/translate";
+import translations from "@/core/config/i18n";
+import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 
-// 🔐 Required SMTP environment variables
+// Dil belirle (profil ya da env üzerinden)
+const profile = process.env.ACTIVE_META_PROFILE || process.env.APP_ENV || "en";
+const lang: SupportedLocale =
+  (process.env.LOG_LOCALE as SupportedLocale) || "en";
+
+// Gerekli SMTP environment değişkenleri
 const requiredVars = [
   "SMTP_HOST",
   "SMTP_PORT",
@@ -12,10 +21,14 @@ const requiredVars = [
 
 const missingVars = requiredVars.filter((key) => !process.env[key]);
 if (missingVars.length > 0) {
-  console.warn(`⚠️ Missing SMTP configuration: ${missingVars.join(", ")}`);
+  logger.warn(
+    t("smtp.missingConfig", lang, translations, {
+      vars: missingVars.join(", "),
+    })
+  );
 }
 
-// 📤 Nodemailer transporter instance
+// Nodemailer transporter instance
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT),
@@ -26,13 +39,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// ✅ Optional connection test (development only)
+// Bağlantı testi (opsiyonel, prod hariç)
 if (process.env.NODE_ENV !== "production") {
   transporter.verify((error, success) => {
     if (error) {
-      console.error("❌ SMTP connection failed:", error);
+      logger.error(
+        t("smtp.connectionFailed", lang, translations, { error: String(error) })
+      );
     } else {
-      console.log("✅ SMTP connection successful.");
+      logger.info(t("smtp.connectionSuccess", lang, translations));
     }
   });
 }

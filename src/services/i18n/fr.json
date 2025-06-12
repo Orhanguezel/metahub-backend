@@ -1,0 +1,28 @@
+{
+  "imap.error.env": "❌ Les variables d'environnement IMAP_* ne sont pas correctement définies.",
+  "imap.error.profile": "❌ APP_ENV ou ACTIVE_META_PROFILE doit être défini.",
+  "imap.error.openInbox": "📦 Erreur lors de l'ouverture de la boîte de réception :",
+  "imap.error.search": "🔍 Erreur de recherche :",
+  "imap.nonew": "📭 Aucun nouvel e-mail.",
+  "imap.parse.error": "📨 Erreur lors de l'analyse de l'e-mail :",
+  "imap.saved": "✅ E-mail enregistré avec succès.",
+  "imap.dbError": "❌ Échec de l'enregistrement de l'e-mail :",
+  "imap.allProcessed": "📬 Tous les nouveaux e-mails ont été traités.",
+  "imap.connection.error": "❌ Erreur de connexion IMAP :",
+  "imap.connection.closed": "📴 Connexion IMAP fermée.",
+  "email.sent.success": "E-mail envoyé avec succès | ID du message : {id}",
+  "email.sent.to": "À : {to}",
+  "email.sent.error": "Échec de l'envoi de l'e-mail : {error}",
+  "email.verification.subject": "Vérifiez votre adresse e-mail",
+  "email.verification.heading": "Vérifiez votre e-mail",
+  "email.verification.body": "Veuillez vérifier votre e-mail en cliquant sur le lien ci-dessous :",
+  "email.verification.ignore": "Si vous n'avez pas demandé ceci, veuillez ignorer cet e-mail.",
+  "sms.sent.success": "SMS envoyé avec succès à {to}.",
+  "sms.sent.error": "Échec de l'envoi du SMS : {error}",
+  "sms.body.default": "Votre code de vérification est : {code}",
+  "auth.token.set": "Jeton d'accès défini pour l'utilisateur : {userId}, rôle : {role}.",
+  "auth.token.cleared": "Jeton d'accès supprimé (déconnexion).",
+  "auth.password.checked": "Résultat de la vérification du mot de passe : {result}.",
+  "auth.password.hashed": "Mot de passe chiffré avec succès."
+}
+

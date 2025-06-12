@@ -1,7 +1,8 @@
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
-// 🔐 Register validasyonu
+// 🔐 Register validation
 export const validateRegister = [
   body("name").isString().notEmpty().withMessage("Name is required."),
   body("email").isEmail().withMessage("Valid email is required."),
@@ -12,32 +13,34 @@ export const validateRegister = [
   validateRequest,
 ];
 
-// 🔐 Login validasyonu
+// 🔐 Login validation
 export const validateLogin = [
   body("email").isEmail().withMessage("Valid email is required."),
   body("password").notEmpty().withMessage("Password is required."),
   validateRequest,
 ];
 
-// ✅ User ID parametre kontrolü
+// ✅ User ID param check
 export const validateUserId = [
   param("id").isMongoId().withMessage("Invalid user ID."),
   validateRequest,
 ];
 
-// ✏️ Profil güncelleme validasyonu (me/update)
+// ✏️ Update my profile (me/update)
 export const validateUpdateMyProfile = [
   body("name").optional().isString().withMessage("Name must be a string."),
   body("email").optional().isEmail().withMessage("Email must be valid."),
   body("phone").optional().isString().withMessage("Phone must be a string."),
   body("language")
     .optional()
-    .isIn(["tr", "en", "de"])
-    .withMessage("Language must be 'tr', 'en', or 'de'."),
+    .isIn(SUPPORTED_LOCALES)
+    .withMessage(
+      `Language must be one of: ${SUPPORTED_LOCALES.join(", ")}.`
+    ),
   validateRequest,
 ];
 
-// 🔑 Şifre güncelleme validasyonu (me/password)
+// 🔑 Update my password (me/password)
 export const validateUpdateMyPassword = [
   body("currentPassword")
     .notEmpty()
@@ -49,7 +52,7 @@ export const validateUpdateMyPassword = [
   validateRequest,
 ];
 
-// 🔔 Bildirim tercihleri validasyonu (me/notifications)
+// 🔔 Update notification settings (me/notifications)
 export const validateUpdateNotificationSettings = [
   body("emailNotifications")
     .optional()
@@ -62,10 +65,21 @@ export const validateUpdateNotificationSettings = [
   validateRequest,
 ];
 
-// 🌐 Sosyal medya validasyonu (me/social)
+// 🌐 Update social links (me/social)
 export const validateUpdateSocialLinks = [
-  body("facebook").optional().isString().withMessage("Facebook must be a string."),
-  body("instagram").optional().isString().withMessage("Instagram must be a string."),
-  body("twitter").optional().isString().withMessage("Twitter must be a string."),
+  body("facebook")
+    .optional()
+    .isString()
+    .withMessage("Facebook must be a string."),
+  body("instagram")
+    .optional()
+    .isString()
+    .withMessage("Instagram must be a string."),
+  body("twitter")
+    .optional()
+    .isString()
+    .withMessage("Twitter must be a string."),
+  // Yeni sosyal medya platformu eklemek için buraya ekle:
+  // body("linkedin").optional().isString().withMessage("LinkedIn must be a string."),
   validateRequest,
 ];

@@ -1,0 +1,19 @@
+{
+  "error.orderNotFound": "Order not found.",
+  "error.notAuthorizedViewOrder": "You are not authorized to view this order.",
+  "error.notAuthorizedUpdateOrder": "You are not authorized to update this order.",
+  "error.shippingAddressRequired": "Shipping address is required.",
+  "order.fetched.success": "Order fetched successfully.",
+  "order.addressUpdated.success": "Shipping address updated successfully.",
+  "order.fetched.all": "Orders fetched successfully.",
+  "order.status.updated": "Order status updated successfully.",
+  "order.delivered.success": "Order marked as delivered.",
+  "order.delivered": "Your order has been delivered.",
+  "order.deleted.success": "Order deleted successfully.",
+  "error.invalidOrderStatus": "Invalid order status.",
+  "order.status.pending": "Order is pending.",
+  "order.status.preparing": "Order is being prepared.",
+  "order.status.shipped": "Order has been shipped.",
+  "order.status.completed": "Order completed.",
+  "order.status.cancelled": "Order cancelled."
+}

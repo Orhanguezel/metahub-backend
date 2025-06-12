@@ -10,20 +10,37 @@ import path from "path";
 import fs from "fs";
 import { v2 as cloudinary } from "cloudinary";
 
+import logger from "@/core/middleware/logger/logger";
+import { t } from "@/core/utils/i18n/translate";
+import userTranslations from "@/modules/users/i18n";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import type { SupportedLocale } from "@/types/common";
+
+// Kısayol fonksiyonu
+function userT(
+  key: string,
+  locale: SupportedLocale,
+  vars?: Record<string, string | number>
+) {
+  return t(key, locale, userTranslations, vars);
+}
+
 // 📂 Profil resim klasörü
 const PROFILE_IMAGE_DIR = path.join(process.cwd(), "uploads", "profile-images");
 
 // ✅ Admin: Tüm kullanıcıları getir
-export const getUsers = asyncHandler(async (_req: Request, res: Response) => {
+export const getUsers = asyncHandler(async (req: Request, res: Response) => {
+  const locale: SupportedLocale = req.locale || getLogLocale();
+
+  logger.debug(`[Admin] getUsers called | locale=${locale}`);
+
   const users = await User.find().select("-password");
+
+  logger.info(`[Admin] getUsers success | count=${users.length}`);
+
   res.status(200).json({
     success: true,
-    message:
-      _req.locale === "de"
-        ? "Alle Benutzer erfolgreich abgerufen"
-        : _req.locale === "tr"
-        ? "Tüm kullanıcılar başarıyla getirildi"
-        : "All users fetched successfully",
+    message: userT("admin.users.fetched", locale),
     data: users,
   });
 });
@@ -31,31 +48,30 @@ export const getUsers = asyncHandler(async (_req: Request, res: Response) => {
 // ✅ Admin: Kullanıcıyı ID ile getir
 export const getUserById = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
+  const locale: SupportedLocale = req.locale || getLogLocale();
+
+  logger.debug(`[Admin] getUserById called | id=${id} | locale=${locale}`);
 
   if (!isValidObjectId(id)) {
+    logger.warn(`[Admin] Invalid user ID: ${id}`);
     res.status(400).json({
       success: false,
-      message:
-        req.locale === "de"
-          ? "Ungültige Benutzer-ID"
-          : req.locale === "tr"
-          ? "Geçersiz kullanıcı ID formatı"
-          : "Invalid user ID format",
+      message: userT("admin.users.invalidId", locale),
     });
     return;
   }
 
   const user = await getUserOrFail(id, res);
-  if (!user) return;
+  if (!user) {
+    logger.warn(`[Admin] User not found: ${id}`);
+    return;
+  }
+
+  logger.info(`[Admin] User fetched: ${id}`);
 
   res.status(200).json({
     success: true,
-    message:
-      req.locale === "de"
-        ? "Benutzer erfolgreich abgerufen"
-        : req.locale === "tr"
-        ? "Kullanıcı başarıyla getirildi"
-        : "User fetched successfully",
+    message: userT("admin.users.fetchedOne", locale),
     data: user,
   });
 });
@@ -74,39 +90,61 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
     socialMedia,
     notifications,
     addresses,
-    oldProfileImage, // eskiyi silmek için (url/publicId vs.)
+    oldProfileImage,
   } = req.body;
 
+  const locale: SupportedLocale = req.locale || getLogLocale();
+
+  logger.debug(`[Admin] updateUser called | id=${id} | locale=${locale}`);
+
   const user = await getUserOrFail(id, res);
-  if (!user) return;
+  if (!user) {
+    logger.warn(`[Admin] User not found for update: ${id}`);
+    return;
+  }
 
   let newProfileImage = user.profileImage;
 
   // Eğer yeni dosya yüklenmişse
   if (req.file) {
-    // 1️⃣ Eski resmi sil (hem Cloudinary hem local)
+    logger.info(`[Admin] Updating profile image for user: ${id}`);
+
+    // 1️⃣ Eski resmi sil (Cloudinary ve local)
     if (user.profileImage) {
-      // Obje ise
       if (typeof user.profileImage === "object") {
         if (user.profileImage.publicId) {
-          try { await cloudinary.uploader.destroy(user.profileImage.publicId); } catch {}
+          try {
+            await cloudinary.uploader.destroy(user.profileImage.publicId);
+            logger.info(
+              `[Admin] Cloudinary image deleted: ${user.profileImage.publicId}`
+            );
+          } catch (err) {
+            logger.error(`[Admin] Cloudinary image delete error: ${err}`);
+          }
         }
         if (
           user.profileImage.url &&
           user.profileImage.url.startsWith("/uploads/profile-images/")
         ) {
           try {
-            const localPath = path.join(PROFILE_IMAGE_DIR, path.basename(user.profileImage.url));
+            const localPath = path.join(
+              PROFILE_IMAGE_DIR,
+              path.basename(user.profileImage.url)
+            );
             await fs.promises.unlink(localPath);
-          } catch {}
+            logger.info(`[Admin] Local profile image deleted: ${localPath}`);
+          } catch (err) {
+            logger.error(`[Admin] Local image delete error: ${err}`);
+          }
         }
-      }
-      // String ise
-      else if (typeof user.profileImage === "string") {
+      } else if (typeof user.profileImage === "string") {
         try {
           const localPath = path.join(PROFILE_IMAGE_DIR, user.profileImage);
           await fs.promises.unlink(localPath);
-        } catch {}
+          logger.info(`[Admin] Local profile image deleted: ${localPath}`);
+        } catch (err) {
+          logger.error(`[Admin] Local image delete error: ${err}`);
+        }
       }
     }
 
@@ -129,7 +167,7 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
     newProfileImage = { url, thumbnail, webp, publicId };
   }
 
-  // ✅ JSON alanları güvenle güncelle
+  // JSON alanları güvenle güncelle
   let updates: any = {
     name: name ?? user.name,
     email: email ?? user.email,
@@ -142,24 +180,31 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   };
 
   try {
-    updates.socialMedia = socialMedia ? validateJsonField(socialMedia, "socialMedia") : user.socialMedia;
-    updates.notifications = notifications ? validateJsonField(notifications, "notifications") : user.notifications;
-    updates.addresses = addresses ? validateJsonField(addresses, "addresses") : user.addresses;
+    updates.socialMedia = socialMedia
+      ? validateJsonField(socialMedia, "socialMedia")
+      : user.socialMedia;
+    updates.notifications = notifications
+      ? validateJsonField(notifications, "notifications")
+      : user.notifications;
+    updates.addresses = addresses
+      ? validateJsonField(addresses, "addresses")
+      : user.addresses;
   } catch (error: any) {
+    logger.warn(`[Admin] JSON field validation error: ${error.message}`);
     res.status(400).json({ success: false, message: error.message });
     return;
   }
 
-  const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
+  const updatedUser = await User.findByIdAndUpdate(id, updates, {
+    new: true,
+    runValidators: true,
+  });
+
+  logger.info(`[Admin] User updated: ${id}`);
 
   res.status(200).json({
     success: true,
-    message:
-      req.locale === "de"
-        ? "Benutzer erfolgreich aktualisiert"
-        : req.locale === "tr"
-        ? "Kullanıcı başarıyla güncellendi"
-        : "User updated successfully",
+    message: userT("admin.users.updated", locale),
     data: updatedUser,
   });
 });
@@ -167,65 +212,73 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
 // ✅ Admin: Kullanıcıyı sil (profil fotoğrafı Cloudinary & local dosya mantığı ile)
 export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
+  const locale: SupportedLocale = req.locale || getLogLocale();
+
+  logger.debug(`[Admin] deleteUser called | id=${id} | locale=${locale}`);
 
   if (!isValidObjectId(id)) {
+    logger.warn(`[Admin] Invalid user ID: ${id}`);
     res.status(400).json({
       success: false,
-      message:
-        req.locale === "de"
-          ? "Ungültige Benutzer-ID"
-          : req.locale === "tr"
-          ? "Geçersiz kullanıcı ID formatı"
-          : "Invalid user ID format",
+      message: userT("admin.users.invalidId", locale),
     });
     return;
   }
 
   const user = await User.findByIdAndDelete(id);
   if (!user) {
+    logger.warn(`[Admin] User not found for delete: ${id}`);
     res.status(404).json({
       success: false,
-      message:
-        req.locale === "de"
-          ? "Benutzer nicht gefunden"
-          : req.locale === "tr"
-          ? "Kullanıcı bulunamadı"
-          : "User not found",
+      message: userT("admin.users.notFound", locale),
     });
     return;
   }
 
-  // Profil resmi sil (objeyse hem cloud hem local, stringse local)
+  // Profil resmi sil
   if (user.profileImage) {
     if (typeof user.profileImage === "object") {
       if (user.profileImage.publicId) {
-        try { await cloudinary.uploader.destroy(user.profileImage.publicId); } catch {}
+        try {
+          await cloudinary.uploader.destroy(user.profileImage.publicId);
+          logger.info(
+            `[Admin] Cloudinary image deleted: ${user.profileImage.publicId}`
+          );
+        } catch (err) {
+          logger.error(`[Admin] Cloudinary image delete error: ${err}`);
+        }
       }
       if (
         user.profileImage.url &&
         user.profileImage.url.startsWith("/uploads/profile-images/")
       ) {
         try {
-          const localPath = path.join(PROFILE_IMAGE_DIR, path.basename(user.profileImage.url));
+          const localPath = path.join(
+            PROFILE_IMAGE_DIR,
+            path.basename(user.profileImage.url)
+          );
           await fs.promises.unlink(localPath);
-        } catch {}
+          logger.info(`[Admin] Local profile image deleted: ${localPath}`);
+        } catch (err) {
+          logger.error(`[Admin] Local image delete error: ${err}`);
+        }
       }
     } else if (typeof user.profileImage === "string") {
       try {
         const localPath = path.join(PROFILE_IMAGE_DIR, user.profileImage);
         await fs.promises.unlink(localPath);
-      } catch {}
+        logger.info(`[Admin] Local profile image deleted: ${localPath}`);
+      } catch (err) {
+        logger.error(`[Admin] Local image delete error: ${err}`);
+      }
     }
   }
 
+  logger.info(`[Admin] User deleted: ${id}`);
+
   res.status(200).json({
     success: true,
-    message:
-      req.locale === "de"
-        ? "Benutzer erfolgreich gelöscht"
-        : req.locale === "tr"
-        ? "Kullanıcı başarıyla silindi"
-        : "User deleted successfully",
+    message: userT("admin.users.deleted", locale),
     data: { userId: id },
   });
 });

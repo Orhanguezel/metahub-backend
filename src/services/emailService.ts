@@ -1,14 +1,17 @@
-// services/emailService.ts
-
 import { transporter } from "@/core/config/emailConfig";
 import { User } from "@/modules/users/users.models";
 import crypto from "crypto";
+import logger from "@/core/middleware/logger/logger";
+import { t } from "@/core/utils/i18n/translate";
+import emailI18n from "@/services/i18n";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 
 interface EmailOptions {
   to: string;
   subject: string;
   html: string;
   from?: string;
+  // locale?: SupportedLocale;  // Artık gereksiz, sadece ortamdan alınacak!
 }
 
 export const sendEmail = async ({
@@ -17,6 +20,8 @@ export const sendEmail = async ({
   html,
   from,
 }: EmailOptions): Promise<void> => {
+  const lang = getLogLocale();
+
   const sender =
     from ||
     (process.env.SMTP_FROM && process.env.SMTP_FROM_NAME
@@ -33,30 +38,33 @@ export const sendEmail = async ({
   try {
     const info = await transporter.sendMail(mailOptions);
     const env = process.env.APP_ENV || "default";
-
-    console.log(
-      `📧 [${env}] Email sent successfully | Message ID: ${info.messageId}`
+    logger.info(
+      `[${env}] ${t("email.sent.success", lang, emailI18n, {
+        id: info.messageId,
+      })}`
     );
-    console.log("📨 To:", mailOptions.to);
-  } catch (error) {
-    console.error("❌ Failed to send email:", error);
+    logger.info(t("email.sent.to", lang, emailI18n, { to }));
+  } catch (error: any) {
+    logger.error(
+      t("email.sent.error", lang, emailI18n, { error: error.message || error })
+    );
   }
 };
 
-// YENİ: E-posta doğrulama linki gönderici fonksiyon
+// E-posta doğrulama linki gönderici fonksiyon
 export const sendEmailVerificationLink = async ({
   userId,
   email,
-  locale = "en",
 }: {
   userId: string;
   email: string;
-  locale?: string;
 }) => {
-  // 1. Token oluştur (örneğin random hash)
+  const lang = getLogLocale();
+
+  // 1. Token oluştur
   const token = crypto.randomBytes(32).toString("hex");
 
-  // 2. Token'ı user modeline kaydet (emailVerifyToken, expires)
+  // 2. Token'ı user modeline kaydet
   await User.findByIdAndUpdate(userId, {
     emailVerifyToken: token,
     emailVerifyTokenExpires: new Date(Date.now() + 1000 * 60 * 60 * 24), // 24 saat
@@ -66,43 +74,18 @@ export const sendEmailVerificationLink = async ({
   const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
   const verifyUrl = `${frontendUrl}/verify-email/${token}`;
 
-  // 4. HTML içeriği hazırla (basit bir örnek)
+  // 4. HTML içeriği (tamamen i18n)
   const html = `
-    <h3>${locale === "de"
-      ? "E-Mail bestätigen"
-      : locale === "tr"
-      ? "E-postanızı doğrulayın"
-      : "Verify your email"}</h3>
-    <p>
-      ${
-        locale === "de"
-          ? "Bitte bestätigen Sie Ihre E-Mail-Adresse, indem Sie auf den untenstehenden Link klicken:"
-          : locale === "tr"
-          ? "Aşağıdaki bağlantıya tıklayarak e-postanızı doğrulayabilirsiniz:"
-          : "Please verify your email by clicking the link below:"
-      }
-    </p>
+    <h3>${t("email.verification.heading", lang, emailI18n)}</h3>
+    <p>${t("email.verification.body", lang, emailI18n)}</p>
     <a href="${verifyUrl}" target="_blank">${verifyUrl}</a>
-    <p>
-      ${
-        locale === "de"
-          ? "Sollten Sie sich nicht registriert haben, ignorieren Sie diese E-Mail."
-          : locale === "tr"
-          ? "Eğer bu işlemi siz yapmadıysanız, bu e-postayı dikkate almayınız."
-          : "If you did not request this, please ignore this email."
-      }
-    </p>
+    <p>${t("email.verification.ignore", lang, emailI18n)}</p>
   `;
 
   // 5. E-posta gönder
   await sendEmail({
     to: email,
-    subject:
-      locale === "de"
-        ? "Bestätigen Sie Ihre E-Mail-Adresse"
-        : locale === "tr"
-        ? "E-posta adresinizi doğrulayın"
-        : "Verify your email address",
+    subject: t("email.verification.subject", lang, emailI18n),
     html,
   });
 };

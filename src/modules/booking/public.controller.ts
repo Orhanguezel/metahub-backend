@@ -1,133 +1,202 @@
-// @/modules/booking/public.controller.ts
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import dayjs from "dayjs";
 import { Booking } from "@/modules/booking";
 import { Notification } from "@/modules/notification";
 import { sendEmail } from "@/services/emailService";
-import { BookingReceivedTemplate } from "@/templates/bookingReceived";
+import { BookingReceivedTemplate } from "@/modules/booking/templates/bookingReceived";
 import { getSettingValue } from "@/core/utils/settingUtils";
+import logger from "@/core/middleware/logger/logger";
+import { t } from "@/core/utils/i18n/translate";
+import translations from "@/templates/i18n";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import type { SupportedLocale } from "@/types/common";
 
-export const createBooking = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const {
-    name,
-    email,
-    phone,
-    serviceType,
-    note,
-    date,
-    time,
-    service,
-    durationMinutes = 60,
-    language = "en",
-  } = req.body;
+// Yardımcı fonksiyon: Hem response, hem log için locale destekli
+function bookingT(
+  key: string,
+  locale?: SupportedLocale,
+  vars?: Record<string, any>
+) {
+  return t(key, locale || getLogLocale(), translations, vars);
+}
 
-  // ✅ Yeni kontrol: name artık object olmalı
-  if (
-    typeof name !== "object" ||
-    !name[language] ||
-    !email ||
-    !serviceType ||
-    !date ||
-    !time ||
-    !service
-  ) {
-    res.status(400).json({ message: "Please fill all required fields." });
-    return;
-  }
+export const createBooking = asyncHandler(
+  async (req: Request, res: Response) => {
+    let {
+      name,
+      email,
+      phone,
+      serviceType,
+      note,
+      date,
+      time,
+      service,
+      durationMinutes = 60,
+      language,
+    } = req.body;
 
-  const start = dayjs(`${date}T${time}`);
-  const end = start.add(durationMinutes, "minute");
+    // User'ın locale'i (middleware ile atanırsa req.locale, yoksa body/query/env)
+    const userLocale: SupportedLocale =
+      req.locale ||
+      language ||
+      (process.env.LOG_LOCALE as SupportedLocale) ||
+      "en";
 
-  const maxConcurrentBookingsSetting = await getSettingValue("max_concurrent_bookings");
-  const maxConcurrentBookings = parseInt(maxConcurrentBookingsSetting || "1", 10);
+    // Name zorunlu alan ve object olmalı (örn: { tr, en, de, ... })
+    if (
+      typeof name !== "object" ||
+      !name[userLocale] ||
+      !email ||
+      !serviceType ||
+      !date ||
+      !time ||
+      !service
+    ) {
+      logger.warn(bookingT("public.create.missingFields", getLogLocale()));
+      res.status(400).json({
+        success: false,
+        message: bookingT("public.create.missingFields", userLocale),
+      });
+      return;
+    }
 
-  const overlappingBookings = await Booking.find({
-    date,
-    $expr: {
-      $and: [
-        { $lt: [{ $toDate: { $concat: ["$date", "T", "$time"] } }, end.toDate()] },
-        {
-          $gt: [
-            {
-              $toDate: {
-                $dateAdd: {
-                  startDate: { $concat: ["$date", "T", "$time"] },
-                  unit: "minute",
-                  amount: "$durationMinutes",
+    const start = dayjs(`${date}T${time}`);
+    const end = start.add(durationMinutes, "minute");
+
+    const maxConcurrentBookingsSetting = await getSettingValue(
+      "max_concurrent_bookings"
+    );
+    const maxConcurrentBookings = parseInt(
+      maxConcurrentBookingsSetting || "1",
+      10
+    );
+
+    const overlappingBookings = await Booking.find({
+      date,
+      $expr: {
+        $and: [
+          {
+            $lt: [
+              { $toDate: { $concat: ["$date", "T", "$time"] } },
+              end.toDate(),
+            ],
+          },
+          {
+            $gt: [
+              {
+                $toDate: {
+                  $dateAdd: {
+                    startDate: { $concat: ["$date", "T", "$time"] },
+                    unit: "minute",
+                    amount: "$durationMinutes",
+                  },
                 },
               },
-            },
-            start.toDate(),
-          ],
-        },
-      ],
-    },
-  });
+              start.toDate(),
+            ],
+          },
+        ],
+      },
+    });
 
-  if (overlappingBookings.length >= maxConcurrentBookings) {
-    res.status(409).json({ message: "All booking slots are full for this time." });
-    return;
-  }
+    if (overlappingBookings.length >= maxConcurrentBookings) {
+      logger.warn(bookingT("public.create.slotsFull", getLogLocale()));
+      res.status(409).json({
+        success: false,
+        message: bookingT("public.create.slotsFull", userLocale),
+      });
+      return;
+    }
 
-  const booking = await Booking.create({
-    user: req.user?.id || undefined,
-    name,
-    email,
-    phone,
-    serviceType,
-    note,
-    date,
-    time,
-    service,
-    durationMinutes,
-    language,
-  });
+    const booking = await Booking.create({
+      user: req.user?.id || undefined,
+      name,
+      email,
+      phone,
+      serviceType,
+      note,
+      date,
+      time,
+      service,
+      durationMinutes,
+      language: userLocale,
+    });
 
-  // ✅ name[language] kullanılmalı
-  const htmlToCustomer = BookingReceivedTemplate({
-    name: name[language],
-    service: serviceType,
-    date,
-    time,
-    locale: language,
-  });
+    logger.info(
+      bookingT("public.create.created", getLogLocale(), {
+        name: name[userLocale],
+        date,
+        time,
+      })
+    );
 
-  const htmlToAdmin = `
-    <h2>📬 New Booking</h2>
+    // Müşteriye mail (i18n template)
+    const htmlToCustomer = BookingReceivedTemplate({
+      name: name[userLocale],
+      service: serviceType,
+      date,
+      time,
+    });
+
+    // Admin mail (i18n, kısmen vars kullanılıyor)
+    const htmlToAdmin = `
+    <h2>📬 ${bookingT("public.adminMail.newBooking", userLocale)}</h2>
     <ul>
-      <li><strong>Name:</strong> ${name[language]}</li>
+      <li><strong>${bookingT("public.adminMail.name", userLocale)}:</strong> ${
+      name[userLocale]
+    }</li>
       <li><strong>Email:</strong> ${email}</li>
-      <li><strong>Phone:</strong> ${phone || "-"}</li>
-      <li><strong>Service:</strong> ${serviceType}</li>
-      <li><strong>Date:</strong> ${date}</li>
-      <li><strong>Time:</strong> ${time}</li>
-      <li><strong>Note:</strong> ${note || "-"}</li>
+      <li><strong>${bookingT("public.adminMail.phone", userLocale)}:</strong> ${
+      phone || "-"
+    }</li>
+      <li><strong>${bookingT(
+        "public.adminMail.service",
+        userLocale
+      )}:</strong> ${serviceType}</li>
+      <li><strong>${bookingT(
+        "public.adminMail.date",
+        userLocale
+      )}:</strong> ${date}</li>
+      <li><strong>${bookingT(
+        "public.adminMail.time",
+        userLocale
+      )}:</strong> ${time}</li>
+      <li><strong>${bookingT("public.adminMail.note", userLocale)}:</strong> ${
+      note || "-"
+    }</li>
     </ul>`;
 
-  await Promise.all([
-    sendEmail({
-      to: email,
-      subject: "📬 Booking Request Received – Anastasia Massage",
-      html: htmlToCustomer,
-    }),
-    sendEmail({
-      to: process.env.SMTP_FROM || "admin@example.com",
-      subject: "🆕 New Booking Received",
-      html: htmlToAdmin,
-    }),
-  ]);
+    await Promise.all([
+      sendEmail({
+        to: email,
+        subject: bookingT("public.email.subject.customer", userLocale),
+        html: htmlToCustomer,
+      }),
+      sendEmail({
+        to: process.env.SMTP_FROM || "admin@example.com",
+        subject: bookingT("public.email.subject.admin", userLocale),
+        html: htmlToAdmin,
+      }),
+    ]);
 
-  await Notification.create({
-    title: "New Booking",
-    message: `${name[language]} booked ${serviceType} for ${date} ${time}.`,
-    type: "info",
-    user: req.user?.id || null,
-  });
+    // Admin notification (i18n)
+    await Notification.create({
+      title: bookingT("public.notification.title", userLocale),
+      message: bookingT("public.notification.message", userLocale, {
+        name: name[userLocale],
+        service: serviceType,
+        date,
+        time,
+      }),
+      type: "info",
+      user: req.user?.id || null,
+    });
 
-  res.status(201).json({
-    success: true,
-    message: "Booking created successfully.",
-    booking,
-  });
-});
+    res.status(201).json({
+      success: true,
+      message: bookingT("public.create.success", userLocale),
+      booking,
+    });
+  }
+);

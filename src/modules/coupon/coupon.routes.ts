@@ -1,7 +1,7 @@
 import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import { validateRequest } from "@/core/middleware/validateRequest";
-import { analyticsLogger } from "@/core/middleware/analyticsLogger";
+import { analyticsLogger } from "@/core/middleware/logger/analyticsLogger";
 import {
   createCoupon,
   getAllCoupons,

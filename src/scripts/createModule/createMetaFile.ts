@@ -3,7 +3,7 @@ import path from "path";
 import { getGitUser, getGitCommitHash } from "../generateMeta/utils/gitHelpers";
 import { updateMetaVersionLog } from "../generateMeta/utils/versionHelpers";
 
-export const createMetaFile = async (moduleName: string, metaDir: string) => {
+export const createMetaFile = async (moduleName: string, metaDir: string, options?: { useAnalytics?: boolean }) => {
   const username = await getGitUser();
   const commitHash = await getGitCommitHash();
   const now = new Date().toISOString();
@@ -12,9 +12,9 @@ export const createMetaFile = async (moduleName: string, metaDir: string) => {
     name: moduleName,
     icon: "box",
     visibleInSidebar: true,
+    useAnalytics: options?.useAnalytics ?? false,
     enabled: true,
     roles: ["admin"],
-    useAnalytics: false,
     language: "en",
     routes: [],
     updatedBy: { username, commitHash },

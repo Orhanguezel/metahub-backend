@@ -1,32 +1,22 @@
-// src/core/email/readInboxEmails.ts
-
 import Imap from "imap";
 import { simpleParser, ParsedMail } from "mailparser";
 import { Readable } from "stream";
 import { MailMessage } from "@/modules/email";
+import logger from "@/core/middleware/logger/logger";
+import { t } from "@/core/utils/i18n/translate";
+import translations from "@/core/config/i18n";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import type { SupportedLocale } from "@/types/common";
+
+// 🌐 Log dili belirleme (her zaman standart fonksiyon ile)
+const lang: SupportedLocale = getLogLocale();
 
 // 🌐 Environment variables
-const {
-  IMAP_USER,
-  IMAP_PASS,
-  IMAP_HOST,
-  IMAP_PORT,
-  APP_ENV,
-  ACTIVE_META_PROFILE,
-} = process.env;
+const { IMAP_USER, IMAP_PASS, IMAP_HOST, IMAP_PORT } = process.env;
 
 if (!IMAP_USER || !IMAP_PASS || !IMAP_HOST || !IMAP_PORT) {
-  throw new Error("❌ IMAP_* environment variables are not properly set.");
+  throw new Error(t("imap.error.env", lang, translations));
 }
-
-const profile = ACTIVE_META_PROFILE || APP_ENV;
-
-if (!profile) {
-  throw new Error("❌ APP_ENV or ACTIVE_META_PROFILE must be defined.");
-}
-
-// 🌐 Determine language for logs
-const lang = profile === "tr" ? "tr" : profile === "de" ? "de" : "en";
 
 // 📬 IMAP config
 const imap = new Imap({
@@ -42,39 +32,19 @@ export const readInboxEmails = (): void => {
   imap.once("ready", () => {
     imap.openBox("INBOX", true, (err, _box) => {
       if (err) {
-        console.error(
-          lang === "de"
-            ? "📦 Fehler beim Öffnen des Posteingangs:"
-            : lang === "tr"
-            ? "📦 INBOX açılırken hata:"
-            : "📦 Error opening inbox:",
-          err
-        );
+        logger.error(t("imap.error.openInbox", lang, translations) + ` ${err}`);
         return;
       }
 
       imap.search(["UNSEEN"], (err, results = []) => {
         if (err) {
-          console.error(
-            lang === "de"
-              ? "🔍 Suchfehler:"
-              : lang === "tr"
-              ? "🔍 Arama hatası:"
-              : "🔍 Search error:",
-            err
-          );
+          logger.error(t("imap.error.search", lang, translations) + ` ${err}`);
           imap.end();
           return;
         }
 
         if (!results.length) {
-          console.log(
-            lang === "de"
-              ? "📭 Keine neuen E-Mails."
-              : lang === "tr"
-              ? "📭 Yeni e-posta yok."
-              : "📭 No new emails."
-          );
+          logger.info(t("imap.nonew", lang, translations));
           imap.end();
           return;
         }
@@ -85,17 +55,11 @@ export const readInboxEmails = (): void => {
           msg.on("body", (stream: Readable) => {
             simpleParser(stream, async (err, parsed: ParsedMail) => {
               if (err) {
-                console.error(
-                  lang === "de"
-                    ? "📨 Fehler beim Parsen der E-Mail:"
-                    : lang === "tr"
-                    ? "📨 E-posta ayrıştırma hatası:"
-                    : "📨 Email parse error:",
-                  err
+                logger.error(
+                  t("imap.parse.error", lang, translations) + ` ${err}`
                 );
                 return;
               }
-
               try {
                 await MailMessage.create({
                   from: parsed.from?.text || "Unknown Sender",
@@ -112,22 +76,10 @@ export const readInboxEmails = (): void => {
                   date: parsed.date || new Date(),
                   isRead: false,
                 });
-
-                console.log(
-                  lang === "de"
-                    ? "✅ E-Mail erfolgreich gespeichert."
-                    : lang === "tr"
-                    ? "✅ E-posta başarıyla kaydedildi."
-                    : "✅ Email saved successfully."
-                );
+                logger.info(t("imap.saved", lang, translations));
               } catch (dbErr) {
-                console.error(
-                  lang === "de"
-                    ? "❌ Fehler beim Speichern der E-Mail:"
-                    : lang === "tr"
-                    ? "❌ E-posta veritabanına kaydedilemedi:"
-                    : "❌ Failed to save email:",
-                  dbErr
+                logger.error(
+                  t("imap.dbError", lang, translations) + ` ${dbErr}`
                 );
               }
             });
@@ -135,39 +87,20 @@ export const readInboxEmails = (): void => {
         });
 
         fetch.once("end", () => {
-          console.log(
-            lang === "de"
-              ? "📬 Alle neuen E-Mails wurden verarbeitet."
-              : lang === "tr"
-              ? "📬 Tüm yeni e-postalar işlendi."
-              : "📬 All new emails processed."
-          );
+          logger.info(t("imap.allProcessed", lang, translations));
           imap.end();
         });
       });
     });
   });
 
-  imap.once("error", (err: Error) =>
-    console.error(
-      lang === "de"
-        ? "❌ IMAP-Verbindungsfehler:"
-        : lang === "tr"
-        ? "❌ IMAP bağlantı hatası:"
-        : "❌ IMAP connection error:",
-      err
-    )
-  );
+  imap.once("error", (err: Error) => {
+    logger.error(t("imap.connection.error", lang, translations) + ` ${err}`);
+  });
 
-  imap.once("end", () =>
-    console.log(
-      lang === "de"
-        ? "📴 Verbindung zum Mailserver beendet."
-        : lang === "tr"
-        ? "📴 Mail sunucusu bağlantısı kapatıldı."
-        : "📴 IMAP connection closed."
-    )
-  );
+  imap.once("end", () => {
+    logger.info(t("imap.connection.closed", lang, translations));
+  });
 
   imap.connect();
 };

@@ -14,7 +14,9 @@ const uploadRoot = process.env.UPLOAD_ROOT || "uploads";
 
 // ❗ Required variable check
 if (!envProfile) {
-  throw new Error("APP_ENV is not defined. Please set it via your environment configuration.");
+  throw new Error(
+    "APP_ENV is not defined. Please set it via your environment configuration."
+  );
 }
 if (!provider) {
   throw new Error("STORAGE_PROVIDER is not defined in your environment.");
@@ -32,6 +34,7 @@ export const UPLOAD_FOLDERS = {
   product: "product-images",
   ensotekprod: "ensotekprod-images",
   radonarprod: "radonarprod-images",
+  bikes: "bikes-images",
   category: "category-images",
   news: "news-images",
   articles: "articles-images",
@@ -63,9 +66,22 @@ Object.values(UPLOAD_FOLDERS).forEach((folder) => {
   }
 });
 
-const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".pdf", ".docx", ".pptx"];
+const allowedExtensions = [
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".gif",
+  ".pdf",
+  ".docx",
+  ".pptx",
+];
 const allowedMimeTypes = [
-  "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif",
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/gif",
   "application/pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "application/msword",
@@ -73,11 +89,22 @@ const allowedMimeTypes = [
   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
 ];
 
-const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+const fileFilter = (
+  req: Request,
+  file: Express.Multer.File,
+  cb: FileFilterCallback
+) => {
   const fileExtension = path.extname(file.originalname).toLowerCase();
-  if (!allowedMimeTypes.includes(file.mimetype) || !allowedExtensions.includes(fileExtension)) {
-    console.warn(`[UPLOAD] Unsupported file type or extension: ${file.originalname}`);
-    return cb(new Error(`Unsupported file type or extension: ${file.originalname}`));
+  if (
+    !allowedMimeTypes.includes(file.mimetype) ||
+    !allowedExtensions.includes(fileExtension)
+  ) {
+    console.warn(
+      `[UPLOAD] Unsupported file type or extension: ${file.originalname}`
+    );
+    return cb(
+      new Error(`Unsupported file type or extension: ${file.originalname}`)
+    );
   }
   cb(null, true);
 };

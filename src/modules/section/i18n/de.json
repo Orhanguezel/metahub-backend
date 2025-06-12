@@ -1,0 +1,13 @@
+{
+  "section.invalidLabel": "Bezeichnung ist in allen unterstützten Sprachen erforderlich.",
+  "section.validation.invalidJSON": "Bezeichnungswert ist kein gültiges JSON.",
+  "section.validation.missingLocale": "Bezeichnung fehlt oder ist in einigen Sprachen leer.",
+  "section.create.success": "{{name}}-Abschnitt erfolgreich erstellt.",
+  "section.create.labelMissing": "Bezeichnung ist in allen Sprachen erforderlich.",
+  "section.update.success": "{{name}}-Abschnitt erfolgreich aktualisiert.",
+  "section.update.notFound": "Abschnitt nicht gefunden.",
+  "section.update.labelMissing": "Bezeichnung ist in allen Sprachen erforderlich.",
+  "section.list.success": "Abschnitte erfolgreich aufgelistet.",
+  "section.delete.success": "{{name}}-Abschnitt gelöscht.",
+  "section.delete.notFound": "Abschnitt nicht gefunden."
+}

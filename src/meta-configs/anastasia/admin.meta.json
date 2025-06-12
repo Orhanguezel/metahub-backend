@@ -8,6 +8,22 @@
   "language": "en",
   "routes": [
     {
+      "method": "GET",
+      "path": "/enabled-modules",
+      "auth": true,
+      "summary": "GET /enabled-modules",
+      "validationName": "\"/enabled-modules\"",
+      "controllerName": "getEnabledModules"
+    },
+    {
+      "method": "GET",
+      "path": "/analytics-modules",
+      "auth": true,
+      "summary": "GET /analytics-modules",
+      "validationName": "\"/analytics-modules\"",
+      "controllerName": "getAnalyticsModules"
+    },
+    {
       "method": "POST",
       "path": "/modules",
       "auth": true,
@@ -35,34 +51,60 @@
       "method": "GET",
       "path": "/module/:name",
       "auth": true,
-      "summary": "GET /module/:name"
+      "summary": "GET /module/:name",
+      "validationName": "\"/modules/:name/toggle-analytics\"",
+      "controllerName": "toggleUseAnalytics",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "PATCH",
       "path": "/module/:name",
       "auth": true,
-      "summary": "PATCH /module/:name"
+      "summary": "PATCH /module/:name",
+      "validationName": "\"/modules/:name/toggle-analytics\"",
+      "controllerName": "toggleUseAnalytics",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "DELETE",
       "path": "/module/:name",
       "auth": true,
-      "summary": "DELETE /module/:name"
+      "summary": "DELETE /module/:name",
+      "validationName": "\"/modules/:name/toggle-analytics\"",
+      "controllerName": "toggleUseAnalytics",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/modules/:name/toggle-analytics",
+      "auth": true,
+      "summary": "PATCH /modules/:name/toggle-analytics",
+      "validationName": "\"/modules/:name/toggle-analytics\"",
+      "controllerName": "toggleUseAnalytics"
     }
   ],
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013"
+    "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7"
   },
-  "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
-  "lastUpdatedAt": "2025-06-04T22:17:10.060Z",
+  "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+  "lastUpdatedAt": "2025-06-10T22:04:24.276Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
-      "date": "2025-06-04T22:17:10.060Z",
+      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+      "date": "2025-06-10T22:04:24.276Z",
       "note": "Meta auto-generated"
     }
   ]

@@ -1,40 +1,19 @@
+// /modules/blog/blog.model.ts
+
 import mongoose, { Schema, Types, Model, models } from "mongoose";
+import { SUPPORTED_LOCALES } from "@/types/common";
+import type { IBlog, IBlogImage } from "./types/index";
 
-interface IBlogImage {
-  url: string;
-  thumbnail: string;
-  webp?: string;
-  publicId?: string;
-}
-
-export interface IBlog  {
-  title: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  slug: string;
-  summary: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  content: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  images: IBlogImage[];
-  tags: string[];
-  author?: string;
-  category?: Types.ObjectId;
-  isPublished: boolean;
-  publishedAt?: Date;
-  comments: Types.ObjectId[];
-  isActive: boolean; // soft delete desteği
-  createdAt: Date;
-  updatedAt: Date;
-}
+// 🔸 Dinamik çok dilli alan şeması
+const multilingualField = (maxLength?: number) => {
+  const field: any = {};
+  for (const lang of SUPPORTED_LOCALES) {
+    field[lang] = maxLength
+      ? { type: String, trim: true, maxlength: maxLength }
+      : { type: String, trim: true };
+  }
+  return field;
+};
 
 const BlogImageSchema = new Schema<IBlogImage>(
   {
@@ -48,42 +27,32 @@ const BlogImageSchema = new Schema<IBlogImage>(
 
 const BlogSchema: Schema = new Schema<IBlog>(
   {
-    title: {
-      tr: { type: String, trim: true },
-      en: { type: String, trim: true },
-      de: { type: String, trim: true },
-    },
+    title: multilingualField(),
     slug: { type: String, required: true, unique: true, lowercase: true },
-    summary: {
-      tr: { type: String, maxlength: 300 },
-      en: { type: String, maxlength: 300 },
-      de: { type: String, maxlength: 300 },
-    },
-    content: {
-      tr: { type: String },
-      en: { type: String },
-      de: { type: String },
-    },
+    summary: multilingualField(300),
+    content: multilingualField(),
     images: { type: [BlogImageSchema], default: [] },
     tags: [{ type: String }],
     author: { type: String },
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "BlogCategory",
-    },
+    category: { type: mongoose.Schema.Types.ObjectId, ref: "BlogCategory" },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
-    isActive: { type: Boolean, default: true }, // soft delete desteği
+    isActive: { type: Boolean, default: true }, // soft delete
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 // ✅ Slug oluşturucu middleware
-BlogSchema.pre("validate", function (this: IBlog, next) {
-  const baseTitle = this.title?.en || this.title?.de || this.title?.tr || "Blog";
+BlogSchema.pre("validate", function (next) {
+  const langs = SUPPORTED_LOCALES;
+  let baseTitle = "";
+  for (const l of langs) {
+    if ((this.title && this.title[l]) && this.title[l].trim().length > 0) {
+      baseTitle = this.title[l];
+      break;
+    }
+  }
   if (!this.slug && baseTitle) {
     this.slug = baseTitle
       .toLowerCase()
@@ -93,10 +62,14 @@ BlogSchema.pre("validate", function (this: IBlog, next) {
   next();
 });
 
-// ✅ Guard + Model Type
+
+BlogSchema.post("save", function (doc) {
+  if (process.env.NODE_ENV !== "test") {
+  }
+});
+
+// Guard + Model Type
 const Blog: Model<IBlog> =
   (models.Blog as Model<IBlog>) || mongoose.model<IBlog>("Blog", BlogSchema);
 
-export { Blog};
-
-
+export { Blog };

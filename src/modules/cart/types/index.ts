@@ -18,4 +18,5 @@ export interface ICart {
   discount?: number;
   createdAt: Date;
   updatedAt: Date;
+  language: string;
 }

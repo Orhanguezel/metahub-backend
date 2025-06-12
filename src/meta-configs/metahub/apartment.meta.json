@@ -14,11 +14,7 @@
       "summary": "GET /",
       "validationName": "\"/:id\"",
       "controllerName": "validateObjectId(\"id\"",
-      "pathPrefix": "admin.",
-      "body": {
-        "type": "object",
-        "properties": {}
-      }
+      "pathPrefix": "admin.apartment"
     },
     {
       "method": "GET",
@@ -27,11 +23,7 @@
       "summary": "GET /:id",
       "validationName": "\"/:id\"",
       "controllerName": "validateObjectId(\"id\"",
-      "pathPrefix": "admin.",
-      "body": {
-        "type": "object",
-        "properties": {}
-      }
+      "pathPrefix": "admin.apartment"
     },
     {
       "method": "DELETE",
@@ -40,11 +32,7 @@
       "summary": "DELETE /:id",
       "validationName": "\"/:id\"",
       "controllerName": "validateObjectId(\"id\"",
-      "pathPrefix": "admin.",
-      "body": {
-        "type": "object",
-        "properties": {}
-      }
+      "pathPrefix": "admin.apartment"
     },
     {
       "method": "GET",
@@ -53,11 +41,7 @@
       "summary": "GET /",
       "validationName": "\"/\"",
       "controllerName": "getAllApartments",
-      "pathPrefix": "public.",
-      "body": {
-        "type": "object",
-        "properties": {}
-      }
+      "pathPrefix": "public.apartment"
     },
     {
       "method": "GET",
@@ -66,7 +50,7 @@
       "summary": "GET /slug/:slug",
       "validationName": "\"/slug/:slug\"",
       "controllerName": "getApartmentBySlug",
-      "pathPrefix": "public."
+      "pathPrefix": "public.apartment"
     },
     {
       "method": "GET",
@@ -75,27 +59,38 @@
       "summary": "GET /:id",
       "validationName": "\"/:id\"",
       "controllerName": "validateObjectId(\"id\"",
-      "pathPrefix": "public.",
-      "body": {
-        "type": "object",
-        "properties": {}
-      }
+      "pathPrefix": "public.apartment"
     }
   ],
-  "version": "1.0.1",
+  "version": "1.0.2",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013"
+    "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7"
   },
-  "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
-  "lastUpdatedAt": "2025-06-06T09:24:40.542Z",
+  "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+  "lastUpdatedAt": "2025-06-12T08:39:01.845Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
-      "date": "2025-06-06T09:24:40.542Z",
+      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+      "date": "2025-06-12T08:33:25.547Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.2",
+      "by": "Orhan Güzel",
+      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+      "date": "2025-06-12T08:39:01.845Z",
       "note": "Meta auto-generated"
     }
-  ]
+  ],
+  "label": {
+    "tr": "apartment",
+    "en": "apartment",
+    "de": "apartment",
+    "pl": "apartment",
+    "fr": "apartment",
+    "es": "apartment"
+  }
 }

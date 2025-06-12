@@ -1,0 +1,22 @@
+{
+  "admin.module.nameRequired": "Nazwa modułu jest wymagana.",
+  "admin.module.exists": "Moduł o tej nazwie już istnieje: {{name}}",
+  "admin.module.created": "Moduł {{name}} został pomyślnie utworzony.",
+  "admin.module.updated": "Moduł zaktualizowany.",
+  "admin.module.deleted": "Moduł usunięty.",
+  "admin.module.notFound": "Nie znaleziono modułu.",
+  "admin.module.notFoundOrDeleted": "Nie znaleziono modułu lub został już usunięty.",
+  "admin.module.projectRequired": "Brakuje parametru projektu.",
+  "admin.module.enabledFetched": "Wyświetlono aktywne moduły.",
+  "admin.module.analyticsFetched": "Wyświetlono moduły analityczne.",
+  "admin.module.toggleAnalyticsInvalid": "Nieprawidłowe żądanie analytics.",
+  "admin.module.fetched": "Moduł pobrany.",
+  "admin.module.fetchedAll": "Wszystkie moduły pobrane.",
+  "admin.module.noneForProject": "Brak modułu dla tego projektu.",
+  "admin.module.labelRequired": "Wymagany jest co najmniej jeden label językowy.",
+  "admin.module.labelLocaleType": "Wartości labeli muszą być typu string.",
+  "admin.module.rolesInvalid": "Podano nieprawidłową rolę(e).",
+  "admin.module.iconInvalid": "Nieprawidłowa nazwa ikony.",
+  "admin.module.invalidRequest": "Nieprawidłowe żądanie lub brakujący parametr.",
+  "admin.module.validationFailed": "Walidacja nie powiodła się."
+}

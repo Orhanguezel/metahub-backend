@@ -14,11 +14,7 @@
       "summary": "GET /",
       "validationName": "\"/:id\"",
       "controllerName": "validateObjectId(\"id\"",
-      "pathPrefix": "admin.",
-      "body": {
-        "type": "object",
-        "properties": {}
-      }
+      "pathPrefix": "admin.services"
     },
     {
       "method": "GET",
@@ -27,11 +23,7 @@
       "summary": "GET /:id",
       "validationName": "\"/:id\"",
       "controllerName": "validateObjectId(\"id\"",
-      "pathPrefix": "admin.",
-      "body": {
-        "type": "object",
-        "properties": {}
-      }
+      "pathPrefix": "admin.services"
     },
     {
       "method": "DELETE",
@@ -40,11 +32,7 @@
       "summary": "DELETE /:id",
       "validationName": "\"/:id\"",
       "controllerName": "validateObjectId(\"id\"",
-      "pathPrefix": "admin.",
-      "body": {
-        "type": "object",
-        "properties": {}
-      }
+      "pathPrefix": "admin.services"
     },
     {
       "method": "GET",
@@ -53,11 +41,7 @@
       "summary": "GET /",
       "validationName": "\"/\"",
       "controllerName": "getAllServices",
-      "pathPrefix": "public.",
-      "body": {
-        "type": "object",
-        "properties": {}
-      }
+      "pathPrefix": "public.services"
     },
     {
       "method": "GET",
@@ -66,7 +50,7 @@
       "summary": "GET /slug/:slug",
       "validationName": "\"/slug/:slug\"",
       "controllerName": "getServicesBySlug",
-      "pathPrefix": "public."
+      "pathPrefix": "public.services"
     },
     {
       "method": "GET",
@@ -75,26 +59,22 @@
       "summary": "GET /:id",
       "validationName": "\"/:id\"",
       "controllerName": "validateObjectId(\"id\"",
-      "pathPrefix": "public.",
-      "body": {
-        "type": "object",
-        "properties": {}
-      }
+      "pathPrefix": "public.services"
     }
   ],
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013"
+    "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7"
   },
-  "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
-  "lastUpdatedAt": "2025-06-04T22:17:10.681Z",
+  "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+  "lastUpdatedAt": "2025-06-10T22:05:10.803Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
-      "date": "2025-06-04T22:17:10.681Z",
+      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+      "date": "2025-06-10T22:05:10.803Z",
       "note": "Meta auto-generated"
     }
   ]

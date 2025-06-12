@@ -2,33 +2,49 @@
 import { Response } from "express";
 
 const isProduction = process.env.NODE_ENV === "production";
-const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN;
 const COOKIE_NAME = process.env.COOKIE_NAME || "accessToken";
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-if (isProduction && !COOKIE_DOMAIN) {
-  throw new Error("❌ COOKIE_DOMAIN must be defined in production.");
-}
-
 export const setTokenCookie = (res: Response, token: string): void => {
-  res.cookie(COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: isProduction, // ✅ HTTPS zorunluluğu sadece production'da aktif
-    sameSite: isProduction ? "none" : "lax", // ✅ Dev'de sorun çıkmaz, prod'da cross-site desteklenir
-    domain: isProduction ? COOKIE_DOMAIN : undefined, // ✅ prod'da domain zorunlu
-    maxAge: COOKIE_MAX_AGE,
-    path: "/", // tüm path'ler için geçerli
-  });
+  if (isProduction) {
+    // PROD için: domain, secure, sameSite 'none'
+    const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN;
+    res.cookie(COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      domain: COOKIE_DOMAIN,
+      maxAge: COOKIE_MAX_AGE,
+      path: "/",
+    });
+  } else {
+    // DEV için: secure=false, sameSite='lax', domain=undefined
+    res.cookie(COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: COOKIE_MAX_AGE,
+      path: "/",
+    });
+  }
 };
 
 export const clearTokenCookie = (res: Response): void => {
-  res.clearCookie(COOKIE_NAME, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-    domain: isProduction ? COOKIE_DOMAIN : undefined,
-    path: "/",
-  });
+  if (isProduction) {
+    const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN;
+    res.clearCookie(COOKIE_NAME, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      domain: COOKIE_DOMAIN,
+      path: "/",
+    });
+  } else {
+    res.clearCookie(COOKIE_NAME, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      path: "/",
+    });
+  }
 };
-
-

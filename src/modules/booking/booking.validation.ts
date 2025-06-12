@@ -1,25 +1,21 @@
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
-// ✅ Create Booking — Public
+// ✅ Create Booking — Public (Dinamik Diller)
 export const validateCreateBooking = [
   body("name")
     .notEmpty()
     .isObject()
-    .withMessage("Name must be an object with tr, en, de values."),
-  body("name.tr")
-    .notEmpty()
-    .isString()
-    .withMessage("Name.tr is required and must be a string."),
-  body("name.en")
-    .notEmpty()
-    .isString()
-    .withMessage("Name.en is required and must be a string."),
-  body("name.de")
-    .notEmpty()
-    .isString()
-    .withMessage("Name.de is required and must be a string."),
-
+    .withMessage(
+      `Name must be an object with all language keys: ${SUPPORTED_LOCALES.join(", ")}`
+    ),
+  ...SUPPORTED_LOCALES.map((lang) =>
+    body(`name.${lang}`)
+      .notEmpty()
+      .isString()
+      .withMessage(`name.${lang} is required and must be a string.`)
+  ),
   body("email")
     .isEmail()
     .withMessage("Valid email is required."),
@@ -52,8 +48,10 @@ export const validateCreateBooking = [
     .withMessage("Duration must be a positive integer."),
   body("language")
     .notEmpty()
-    .isIn(["tr", "en", "de"])
-    .withMessage("Language must be one of tr, en or de."),
+    .isIn(SUPPORTED_LOCALES)
+    .withMessage(
+      `Language must be one of: ${SUPPORTED_LOCALES.join(", ")}`
+    ),
   validateRequest,
 ];
 
