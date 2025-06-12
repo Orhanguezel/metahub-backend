@@ -1,29 +1,77 @@
 // src/modules/admin/admin.validation.ts
 import { body, param, query } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
+import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+
+const labelValidator = body("label")
+  .optional()
+  .custom((label) => {
+    if (typeof label === "string") {
+      // Eğer tamamen string gelirse tüm dillere aynı atanacak.
+      return true;
+    }
+    if (typeof label !== "object" || Array.isArray(label)) {
+      throw new Error("admin.module.labelRequired"); // i18n anahtarı
+    }
+    // En az bir dilde dolu olmalı
+    const hasAtLeastOneLocale = SUPPORTED_LOCALES.some(
+      (locale) => typeof label[locale] === "string" && label[locale].trim() !== ""
+    );
+    if (!hasAtLeastOneLocale) {
+      throw new Error("admin.module.labelRequired"); // i18n anahtarı
+    }
+    // Bütün mevcut locale string mi diye kontrol
+    for (const locale of Object.keys(label)) {
+      // <--- DÜZELTİLMİŞ TİP ATAMA
+      if (
+        SUPPORTED_LOCALES.includes(locale as SupportedLocale) &&
+        typeof label[locale] !== "string"
+      ) {
+        throw new Error("admin.module.labelLocaleType"); // i18n anahtarı
+      }
+    }
+    return true;
+  });
 
 // ➕ Modül oluşturma doğrulaması
 export const validateCreateModule = [
-  body("name").isString().notEmpty().withMessage("Module name is required."),
-  body("icon").optional().isString().withMessage("Icon must be a string."),
-  body("roles").optional().isArray().withMessage("Roles must be an array."),
-  body("language").optional().isIn(["tr", "en", "de"]).withMessage("Language must be 'tr', 'en', or 'de'."),
-  body("visibleInSidebar").optional().isBoolean().withMessage("visibleInSidebar must be a boolean."),
-  body("useAnalytics").optional().isBoolean().withMessage("useAnalytics must be a boolean."),
-  body("enabled").optional().isBoolean().withMessage("enabled must be a boolean."),
+  body("name").isString().notEmpty().withMessage("admin.module.nameRequired"),
+  body("icon").optional().isString().withMessage("admin.module.iconType"),
+  body("roles").optional().isArray().withMessage("admin.module.rolesType"),
+  body("language")
+    .optional()
+    .isIn(SUPPORTED_LOCALES)
+    .withMessage("admin.module.languageInvalid"),
+  body("visibleInSidebar")
+    .optional()
+    .isBoolean()
+    .withMessage("admin.module.visibleInSidebarType"),
+  body("useAnalytics")
+    .optional()
+    .isBoolean()
+    .withMessage("admin.module.useAnalyticsType"),
+  body("enabled")
+    .optional()
+    .isBoolean()
+    .withMessage("admin.module.enabledType"),
+  labelValidator,
   validateRequest,
 ];
 
 // ✏️ Modül güncelleme doğrulaması
 export const validateUpdateModule = [
-  body("enabled").optional().isBoolean().withMessage("enabled must be boolean."),
-  body("visibleInSidebar").optional().isBoolean().withMessage("visibleInSidebar must be boolean."),
-  body("useAnalytics").optional().isBoolean().withMessage("useAnalytics must be boolean."),
-  body("roles").optional().isArray().withMessage("roles must be an array."),
-  body("icon").optional().isString().withMessage("icon must be a string."),
-  body("label.tr").optional().isString().withMessage("label.tr must be a string."),
-  body("label.en").optional().isString().withMessage("label.en must be a string."),
-  body("label.de").optional().isString().withMessage("label.de must be a string."),
+  body("enabled").optional().isBoolean().withMessage("admin.module.enabledType"),
+  body("visibleInSidebar")
+    .optional()
+    .isBoolean()
+    .withMessage("admin.module.visibleInSidebarType"),
+  body("useAnalytics")
+    .optional()
+    .isBoolean()
+    .withMessage("admin.module.useAnalyticsType"),
+  body("roles").optional().isArray().withMessage("admin.module.rolesType"),
+  body("icon").optional().isString().withMessage("admin.module.iconType"),
+  labelValidator, // update'te de aynı validatorı kullan
   validateRequest,
 ];
 
@@ -32,7 +80,7 @@ export const validateModuleNameParam = [
   param("name")
     .isString()
     .notEmpty()
-    .withMessage("Module name parameter is required."),
+    .withMessage("admin.module.nameParamRequired"),
   validateRequest,
 ];
 
@@ -41,6 +89,6 @@ export const validateProjectQuery = [
   query("project")
     .optional()
     .isString()
-    .withMessage("Project must be a string."),
+    .withMessage("admin.module.projectType"),
   validateRequest,
 ];

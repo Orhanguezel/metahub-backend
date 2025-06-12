@@ -1,67 +1,28 @@
 import mongoose, { Schema, Model, models } from "mongoose";
+import type { IModuleMeta, IModuleSetting } from "@/modules/admin/types";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
-/* ---------------------------------------------
-   TYPE EXPORTLARI
-----------------------------------------------*/
+// Dinamik label alanı oluşturucu
+const labelSchemaFields = SUPPORTED_LOCALES.reduce((fields, lang) => {
+  fields[lang] = { type: String, required: true };
+  return fields;
+}, {} as Record<string, any>);
 
-// RouteMeta tipi
-export type RouteMeta = {
-  method: string;
-  path: string;
-  auth?: boolean;
-  summary?: string;
-  body?: any;
-};
-
-// TranslatedLabel tipi
-export interface TranslatedLabel {
-  tr: string;
-  en: string;
-  de: string;
-}
-
-/* ---------------------------------------------
-   MODULE META MODEL
-----------------------------------------------*/
-
-export interface IModuleMeta {
-  name: string;
-  label: TranslatedLabel;
-  icon: string;
-  roles: string[];
-  visibleInSidebar: boolean;
-  enabled: boolean;
-  useAnalytics: boolean;
-  language: "tr" | "en" | "de";
-  version: string;
-  showInDashboard: boolean;
-  order: number;
-  statsKey?: string;
-  history: {
-    version: string;
-    by: string;
-    date: string;
-    note: string;
-  }[];
-  routes: RouteMeta[];
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
+// --- ModuleMeta Schema ---
 const moduleMetaSchema = new Schema<IModuleMeta>(
   {
     name: { type: String, required: true, unique: true },
-    label: {
-      tr: { type: String, required: true },
-      en: { type: String, required: true },
-      de: { type: String, required: true },
-    },
+    label: labelSchemaFields, // Dinamik yapı!
     icon: { type: String, default: "box" },
     roles: { type: [String], default: ["admin"] },
     visibleInSidebar: { type: Boolean, default: true },
     enabled: { type: Boolean, default: true },
     useAnalytics: { type: Boolean, default: false },
-    language: { type: String, enum: ["tr", "en", "de"], default: "en" },
+    language: {
+      type: String,
+      enum: SUPPORTED_LOCALES,
+      default: "en",
+    },
     version: { type: String, default: "1.0.0" },
     showInDashboard: { type: Boolean, default: true },
     order: { type: Number, default: 0 },
@@ -90,23 +51,7 @@ const moduleMetaSchema = new Schema<IModuleMeta>(
 export const ModuleMeta: Model<IModuleMeta> =
   models.ModuleMeta || mongoose.model<IModuleMeta>("ModuleMeta", moduleMetaSchema);
 
-/* ---------------------------------------------
-   MODULE SETTING MODEL
-----------------------------------------------*/
-
-export interface IModuleSetting {
-  project: string;
-  module: string;
-  enabled: boolean;
-  visibleInSidebar: boolean;
-  useAnalytics: boolean;
-  roles: string[];
-  icon: string;
-  label: TranslatedLabel;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
+// --- ModuleSetting Schema ---
 const moduleSettingsSchema = new Schema<IModuleSetting>(
   {
     project: { type: String, required: true },
@@ -116,10 +61,11 @@ const moduleSettingsSchema = new Schema<IModuleSetting>(
     useAnalytics: { type: Boolean, default: false },
     roles: { type: [String], default: ["admin"] },
     icon: { type: String, default: "box" },
-    label: {
-      tr: { type: String, required: true },
-      en: { type: String, required: true },
-      de: { type: String, required: true },
+    label: labelSchemaFields, // Dinamik yapı!
+    language: {
+      type: String,
+      enum: SUPPORTED_LOCALES,
+      default: "en",
     },
   },
   { timestamps: true }
@@ -127,4 +73,3 @@ const moduleSettingsSchema = new Schema<IModuleSetting>(
 
 export const ModuleSetting: Model<IModuleSetting> =
   models.ModuleSetting || mongoose.model<IModuleSetting>("ModuleSetting", moduleSettingsSchema);
-

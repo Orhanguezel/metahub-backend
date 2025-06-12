@@ -13,11 +13,7 @@
       "auth": true,
       "summary": "GET /",
       "validationName": "\"/\"",
-      "controllerName": "getAllNewsCategories",
-      "body": {
-        "type": "object",
-        "properties": {}
-      }
+      "controllerName": "getAllNewsCategories"
     },
     {
       "method": "GET",
@@ -25,26 +21,22 @@
       "auth": true,
       "summary": "GET /:id",
       "validationName": "\"/:id\"",
-      "controllerName": "validateObjectId(\"id\"",
-      "body": {
-        "type": "object",
-        "properties": {}
-      }
+      "controllerName": "validateObjectId(\"id\""
     }
   ],
   "version": "1.0.1",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013"
+    "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7"
   },
-  "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
-  "lastUpdatedAt": "2025-06-02T07:22:06.626Z",
+  "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+  "lastUpdatedAt": "2025-06-10T07:53:01.748Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
-      "date": "2025-06-02T07:22:06.626Z",
+      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+      "date": "2025-06-10T07:53:01.748Z",
       "note": "Meta auto-generated"
     }
   ]

@@ -13,6 +13,47 @@
       "auth": true,
       "summary": "GET /",
       "validationName": "\"/\"",
+      "controllerName": "getAllCarts",
+      "pathPrefix": "admin.cart",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id",
+      "pathPrefix": "admin.cart"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id",
+      "auth": true,
+      "summary": "PUT /:id",
+      "pathPrefix": "admin.cart"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id",
+      "pathPrefix": "admin.cart"
+    },
+    {
+      "method": "PATCH",
+      "path": "/:id/toggle-active",
+      "auth": true,
+      "summary": "PATCH /:id/toggle-active",
+      "pathPrefix": "admin.cart"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"/\"",
       "controllerName": "getUserCart",
       "body": {
         "type": "object",
@@ -62,63 +103,37 @@
       "summary": "DELETE /clear",
       "validationName": "\"/clear\"",
       "controllerName": "clearCart"
-    },
-    {
-      "method": "GET",
-      "path": "/",
-      "auth": true,
-      "summary": "GET /",
-      "validationName": "\"/\"",
-      "controllerName": "getAllCarts",
-      "pathPrefix": "admin.",
-      "body": {
-        "type": "object",
-        "properties": {}
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/:id",
-      "auth": true,
-      "summary": "GET /:id",
-      "pathPrefix": "admin."
-    },
-    {
-      "method": "PUT",
-      "path": "/:id",
-      "auth": true,
-      "summary": "PUT /:id",
-      "pathPrefix": "admin."
-    },
-    {
-      "method": "DELETE",
-      "path": "/:id",
-      "auth": true,
-      "summary": "DELETE /:id",
-      "pathPrefix": "admin."
-    },
-    {
-      "method": "PATCH",
-      "path": "/:id/toggle-active",
-      "auth": true,
-      "summary": "PATCH /:id/toggle-active",
-      "pathPrefix": "admin."
     }
   ],
-  "version": "1.0.1",
+  "version": "1.0.2",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013"
+    "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7"
   },
-  "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
-  "lastUpdatedAt": "2025-06-06T09:24:40.624Z",
+  "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+  "lastUpdatedAt": "2025-06-12T08:39:02.084Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
-      "date": "2025-06-06T09:24:40.624Z",
+      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+      "date": "2025-06-12T08:33:25.764Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.2",
+      "by": "Orhan Güzel",
+      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+      "date": "2025-06-12T08:39:02.084Z",
       "note": "Meta auto-generated"
     }
-  ]
+  ],
+  "label": {
+    "tr": "cart",
+    "en": "cart",
+    "de": "cart",
+    "pl": "cart",
+    "fr": "cart",
+    "es": "cart"
+  }
 }

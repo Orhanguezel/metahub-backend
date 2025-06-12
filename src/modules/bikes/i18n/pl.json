@@ -1,0 +1,18 @@
+{
+  "log": {
+    "created": "Rower został pomyślnie utworzony.",
+    "updated": "Rower został pomyślnie zaktualizowany.",
+    "deleted": "Rower został pomyślnie usunięty.",
+    "fetched": "Rower został pomyślnie pobrany.",
+    "listed": "Rowery zostały pomyślnie wyświetlone."
+  },
+  "error": {
+    "not_found": "Nie znaleziono roweru.",
+    "invalid_id": "Nieprawidłowy identyfikator roweru.",
+    "create_fail": "Nie udało się utworzyć roweru.",
+    "update_fail": "Nie udało się zaktualizować roweru.",
+    "delete_fail": "Nie udało się usunąć roweru."
+  }
+}
+
+

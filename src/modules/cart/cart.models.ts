@@ -1,5 +1,6 @@
 import { Schema, model, Types, Model, models } from "mongoose";
 import { ICart, ICartItem } from "@/modules/cart/types";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
 // 🛒 Sepet Ürün Alt Şeması
 const cartItemSchema = new Schema<ICartItem>(
@@ -22,6 +23,11 @@ const cartSchema = new Schema<ICart>(
     status: { type: String, enum: ["open", "ordered", "cancelled"], default: "open" },
     isActive: { type: Boolean, default: true },
     discount: { type: Number, default: 0 },
+    language: {
+              type: String,
+              enum: SUPPORTED_LOCALES,
+              default: "en",
+            },
   },
   { timestamps: true }
 );

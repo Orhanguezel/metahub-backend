@@ -1,0 +1,26 @@
+{
+  "blog.log.created": "Utworzono blog: ID: {id}, Slug: {slug}",
+  "blog.log.admin_list": "Wszystkie blogi (admin) wyświetlone. Razem: {count}",
+  "blog.log.invalid_id": "Nieprawidłowy identyfikator bloga: {id}",
+  "blog.log.not_found": "Nie znaleziono bloga: {id}",
+  "blog.log.admin_detail": "Szczegóły bloga (admin) pobrane: {id}",
+  "blog.log.updated": "Blog zaktualizowany: ID: {id}, Slug: {slug}",
+  "blog.log.invalid_removed_images": "Nieprawidłowy JSON removedImages.",
+  "blog.log.cloudinary_delete_error": "Błąd usuwania z Cloudinary. PublicId: {publicId}",
+  "blog.log.deleted": "Blog usunięty: ID: {id}, Slug: {slug}",
+  "blog.log.public_list": "Wszystkie publiczne blogi wyświetlone. Razem: {count}",
+  "blog.log.public_detail": "Szczegóły publicznego bloga pobrane: {id}",
+  "blog.log.public_detail_slug": "Szczegóły publicznego bloga pobrane: {slug}",
+  "blog.log.not_found_slug": "Nie znaleziono bloga o slug: {slug}",
+
+  "blog.create.success": "Blog został pomyślnie utworzony: {title}",
+  "blog.admin.list.success": "Lista blogów została pomyślnie pobrana. Razem: {count}",
+  "blog.invalid_id": "Nieprawidłowy identyfikator bloga: {id}",
+  "blog.not_found": "Nie znaleziono bloga.",
+  "blog.admin.detail.success": "Szczegóły bloga zostały pomyślnie pobrane.",
+  "blog.update.success": "Blog został pomyślnie zaktualizowany: {id}",
+  "blog.delete.success": "Blog został pomyślnie usunięty: {id}",
+  "blog.detail.success": "Szczegóły bloga zostały pomyślnie pobrane.",
+  "blog.list.success": "Lista blogów została pomyślnie pobrana. Razem: {count}"
+}
+

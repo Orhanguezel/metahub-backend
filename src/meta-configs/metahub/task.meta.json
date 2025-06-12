@@ -62,20 +62,35 @@
       "summary": "PATCH /me/:id"
     }
   ],
-  "version": "1.0.1",
+  "version": "1.0.2",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013"
+    "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7"
   },
-  "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
-  "lastUpdatedAt": "2025-06-06T09:24:40.284Z",
+  "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+  "lastUpdatedAt": "2025-06-12T08:39:02.033Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "1837ca6b8fcec7e7b5597dc68ad9b1027962e013",
-      "date": "2025-06-06T09:24:40.284Z",
+      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+      "date": "2025-06-12T08:33:25.726Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.2",
+      "by": "Orhan Güzel",
+      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+      "date": "2025-06-12T08:39:02.033Z",
       "note": "Meta auto-generated"
     }
-  ]
+  ],
+  "label": {
+    "tr": "task",
+    "en": "task",
+    "de": "task",
+    "pl": "task",
+    "fr": "task",
+    "es": "task"
+  }
 }

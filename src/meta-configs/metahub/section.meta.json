@@ -1,0 +1,90 @@
+{
+  "name": "section",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/",
+      "auth": false,
+      "summary": "POST /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllSection);\n\n// ✏️ Section güncelle (sadece gönderilen diller",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": false,
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllSection);\n\n// ✏️ Section güncelle (sadece gönderilen diller",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/:id",
+      "auth": false,
+      "summary": "PUT /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "deleteSection",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": false,
+      "summary": "DELETE /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "deleteSection",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ],
+  "version": "1.0.2",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7"
+  },
+  "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+  "lastUpdatedAt": "2025-06-12T08:39:01.684Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+      "date": "2025-06-12T08:33:25.408Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.2",
+      "by": "Orhan Güzel",
+      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+      "date": "2025-06-12T08:39:01.684Z",
+      "note": "Meta auto-generated"
+    }
+  ],
+  "label": {
+    "tr": "section",
+    "en": "section",
+    "de": "section",
+    "pl": "section",
+    "fr": "section",
+    "es": "section"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "env.loaded": "✅ Załadowano środowisko z pliku {file}.",
+  "env.notFound": "❌ {file} nie znaleziony. Utwórz go przed uruchomieniem serwera.",
+  "env.fallbackLoaded": "✅ Załadowano zapasowy plik .env.",
+  "env.noEnvFile": "⚠️ Nie znaleziono żadnego pliku .env. Zmienne środowiskowe mogą być nieustawione.",
+  "env.profile.active": "🌐 Aktywny profil: {profile}",
+  "env.activeProfile": "🌐 Aktywny profil: {profile}",
+
+  "email.missingConfig": "⚠️ Brak konfiguracji SMTP: {vars}",
+  "email.smtp.success": "✅ Połączenie SMTP powiodło się.",
+  "email.smtp.failed": "❌ Błąd połączenia SMTP: {error}",
+
+  "connect.success": "✅ Połączono z MongoDB.",
+  "connect.failed": "❌ Błąd połączenia z MongoDB: {error}",
+
+  "mongo.connected": "✅ Połączono z MongoDB.",
+  "mongo.error.notDefined": "❌ Zmienna środowiskowa MONGO_URI nie jest zdefiniowana.",
+  "mongo.connectionError": "❌ Błąd połączenia z MongoDB: {error}",
+
+  "smtp.connectionSuccess": "✅ Połączenie SMTP powiodło się.",
+  "smtp.connectionFailed": "❌ Błąd połączenia SMTP: {error}",
+  "smtp.missingConfig": "⚠️ Brak konfiguracji SMTP: {vars}",
+
+  "migration.noAppEnv": "❌ APP_ENV nie jest ustawione. Proszę ustawić przed uruchomieniem tego skryptu.",
+  "migration.envNotFound": "❌ Plik środowiskowy nie został znaleziony: {envPath}",
+  "migration.envLoaded": "🌱 Plik środowiskowy załadowany: {envPath}",
+  "migration.migrated": "✅ Zmigrowano moduł: {module}",
+  "migration.alreadyMigrated": "✔️ Już zmigrowano: {module}",
+  "migration.error": "❌ Błąd migracji: {error}",
+
+  "server.cors.notAllowed": "❌ CORS nie jest dozwolony: {origin}",
+  "server.error.noPort": "❌ PORT nie jest zdefiniowany w pliku środowiskowym.",
+  "server.started": "🚀 Serwer uruchomiony na: {baseUrl}"
+}
+
+

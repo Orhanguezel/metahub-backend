@@ -7,33 +7,44 @@ import { Coupon } from "@/modules/coupon";
 import { Payment } from "@/modules/payment";
 import { User } from "@/modules/users";
 import { sendEmail } from "@/services/emailService";
-import { orderConfirmationTemplate } from "@/templates/orderConfirmation";
+import { orderConfirmationTemplate } from "@/modules/order/templates/orderConfirmation";
 import { Notification } from "@/modules/notification";
+import type { SupportedLocale } from "@/types/common";
+import { t } from "@/core/utils/i18n/translate";
+import orderTranslations from "@/modules/order/i18n";
+import logger from "@/core/middleware/logger/logger";
 
-// Multi-language notification mesajı
-function getOrderNotificationMessage(totalPrice: number, locale: "en" | "de" | "tr" = "en") {
-  const messages = {
-    tr: `Yeni siparişiniz alındı. Toplam: ${totalPrice}₺`,
-    en: `Your order has been received. Total: €${totalPrice}`,
-    de: `Ihre Bestellung ist eingegangen. Gesamt: €${totalPrice}`,
-  };
-  return messages[locale] || messages.en;
+// i18n kısa yol fonksiyonu
+function orderT(
+  key: string,
+  locale: SupportedLocale,
+  vars?: Record<string, string | number>
+) {
+  return t(key, locale, orderTranslations, vars);
 }
 
 // 🟢 Sipariş Oluştur
 export const createOrder = asyncHandler(async (req: Request, res: Response) => {
-  const { items, addressId, shippingAddress, totalPrice, paymentMethod, couponCode } = req.body;
+  const { items, addressId, shippingAddress, paymentMethod, couponCode } =
+    req.body;
+  const userId = req.user?._id;
+  const userName = req.user?.name || "";
+  const reqLocale: SupportedLocale = req.locale || "en";
 
-  // 1️⃣ Shipping Address
+  // 1️⃣ Adres bul/gönder
   let finalShippingAddress = shippingAddress;
   if (addressId) {
     const addressDoc = await Address.findById(addressId).lean();
     if (!addressDoc) {
-      res.status(400).json({ success: false, message: "Address not found." });
-      return 
+      logger.warn(orderT("error.addressNotFound", reqLocale));
+      res.status(400).json({
+        success: false,
+        message: orderT("error.addressNotFound", reqLocale),
+      });
+      return;
     }
     finalShippingAddress = {
-      name: req.user?.name || "",
+      name: userName,
       phone: addressDoc.phone,
       email: addressDoc.email,
       street: addressDoc.street,
@@ -43,7 +54,6 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       ...(shippingAddress || {}),
     };
   }
-  // Guard: Eksik adres
   if (
     !finalShippingAddress ||
     !finalShippingAddress.name ||
@@ -54,34 +64,52 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     !finalShippingAddress.postalCode ||
     !finalShippingAddress.country
   ) {
+    logger.warn(orderT("error.shippingAddressRequired", reqLocale));
     res.status(400).json({
       success: false,
-      message: "Shipping address is required. Please update your address.",
+      message: orderT("error.shippingAddressRequired", reqLocale),
       redirect: "/account",
-    });return;
+    });
+    return;
   }
 
-  // 2️⃣ Ürünleri doğrula, fiyatları netleştir
+  // 2️⃣ Ürün doğrulama ve fiyat
   let total = 0;
-  const enrichedItems = [];
+  const enrichedItems: any[] = [];
   const criticalStockWarnings: string[] = [];
   const itemsForMail: string[] = [];
 
   for (const item of items) {
     const product = await RadonarProd.findById(item.product);
     if (!product) {
-      res.status(404).json({ success: false, message: `Product not found: ${item.product}` });
+      logger.warn(orderT("error.productNotFound", reqLocale));
+      res.status(404).json({
+        success: false,
+        message: orderT("error.productNotFound", reqLocale),
+      });
       return;
     }
     if (product.stock < item.quantity) {
-      res.status(400).json({ success: false, message: `Insufficient stock for ${product.name.en}` });
+      logger.warn(orderT("error.insufficientStock", reqLocale));
+      res.status(400).json({
+        success: false,
+        message: orderT("error.insufficientStock", reqLocale),
+      });
       return;
     }
     product.stock -= item.quantity;
     await product.save();
 
     if (product.stock <= (product.stockThreshold ?? 5)) {
-      criticalStockWarnings.push(`${product.name.tr} → ${product.stock} left`);
+      criticalStockWarnings.push(
+        orderT("warning.lowStock", reqLocale, {
+          name:
+            product.name?.[reqLocale] ||
+            product.name?.en ||
+            String(product._id),
+          stock: String(product.stock),
+        })
+      );
     }
     enrichedItems.push({
       product: product._id,
@@ -89,39 +117,48 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       unitPrice: product.price,
     });
     itemsForMail.push(
-      `• ${product.name?.en || product.name?.tr || product.name?.de || product._id} – Qty: ${item.quantity}`
+      `• ${
+        product.name?.[reqLocale] || product.name?.en || String(product._id)
+      } – Qty: ${item.quantity}`
     );
     total += product.price * item.quantity;
   }
 
-  // 3️⃣ Kuponu uygula (opsiyonel)
+  // 3️⃣ Kupon
   let discount = 0;
   let coupon = null;
   if (couponCode) {
     coupon = await Coupon.findOne({
       code: couponCode.trim().toUpperCase(),
       isActive: true,
-      expiresAt: { $gte: new Date() }
+      expiresAt: { $gte: new Date() },
     });
     if (coupon) {
       discount = Math.round(total * (coupon.discount / 100));
     } else {
-      // Yanlış/expired kupon — Hata dön, sipariş oluşmasın
-      res.status(400).json({ success: false, message: "Invalid or expired coupon code." });
+      logger.warn(orderT("error.invalidCoupon", reqLocale));
+      res.status(400).json({
+        success: false,
+        message: orderT("error.invalidCoupon", reqLocale),
+      });
       return;
     }
   }
 
-  // 4️⃣ Ödeme methodunu kontrol et
-  const method: "cash_on_delivery" | "credit_card" | "paypal" = paymentMethod || "cash_on_delivery";
+  // 4️⃣ Payment method kontrol
+  const method = (paymentMethod as string) || "cash_on_delivery";
   if (!["cash_on_delivery", "credit_card", "paypal"].includes(method)) {
-    res.status(400).json({ success: false, message: "Invalid payment method." });
+    logger.warn(orderT("error.invalidPaymentMethod", reqLocale));
+    res.status(400).json({
+      success: false,
+      message: orderT("error.invalidPaymentMethod", reqLocale),
+    });
     return;
   }
 
-  // 5️⃣ Sipariş Oluştur
+  // 5️⃣ Siparişi oluştur
   const order = await Order.create({
-    user: req.user?._id,
+    user: userId,
     addressId: addressId || undefined,
     items: enrichedItems,
     shippingAddress: finalShippingAddress,
@@ -130,10 +167,10 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     coupon: coupon?._id,
     paymentMethod: method,
     status: "pending",
-    language: req.locale || "en",
+    language: reqLocale,
   });
 
-  // 6️⃣ Payment (sadece kredi kartı/paypal ise hemen payment kaydı aç, stripe/paypal entegrasyonu ile güncellenir)
+  // 6️⃣ Payment (kredi kartı/paypal ise)
   let paymentDoc = null;
   if (["credit_card", "paypal"].includes(method)) {
     paymentDoc = await Payment.create({
@@ -141,23 +178,23 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       amount: total - discount,
       method,
       status: "pending",
-      language: req.locale || "en",
+      language: reqLocale,
       isActive: true,
     });
-    // Order'a payment referansı ekle (çoklu ödeme desteği için payments dizisine push)
     order.payments = [paymentDoc._id];
     await order.save();
   }
 
   // 7️⃣ Email & Notification
-  const user = req.user ? await User.findById(req.user._id).select("email name language") : null;
-  const locale = req.locale || user?.language || "en";
+  const user = userId
+    ? await User.findById(userId).select("email name language")
+    : null;
+  const locale: SupportedLocale = reqLocale || user?.language || "en";
   const customerEmail = finalShippingAddress?.email || user?.email || "";
-  const subjectMap = { de: "Bestellbestätigung", tr: "Sipariş Onayı", en: "Order Confirmation" };
 
   await sendEmail({
     to: customerEmail,
-    subject: subjectMap[locale as "de" | "tr" | "en"] || subjectMap.en,
+    subject: orderT("email.subject", locale),
     html: orderConfirmationTemplate({
       name: finalShippingAddress.name || user?.name || "",
       itemsList: itemsForMail.join("<br/>"),
@@ -166,24 +203,32 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     }),
   });
 
-  const adminSubjectMap = { de: "Neue Bestellung erhalten", tr: "Yeni Sipariş Alındı", en: "New Order Received" };
   await sendEmail({
     to: process.env.ADMIN_EMAIL,
-    subject: adminSubjectMap[locale as "de" | "tr" | "en"] || adminSubjectMap.en,
-    html: `<p>New order received. Order ID: ${order._id}</p>`,
+    subject: orderT("email.adminSubject", locale),
+    html: `<p>${orderT("email.adminBody", locale, {
+      orderId: String(order._id),
+    })}</p>`,
   });
 
   await Notification.create({
-    user: req.user?._id,
+    user: userId,
     type: "success",
-    message: getOrderNotificationMessage(total - discount, locale as "en" | "de" | "tr"),
-    data: { orderId: order._id },
+    message: orderT("notification.orderReceived", locale, {
+      total: total - discount,
+    }),
+    data: { orderId: String(order._id) },
     language: locale,
   });
 
+  logger.info(
+    orderT("order.created.success", locale) +
+      ` | User: ${userId} | Order: ${order._id}`
+  );
+
   res.status(201).json({
     success: true,
-    message: "Order created successfully.",
+    message: orderT("order.created.success", locale),
     data: {
       ...order.toObject(),
       payment: paymentDoc ? paymentDoc.toObject() : undefined,
@@ -193,69 +238,96 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       finalTotal: total - discount,
     },
   });
-  return;
 });
 
+// 🟠 Sipariş detay (sadece sahibi veya admin görebilir)
+export const getOrderById = asyncHandler(
+  async (req: Request, res: Response) => {
+    const order = await Order.findById(req.params.id)
+      .populate("items.product")
+      .populate("addressId");
 
-// 🟢 Siparişi getir
-export const getOrderById = asyncHandler(async (req: Request, res: Response) => {
-  const order = await Order.findById(req.params.id)
-    .populate("items.product")
-    .populate("addressId");
+    const locale: SupportedLocale = (req.locale as SupportedLocale) || "en";
 
-  if (!order) {
-     res.status(404).json({ success: false, message: "Order not found." });
-     return
+    if (!order) {
+      logger.warn(orderT("error.orderNotFound", locale));
+      res.status(404).json({
+        success: false,
+        message: orderT("error.orderNotFound", locale),
+      });
+      return;
+    }
+    if (
+      order.user?.toString() !== req.user?._id.toString() &&
+      req.user?.role !== "admin"
+    ) {
+      logger.warn(orderT("error.notAuthorizedViewOrder", locale));
+      res.status(403).json({
+        success: false,
+        message: orderT("error.notAuthorizedViewOrder", locale),
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: orderT("order.fetched.success", locale),
+      data: order,
+    });
   }
-  // Sadece siparişi oluşturan kullanıcı veya admin görebilir
-  if (
-    order.user?.toString() !== req.user?._id.toString() &&
-    req.user?.role !== "admin"
-  ) {
-     res.status(403).json({ success: false, message: "You are not authorized to view this order." });
-     return;
+);
+
+// 🟢 Siparişin adresini güncelle (sadece sahibi!)
+export const updateShippingAddress = asyncHandler(
+  async (req: Request, res: Response) => {
+    const order = await Order.findById(req.params.id);
+    const locale: SupportedLocale = (req.locale as SupportedLocale) || "en";
+
+    if (!order) {
+      logger.warn(orderT("error.orderNotFound", locale));
+      res.status(404).json({
+        success: false,
+        message: orderT("error.orderNotFound", locale),
+      });
+      return;
+    }
+
+    if (order.user?.toString() !== req.user?._id.toString()) {
+      logger.warn(orderT("error.notAuthorizedUpdateOrder", locale));
+      res.status(403).json({
+        success: false,
+        message: orderT("error.notAuthorizedUpdateOrder", locale),
+      });
+      return;
+    }
+
+    const { shippingAddress } = req.body;
+
+    if (!shippingAddress) {
+      logger.warn(orderT("error.shippingAddressRequired", locale));
+      res.status(400).json({
+        success: false,
+        message: orderT("error.shippingAddressRequired", locale),
+      });
+      return;
+    }
+
+    order.shippingAddress = {
+      ...order.shippingAddress,
+      ...shippingAddress,
+    };
+
+    await order.save();
+
+    logger.info(
+      orderT("order.addressUpdated.success", locale) +
+        ` | User: ${order.user} | Order: ${order._id}`
+    );
+
+    res.status(200).json({
+      success: true,
+      message: orderT("order.addressUpdated.success", locale),
+      data: order,
+    });
   }
-
-   res.status(200).json({
-    success: true,
-    message: "Order fetched successfully.",
-    data: order,
-  });
-  return;
-});
-
-// 🟢 Siparişin adresini güncelle (sadece siparişi oluşturan user!)
-export const updateShippingAddress = asyncHandler(async (req: Request, res: Response) => {
-  const order = await Order.findById(req.params.id);
-
-  if (!order) {
-    res.status(404).json({ success: false, message: "Order not found." });
-    return;
-  }
-
-  if (order.user?.toString() !== req.user?._id.toString()) {
-     res.status(403).json({ success: false, message: "You are not authorized to update this order." });
-     return;
-  }
-
-  const { shippingAddress } = req.body;
-
-  if (!shippingAddress) {
-    res.status(400).json({ success: false, message: "Shipping address is required." });
-    return;
-  }
-
-  order.shippingAddress = {
-    ...order.shippingAddress,
-    ...shippingAddress,
-  };
-
-  await order.save();
-
-   res.status(200).json({
-    success: true,
-    message: "Shipping address updated successfully.",
-    data: order,
-  });
-  return;
-});
+);

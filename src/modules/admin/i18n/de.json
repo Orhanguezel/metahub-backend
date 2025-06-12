@@ -1,0 +1,22 @@
+{
+  "admin.module.nameRequired": "Modulname ist erforderlich.",
+  "admin.module.exists": "Ein Modul mit diesem Namen existiert bereits: {{name}}",
+  "admin.module.created": "Modul {{name}} wurde erfolgreich erstellt.",
+  "admin.module.updated": "Modul aktualisiert.",
+  "admin.module.deleted": "Modul gelöscht.",
+  "admin.module.notFound": "Modul nicht gefunden.",
+  "admin.module.notFoundOrDeleted": "Modul nicht gefunden oder bereits gelöscht.",
+  "admin.module.projectRequired": "Projektparameter fehlt.",
+  "admin.module.enabledFetched": "Aktive Module aufgelistet.",
+  "admin.module.analyticsFetched": "Analyse-Module aufgelistet.",
+  "admin.module.toggleAnalyticsInvalid": "Ungültige Analytics-Anfrage.",
+  "admin.module.fetched": "Modul abgerufen.",
+  "admin.module.fetchedAll": "Alle Module abgerufen.",
+  "admin.module.noneForProject": "Für dieses Projekt wurden keine Module gefunden.",
+  "admin.module.labelRequired": "Mindestens ein Sprachlabel muss angegeben werden.",
+  "admin.module.labelLocaleType": "Label-Werte müssen für alle Sprachen Strings sein.",
+  "admin.module.rolesInvalid": "Ungültige Rolle(n) angegeben.",
+  "admin.module.iconInvalid": "Ungültiger Icon-Name.",
+  "admin.module.invalidRequest": "Ungültige Anfrage oder fehlender Parameter.",
+  "admin.module.validationFailed": "Validierung fehlgeschlagen."
+}

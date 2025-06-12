@@ -1,0 +1,58 @@
+{
+  "name": "bikescategory",
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "tr",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": true,
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "getAllBikeCategories"
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "validateObjectId(\"id\""
+    }
+  ],
+  "version": "1.0.2",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7"
+  },
+  "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+  "lastUpdatedAt": "2025-06-12T08:39:01.252Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+      "date": "2025-06-12T08:33:25.041Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.2",
+      "by": "Orhan Güzel",
+      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
+      "date": "2025-06-12T08:39:01.252Z",
+      "note": "Meta auto-generated"
+    }
+  ],
+  "label": {
+    "tr": "bikescategory",
+    "en": "bikescategory",
+    "de": "bikescategory",
+    "pl": "bikescategory",
+    "fr": "bikescategory",
+    "es": "bikescategory"
+  }
+}

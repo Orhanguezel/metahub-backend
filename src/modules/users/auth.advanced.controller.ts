@@ -1,5 +1,3 @@
-// src/modules/users/auth.advanced.controller.ts
-
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import crypto from "crypto";
@@ -7,62 +5,91 @@ import { User } from "./users.models";
 import { sendEmail } from "@/services/emailService";
 import { sendSms } from "@/services/smsService";
 import { generateOtpCode } from "@/core/utils/otp";
-import { getMessage } from "@/core/utils/langHelpers";
 import speakeasy from "speakeasy";
 import qrcode from "qrcode";
+import logger from "@/core/middleware/logger/logger";
+import { t } from "@/core/utils/i18n/translate";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import userTranslations from "@/modules/users/i18n";
+import type { SupportedLocale } from "@/types/common";
 
-// --- EMAIL VERIFICATION ---
+// Dil ve log için kısa yol
+function getLocale(req: Request): SupportedLocale {
+  return (req.locale as SupportedLocale) || getLogLocale();
+}
+function userT(
+  key: string,
+  locale: SupportedLocale,
+  vars?: Record<string, string | number>
+) {
+  return t(key, locale, userTranslations, vars);
+}
 
-/**
- * Kullanıcıya e-posta doğrulama linki gönderir.
- */
-export const sendEmailVerification = asyncHandler(async (req: Request, res: Response) => {
-  const { email } = req.body;
-  if (!email) {
-    res.status(400).json({ success: false, message: getMessage(req.locale, "E-Mail ist erforderlich.", "E-posta gereklidir.", "Email is required.") });
-    return 
-  }
-  const user = await User.findOne({ email });
-  if (!user) {
-     res.status(404).json({ success: false, message: getMessage(req.locale, "Benutzer nicht gefunden.", "Kullanıcı bulunamadı.", "User not found.") });
-     return
-  }
-  if (user.emailVerified) {
-     res.status(200).json({ success: true, message: getMessage(req.locale, "E-Mail bereits verifiziert.", "E-posta zaten doğrulanmış.", "Email already verified.") });return
-  }
+// ✅ E-posta Doğrulama Gönder
+export const sendEmailVerification = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email } = req.body;
+    const locale = getLocale(req);
 
-  const token = crypto.randomBytes(32).toString("hex");
-  user.emailVerificationToken = token;
-  user.emailVerificationExpires = new Date(Date.now() + 1000 * 60 * 60 * 6); // 6 saat geçerli
-  await user.save();
+    if (!email) {
+      logger.warn(`[EMAIL-VERIFICATION] E-posta eksik.`);
+      res.status(400).json({
+        success: false,
+        message: userT("error.emailRequired", locale),
+      });
+      return;
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      logger.warn(`[EMAIL-VERIFICATION] Kullanıcı bulunamadı: ${email}`);
+      res
+        .status(404)
+        .json({ success: false, message: userT("error.userNotFound", locale) });
+      return;
+    }
+    if (user.emailVerified) {
+      logger.info(`[EMAIL-VERIFICATION] Zaten doğrulanmış: ${email}`);
+      res.status(200).json({
+        success: true,
+        message: userT("email.alreadyVerified", locale),
+      });
+      return;
+    }
 
-  const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${token}`;
-  await sendEmail({
-    to: user.email,
-    subject: getMessage(req.locale, "E-Mail-Verifizierung", "E-posta Doğrulama", "Email Verification"),
-    html: `
-      <p>${getMessage(req.locale, "Bitte verifiziere deine E-Mail-Adresse.", "Lütfen e-posta adresinizi doğrulayın.", "Please verify your email address.")}</p>
+    const token = crypto.randomBytes(32).toString("hex");
+    user.emailVerificationToken = token;
+    user.emailVerificationExpires = new Date(Date.now() + 1000 * 60 * 60 * 6);
+    await user.save();
+
+    const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${token}`;
+    await sendEmail({
+      to: user.email,
+      subject: userT("email.verification.subject", locale),
+      html: `
+      <p>${userT("email.verification.body", locale)}</p>
       <a href="${verifyUrl}">${verifyUrl}</a>
     `,
-  });
+    });
 
-   res.status(200).json({ success: true, message: getMessage(req.locale, "Bestätigungslink gesendet.", "Doğrulama linki gönderildi.", "Verification link sent.") });return
-});
+    logger.info(`[EMAIL-VERIFICATION] E-posta gönderildi: ${email}`);
+    res.status(200).json({
+      success: true,
+      message: userT("email.verification.sent", locale),
+    });
+  }
+);
 
-/**
- * Kullanıcının e-posta adresini doğrular.
- */
-/**
- * Kullanıcının e-posta adresini doğrular.
- */
+// ✅ E-posta doğrula
 export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   const { token } = req.body;
-  console.log("🔎 Gelen token:", token);
+  const locale = getLocale(req);
 
   if (!token) {
-     console.log("❌ Token eksik!");
-     res.status(400).json({ success: false, message: getMessage(req.locale, "Token ist erforderlich.", "Token gereklidir.", "Token is required.") });
-     return;
+    logger.warn(`[EMAIL-VERIFY] Token eksik.`);
+    res
+      .status(400)
+      .json({ success: false, message: userT("error.tokenRequired", locale) });
+    return;
   }
 
   const user = await User.findOne({
@@ -70,21 +97,13 @@ export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
     emailVerificationExpires: { $gt: new Date() },
   });
 
-  console.log("🧑 Kullanıcı bulundu mu?", !!user);
-  if (user) {
-    console.log("🧑 Kullanıcı:", {
-      _id: user._id,
-      email: user.email,
-      tokenDb: user.emailVerificationToken,
-      expiresDb: user.emailVerificationExpires,
-      emailVerified: user.emailVerified,
-    });
-  }
-
   if (!user) {
-     console.log("❌ Kullanıcı bulunamadı veya token süresi doldu!");
-     res.status(400).json({ success: false, message: getMessage(req.locale, "Token ungültig oder abgelaufen.", "Token geçersiz veya süresi dolmuş.", "Invalid or expired token.") });
-     return;
+    logger.warn(`[EMAIL-VERIFY] Geçersiz veya süresi dolmuş token.`);
+    res.status(400).json({
+      success: false,
+      message: userT("error.tokenInvalidOrExpired", locale),
+    });
+    return;
   }
 
   user.emailVerified = true;
@@ -92,73 +111,76 @@ export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   user.verifiedAt = new Date();
   user.emailVerificationToken = undefined;
   user.emailVerificationExpires = undefined;
-
-  // Kaydetmeden önce güncel değerleri logla
-  console.log("✅ Onaylandı, kaydedilecek alanlar:", {
-    emailVerified: user.emailVerified,
-    verifiedAt: user.verifiedAt,
-    emailVerificationToken: user.emailVerificationToken,
-    emailVerificationExpires: user.emailVerificationExpires,
-  });
-
   await user.save();
 
-  console.log("✅ Kaydedildi!");
-  res.status(200).json({ success: true, message: getMessage(req.locale, "E-Mail erfolgreich verifiziert.", "E-posta başarıyla doğrulandı.", "Email verified successfully.") });
-  return;
+  logger.info(`[EMAIL-VERIFY] Doğrulama tamamlandı: ${user.email}`);
+  res.status(200).json({
+    success: true,
+    message: userT("email.verification.success", locale),
+  });
 });
 
 // --- OTP (EMAIL/SMS) ---
 
-/**
- * E-posta veya SMS ile OTP (tek kullanımlık kod) gönderir.
- */
 export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
-  const { email, via = "email" } = req.body; // via: "email" | "sms"
+  const { email, via = "email" } = req.body;
+  const locale = getLocale(req);
+
   if (!email) {
-     res.status(400).json({ success: false, message: getMessage(req.locale, "E-Mail ist erforderlich.", "E-posta gereklidir.", "Email is required.") });
-     return
+    logger.warn(`[OTP] E-posta eksik.`);
+    res
+      .status(400)
+      .json({ success: false, message: userT("error.emailRequired", locale) });
+    return;
   }
   const user = await User.findOne({ email });
   if (!user) {
-    res.status(404).json({ success: false, message: getMessage(req.locale, "Benutzer nicht gefunden.", "Kullanıcı bulunamadı.", "User not found.") });
-    return 
+    logger.warn(`[OTP] Kullanıcı bulunamadı: ${email}`);
+    res
+      .status(404)
+      .json({ success: false, message: userT("error.userNotFound", locale) });
+    return;
   }
 
   const otpCode = generateOtpCode(6);
   user.otpCode = otpCode;
-  user.otpExpires = new Date(Date.now() + 1000 * 60 * 10); // 10 dk geçerli
+  user.otpExpires = new Date(Date.now() + 1000 * 60 * 10);
   await user.save();
 
   if (via === "sms" && user.phone) {
-    await sendSms(user.phone, `${otpCode} - ${getMessage(req.locale, "Dein Einmal-Code zum Login.", "Giriş için tek kullanımlık kodunuz.", "Your one-time code for login.")}`);
+    await sendSms(user.phone, `${otpCode} - ${userT("otp.smsBody", locale)}`);
+    logger.info(`[OTP] SMS ile kod gönderildi: ${user.phone}`);
   } else {
     await sendEmail({
       to: user.email,
-      subject: getMessage(req.locale, "Dein Sicherheitscode", "Güvenlik Kodunuz", "Your Security Code"),
+      subject: userT("otp.emailSubject", locale),
       html: `
         <h2>${otpCode}</h2>
-        <p>${getMessage(req.locale, "Dein Einmal-Code zum Login.", "Giriş için tek kullanımlık kodunuz.", "Your one-time code for login.")}</p>
+        <p>${userT("otp.emailBody", locale)}</p>
       `,
     });
+    logger.info(`[OTP] E-posta ile kod gönderildi: ${user.email}`);
   }
 
-   res.status(200).json({
+  res.status(200).json({
     success: true,
-    message: getMessage(req.locale, "OTP-Code gesendet.", "OTP kodu gönderildi.", "OTP code sent."),
-    via: via,
+    message: userT("otp.sent", locale),
+    via,
   });
-  return
 });
 
-/**
- * OTP kodunu doğrular.
- */
+// ✅ OTP Doğrula
 export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
   const { email, code } = req.body;
+  const locale = getLocale(req);
+
   if (!email || !code) {
-     res.status(400).json({ success: false, message: getMessage(req.locale, "E-Mail und Code sind erforderlich.", "E-posta ve kod gereklidir.", "Email and code are required.") });
-     return
+    logger.warn(`[OTP-VERIFY] Email veya kod eksik.`);
+    res.status(400).json({
+      success: false,
+      message: userT("error.emailAndCodeRequired", locale),
+    });
+    return;
   }
   const user = await User.findOne({
     email,
@@ -166,8 +188,12 @@ export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
     otpExpires: { $gt: new Date() },
   });
   if (!user) {
-     res.status(400).json({ success: false, message: getMessage(req.locale, "Ungültiger oder abgelaufener Code.", "Kod geçersiz veya süresi dolmuş.", "Invalid or expired code.") });
-     return
+    logger.warn(`[OTP-VERIFY] Kod geçersiz veya süresi dolmuş.`);
+    res.status(400).json({
+      success: false,
+      message: userT("error.otpInvalidOrExpired", locale),
+    });
+    return;
   }
 
   user.otpCode = undefined;
@@ -175,30 +201,32 @@ export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
   user.isActive = true;
   await user.save();
 
-   res.status(200).json({ success: true, message: getMessage(req.locale, "OTP erfolgreich verifiziert.", "OTP başarıyla doğrulandı.", "OTP verified successfully.") });return
+  logger.info(`[OTP-VERIFY] Başarıyla doğrulandı: ${email}`);
+  res
+    .status(200)
+    .json({ success: true, message: userT("otp.verified", locale) });
 });
 
-/**
- * OTP kodunu tekrar gönderir.
- */
-export const resendOtp = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  // sendOtp asyncHandler ile, next göndermek gerekirse de destekli
-  return sendOtp(req, res, next);
-});
+export const resendOtp = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    logger.info(`[OTP-RESEND] Tekrar gönderiliyor...`);
+    return sendOtp(req, res, next);
+  }
+);
 
 // --- MFA (Google Authenticator - TOTP) ---
 
-/**
- * Kullanıcıya MFA secret'ı ve QR kodu gönderir.
- */
 export const enableMfa = asyncHandler(async (req: Request, res: Response) => {
   const user = await User.findById(req.user!.id);
+  const locale = getLocale(req);
   if (!user) {
-     res.status(404).json({ success: false, message: getMessage(req.locale, "Benutzer nicht gefunden.", "Kullanıcı bulunamadı.", "User not found.") });
-     return
+    logger.warn(`[MFA-ENABLE] Kullanıcı bulunamadı: ${req.user!.id}`);
+    res
+      .status(404)
+      .json({ success: false, message: userT("error.userNotFound", locale) });
+    return;
   }
 
-  // Secret oluştur
   const secret = speakeasy.generateSecret({
     name: `Ensotek (${user.email})`,
     length: 32,
@@ -211,29 +239,36 @@ export const enableMfa = asyncHandler(async (req: Request, res: Response) => {
   const otpauthUrl = secret.otpauth_url!;
   const qrImageUrl = await qrcode.toDataURL(otpauthUrl);
 
+  logger.info(`[MFA-ENABLE] MFA başlatıldı: ${user.email}`);
+
   res.status(200).json({
     success: true,
-    message: getMessage(req.locale, "MFA başlatıldı.", "MFA başlatıldı.", "MFA initialized."),
+    message: userT("mfa.initialized", locale),
     otpauthUrl,
-    qrImageUrl, // Frontend'de göster
+    qrImageUrl,
     mfaEnabled: false,
   });
-  return 
 });
 
-/**
- * Kullanıcının MFA kodunu doğrular ve MFA'yı etkinleştirir.
- */
+// ✅ MFA Kod Doğrulama
 export const verifyMfa = asyncHandler(async (req: Request, res: Response) => {
   const { code } = req.body;
+  const locale = getLocale(req);
+
   if (!code) {
-     res.status(400).json({ success: false, message: getMessage(req.locale, "Kod gereklidir.", "Kod gereklidir.", "Code is required.") });
-     return
+    logger.warn(`[MFA-VERIFY] Kod eksik.`);
+    res
+      .status(400)
+      .json({ success: false, message: userT("error.codeRequired", locale) });
+    return;
   }
   const user = await User.findById(req.user!.id).select("+mfaSecret");
   if (!user || !user.mfaSecret) {
-     res.status(404).json({ success: false, message: getMessage(req.locale, "MFA ayarlı değil.", "MFA ayarlı değil.", "MFA not set.") });
-     return
+    logger.warn(`[MFA-VERIFY] MFA tanımlı değil: ${req.user!.id}`);
+    res
+      .status(404)
+      .json({ success: false, message: userT("error.mfaNotSet", locale) });
+    return;
   }
 
   const verified = speakeasy.totp.verify({
@@ -244,17 +279,21 @@ export const verifyMfa = asyncHandler(async (req: Request, res: Response) => {
   });
 
   if (!verified) {
-    res.status(400).json({ success: false, message: getMessage(req.locale, "Kod hatalı.", "Kod hatalı.", "Invalid code.") });
-    return 
+    logger.warn(`[MFA-VERIFY] Kod geçersiz: ${user.email}`);
+    res
+      .status(400)
+      .json({ success: false, message: userT("error.invalidCode", locale) });
+    return;
   }
 
   user.mfaEnabled = true;
   await user.save();
 
+  logger.info(`[MFA-VERIFY] MFA etkinleştirildi: ${user.email}`);
+
   res.status(200).json({
     success: true,
-    message: getMessage(req.locale, "MFA başarıyla etkinleştirildi.", "MFA başarıyla etkinleştirildi.", "MFA enabled successfully."),
+    message: userT("mfa.enabled", locale),
     mfaEnabled: true,
   });
-  return
 });

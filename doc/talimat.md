@@ -219,3 +219,209 @@ APP_ENV=anastasia bun run dev
 
 APP_ENV=ensotek bun run dev
 
+APP_ENV=anastasia npm run dev
+
+rm -rf dist node_modules
+npm install
+npx tsc --noEmit
+
+
+# 1. Derleyiciyi sıfırla
+rm -rf dist
+npx tsc --noEmit
+npm run build
+
+# 2. ts-node ile tekrar başlat
+APP_ENV=anastasia npm run dev
+
+Her zaman log ve i18n işlemleri için standart bir dil (ör: process.env.LOG_LOCALE) kullanacak şekilde kodu güncelle
+
+
+
+# 1. Derleyiciyi sıfırla
+rm -rf dist
+npx tsc --noEmit
+npm run build
+
+# 2. ts-node ile tekrar başlat
+APP_ENV=metahub npm run dev
+
+---
+APP_ENV=radanor npm run dev
+
+# 🌐 MetaHub — Çok Dilli Modül + Log & Veri Analiz Standartları (2025)
+
+## 1. **Çok Dilli Yapı (i18n) — Modül Standartları**
+
+### 1.1 **Desteklenen Dillerin Yönetimi**
+
+* Tüm projede diller **tek noktadan** yönetilir:
+
+  ```ts
+  // /src/types/common.ts
+  export type SupportedLocale = "tr" | "en" | "de" | "pl" | "fr" | "es";
+  export const SUPPORTED_LOCALES: SupportedLocale[] = [ "tr", "en", "de", "pl", "fr", "es" ];
+  ```
+
+### 1.2 **Modül Bazlı Çeviriler**
+
+* Her modül için `/modules/[modül]/i18n/` altında `tr.json`, `en.json`, ... dosyaları tutulur.
+* `/modules/[modül]/i18n/index.ts`:
+
+  ```ts
+  import tr from "./tr.json";
+  import en from "./en.json";
+  import de from "./de.json";
+  import pl from "./pl.json";
+  import fr from "./fr.json";
+  import es from "./es.json";
+  import type { SupportedLocale } from "@/types/common";
+  const translations: Record<SupportedLocale, any> = { tr, en, de, pl, fr, es };
+  export default translations;
+  ```
+* Yeni bir dil eklerken yalnızca `SUPPORTED_LOCALES`’a eklemen ve i18n dosyalarını oluşturman yeterli.
+
+### 1.3 **Tip ve Model Standartları**
+
+* Çok dilli alanlar için:
+
+  ```ts
+  export type TranslatedLabel = { [key in SupportedLocale]: string };
+  ```
+* Tüm modül tipleri `/modules/[modül]/types/index.ts`’de ortak tipleri referans alır:
+
+  ```ts
+  import type { SupportedLocale, TranslatedLabel } from "@/types/common";
+  export interface IBlog { title: TranslatedLabel; ... }
+  ```
+* Mongoose model:
+
+  ```ts
+  import { SUPPORTED_LOCALES } from "@/types/common";
+  label: {
+    type: Map,
+    of: String,
+    required: true,
+    validate: {
+      validator: (obj) => SUPPORTED_LOCALES.every((l) => obj.has(l)),
+      message: "All supported locales must be provided in label.",
+    }
+  }
+  ```
+* **Hardcoded dil** (ör. sadece `tr`, `en` vs.) **yasaktır**!
+
+### 1.4 **Validasyon Standartları**
+
+* Express validator veya Zod, `SUPPORTED_LOCALES` üzerinden otomatik kontrol:
+
+  ```ts
+  body("language").optional().isIn(SUPPORTED_LOCALES)
+    .withMessage(`Language must be one of: ${SUPPORTED_LOCALES.join(", ")}.`);
+  body("title")
+    .custom((value) => {
+      try {
+        const obj = typeof value === "string" ? JSON.parse(value) : value;
+        return SUPPORTED_LOCALES.every((lang) => obj[lang] && obj[lang].trim());
+      } catch {
+        throw new Error("Title must be a valid object for all locales.");
+      }
+    });
+  ```
+
+### 1.5 **i18n Key Kullanımı**
+
+* Tüm hata, info ve response mesajları **i18n key** üzerinden ve modül i18n dosyasından gelir.
+* Backend ve frontend tarafında **ortak çeviri dosyası kullanılır**.
+
+### 1.6 **Yeni Dil Ekleme Akışı**
+
+1. `SUPPORTED_LOCALES`’a yeni dili ekle.
+2. Tüm ilgili i18n dizinlerine yeni dil JSON dosyasını ekle.
+3. Model, tip, validasyon, controller değiştirmene gerek yok.
+
+---
+
+## 2. **Logger ve Veri Analiz (Log Analytics) Standartları**
+
+### 2.1 **JSON Formatında Loglama + Coğrafi & Kullanıcı Bilgisi**
+
+* **Logger yapılandırması (`logger.ts`):**
+
+  * Loglar **JSON formatında** tutulur.
+  * Her gün yeni dosya (rotate), maksimum 30 gün saklanır.
+  * Console’a ise renkli/okunaklı çıktı.
+  * Her loga otomatik timestamp eklenir.
+
+* **Request context (`logRequestContext.ts`):**
+
+  * Her logda:
+
+    * IP (X-Forwarded-For desteği ile)
+    * Ülke, şehir, koordinat (geoip-lite)
+    * User Agent
+    * userId (login ise)
+
+* **Controller/service’te kullanım örneği:**
+
+  ```ts
+  import logger from "@/core/middleware/logger/logger";
+  import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
+
+  logger.info("Ürün sepete eklendi.", getRequestContext(req));
+  ```
+
+### 2.2 **Log Dosyaları ve Analiz Entegrasyonu**
+
+* Tüm loglar `/logs/YYYY-MM-DD.log` gibi günlük olarak tutulur.
+* Tüm loglar **JSON olduğu için**: Kibana, Graylog, Datadog, Papertrail gibi araçlarda rahatça analiz edilir.
+* Her log kaydında örnek alanlar:
+
+  ```json
+  {
+    "timestamp": "2025-06-09 04:00:17",
+    "level": "info",
+    "message": "Sepet başarıyla getirildi.",
+    "ip": "78.174.44.XX",
+    "country": "TR",
+    "city": "Istanbul",
+    "location": {"lat":41.01,"lon":28.97},
+    "userAgent": "Mozilla/5.0 ...",
+    "userId": "665e0cd...."
+  }
+  ```
+* Gerektiğinde `"event": "cart.add"`, `"module": "cart"`, `"status": "success"` gibi alanlar ekle!
+
+### 2.3 **Geleceğe Hazırlık: Data Mining & Monitoring**
+
+* Loglar Elasticsearch ile ingest edilip **Kibana ile anlık analiz** edilebilir.
+* Dilersen event bazlı custom alanları da loglara ekleyebilirsin: `logger.info("Login success", {...context, event: "login"})`
+* Her aksiyon tipini (ör: "cart.add", "cart.clear", "user.login") tag’le; future-proof!
+
+---
+
+## 3. **Toplam Akış — Best Practices**
+
+* **Modül, model, validasyon, logger, analiz:**
+  Tüm yeni geliştirme ve refaktörlerde bu dokümandaki standartlar birebir uygulanmalı.
+* **Hiçbir modülde dil ve log formatı hardcoded/elle tanımlanmaz**.
+* **Yeni bir modül/dil eklerken tek noktadan ekle, migration’a gerek yok.**
+* **Log analizine uygun, context-rich, JSON loglar** ile data science ve AI tarafında analiz altyapısı hazır olur.
+
+---
+
+## 4. **Ekstra: Otomasyon ve Monitoring Altyapısı**
+
+* Gelişmiş monitoring için örnek bir Docker Compose ile Elasticsearch + Kibana stack hazırlanabilir.
+* Otomatik log ingest, alert ve görselleştirme kolayca eklenir.
+* Her log satırı bir aksiyon veya hata için veri madenciliği, anomaly detection gibi AI uygulamalarına hazır formatta olur.
+
+---
+
+> **MetaHub’ı ölçeklenebilir, sürdürülebilir ve veri analizine hazır tutmak için bu standartları uygulaman yeterli!**
+>
+> Bir sonraki adım: Otomasyon scriptleri ve monitoring/analiz örnekleri istersen söyle, direkt starter template hazırlayabilirim.
+
+---
+
+Hazır!
+Bundan sonra ister frontend, ister backend, ister log—hepsi tam entegre ve future-proof!

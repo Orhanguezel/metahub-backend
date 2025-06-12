@@ -1,0 +1,10 @@
+// src/core/utils/i18n/getLogLocale.ts
+import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+
+/**
+ * Returns the standard log locale from env.
+ */
+export function getLogLocale(): SupportedLocale {
+  const envLocale = process.env.LOG_LOCALE as SupportedLocale;
+  return SUPPORTED_LOCALES.includes(envLocale) ? envLocale : "en";
+}

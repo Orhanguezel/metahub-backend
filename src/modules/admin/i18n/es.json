@@ -1,0 +1,22 @@
+{
+  "admin.module.nameRequired": "El nombre del módulo es obligatorio.",
+  "admin.module.exists": "Ya existe un módulo con este nombre: {{name}}",
+  "admin.module.created": "El módulo {{name}} se ha creado correctamente.",
+  "admin.module.updated": "Módulo actualizado.",
+  "admin.module.deleted": "Módulo eliminado.",
+  "admin.module.notFound": "Módulo no encontrado.",
+  "admin.module.notFoundOrDeleted": "Módulo no encontrado o ya eliminado.",
+  "admin.module.projectRequired": "Falta el parámetro de proyecto.",
+  "admin.module.enabledFetched": "Módulos activos listados.",
+  "admin.module.analyticsFetched": "Módulos de análisis listados.",
+  "admin.module.toggleAnalyticsInvalid": "Solicitud de analytics no válida.",
+  "admin.module.fetched": "Módulo recuperado.",
+  "admin.module.fetchedAll": "Todos los módulos recuperados.",
+  "admin.module.noneForProject": "No hay módulos para este proyecto.",
+  "admin.module.labelRequired": "Se debe proporcionar al menos una etiqueta de idioma.",
+  "admin.module.labelLocaleType": "Los valores de las etiquetas deben ser cadenas de texto.",
+  "admin.module.rolesInvalid": "Rol(es) no válido(s) especificado(s).",
+  "admin.module.iconInvalid": "Nombre de icono no válido.",
+  "admin.module.invalidRequest": "Solicitud no válida o parámetro faltante.",
+  "admin.module.validationFailed": "La validación falló."
+}

@@ -1,0 +1,9 @@
+{
+  "socket.env.error": "❌ CORS_ORIGIN y JWT_SECRET deben estar definidos en .env.",
+  "socket.auth.tokenParseError": "❌ [Socket Auth] Error al analizar el token:",
+  "socket.session.saveError": "❌ [Socket] Error al guardar ChatSession:",
+  "socket.connection": "🟢 [Socket] Conectado: {user} | Sala: {room}",
+  "socket.adminMessage.success": "✅ [Admin Message] {email} → {room}",
+  "socket.adminMessage.error": "❌ [Socket] Error de mensaje de administrador:",
+  "socket.disconnect": "🔴 [Socket] Desconectado: {user}"
+}

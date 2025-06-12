@@ -1,0 +1,13 @@
+{
+  "section.invalidLabel": "Label is required in all supported languages.",
+  "section.validation.invalidJSON": "Label value is not valid JSON.",
+  "section.validation.missingLocale": "Label is missing or empty in some languages.",
+  "section.create.success": "{{name}} section created successfully.",
+  "section.create.labelMissing": "Label is required in all languages.",
+  "section.update.success": "{{name}} section updated successfully.",
+  "section.update.notFound": "Section not found.",
+  "section.update.labelMissing": "Label is required in all languages.",
+  "section.list.success": "Sections listed successfully.",
+  "section.delete.success": "{{name}} section deleted.",
+  "section.delete.notFound": "Section not found."
+}

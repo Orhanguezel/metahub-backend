@@ -1,0 +1,34 @@
+{
+  "env.loaded": "✅ {file} ortam dosyası yüklendi.",
+  "env.notFound": "❌ {file} bulunamadı. Lütfen sunucuyu başlatmadan önce oluşturun.",
+  "env.fallbackLoaded": "✅ Yedek .env dosyası yüklendi.",
+  "env.noEnvFile": "⚠️ Hiçbir .env dosyası bulunamadı. Ortam değişkenleri eksik olabilir.",
+  "env.profile.active": "🌐 Aktif profil: {profile}",
+  "env.activeProfile": "🌐 Aktif profil: {profile}",
+
+  "email.missingConfig": "⚠️ Eksik SMTP ayarı: {vars}",
+  "email.smtp.success": "✅ SMTP bağlantısı başarılı.",
+  "email.smtp.failed": "❌ SMTP bağlantısı başarısız: {error}",
+
+  "connect.success": "✅ MongoDB bağlantısı başarılı.",
+  "connect.failed": "❌ MongoDB bağlantı hatası: {error}",
+
+  "mongo.connected": "✅ MongoDB bağlantısı kuruldu.",
+  "mongo.error.notDefined": "❌ MONGO_URI ortam değişkeni tanımlı değil.",
+  "mongo.connectionError": "❌ MongoDB bağlantı hatası: {error}",
+
+  "smtp.connectionSuccess": "✅ SMTP bağlantısı başarılı.",
+  "smtp.connectionFailed": "❌ SMTP bağlantısı başarısız: {error}",
+  "smtp.missingConfig": "⚠️ Eksik SMTP ayarı: {vars}",
+  "migration.noAppEnv": "❌ APP_ENV tanımlı değil. Lütfen scripti çalıştırmadan önce ayarlayın.",
+  "migration.envNotFound": "❌ Ortam dosyası bulunamadı: {envPath}",
+  "migration.envLoaded": "🌱 Ortam dosyası yüklendi: {envPath}",
+  "migration.migrated": "✅ Modül taşındı: {module}",
+  "migration.alreadyMigrated": "✔️ Zaten taşınmış: {module}",
+  "migration.error": "❌ Migration hatası: {error}",
+  
+  "server.cors.notAllowed": "❌ CORS tarafından izin verilmedi: {origin}",
+  "server.error.noPort": "❌ PORT ortam dosyasında tanımlı değil.",
+  "server.started": "🚀 Sunucu başlatıldı: {baseUrl}"
+}
+

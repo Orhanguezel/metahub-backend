@@ -1,0 +1,19 @@
+{
+  "error.orderNotFound": "Sipariş bulunamadı.",
+  "error.notAuthorizedViewOrder": "Bu siparişi görüntüleme yetkiniz yok.",
+  "error.notAuthorizedUpdateOrder": "Bu siparişi güncelleme yetkiniz yok.",
+  "error.shippingAddressRequired": "Teslimat adresi gerekli.",
+  "order.fetched.success": "Sipariş başarıyla getirildi.",
+  "order.addressUpdated.success": "Teslimat adresi başarıyla güncellendi.",
+  "order.fetched.all": "Tüm siparişler başarıyla getirildi.",
+  "order.status.updated": "Sipariş durumu başarıyla güncellendi.",
+  "order.delivered.success": "Sipariş teslim edildi olarak işaretlendi.",
+  "order.delivered": "Siparişiniz teslim edildi.",
+  "order.deleted.success": "Sipariş başarıyla silindi.",
+  "error.invalidOrderStatus": "Geçersiz sipariş durumu.",
+  "order.status.pending": "Sipariş beklemede.",
+  "order.status.preparing": "Sipariş hazırlanıyor.",
+  "order.status.shipped": "Sipariş kargoya verildi.",
+  "order.status.completed": "Sipariş tamamlandı.",
+  "order.status.cancelled": "Sipariş iptal edildi."
+}

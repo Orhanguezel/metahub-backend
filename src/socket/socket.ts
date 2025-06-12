@@ -4,6 +4,10 @@ import { parse } from "cookie";
 import jwt from "jsonwebtoken";
 import { ChatMessage, ChatSession } from "@/modules/chat";
 import { v4 as uuidv4 } from "uuid";
+import logger from "@/core/middleware/logger/logger";
+import { t } from "@/core/utils/i18n/translate";
+import translations from "@/socket/i18n";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 
 interface ChatMessagePayload {
   room: string;
@@ -18,11 +22,13 @@ interface IUserToken {
 }
 
 export const initializeSocket = (server: HttpServer): SocketIOServer => {
+  const lang = getLogLocale();
   const corsOrigins = process.env.CORS_ORIGIN?.split(",").map((o) => o.trim());
   const jwtSecret = process.env.JWT_SECRET;
 
   if (!corsOrigins || !jwtSecret) {
-    throw new Error("❌ CORS_ORIGIN and JWT_SECRET must be defined in .env");
+    logger.error(t("socket.env.error", lang, translations));
+    throw new Error(t("socket.env.error", lang, translations));
   }
 
   const io = new SocketIOServer(server, {
@@ -45,8 +51,10 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
 
       next();
     } catch (err) {
-      console.error("❌ [Socket Auth] Token parsing error:", err);
-      next(); 
+      logger.warn(
+        t("socket.auth.tokenParseError", lang, translations) + ` ${err}`
+      );
+      next();
     }
   });
 
@@ -61,7 +69,6 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
     socket.join(roomId);
     socket.emit("room-assigned", roomId);
 
-
     try {
       await ChatSession.findOneAndUpdate(
         { roomId },
@@ -73,7 +80,9 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
         { upsert: true, new: true }
       );
     } catch (err) {
-      console.error("❌ [Socket] ChatSession save error:", err);
+      logger.error(
+        t("socket.session.saveError", lang, translations) + ` ${err}`
+      );
     }
 
     if (userId) {
@@ -81,7 +90,12 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
       io.emit("online-users", Array.from(onlineUsers.entries()));
     }
 
-    console.log(`🟢 [Socket] Connected: ${userId ?? "Guest"} | Room: ${roomId}`);
+    logger.info(
+      t("socket.connection", lang, translations, {
+        user: userId ?? "Guest",
+        room: roomId,
+      })
+    );
 
     socket.on(
       "admin-message",
@@ -115,9 +129,16 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
             language: populated.get("language"),
           });
 
-          console.log(`✅ [Admin Message] ${sender.email} → ${room}`);
+          logger.info(
+            t("socket.adminMessage.success", lang, translations, {
+              email: sender.email,
+              room,
+            })
+          );
         } catch (err) {
-          console.error("❌ [Socket] Admin message error:", err);
+          logger.error(
+            t("socket.adminMessage.error", lang, translations) + ` ${err}`
+          );
         }
       }
     );
@@ -127,7 +148,9 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
         onlineUsers.delete(userId);
         io.emit("online-users", Array.from(onlineUsers.entries()));
       }
-      console.log(`🔴 [Socket] Disconnected: ${userId ?? "Guest"}`);
+      logger.info(
+        t("socket.disconnect", lang, translations, { user: userId ?? "Guest" })
+      );
     });
   });
 

@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import type { SupportedLocale } from "@/types/common";
 
 export type PaymentMethod = "cash_on_delivery" | "credit_card" | "paypal";
 export type OrderStatus = "pending" | "preparing" | "shipped" | "completed" | "cancelled";
@@ -33,7 +34,7 @@ export interface IOrder {
   isDelivered: boolean;
   isPaid: boolean;
   deliveredAt?: Date;
-  language?: "tr" | "en" | "de";
+  language?: SupportedLocale; 
   createdAt?: Date;
   updatedAt?: Date;
 }

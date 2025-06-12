@@ -6,6 +6,7 @@ export const uploadSizeLimits: Record<UploadFolderKeys, number> = {
   product: 20 * 1024 * 1024,
   ensotekprod: 20 * 1024 * 1024,
   radonarprod: 20 * 1024 * 1024,
+  bikes: 20 * 1024 * 1024,
   category: 10 * 1024 * 1024,
   news: 15 * 1024 * 1024,
   articles: 15 * 1024 * 1024,
@@ -28,7 +29,9 @@ export const uploadTypeWrapper = (type: UploadFolderKeys) => {
   return (req: Request, _res: Response, next: NextFunction) => {
     req.uploadType = type;
     req.uploadSizeLimit = uploadSizeLimits[type] || uploadSizeLimits.default;
-    console.log(`[UPLOAD TYPE WRAPPER] type: ${type}, limit: ${req.uploadSizeLimit}`);
+    console.log(
+      `[UPLOAD TYPE WRAPPER] type: ${type}, limit: ${req.uploadSizeLimit}`
+    );
     next();
   };
 };

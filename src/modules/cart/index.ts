@@ -8,8 +8,10 @@ import * as cartValidation from "./cart.validation";
 
 const router = express.Router();
 
-router.use("/", routes);
+
 router.use("/admin", adminRoutes);
+router.use("/", routes);
+
 
 // ✅ Guard + Model Type (This module has been updated and is now standardized)
 export {

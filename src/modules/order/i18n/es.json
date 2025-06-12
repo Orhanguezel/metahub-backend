@@ -1,0 +1,19 @@
+{
+  "error.orderNotFound": "Pedido no encontrado.",
+  "error.notAuthorizedViewOrder": "No está autorizado para ver este pedido.",
+  "error.notAuthorizedUpdateOrder": "No está autorizado para actualizar este pedido.",
+  "error.shippingAddressRequired": "Se requiere dirección de envío.",
+  "order.fetched.success": "Pedido obtenido correctamente.",
+  "order.addressUpdated.success": "Dirección de envío actualizada correctamente.",
+  "order.fetched.all": "Todos los pedidos se han obtenido correctamente.",
+  "order.status.updated": "El estado del pedido se actualizó correctamente.",
+  "order.delivered.success": "Pedido marcado como entregado.",
+  "order.delivered": "Su pedido ha sido entregado.",
+  "order.deleted.success": "Pedido eliminado correctamente.",
+  "error.invalidOrderStatus": "Estado de pedido no válido.",
+  "order.status.pending": "El pedido está pendiente.",
+  "order.status.preparing": "El pedido se está preparando.",
+  "order.status.shipped": "El pedido ha sido enviado.",
+  "order.status.completed": "Pedido completado.",
+  "order.status.cancelled": "Pedido cancelado."
+}

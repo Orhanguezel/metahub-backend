@@ -1,0 +1,26 @@
+{
+  "blog.log.created": "Blog created: ID: {id}, Slug: {slug}",
+  "blog.log.admin_list": "All blogs (admin) listed. Total: {count}",
+  "blog.log.invalid_id": "Invalid blog ID: {id}",
+  "blog.log.not_found": "Blog not found: {id}",
+  "blog.log.admin_detail": "Admin blog detail fetched: {id}",
+  "blog.log.updated": "Blog updated: ID: {id}, Slug: {slug}",
+  "blog.log.invalid_removed_images": "Invalid removedImages JSON.",
+  "blog.log.cloudinary_delete_error": "Cloudinary delete error. PublicId: {publicId}",
+  "blog.log.deleted": "Blog deleted: ID: {id}, Slug: {slug}",
+  "blog.log.public_list": "All public blogs listed. Total: {count}",
+  "blog.log.public_detail": "Public blog detail fetched: {id}",
+  "blog.log.public_detail_slug": "Public blog detail fetched: {slug}",
+  "blog.log.not_found_slug": "Blog not found by slug: {slug}",
+
+  "blog.create.success": "Blog successfully created: {title}",
+  "blog.admin.list.success": "Blog list fetched successfully. Total: {count}",
+  "blog.invalid_id": "Invalid blog ID: {id}",
+  "blog.not_found": "Blog not found.",
+  "blog.admin.detail.success": "Blog details fetched successfully.",
+  "blog.update.success": "Blog successfully updated: {id}",
+  "blog.delete.success": "Blog successfully deleted: {id}",
+  "blog.detail.success": "Blog details fetched successfully.",
+  "blog.list.success": "Blog list fetched successfully. Total: {count}"
+}
+
