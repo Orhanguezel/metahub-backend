@@ -35,13 +35,13 @@
       "pathPrefix": "admin.ensotekprod"
     }
   ],
-  "version": "1.0.2",
+  "version": "1.0.6",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7"
+    "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5"
   },
-  "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
-  "lastUpdatedAt": "2025-06-12T08:39:01.550Z",
+  "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
+  "lastUpdatedAt": "2025-06-12T12:29:44.131Z",
   "history": [
     {
       "version": "1.0.1",
@@ -55,6 +55,34 @@
       "by": "Orhan Güzel",
       "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
       "date": "2025-06-12T08:39:01.550Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.3",
+      "by": "Orhan Güzel",
+      "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
+      "date": "2025-06-12T11:20:16.101Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.4",
+      "by": "Orhan Güzel",
+      "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
+      "date": "2025-06-12T11:30:18.407Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.5",
+      "by": "Orhan Güzel",
+      "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
+      "date": "2025-06-12T11:45:12.830Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.6",
+      "by": "Orhan Güzel",
+      "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
+      "date": "2025-06-12T12:29:44.131Z",
       "note": "Meta auto-generated"
     }
   ],

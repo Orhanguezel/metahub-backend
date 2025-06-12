@@ -105,13 +105,13 @@
       "controllerName": "clearCart"
     }
   ],
-  "version": "1.0.2",
+  "version": "1.0.6",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7"
+    "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5"
   },
-  "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
-  "lastUpdatedAt": "2025-06-12T08:39:02.084Z",
+  "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
+  "lastUpdatedAt": "2025-06-12T12:29:44.639Z",
   "history": [
     {
       "version": "1.0.1",
@@ -125,6 +125,34 @@
       "by": "Orhan Güzel",
       "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
       "date": "2025-06-12T08:39:02.084Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.3",
+      "by": "Orhan Güzel",
+      "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
+      "date": "2025-06-12T11:20:16.630Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.4",
+      "by": "Orhan Güzel",
+      "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
+      "date": "2025-06-12T11:30:19.041Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.5",
+      "by": "Orhan Güzel",
+      "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
+      "date": "2025-06-12T11:45:14.166Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.6",
+      "by": "Orhan Güzel",
+      "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
+      "date": "2025-06-12T12:29:44.639Z",
       "note": "Meta auto-generated"
     }
   ],

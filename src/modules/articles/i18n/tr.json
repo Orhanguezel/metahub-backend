@@ -1,0 +1,18 @@
+{
+  "created": "Makale başarıyla oluşturuldu.",
+  "updated": "Makale başarıyla güncellendi.",
+  "deleted": "Makale başarıyla silindi.",
+  "fetched": "Makale başarıyla getirildi.",
+  "listFetched": "Makale listesi başarıyla getirildi.",
+  "invalidId": "Geçersiz Makale ID'si.",
+  "notFound": "Makale bulunamadı veya pasif durumda.",
+  "invalidRemovedImages": "Geçersiz removedImages alanı.",
+  "validation": {
+    "invalidObjectId": "{{field}} geçerli bir MongoDB ObjectId olmalıdır.",
+    "invalidLanguage": "Dil şu değerlerden biri olmalıdır: tr, en, de, pl, fr, es.",
+    "invalidCategory": "Geçersiz kategori ID'si.",
+    "tagsArray": "Etiketler bir dizi (array) olmalıdır.",
+    "invalidRemovedImages": "RemovedImages alanı geçersiz formatta.",
+    "booleanField": "Bu alan boolean türünde olmalıdır."
+  }
+}

@@ -40,13 +40,13 @@
       "controllerName": "validateObjectIdParam(\"productId\""
     }
   ],
-  "version": "1.0.1",
+  "version": "1.0.2",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7"
+    "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5"
   },
-  "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
-  "lastUpdatedAt": "2025-06-10T22:05:10.463Z",
+  "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
+  "lastUpdatedAt": "2025-06-12T14:18:32.037Z",
   "history": [
     {
       "version": "1.0.1",
@@ -54,6 +54,21 @@
       "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
       "date": "2025-06-10T22:05:10.463Z",
       "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.2",
+      "by": "Orhan Güzel",
+      "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
+      "date": "2025-06-12T14:18:32.037Z",
+      "note": "Meta auto-generated"
     }
-  ]
+  ],
+  "label": {
+    "tr": "review",
+    "en": "review",
+    "de": "review",
+    "pl": "review",
+    "fr": "review",
+    "es": "review"
+  }
 }

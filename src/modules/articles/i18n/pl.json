@@ -1,0 +1,18 @@
+{
+  "created": "Artykuł został pomyślnie utworzony.",
+  "updated": "Artykuł został pomyślnie zaktualizowany.",
+  "deleted": "Artykuł został pomyślnie usunięty.",
+  "fetched": "Artykuł został pomyślnie pobrany.",
+  "listFetched": "Lista artykułów została pomyślnie pobrana.",
+  "invalidId": "Nieprawidłowy identyfikator artykułu.",
+  "notFound": "Artykuł nie został znaleziony lub jest nieaktywny.",
+  "invalidRemovedImages": "Nieprawidłowe pole removedImages.",
+  "validation": {
+    "invalidObjectId": "{{field}} musi być prawidłowym identyfikatorem MongoDB ObjectId.",
+    "invalidLanguage": "Język musi być jednym z: tr, en, de, pl, fr, es.",
+    "invalidCategory": "Nieprawidłowy identyfikator kategorii.",
+    "tagsArray": "Tagi muszą być tablicą.",
+    "invalidRemovedImages": "Nieprawidłowy format removedImages.",
+    "booleanField": "To pole musi być typu boolean."
+  }
+}

@@ -1,40 +1,11 @@
-import mongoose, { Schema, Types, Model, models } from "mongoose";
+import { Schema, Model, Types, models, model } from "mongoose";
+import type { IArticles, IArticlesImage } from "./types";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
-interface IArticlesImage {
-  url: string;
-  thumbnail: string;
-  webp?: string;
-  publicId?: string;
-}
-
-export interface IArticles  {
-  title: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  slug: string;
-  summary: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  content: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  images: IArticlesImage[];
-  tags: string[];
-  author?: string;
-  category?: Types.ObjectId;
-  isPublished: boolean;
-  publishedAt?: Date;
-  comments: Types.ObjectId[];
-  isActive: boolean; // soft delete desteği
-  createdAt: Date;
-  updatedAt: Date;
-}
+const translatedFieldSchema = SUPPORTED_LOCALES.reduce((acc, lang) => {
+  acc[lang] = { type: String, trim: true, default: "" };
+  return acc;
+}, {} as Record<string, any>);
 
 const ArticlesImageSchema = new Schema<IArticlesImage>(
   {
@@ -46,58 +17,41 @@ const ArticlesImageSchema = new Schema<IArticlesImage>(
   { _id: false }
 );
 
-const ArticlesSchema: Schema = new Schema<IArticles>(
+const ArticlesSchema = new Schema<IArticles>(
   {
-    title: {
-      tr: { type: String, trim: true },
-      en: { type: String, trim: true },
-      de: { type: String, trim: true },
-    },
+    title: translatedFieldSchema,
+    summary: translatedFieldSchema,
+    content: translatedFieldSchema,
     slug: { type: String, required: true, unique: true, lowercase: true },
-    summary: {
-      tr: { type: String, maxlength: 300 },
-      en: { type: String, maxlength: 300 },
-      de: { type: String, maxlength: 300 },
-    },
-    content: {
-      tr: { type: String },
-      en: { type: String },
-      de: { type: String },
-    },
     images: { type: [ArticlesImageSchema], default: [] },
     tags: [{ type: String }],
     author: { type: String },
     category: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "ArticlesCategory",
+      required: true,
     },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
-    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
-    isActive: { type: Boolean, default: true }, // soft delete desteği
+    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+    isActive: { type: Boolean, default: true },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-// ✅ Slug oluşturucu middleware
-ArticlesSchema.pre("validate", function (this: IArticles, next) {
-  const baseTitle = this.title?.en || this.title?.de || this.title?.tr || "Articles";
-  if (!this.slug && baseTitle) {
-    this.slug = baseTitle
+ArticlesSchema.pre("validate", function (next) {
+  if (!this.slug && this.title?.en) {
+    this.slug = this.title.en
       .toLowerCase()
-      .replace(/ /g, "-")
-      .replace(/[^\w-]+/g, "");
+      .replace(/\s+/g, "-")
+      .replace(/[^\w\-]+/g, "")
+      .replace(/--+/g, "-")
+      .replace(/^-+|-+$/g, "");
   }
   next();
 });
 
-// ✅ Guard + Model Type
 const Articles: Model<IArticles> =
-  (models.Articles as Model<IArticles>) || mongoose.model<IArticles>("Articles", ArticlesSchema);
+  models.Articles || model<IArticles>("Articles", ArticlesSchema);
 
-
-export { Articles,ArticlesImageSchema, ArticlesSchema };
-
-
+export { Articles, ArticlesImageSchema, ArticlesSchema };

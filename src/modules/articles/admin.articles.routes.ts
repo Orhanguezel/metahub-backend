@@ -1,3 +1,4 @@
+// src/modules/articles/admin.articles.routes.ts
 import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
@@ -7,13 +8,15 @@ import {
   deleteArticles,
   createArticles,
 } from "./admin.articles.controller";
+
 import {
   validateObjectId,
   validateCreateArticles,
   validateUpdateArticles,
   validateAdminQuery,
 } from "./articles.validation";
-import {upload} from "@/core/middleware/uploadMiddleware";
+
+import { upload } from "@/core/middleware/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 

@@ -1,18 +1,19 @@
+// src/core/utils/i18n/translate.ts
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 
+/**
+ * Fills all locales based on the first valid input.
+ * - Accepts string or partial locale object
+ * - Returns all locales filled
+ */
 export function fillAllLocales(input: any): Record<SupportedLocale, string> {
-  // input tamamen eksikse → tüm diller boş
-  if (
-    !input ||
-    (typeof input === "object" && Object.keys(input).length === 0)
-  ) {
+  if (!input || typeof input === "undefined") {
     return SUPPORTED_LOCALES.reduce((acc, lang) => {
       acc[lang] = "";
       return acc;
     }, {} as Record<SupportedLocale, string>);
   }
 
-  // input bir string ise → hepsine ata
   if (typeof input === "string") {
     const val = input.trim();
     return SUPPORTED_LOCALES.reduce((acc, lang) => {
@@ -21,22 +22,21 @@ export function fillAllLocales(input: any): Record<SupportedLocale, string> {
     }, {} as Record<SupportedLocale, string>);
   }
 
-  // input bir object ise → eksikleri ilk geçerli ile doldur
-  const firstValidValue: string =
-    Object.values(input).find(
-      (v): v is string => typeof v === "string" && Boolean(v.trim())
-    ) || "";
-
-  const filled: Record<SupportedLocale, string> = {} as Record<
-    SupportedLocale,
-    string
-  >;
-
-  for (const lang of SUPPORTED_LOCALES) {
-    const val = input?.[lang];
-    filled[lang] =
-      typeof val === "string" && val.trim() ? val.trim() : firstValidValue;
+  if (typeof input !== "object" || Array.isArray(input)) {
+    return SUPPORTED_LOCALES.reduce((acc, lang) => {
+      acc[lang] = "";
+      return acc;
+    }, {} as Record<SupportedLocale, string>);
   }
 
-  return filled;
+  const firstValid = SUPPORTED_LOCALES.map((l) => input[l]).find(
+    (v) => typeof v === "string" && v.trim()
+  );
+
+  return SUPPORTED_LOCALES.reduce((acc, lang) => {
+    const val = input[lang];
+    acc[lang] =
+      typeof val === "string" && val.trim() ? val.trim() : firstValid || "";
+    return acc;
+  }, {} as Record<SupportedLocale, string>);
 }
