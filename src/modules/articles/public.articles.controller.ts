@@ -2,86 +2,146 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { Articles } from "@/modules/articles";
 import { isValidObjectId } from "@/core/utils/validation";
+import { extractMultilangValue } from "@/core/utils/i18n/parseMultilangField";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import type { SupportedLocale } from "@/types/common";
 
-// ✅ Get All Articles (public)
-export const getAllArticles = asyncHandler(async (req: Request, res: Response) => {
-  const { category, language } = req.query;
-  const filter: any = { isActive: true, isPublished: true };
+// 🚩 Helper: kategori nesnesi olup olmadığını kontrol et
+function isPopulatedCategory(
+  category: any
+): category is { title: Record<SupportedLocale, string> } {
+  return (
+    typeof category === "object" && category !== null && "title" in category
+  );
+}
 
-  if (category && isValidObjectId(category.toString())) {
-    filter.category = category;
-  }
-
-  // Add language-specific check: only return Articles that has that language field
-  if (language && ["tr", "en", "de"].includes(language.toString())) {
-    filter[`title.${language}`] = { $exists: true };
-  }
-  const defaultPopulate = [
-    { path: "comments" },
-    { path: "category", select: "title" },
-  ];
-
-  const articlesList = await Articles.find(filter)
-    .populate(defaultPopulate)
-    .sort({ createdAt: -1 })
-    .lean();
-
-  res.status(200).json({
-    success: true,
-    message: "Articles list fetched successfully.",
-    data: articlesList,
-  });
-});
-
-// ✅ Get Articles by ID (public)
-export const getArticlesById = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ success: false, message: "Invalid Articles ID." });
-    return;
-  }
-
-  const articles = await Articles.findOne({
-    _id: id,
-    isActive: true,
-    isPublished: true,
-  })
-    .populate("comments")
-    .populate("category", "title")
-    .lean();
-
-  if (!articles) {
-    res.status(404).json({ success: false, message: "Articles not found." });
-    return;
-  }
-
-  res.status(200).json({
-    success: true,
-    message: "Articles fetched successfully.",
-    data: articles,
-  });
-});
-
-// ✅ Get Articles by Slug (public)
-export const getArticlesBySlug = asyncHandler(
+// 📥 GET /articles (Public)
+export const getAllArticles = asyncHandler(
   async (req: Request, res: Response) => {
-    const { slug } = req.params;
+    const locale: SupportedLocale = req.locale || getLogLocale();
+    const { category } = req.query;
 
-    const articles = await Articles.findOne({ slug, isActive: true, isPublished: true })
+    const filter: any = {
+      isActive: true,
+      isPublished: true,
+    };
+
+    if (category && isValidObjectId(category.toString())) {
+      filter.category = category;
+    }
+
+    const articlesList = await Articles.find(filter)
+      .populate([
+        { path: "comments", strictPopulate: false },
+        { path: "category", select: "title" },
+      ])
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const data = articlesList.map((article) => ({
+      ...article,
+      title: extractMultilangValue(article.title, locale),
+      summary: extractMultilangValue(article.summary, locale),
+      content: extractMultilangValue(article.content, locale),
+      category: isPopulatedCategory(article.category)
+        ? {
+            ...article.category,
+            title: extractMultilangValue(article.category.title, locale),
+          }
+        : undefined,
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: "Articles list fetched successfully.",
+      data,
+    });
+  }
+);
+
+// 📥 GET /articles/:id (Public)
+export const getArticlesById = asyncHandler(
+  async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      res.status(400).json({ success: false, message: "Invalid Articles ID." });
+      return;
+    }
+
+    const article = await Articles.findOne({
+      _id: id,
+      isActive: true,
+      isPublished: true,
+    })
       .populate("comments")
       .populate("category", "title")
       .lean();
 
-    if (!articles) {
+    if (!article) {
       res.status(404).json({ success: false, message: "Articles not found." });
       return;
     }
 
+    const data = {
+      ...article,
+      title: extractMultilangValue(article.title, locale),
+      summary: extractMultilangValue(article.summary, locale),
+      content: extractMultilangValue(article.content, locale),
+      category: isPopulatedCategory(article.category)
+        ? {
+            ...article.category,
+            title: extractMultilangValue(article.category.title, locale),
+          }
+        : undefined,
+    };
+
     res.status(200).json({
       success: true,
       message: "Articles fetched successfully.",
-      data: articles,
+      data,
+    });
+  }
+);
+
+// 📥 GET /articles/slug/:slug (Public)
+export const getArticlesBySlug = asyncHandler(
+  async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
+    const { slug } = req.params;
+
+    const article = await Articles.findOne({
+      slug,
+      isActive: true,
+      isPublished: true,
+    })
+      .populate("comments")
+      .populate("category", "title")
+      .lean();
+
+    if (!article) {
+      res.status(404).json({ success: false, message: "Articles not found." });
+      return;
+    }
+
+    const data = {
+      ...article,
+      title: extractMultilangValue(article.title, locale),
+      summary: extractMultilangValue(article.summary, locale),
+      content: extractMultilangValue(article.content, locale),
+      category: isPopulatedCategory(article.category)
+        ? {
+            ...article.category,
+            title: extractMultilangValue(article.category.title, locale),
+          }
+        : undefined,
+    };
+
+    res.status(200).json({
+      success: true,
+      message: "Articles fetched successfully.",
+      data,
     });
   }
 );

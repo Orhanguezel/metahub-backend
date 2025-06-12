@@ -1,8 +1,11 @@
-
 // src/core/utils/i18n/translate.ts
 import type { SupportedLocale } from "@/types/common";
 
-
+/**
+ * i18n çeviri fonksiyonu
+ * - Modül i18n dosyasından alır
+ * - `t("key", "de", translations, { name: "Test" })`
+ */
 export function t(
   key: string,
   locale: SupportedLocale,
@@ -10,10 +13,12 @@ export function t(
   vars?: Record<string, string | number>
 ): string {
   let str = translations[locale]?.[key] || translations["en"]?.[key] || key;
+
   if (vars) {
-    Object.entries(vars).forEach(([k, v]) => {
+    for (const [k, v] of Object.entries(vars)) {
       str = str.replace(new RegExp(`{${k}}`, "g"), String(v));
-    });
+    }
   }
+
   return str;
 }

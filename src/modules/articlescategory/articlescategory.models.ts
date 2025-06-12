@@ -1,24 +1,17 @@
 import mongoose, { Schema, Types, Model, models } from "mongoose";
+import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import { IArticlesCategory } from "./types";
 
-export interface IArticlesCategory  {
-  name: {
-    tr: string;
-    en: string;
-    de: string;
-  };
-  slug: string;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// name alanını dinamik olarak oluştur
+const nameFields = SUPPORTED_LOCALES.reduce((acc, lang) => {
+  acc[lang] = { type: String, required: true, trim: true };
+  return acc;
+}, {} as Record<SupportedLocale, any>);
 
 const ArticlesCategorySchema = new Schema<IArticlesCategory>(
   {
-    name: {
-      tr: { type: String, required: true, trim: true },
-      en: { type: String, required: true, trim: true },
-      de: { type: String, required: true, trim: true },
-    },
+    name: nameFields,
+
     slug: {
       type: String,
       required: true,
@@ -26,6 +19,7 @@ const ArticlesCategorySchema = new Schema<IArticlesCategory>(
       lowercase: true,
       trim: true,
     },
+
     isActive: {
       type: Boolean,
       default: true,
@@ -35,8 +29,12 @@ const ArticlesCategorySchema = new Schema<IArticlesCategory>(
 );
 
 ArticlesCategorySchema.pre("validate", function (next) {
-  if (!this.slug && this.name?.en) {
-    this.slug = this.name.en
+  if (!this.slug && this.name) {
+    const firstValidName =
+      Object.values(this.name).find(
+        (val) => typeof val === "string" && val.trim()
+      ) || "";
+    this.slug = firstValidName
       .toLowerCase()
       .replace(/ /g, "-")
       .replace(/[^\w-]+/g, "")
@@ -46,10 +44,8 @@ ArticlesCategorySchema.pre("validate", function (next) {
   next();
 });
 
-
-// ✅ Guard + Model Type
-const ArticlesCategory: Model<IArticlesCategory>=
-(models.ArticlesCategory as Model<IArticlesCategory>) || mongoose.model<IArticlesCategory>("ArticlesCategory", ArticlesCategorySchema);
+const ArticlesCategory: Model<IArticlesCategory> =
+  (models.ArticlesCategory as Model<IArticlesCategory>) ||
+  mongoose.model<IArticlesCategory>("ArticlesCategory", ArticlesCategorySchema);
 
 export { ArticlesCategory };
-

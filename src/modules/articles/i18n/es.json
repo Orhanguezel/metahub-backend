@@ -1,0 +1,18 @@
+{
+  "created": "Artículo creado con éxito.",
+  "updated": "Artículo actualizado con éxito.",
+  "deleted": "Artículo eliminado con éxito.",
+  "fetched": "Artículo obtenido con éxito.",
+  "listFetched": "Lista de artículos obtenida con éxito.",
+  "invalidId": "ID de artículo no válido.",
+  "notFound": "Artículo no encontrado o inactivo.",
+  "invalidRemovedImages": "Campo removedImages no válido.",
+  "validation": {
+    "invalidObjectId": "{{field}} debe ser un ObjectId válido de MongoDB.",
+    "invalidLanguage": "El idioma debe ser uno de los siguientes: tr, en, de, pl, fr, es.",
+    "invalidCategory": "ID de categoría no válido.",
+    "tagsArray": "Los tags deben ser un array.",
+    "invalidRemovedImages": "Formato de removedImages no válido.",
+    "booleanField": "Este campo debe ser un valor booleano."
+  }
+}

@@ -1,129 +1,238 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import {ArticlesCategory} from ".";
+import { ArticlesCategory } from ".";
 import { isValidObjectId } from "@/core/utils/validation";
+import {
+  fillAllLocales,
+  extractMultilangValue,
+} from "@/core/utils/i18n/parseMultilangField";
+import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import { SupportedLocale } from "@/types/common";
+import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
+import logger from "@/core/middleware/logger/logger";
+import { t as translate } from "@/core/utils/i18n/translate";
+import translations from "./i18n";
 
-// ✅ Create Articles Category
-export const createArticlesCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { name } = req.body;
+// ✅ CREATE
+export const createArticlesCategory = asyncHandler(
+  async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
+    const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
 
-  if (!name?.tr || !name?.en || !name?.de) {
-    res.status(400).json({ success: false, message: "Name in all languages is required." });
-    return;
+    const name = fillAllLocales(req.body.name);
+
+    try {
+      const category = await ArticlesCategory.create({ name });
+
+      logger.info(
+        t("articlescategory.create.success", { name: name[locale] }),
+        {
+          ...getRequestContext(req),
+          event: "articlescategory.create",
+          module: "articlescategory",
+          status: "success",
+        }
+      );
+
+      res.status(201).json({
+        success: true,
+        message: t("articlescategory.create.success", { name: name[locale] }),
+        data: category,
+      });
+    } catch (err: any) {
+      logger.error(t("articlescategory.create.error"), {
+        ...getRequestContext(req),
+        event: "articlescategory.create",
+        module: "articlescategory",
+        status: "fail",
+        error: err.message,
+      });
+
+      res.status(500).json({
+        success: false,
+        message: t("articlescategory.create.error"),
+      });
+    }
   }
+);
 
-  const category = await ArticlesCategory.create({
-    name,
-    slug: name.en
-      .toLowerCase()
-      .replace(/ /g, "-")
-      .replace(/[^\w-]+/g, "")
-      .replace(/--+/g, "-")
-      .replace(/^-+|-+$/g, ""),
-  });
+// ✅ GET ALL
+export const getAllArticlesCategories = asyncHandler(
+  async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
+    const t = (key: string) => translate(key, locale, translations);
 
-  res.status(201).json({
-    success: true,
-    message: "Articles category created successfully.",
-    data: category,
-  });
-});
+    try {
+      const categories = await ArticlesCategory.find()
+        .sort({ createdAt: -1 })
+        .lean();
 
-// ✅ Get All Articles Categories
-export const getAllArticlesCategories = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
-  const categories = await ArticlesCategory.find().sort({ createdAt: -1 });
+      const localized = categories.map((cat) => ({
+        ...cat,
+        name: extractMultilangValue(cat.name, locale),
+      }));
 
-  res.status(200).json({
-    success: true,
-    message: "Articles categories fetched successfully.",
-    data: categories,
-  });
-});
+      logger.info(t("articlescategory.list.success"), {
+        ...getRequestContext(req),
+        event: "articlescategory.list",
+        module: "articlescategory",
+        resultCount: localized.length,
+      });
 
-// ✅ Get Single Articles Category
-export const getArticlesCategoryById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
+      res.status(200).json({
+        success: true,
+        message: t("articlescategory.list.success"),
+        data: localized,
+      });
+    } catch (err: any) {
+      logger.error(t("articlescategory.list.error"), {
+        ...getRequestContext(req),
+        event: "articlescategory.list",
+        module: "articlescategory",
+        status: "fail",
+        error: err.message,
+      });
 
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ success: false, message: "Invalid category ID." });
-    return;
+      res.status(500).json({
+        success: false,
+        message: t("articlescategory.list.error"),
+      });
+    }
   }
+);
 
-  const category = await ArticlesCategory.findById(id);
+// ✅ GET BY ID
+export const getArticlesCategoryById = asyncHandler(
+  async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
+    const t = (key: string) => translate(key, locale, translations);
+    const { id } = req.params;
 
-  if (!category) {
-    res.status(404).json({ success: false, message: "Articles category not found." });
-    return;
+    if (!isValidObjectId(id)) {
+      logger.warn(t("articlescategory.invalidId"), getRequestContext(req));
+      res
+        .status(400)
+        .json({ success: false, message: t("articlescategory.invalidId") });
+      return;
+    }
+
+    const category = await ArticlesCategory.findById(id).lean();
+
+    if (!category) {
+      logger.warn(t("articlescategory.notFound"), getRequestContext(req));
+      res
+        .status(404)
+        .json({ success: false, message: t("articlescategory.notFound") });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: t("articlescategory.fetch.success"),
+      data: {
+        ...category,
+        name: extractMultilangValue(category.name, locale),
+      },
+    });
   }
+);
 
-  res.status(200).json({
-    success: true,
-    message: "Articles category fetched successfully.",
-    data: category,
-  });
-});
+// ✅ UPDATE
+export const updateArticlesCategory = asyncHandler(
+  async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
+    const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
+    const { id } = req.params;
+    const { name, isActive } = req.body;
 
-// ✅ Update Articles Category
-export const updateArticlesCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-  const { name, isActive } = req.body;
+    if (!isValidObjectId(id)) {
+      logger.warn(t("articlescategory.invalidId"), getRequestContext(req));
+      res
+        .status(400)
+        .json({ success: false, message: t("articlescategory.invalidId") });
+      return;
+    }
 
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ success: false, message: "Invalid category ID." });
-    return;
+    const category = await ArticlesCategory.findById(id);
+    if (!category) {
+      logger.warn(t("articlescategory.notFound"), getRequestContext(req));
+      res
+        .status(404)
+        .json({ success: false, message: t("articlescategory.notFound") });
+      return;
+    }
+
+    if (name) {
+      category.name = mergeLocalesForUpdate(category.name, name);
+    }
+
+    if (typeof isActive === "boolean") {
+      category.isActive = isActive;
+    }
+
+    await category.save();
+
+    logger.info(
+      t("articlescategory.update.success", { name: category.name[locale] }),
+      {
+        ...getRequestContext(req),
+        event: "articlescategory.update",
+        module: "articlescategory",
+        status: "success",
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: t("articlescategory.update.success", {
+        name: category.name[locale],
+      }),
+      data: category,
+    });
   }
+);
 
-  const category = await ArticlesCategory.findById(id);
+// ✅ DELETE
+export const deleteArticlesCategory = asyncHandler(
+  async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
+    const t = (key: string, params?: Record<string, any>) =>
+      translate(key, locale, translations, params);
+    const { id } = req.params;
 
-  if (!category) {
-    res.status(404).json({ success: false, message: "Articles category not found." });
-    return;
+    if (!isValidObjectId(id)) {
+      logger.warn(t("articlescategory.invalidId"), getRequestContext(req));
+      res
+        .status(400)
+        .json({ success: false, message: t("articlescategory.invalidId") });
+      return;
+    }
+
+    const deleted = await ArticlesCategory.findByIdAndDelete(id);
+
+    if (!deleted) {
+      logger.warn(t("articlescategory.notFound"), getRequestContext(req));
+      res
+        .status(404)
+        .json({ success: false, message: t("articlescategory.notFound") });
+      return;
+    }
+
+    const name = (deleted.name as Record<SupportedLocale, string>)[locale];
+
+    logger.info(t("articlescategory.delete.success", { name }), {
+      ...getRequestContext(req),
+      event: "articlescategory.delete",
+      module: "articlescategory",
+      status: "success",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: t("articlescategory.delete.success", { name }),
+    });
   }
-
-  if (name?.tr) category.name.tr = name.tr;
-  if (name?.en) category.name.en = name.en;
-  if (name?.de) category.name.de = name.de;
-
-  if (typeof isActive === "boolean") {
-    category.isActive = isActive;
-  }
-
-  if (name?.en) {
-    category.slug = name.en
-      .toLowerCase()
-      .replace(/ /g, "-")
-      .replace(/[^\w-]+/g, "")
-      .replace(/--+/g, "-")
-      .replace(/^-+|-+$/g, "");
-  }
-
-  await category.save();
-
-  res.status(200).json({
-    success: true,
-    message: "Articles category updated successfully.",
-    data: category,
-  });
-});
-
-// ✅ Delete Articles Category
-export const deleteArticlesCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ success: false, message: "Invalid category ID." });
-    return;
-  }
-
-  const deleted = await ArticlesCategory.findByIdAndDelete(id);
-
-  if (!deleted) {
-    res.status(404).json({ success: false, message: "Articles category not found." });
-    return;
-  }
-
-  res.status(200).json({
-    success: true,
-    message: "Articles category deleted successfully.",
-  });
-});
+);

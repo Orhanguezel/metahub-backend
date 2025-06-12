@@ -6,15 +6,20 @@ import {
   updateArticlesCategory,
   deleteArticlesCategory,
 } from "./articlescategory.controller";
+import {
+  validateCreateArticlesCategory,
+  validateUpdateArticlesCategory,
+  validateObjectId,
+} from "./articlescategory.validation";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { validateCreateArticlesCategory, validateUpdateArticlesCategory, validateObjectId } from "./articlescategory.validation";
 
 const router = express.Router();
 
-
+// 🌿 Public Routes
 router.get("/", getAllArticlesCategories);
 router.get("/:id", validateObjectId("id"), getArticlesCategoryById);
 
+// 🔐 Admin Routes
 router.post(
   "/",
   authenticate,
@@ -39,6 +44,5 @@ router.delete(
   validateObjectId("id"),
   deleteArticlesCategory
 );
-
 
 export default router;
