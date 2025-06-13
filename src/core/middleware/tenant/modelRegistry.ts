@@ -1,4 +1,4 @@
-//src/core/config/modelRegistry.ts
+//src/core/middleware/tenant/modelRegistry.ts
 import { getTenantDbConnection } from "@/core/middleware/tenant/tenantDb";
 import mongoose from "mongoose";
 
