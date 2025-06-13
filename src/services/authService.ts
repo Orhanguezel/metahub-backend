@@ -1,53 +1,94 @@
-// src/services/authService.ts
-import { Response } from "express";
+import { Request, Response } from "express";
 import { generateToken } from "@/core/utils/token";
 import { setTokenCookie, clearTokenCookie } from "@/core/utils/cookie";
 import { comparePasswords, hashPassword } from "@/core/utils/authUtils";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
-import authTranslations from "@/services/i18n"; // veya kendi i18n dosyan
+import authTranslations from "@/services/i18n";
 
+// ✅ Login & Token Set
+// ✅ Login & Token Set
 export const loginAndSetToken = async (
+  req: Request,
   res: Response,
   userId: string,
   role: string
 ): Promise<string> => {
   const token = generateToken({ id: userId, role });
-  setTokenCookie(res, token);
+
+  setTokenCookie(res, token, req.tenant);
 
   logger.info(
-    t("auth.token.set", getLogLocale(), authTranslations, { userId, role })
+    t("auth.token.set", req.locale || getLogLocale(), authTranslations, {
+      userId,
+      role,
+    }),
+    {
+      tenant: req.tenant,
+      module: "auth",
+      event: "auth.login.token_set",
+      status: "success",
+    }
   );
 
   return token;
 };
 
-export const logoutAndClearToken = (res: Response) => {
+// ✅ Logout & Clear Token
+export const logoutAndClearToken = (req: Request, res: Response) => {
   clearTokenCookie(res);
 
-  logger.info(t("auth.token.cleared", getLogLocale(), authTranslations));
+  logger.info(
+    t("auth.token.cleared", req.locale || getLogLocale(), authTranslations),
+    {
+      tenant: req.tenant,
+      module: "auth",
+      event: "auth.logout.token_cleared",
+      status: "success",
+    }
+  );
 };
 
+// ✅ Password Check
 export const checkPassword = async (
+  req: Request,
   inputPassword: string,
   hashedPassword: string
 ): Promise<boolean> => {
   const result = await comparePasswords(inputPassword, hashedPassword);
 
   logger.info(
-    t("auth.password.checked", getLogLocale(), authTranslations, {
+    t("auth.password.checked", req.locale || getLogLocale(), authTranslations, {
       result: String(result),
-    })
+    }),
+    {
+      tenant: req.tenant,
+      module: "auth",
+      event: "auth.password.checked",
+      status: "success",
+    }
   );
 
   return result;
 };
 
-export const hashNewPassword = async (password: string): Promise<string> => {
+// ✅ Password Hashing
+export const hashNewPassword = async (
+  req: Request,
+  password: string
+): Promise<string> => {
   const hashed = await hashPassword(password);
 
-  logger.info(t("auth.password.hashed", getLogLocale(), authTranslations));
+  logger.info(
+    t("auth.password.hashed", req.locale || getLogLocale(), authTranslations),
+    {
+      tenant: req.tenant,
+      module: "auth",
+      event: "auth.password.hashed",
+      status: "success",
+    }
+  );
 
   return hashed;
 };

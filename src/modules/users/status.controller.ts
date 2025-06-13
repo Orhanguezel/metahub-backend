@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { User } from "@/modules/users";
+//import { User } from "@/modules/users";
 import {
   isValidObjectId,
   getUserOrFail,
@@ -12,6 +12,7 @@ import { t } from "@/core/utils/i18n/translate";
 import userTranslations from "@/modules/users/i18n";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import type { SupportedLocale } from "@/types/common";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // Kısayol fonksiyon
 function userT(
@@ -72,6 +73,7 @@ export const updateUserRole = asyncHandler(
     const { id } = req.params;
     const { role } = req.body;
     const locale: SupportedLocale = req.locale || getLogLocale();
+    const { User } = await getTenantModels(req);
 
     logger.debug(
       `[Admin] updateUserRole called with id=${id} | role=${role} | locale=${locale}`

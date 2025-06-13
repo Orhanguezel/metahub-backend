@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { User } from "@/modules/users";
+//import { User } from "@/modules/users";
 import {
   isValidObjectId,
   getUserOrFail,
@@ -15,6 +15,7 @@ import { t } from "@/core/utils/i18n/translate";
 import userTranslations from "@/modules/users/i18n";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import type { SupportedLocale } from "@/types/common";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // Kısayol fonksiyonu
 function userT(
@@ -31,6 +32,7 @@ const PROFILE_IMAGE_DIR = path.join(process.cwd(), "uploads", "profile-images");
 // ✅ Admin: Tüm kullanıcıları getir
 export const getUsers = asyncHandler(async (req: Request, res: Response) => {
   const locale: SupportedLocale = req.locale || getLogLocale();
+  const { User } = await getTenantModels(req);
 
   logger.debug(`[Admin] getUsers called | locale=${locale}`);
 
@@ -94,6 +96,7 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   } = req.body;
 
   const locale: SupportedLocale = req.locale || getLogLocale();
+  const { User } = await getTenantModels(req);
 
   logger.debug(`[Admin] updateUser called | id=${id} | locale=${locale}`);
 
@@ -213,6 +216,7 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
 export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const locale: SupportedLocale = req.locale || getLogLocale();
+  const { User } = await getTenantModels(req);
 
   logger.debug(`[Admin] deleteUser called | id=${id} | locale=${locale}`);
 

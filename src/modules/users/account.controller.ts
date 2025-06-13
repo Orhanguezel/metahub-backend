@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { User } from "@/modules/users";
+//import { User } from "@/modules/users";
 import { getUserOrFail, validateJsonField } from "@/core/utils/validation";
 import { checkPassword, hashNewPassword } from "@/services/authService";
 import { safelyDeleteFile } from "@/core/utils/fileUtils";
@@ -19,6 +19,7 @@ import { t } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import userTranslations from "@/modules/users/i18n";
 import type { SupportedLocale } from "@/types/common";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // Locale helper
 function getLocale(req: Request): SupportedLocale {
@@ -52,6 +53,8 @@ async function processUploadedProfileImage(file: Express.Multer.File) {
 export const getMyProfile = asyncHandler(
   async (req: Request, res: Response) => {
     const locale = getLocale(req);
+    const { User } = await getTenantModels(req);
+
     const user = await User.findById(req.user!.id)
       .select("-password")
       .populate("addresses profile payment cart orders favorites");
@@ -76,6 +79,7 @@ export const getMyProfile = asyncHandler(
 export const updateMyProfile = asyncHandler(
   async (req: Request, res: Response) => {
     const locale = getLocale(req);
+    const { User } = await getTenantModels(req);
     const user = await getUserOrFail(req.user!.id, res);
     if (!user) return;
 
@@ -106,6 +110,7 @@ export const updateMyProfile = asyncHandler(
 export const updateMyPassword = asyncHandler(
   async (req: Request, res: Response) => {
     const locale = getLocale(req);
+    const { User } = await getTenantModels(req);
     const user = await User.findById(req.user!.id).select("+password");
     if (!user) {
       logger.warn(
@@ -118,7 +123,7 @@ export const updateMyPassword = asyncHandler(
     }
     const { currentPassword, newPassword } = req.body;
 
-    const isMatch = await checkPassword(currentPassword, user.password);
+    const isMatch = await checkPassword(req, currentPassword, user.password);
     if (!isMatch) {
       logger.warn(`[PROFILE] Incorrect current password for: ${user.email}`);
       res.status(400).json({
@@ -127,7 +132,7 @@ export const updateMyPassword = asyncHandler(
       });
       return;
     }
-    user.password = await hashNewPassword(newPassword);
+    user.password = await hashNewPassword(req, newPassword);
     await user.save();
     logger.info(`[PROFILE] Password updated for: ${user.email}`);
     res.status(200).json({
@@ -141,6 +146,7 @@ export const updateMyPassword = asyncHandler(
 export const updateNotificationSettings = asyncHandler(
   async (req: Request, res: Response) => {
     const locale = getLocale(req);
+    const { User } = await getTenantModels(req);
     const user = await getUserOrFail(req.user!.id, res);
     if (!user) return;
 
@@ -165,6 +171,7 @@ export const updateNotificationSettings = asyncHandler(
 export const updateSocialMediaLinks = asyncHandler(
   async (req: Request, res: Response) => {
     const locale = getLocale(req);
+    const { User } = await getTenantModels(req);
     const user = await getUserOrFail(req.user!.id, res);
     if (!user) return;
     const { facebook, instagram, twitter } = req.body;
@@ -187,6 +194,7 @@ export const updateSocialMediaLinks = asyncHandler(
 export const updateProfileImage = asyncHandler(
   async (req: Request, res: Response) => {
     const locale = getLocale(req);
+    const { User } = await getTenantModels(req);
     if (!req.file) {
       logger.warn(`[PROFILE] No file uploaded for profile image.`);
       res.status(400).json({
@@ -253,6 +261,7 @@ export const updateProfileImage = asyncHandler(
 export const updateFullProfile = asyncHandler(
   async (req: Request, res: Response) => {
     const locale = getLocale(req);
+    const { User } = await getTenantModels(req);
     const updateFields: Record<string, any> = { ...req.body };
     const jsonFields = ["addresses", "notifications", "socialMedia", "payment"];
     for (const field of jsonFields) {
@@ -294,6 +303,7 @@ export const updateFullProfile = asyncHandler(
 export const deleteMyAccount = asyncHandler(
   async (req: Request, res: Response) => {
     const locale = getLocale(req);
+    const { User } = await getTenantModels(req);
     const { password } = req.body;
     const user = await User.findById(req.user!.id);
     if (!user) {

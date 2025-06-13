@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { User } from "@/modules/users/users.models";
+//import { User } from "@/modules/users/users.models";
 import type { IUserProfileImage } from "@/modules/users/types";
 import crypto from "crypto";
 import { passwordResetTemplate } from "@/templates/passwordReset";
@@ -10,6 +10,8 @@ import { t } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import userTranslations from "@/modules/users/i18n";
 import type { SupportedLocale } from "@/types/common";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+
 import {
   loginAndSetToken,
   logoutAndClearToken,
@@ -38,6 +40,7 @@ function userT(
 export const registerUser = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const locale = getLocale(req);
+
     const {
       name,
       email,
@@ -117,10 +120,12 @@ export const registerUser = asyncHandler(
       }
     }
 
-    const hashedPassword = await hashNewPassword(password);
+    const hashedPassword = await hashNewPassword(req, password);
     let user;
     try {
-      user = await User.create({
+      const { User } = await getTenantModels(req);
+
+      const user = await User.create({
         name,
         email,
         password: hashedPassword,
@@ -187,6 +192,7 @@ export const loginUser = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
     const locale = getLocale(req);
+    const { User } = await getTenantModels(req);
 
     if (!validateEmailFormat(email)) {
       logger.warn(`[LOGIN] Geçersiz e-posta: ${email}`);
@@ -209,7 +215,7 @@ export const loginUser = asyncHandler(
       return;
     }
 
-    const passwordValid = await checkPassword(password, user.password);
+    const passwordValid = await checkPassword(req, password, user.password);
     if (!passwordValid) {
       logger.warn(`[LOGIN] Hatalı şifre: ${email}`);
       res.status(401).json({
@@ -248,7 +254,7 @@ export const loginUser = asyncHandler(
       return;
     }
 
-    await loginAndSetToken(res, user.id, user.role);
+    await loginAndSetToken(req, res, user.id, user.role);
 
     logger.info(`[LOGIN] Başarılı giriş: ${email}`);
 
@@ -271,6 +277,7 @@ export const changePassword = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { currentPassword, newPassword } = req.body;
     const locale = getLocale(req);
+    const { User } = await getTenantModels(req);
 
     const user = await User.findById(req.user!.id).select("+password");
     if (!user) {
@@ -282,7 +289,7 @@ export const changePassword = asyncHandler(
       return;
     }
 
-    if (!(await checkPassword(currentPassword, user.password))) {
+    if (!(await checkPassword(req, currentPassword, user.password))) {
       logger.warn(`[CHANGE-PASSWORD] Yanlış mevcut şifre: ${user.email}`);
       res.status(401).json({
         success: false,
@@ -300,7 +307,7 @@ export const changePassword = asyncHandler(
       return;
     }
 
-    user.password = await hashNewPassword(newPassword);
+    user.password = await hashNewPassword(req, newPassword);
     await user.save();
 
     logger.info(`[CHANGE-PASSWORD] Şifre değiştirildi: ${user.email}`);
@@ -315,7 +322,10 @@ export const changePassword = asyncHandler(
 export const logoutUser = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const locale = getLocale(req);
-    logoutAndClearToken(res);
+    const { User } = await getTenantModels(req);
+
+    logoutAndClearToken(req, res);
+
     logger.info(
       `[LOGOUT] Kullanıcı çıkış yaptı: ${req.user?.id ?? "Bilinmiyor"}`
     );
@@ -330,6 +340,7 @@ export const forgotPassword = asyncHandler(
   async (req: Request, res: Response) => {
     const { email } = req.body;
     const locale = getLocale(req);
+    const { User } = await getTenantModels(req);
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -379,6 +390,7 @@ export const resetPassword = asyncHandler(
     const { token } = req.params;
     const { newPassword } = req.body;
     const locale = getLocale(req);
+    const { User } = await getTenantModels(req);
 
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
     const user = await User.findOne({
@@ -404,7 +416,7 @@ export const resetPassword = asyncHandler(
       return;
     }
 
-    user.password = await hashNewPassword(newPassword);
+    user.password = await hashNewPassword(req, newPassword);
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save();
