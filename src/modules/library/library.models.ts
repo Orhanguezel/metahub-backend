@@ -1,7 +1,7 @@
 import { Schema, Model, models, model } from "mongoose";
 
 // ✅ Interface
-export interface ILibraryItem  {
+export interface ILibrary {
   title: {
     tr?: string;
     en?: string;
@@ -23,7 +23,7 @@ export interface ILibraryItem  {
 }
 
 // ✅ Schema
-const librarySchema = new Schema<ILibraryItem>(
+const LibrarySchema = new Schema<ILibrary>(
   {
     title: {
       tr: { type: String, trim: true },
@@ -52,7 +52,7 @@ const librarySchema = new Schema<ILibraryItem>(
 );
 
 // ✅ Slug middleware
-librarySchema.pre("validate", function (this: ILibraryItem, next) {
+LibrarySchema.pre("validate", function (this: ILibrary, next) {
   const baseTitle =
     this.title?.en || this.title?.de || this.title?.tr || "untitled";
   if (!this.slug && baseTitle) {
@@ -65,9 +65,9 @@ librarySchema.pre("validate", function (this: ILibraryItem, next) {
 });
 
 // ✅ Guard + Model Type
-const LibraryItem: Model<ILibraryItem> =
-  (models.LibraryItem as Model<ILibraryItem>) ||
-  model<ILibraryItem>("LibraryItem", librarySchema);
+const Library: Model<ILibrary> =
+  (models.Library as Model<ILibrary>) ||
+  model<ILibrary>("Library", LibrarySchema);
 
 // ✅ Export
-export { LibraryItem };
+export { Library };

@@ -3,7 +3,7 @@ import { Schema, model, models, Types, Model } from "mongoose";
 /* --------------------------------------
    Chat Message
 --------------------------------------- */
-export interface IChatMessage  {
+export interface IChatMessage {
   sender: Types.ObjectId | null;
   roomId: string;
   message: string;
@@ -19,7 +19,7 @@ export interface IChatMessage  {
   updatedAt?: Date;
 }
 
-const chatMessageSchema = new Schema<IChatMessage>(
+const ChatMessageSchema = new Schema<IChatMessage>(
   {
     sender: { type: Schema.Types.ObjectId, ref: "User", default: null },
     roomId: { type: String, required: true },
@@ -37,19 +37,19 @@ const chatMessageSchema = new Schema<IChatMessage>(
 );
 
 export const ChatMessage: Model<IChatMessage> =
-  models.ChatMessage || model<IChatMessage>("ChatMessage", chatMessageSchema);
+  models.ChatMessage || model<IChatMessage>("ChatMessage", ChatMessageSchema);
 
 /* --------------------------------------
    Chat Session
 --------------------------------------- */
-export interface IChatSession  {
+export interface IChatSession {
   roomId: string;
   user?: Types.ObjectId;
   createdAt: Date;
   closedAt?: Date;
 }
 
-const chatSessionSchema = new Schema<IChatSession>({
+const ChatSessionSchema = new Schema<IChatSession>({
   roomId: { type: String, required: true, unique: true },
   user: { type: Schema.Types.ObjectId, ref: "User" },
   createdAt: { type: Date, default: Date.now },
@@ -57,4 +57,4 @@ const chatSessionSchema = new Schema<IChatSession>({
 });
 
 export const ChatSession: Model<IChatSession> =
-  models.ChatSession || model<IChatSession>("ChatSession", chatSessionSchema);
+  models.ChatSession || model<IChatSession>("ChatSession", ChatSessionSchema);

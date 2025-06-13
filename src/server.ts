@@ -17,6 +17,7 @@ import { setLocale } from "./core/utils/i18n/setLocale";
 import { getRouter } from "./routes";
 import { setupSwagger } from "./core/swagger/setupSwagger";
 import { errorHandler } from "./core/middleware/errorMiddleware";
+import { injectTenantModel } from "./core/middleware/injectTenantModel";
 
 const app: Express = express();
 const server = http.createServer(app);
@@ -29,6 +30,7 @@ connectDB();
 app.use(cookieParser());
 app.use(express.json({ strict: false }));
 app.use(setLocale);
+app.use(injectTenantModel);
 app.use("/uploads", express.static("uploads"));
 
 // CORS

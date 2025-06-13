@@ -1,7 +1,7 @@
 import { Schema, model, Model, models } from "mongoose";
 
 // ✅ Contact Message Interface
-export interface IContactMessage  {
+export interface IContactMessage {
   name: string;
   email: string;
   label: {
@@ -23,7 +23,7 @@ export interface IContactMessage  {
 }
 
 // ✅ Contact Message Schema
-const contactMessageSchema = new Schema<IContactMessage>(
+const ContactMessageSchema = new Schema<IContactMessage>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true },
@@ -47,6 +47,7 @@ const contactMessageSchema = new Schema<IContactMessage>(
 
 // ✅ Guard + Model Type (This module has been updated and is now standardized)
 const ContactMessage: Model<IContactMessage> =
-  models.ContactMessage || model<IContactMessage>("ContactMessage", contactMessageSchema);
+  models.ContactMessage ||
+  model<IContactMessage>("ContactMessage", ContactMessageSchema);
 
 export { ContactMessage };

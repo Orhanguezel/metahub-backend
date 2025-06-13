@@ -38,7 +38,7 @@ export interface IReference extends Document {
   updatedAt: Date;
 }
 
-const referenceImageSchema = new Schema<IReferenceImage>(
+const ReferenceImageSchema = new Schema<IReferenceImage>(
   {
     url: { type: String, required: true },
     thumbnail: { type: String, required: true },
@@ -48,7 +48,7 @@ const referenceImageSchema = new Schema<IReferenceImage>(
   { _id: false }
 );
 
-const referenceSchema = new Schema<IReference>(
+const ReferenceSchema = new Schema<IReference>(
   {
     title: {
       tr: { type: String, trim: true },
@@ -66,7 +66,7 @@ const referenceSchema = new Schema<IReference>(
       en: { type: String },
       de: { type: String },
     },
-    images: { type: [referenceImageSchema], default: [] },
+    images: { type: [ReferenceImageSchema], default: [] },
     tags: [{ type: String, trim: true }],
     category: {
       type: mongoose.Schema.Types.ObjectId,
@@ -81,7 +81,7 @@ const referenceSchema = new Schema<IReference>(
 );
 
 // Slug middleware
-referenceSchema.pre("validate", async function (next) {
+ReferenceSchema.pre("validate", async function (next) {
   const doc = this as IReference;
 
   if (!doc.slug) {
@@ -105,6 +105,6 @@ referenceSchema.pre("validate", async function (next) {
 });
 
 const Reference: Model<IReference> =
-  models.Reference || mongoose.model<IReference>("Reference", referenceSchema);
+  models.Reference || mongoose.model<IReference>("Reference", ReferenceSchema);
 
 export { Reference };

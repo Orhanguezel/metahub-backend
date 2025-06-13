@@ -1,7 +1,7 @@
 import mongoose, { Schema, model, Model, models } from "mongoose";
 
-// ✅ MailMessage Interface
-export interface IMailMessage  {
+// ✅ EmailMessage Interface
+export interface IEmailMessage {
   from: string;
   subject: {
     tr: string;
@@ -20,8 +20,8 @@ export interface IMailMessage  {
   updatedAt: Date;
 }
 
-// ✅ MailMessage Schema
-const mailSchema = new Schema<IMailMessage>(
+// ✅ EmailMessage Schema
+const EmailSchema = new Schema<IEmailMessage>(
   {
     from: { type: String, required: true },
     subject: {
@@ -42,7 +42,7 @@ const mailSchema = new Schema<IMailMessage>(
 );
 
 // ✅ Guard + Model Type (This module has been updated and is now standardized)
-const MailMessage: Model<IMailMessage> =
-  models.MailMessage || model<IMailMessage>("MailMessage", mailSchema);
+const EmailMessage: Model<IEmailMessage> =
+  models.EmailMessage || model<IEmailMessage>("EmailMessage", EmailSchema);
 
-export { MailMessage };
+export { EmailMessage };

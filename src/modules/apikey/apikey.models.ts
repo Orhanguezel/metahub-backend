@@ -9,7 +9,7 @@ export interface IApikey {
   updatedAt: Date;
 }
 
-const apikeySchema = new Schema<IApikey>(
+const ApikeySchema = new Schema<IApikey>(
   {
     name: { type: String, required: true },
     key: { type: String, required: true, unique: true },
@@ -20,7 +20,7 @@ const apikeySchema = new Schema<IApikey>(
 );
 
 const Apikey: Model<IApikey> =
-  models.Apikey || model<IApikey>("Apikey", apikeySchema);
+  models.Apikey || model<IApikey>("Apikey", ApikeySchema);
 
 // 📊 ApiKeyLog
 export interface IApiKeyLog {
@@ -33,7 +33,7 @@ export interface IApiKeyLog {
   createdAt: Date;
 }
 
-const apiKeyLogSchema = new Schema<IApiKeyLog>(
+const ApiKeyLogSchema = new Schema<IApiKeyLog>(
   {
     apiKey: { type: Schema.Types.ObjectId, ref: "Apikey", required: true },
     route: { type: String, required: true },
@@ -46,8 +46,6 @@ const apiKeyLogSchema = new Schema<IApiKeyLog>(
 );
 
 const ApiKeyLog: Model<IApiKeyLog> =
-  models.ApiKeyLog || model<IApiKeyLog>("ApiKeyLog", apiKeyLogSchema);
+  models.ApiKeyLog || model<IApiKeyLog>("ApiKeyLog", ApiKeyLogSchema);
 
-export { Apikey, ApiKeyLog};
-
-
+export { Apikey, ApiKeyLog };

@@ -1,0 +1,8 @@
+{
+  "setting.upload.success": "Loga zostały pomyślnie przesłane i zapisane.",
+  "setting.update.success": "Ustawienie zostało zaktualizowane.",
+  "setting.delete.success": "Ustawienie zostało usunięte.",
+  "setting.create.success": "Ustawienie zostało utworzone.",
+  "setting.error.missing": "Pola klucza i wartości są wymagane.",
+  "setting.notFound": "Nie znaleziono ustawienia dla podanego klucza."
+}

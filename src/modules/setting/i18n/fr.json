@@ -1,0 +1,8 @@
+{
+  "setting.upload.success": "Logos téléchargés et paramètre enregistré avec succès.",
+  "setting.update.success": "Paramètre mis à jour avec succès.",
+  "setting.delete.success": "Paramètre supprimé avec succès.",
+  "setting.create.success": "Paramètre créé avec succès.",
+  "setting.error.missing": "Les champs clé et valeur sont obligatoires.",
+  "setting.notFound": "Aucun paramètre trouvé pour la clé fournie."
+}

@@ -1,0 +1,8 @@
+{
+  "setting.upload.success": "Logos uploaded and setting saved successfully.",
+  "setting.update.success": "Setting updated successfully.",
+  "setting.delete.success": "Setting deleted successfully.",
+  "setting.create.success": "Setting created successfully.",
+  "setting.error.missing": "Key and value fields are required.",
+  "setting.notFound": "No setting found with the provided key."
+}

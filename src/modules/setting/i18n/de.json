@@ -1,0 +1,8 @@
+{
+  "setting.upload.success": "Logos wurden erfolgreich hochgeladen und Einstellung gespeichert.",
+  "setting.update.success": "Einstellung erfolgreich aktualisiert.",
+  "setting.delete.success": "Einstellung erfolgreich gelöscht.",
+  "setting.create.success": "Einstellung erfolgreich erstellt.",
+  "setting.error.missing": "Key- und Wertfelder sind erforderlich.",
+  "setting.notFound": "Keine Einstellung mit dem angegebenen Schlüssel gefunden."
+}
