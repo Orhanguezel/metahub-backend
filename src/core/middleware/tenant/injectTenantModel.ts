@@ -1,4 +1,4 @@
-// src/core/middleware/injectTenantModel.ts
+// src/core/middleware/tenant/injectTenantModel.ts
 
 import { Request, Response, NextFunction } from "express";
 import { getTenantModel } from "@/core/middleware/tenant/modelRegistry";

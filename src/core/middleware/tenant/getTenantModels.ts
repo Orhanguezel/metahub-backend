@@ -1,4 +1,4 @@
-// src/core/utils/getTenantModels.ts
+// src/core/middleware/tenant/getTenantModels.ts
 import { Request } from "express";
 
 // ✅ Doğrudan model export edilen modüller

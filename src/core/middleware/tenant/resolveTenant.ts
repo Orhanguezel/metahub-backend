@@ -1,4 +1,4 @@
-// src/core/middleware/resolveTenant.ts
+// src/core/middleware/tenant/resolveTenant.ts
 const tenantMap: Record<string, string> = {
   "koenigsmassage.com": "anastasia",
   "guezelwebdesign.com": "metahub",
