@@ -243,6 +243,10 @@ rm -rf dist
 npx tsc --noEmit
 npm run build
 
+pm2 restart all
+
+
+
 # 2. ts-node ile tekrar başlat
 APP_ENV=metahub npm run dev
 
