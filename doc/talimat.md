@@ -248,7 +248,8 @@ pm2 restart all
 
 
 # 2. ts-node ile tekrar başlat
-APP_ENV=metahub npm run dev
+APP_ENV=metahub bun run dev
+
 
 ---
 APP_ENV=radanor npm run dev

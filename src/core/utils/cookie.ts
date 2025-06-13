@@ -1,50 +1,44 @@
-// src/core/utils/cookie.ts
 import { Response } from "express";
 
 const isProduction = process.env.NODE_ENV === "production";
 const COOKIE_NAME = process.env.COOKIE_NAME || "accessToken";
-const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
+const COOKIE_MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 gün
 
-export const setTokenCookie = (res: Response, token: string): void => {
-  if (isProduction) {
-    // PROD için: domain, secure, sameSite 'none'
-    const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN;
-    res.cookie(COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      domain: COOKIE_DOMAIN,
-      maxAge: COOKIE_MAX_AGE,
-      path: "/",
-    });
-  } else {
-    // DEV için: secure=false, sameSite='lax', domain=undefined
-    res.cookie(COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: COOKIE_MAX_AGE,
-      path: "/",
-    });
-  }
+const domainMap = {
+  metahub: ".guezelwebdesign.com",
+  anastasia: ".koenigsmassage.com",
+  ensotek: ".ensotek.de",
 };
 
-export const clearTokenCookie = (res: Response): void => {
-  if (isProduction) {
-    const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN;
-    res.clearCookie(COOKIE_NAME, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      domain: COOKIE_DOMAIN,
-      path: "/",
-    });
-  } else {
-    res.clearCookie(COOKIE_NAME, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      path: "/",
-    });
-  }
+// 🔁 Tenant’a göre domain
+export const getCookieDomain = (tenant: string): string =>
+  domainMap[tenant] || ".guezelwebdesign.com";
+
+// ✅ Çerez yazma
+export const setTokenCookie = (
+  res: Response,
+  token: string,
+  tenant: string
+): void => {
+  res.cookie(COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    domain: getCookieDomain(tenant),
+    path: "/",
+    maxAge: COOKIE_MAX_AGE,
+  });
+};
+
+// ✅ Çerez silme
+export const clearTokenCookie = (res: Response, tenant?: string): void => {
+  const options = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    path: "/",
+    domain: tenant ? getCookieDomain(tenant) : undefined,
+  } as const;
+
+  res.clearCookie(COOKIE_NAME, options);
 };

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import crypto from "crypto";
-import { User } from "./users.models";
+//import { User } from "./users.models";
 import { sendEmail } from "@/services/emailService";
 import { sendSms } from "@/services/smsService";
 import { generateOtpCode } from "@/core/utils/otp";
@@ -12,6 +12,7 @@ import { t } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import userTranslations from "@/modules/users/i18n";
 import type { SupportedLocale } from "@/types/common";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // Dil ve log için kısa yol
 function getLocale(req: Request): SupportedLocale {
@@ -30,6 +31,7 @@ export const sendEmailVerification = asyncHandler(
   async (req: Request, res: Response) => {
     const { email } = req.body;
     const locale = getLocale(req);
+    const { User } = await getTenantModels(req);
 
     if (!email) {
       logger.warn(`[EMAIL-VERIFICATION] E-posta eksik.`);
@@ -83,6 +85,7 @@ export const sendEmailVerification = asyncHandler(
 export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   const { token } = req.body;
   const locale = getLocale(req);
+  const { User } = await getTenantModels(req);
 
   if (!token) {
     logger.warn(`[EMAIL-VERIFY] Token eksik.`);
@@ -125,6 +128,7 @@ export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
 export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
   const { email, via = "email" } = req.body;
   const locale = getLocale(req);
+  const { User } = await getTenantModels(req);
 
   if (!email) {
     logger.warn(`[OTP] E-posta eksik.`);
@@ -173,6 +177,7 @@ export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
 export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
   const { email, code } = req.body;
   const locale = getLocale(req);
+  const { User } = await getTenantModels(req);
 
   if (!email || !code) {
     logger.warn(`[OTP-VERIFY] Email veya kod eksik.`);
@@ -217,6 +222,7 @@ export const resendOtp = asyncHandler(
 // --- MFA (Google Authenticator - TOTP) ---
 
 export const enableMfa = asyncHandler(async (req: Request, res: Response) => {
+  const { User } = await getTenantModels(req);
   const user = await User.findById(req.user!.id);
   const locale = getLocale(req);
   if (!user) {
@@ -254,6 +260,7 @@ export const enableMfa = asyncHandler(async (req: Request, res: Response) => {
 export const verifyMfa = asyncHandler(async (req: Request, res: Response) => {
   const { code } = req.body;
   const locale = getLocale(req);
+  const { User } = await getTenantModels(req);
 
   if (!code) {
     logger.warn(`[MFA-VERIFY] Kod eksik.`);
