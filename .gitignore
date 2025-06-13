@@ -139,3 +139,4 @@ dist
 .env*
 
 deploy.md
+node_modules/
