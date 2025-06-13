@@ -6,7 +6,10 @@ import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
  * - Accepts string or partial locale object
  * - Returns all locales filled
  */
-export function fillAllLocales(input: any): Record<SupportedLocale, string> {
+export function fillAllLocales(
+  input: any,
+  preferredLang: SupportedLocale = "en"
+): Record<SupportedLocale, string> {
   if (!input || typeof input === "undefined") {
     return SUPPORTED_LOCALES.reduce((acc, lang) => {
       acc[lang] = "";
@@ -29,6 +32,7 @@ export function fillAllLocales(input: any): Record<SupportedLocale, string> {
     }, {} as Record<SupportedLocale, string>);
   }
 
+  const preferred = input[preferredLang]?.trim();
   const firstValid = SUPPORTED_LOCALES.map((l) => input[l]).find(
     (v) => typeof v === "string" && v.trim()
   );
@@ -36,7 +40,9 @@ export function fillAllLocales(input: any): Record<SupportedLocale, string> {
   return SUPPORTED_LOCALES.reduce((acc, lang) => {
     const val = input[lang];
     acc[lang] =
-      typeof val === "string" && val.trim() ? val.trim() : firstValid || "";
+      typeof val === "string" && val.trim()
+        ? val.trim()
+        : preferred || firstValid || "";
     return acc;
   }, {} as Record<SupportedLocale, string>);
 }

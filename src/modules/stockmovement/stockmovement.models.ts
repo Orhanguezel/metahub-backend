@@ -1,8 +1,14 @@
 import mongoose, { Schema, model, models, Types, Model } from "mongoose";
 
-export type MovementType = "increase" | "decrease" | "adjust" | "order" | "return" | "manual";
+export type MovementType =
+  | "increase"
+  | "decrease"
+  | "adjust"
+  | "order"
+  | "return"
+  | "manual";
 
-export interface IStockmovement  {
+export interface IStockmovement {
   product: Types.ObjectId;
   type: MovementType;
   quantity: number;
@@ -15,7 +21,7 @@ export interface IStockmovement  {
   createdAt: Date;
 }
 
-const stockmovementSchema = new Schema<IStockmovement>(
+const StockmovementSchema = new Schema<IStockmovement>(
   {
     product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
     type: {
@@ -36,6 +42,7 @@ const stockmovementSchema = new Schema<IStockmovement>(
 
 // ✅ Guard + Tip belirleme
 const Stockmovement: Model<IStockmovement> =
-  models.Stockmovement || model<IStockmovement>("Stockmovement", stockmovementSchema);
+  models.Stockmovement ||
+  model<IStockmovement>("Stockmovement", StockmovementSchema);
 
 export { Stockmovement };

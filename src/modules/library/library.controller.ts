@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { LibraryItem } from "@/modules/library";
+import { Library } from "@/modules/library";
 import { BASE_URL, UPLOAD_BASE_PATH } from "@/core/middleware/uploadMiddleware";
 import { isValidObjectId } from "@/core/utils/validation";
 
@@ -36,7 +36,7 @@ export const createLibraryItem = asyncHandler(
         .replace(/[^\w-]/g, "");
       const finalSlug = `${slugBase}-${lang}`;
 
-      const item = await LibraryItem.create({
+      const item = await Library.create({
         title: { [lang]: title },
         slug: finalSlug,
         description: { [lang]: description },
@@ -51,12 +51,10 @@ export const createLibraryItem = asyncHandler(
     }
 
     if (createdItems.length === 0) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          message: "At least one valid language field is required.",
-        });
+      res.status(400).json({
+        success: false,
+        message: "At least one valid language field is required.",
+      });
       return;
     }
 
@@ -74,7 +72,7 @@ export const getAllLibraryItems = asyncHandler(
     const lang = req.query.lang || "en";
     const filter: any = { [`title.${lang}`]: { $exists: true } };
 
-    const items = await LibraryItem.find(filter).sort({ createdAt: -1 });
+    const items = await Library.find(filter).sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
       message: "Library items fetched successfully.",
@@ -88,7 +86,7 @@ export const getLibraryItemBySlug = asyncHandler(
   async (req: Request, res: Response) => {
     const { slug } = req.params;
 
-    const item = await LibraryItem.findOne({ slug });
+    const item = await Library.findOne({ slug });
     if (!item) {
       res
         .status(404)
@@ -115,7 +113,7 @@ export const getLibraryItemById = asyncHandler(
       return;
     }
 
-    const item = await LibraryItem.findById(id);
+    const item = await Library.findById(id);
     if (!item) {
       res
         .status(404)
@@ -148,7 +146,7 @@ export const updateLibraryItem = asyncHandler(
       updates.fileUrl = `${BASE_URL}/${UPLOAD_BASE_PATH}/library/${req.file.filename}`;
     }
 
-    const updated = await LibraryItem.findByIdAndUpdate(id, updates, {
+    const updated = await Library.findByIdAndUpdate(id, updates, {
       new: true,
     });
 
@@ -179,7 +177,7 @@ export const deleteLibraryItem = asyncHandler(
       return;
     }
 
-    const deleted = await LibraryItem.findByIdAndDelete(id);
+    const deleted = await Library.findByIdAndDelete(id);
     if (!deleted) {
       res
         .status(404)

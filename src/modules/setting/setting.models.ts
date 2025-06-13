@@ -1,12 +1,17 @@
 import { Schema, model, models, Model } from "mongoose";
+import {
+  SUPPORTED_LOCALES,
+  SupportedLocale,
+  TranslatedLabel,
+} from "@/types/common";
 
-// Logo için özel value tipi
+// ✅ Logo tipi
 export interface ILogoSettingValue {
   light?: {
     url: string;
-    publicId?: string;      // Cloudinary dosya silme için
-    thumbnail?: string;     // (Varsa) Thumbnail adresi
-    webp?: string;          // (Varsa) Webp adresi
+    publicId?: string;
+    thumbnail?: string;
+    webp?: string;
   };
   dark?: {
     url: string;
@@ -16,13 +21,13 @@ export interface ILogoSettingValue {
   };
 }
 
-// Diğer setting türleriyle birlikte logo tipi
+// ✅ Setting tipi
 export interface ISetting {
   key: string;
   value:
     | string
     | string[]
-    | { tr: string; en: string; de: string }
+    | TranslatedLabel
     | Record<string, any>
     | ILogoSettingValue;
   isActive: boolean;
@@ -30,7 +35,8 @@ export interface ISetting {
   updatedAt: Date;
 }
 
-const settingSchema = new Schema<ISetting>(
+// ✔ Gelişmiş şema
+const SettingSchema = new Schema<ISetting>(
   {
     key: {
       type: String,
@@ -41,7 +47,7 @@ const settingSchema = new Schema<ISetting>(
       maxlength: [100, "Key cannot exceed 100 characters."],
     },
     value: {
-      type: Schema.Types.Mixed,
+      type: Schema.Types.Mixed, // Çok dilli veya generic olabilir
       required: [true, "Value is required."],
     },
     isActive: {
@@ -52,7 +58,8 @@ const settingSchema = new Schema<ISetting>(
   { timestamps: true }
 );
 
-// Model guard
-const Setting: Model<ISetting> = models.Setting || model<ISetting>("Setting", settingSchema);
+// 🚫 Hardcoded model guard yok, tenant-aware çağrılmalı!
+const Setting: Model<ISetting> =
+  models.Setting || model<ISetting>("Setting", SettingSchema);
 
 export { Setting };

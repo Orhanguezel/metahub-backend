@@ -1,159 +1,177 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import  { MailMessage} from "@/modules/email";
+import { EmailMessage } from "@/modules/email";
 import { sendEmail } from "@/services/emailService";
 import { readInboxEmails } from "@/services/emailReader";
 import { isValidObjectId } from "@/core/utils/validation";
 
 // ✅ Test e-posta gönder (Admin)
-export const sendTestEmail = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { to, subject, message }: { to: string; subject: string; message: string } = req.body;
+export const sendTestEmail = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const {
+      to,
+      subject,
+      message,
+    }: { to: string; subject: string; message: string } = req.body;
 
-  if (!to || !subject || !message) {
-    res.status(400).json({ message: "Please provide 'to', 'subject' and 'message'." });
-    return;
-  }
+    if (!to || !subject || !message) {
+      res
+        .status(400)
+        .json({ message: "Please provide 'to', 'subject' and 'message'." });
+      return;
+    }
 
-  const brand = process.env.BRAND_NAME || "MetaHup";
+    const brand = process.env.BRAND_NAME || "MetaHup";
 
-  const html = `
+    const html = `
     <h2>${subject}</h2>
     <p>${message}</p>
     <br/>
     <small>This email was sent from the <strong>${brand}</strong> platform.</small>
   `;
 
-  await sendEmail({ to, subject, html });
+    await sendEmail({ to, subject, html });
 
-  res.status(200).json({
-    success: true,
-    message:
-      req.locale === "de"
-        ? "Test-E-Mail wurde erfolgreich gesendet."
-        : req.locale === "tr"
-        ? "Test e-postası başarıyla gönderildi."
-        : "Test email sent successfully.",
-  });
-});
+    res.status(200).json({
+      success: true,
+      message:
+        req.locale === "de"
+          ? "Test-E-Mail wurde erfolgreich gesendet."
+          : req.locale === "tr"
+          ? "Test e-postası başarıyla gönderildi."
+          : "Test email sent successfully.",
+    });
+  }
+);
 
 // ✅ Tüm mailleri getir (opsiyonel dil filtresi)
-export const getAllMails = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { lang } = req.query;
-  const filter: any = {};
+export const getAllMails = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { lang } = req.query;
+    const filter: any = {};
 
-  if (lang) {
-    filter[`subject.${lang}`] = { $exists: true };
-    filter[`body.${lang}`] = { $exists: true };
+    if (lang) {
+      filter[`subject.${lang}`] = { $exists: true };
+      filter[`body.${lang}`] = { $exists: true };
+    }
+
+    const mails = await EmailMessage.find(filter).sort({ createdAt: -1 });
+    res.status(200).json(mails);
   }
-
-  const mails = await MailMessage.find(filter).sort({ createdAt: -1 });
-  res.status(200).json(mails);
-});
+);
 
 // ✅ Tek mail getir
-export const getMailById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
+export const getMailById = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
 
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ message: "Invalid mail ID" });
-    return;
+    if (!isValidObjectId(id)) {
+      res.status(400).json({ message: "Invalid mail ID" });
+      return;
+    }
+
+    const mail = await EmailMessage.findById(id);
+    if (!mail) {
+      res.status(404).json({
+        message:
+          req.locale === "de"
+            ? "E-Mail wurde nicht gefunden."
+            : req.locale === "tr"
+            ? "E-posta bulunamadı."
+            : "Mail not found.",
+      });
+      return;
+    }
+
+    res.status(200).json(mail);
   }
-
-  const mail = await MailMessage.findById(id);
-  if (!mail) {
-    res.status(404).json({
-      message:
-        req.locale === "de"
-          ? "E-Mail wurde nicht gefunden."
-          : req.locale === "tr"
-          ? "E-posta bulunamadı."
-          : "Mail not found.",
-    });
-    return;
-  }
-
-  res.status(200).json(mail);
-});
+);
 
 // ✅ Mail sil
-export const deleteMail = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
+export const deleteMail = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
 
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ message: "Invalid mail ID" });
-    return;
-  }
+    if (!isValidObjectId(id)) {
+      res.status(400).json({ message: "Invalid mail ID" });
+      return;
+    }
 
-  const mail = await MailMessage.findByIdAndDelete(id);
-  if (!mail) {
-    res.status(404).json({
+    const mail = await EmailMessage.findByIdAndDelete(id);
+    if (!mail) {
+      res.status(404).json({
+        message:
+          req.locale === "de"
+            ? "E-Mail wurde nicht gefunden."
+            : req.locale === "tr"
+            ? "E-posta bulunamadı."
+            : "Mail not found.",
+      });
+      return;
+    }
+
+    res.status(200).json({
       message:
         req.locale === "de"
-          ? "E-Mail wurde nicht gefunden."
+          ? "E-Mail wurde gelöscht."
           : req.locale === "tr"
-          ? "E-posta bulunamadı."
-          : "Mail not found.",
+          ? "E-posta başarıyla silindi."
+          : "Mail deleted successfully.",
     });
-    return;
   }
-
-  res.status(200).json({
-    message:
-      req.locale === "de"
-        ? "E-Mail wurde gelöscht."
-        : req.locale === "tr"
-        ? "E-posta başarıyla silindi."
-        : "Mail deleted successfully.",
-  });
-});
+);
 
 // ✅ Manuel e-posta okuma
-export const fetchEmailsManually = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  await readInboxEmails();
+export const fetchEmailsManually = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    await readInboxEmails();
 
-  res.status(200).json({
-    message:
-      req.locale === "de"
-        ? "Neue E-Mails werden geprüft..."
-        : req.locale === "tr"
-        ? "Yeni e-postalar kontrol ediliyor..."
-        : "Checking for new emails...",
-  });
-});
-
-// ✅ Okundu/okunmadı olarak işaretle
-export const markAsReadOrUnread = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-  const { isRead }: { isRead: boolean } = req.body;
-
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ message: "Invalid mail ID" });
-    return;
-  }
-
-  const mail = await MailMessage.findById(id);
-  if (!mail) {
-    res.status(404).json({
+    res.status(200).json({
       message:
         req.locale === "de"
-          ? "E-Mail wurde nicht gefunden."
+          ? "Neue E-Mails werden geprüft..."
           : req.locale === "tr"
-          ? "E-posta bulunamadı."
-          : "Mail not found.",
+          ? "Yeni e-postalar kontrol ediliyor..."
+          : "Checking for new emails...",
     });
-    return;
   }
+);
 
-  mail.isRead = isRead;
-  await mail.save();
+// ✅ Okundu/okunmadı olarak işaretle
+export const markAsReadOrUnread = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+    const { isRead }: { isRead: boolean } = req.body;
 
-  res.status(200).json({
-    message:
-      req.locale === "de"
-        ? `Nachricht als ${isRead ? "gelesen" : "ungelesen"} markiert.`
-        : req.locale === "tr"
-        ? `Mesaj ${isRead ? "okundu" : "okunmadı"} olarak işaretlendi.`
-        : `Message marked as ${isRead ? "read" : "unread"}.`,
-    mail,
-  });
-});
+    if (!isValidObjectId(id)) {
+      res.status(400).json({ message: "Invalid mail ID" });
+      return;
+    }
+
+    const mail = await EmailMessage.findById(id);
+    if (!mail) {
+      res.status(404).json({
+        message:
+          req.locale === "de"
+            ? "E-Mail wurde nicht gefunden."
+            : req.locale === "tr"
+            ? "E-posta bulunamadı."
+            : "Mail not found.",
+      });
+      return;
+    }
+
+    mail.isRead = isRead;
+    await mail.save();
+
+    res.status(200).json({
+      message:
+        req.locale === "de"
+          ? `Nachricht als ${isRead ? "gelesen" : "ungelesen"} markiert.`
+          : req.locale === "tr"
+          ? `Mesaj ${isRead ? "okundu" : "okunmadı"} olarak işaretlendi.`
+          : `Message marked as ${isRead ? "read" : "unread"}.`,
+      mail,
+    });
+  }
+);

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { Order } from "@/modules/order";
-import { RadonarProd } from "@/modules/radonarprod";
+import { Bike } from "@/modules/bikes";
 import { Address } from "@/modules/address";
 import { Coupon } from "@/modules/coupon";
 import { Payment } from "@/modules/payment";
@@ -80,7 +80,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   const itemsForMail: string[] = [];
 
   for (const item of items) {
-    const product = await RadonarProd.findById(item.product);
+    const product = await Bike.findById(item.product);
     if (!product) {
       logger.warn(orderT("error.productNotFound", reqLocale));
       res.status(404).json({

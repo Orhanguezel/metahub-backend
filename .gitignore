@@ -137,3 +137,5 @@ dist
 .env.kuhlturm
 .env.metahub
 .env*
+
+deploy.md

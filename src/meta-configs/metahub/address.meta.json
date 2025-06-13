@@ -44,13 +44,13 @@
       "summary": "PUT /all/replace"
     }
   ],
-  "version": "1.0.6",
+  "version": "1.0.15",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5"
+    "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5"
   },
-  "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
-  "lastUpdatedAt": "2025-06-12T12:29:40.701Z",
+  "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
+  "lastUpdatedAt": "2025-06-13T00:29:41.341Z",
   "history": [
     {
       "version": "1.0.1",
@@ -92,6 +92,69 @@
       "by": "Orhan Güzel",
       "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
       "date": "2025-06-12T12:29:40.701Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.7",
+      "by": "Orhan Güzel",
+      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
+      "date": "2025-06-12T22:00:05.317Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.8",
+      "by": "Orhan Güzel",
+      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
+      "date": "2025-06-12T22:02:17.887Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.9",
+      "by": "Orhan Güzel",
+      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
+      "date": "2025-06-12T22:05:44.866Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.10",
+      "by": "Orhan Güzel",
+      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
+      "date": "2025-06-12T23:42:55.695Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.11",
+      "by": "Orhan Güzel",
+      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
+      "date": "2025-06-12T23:45:47.802Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.12",
+      "by": "Orhan Güzel",
+      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
+      "date": "2025-06-12T23:50:41.244Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.13",
+      "by": "Orhan Güzel",
+      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
+      "date": "2025-06-12T23:59:25.743Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.14",
+      "by": "Orhan Güzel",
+      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
+      "date": "2025-06-13T00:04:29.673Z",
+      "note": "Meta auto-generated"
+    },
+    {
+      "version": "1.0.15",
+      "by": "Orhan Güzel",
+      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
+      "date": "2025-06-13T00:29:41.341Z",
       "note": "Meta auto-generated"
     }
   ],

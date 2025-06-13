@@ -1,258 +1,368 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Setting, ILogoSettingValue } from "@/modules/setting";
+import { ILogoSettingValue } from "@/modules/setting";
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 import path from "path";
 import { getImagePath } from "@/core/utils/uploadUtils";
+import { getTenantModels } from "@/core/utils/getTenantModels";
+import logger from "@/core/middleware/logger/logger";
+import { t as translate } from "@/core/utils/i18n/translate";
+import translations from "./i18n";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import type { SupportedLocale } from "@/types/common";
+import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
+import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
 
-const ENV = process.env.APP_ENV || "ensotek";
-const FOLDER_KEY = "setting";
-const FOLDER = "setting-images";
-
-// 🔗 Eski logo dosyalarını hem localden hem Cloudinary'den siler
-async function cleanupLogoFiles(logoObj?: ILogoSettingValue) {
+const cleanupLogoFiles = async (logoObj?: ILogoSettingValue) => {
   for (const mode of ["light", "dark"] as const) {
     const logo = logoObj?.[mode];
     if (!logo) continue;
 
-    // Local dosya ise
     if (logo.url && logo.url.startsWith("uploads")) {
       const absPath = path.join(process.cwd(), logo.url);
-      if (fs.existsSync(absPath)) {
-        fs.unlinkSync(absPath);
-      }
+      if (fs.existsSync(absPath)) fs.unlinkSync(absPath);
     }
-    // Cloudinary ise
+
     if (logo.publicId) {
       try {
         await cloudinary.uploader.destroy(logo.publicId);
       } catch (err) {
-        console.error(`[Cloudinary Delete] ${logo.publicId}:`, err);
+        logger.error("[Cloudinary Delete Error]", {
+          error: err,
+          tenant: logo.publicId,
+        });
       }
     }
   }
-}
+};
 
-// 🎯 Upload (POST): /setting/upload/:key
-export const upsertSettingImage = asyncHandler(async (req: Request, res: Response) => {
-  const { key } = req.params;
-  if (!key) throw new Error("Key param is required.");
+const getI18nTools = (req: Request) => {
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const t = (key: string, params?: any) =>
+    translate(key, locale, translations, params);
+  const logContext = {
+    tenant: req.tenant,
+    module: "setting",
+    path: req.path,
+    method: req.method,
+    ip: req.ip,
+  };
+  return { locale, t, logContext };
+};
 
-  // Multer field'ları: lightFile/darkFile şeklinde (cloudinary ise .path, .filename yok!)
-  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-  const light = files?.lightFile?.[0];
-  const dark = files?.darkFile?.[0];
+export const upsertSettingImage = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { Setting } = await getTenantModels(req);
+    const { t, logContext } = getI18nTools(req);
+    const { key } = req.params;
 
-  if (!light && !dark) throw new Error("At least one of lightFile or darkFile is required.");
+    if (!key) {
+      logger.warn("Key param missing", {
+        ...logContext,
+        event: "setting.upload",
+        status: "fail",
+      });
+      res
+        .status(400)
+        .json({ success: false, message: t("setting.error.missing") });
+      return;
+    }
 
-  let setting = await Setting.findOne({ key });
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const light = files?.lightFile?.[0];
+    const dark = files?.darkFile?.[0];
 
-  // 🔴 Önce eski dosyaları temizle!
-  if (setting && setting.value && typeof setting.value === "object") {
-    await cleanupLogoFiles(setting.value as ILogoSettingValue);
-  }
+    if (!light && !dark) {
+      res
+        .status(400)
+        .json({ success: false, message: t("setting.error.missingImage") });
+      return;
+    }
 
-  // Yeni logoları kaydet
-  const newLogo: ILogoSettingValue = {};
+    let setting = await Setting.findOne({ key });
 
-  if (light) {
-    newLogo.light = {
-      url: getImagePath(light), // Cloudinary ise path, local ise dosya yolu
-      publicId: (light as any).public_id || undefined,
-      thumbnail: undefined, // İstersen burada otomatik üretebilirsin
-      webp: undefined,      // Aynı şekilde
-    };
-  }
+    if (setting?.value && typeof setting.value === "object") {
+      await cleanupLogoFiles(setting.value as ILogoSettingValue);
+    }
 
-  if (dark) {
-    newLogo.dark = {
-      url: getImagePath(dark),
-      publicId: (dark as any).public_id || undefined,
-      thumbnail: undefined,
-      webp: undefined,
-    };
-  }
+    const newLogo: ILogoSettingValue = {};
+    if (light)
+      newLogo.light = {
+        url: getImagePath(light),
+        publicId: (light as any).public_id,
+      };
+    if (dark)
+      newLogo.dark = {
+        url: getImagePath(dark),
+        publicId: (dark as any).public_id,
+      };
 
-  if (setting) {
-    setting.value = newLogo;
-    await setting.save();
-  } else {
-    setting = await Setting.create({
+    if (setting) {
+      setting.value = newLogo;
+      await setting.save();
+    } else {
+      setting = await Setting.create({ key, value: newLogo, isActive: true });
+    }
+
+    logger.info(t("setting.upload.success"), {
+      ...logContext,
+      event: "setting.upload",
+      status: "success",
       key,
-      value: newLogo,
-      isActive: true,
+    });
+    res.status(200).json({
+      success: true,
+      message: t("setting.upload.success"),
+      data: setting,
     });
   }
+);
+export const updateSettingImage = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { Setting } = await getTenantModels(req);
+    const { t, logContext } = getI18nTools(req);
+    const { key } = req.params;
 
-  res.status(200).json({
-    success: true,
-    message: "Logos uploaded and setting saved successfully.",
-    data: setting,
-  });
-});
+    if (!key) {
+      logger.warn("Key param missing", {
+        ...logContext,
+        event: "setting.updateImage",
+        status: "fail",
+      });
+      res
+        .status(400)
+        .json({ success: false, message: t("setting.error.missing") });
+      return;
+    }
 
-// 🎯 Update (PUT): /setting/upload/:key
-export const updateSettingImage = asyncHandler(async (req: Request, res: Response) => {
-  const { key } = req.params;
-  if (!key) throw new Error("Key param is required.");
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const light = files?.lightFile?.[0];
+    const dark = files?.darkFile?.[0];
 
-  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-  const light = files?.lightFile?.[0];
-  const dark = files?.darkFile?.[0];
+    if (!light && !dark) {
+      logger.warn("No image files provided", {
+        ...logContext,
+        event: "setting.updateImage",
+        status: "fail",
+        key,
+      });
+      res
+        .status(400)
+        .json({ success: false, message: t("setting.error.missingImage") });
+      return;
+    }
 
-  if (!light && !dark) throw new Error("At least one of lightFile or darkFile is required.");
+    const setting = await Setting.findOne({ key });
+    if (!setting) {
+      logger.warn("Setting not found", {
+        ...logContext,
+        event: "setting.updateImage",
+        status: "fail",
+        key,
+      });
+      res
+        .status(404)
+        .json({ success: false, message: t("setting.error.notFound") });
+      return;
+    }
 
-  const setting = await Setting.findOne({ key });
-  if (!setting) throw new Error("Setting not found for the provided key.");
+    // 🔄 Mevcut logolar varsa temizle
+    if (setting.value && typeof setting.value === "object") {
+      const val = setting.value as ILogoSettingValue;
+      if (light && val.light) await cleanupLogoFiles({ light: val.light });
+      if (dark && val.dark) await cleanupLogoFiles({ dark: val.dark });
+    }
 
-  // 🔴 Eski dosyaları temizle (sadece değişenler için)
-  if (setting.value && typeof setting.value === "object") {
-    const val = setting.value as ILogoSettingValue;
-    if (light && val.light) await cleanupLogoFiles({ light: val.light });
-    if (dark && val.dark) await cleanupLogoFiles({ dark: val.dark });
-  }
-
-  const newLogo: ILogoSettingValue = { ...(setting.value as ILogoSettingValue) };
-
-  if (light) {
-    newLogo.light = {
-      url: getImagePath(light),
-      publicId: (light as any).public_id || undefined,
-      thumbnail: undefined,
-      webp: undefined,
+    // ✅ Yeni logo objesi oluşturuluyor
+    const newLogo: ILogoSettingValue = {
+      ...(setting.value as ILogoSettingValue),
     };
+
+    if (light) {
+      newLogo.light = {
+        url: getImagePath(light),
+        publicId: (light as any).public_id,
+      };
+    }
+
+    if (dark) {
+      newLogo.dark = {
+        url: getImagePath(dark),
+        publicId: (dark as any).public_id,
+      };
+    }
+
+    // 🔃 Güncelle ve kaydet
+    setting.value = newLogo;
+    await setting.save();
+
+    logger.info(t("setting.update.success"), {
+      ...logContext,
+      event: "setting.updateImage",
+      status: "success",
+      key,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: t("setting.update.success"),
+      data: setting,
+    });
   }
-  if (dark) {
-    newLogo.dark = {
-      url: getImagePath(dark),
-      publicId: (dark as any).public_id || undefined,
-      thumbnail: undefined,
-      webp: undefined,
-    };
-  }
+);
 
-  setting.value = newLogo;
-  await setting.save();
-
-  res.status(200).json({
-    success: true,
-    message: "Logos updated successfully.",
-    data: setting,
-  });
-});
-
-// 🎯 Delete Setting by Key
-export const deleteSetting = asyncHandler(async (req: Request, res: Response) => {
+export const deleteSetting = asyncHandler(async (req, res) => {
+  const { Setting } = await getTenantModels(req);
+  const { t, logContext } = getI18nTools(req);
   const { key } = req.params;
-  if (!key) throw new Error("Key parameter is required for deletion.");
+
+  if (!key) {
+    logger.warn("Key param missing", {
+      ...logContext,
+      event: "setting.delete",
+      status: "fail",
+    });
+    res
+      .status(400)
+      .json({ success: false, message: t("setting.error.missing") });
+    return;
+  }
 
   const setting = await Setting.findOneAndDelete({ key });
-
   if (!setting) {
-    res.status(404);
-    throw new Error("Setting not found with the provided key.");
+    logger.warn("Setting not found", {
+      ...logContext,
+      event: "setting.delete",
+      status: "fail",
+      key,
+    });
+    res
+      .status(404)
+      .json({ success: false, message: t("setting.error.notFound") });
+    return;
   }
 
-  // Eğer value bir logo ise, logoları da sil!
   if (setting.value && typeof setting.value === "object") {
     await cleanupLogoFiles(setting.value as ILogoSettingValue);
   }
 
-  res.status(200).json({
-    success: true,
-    message: `Setting '${key}' has been deleted successfully.`,
+  logger.warn(t("setting.delete.success"), {
+    ...logContext,
+    event: "setting.delete",
+    status: "success",
+    key,
   });
+  res.status(200).json({ success: true, message: t("setting.delete.success") });
 });
 
-
-
-// 🎯 Create or Update Setting (JSON)
-export const upsertSetting = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const upsertSetting = asyncHandler(async (req, res) => {
+  const { Setting } = await getTenantModels(req);
+  const { t, logContext } = getI18nTools(req);
   const { key, value, isActive = true } = req.body;
 
   if (!key || value === undefined || value === null) {
-    res.status(400).json({
-      success: false,
-      message: "Key and value are required.",
+    logger.warn(t("setting.error.missing"), {
+      ...logContext,
+      event: "setting.create",
+      status: "fail",
     });
+    res
+      .status(400)
+      .json({ success: false, message: t("setting.error.missing") });
     return;
   }
 
   const trimmedKey = key.trim();
+  let setting = await Setting.findOne({ key: trimmedKey });
 
-  let finalValue: any = value;
+  const normalizedValue =
+    typeof value === "object" ? fillAllLocales(value) : value;
 
-  // ✅ Özel kontrol: site_template için validasyon
   if (trimmedKey === "site_template") {
-    const availableThemesSetting = await Setting.findOne({ key: "available_themes" });
-    const availableThemes = Array.isArray(availableThemesSetting?.value)
-      ? availableThemesSetting.value
+    const themeSetting = await Setting.findOne({ key: "available_themes" });
+    const availableThemes = Array.isArray(themeSetting?.value)
+      ? themeSetting.value
       : [];
-
     if (!availableThemes.includes(value)) {
-      res.status(422);
-      throw new Error(`Selected theme '${value}' is not listed in available themes.`);
+      logger.warn("Invalid theme selection", {
+        ...logContext,
+        key: trimmedKey,
+        event: "setting.create",
+        status: "fail",
+      });
+      res
+        .status(422)
+        .json({ success: false, message: t("setting.error.invalidTheme") });
+      return;
     }
   }
 
-  let setting = await Setting.findOne({ key: trimmedKey });
-
   if (setting) {
-    setting.value = finalValue;
-    setting.isActive = typeof isActive === "boolean" ? isActive : setting.isActive;
+    setting.value = normalizedValue;
+    setting.isActive =
+      typeof isActive === "boolean" ? isActive : setting.isActive;
     await setting.save();
-
+    logger.info(t("setting.update.success"), {
+      ...logContext,
+      event: "setting.update",
+      status: "success",
+      key,
+    });
     res.status(200).json({
       success: true,
-      message: "Setting updated successfully.",
+      message: t("setting.update.success"),
       data: setting,
     });
   } else {
-    const newSetting = new Setting({
+    setting = await Setting.create({
       key: trimmedKey,
-      value: finalValue,
+      value: normalizedValue,
       isActive,
     });
-    await newSetting.save();
-
+    logger.info(t("setting.create.success"), {
+      ...logContext,
+      event: "setting.create",
+      status: "success",
+      key,
+    });
     res.status(201).json({
       success: true,
-      message: "Setting created successfully.",
-      data: newSetting,
+      message: t("setting.create.success"),
+      data: setting,
     });
   }
 });
 
-
-
-// 🎯 Get All Settings
-export const getAllSettings = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
-  const settings = await Setting.find().sort({ createdAt: -1 });
-  res.status(200).json({
-    success: true,
-    data: settings,
-  });
-});
-
-// 🎯 Get Setting by Key
-export const getSettingByKey = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const { key } = req.params;
-
-  if (!key?.trim()) {
-    res.status(400);
-    throw new Error("Key parameter is required.");
+export const getAllSettings = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { Setting } = await getTenantModels(req);
+    const settings = await Setting.find().sort({ createdAt: -1 });
+    res.status(200).json({ success: true, data: settings });
   }
+);
 
-  const setting = await Setting.findOne({ key: key.trim() });
+export const getSettingByKey = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { Setting } = await getTenantModels(req);
+    const { t, logContext } = getI18nTools(req);
+    const { key } = req.params;
 
-  if (!setting) {
-    res.status(404);
-    throw new Error("Setting not found with the provided key.");
+    if (!key?.trim()) {
+      res
+        .status(400)
+        .json({ success: false, message: t("setting.error.missing") });
+      return;
+    }
+
+    const setting = await Setting.findOne({ key: key.trim() });
+    if (!setting) {
+      res
+        .status(404)
+        .json({ success: false, message: t("setting.error.notFound") });
+      return;
+    }
+
+    res.status(200).json({ success: true, data: setting });
   }
-
-  res.status(200).json({
-    success: true,
-    data: setting,
-  });
-});
+);
