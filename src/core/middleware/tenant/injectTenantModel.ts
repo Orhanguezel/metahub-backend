@@ -2,9 +2,8 @@
 
 import { Request, Response, NextFunction } from "express";
 import { getTenantModel } from "@/core/middleware/tenant/modelRegistry";
-import { resolveTenantFromHost } from "@/core/middleware/tenant/resolveTenant";
 import { Schema, Model } from "mongoose";
-
+import { resolveTenantFromRequest } from "./resolveTenant";
 declare global {
   namespace Express {
     interface Request {
@@ -16,13 +15,14 @@ declare global {
     }
   }
 }
+// src/core/middleware/tenant/injectTenantModel.ts
 
 export const injectTenantModel = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const tenant = resolveTenantFromHost(req.hostname);
+  const tenant = resolveTenantFromRequest(req);
   req.tenant = tenant;
 
   req.getModel = async <T = any>(modelName: string, schema: Schema<T>) => {
@@ -33,6 +33,7 @@ export const injectTenantModel = (
     console.log(`🔑 Tenant resolved: ${tenant}`);
     console.log("HOSTNAME:", req.hostname);
     console.log("HEADERS.HOST:", req.headers.host);
+    console.log("HEADERS.X-Tenant:", req.headers["x-tenant"]);
   }
 
   next();
