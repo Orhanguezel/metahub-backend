@@ -5,7 +5,7 @@ import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 import path from "path";
 import { getImagePath } from "@/core/utils/uploadUtils";
-import { getTenantModels } from "@/core/utils/getTenantModels";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import logger from "@/core/middleware/logger/logger";
 import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";

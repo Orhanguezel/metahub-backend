@@ -17,7 +17,7 @@ import { setLocale } from "./core/utils/i18n/setLocale";
 import { getRouter } from "./routes";
 import { setupSwagger } from "./core/swagger/setupSwagger";
 import { errorHandler } from "./core/middleware/errorMiddleware";
-import { injectTenantModel } from "./core/middleware/injectTenantModel";
+import { injectTenantModel } from "./core/middleware/tenant/injectTenantModel";
 
 const app: Express = express();
 const server = http.createServer(app);
