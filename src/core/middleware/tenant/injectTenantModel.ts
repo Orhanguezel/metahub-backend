@@ -1,8 +1,8 @@
 // src/core/middleware/injectTenantModel.ts
 
 import { Request, Response, NextFunction } from "express";
-import { getTenantModel } from "@/core/config/modelRegistry";
-import { resolveTenantFromHost } from "@/core/middleware/resolveTenant";
+import { getTenantModel } from "@/core/middleware/tenant/modelRegistry";
+import { resolveTenantFromHost } from "@/core/middleware/tenant/resolveTenant";
 import { Schema, Model } from "mongoose";
 
 declare global {

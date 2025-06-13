@@ -1,5 +1,5 @@
 //src/core/config/modelRegistry.ts
-import { getTenantDbConnection } from "@/core/config/tenantDb";
+import { getTenantDbConnection } from "@/core/middleware/tenant/tenantDb";
 import mongoose from "mongoose";
 
 const modelCache = new Map<string, any>();
