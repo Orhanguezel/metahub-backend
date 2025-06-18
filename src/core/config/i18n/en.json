@@ -1,10 +1,11 @@
 {
-  "env.loaded": "✅ Loaded environment from {file}.",
-  "env.notFound": "❌ {file} not found. Please create it before starting the server.",
-  "env.fallbackLoaded": "✅ Loaded fallback .env file.",
-  "env.noEnvFile": "⚠️ No .env file found. Environment variables may be missing.",
-  "env.profile.active": "🌐 Active profile: {profile}",
-  "env.activeProfile": "🌐 Active profile: {profile}",
+  "env": {
+    "required": "❌ APP_ENV environment variable is required but not defined.",
+    "notFound": "❌ Environment file not found: {{file}}",
+    "loaded": "✅ Environment loaded from {{file}}",
+    "loadError": "❌ Failed to load {{file}}: {{error}}",
+    "activeProfile": "🌐 Active profile: {{profile}}"
+  },
 
   "email.missingConfig": "⚠️ Missing SMTP configuration: {vars}",
   "email.smtp.success": "✅ SMTP connection successful.",
@@ -31,4 +32,3 @@
   "server.error.noPort": "❌ PORT not defined in environment file.",
   "server.started": "🚀 Server running at {baseUrl}"
 }
-

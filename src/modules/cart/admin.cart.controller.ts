@@ -1,12 +1,13 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response, NextFunction } from "express";
 import { isValidObjectId } from "@/core/utils/validation";
-import { Cart } from "@/modules/cart";
+//import { Cart } from "@/modules/cart";
 import { ICartItem } from "@/modules/cart/types";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import cartTranslations from "@/modules/cart/i18n";
 import type { SupportedLocale } from "@/types/common";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 function cartT(
   key: string,
@@ -20,9 +21,10 @@ function cartT(
 export const getAllCarts = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const locale = (req.locale as SupportedLocale) || "en";
+    const { Cart } = await getTenantModels(req);
     try {
       const { userId, status, couponCode, isActive, language } = req.query;
-      const filter: any = {};
+      const filter: any = { tenant: req.tenant };
 
       if (userId) filter.user = userId;
       if (status && ["open", "ordered", "cancelled"].includes(status as string))
@@ -57,6 +59,7 @@ export const getAllCarts = asyncHandler(
 export const getSingleCart = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const locale = (req.locale as SupportedLocale) || "en";
+    const { Cart } = await getTenantModels(req);
     try {
       const { id } = req.params;
       if (!isValidObjectId(id)) {
@@ -67,7 +70,9 @@ export const getSingleCart = asyncHandler(
         });
         return;
       }
-      const cart = await Cart.findById(id).populate("items.product");
+      const cart = await Cart.findOne({ _id: id, tenant: req.tenant }).populate(
+        "items.product"
+      );
       if (!cart) {
         logger.warn(cartT("cart.notFound", locale, { id }));
         res
@@ -95,6 +100,7 @@ export const getSingleCart = asyncHandler(
 export const updateCart = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const locale = (req.locale as SupportedLocale) || "en";
+    const { Cart } = await getTenantModels(req);
     try {
       const { id } = req.params;
       const { items, status, couponCode, isActive } = req.body;
@@ -108,7 +114,7 @@ export const updateCart = asyncHandler(
         return;
       }
 
-      const cart = await Cart.findById(id);
+      const cart = await Cart.findOne({ _id: id, tenant: req.tenant });
       if (!cart) {
         logger.warn(cartT("cart.notFound", locale, { id }));
         res
@@ -163,6 +169,7 @@ export const updateCart = asyncHandler(
 export const deleteCart = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const locale = (req.locale as SupportedLocale) || "en";
+    const { Cart } = await getTenantModels(req);
     try {
       const { id } = req.params;
       if (!isValidObjectId(id)) {
@@ -173,7 +180,7 @@ export const deleteCart = asyncHandler(
         });
         return;
       }
-      const cart = await Cart.findById(id);
+      const cart = await Cart.findOne({ _id: id, tenant: req.tenant });
       if (!cart) {
         logger.warn(cartT("cart.notFound", locale, { id }));
         res
@@ -202,6 +209,7 @@ export const deleteCart = asyncHandler(
 export const toggleCartActiveStatus = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const locale = (req.locale as SupportedLocale) || "en";
+    const { Cart } = await getTenantModels(req);
     try {
       const { id } = req.params;
 
@@ -214,7 +222,7 @@ export const toggleCartActiveStatus = asyncHandler(
         return;
       }
 
-      const cart = await Cart.findById(id);
+      const cart = await Cart.findOne({ _id: id, tenant: req.tenant });
       if (!cart) {
         logger.warn(cartT("cart.notFound", locale, { id }));
         res

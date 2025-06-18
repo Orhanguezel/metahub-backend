@@ -1,0 +1,14 @@
+{
+  "apikey": {
+    "error": {
+      "missing": "API anahtarı eksik.",
+      "invalid": "Geçersiz veya iptal edilmiş API anahtarı."
+    },
+    "success": {
+      "validated": "API anahtarı başarıyla doğrulandı."
+    },
+    "log": {
+      "success": "API anahtarı kullanımı kaydedildi."
+    }
+  }
+}

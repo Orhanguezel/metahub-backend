@@ -52,5 +52,13 @@
   "meta.version.invalidFormat": "⚠️ Versiyon formatı geçersiz: {version}, 1.0.0 olarak ayarlandı.",
   "meta.fix.setting.created": "Eksik ayar oluşturuldu: {{module}} ({{project}})",
   "meta.fix.setting.completed": "{{count}} eksik setting otomatik eklendi.",
-  "meta.fix.setting.noMissing": "Hiçbir eksik setting bulunamadı."
+  "meta.fix.setting.noMissing": "Hiçbir eksik setting bulunamadı.",
+  "meta": {
+    "validation": {
+      "notFound": "{tenant} tenantı için {mod} modülünde {route} route'u için validasyon bulunamadı.",
+      "empty": "{tenant} tenantı için {mod} modülünde validation modülü boş.",
+      "importFail": "{tenant} tenantı için {mod} validation dosyası yüklenirken hata: {error}",
+      "schemaGenerated": "{tenant} tenantında {mod} modülünde {route} için validation schema oluşturuldu."
+    }
+  }
 }

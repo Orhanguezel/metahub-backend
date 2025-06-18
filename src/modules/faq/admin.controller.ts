@@ -1,12 +1,14 @@
 import { Response, Request } from "express";
 import asyncHandler from "express-async-handler";
 import { isValidObjectId } from "@/core/utils/validation";
-import  {FAQ} from "@/modules/faq";
+//import { FAQ } from "@/modules/faq";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // ✅ GET /admin/faqs
 export const getAllFAQs = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const faqs = await FAQ.find().sort({ createdAt: -1 });
+    const { FAQ } = await getTenantModels(req);
+    const faqs = await FAQ.find({ tenant: req.tenant }).sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -20,6 +22,7 @@ export const getAllFAQs = asyncHandler(
 // ✅ POST /admin/faqs
 export const createFAQ = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
+    const { FAQ } = await getTenantModels(req);
     const { question, answer, category, isPublished, isActive } = req.body;
 
     // Çoklu dil kontrolü
@@ -38,6 +41,7 @@ export const createFAQ = asyncHandler(
     const newFAQ = await FAQ.create({
       question,
       answer,
+      tenant: req.tenant,
       category,
       isPublished: isPublished ?? false,
       isActive: isActive ?? true,
@@ -55,6 +59,7 @@ export const createFAQ = asyncHandler(
 // ✅ PUT /admin/faqs/:id
 export const updateFAQ = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
+    const { FAQ } = await getTenantModels(req);
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -65,7 +70,7 @@ export const updateFAQ = asyncHandler(
       return;
     }
 
-    const faq = await FAQ.findById(id);
+    const faq = await FAQ.findOne({ _id: id, tenant: req.tenant });
     if (!faq) {
       res.status(404).json({
         success: false,
@@ -106,6 +111,7 @@ export const updateFAQ = asyncHandler(
 // ✅ DELETE /admin/faqs/:id
 export const deleteFAQ = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
+    const { FAQ } = await getTenantModels(req);
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -116,7 +122,7 @@ export const deleteFAQ = asyncHandler(
       return;
     }
 
-    const deleted = await FAQ.findByIdAndDelete(id);
+    const deleted = await FAQ.deleteOne({ _id: id, tenant: req.tenant });
 
     if (!deleted) {
       res.status(404).json({

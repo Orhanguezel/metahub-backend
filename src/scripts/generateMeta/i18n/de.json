@@ -52,5 +52,13 @@
   "meta.version.invalidFormat": "⚠️ Ungültiges Versionsformat: {version}, Standard ist 1.0.0",
   "meta.fix.setting.created": "Fehlende Einstellung erstellt: {{module}} ({{project}})",
   "meta.fix.setting.completed": "{{count}} fehlende Einstellungen wurden automatisch hinzugefügt.",
-  "meta.fix.setting.noMissing": "Keine fehlenden Einstellungen gefunden."
+  "meta.fix.setting.noMissing": "Keine fehlenden Einstellungen gefunden.",
+  "meta.fix.setting.invalid": "Ungültige Einstellung gefunden: {{param}}",
+  "meta": {
+    "validation": {
+      "notFound": "Keine Validierung gefunden für Modul {mod} und Route {route} im Mandanten {tenant}.",
+      "empty": "Validierungsmodul ist leer für Modul {mod} im Mandanten {tenant}.",
+      "importFail": "Fehler beim Importieren der Validierung für {mod}: {error}"
+    }
+  }
 }

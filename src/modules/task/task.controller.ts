@@ -1,24 +1,37 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Task } from "@/modules/task";
+//import { Task } from "@/modules/task";
 import { isValidObjectId } from "@/core/utils/validation";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // ✅ Create Task
 export const createTask = asyncHandler(async (req: Request, res: Response) => {
-  const { title, description, assignedTo, apartment, period, priority, dueDate, repeat, notes } = req.body;
+  const { Task } = await getTenantModels(req);
+  const {
+    title,
+    description,
+    assignedTo,
+    apartment,
+    period,
+    priority,
+    dueDate,
+    repeat,
+    notes,
+  } = req.body;
 
   if (!assignedTo || !apartment || !period) {
     res.status(400).json({
       success: false,
       message: "assignedTo, apartment and period are required.",
     });
-    return 
+    return;
   }
 
   const task = await Task.create({
     title,
     description,
     assignedTo,
+    tenant: req.tenant,
     assignedBy: req.user?._id,
     apartment,
     period,
@@ -37,8 +50,9 @@ export const createTask = asyncHandler(async (req: Request, res: Response) => {
 });
 
 // ✅ Get All Tasks (admin/moderator only)
-export const getAllTasks = asyncHandler(async (_req: Request, res: Response) => {
-  const tasks = await Task.find()
+export const getAllTasks = asyncHandler(async (req: Request, res: Response) => {
+  const { Task } = await getTenantModels(req);
+  const tasks = await Task.find({ tenant: req.tenant })
     .populate("assignedTo", "name email")
     .populate("assignedBy", "name email")
     .populate("apartment", "name address")
@@ -53,7 +67,11 @@ export const getAllTasks = asyncHandler(async (_req: Request, res: Response) => 
 
 // ✅ Get My Tasks (kullanıcının kendi atandığı görevler)
 export const getMyTasks = asyncHandler(async (req: Request, res: Response) => {
-  const tasks = await Task.find({ assignedTo: req.user?._id })
+  const { Task } = await getTenantModels(req);
+  const tasks = await Task.find({
+    assignedTo: req.user?._id,
+    tenant: req.tenant,
+  })
     .populate("apartment", "name address")
     .sort({ createdAt: -1 });
 
@@ -66,21 +84,22 @@ export const getMyTasks = asyncHandler(async (req: Request, res: Response) => {
 
 // ✅ Get Single Task
 export const getTaskById = asyncHandler(async (req: Request, res: Response) => {
+  const { Task } = await getTenantModels(req);
   const { id } = req.params;
 
   if (!isValidObjectId(id)) {
     res.status(400).json({ success: false, message: "Invalid task ID." });
-    return 
+    return;
   }
 
-  const task = await Task.findById(id)
+  const task = await Task.findOne({ _id: id, tenant: req.tenant })
     .populate("assignedTo", "name email")
     .populate("assignedBy", "name email")
     .populate("apartment", "name address");
 
   if (!task) {
     res.status(404).json({ success: false, message: "Task not found." });
-    return 
+    return;
   }
 
   res.status(200).json({
@@ -92,17 +111,18 @@ export const getTaskById = asyncHandler(async (req: Request, res: Response) => {
 
 // ✅ Update Task (admin/moderator)
 export const updateTask = asyncHandler(async (req: Request, res: Response) => {
+  const { Task } = await getTenantModels(req);
   const { id } = req.params;
 
   if (!isValidObjectId(id)) {
     res.status(400).json({ success: false, message: "Invalid task ID." });
-    return 
+    return;
   }
 
-  const task = await Task.findById(id);
+  const task = await Task.findOne({ _id: id, tenant: req.tenant });
   if (!task) {
-     res.status(404).json({ success: false, message: "Task not found." });
-     return
+    res.status(404).json({ success: false, message: "Task not found." });
+    return;
   }
 
   const {
@@ -144,17 +164,18 @@ export const updateTask = asyncHandler(async (req: Request, res: Response) => {
 
 // ✅ Delete Task
 export const deleteTask = asyncHandler(async (req: Request, res: Response) => {
+  const { Task } = await getTenantModels(req);
   const { id } = req.params;
 
   if (!isValidObjectId(id)) {
-     res.status(400).json({ success: false, message: "Invalid task ID." });
-     return
+    res.status(400).json({ success: false, message: "Invalid task ID." });
+    return;
   }
 
-  const task = await Task.findByIdAndDelete(id);
+  const task = await Task.deleteOne({ _id: id, tenant: req.tenant });
   if (!task) {
-     res.status(404).json({ success: false, message: "Task not found." });
-     return
+    res.status(404).json({ success: false, message: "Task not found." });
+    return;
   }
 
   res.status(200).json({
@@ -164,29 +185,45 @@ export const deleteTask = asyncHandler(async (req: Request, res: Response) => {
 });
 
 // ✅ Update Task Status (kullanıcı kendi görevine)
-export const updateMyTaskStatus = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { status } = req.body;
+export const updateMyTaskStatus = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { Task } = await getTenantModels(req);
+    const { id } = req.params;
+    const { status } = req.body;
 
-  if (!["pending", "in-progress", "paused", "completed", "cancelled"].includes(status)) {
-     res.status(400).json({ success: false, message: "Invalid status value." });
-     return
+    if (
+      !["pending", "in-progress", "paused", "completed", "cancelled"].includes(
+        status
+      )
+    ) {
+      res
+        .status(400)
+        .json({ success: false, message: "Invalid status value." });
+      return;
+    }
+
+    const task = await Task.findOne({
+      _id: id,
+      assignedTo: req.user?._id,
+      tenant: req.tenant,
+    });
+    if (!task) {
+      res.status(404).json({
+        success: false,
+        message: "Task not found or not assigned to you.",
+      });
+      return;
+    }
+
+    task.status = status;
+    if (status === "completed") task.completedAt = new Date();
+
+    await task.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Task status updated successfully.",
+      data: task,
+    });
   }
-
-  const task = await Task.findOne({ _id: id, assignedTo: req.user?._id });
-  if (!task) {
-     res.status(404).json({ success: false, message: "Task not found or not assigned to you." });
-     return
-  }
-
-  task.status = status;
-  if (status === "completed") task.completedAt = new Date();
-
-  await task.save();
-
-  res.status(200).json({
-    success: true,
-    message: "Task status updated successfully.",
-    data: task,
-  });
-});
+);

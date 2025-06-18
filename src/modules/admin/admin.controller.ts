@@ -1,4 +1,4 @@
-import "@/core/config/envLoader";
+// src/modules/admin/admin.controller.ts (veya uygun modül path'in)
 import fs from "fs";
 import path from "path";
 import { Request, Response, NextFunction } from "express";
@@ -6,23 +6,28 @@ import asyncHandler from "express-async-handler";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "@/modules/admin/i18n";
-import { ModuleMeta, ModuleSetting } from "@/modules/admin";
-import { updateMetaVersionLog } from "@/scripts/generateMeta/utils/versionHelpers";
+import { updateMetaVersionLog } from "@/scripts/generateMeta/helpers/updateMetaVersion";
 import {
   getGitUser,
   getGitCommitHash,
-} from "@/scripts/generateMeta/utils/gitHelpers";
+} from "@/scripts/generateMeta/helpers/gitHelpers";
 import { writeModuleFiles } from "@/scripts/createModule/writeModuleFiles";
 import { getPaths } from "@/scripts/createModule/utils";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import type { SupportedLocale, TranslatedLabel } from "@/types/common";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
+// --- ENV/Config ---
 const PROJECT_ENV = process.env.APP_ENV;
 if (!PROJECT_ENV) {
-  throw new Error("❌ APP_ENV is not defined. Please set the environment before running the server.");
+  throw new Error(
+    "❌ APP_ENV is not defined. Please set the environment before running the server."
+  );
 }
 
+// Yardımcı: Büyük harf başlatıcı
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+// Yardımcı: Varsayılan çok dilli label
 const generateDefaultLabel = (name: string): TranslatedLabel => ({
   tr: capitalize(name),
   en: capitalize(name),
@@ -36,6 +41,23 @@ const generateDefaultLabel = (name: string): TranslatedLabel => ({
 export const createModule = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const locale: SupportedLocale = req.locale || "en";
+    const tenant: string = req.tenant; // Tenant middleware'den gelmeli!
+    if (!tenant) {
+      logger.error("Tenant bulunamadı (createModule)!", {
+        module: "admin",
+        event: "createModule",
+        status: "fail",
+        locale,
+      });
+      res.status(400).json({
+        success: false,
+        message: t("admin.module.tenantRequired", locale, translations),
+      });
+      return;
+    }
+
+    const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
+
     try {
       const {
         name,
@@ -44,6 +66,7 @@ export const createModule = asyncHandler(
         language = "en",
         visibleInSidebar = true,
         useAnalytics = false,
+        tenant = req.tenant,
         enabled = true,
         label,
         showInDashboard = true,
@@ -52,7 +75,11 @@ export const createModule = asyncHandler(
       } = req.body;
 
       if (!name) {
-        logger.warn("Modül adı girilmedi.", { module: "admin", fn: "createModule" });
+        logger.warn("Modül adı girilmedi.", {
+          module: "admin",
+          fn: "createModule",
+          tenant,
+        });
         res.status(400).json({
           success: false,
           message: t("admin.module.nameRequired", locale, translations),
@@ -60,9 +87,16 @@ export const createModule = asyncHandler(
         return;
       }
 
-      const existing = await ModuleMeta.findOne({ name });
+      // Aynı isimde var mı?
+      const existing = await ModuleMeta.findOne({
+        name,
+        tenant: req.tenant,
+      });
       if (existing) {
-        logger.warn(`Module '${name}' already exists.`, { module: "admin" });
+        logger.warn(`Module '${name}' already exists.`, {
+          module: "admin",
+          tenant: req.tenant,
+        });
         res.status(400).json({
           success: false,
           message: t("admin.module.exists", locale, translations, { name }),
@@ -70,11 +104,12 @@ export const createModule = asyncHandler(
         return;
       }
 
+      // Kullanıcı ve commit bilgisi (audit)
       const username = await getGitUser();
       const commitHash = await getGitCommitHash();
       const now = new Date().toISOString();
 
-      // Label otomatik doldurma (fillAllLocales)
+      // Çoklu dil label normalizasyonu
       let finalLabel: TranslatedLabel;
       if (label && typeof label === "object") {
         finalLabel = fillAllLocales(label);
@@ -84,33 +119,41 @@ export const createModule = asyncHandler(
         finalLabel = generateDefaultLabel(name);
       }
 
-      const metaContent = updateMetaVersionLog({
-        name,
-        icon,
-        visibleInSidebar,
-        useAnalytics,
-        enabled,
-        roles,
-        language,
-        label: finalLabel,
-        routes: [],
-        updatedBy: { username, commitHash },
-        lastUpdatedAt: now,
-        history: [],
-        showInDashboard,
-        order,
-        statsKey,
-      });
+      // --- Meta dosyasını oluştur ve versiyon logla
+      const metaContent = updateMetaVersionLog(
+        {
+          name,
+          tenant,
+          icon,
+          visibleInSidebar,
+          useAnalytics,
+          enabled,
+          roles,
+          language,
+          label: finalLabel,
+          routes: [],
+          updatedBy: { username, commitHash },
+          lastUpdatedAt: now,
+          history: [],
+          showInDashboard,
+          order,
+          statsKey,
+        },
+        t("meta.created", locale, translations, { name, tenant }), // note
+        tenant
+      );
 
-      const { metaPath, modulePath } = getPaths(name);
+      // Dosya yolları (tenant context ile)
+      const { metaPath, modulePath } = getPaths(name, tenant);
 
-      // Meta dosyasını yaz
+      // --- Meta dosyasını yaz
       fs.mkdirSync(path.dirname(metaPath), { recursive: true });
       fs.writeFileSync(metaPath, JSON.stringify(metaContent, null, 2));
 
-      // Mongo kayıtları
+      // --- MongoDB kayıtları (tenant-aware)
       await ModuleMeta.create(metaContent);
       await ModuleSetting.create({
+        tenant: req.tenant,
         project: PROJECT_ENV,
         module: name,
         enabled,
@@ -122,12 +165,13 @@ export const createModule = asyncHandler(
         language,
       });
 
-      // Modül dosyalarını oluştur
+      // --- Modül dosyalarını oluştur (tenant bağımsız)
       fs.mkdirSync(modulePath, { recursive: true });
       await writeModuleFiles(modulePath, name);
 
       logger.info(`Module created: ${name}`, {
         module: "admin",
+        tenant,
         user: username,
         locale,
       });
@@ -138,7 +182,12 @@ export const createModule = asyncHandler(
         data: metaContent,
       });
     } catch (error) {
-      logger.error("Module create error:", { module: "admin", error, locale });
+      logger.error("Module create error:", {
+        module: "admin",
+        error,
+        tenant,
+        locale,
+      });
       return next(error);
     }
   }
@@ -148,6 +197,7 @@ export const createModule = asyncHandler(
 export const getModules = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const locale: SupportedLocale = req.locale || "en";
+
     try {
       const project = req.query.project as string | undefined;
       if (!project) {
@@ -158,8 +208,12 @@ export const getModules = asyncHandler(
         });
         return;
       }
+      const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
 
-      const settings = await ModuleSetting.find({ project });
+      const settings = await ModuleSetting.find({
+        project,
+        tenant: req.tenant,
+      });
       if (!settings || settings.length === 0) {
         res.status(200).json({
           success: true,
@@ -194,9 +248,10 @@ export const getModules = asyncHandler(
 export const getModuleByName = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const locale: SupportedLocale = req.locale || "en";
+    const { ModuleMeta } = await getTenantModels(req);
     try {
       const { name } = req.params;
-      const module = await ModuleMeta.findOne({ name });
+      const module = await ModuleMeta.findOne({ name, tenant: req.tenant });
 
       if (!module) {
         logger.warn(`Module not found: ${name}`, { module: "admin" });
@@ -228,6 +283,7 @@ export const getModuleByName = asyncHandler(
 export const updateModule = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const locale: SupportedLocale = req.locale || "en";
+    const { ModuleMeta } = await getTenantModels(req);
     try {
       const { name } = req.params;
       const updates = req.body;
@@ -238,7 +294,7 @@ export const updateModule = asyncHandler(
       }
 
       const updated = await ModuleMeta.findOneAndUpdate(
-        { name },
+        { name, tenant: req.tenant },
         { $set: updates },
         { new: true }
       );
@@ -270,10 +326,14 @@ export const updateModule = asyncHandler(
 export const deleteModule = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const locale: SupportedLocale = req.locale || "en";
+    const { ModuleMeta } = await getTenantModels(req);
     try {
       const { name } = req.params;
 
-      const deleted = await ModuleMeta.findOneAndDelete({ name });
+      const deleted = await ModuleMeta.findOneAndDelete({
+        name,
+        tenant: req.tenant,
+      });
       if (!deleted) {
         logger.warn(`Module not found for delete: ${name}`, {
           module: "admin",
@@ -310,8 +370,9 @@ export const deleteModule = asyncHandler(
 
 // --- Mevcut projeleri getir (dinamik DEFAULT_PROJECT ile) ---
 export const getProjects = asyncHandler(
-  async (_req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const { ModuleSetting } = await getTenantModels(req);
       const distinctProjects = await ModuleSetting.distinct("project");
       const DEFAULT_PROJECT = process.env.DEFAULT_PROJECT;
       if (!DEFAULT_PROJECT)
@@ -333,103 +394,121 @@ export const getProjects = asyncHandler(
 );
 
 // --- Enabled modules (public) ---
-export const getEnabledModules = asyncHandler(async (req: Request, res: Response) => {
-  const locale: SupportedLocale = req.locale || "en";
-  const project = req.query.project as string;
+export const getEnabledModules = asyncHandler(
+  async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || "en";
+    const { ModuleSetting } = await getTenantModels(req);
+    const project = req.query.project as string;
 
-  if (!project) {
-    res.status(400).json({
-      success: false,
-      message: t("admin.module.projectRequired", locale, translations),
+    if (!project) {
+      res.status(400).json({
+        success: false,
+        message: t("admin.module.projectRequired", locale, translations),
+      });
+      return;
+    }
+
+    const settings = await ModuleSetting.find({
+      project,
+      enabled: true,
+      tenant: req.tenant,
     });
-    return;
+    const moduleNames = settings.map((s) => s.module);
+
+    logger.info(`Enabled modules listed for: ${project}`, {
+      module: "admin",
+      locale,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: t("admin.module.enabledFetched", locale, translations),
+      data: moduleNames,
+    });
   }
-
-  const settings = await ModuleSetting.find({ project, enabled: true });
-  const moduleNames = settings.map((s) => s.module);
-
-  logger.info(`Enabled modules listed for: ${project}`, {
-    module: "admin",
-    locale,
-  });
-
-  res.status(200).json({
-    success: true,
-    message: t("admin.module.enabledFetched", locale, translations),
-    data: moduleNames,
-  });
-});
+);
 
 // --- Analytics aktif modülleri getir (public) ---
-export const getAnalyticsModules = asyncHandler(async (req: Request, res: Response) => {
-  const locale: SupportedLocale = req.locale || "en";
-  const project = req.query.project as string;
+export const getAnalyticsModules = asyncHandler(
+  async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || "en";
+    const { ModuleSetting } = await getTenantModels(req);
+    const project = req.query.project as string;
 
-  if (!project) {
-    res.status(400).json({
-      success: false,
-      message: t("admin.module.projectRequired", locale, translations),
+    if (!project) {
+      res.status(400).json({
+        success: false,
+        message: t("admin.module.projectRequired", locale, translations),
+      });
+      return;
+    }
+
+    const settings = await ModuleSetting.find({
+      project,
+      tenant: req.tenant,
+      enabled: true,
+      useAnalytics: true,
     });
-    return;
+    const moduleNames = settings.map((s) => s.module);
+
+    logger.info(`Analytics modules listed for: ${project}`, {
+      module: "admin",
+      locale,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: t("admin.module.analyticsFetched", locale, translations),
+      data: moduleNames,
+    });
   }
-
-  const settings = await ModuleSetting.find({ project, enabled: true, useAnalytics: true });
-  const moduleNames = settings.map((s) => s.module);
-
-  logger.info(`Analytics modules listed for: ${project}`, {
-    module: "admin",
-    locale,
-  });
-
-  res.status(200).json({
-    success: true,
-    message: t("admin.module.analyticsFetched", locale, translations),
-    data: moduleNames,
-  });
-});
+);
 
 // --- useAnalytics toggle ---
-export const toggleUseAnalytics = asyncHandler(async (req: Request, res: Response) => {
-  const locale: SupportedLocale = req.locale || "en";
-  const { name } = req.params;
-  const { value, project } = req.body; // boolean + project
+export const toggleUseAnalytics = asyncHandler(
+  async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || "en";
+    const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
+    const { name } = req.params;
+    const { value, project } = req.body; // boolean + project
 
-  if (typeof value !== "boolean" || !project) {
-    res.status(400).json({
-      success: false,
-      message: t("admin.module.toggleAnalyticsInvalid", locale, translations),
+    if (typeof value !== "boolean" || !project) {
+      res.status(400).json({
+        success: false,
+        message: t("admin.module.toggleAnalyticsInvalid", locale, translations),
+      });
+      return;
+    }
+
+    const setting = await ModuleSetting.findOneAndUpdate(
+      { name, tenant: req.tenant, project },
+      { $set: { useAnalytics: value } },
+      { new: true }
+    );
+
+    const meta = await ModuleMeta.findOneAndUpdate(
+      { name, tenant: req.tenant },
+      { $set: { useAnalytics: value } },
+      { new: true }
+    );
+
+    if (!setting || !meta) {
+      res.status(404).json({
+        success: false,
+        message: t("admin.module.notFound", locale, translations),
+      });
+      return;
+    }
+
+    logger.info(`Analytics toggled for '${name}' -> ${value}`, {
+      module: "admin",
+      locale,
     });
-    return;
-  }
 
-  const setting = await ModuleSetting.findOneAndUpdate(
-    { module: name, project },
-    { $set: { useAnalytics: value } },
-    { new: true }
-  );
-
-  const meta = await ModuleMeta.findOneAndUpdate(
-    { name },
-    { $set: { useAnalytics: value } },
-    { new: true }
-  );
-
-  if (!setting || !meta) {
-    res.status(404).json({
-      success: false,
-      message: t("admin.module.notFound", locale, translations),
+    res.status(200).json({
+      success: true,
+      message: t("admin.module.analyticsToggled", locale, translations),
+      data: { setting, meta },
     });
-    return;
   }
-
-  logger.info(`Analytics toggled for '${name}' -> ${value}`, {
-    module: "admin",
-    locale,
-  });
-
-  res.status(200).json({
-    success: true,
-    message: t("admin.module.analyticsToggled", locale, translations),
-    data: { setting, meta },
-  });
-});
+);

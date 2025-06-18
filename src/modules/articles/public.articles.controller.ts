@@ -5,6 +5,7 @@ import { isValidObjectId } from "@/core/utils/validation";
 import { extractMultilangValue } from "@/core/utils/i18n/parseMultilangField";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import type { SupportedLocale } from "@/types/common";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // 🚩 Helper: kategori nesnesi olup olmadığını kontrol et
 function isPopulatedCategory(
@@ -19,10 +20,12 @@ function isPopulatedCategory(
 export const getAllArticles = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
+    const { Articles } = await getTenantModels(req);
     const { category } = req.query;
 
     const filter: any = {
       isActive: true,
+      tenant: req.tenant,
       isPublished: true,
     };
 
@@ -63,6 +66,7 @@ export const getAllArticles = asyncHandler(
 export const getArticlesById = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
+    const { Articles } = await getTenantModels(req);
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -74,6 +78,7 @@ export const getArticlesById = asyncHandler(
       _id: id,
       isActive: true,
       isPublished: true,
+      tenant: req.tenant,
     })
       .populate("comments")
       .populate("category", "title")
@@ -109,10 +114,12 @@ export const getArticlesById = asyncHandler(
 export const getArticlesBySlug = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
+    const { Articles } = await getTenantModels(req);
     const { slug } = req.params;
 
     const article = await Articles.findOne({
       slug,
+      tenant: req.tenant,
       isActive: true,
       isPublished: true,
     })

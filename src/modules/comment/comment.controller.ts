@@ -1,11 +1,13 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Comment } from "@/modules/comment";
+//import { Comment } from "@/modules/comment";
 import {
   ALLOWED_COMMENT_CONTENT_TYPES,
   CommentContentType,
 } from "@/core/utils/constants";
 import { isValidObjectId } from "@/core/utils/validation";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+
 import "@/modules/product";
 import "@/modules/ensotekprod";
 import "@/modules/bikes";
@@ -30,6 +32,7 @@ export const createComment = asyncHandler(
 
     const normalizedType = contentType?.toLowerCase();
     const finalContentType = normalizeContentType(normalizedType);
+    const { Comment } = await getTenantModels(req);
 
     if (!user && (!req.body.name || !req.body.email)) {
       res.status(400).json({
@@ -57,6 +60,7 @@ export const createComment = asyncHandler(
 
     const newComment = await Comment.create({
       name: user?.name || req.body.name,
+      tenant: req.tenant,
       email: user?.email || req.body.email,
       userId: user?._id,
       label: {
@@ -84,6 +88,7 @@ export const getCommentsForContent = asyncHandler(
     const { type: rawType, id } = req.params;
     const normalizedType = rawType?.toLowerCase();
     const finalContentType = normalizeContentType(normalizedType);
+    const { Comment } = await getTenantModels(req);
 
     if (!ALLOWED_COMMENT_CONTENT_TYPES.includes(finalContentType)) {
       res
@@ -98,6 +103,7 @@ export const getCommentsForContent = asyncHandler(
     }
 
     const comments = await Comment.find({
+      tenant: req.tenant,
       contentType: finalContentType,
       contentId: id,
       isPublished: true,
@@ -117,10 +123,12 @@ export const getCommentsForContent = asyncHandler(
 // ✅ Admin - Get all comments with pagination
 export const getAllComments = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
+    const { Comment } = await getTenantModels(req);
+
     const page = parseInt(req.query.page as string, 10) || 1;
     const limit = 10;
 
-    const query = { isActive: true };
+    const query = { isActive: true, tenant: req.tenant };
 
     const total = await Comment.countDocuments(query);
     const comments = await Comment.find(query)
@@ -147,6 +155,7 @@ export const getAllComments = asyncHandler(
 // ✅ Admin - Toggle publish/unpublish comment
 export const togglePublishComment = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
+    const { Comment } = await getTenantModels(req);
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -154,7 +163,7 @@ export const togglePublishComment = asyncHandler(
       return;
     }
 
-    const comment = await Comment.findById(id);
+    const comment = await Comment.findOne({ _id: id, tenant: req.tenant });
     if (!comment) {
       res.status(404).json({ success: false, message: "Comment not found." });
       return;
@@ -183,7 +192,8 @@ export const deleteComment = asyncHandler(
       return;
     }
 
-    const comment = await Comment.findById(id);
+    const { Comment } = await getTenantModels(req);
+    const comment = await Comment.findOne({ _id: id, tenant: req.tenant });
     if (!comment) {
       res.status(404).json({ success: false, message: "Comment not found." });
       return;
@@ -204,8 +214,9 @@ export const replyToComment = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { text } = req.body;
+    const { Comment } = await getTenantModels(req);
 
-    const comment = await Comment.findById(id);
+    const comment = await Comment.findOne({ _id: id, tenant: req.tenant });
     if (!comment) {
       res.status(404).json({ success: false, message: "Comment not found." });
       return;

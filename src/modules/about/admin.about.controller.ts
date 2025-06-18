@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { About } from ".";
+//import { About } from ".";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
 import path from "path";
@@ -12,6 +12,7 @@ import {
   processImageLocal,
   shouldProcessImage,
 } from "@/core/utils/uploadUtils";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 function parseIfJsonString(value: any) {
   if (typeof value === "string") {
@@ -33,7 +34,11 @@ async function processUploadedImages(files: Express.Multer.File[]) {
     let publicId = (file as any).public_id;
 
     if (shouldProcessImage()) {
-      const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+      const processed = await processImageLocal(
+        file.path,
+        file.filename,
+        path.dirname(file.path)
+      );
       thumbnail = processed.thumbnail;
       webp = processed.webp;
     }
@@ -46,11 +51,13 @@ async function processUploadedImages(files: Express.Multer.File[]) {
 
 // ✅ Create About
 export const createAbout = asyncHandler(async (req: Request, res: Response) => {
-  let { title, summary, content, tags, category, isPublished, publishedAt } = req.body;
+  let { title, summary, content, tags, category, isPublished, publishedAt } =
+    req.body;
 
   title = parseIfJsonString(title);
   summary = parseIfJsonString(summary);
   content = parseIfJsonString(content);
+  const { About } = await getTenantModels(req);
 
   const images = Array.isArray(req.files)
     ? await processUploadedImages(req.files as Express.Multer.File[])
@@ -65,8 +72,10 @@ export const createAbout = asyncHandler(async (req: Request, res: Response) => {
     title,
     slug,
     summary,
+    tenant: req.tenant,
     content,
-    category: isValidObjectId(category) && category !== "" ? category : undefined,
+    category:
+      isValidObjectId(category) && category !== "" ? category : undefined,
     isPublished: isPublished === "true" || isPublished === true,
     publishedAt: isPublished ? publishedAt || new Date() : undefined,
     images,
@@ -81,77 +90,89 @@ export const createAbout = asyncHandler(async (req: Request, res: Response) => {
 });
 
 // ✅ Admin - Get All About
-export const adminGetAllAbout = asyncHandler(async (req: Request, res: Response) => {
-  const { language, category, isPublished, isActive } = req.query;
+export const adminGetAllAbout = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { language, category, isPublished, isActive } = req.query;
+    const { About } = await getTenantModels(req);
 
-  const filter: Record<string, any> = {};
+    const filter: Record<string, any> = { tenant: req.tenant };
 
-  if (typeof language === "string" && ["tr", "en", "de"].includes(language)) {
-    filter[`title.${language}`] = { $exists: true };
+    if (typeof language === "string" && ["tr", "en", "de"].includes(language)) {
+      filter[`title.${language}`] = { $exists: true };
+    }
+
+    if (typeof category === "string" && isValidObjectId(category)) {
+      filter.category = category;
+    }
+
+    if (typeof isPublished === "string") {
+      filter.isPublished = isPublished === "true";
+    }
+
+    if (typeof isActive === "string") {
+      filter.isActive = isActive === "true";
+    } else {
+      filter.isActive = true;
+    }
+
+    const aboutList = await About.find(filter)
+      .populate([
+        { path: "comments", strictPopulate: false },
+        { path: "category", select: "name" },
+      ])
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.status(200).json({
+      success: true,
+      message: "About list fetched successfully.",
+      data: aboutList,
+    });
   }
-
-  if (typeof category === "string" && isValidObjectId(category)) {
-    filter.category = category;
-  }
-
-  if (typeof isPublished === "string") {
-    filter.isPublished = isPublished === "true";
-  }
-
-  if (typeof isActive === "string") {
-    filter.isActive = isActive === "true";
-  } else {
-    filter.isActive = true;
-  }
-
-  const aboutList = await About.find(filter)
-    .populate([{ path: "comments", strictPopulate: false }, { path: "category", select: "name" }])
-    .sort({ createdAt: -1 })
-    .lean();
-
-  res.status(200).json({
-    success: true,
-    message: "About list fetched successfully.",
-    data: aboutList,
-  });
-});
+);
 
 // ✅ Admin - Get About By ID
-export const adminGetAboutById = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
+export const adminGetAboutById = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { About } = await getTenantModels(req);
 
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ success: false, message: "Invalid About ID." });
-    return;
+    if (!isValidObjectId(id)) {
+      res.status(400).json({ success: false, message: "Invalid About ID." });
+      return;
+    }
+
+    const about = await About.findOne({ _id: id, tenant: req.tenant })
+      .populate([{ path: "comments" }, { path: "category", select: "title" }])
+      .lean();
+
+    if (!about || !about.isActive) {
+      res
+        .status(404)
+        .json({ success: false, message: "About not found or inactive." });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "About fetched successfully.",
+      data: about,
+    });
   }
-
-  const about = await About.findById(id)
-    .populate([{ path: "comments" }, { path: "category", select: "title" }])
-    .lean();
-
-  if (!about || !about.isActive) {
-    res.status(404).json({ success: false, message: "About not found or inactive." });
-    return;
-  }
-
-  res.status(200).json({
-    success: true,
-    message: "About fetched successfully.",
-    data: about,
-  });
-});
+);
 
 // ✅ Update About
 export const updateAbout = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const updates = req.body;
+  const { About } = await getTenantModels(req);
 
   if (!isValidObjectId(id)) {
     res.status(400).json({ success: false, message: "Invalid About ID." });
     return;
   }
 
-  const about = await About.findById(id);
+  const about = await About.findOne({ _id: id, tenant: req.tenant });
   if (!about) {
     res.status(404).json({ success: false, message: "About not found." });
     return;
@@ -174,21 +195,27 @@ export const updateAbout = asyncHandler(async (req: Request, res: Response) => {
   });
 
   if (Array.isArray(req.files)) {
-    const newImages = await processUploadedImages(req.files as Express.Multer.File[]);
+    const newImages = await processUploadedImages(
+      req.files as Express.Multer.File[]
+    );
     about.images.push(...newImages);
   }
 
   if (updates.removedImages) {
     try {
       const removed: any[] = JSON.parse(updates.removedImages);
-      about.images = about.images.filter((img: any) => !removed.includes(img.url));
+      about.images = about.images.filter(
+        (img: any) => !removed.includes(img.url)
+      );
 
       for (const imgUrl of removed) {
         const filename = path.basename(imgUrl);
         const localPath = path.join("uploads", "about-images", filename);
         if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
 
-        const match = about.images.find((img: any) => img.url === imgUrl && img.publicId);
+        const match = about.images.find(
+          (img: any) => img.url === imgUrl && img.publicId
+        );
         if (match && match.publicId) {
           await cloudinary.uploader.destroy(match.publicId);
         }
@@ -210,20 +237,25 @@ export const updateAbout = asyncHandler(async (req: Request, res: Response) => {
 // ✅ Delete About
 export const deleteAbout = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
+  const { About } = await getTenantModels(req);
 
   if (!isValidObjectId(id)) {
     res.status(400).json({ success: false, message: "Invalid About ID." });
     return;
   }
 
-  const about = await About.findById(id);
+  const about = await About.findOne({ _id: id, tenant: req.tenant });
   if (!about) {
     res.status(404).json({ success: false, message: "About not found." });
     return;
   }
 
   for (const img of about.images) {
-    const localPath = path.join("uploads", "about-images", path.basename(img.url));
+    const localPath = path.join(
+      "uploads",
+      "about-images",
+      path.basename(img.url)
+    );
     if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
 
     if (img.publicId) {

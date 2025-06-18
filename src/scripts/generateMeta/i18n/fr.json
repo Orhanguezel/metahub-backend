@@ -52,5 +52,13 @@
   "meta.version.invalidFormat": "⚠️ Format de version invalide : {version}, par défaut 1.0.0",
   "meta.fix.setting.created": "Paramètre manquant créé : {{module}} ({{project}})",
   "meta.fix.setting.completed": "{{count}} paramètres manquants ont été ajoutés automatiquement.",
-  "meta.fix.setting.noMissing": "Aucun paramètre manquant trouvé."
+  "meta.fix.setting.noMissing": "Aucun paramètre manquant trouvé.",
+  "meta.fix.setting.invalid": "Paramètre invalide détecté : {{param}}",
+  "meta": {
+    "validation": {
+      "notFound": "Aucune validation trouvée pour le module {mod} et la route {route} dans le locataire {tenant}.",
+      "empty": "Le module de validation est vide pour le module {mod} dans le locataire {tenant}.",
+      "importFail": "Erreur lors du chargement de la validation pour le module {mod} dans le locataire {tenant} : {error}"
+    }
+  }
 }

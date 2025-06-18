@@ -1,16 +1,18 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Section } from "@/modules/section";
+//import { Section } from "@/modules/section";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import logger from "@/core/middleware/logger/logger";
 import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // --- CREATE ---
 export const createSection = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Section } = await getTenantModels(req);
     const locale: SupportedLocale = (req.locale as SupportedLocale) || "tr";
     const t = (key: string, params?: Record<string, any>) =>
       translate(key, locale, translations, params);
@@ -44,6 +46,7 @@ export const createSection = asyncHandler(
 
       const section = await Section.create({
         label,
+        tenant: req.tenant,
         description,
         icon,
         order,
@@ -83,12 +86,13 @@ export const createSection = asyncHandler(
 // --- GET ALL ---
 export const getAllSection = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Section } = await getTenantModels(req);
     const locale: SupportedLocale = (req.locale as SupportedLocale) || "tr";
     const t = (key: string, params?: Record<string, any>) =>
       translate(key, locale, translations, params);
 
     try {
-      const sections = await Section.find();
+      const sections = await Section.find({ tenant: req.tenant });
       logger.info(t("section.list.success"), {
         ...getRequestContext(req),
         event: "section.list",
@@ -118,6 +122,7 @@ export const getAllSection = asyncHandler(
 // --- UPDATE ---
 export const updateSection = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Section } = await getTenantModels(req);
     const locale: SupportedLocale = (req.locale as SupportedLocale) || "tr";
     const t = (key: string, params?: Record<string, any>) =>
       translate(key, locale, translations, params);
@@ -126,7 +131,7 @@ export const updateSection = asyncHandler(
     let updates = req.body;
 
     try {
-      const section = await Section.findById(id);
+      const section = await Section.findOne({ _id: id, tenant: req.tenant });
       if (!section) {
         logger.warn(t("section.update.notFound"), getRequestContext(req));
         res
@@ -147,9 +152,13 @@ export const updateSection = asyncHandler(
         };
       }
 
-      const updated = await Section.findByIdAndUpdate(id, updates, {
-        new: true,
-      });
+      const updated = await Section.findByIdAndUpdate(
+        { _id: id, tenant: req.tenant },
+        updates,
+        {
+          new: true,
+        }
+      );
 
       logger.info(
         t("section.update.success", { name: updated?.label[locale] }),
@@ -184,6 +193,7 @@ export const updateSection = asyncHandler(
 // --- DELETE ---
 export const deleteSection = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Section } = await getTenantModels(req);
     const locale: SupportedLocale = (req.locale as SupportedLocale) || "tr";
     const t = (key: string, params?: Record<string, any>) =>
       translate(key, locale, translations, params);
@@ -191,8 +201,7 @@ export const deleteSection = asyncHandler(
     const { id } = req.params;
 
     try {
-      const deleted = await Section.findByIdAndDelete(id);
-
+      const deleted = await Section.findOne({ _id: id, tenant: req.tenant });
       if (!deleted) {
         logger.warn(t("section.delete.notFound"), getRequestContext(req));
         res

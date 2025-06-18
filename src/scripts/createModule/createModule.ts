@@ -1,53 +1,175 @@
+// src/scripts/createModule/createModule.ts
+
 import fs from "fs";
 import path from "path";
+import logger from "@/core/middleware/logger/logger";
 import { writeModuleFiles } from "./writeModuleFiles";
 import { createMetaFile } from "./createMetaFile";
-import { getEnabledModulesFromEnv } from "../../core/utils/envHelpers";
+import { getEnabledModulesFromEnv } from "@/core/utils/envHelpers";
+import { t } from "@/core/utils/i18n/translate";
+import translations from "./i18n"; // createModule i18n dosyası!
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import type { SupportedLocale } from "@/types/common";
 
+// --- CLI Context (Loglar için) ---
+function getCliContext(tenant: string) {
+  return {
+    tenant,
+    pid: process.pid,
+    cwd: process.cwd(),
+    user: process.env.USER || process.env.USERNAME || "cli",
+    env: process.env.NODE_ENV,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+// --- Tenant tespiti CLI veya ENV üzerinden ---
+function getTenantFromArgsOrEnv(): string {
+  const arg = process.argv.find((a) => a.startsWith("--tenant="));
+  if (arg) return arg.replace("--tenant=", "");
+  if (process.env.TENANT_NAME) return process.env.TENANT_NAME;
+  logger.error("❌ Tenant is required! Use --tenant=xyz or TENANT_NAME env.", {
+    module: "createModule",
+    status: "fail",
+    ...getCliContext("unknown"),
+  });
+  process.exit(1);
+}
+const tenant = getTenantFromArgsOrEnv();
+const lang: SupportedLocale = getLogLocale();
+
+// --- Module name parametresi kontrolü ---
 const moduleName = process.argv[2];
-const useAnalyticsFlag = process.argv.includes("--analytics"); // ✅ flag desteği
+const useAnalyticsFlag = process.argv.includes("--analytics");
 
 if (!moduleName) {
-  console.error("❌ Please provide a module name");
+  logger.error(t("createModule.noModuleName", lang, translations, { tenant }), {
+    tenant,
+    module: "createModule",
+    status: "fail",
+    ...getCliContext(tenant),
+  });
   process.exit(1);
 }
 
-// 🔐 Check if module is enabled in .env
-const enabledModules = getEnabledModulesFromEnv();
-
+// --- Sadece tenant'ın ENABLED_MODULES içindeyse devam et ---
+const enabledModules = getEnabledModulesFromEnv(tenant);
 if (!enabledModules.includes(moduleName)) {
-  console.error(`❌ Module "${moduleName}" is not listed in ENABLED_MODULES`);
+  logger.error(
+    t("createModule.notEnabled", lang, translations, { moduleName, tenant }),
+    { tenant, module: "createModule", status: "fail", ...getCliContext(tenant) }
+  );
   process.exit(1);
 }
 
+// --- Tenant-aware dosya yolları ---
 const modulesPath = path.resolve(process.cwd(), "src/modules");
-
-const metaConfigRelativePath = process.env.META_CONFIG_PATH;
-if (!metaConfigRelativePath) {
-  console.error("❌ META_CONFIG_PATH is not defined in environment.");
-  process.exit(1);
-}
-
-const metaPath = path.resolve(process.cwd(), metaConfigRelativePath);
+const metaConfigDir = path.resolve(process.cwd(), "src/meta-configs", tenant);
+const metaPath = path.join(metaConfigDir, `${moduleName}.meta.json`);
 const modulePath = path.join(modulesPath, moduleName);
 
-if (fs.existsSync(modulePath)) {
-  console.error(`❌ Module "${moduleName}" already exists.`);
+// --- Modül klasörünü oluştur ---
+try {
+  fs.mkdirSync(modulePath, { recursive: true });
+  logger.info(
+    t("createModule.dirCreated", lang, translations, { modulePath, tenant }),
+    {
+      tenant,
+      module: "createModule",
+      status: "success",
+      ...getCliContext(tenant),
+    }
+  );
+} catch (err) {
+  logger.error(
+    t("createModule.dirCreateFail", lang, translations, {
+      modulePath,
+      tenant,
+    }) +
+      " " +
+      String(err),
+    {
+      tenant,
+      module: "createModule",
+      status: "fail",
+      error: err,
+      ...getCliContext(tenant),
+    }
+  );
   process.exit(1);
 }
 
-// 📄 Create module folder
-fs.mkdirSync(modulePath, { recursive: true });
+// --- Boilerplate dosyaları yaz ---
+try {
+  writeModuleFiles(modulePath, moduleName);
+  logger.info(
+    t("createModule.filesWritten", lang, translations, { moduleName, tenant }),
+    {
+      tenant,
+      module: "createModule",
+      status: "success",
+      ...getCliContext(tenant),
+    }
+  );
+} catch (err) {
+  logger.error(
+    t("createModule.filesWriteFail", lang, translations, {
+      moduleName,
+      tenant,
+    }) +
+      " " +
+      String(err),
+    {
+      tenant,
+      module: "createModule",
+      status: "fail",
+      error: err,
+      ...getCliContext(tenant),
+    }
+  );
+  process.exit(1);
+}
 
-// 🧱 Generate initial boilerplate files
-writeModuleFiles(modulePath, moduleName);
+// --- Tenant meta-config klasörü oluştur (varsa geç) ---
+try {
+  fs.mkdirSync(metaConfigDir, { recursive: true });
+} catch {
+  /* already exists */
+}
 
-// 🧠 Generate meta file
-createMetaFile(moduleName, metaPath, { useAnalytics: useAnalyticsFlag }) // ✅ flag ekleniyor
+// --- Meta dosyasını oluştur ---
+createMetaFile(
+  moduleName,
+  metaConfigDir, // dikkat: burada metaDir yerine metaConfigDir (klasör)
+  tenant, // 3. parametre tenant string!
+  { useAnalytics: useAnalyticsFlag } // 4. parametre opsiyonel ayarlar
+)
   .then(() => {
-    console.log(`✅ Module "${moduleName}" created successfully!`);
+    logger.info(
+      t("createModule.success", lang, translations, { moduleName, tenant }),
+      {
+        tenant,
+        module: "createModule",
+        status: "success",
+        ...getCliContext(tenant),
+      }
+    );
+    console.log(
+      t("createModule.success", lang, translations, { moduleName, tenant })
+    );
   })
   .catch((err) => {
-    console.error("❌ Failed to create meta file:", err);
+    logger.error(
+      t("createModule.metaFail", lang, translations, { moduleName, tenant }) +
+        " " +
+        String(err),
+      {
+        tenant,
+        module: "createModule",
+        status: "fail",
+        error: err,
+        ...getCliContext(tenant),
+      }
+    );
     process.exit(1);
   });

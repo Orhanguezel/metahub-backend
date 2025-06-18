@@ -1,11 +1,5 @@
 {
   "name": "invoice",
-  "icon": "box",
-  "roles": [
-    "admin"
-  ],
-  "useAnalytics": false,
-  "language": "en",
   "routes": [
     {
       "method": "GET",
@@ -44,127 +38,6 @@
       "summary": "GET /:id/pdf"
     }
   ],
-  "version": "1.0.16",
-  "updatedBy": {
-    "username": "Orhan Güzel",
-    "commitHash": "36f466afc5a84552df11f47e3c7e6ce10b387e75"
-  },
-  "commitHash": "36f466afc5a84552df11f47e3c7e6ce10b387e75",
-  "lastUpdatedAt": "2025-06-13T13:24:08.551Z",
-  "history": [
-    {
-      "version": "1.0.1",
-      "by": "Orhan Güzel",
-      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
-      "date": "2025-06-12T08:33:24.947Z",
-      "note": "Meta auto-generated"
-    },
-    {
-      "version": "1.0.2",
-      "by": "Orhan Güzel",
-      "commitHash": "2f91025ee6d70465b01704e36f0b80a355e576c7",
-      "date": "2025-06-12T08:39:01.154Z",
-      "note": "Meta auto-generated"
-    },
-    {
-      "version": "1.0.3",
-      "by": "Orhan Güzel",
-      "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
-      "date": "2025-06-12T11:20:15.708Z",
-      "note": "Meta auto-generated"
-    },
-    {
-      "version": "1.0.4",
-      "by": "Orhan Güzel",
-      "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
-      "date": "2025-06-12T11:30:18.016Z",
-      "note": "Meta auto-generated"
-    },
-    {
-      "version": "1.0.5",
-      "by": "Orhan Güzel",
-      "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
-      "date": "2025-06-12T11:45:11.939Z",
-      "note": "Meta auto-generated"
-    },
-    {
-      "version": "1.0.6",
-      "by": "Orhan Güzel",
-      "commitHash": "c7ac8c6295fdebf7d52170208ccae86868ccc6a5",
-      "date": "2025-06-12T12:29:43.718Z",
-      "note": "Meta auto-generated"
-    },
-    {
-      "version": "1.0.7",
-      "by": "Orhan Güzel",
-      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
-      "date": "2025-06-12T22:00:08.356Z",
-      "note": "Meta auto-generated"
-    },
-    {
-      "version": "1.0.8",
-      "by": "Orhan Güzel",
-      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
-      "date": "2025-06-12T22:02:21.681Z",
-      "note": "Meta auto-generated"
-    },
-    {
-      "version": "1.0.9",
-      "by": "Orhan Güzel",
-      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
-      "date": "2025-06-12T22:05:47.879Z",
-      "note": "Meta auto-generated"
-    },
-    {
-      "version": "1.0.10",
-      "by": "Orhan Güzel",
-      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
-      "date": "2025-06-12T23:42:59.641Z",
-      "note": "Meta auto-generated"
-    },
-    {
-      "version": "1.0.11",
-      "by": "Orhan Güzel",
-      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
-      "date": "2025-06-12T23:45:50.908Z",
-      "note": "Meta auto-generated"
-    },
-    {
-      "version": "1.0.12",
-      "by": "Orhan Güzel",
-      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
-      "date": "2025-06-12T23:50:44.573Z",
-      "note": "Meta auto-generated"
-    },
-    {
-      "version": "1.0.13",
-      "by": "Orhan Güzel",
-      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
-      "date": "2025-06-12T23:59:29.440Z",
-      "note": "Meta auto-generated"
-    },
-    {
-      "version": "1.0.14",
-      "by": "Orhan Güzel",
-      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
-      "date": "2025-06-13T00:04:33.143Z",
-      "note": "Meta auto-generated"
-    },
-    {
-      "version": "1.0.15",
-      "by": "Orhan Güzel",
-      "commitHash": "beb34233d73992726f9e9a5b4214ecf5b91356c5",
-      "date": "2025-06-13T00:29:44.338Z",
-      "note": "Meta auto-generated"
-    },
-    {
-      "version": "1.0.16",
-      "by": "Orhan Güzel",
-      "commitHash": "36f466afc5a84552df11f47e3c7e6ce10b387e75",
-      "date": "2025-06-13T13:24:08.551Z",
-      "note": "Meta auto-generated"
-    }
-  ],
   "label": {
     "tr": "invoice",
     "en": "invoice",
@@ -172,5 +45,27 @@
     "pl": "invoice",
     "fr": "invoice",
     "es": "invoice"
-  }
+  },
+  "icon": "box",
+  "roles": [
+    "admin"
+  ],
+  "useAnalytics": false,
+  "language": "en",
+  "version": "1.0.1",
+  "updatedBy": {
+    "username": "Orhan Güzel",
+    "commitHash": "769653ecb5b74af7ad3b0a3aa68f987ade5a9167"
+  },
+  "commitHash": "769653ecb5b74af7ad3b0a3aa68f987ade5a9167",
+  "lastUpdatedAt": "2025-06-18T17:18:03.669Z",
+  "history": [
+    {
+      "version": "1.0.1",
+      "by": "Orhan Güzel",
+      "commitHash": "769653ecb5b74af7ad3b0a3aa68f987ade5a9167",
+      "date": "2025-06-18T17:18:03.669Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    }
+  ]
 }

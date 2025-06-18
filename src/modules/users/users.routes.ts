@@ -18,8 +18,7 @@ import {
 
 import { updateUserRole, toggleUserStatus } from "./status.controller";
 
-
-import {upload} from "@/core/middleware/uploadMiddleware";
+import { upload } from "@/core/middleware/uploadMiddleware";
 import { validateApiKey } from "@/core/middleware/validateApiKey";
 
 // ✅ Validations
@@ -35,33 +34,31 @@ import {
   validateToggleUserStatus,
 } from "./users.admin.validation";
 
+console.log({
+  registerUser,
+  loginUser,
+  changePassword,
+  logoutUser,
+  forgotPassword,
+  resetPassword,
+});
+
 const router = express.Router();
 
 // 🔐 Auth Routes
-router.post(
-  "/register", 
-  validateRegister, 
-  registerUser);
+router.post("/register", validateRegister, registerUser);
 
-router.post(
-  "/login", 
-  validateLogin, 
-  loginUser);
+router.post("/login", validateLogin, loginUser);
 
 router.post(
   "/change-password",
   authenticate,
   validateChangePassword,
-  changePassword);
-router.post(
-  "/forgot-password",
-  validateForgotPassword,
-  forgotPassword);
+  changePassword
+);
+router.post("/forgot-password", validateForgotPassword, forgotPassword);
 
-router.post(
-  "/reset-password/:token",
-  validateResetPassword,
-  resetPassword);
+router.post("/reset-password/:token", validateResetPassword, resetPassword);
 
 // 📋 Admin Routes
 router.get(
@@ -77,7 +74,8 @@ router.get(
   authenticate,
   authorizeRoles("admin"),
   validateUserIdParam,
-  getUserById);
+  getUserById
+);
 
 router.put(
   "/users/:id",
@@ -90,7 +88,8 @@ router.put(
   },
   upload.single("profileImage"),
   validateUpdateUser,
-  updateUser);
+  updateUser
+);
 
 router.delete(
   "/users/:id",
@@ -98,7 +97,8 @@ router.delete(
   authorizeRoles("admin"),
   validateApiKey,
   validateUserIdParam,
-  deleteUser);
+  deleteUser
+);
 
 router.put(
   "/users/:id/role",
@@ -106,7 +106,8 @@ router.put(
   authorizeRoles("admin"),
   validateUpdateUserRole,
   validateApiKey,
-  updateUserRole);
+  updateUserRole
+);
 
 router.put(
   "/users/:id/status",
@@ -114,11 +115,10 @@ router.put(
   authorizeRoles("admin"),
   validateToggleUserStatus,
   validateApiKey,
-  toggleUserStatus);
+  toggleUserStatus
+);
 
 // 🔓 Logout (genel)
-router.post(
-  "/logout", 
-  logoutUser);
+router.post("/logout", logoutUser);
 
 export default router;

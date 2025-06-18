@@ -1,6 +1,6 @@
 import { Schema, Model, models, model } from "mongoose";
 
-export interface ISparePart  {
+export interface ISparepart {
   label: {
     tr: string;
     en: string;
@@ -25,7 +25,7 @@ export interface ISparePart  {
   updatedAt: Date;
 }
 
-const sparePartSchema = new Schema<ISparePart>(
+const SparepartSchema = new Schema<ISparepart>(
   {
     label: {
       tr: { type: String, required: true },
@@ -58,7 +58,7 @@ const sparePartSchema = new Schema<ISparePart>(
 );
 
 // 🔁 Slug generator middleware
-sparePartSchema.pre("validate", function (this: ISparePart, next) {
+SparepartSchema.pre("validate", function (this: ISparepart, next) {
   if (!this.slug && this.label?.en) {
     this.slug = this.label.en
       .toLowerCase()
@@ -69,7 +69,7 @@ sparePartSchema.pre("validate", function (this: ISparePart, next) {
 });
 
 // ✅ Guard + Model Type (standart)
-const SparePart: Model<ISparePart> =
-  models.SparePart || model<ISparePart>("SparePart", sparePartSchema);
+const Sparepart: Model<ISparepart> =
+  models.Sparepart || model<ISparepart>("Sparepart", SparepartSchema);
 
-export { SparePart };
+export { Sparepart };

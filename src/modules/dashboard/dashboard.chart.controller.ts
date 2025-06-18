@@ -3,6 +3,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { Order } from "@/modules/order/order.models"; // Net path kullan!
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // 📊 Aylık sipariş sayıları (son 12 ay)
 export const getMonthlyOrders = asyncHandler(
@@ -12,6 +13,7 @@ export const getMonthlyOrders = asyncHandler(
         $group: {
           _id: { $month: "$createdAt" },
           total: { $sum: 1 },
+          tenant: { $first: "$tenant" },
         },
       },
       { $sort: { _id: 1 } },
@@ -41,6 +43,7 @@ export const getMonthlyRevenue = asyncHandler(
         $group: {
           _id: { $month: "$createdAt" },
           total: { $sum: "$totalPrice" },
+          tenant: { $first: "$tenant" },
         },
       },
       { $sort: { _id: 1 } },

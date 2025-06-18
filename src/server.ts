@@ -4,14 +4,13 @@ import http from "http";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-import "./core/config/env";
+import "./core/config/envLoader";
 
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "@/core/config/i18n";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 
-import { connectDB } from "./core/config/connect";
 import { initializeSocket } from "./socket/socket";
 import { setLocale } from "./core/utils/i18n/setLocale";
 import { getRouter } from "./routes";
@@ -24,13 +23,14 @@ const server = http.createServer(app);
 
 const lang = getLogLocale();
 
-connectDB();
-
-// Middleware
+// Global middleware (tenant ile ilgisi yok)
 app.use(cookieParser());
 app.use(express.json({ strict: false }));
 app.use(setLocale);
+
+// --- EN KRİTİK: Her istek için tenant injection ---
 app.use(injectTenantModel);
+
 app.use("/uploads", express.static("uploads"));
 
 // CORS
@@ -51,6 +51,7 @@ app.use(
   })
 );
 
+// Router ve diğer sistemler
 (async () => {
   const router = await getRouter();
   app.use("", router);
@@ -59,14 +60,9 @@ app.use(
 
   app.use(errorHandler);
 
-  const port = process.env.PORT;
-  if (!port) {
-    logger.error(t("server.error.noPort", lang, translations));
-    process.exit(1);
-  }
-
+  const port = process.env.PORT || 5019;
   server.listen(Number(port), () => {
-    const baseUrl = process.env.BASE_URL || `http://localhost:${Number(port)}`;
+    const baseUrl = process.env.BASE_URL || `http://localhost:${port}`;
     logger.info(t("server.started", lang, translations, { baseUrl }));
   });
 

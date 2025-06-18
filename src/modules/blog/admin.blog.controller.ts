@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Blog } from "@/modules/blog";
+//import { Blog } from "@/modules/blog";
 import type { IBlog } from "@/modules/blog/types";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
@@ -18,6 +18,7 @@ import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "@/templates/i18n";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // Yardımcı çeviri fonksiyonu
 function blogT(
@@ -40,7 +41,6 @@ const parseIfJson = (value: any) => {
 export const createBlog = asyncHandler(async (req: Request, res: Response) => {
   let { title, summary, content, tags, category, isPublished, publishedAt } =
     req.body;
-
   // Locale öncelik sırası: req.locale > query.language > env > "en"
   const reqLang =
     (req.locale as SupportedLocale) ||
@@ -88,10 +88,12 @@ export const createBlog = asyncHandler(async (req: Request, res: Response) => {
     }
   }
   const slug = slugify(slugBase || "Blog", { lower: true, strict: true });
+  const { Blog } = await getTenantModels(req);
 
   const blog = await Blog.create({
     title,
     slug,
+    tenant: req.tenant,
     summary,
     content,
     tags,
@@ -126,8 +128,7 @@ export const adminGetAllBlog = asyncHandler(
       SUPPORTED_LOCALES.includes(language as SupportedLocale)
         ? (language as SupportedLocale)
         : (process.env.LOG_LOCALE as SupportedLocale) || "en");
-
-    const filter: Record<string, any> = {};
+    const filter: Record<string, any> = { tenant: req.tenant };
 
     if (
       typeof language === "string" &&
@@ -150,6 +151,7 @@ export const adminGetAllBlog = asyncHandler(
       filter.isActive = true;
     }
 
+    const { Blog } = await getTenantModels(req);
     const blogList = await Blog.find(filter)
       .populate([
         { path: "comments", strictPopulate: false },
@@ -193,7 +195,11 @@ export const adminGetBlogById = asyncHandler(
       return;
     }
 
-    const blog = await Blog.findById(id)
+    const { Blog } = await getTenantModels(req);
+    const blog = await Blog.findOne({
+      _id: id,
+      tenant: req.tenant,
+    })
       .populate([{ path: "comments" }, { path: "category", select: "title" }])
       .lean();
 
@@ -236,7 +242,11 @@ export const updateBlog = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  const blog = await Blog.findById(id);
+  const { Blog } = await getTenantModels(req);
+  const blog = await Blog.findOne({
+    _id: id,
+    tenant: req.tenant,
+  });
   if (!blog) {
     logger.warn(blogT("blog.log.not_found", getLogLocale(), { id }));
     res.status(404).json({
@@ -341,7 +351,11 @@ export const deleteBlog = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  const blog = await Blog.findById(id);
+  const { Blog } = await getTenantModels(req);
+  const blog = await Blog.findOne({
+    _id: id,
+    tenant: req.tenant,
+  });
   if (!blog) {
     logger.warn(blogT("blog.log.not_found", getLogLocale(), { id }));
     res.status(404).json({

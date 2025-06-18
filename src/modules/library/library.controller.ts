@@ -1,12 +1,14 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Library } from "@/modules/library";
+//import { Library } from "@/modules/library";
 import { BASE_URL, UPLOAD_BASE_PATH } from "@/core/middleware/uploadMiddleware";
 import { isValidObjectId } from "@/core/utils/validation";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // ✅ Create Library Item
 export const createLibraryItem = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Library } = await getTenantModels(req);
     const {
       category,
       tags = [],
@@ -39,6 +41,7 @@ export const createLibraryItem = asyncHandler(
       const item = await Library.create({
         title: { [lang]: title },
         slug: finalSlug,
+        tenant: req.tenant,
         description: { [lang]: description },
         category,
         tags: typeof tags === "string" ? JSON.parse(tags) : tags,
@@ -69,8 +72,12 @@ export const createLibraryItem = asyncHandler(
 // ✅ Get All Library Items (by language filter)
 export const getAllLibraryItems = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Library } = await getTenantModels(req);
     const lang = req.query.lang || "en";
-    const filter: any = { [`title.${lang}`]: { $exists: true } };
+    const filter: any = {
+      [`title.${lang}`]: { $exists: true },
+      tenant: req.tenant,
+    };
 
     const items = await Library.find(filter).sort({ createdAt: -1 });
     res.status(200).json({
@@ -84,9 +91,10 @@ export const getAllLibraryItems = asyncHandler(
 // ✅ Get Library Item by Slug
 export const getLibraryItemBySlug = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Library } = await getTenantModels(req);
     const { slug } = req.params;
 
-    const item = await Library.findOne({ slug });
+    const item = await Library.findOne({ slug, tenant: req.tenant });
     if (!item) {
       res
         .status(404)
@@ -104,6 +112,7 @@ export const getLibraryItemBySlug = asyncHandler(
 // ✅ Get Library Item by ID
 export const getLibraryItemById = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Library } = await getTenantModels(req);
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -113,7 +122,7 @@ export const getLibraryItemById = asyncHandler(
       return;
     }
 
-    const item = await Library.findById(id);
+    const item = await Library.findOne({ _id: id, tenant: req.tenant });
     if (!item) {
       res
         .status(404)
@@ -131,6 +140,7 @@ export const getLibraryItemById = asyncHandler(
 // ✅ Update Library Item
 export const updateLibraryItem = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Library } = await getTenantModels(req);
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -146,9 +156,13 @@ export const updateLibraryItem = asyncHandler(
       updates.fileUrl = `${BASE_URL}/${UPLOAD_BASE_PATH}/library/${req.file.filename}`;
     }
 
-    const updated = await Library.findByIdAndUpdate(id, updates, {
-      new: true,
-    });
+    const updated = await Library.findByIdAndUpdate(
+      { _id: id, tenant: req.tenant },
+      updates,
+      {
+        new: true,
+      }
+    );
 
     if (!updated) {
       res
@@ -168,6 +182,7 @@ export const updateLibraryItem = asyncHandler(
 // ✅ Delete Library Item (hard delete)
 export const deleteLibraryItem = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Library } = await getTenantModels(req);
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -177,7 +192,7 @@ export const deleteLibraryItem = asyncHandler(
       return;
     }
 
-    const deleted = await Library.findByIdAndDelete(id);
+    const deleted = await Library.deleteOne({ _id: id, tenant: req.tenant });
     if (!deleted) {
       res
         .status(404)

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Gallery } from "@/modules/gallery";
+//import { Gallery } from "@/modules/gallery";
 import { isValidObjectId } from "@/core/utils/validation";
 import {
   processImageLocal,
@@ -10,10 +10,13 @@ import {
 } from "@/core/utils/uploadUtils";
 import { UPLOAD_BASE_PATH } from "@/core/middleware/uploadMiddleware";
 import path from "path";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // ✅ Get all gallery items (with category population)
 export const getAllGalleryItems = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Gallery } = await getTenantModels(req);
+    const { GalleryCategory } = await getTenantModels(req);
     const { page = "1", limit = "10", category } = req.query;
     const pageNum = parseInt(page as string);
     const limitNum = parseInt(limit as string);
@@ -50,6 +53,7 @@ export const getAllGalleryItems = asyncHandler(
 // ✅ Upload new gallery items
 export const uploadGalleryItem = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Gallery } = await getTenantModels(req);
     const { type = "image", category } = req.body;
     const files = req.files as Express.Multer.File[];
 
@@ -66,12 +70,10 @@ export const uploadGalleryItem = asyncHandler(
     }
 
     if (!["image", "video"].includes(type)) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          message: "Invalid type. Must be 'image' or 'video'.",
-        });
+      res.status(400).json({
+        success: false,
+        message: "Invalid type. Must be 'image' or 'video'.",
+      });
       return;
     }
 
@@ -152,6 +154,7 @@ export const uploadGalleryItem = asyncHandler(
 // ✅ Update gallery item
 export const updateGalleryItem = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Gallery } = await getTenantModels(req);
     const { id } = req.params;
     const {
       category,
@@ -168,16 +171,15 @@ export const updateGalleryItem = asyncHandler(
     } = req.body;
 
     if (!isValidObjectId(id)) {
-       res.status(400).json({ success: false, message: "Invalid gallery ID." });
-       return
+      res.status(400).json({ success: false, message: "Invalid gallery ID." });
+      return;
     }
 
-    const item = await Gallery.findById(id);
+    const item = await Gallery.findOne({ _id: id, tenant: req.tenant });
     if (!item) {
-       res.status(404).json({ success: false, message: "Media not found." });
-       return
+      res.status(404).json({ success: false, message: "Media not found." });
+      return;
     }
-
 
     if (category && isValidObjectId(category)) item.category = category;
     if (type) item.type = type;
@@ -219,7 +221,7 @@ export const updateGalleryItem = asyncHandler(
           success: false,
           message: "Cannot remove all images from a gallery item.",
         });
-        return 
+        return;
       }
     }
 
@@ -264,17 +266,17 @@ export const updateGalleryItem = asyncHandler(
   }
 );
 
-
 // ✅ Toggle publish
 export const togglePublishGalleryItem = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Gallery } = await getTenantModels(req);
     const { id } = req.params;
     if (!isValidObjectId(id)) {
       res.status(400).json({ success: false, message: "Invalid gallery ID." });
       return;
     }
 
-    const item = await Gallery.findById(id);
+    const item = await Gallery.findOne({ _id: id, tenant: req.tenant });
     if (!item) {
       res.status(404).json({ success: false, message: "Media not found." });
       return;
@@ -296,13 +298,14 @@ export const togglePublishGalleryItem = asyncHandler(
 // ✅ Soft delete
 export const softDeleteGalleryItem = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Gallery } = await getTenantModels(req);
     const { id } = req.params;
     if (!isValidObjectId(id)) {
       res.status(400).json({ success: false, message: "Invalid gallery ID." });
       return;
     }
 
-    const item = await Gallery.findById(id);
+    const item = await Gallery.findOne({ _id: id, tenant: req.tenant });
     if (!item) {
       res.status(404).json({ success: false, message: "Media not found." });
       return;
@@ -320,13 +323,17 @@ export const softDeleteGalleryItem = asyncHandler(
 // ✅ Permanent delete
 export const deleteGalleryItem = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Gallery } = await getTenantModels(req);
     const { id } = req.params;
     if (!isValidObjectId(id)) {
       res.status(400).json({ success: false, message: "Invalid gallery ID." });
       return;
     }
 
-    const item = await Gallery.findByIdAndDelete(id).lean();
+    const item = await Gallery.deleteOne({
+      _id: id,
+      tenant: req.tenant,
+    }).lean();
     if (!item) {
       res.status(404).json({ success: false, message: "Media not found." });
       return;
@@ -341,13 +348,14 @@ export const deleteGalleryItem = asyncHandler(
 // ✅ Restore soft-deleted item
 export const restoreGalleryItem = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Gallery } = await getTenantModels(req);
     const { id } = req.params;
     if (!isValidObjectId(id)) {
       res.status(400).json({ success: false, message: "Invalid gallery ID." });
       return;
     }
 
-    const item = await Gallery.findById(id);
+    const item = await Gallery.findOne({ _id: id, tenant: req.tenant });
     if (!item) {
       res.status(404).json({ success: false, message: "Media not found." });
       return;
@@ -367,6 +375,7 @@ export const restoreGalleryItem = asyncHandler(
 // ✅ Batch publish/unpublish
 export const batchPublishGalleryItems = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Gallery } = await getTenantModels(req);
     const { ids, publish } = req.body;
 
     if (!Array.isArray(ids) || typeof publish !== "boolean") {
@@ -377,7 +386,7 @@ export const batchPublishGalleryItems = asyncHandler(
     }
 
     const updated = await Gallery.updateMany(
-      { _id: { $in: ids }, isActive: true },
+      { _id: { $in: ids }, isActive: true, tenant: req.tenant },
       { $set: { isPublished: publish } }
     );
 
@@ -393,6 +402,7 @@ export const batchPublishGalleryItems = asyncHandler(
 // ✅ Batch permanent delete
 export const batchDeleteGalleryItems = asyncHandler(
   async (req: Request, res: Response) => {
+    const { Gallery } = await getTenantModels(req);
     const { ids } = req.body;
 
     if (!Array.isArray(ids)) {
@@ -402,7 +412,10 @@ export const batchDeleteGalleryItems = asyncHandler(
       return;
     }
 
-    const result = await Gallery.deleteMany({ _id: { $in: ids } });
+    const result = await Gallery.deleteMany({
+      _id: { $in: ids },
+      tenant: req.tenant,
+    });
 
     res.status(200).json({
       success: true,

@@ -1,12 +1,14 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { News } from "@/modules/news";
+//import { News } from "@/modules/news";
 import { isValidObjectId } from "@/core/utils/validation";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // ✅ Get All News (public)
 export const getAllNews = asyncHandler(async (req: Request, res: Response) => {
+  const { News } = await getTenantModels(req);
   const { category, language } = req.query;
-  const filter: any = { isActive: true, isPublished: true };
+  const filter: any = { isActive: true, isPublished: true, tenant: req.tenant };
 
   if (category && isValidObjectId(category.toString())) {
     filter.category = category;
@@ -32,6 +34,7 @@ export const getAllNews = asyncHandler(async (req: Request, res: Response) => {
 
 // ✅ Get News by ID (public)
 export const getNewsById = asyncHandler(async (req: Request, res: Response) => {
+  const { News } = await getTenantModels(req);
   const { id } = req.params;
 
   if (!isValidObjectId(id)) {
@@ -39,7 +42,12 @@ export const getNewsById = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  const news = await News.findOne({ _id: id, isActive: true, isPublished: true })
+  const news = await News.findOne({
+    _id: id,
+    tenant: req.tenant,
+    isActive: true,
+    isPublished: true,
+  })
     .populate("comments")
     .populate("category", "title")
     .lean();
@@ -57,22 +65,30 @@ export const getNewsById = asyncHandler(async (req: Request, res: Response) => {
 });
 
 // ✅ Get News by Slug (public)
-export const getNewsBySlug = asyncHandler(async (req: Request, res: Response) => {
-  const { slug } = req.params;
+export const getNewsBySlug = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { News } = await getTenantModels(req);
+    const { slug } = req.params;
 
-  const news = await News.findOne({ slug, isActive: true, isPublished: true })
-    .populate("comments")
-    .populate("category", "title")
-    .lean();
+    const news = await News.findOne({
+      slug,
+      tenant: req.tenant,
+      isActive: true,
+      isPublished: true,
+    })
+      .populate("comments")
+      .populate("category", "title")
+      .lean();
 
-  if (!news) {
-    res.status(404).json({ success: false, message: "News not found." });
-    return;
+    if (!news) {
+      res.status(404).json({ success: false, message: "News not found." });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "News fetched successfully.",
+      data: news,
+    });
   }
-
-  res.status(200).json({
-    success: true,
-    message: "News fetched successfully.",
-    data: news,
-  });
-});
+);

@@ -1,13 +1,13 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response, NextFunction } from "express";
 import { Types } from "mongoose";
-import { Cart } from "@/modules/cart";
 import { ICartItem } from "@/modules/cart/types";
-import { RadonarProd, radonarprodTypes } from "@/modules/radonarprod";
+import { IBike } from "@/modules/bikes/types";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import cartTranslations from "@/modules/cart/i18n";
 import type { SupportedLocale } from "@/types/common";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels"; // 👈 Mutlaka import et
 
 // Helper: dil-aware çeviri fonksiyonu
 function cartT(
@@ -22,21 +22,32 @@ function cartT(
 const recalculateTotal = (items: ICartItem[]): number =>
   items.reduce((sum, item) => sum + item.quantity * item.priceAtAddition, 0);
 
+// 🔄 Product fetch (ALWAYS PASS req!)
 const getProduct = async (
+  req: Request,
   productId: string
-): Promise<radonarprodTypes.IRadonarProd | null> =>
-  RadonarProd.findById(productId);
+): Promise<IBike | null> => {
+  const { Bike } = await getTenantModels(req);
+  return Bike.findOne({ _id: productId, tenant: req.tenant });
+};
 
-// Helper to get user's cart
-const getCartForUser = async (userId: string, populate = false) => {
+// 🔄 Cart fetch (ALWAYS PASS req!)
+const getCartForUser = async (
+  req: Request,
+  userId: string,
+  populate = false
+) => {
+  const { Cart } = await getTenantModels(req);
   return populate
-    ? Cart.findOne({ user: userId }).populate("items.product")
-    : Cart.findOne({ user: userId });
+    ? Cart.findOne({ user: userId, tenant: req.tenant }).populate(
+        "items.product"
+      )
+    : Cart.findOne({ user: userId, tenant: req.tenant });
 };
 
 // ✅ Get user's cart
 export const getUserCart = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     const locale = (req.locale as SupportedLocale) || "en";
     const userId = req.user?.id;
 
@@ -48,18 +59,19 @@ export const getUserCart = asyncHandler(
       return;
     }
 
-    let cart = await getCartForUser(userId, true);
+    let cart = await getCartForUser(req, userId, true);
 
     if (!cart) {
+      const { Cart } = await getTenantModels(req);
       cart = new Cart({
         user: userId,
+        tenant: req.tenant,
         items: [],
         totalPrice: 0,
         couponCode: null,
         language: locale,
       });
       await cart.save();
-
       logger.info(cartT("cart.created", locale, { userId }));
       res.status(201).json({
         success: true,
@@ -77,13 +89,12 @@ export const getUserCart = asyncHandler(
       success: true,
       data: cart,
     });
-    return;
   }
 );
 
 // ✅ Add item to cart
 export const addToCart = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     const locale = (req.locale as SupportedLocale) || "en";
     const userId = req.user?.id;
     const { productId, quantity } = req.body;
@@ -97,7 +108,7 @@ export const addToCart = asyncHandler(
       return;
     }
 
-    const product = await getProduct(productId);
+    const product = await getProduct(req, productId);
     if (!product) {
       logger.warn(cartT("cart.add.productNotFound", locale, { productId }));
       res.status(404).json({
@@ -120,11 +131,13 @@ export const addToCart = asyncHandler(
       return;
     }
 
-    let cart = await getCartForUser(userId);
+    let cart = await getCartForUser(req, userId);
     if (!cart) {
+      const { Cart } = await getTenantModels(req);
       cart = new Cart({
         user: userId,
         items: [],
+        tenant: req.tenant,
         totalPrice: 0,
         couponCode: null,
         language: locale,
@@ -141,7 +154,7 @@ export const addToCart = asyncHandler(
         cart.items[itemIndex].quantity * cart.items[itemIndex].priceAtAddition;
     } else {
       cart.items.push({
-        product: new Types.ObjectId(productId),
+        product: Types.ObjectId.createFromHexString(productId),
         quantity,
         priceAtAddition: product.price,
         totalPriceAtAddition: quantity * product.price,
@@ -166,13 +179,12 @@ export const addToCart = asyncHandler(
       data: cart,
       warning,
     });
-    return;
   }
 );
 
 // ✅ Increase item quantity
 export const increaseQuantity = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     const locale = (req.locale as SupportedLocale) || "en";
     const userId = req.user?.id;
     const { productId } = req.params;
@@ -186,7 +198,7 @@ export const increaseQuantity = asyncHandler(
       return;
     }
 
-    const cart = await getCartForUser(userId, true);
+    const cart = await getCartForUser(req, userId, true);
     if (!cart) {
       logger.warn(cartT("cart.notFound", locale));
       res
@@ -206,7 +218,7 @@ export const increaseQuantity = asyncHandler(
       return;
     }
 
-    const product = await getProduct(productId);
+    const product = await getProduct(req, productId);
     if (!product) {
       logger.warn(cartT("cart.add.productNotFound", locale, { productId }));
       res.status(404).json({
@@ -249,13 +261,12 @@ export const increaseQuantity = asyncHandler(
       data: cart,
       warning,
     });
-    return;
   }
 );
 
 // ✅ Decrease item quantity
 export const decreaseQuantity = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     const locale = (req.locale as SupportedLocale) || "en";
     const userId = req.user?.id;
     const { productId } = req.params;
@@ -269,7 +280,7 @@ export const decreaseQuantity = asyncHandler(
       return;
     }
 
-    const cart = await getCartForUser(userId, true);
+    const cart = await getCartForUser(req, userId, true);
     if (!cart) {
       logger.warn(cartT("cart.notFound", locale));
       res
@@ -308,13 +319,12 @@ export const decreaseQuantity = asyncHandler(
       message: cartT("cart.dec.success", locale),
       data: cart,
     });
-    return;
   }
 );
 
 // ✅ Remove item from cart
 export const removeFromCart = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     const locale = (req.locale as SupportedLocale) || "en";
     const userId = req.user?.id;
     const { productId } = req.params;
@@ -328,7 +338,7 @@ export const removeFromCart = asyncHandler(
       return;
     }
 
-    const cart = await getCartForUser(userId, true);
+    const cart = await getCartForUser(req, userId, true);
     if (!cart) {
       logger.warn(cartT("cart.notFound", locale));
       res
@@ -361,17 +371,25 @@ export const removeFromCart = asyncHandler(
       message: cartT("cart.remove.success", locale),
       data: cart,
     });
-    return;
   }
 );
 
 // ✅ Clear cart
 export const clearCart = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     const locale = (req.locale as SupportedLocale) || "en";
     const userId = req.user?.id;
 
-    const cart = await getCartForUser(userId!, true);
+    if (!userId) {
+      logger.warn(cartT("cart.authRequired", locale));
+      res.status(401).json({
+        success: false,
+        message: cartT("cart.authRequired", locale),
+      });
+      return;
+    }
+
+    const cart = await getCartForUser(req, userId, true);
     if (!cart) {
       logger.warn(cartT("cart.notFound", locale));
       res
@@ -399,6 +417,5 @@ export const clearCart = asyncHandler(
       message: cartT("cart.clear.success", locale),
       data: cart,
     });
-    return;
   }
 );

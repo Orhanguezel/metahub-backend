@@ -18,7 +18,6 @@ const BikeImageSchema = new Schema<IBikeImage>(
     thumbnail: { type: String, required: true },
     webp: { type: String },
     publicId: { type: String },
-    altText: localizedStringField(),
   },
   { _id: false }
 );
@@ -33,7 +32,11 @@ const BikeSchema = new Schema<IBike>(
     price: { type: Number, required: true, min: 0 },
     stock: { type: Number, required: true, default: 0 },
     stockThreshold: { type: Number, default: 5 },
-    category: { type: Schema.Types.ObjectId, ref: "BikeCategory", required: true },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: "BikeCategory",
+      required: true,
+    },
     tags: [{ type: String }],
     images: { type: [BikeImageSchema], default: [] },
     frameMaterial: { type: String },

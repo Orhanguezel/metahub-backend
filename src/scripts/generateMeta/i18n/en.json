@@ -52,5 +52,13 @@
   "meta.version.invalidFormat": "⚠️ Invalid version format: {version}, defaulting to 1.0.0",
   "meta.fix.setting.created": "Missing setting created: {{module}} ({{project}})",
   "meta.fix.setting.completed": "{{count}} missing settings were automatically added.",
-  "meta.fix.setting.noMissing": "No missing settings found."
+  "meta.fix.setting.noMissing": "No missing settings found.",
+  "meta.fix.setting.invalid": "Invalid setting detected: {{param}}",
+  "meta": {
+    "validation": {
+      "notFound": "No validation found for module {mod} and route {route} in tenant {tenant}.",
+      "empty": "Validation module is empty for module {mod} in tenant {tenant}.",
+      "importFail": "Error loading validation for module {mod} in tenant {tenant}: {error}"
+    }
+  }
 }

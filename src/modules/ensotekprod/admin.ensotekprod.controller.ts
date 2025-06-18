@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { EnsotekProd } from "@/modules/ensotekprod";
+//import { EnsotekProd } from "@/modules/ensotekprod";
 import { IEnsotekProd } from "@/modules/ensotekprod/ensotekprod.models";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
@@ -13,6 +13,7 @@ import {
   processImageLocal,
   shouldProcessImage,
 } from "@/core/utils/uploadUtils";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 const parseIfJson = (value: any) => {
   try {
@@ -25,6 +26,7 @@ const parseIfJson = (value: any) => {
 // ✅ CREATE
 export const createEnsotekProd = asyncHandler(
   async (req: Request, res: Response) => {
+    const { EnsotekProd } = await getTenantModels(req);
     let {
       name,
       description,
@@ -76,6 +78,7 @@ export const createEnsotekProd = asyncHandler(
 
     const prod = await EnsotekProd.create({
       name,
+      tenant: req.tenant,
       slug,
       description,
       tags,
@@ -88,19 +91,18 @@ export const createEnsotekProd = asyncHandler(
       isActive: true,
     });
 
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "Product created successfully.",
-        data: prod,
-      });
+    res.status(201).json({
+      success: true,
+      message: "Product created successfully.",
+      data: prod,
+    });
   }
 );
 
 // ✅ UPDATE
 export const updateEnsotekProd = asyncHandler(
   async (req: Request, res: Response) => {
+    const { EnsotekProd } = await getTenantModels(req);
     const { id } = req.params;
     const updates = req.body;
 
@@ -109,7 +111,7 @@ export const updateEnsotekProd = asyncHandler(
       return;
     }
 
-    const prod = await EnsotekProd.findById(id);
+    const prod = await EnsotekProd.findOne({ _id: id, tenant: req.tenant });
     if (!prod) {
       res.status(404).json({ success: false, message: "Product not found." });
       return;
@@ -181,19 +183,18 @@ export const updateEnsotekProd = asyncHandler(
 
     await prod.save();
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Product updated successfully.",
-        data: prod,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Product updated successfully.",
+      data: prod,
+    });
   }
 );
 
 // ✅ DELETE
 export const deleteEnsotekProd = asyncHandler(
   async (req: Request, res: Response) => {
+    const { EnsotekProd } = await getTenantModels(req);
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -201,7 +202,7 @@ export const deleteEnsotekProd = asyncHandler(
       return;
     }
 
-    const prod = await EnsotekProd.findById(id);
+    const prod = await EnsotekProd.findOne({ _id: id, tenant: req.tenant });
     if (!prod) {
       res.status(404).json({ success: false, message: "Product not found." });
       return;
@@ -233,20 +234,19 @@ export const deleteEnsotekProd = asyncHandler(
 
 // ✅ GET ALL
 export const adminGetAllEnsotekProd = asyncHandler(
-  async (_req: Request, res: Response) => {
-    const prodList = await EnsotekProd.find()
+  async (req: Request, res: Response) => {
+    const { EnsotekProd } = await getTenantModels(req);
+    const prodList = await EnsotekProd.find({ tenant: req.tenant })
       .populate("comments")
       .populate("category", "name")
       .sort({ createdAt: -1 })
       .lean();
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Product list fetched successfully.",
-        data: prodList,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Product list fetched successfully.",
+      data: prodList,
+    });
   }
 );
 
@@ -254,13 +254,14 @@ export const adminGetAllEnsotekProd = asyncHandler(
 export const adminGetEnsotekProdById = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
+    const { EnsotekProd } = await getTenantModels(req);
 
     if (!isValidObjectId(id)) {
       res.status(400).json({ success: false, message: "Invalid product ID." });
       return;
     }
 
-    const prod = await EnsotekProd.findById(id)
+    const prod = await EnsotekProd.findOne({ _id: id, tenant: req.tenant })
       .populate("comments")
       .populate("category", "name")
       .lean();
@@ -272,12 +273,10 @@ export const adminGetEnsotekProdById = asyncHandler(
       return;
     }
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Product fetched successfully.",
-        data: prod,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Product fetched successfully.",
+      data: prod,
+    });
   }
 );

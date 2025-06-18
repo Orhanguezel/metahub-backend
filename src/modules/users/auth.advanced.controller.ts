@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import crypto from "crypto";
-//import { User } from "./users.models";
 import { sendEmail } from "@/services/emailService";
 import { sendSms } from "@/services/smsService";
 import { generateOtpCode } from "@/core/utils/otp";
@@ -41,7 +40,7 @@ export const sendEmailVerification = asyncHandler(
       });
       return;
     }
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email, tenant: req.tenant });
     if (!user) {
       logger.warn(`[EMAIL-VERIFICATION] Kullanıcı bulunamadı: ${email}`);
       res
@@ -96,6 +95,7 @@ export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const user = await User.findOne({
+    tenant: req.tenant,
     emailVerificationToken: token,
     emailVerificationExpires: { $gt: new Date() },
   });
@@ -137,7 +137,7 @@ export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
       .json({ success: false, message: userT("error.emailRequired", locale) });
     return;
   }
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email, tenant: req.tenant });
   if (!user) {
     logger.warn(`[OTP] Kullanıcı bulunamadı: ${email}`);
     res
@@ -189,6 +189,7 @@ export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
   }
   const user = await User.findOne({
     email,
+    tenant: req.tenant,
     otpCode: code,
     otpExpires: { $gt: new Date() },
   });
@@ -223,7 +224,7 @@ export const resendOtp = asyncHandler(
 
 export const enableMfa = asyncHandler(async (req: Request, res: Response) => {
   const { User } = await getTenantModels(req);
-  const user = await User.findById(req.user!.id);
+  const user = await User.findOne({ _id: req.user!.id, tenant: req.tenant });
   const locale = getLocale(req);
   if (!user) {
     logger.warn(`[MFA-ENABLE] Kullanıcı bulunamadı: ${req.user!.id}`);
@@ -269,7 +270,10 @@ export const verifyMfa = asyncHandler(async (req: Request, res: Response) => {
       .json({ success: false, message: userT("error.codeRequired", locale) });
     return;
   }
-  const user = await User.findById(req.user!.id).select("+mfaSecret");
+  const user = await User.findOne({
+    _id: req.user!.id,
+    tenant: req.tenant,
+  }).select("+mfaSecret");
   if (!user || !user.mfaSecret) {
     logger.warn(`[MFA-VERIFY] MFA tanımlı değil: ${req.user!.id}`);
     res

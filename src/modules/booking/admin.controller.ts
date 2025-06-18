@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
-import { Booking } from "@/modules/booking";
+//import { Booking } from "@/modules/booking";
 import { isValidObjectId } from "@/core/utils/validation";
 import { BookingConfirmedTemplate } from "@/modules/booking/templates/bookingConfirmation";
 import { BookingRejectionTemplate } from "@/modules/booking/templates/bookingRejection";
@@ -10,6 +10,7 @@ import { t } from "@/core/utils/i18n/translate";
 import translations from "@/templates/i18n";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import type { SupportedLocale } from "@/types/common";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // Çok dilli çeviri fonksiyonu (user response veya log için kullanılabilir)
 function bookingT(
@@ -25,8 +26,11 @@ export const getAllBookings = asyncHandler(
     const { language } = req.query;
     const userLocale = req.locale as SupportedLocale | undefined; // setLocale middleware varsa
 
-    const filter = language ? { language: { $eq: language } } : {};
+    const filter = language
+      ? { language: { $eq: language } }
+      : { tenant: req.tenant };
 
+    const { Booking } = await getTenantModels(req);
     const bookings = await Booking.find(filter)
       .populate("service")
       .populate("user", "name email")
@@ -57,8 +61,11 @@ export const getBookingById = asyncHandler(
       });
       return;
     }
-
-    const booking = await Booking.findById(id).populate("service");
+    const { Booking } = await getTenantModels(req);
+    const booking = await Booking.findOne({
+      _id: id,
+      tenant: req.tenant,
+    }).populate("service");
     if (!booking) {
       logger.warn(bookingT("admin.bookings.notFound", { id }, getLogLocale()));
       res.status(404).json({
@@ -92,9 +99,10 @@ export const updateBookingStatus = asyncHandler(
       return;
     }
 
+    const { Booking } = await getTenantModels(req);
     const booking = await Booking.findByIdAndUpdate(
       id,
-      { status },
+      { tenant: req.tenant, status },
       { new: true }
     );
     if (!booking) {
@@ -183,7 +191,8 @@ export const deleteBooking = asyncHandler(
       return;
     }
 
-    const booking = await Booking.findByIdAndDelete(id);
+    const { Booking } = await getTenantModels(req);
+    const booking = await Booking.deleteOne({ _id: id, tenant: req.tenant });
     if (!booking) {
       logger.warn(
         bookingT("admin.bookings.notFoundOrDeleted", { id }, getLogLocale())

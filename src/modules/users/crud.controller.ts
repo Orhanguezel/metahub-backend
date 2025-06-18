@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { User } from "@/modules/users";
 import {
   isValidObjectId,
   getUserOrFail,
@@ -36,7 +35,7 @@ export const getUsers = asyncHandler(async (req: Request, res: Response) => {
 
   logger.debug(`[Admin] getUsers called | locale=${locale}`);
 
-  const users = await User.find().select("-password");
+  const users = await User.find({ tenant: req.tenant }).select("-password");
 
   logger.info(`[Admin] getUsers success | count=${users.length}`);
 
@@ -51,6 +50,7 @@ export const getUsers = asyncHandler(async (req: Request, res: Response) => {
 export const getUserById = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const locale: SupportedLocale = req.locale || getLogLocale();
+  const { User } = await getTenantModels(req);
 
   logger.debug(`[Admin] getUserById called | id=${id} | locale=${locale}`);
 
@@ -63,7 +63,7 @@ export const getUserById = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  const user = await getUserOrFail(id, res);
+  const user = await User.findOne({ _id: id, tenant: req.tenant });
   if (!user) {
     logger.warn(`[Admin] User not found: ${id}`);
     return;
@@ -100,7 +100,7 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
 
   logger.debug(`[Admin] updateUser called | id=${id} | locale=${locale}`);
 
-  const user = await getUserOrFail(id, res);
+  const user = await User.findOne({ _id: id, tenant: req.tenant });
   if (!user) {
     logger.warn(`[Admin] User not found for update: ${id}`);
     return;
@@ -201,6 +201,7 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   const updatedUser = await User.findByIdAndUpdate(id, updates, {
     new: true,
     runValidators: true,
+    tenant: req.tenant,
   });
 
   logger.info(`[Admin] User updated: ${id}`);
@@ -228,8 +229,8 @@ export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
     });
     return;
   }
-
-  const user = await User.findByIdAndDelete(id);
+  const user = await User.findOne({ _id: id, tenant: req.tenant });
+  await User.deleteOne({ _id: id, tenant: req.tenant });
   if (!user) {
     logger.warn(`[Admin] User not found for delete: ${id}`);
     res.status(404).json({

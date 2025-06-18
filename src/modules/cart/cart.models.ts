@@ -5,7 +5,7 @@ import { SUPPORTED_LOCALES } from "@/types/common";
 // 🛒 Sepet Ürün Alt Şeması
 const cartItemSchema = new Schema<ICartItem>(
   {
-    product: { type: Types.ObjectId, ref: "RadonarProd", required: true },
+    product: { type: Types.ObjectId, ref: "Bike", required: true },
     quantity: { type: Number, required: true, min: 1, default: 1 },
     priceAtAddition: { type: Number, required: true },
     totalPriceAtAddition: { type: Number, required: true, default: 0 },
@@ -20,14 +20,18 @@ const cartSchema = new Schema<ICart>(
     items: { type: [cartItemSchema], default: [] },
     totalPrice: { type: Number, required: true, default: 0 },
     couponCode: { type: String, default: null },
-    status: { type: String, enum: ["open", "ordered", "cancelled"], default: "open" },
+    status: {
+      type: String,
+      enum: ["open", "ordered", "cancelled"],
+      default: "open",
+    },
     isActive: { type: Boolean, default: true },
     discount: { type: Number, default: 0 },
     language: {
-              type: String,
-              enum: SUPPORTED_LOCALES,
-              default: "en",
-            },
+      type: String,
+      enum: SUPPORTED_LOCALES,
+      default: "en",
+    },
   },
   { timestamps: true }
 );

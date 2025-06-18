@@ -1,0 +1,30 @@
+{
+  "resolveTenant": {
+    "success": "{tenant} için tenant başarıyla tespit edildi.",
+    "fail": "Tenant tespit edilemedi!"
+  },
+  "modelRegistry": {
+    "cacheHit": "{tenant} tenantında {modelName} modeli cache’ten alındı.",
+    "created": "{tenant} tenantında {modelName} modeli oluşturuldu.",
+    "error": "{tenant} tenantında {modelName} modeli oluşturulurken hata oluştu!"
+  },
+  "tenant": {
+    "override": {
+      "success": "Superadmin ({userId}) tarafından {tenant} tenantına override yapıldı.",
+      "not_found": "Seçilen tenant mapping'de tanımlı değil: {tenant}",
+      "denied": "Tenant override DENIED: Superadmin değil! (user: {userId}, tenant: {tenant})"
+    },
+    "resolve": {
+      "success": "{domain} domaini için tenant tespit edildi: {tenant}",
+      "fail": "Tenant tespit edilemedi! Host: {host}, Header: {tenantHeader}"
+    }
+  },
+  "tenantDb": {
+    "envPath": "Env dosya yolu çözüldü: {envPath}",
+    "missingEnv": "Environment dosyası bulunamadı: .env.{tenant}",
+    "missingUri": ".env.{tenant} içinde MONGO_URI yok",
+    "connecting": "\"{tenant}\" tenantı için MongoDB bağlantısı kuruluyor...",
+    "connected": "\"{tenant}\" tenantına bağlantı başarılı.",
+    "connectionFail": "\"{tenant}\" tenantına bağlantı başarısız."
+  }
+}

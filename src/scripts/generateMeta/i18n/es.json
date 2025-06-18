@@ -52,5 +52,13 @@
   "meta.version.invalidFormat": "⚠️ Formato de versión no válido: {version}, se establece como 1.0.0",
   "meta.fix.setting.created": "Configuración faltante creada: {{module}} ({{project}})",
   "meta.fix.setting.completed": "Se agregaron automáticamente {{count}} configuraciones faltantes.",
-  "meta.fix.setting.noMissing": "No se encontraron configuraciones faltantes."
+  "meta.fix.setting.noMissing": "No se encontraron configuraciones faltantes.",
+  "meta.fix.setting.invalid": "Se detectó una configuración inválida: {{param}}",
+  "meta": {
+    "validation": {
+      "notFound": "No se encontró validación para el módulo {mod} y la ruta {route} en el inquilino {tenant}.",
+      "empty": "El módulo de validación está vacío para el módulo {mod} en el inquilino {tenant}.",
+      "importFail": "Error al cargar el archivo de validación para el módulo {mod} en el inquilino {tenant}: {error}"
+    }
+  }
 }

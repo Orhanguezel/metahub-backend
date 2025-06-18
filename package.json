@@ -54,6 +54,7 @@
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.7",
+    "dotenv-parse-variables": "^2.0.0",
     "express": "^4.21.2",
     "express-async-handler": "^1.2.0",
     "express-rate-limit": "^7.5.0",

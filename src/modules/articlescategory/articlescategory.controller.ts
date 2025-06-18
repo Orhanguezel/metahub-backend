@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { ArticlesCategory } from ".";
+//import { ArticlesCategory } from ".";
 import { isValidObjectId } from "@/core/utils/validation";
 import {
   fillAllLocales,
@@ -13,6 +13,7 @@ import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import logger from "@/core/middleware/logger/logger";
 import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // ✅ CREATE
 export const createArticlesCategory = asyncHandler(
@@ -24,7 +25,11 @@ export const createArticlesCategory = asyncHandler(
     const name = fillAllLocales(req.body.name);
 
     try {
-      const category = await ArticlesCategory.create({ name });
+      const { ArticlesCategory } = await getTenantModels(req);
+      const category = await ArticlesCategory.create({
+        name,
+        tenant: req.tenant,
+      });
 
       logger.info(
         t("articlescategory.create.success", { name: name[locale] }),
@@ -65,7 +70,8 @@ export const getAllArticlesCategories = asyncHandler(
     const t = (key: string) => translate(key, locale, translations);
 
     try {
-      const categories = await ArticlesCategory.find()
+      const { ArticlesCategory } = await getTenantModels(req);
+      const categories = await ArticlesCategory.find({ tenant: req.tenant })
         .sort({ createdAt: -1 })
         .lean();
 
@@ -118,7 +124,11 @@ export const getArticlesCategoryById = asyncHandler(
       return;
     }
 
-    const category = await ArticlesCategory.findById(id).lean();
+    const { ArticlesCategory } = await getTenantModels(req);
+    const category = await ArticlesCategory.findOne({
+      _id: id,
+      tenant: req.tenant,
+    }).lean();
 
     if (!category) {
       logger.warn(t("articlescategory.notFound"), getRequestContext(req));
@@ -156,7 +166,11 @@ export const updateArticlesCategory = asyncHandler(
       return;
     }
 
-    const category = await ArticlesCategory.findById(id);
+    const { ArticlesCategory } = await getTenantModels(req);
+    const category = await ArticlesCategory.findOne({
+      _id: id,
+      tenant: req.tenant,
+    });
     if (!category) {
       logger.warn(t("articlescategory.notFound"), getRequestContext(req));
       res
@@ -211,7 +225,13 @@ export const deleteArticlesCategory = asyncHandler(
       return;
     }
 
-    const deleted = await ArticlesCategory.findByIdAndDelete(id);
+    const { ArticlesCategory } = await getTenantModels(req);
+
+    // ✔️ findOneAndDelete ile hem kontrol hem veri döner
+    const deleted = await ArticlesCategory.findOneAndDelete({
+      _id: id,
+      tenant: req.tenant,
+    });
 
     if (!deleted) {
       logger.warn(t("articlescategory.notFound"), getRequestContext(req));
@@ -221,7 +241,9 @@ export const deleteArticlesCategory = asyncHandler(
       return;
     }
 
-    const name = (deleted.name as Record<SupportedLocale, string>)[locale];
+    const name = deleted.name
+      ? extractMultilangValue(deleted.name, locale)
+      : "Category";
 
     logger.info(t("articlescategory.delete.success", { name }), {
       ...getRequestContext(req),
