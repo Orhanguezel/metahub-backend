@@ -9,7 +9,7 @@ const labelSchemaFields = SUPPORTED_LOCALES.reduce((fields, lang) => {
 }, {} as Record<string, any>);
 
 // --- ModuleMeta Schema ---
-const moduleMetaSchema = new Schema<IModuleMeta>(
+const ModuleMetaSchema = new Schema<IModuleMeta>(
   {
     name: { type: String, required: true, unique: true },
     label: labelSchemaFields, // Dinamik yapı!
@@ -49,10 +49,11 @@ const moduleMetaSchema = new Schema<IModuleMeta>(
 );
 
 export const ModuleMeta: Model<IModuleMeta> =
-  models.ModuleMeta || mongoose.model<IModuleMeta>("ModuleMeta", moduleMetaSchema);
+  models.ModuleMeta ||
+  mongoose.model<IModuleMeta>("ModuleMeta", ModuleMetaSchema);
 
 // --- ModuleSetting Schema ---
-const moduleSettingsSchema = new Schema<IModuleSetting>(
+const ModuleSettingsSchema = new Schema<IModuleSetting>(
   {
     project: { type: String, required: true },
     module: { type: String, required: true },
@@ -72,4 +73,5 @@ const moduleSettingsSchema = new Schema<IModuleSetting>(
 );
 
 export const ModuleSetting: Model<IModuleSetting> =
-  models.ModuleSetting || mongoose.model<IModuleSetting>("ModuleSetting", moduleSettingsSchema);
+  models.ModuleSetting ||
+  mongoose.model<IModuleSetting>("ModuleSetting", ModuleSettingsSchema);

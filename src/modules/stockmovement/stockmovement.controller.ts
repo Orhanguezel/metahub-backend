@@ -1,16 +1,19 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import { isValidObjectId } from "@/core/utils/validation";
-import { Stockmovement } from "@/modules/stockmovement";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // ➕ Create new stock movement
 export const createStockMovement = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      const { Stockmovement } = await getTenantModels(req);
       const { product, type, quantity, note } = req.body;
 
       if (!product || !type || typeof quantity !== "number") {
-        res.status(400).json({ message: "Product, type and quantity are required." });
+        res
+          .status(400)
+          .json({ message: "Product, type and quantity are required." });
         return;
       }
 
@@ -22,6 +25,7 @@ export const createStockMovement = asyncHandler(
       const movement = await Stockmovement.create({
         product,
         type,
+        tenant: req.tenant,
         quantity,
         note,
         createdBy: req.user?._id || null,
@@ -42,9 +46,10 @@ export const createStockMovement = asyncHandler(
 // 📄 Get all stock movements
 export const getStockMovements = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { Stockmovement } = await getTenantModels(req);
     try {
       const { product } = req.query;
-      const filter: any = {};
+      const filter: any = { tenant: req.tenant };
 
       if (product) {
         if (!isValidObjectId(product)) {

@@ -12,7 +12,6 @@ export interface IBikeImage {
   thumbnail: string;
   webp?: string;
   publicId?: string;
-  altText: TranslatedLabel;
 }
 
 // 🚲 Ana Bike tipi
@@ -37,7 +36,7 @@ export interface IBike extends Document {
   isElectric: boolean;
   batteryRangeKm?: number;
   motorPowerW?: number;
-  comments?: Types.ObjectId[]; 
+  comments?: Types.ObjectId[];
   likes: number;
   isActive: boolean;
   isPublished: boolean;

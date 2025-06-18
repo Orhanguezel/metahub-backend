@@ -1,0 +1,14 @@
+{
+  "apikey": {
+    "error": {
+      "missing": "API key is missing.",
+      "invalid": "Invalid or revoked API key."
+    },
+    "success": {
+      "validated": "API key validated successfully."
+    },
+    "log": {
+      "success": "API key usage logged."
+    }
+  }
+}

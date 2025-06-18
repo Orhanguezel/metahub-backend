@@ -6,6 +6,7 @@ import {
   updateNotificationSettings,
   updateSocialMediaLinks,
   updateProfileImage,
+  updateFullProfile,
   deleteMyAccount,
 } from "./account.controller";
 
@@ -60,13 +61,21 @@ router.patch(
 // 🗑️ Hesabı Sil
 router.delete("/me/delete", authenticate, deleteMyAccount);
 
-
 router.put(
   "/me/profile-image",
   authenticate,
-  uploadTypeWrapper("profile"),   
-  upload.single("profileImage"),  
+  uploadTypeWrapper("profile"),
+  upload.single("profileImage"),
   updateProfileImage
+);
+
+// 📝 Profil Bilgilerini Tam Güncelle
+router.put(
+  "/me/full-profile",
+  authenticate,
+  uploadTypeWrapper("profile"),
+  upload.single("profileImage"),
+  updateFullProfile
 );
 
 export default router;

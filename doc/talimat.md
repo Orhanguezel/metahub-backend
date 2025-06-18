@@ -231,6 +231,10 @@ rm -rf dist
 npx tsc --noEmit
 npm run build
 
+export TENANT=metahub
+bun run dev
+
+
 # 2. ts-node ile tekrar başlat
 APP_ENV=anastasia npm run dev
 

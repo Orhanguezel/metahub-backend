@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { User } from "@/modules/users/users.models";
 import type { IUserProfileImage } from "@/modules/users/types";
 import crypto from "crypto";
 import { passwordResetTemplate } from "@/templates/passwordReset";
@@ -43,6 +42,7 @@ export const registerUser = asyncHandler(
 
     const {
       name,
+      tenant,
       email,
       password,
       role = "user",
@@ -56,6 +56,7 @@ export const registerUser = asyncHandler(
 
     logger.info(`[REGISTER] Yeni kayıt: ${email} | locale: ${locale}`);
 
+    // --- Validasyonlar ---
     if (!validateEmailFormat(email)) {
       logger.warn(`[REGISTER] Geçersiz e-posta: ${email}`);
       res.status(400).json({
@@ -124,22 +125,19 @@ export const registerUser = asyncHandler(
     let user;
     try {
       const { User } = await getTenantModels(req);
-
-      const user = await User.create({
+      user = await User.create({
         name,
+        tenant,
         email,
         password: hashedPassword,
         role: normalizedRole,
         phone,
         addresses: parsedAddresses,
-        profileImage: profileImageObj,
         bio,
         birthDate,
         socialMedia: parsedSocialMedia,
         notifications: parsedNotifications,
-        language: locale,
-        isActive: false,
-        emailVerified: false,
+        profileImage: profileImageObj,
       });
       logger.info(`[REGISTER] Kullanıcı kaydedildi: ${email}`);
     } catch (err: any) {
@@ -151,7 +149,6 @@ export const registerUser = asyncHandler(
       return;
     }
 
-    // Email Verification
     try {
       const verificationToken = crypto.randomBytes(32).toString("hex");
       user.emailVerificationToken = verificationToken;
@@ -162,10 +159,8 @@ export const registerUser = asyncHandler(
       await sendEmail({
         to: user.email,
         subject: userT("auth.emailVerification.subject", locale),
-        html: `
-        <p>${userT("auth.emailVerification.body", locale)}</p>
-        <a href="${verifyUrl}">${verifyUrl}</a>
-      `,
+        html: `<p>${userT("auth.emailVerification.body", locale)}</p>
+               <a href="${verifyUrl}">${verifyUrl}</a>`,
       });
       logger.info(`[REGISTER] Email verification gönderildi: ${user.email}`);
     } catch (err) {
@@ -203,7 +198,7 @@ export const loginUser = asyncHandler(
       return;
     }
 
-    const user = await User.findOne({ email }).select(
+    const user = await User.findOne({ email, tenant: req.tenant }).select(
       "+password +mfaEnabled +emailVerified +isActive"
     );
     if (!user) {
@@ -279,7 +274,10 @@ export const changePassword = asyncHandler(
     const locale = getLocale(req);
     const { User } = await getTenantModels(req);
 
-    const user = await User.findById(req.user!.id).select("+password");
+    const user = await User.findOne({
+      _id: req.user!.id,
+      tenant: req.tenant,
+    }).select("+password");
     if (!user) {
       logger.warn(`[CHANGE-PASSWORD] Kullanıcı bulunamadı: ${req.user!.id}`);
       res.status(404).json({
@@ -322,10 +320,7 @@ export const changePassword = asyncHandler(
 export const logoutUser = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const locale = getLocale(req);
-    const { User } = await getTenantModels(req);
-
     logoutAndClearToken(req, res);
-
     logger.info(
       `[LOGOUT] Kullanıcı çıkış yaptı: ${req.user?.id ?? "Bilinmiyor"}`
     );
@@ -342,7 +337,7 @@ export const forgotPassword = asyncHandler(
     const locale = getLocale(req);
     const { User } = await getTenantModels(req);
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email, tenant: req.tenant });
     if (!user) {
       logger.warn(`[FORGOT-PASSWORD] Kullanıcı bulunamadı: ${email}`);
       res.status(404).json({
@@ -395,6 +390,7 @@ export const resetPassword = asyncHandler(
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
     const user = await User.findOne({
       passwordResetToken: hashedToken,
+      tenant: req.tenant,
       passwordResetExpires: { $gt: new Date() },
     });
 

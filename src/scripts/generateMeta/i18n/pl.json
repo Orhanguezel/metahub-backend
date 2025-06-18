@@ -52,5 +52,12 @@
   "meta.version.invalidFormat": "⚠️ Nieprawidłowy format wersji: {version}, domyślnie 1.0.0",
   "meta.fix.setting.created": "Utworzono brakujące ustawienie: {{module}} ({{project}})",
   "meta.fix.setting.completed": "Automatycznie dodano {{count}} brakujących ustawień.",
-  "meta.fix.setting.noMissing": "Nie znaleziono brakujących ustawień."
+  "meta.fix.setting.noMissing": "Nie znaleziono brakujących ustawień.",
+  "meta": {
+    "validation": {
+      "notFound": "Nie znaleziono walidacji dla modułu {mod} i trasy {route} w tenant {tenant}.",
+      "empty": "Moduł walidacji jest pusty dla modułu {mod} w tenant {tenant}.",
+      "importFail": "Błąd podczas ładowania walidacji dla modułu {mod} w tenant {tenant}: {error}"
+    }
+  }
 }

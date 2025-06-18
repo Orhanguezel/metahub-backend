@@ -1,0 +1,30 @@
+{
+  "resolveTenant": {
+    "success": "Tenant resuelto correctamente para {tenant}.",
+    "fail": "¡No se pudo resolver el tenant!"
+  },
+  "modelRegistry": {
+    "cacheHit": "Modelo {modelName} cargado desde la caché para el tenant {tenant}.",
+    "created": "Modelo {modelName} creado para el tenant {tenant}.",
+    "error": "¡Error al crear el modelo {modelName} para el tenant {tenant}!"
+  },
+  "tenant": {
+    "override": {
+      "success": "Tenant override por superadmin ({userId}) a {tenant}.",
+      "not_found": "El tenant seleccionado no existe en el mapeo: {tenant}",
+      "denied": "Override de tenant DENEGADO: No es superadmin (usuario: {userId}, tenant: {tenant})"
+    },
+    "resolve": {
+      "success": "Tenant resuelto para el dominio {domain}: {tenant}",
+      "fail": "No se pudo resolver el tenant. Host: {host}, Header: {tenantHeader}"
+    }
+  },
+  "tenantDb": {
+    "envPath": "Ruta de env resuelta: {envPath}",
+    "missingEnv": "Archivo de entorno no encontrado: .env.{tenant}",
+    "missingUri": "Falta MONGO_URI en .env.{tenant}",
+    "connecting": "Conectando a MongoDB para el tenant \"{tenant}\"...",
+    "connected": "Conectado al tenant \"{tenant}\".",
+    "connectionFail": "Conexión fallida para el tenant \"{tenant}\"."
+  }
+}

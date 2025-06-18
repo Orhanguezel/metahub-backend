@@ -8,7 +8,12 @@
     "strict": false,
     "skipLibCheck": true,
     "noImplicitAny": false,
-    "types": ["node", "express", "multer"],
+    "allowSyntheticDefaultImports": true,
+    "types": [
+      "node",
+      "express",
+      "multer"
+    ],
     "typeRoots": [
       "./src/types",
       "./node_modules/@types"
@@ -17,7 +22,9 @@
     "rootDir": "src",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     }
   },
   "include": [
@@ -29,5 +36,3 @@
     "dist"
   ]
 }
-
-

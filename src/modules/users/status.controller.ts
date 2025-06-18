@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { User } from "@/modules/users";
 import {
   isValidObjectId,
   getUserOrFail,

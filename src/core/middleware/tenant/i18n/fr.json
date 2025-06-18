@@ -1,0 +1,30 @@
+{
+  "resolveTenant": {
+    "success": "Tenant résolu avec succès pour {tenant}.",
+    "fail": "Échec de la résolution du tenant !"
+  },
+  "modelRegistry": {
+    "cacheHit": "Modèle {modelName} chargé depuis le cache pour le tenant {tenant}.",
+    "created": "Modèle {modelName} créé pour le tenant {tenant}.",
+    "error": "Erreur lors de la création du modèle {modelName} pour le tenant {tenant} !"
+  },
+  "tenant": {
+    "override": {
+      "success": "Override du tenant par superadmin ({userId}) vers {tenant}.",
+      "not_found": "Le tenant sélectionné n'existe pas dans le mapping : {tenant}",
+      "denied": "Override du tenant REFUSÉ : non superadmin ! (utilisateur : {userId}, tenant : {tenant})"
+    },
+    "resolve": {
+      "success": "Tenant résolu pour le domaine {domain} : {tenant}",
+      "fail": "Impossible de résoudre le tenant ! Hôte : {host}, Header : {tenantHeader}"
+    }
+  },
+  "tenantDb": {
+    "envPath": "Chemin env résolu : {envPath}",
+    "missingEnv": "Fichier d'environnement introuvable : .env.{tenant}",
+    "missingUri": "MONGO_URI manquant dans .env.{tenant}",
+    "connecting": "Connexion à MongoDB pour le tenant \"{tenant}\"…",
+    "connected": "Connecté au tenant \"{tenant}\".",
+    "connectionFail": "Échec de la connexion au tenant \"{tenant}\"."
+  }
+}

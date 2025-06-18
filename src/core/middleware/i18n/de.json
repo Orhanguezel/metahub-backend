@@ -1,0 +1,14 @@
+{
+  "apikey": {
+    "error": {
+      "missing": "API-Schlüssel fehlt.",
+      "invalid": "Ungültiger oder widerrufener API-Schlüssel."
+    },
+    "success": {
+      "validated": "API-Schlüssel erfolgreich validiert."
+    },
+    "log": {
+      "success": "API-Schlüssel-Nutzung protokolliert."
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Articles } from "@/modules/articles";
+//import { Articles } from "@/modules/articles";
 import { IArticles } from "@/modules/articles/types";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
@@ -24,6 +24,7 @@ import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 const parseIfJson = (value: any) => {
   try {
@@ -37,6 +38,8 @@ const parseIfJson = (value: any) => {
 export const createArticles = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
+
+    const { Articles } = await getTenantModels(req);
     const t = (key: string, params?: any) =>
       translate(key, locale, translations, params);
 
@@ -80,6 +83,7 @@ export const createArticles = asyncHandler(
       title,
       slug,
       summary,
+      tenant: req.tenant,
       content,
       tags,
       category: isValidObjectId(category) ? category : undefined,
@@ -102,6 +106,7 @@ export const updateArticles = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const locale: SupportedLocale = req.locale || getLogLocale();
+    const { Articles } = await getTenantModels(req);
     const t = (key: string, params?: any) =>
       translate(key, locale, translations, params);
 
@@ -111,7 +116,7 @@ export const updateArticles = asyncHandler(
       return;
     }
 
-    const article = await Articles.findById(id);
+    const article = await Articles.findOne({ _id: id, tenant: req.tenant });
     if (!article) {
       logger.warn(t("notFound"), { ...getRequestContext(req), id });
       res.status(404).json({ success: false, message: t("notFound") });
@@ -207,9 +212,12 @@ export const updateArticles = asyncHandler(
 export const adminGetAllArticles = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
+    const { Articles } = await getTenantModels(req);
     const t = (key: string) => translate(key, locale, translations);
     const { language, category, isPublished, isActive } = req.query;
-    const filter: Record<string, any> = {};
+    const filter: Record<string, any> = {
+      tenant: req.tenant,
+    };
 
     if (
       typeof language === "string" &&
@@ -263,6 +271,7 @@ export const adminGetAllArticles = asyncHandler(
 export const adminGetArticlesById = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
+    const { Articles } = await getTenantModels(req);
     const t = (key: string) => translate(key, locale, translations);
     const { id } = req.params;
 
@@ -272,7 +281,7 @@ export const adminGetArticlesById = asyncHandler(
       return;
     }
 
-    const article = await Articles.findById(id)
+    const article = await Articles.findOne({ _id: id, tenant: req.tenant })
       .populate([{ path: "comments" }, { path: "category", select: "title" }])
       .lean();
 
@@ -305,6 +314,7 @@ export const adminGetArticlesById = asyncHandler(
 export const deleteArticles = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
+    const { Articles } = await getTenantModels(req);
     const locale: SupportedLocale = req.locale || getLogLocale();
     const t = (key: string) => translate(key, locale, translations);
 
@@ -314,7 +324,7 @@ export const deleteArticles = asyncHandler(
       return;
     }
 
-    const article = await Articles.findById(id);
+    const article = await Articles.findOne({ _id: id, tenant: req.tenant });
     if (!article) {
       logger.warn(t("notFound"), { ...getRequestContext(req), id });
       res.status(404).json({ success: false, message: t("notFound") });

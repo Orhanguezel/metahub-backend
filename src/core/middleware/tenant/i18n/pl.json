@@ -1,0 +1,30 @@
+{
+  "resolveTenant": {
+    "success": "Tenant został pomyślnie wykryty dla {tenant}.",
+    "fail": "Nie udało się wykryć tenant!"
+  },
+  "modelRegistry": {
+    "cacheHit": "Model {modelName} pobrany z pamięci podręcznej dla tenant {tenant}.",
+    "created": "Model {modelName} utworzony dla tenant {tenant}.",
+    "error": "Błąd podczas tworzenia modelu {modelName} dla tenant {tenant}!"
+  },
+  "tenant": {
+    "override": {
+      "success": "Override tenant przez superadmina ({userId}) na {tenant}.",
+      "not_found": "Wybrany tenant nie istnieje w mapowaniu: {tenant}",
+      "denied": "Override tenant ODRZUCONY: Brak uprawnień superadmina! (użytkownik: {userId}, tenant: {tenant})"
+    },
+    "resolve": {
+      "success": "Tenant wykryty dla domeny {domain}: {tenant}",
+      "fail": "Nie można wykryć tenant! Host: {host}, Header: {tenantHeader}"
+    }
+  },
+  "tenantDb": {
+    "envPath": "Ścieżka env wykryta: {envPath}",
+    "missingEnv": "Plik środowiskowy nie został znaleziony: .env.{tenant}",
+    "missingUri": "Brak MONGO_URI w .env.{tenant}",
+    "connecting": "Łączenie z MongoDB dla tenant \"{tenant}\"...",
+    "connected": "Połączono z tenantem \"{tenant}\".",
+    "connectionFail": "Połączenie z tenantem \"{tenant}\" nie powiodło się."
+  }
+}

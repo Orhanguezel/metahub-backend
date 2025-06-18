@@ -1,0 +1,14 @@
+{
+  "apikey": {
+    "error": {
+      "missing": "Brak klucza API.",
+      "invalid": "Nieprawidłowy lub odwołany klucz API."
+    },
+    "success": {
+      "validated": "Klucz API został pomyślnie zweryfikowany."
+    },
+    "log": {
+      "success": "Użycie klucza API zostało zapisane."
+    }
+  }
+}

@@ -1,49 +1,41 @@
+// models/BikeCategory.ts
 import mongoose, { Schema, Model, models } from "mongoose";
-import type { IBikeCategory } from "./types";
+import type { IBikeCategory, ICategoryImage } from "./types";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
-// Dinamik çok dilli alan: plain object
-const TranslatedLabelSchema = new Schema(
-  Object.fromEntries(
-    SUPPORTED_LOCALES.map((locale) => [locale, { type: String, required: true, trim: true }])
-  ),
-  { _id: false, id: false }
+// Çok dilli metin alanı
+const localizedStringField = () => {
+  const fields: Record<string, any> = {};
+  for (const locale of SUPPORTED_LOCALES) {
+    fields[locale] = { type: String, trim: true };
+  }
+  return fields;
+};
+
+const CategoryImageSchema = new Schema<ICategoryImage>(
+  {
+    url: { type: String, required: true },
+    thumbnail: { type: String, required: true },
+    webp: { type: String },
+    publicId: { type: String },
+  },
+  { _id: false }
 );
 
 const BikeCategorySchema = new Schema<IBikeCategory>(
   {
-    name: {
-      type: TranslatedLabelSchema,
-      required: true,
-      validate: {
-        validator: function (obj: Record<string, string>) {
-          return SUPPORTED_LOCALES.every((l) => obj[l] && obj[l].trim());
-        },
-        message: "All supported locales must be provided in name.",
-      },
-    },
-    slug: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
+    name: localizedStringField(),
+    description: localizedStringField(),
+    slug: { type: String, required: true, unique: true, lowercase: true },
+    images: { type: [CategoryImageSchema], default: [] },
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-// Slug otomatik oluşturma
 BikeCategorySchema.pre("validate", function (next) {
-  // this: any çünkü mongoose instance’ı, tip güvenliği için 'as any' kullanılabilir
-  const self = this as any;
-  // (name.en) fallback, name['en'] ile her zaman güvenli erişirsin
-  if (!self.slug && self.name && self.name.en) {
-    self.slug = self.name.en
+  if (!this.slug && this.name?.en) {
+    this.slug = this.name.en
       .toLowerCase()
       .replace(/\s+/g, "-")
       .replace(/[^\w\-]+/g, "")
@@ -53,9 +45,7 @@ BikeCategorySchema.pre("validate", function (next) {
   next();
 });
 
-// Model export (guard)
 const BikeCategory: Model<IBikeCategory> =
-  (models.BikeCategory as Model<IBikeCategory>) ||
-  mongoose.model<IBikeCategory>("BikeCategory", BikeCategorySchema);
+  models.BikeCategory || mongoose.model<IBikeCategory>("BikeCategory", BikeCategorySchema);
 
 export { BikeCategory };

@@ -1,81 +1,77 @@
 import mongoose from "mongoose";
-import fs from "fs";
-import path from "path";
-import dotenv from "dotenv";
-import { connectDB } from "@/core/config/connect";
-import { ModuleSetting } from "@/modules/admin";
+import { getEnvProfiles } from "./getEnvProfiles";
+import { getTenantDbConnection } from "@/core/config/tenantDb";
+import { getTenantModelsFromConnection } from "@/core/middleware/tenant/getTenantModelsFromConnection";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "@/core/config/i18n";
-import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import { SupportedLocale, TranslatedLabel } from "@/types/common";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import { fillAllLocales } from "@/core/utils/i18n/parseMultilangField";
 
-// Tek satırda standart log dili
-const langEnv = process.env.LOG_LOCALE as SupportedLocale;
-const lang: SupportedLocale = SUPPORTED_LOCALES.includes(langEnv)
-  ? langEnv
-  : "en";
+// 🌍 LOG_LOCALE veya fallback "en"
+const lang: SupportedLocale = getLogLocale();
 
-const envProfile = process.env.APP_ENV;
-if (!envProfile) {
-  const msg =
-    t("migration.noAppEnv", lang, translations) ||
-    "❌ APP_ENV is not defined. Please set it before running this script.";
-  logger.error(msg);
-  throw new Error(msg);
-}
-
-const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
-
-if (!fs.existsSync(envPath)) {
-  const msg =
-    t("migration.envNotFound", lang, translations, { envPath }) ||
-    `❌ Environment file not found: ${envPath}`;
-  logger.error(msg);
-  throw new Error(msg);
-}
-
-dotenv.config({ path: envPath });
-logger.info(
-  t("migration.envLoaded", lang, translations, { envPath }) ||
-    `🌱 Loaded env from: ${envPath}`
-);
-
+// 🔁 Migration Başlat
 const runMigration = async () => {
-  await connectDB();
+  const tenantList = getEnvProfiles(); // Örn: ['metahub', 'anastasia', 'ensotek']
 
-  const allModules = await ModuleSetting.find();
+  for (const tenant of tenantList) {
+    logger.info(`📦 Processing tenant: ${tenant}`, {
+      tenant,
+      module: "migration",
+      status: "start",
+    });
 
-  for (const mod of allModules) {
-    if (typeof mod.label === "string") {
-      const newLabel = {
-        tr: mod.label,
-        en: mod.label,
-        de: mod.label,
-      };
+    try {
+      const connection = await getTenantDbConnection(tenant);
+      const { ModuleSetting } = getTenantModelsFromConnection(connection);
 
-      mod.label = newLabel as any;
+      const allModules = await ModuleSetting.find();
 
-      await mod.save();
-      logger.info(
-        t("migration.migrated", lang, translations, { module: mod.module }) ||
-          `✅ Migrated: ${mod.module}`
-      );
-    } else {
-      logger.info(
-        t("migration.alreadyMigrated", lang, translations, {
-          module: mod.module,
-        }) || `✔️ Already migrated: ${mod.module}`
+      for (const mod of allModules) {
+        if (typeof mod.label === "string") {
+          const newLabel: TranslatedLabel = fillAllLocales(mod.label);
+
+          mod.label = newLabel;
+          await mod.save();
+
+          logger.info(
+            t("migration.migrated", lang, translations, {
+              module: mod.module,
+            }) || `✅ Migrated [${tenant}]: ${mod.module}`,
+            {
+              tenant,
+              module: "migration",
+              status: "success",
+            }
+          );
+        } else {
+          logger.info(
+            t("migration.alreadyMigrated", lang, translations, {
+              module: mod.module,
+            }) || `✔️ Already migrated [${tenant}]: ${mod.module}`,
+            {
+              tenant,
+              module: "migration",
+              status: "skipped",
+            }
+          );
+        }
+      }
+    } catch (err) {
+      logger.error(
+        t("migration.error", lang, translations, {
+          error: String(err),
+        }) || `❌ Migration error for ${tenant}: ${err}`,
+        { tenant, module: "migration", status: "fail", error: String(err) }
       );
     }
   }
 
-  mongoose.connection.close();
+  if (mongoose.connection.readyState === 1) {
+    await mongoose.connection.close();
+  }
 };
 
-runMigration().catch((err) => {
-  logger.error(
-    t("migration.error", lang, translations, { error: String(err) }) ||
-      `❌ Migration error: ${err}`
-  );
-  mongoose.connection.close();
-});
+runMigration();

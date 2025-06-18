@@ -1,7 +1,7 @@
 // 🔠 Veritabanında kullanılacak büyük harfli sabit değerler
 export const ALLOWED_COMMENT_CONTENT_TYPES = [
   "EnsotekProd",
-  "RadonarProd",
+  "Bike",
   "Blog",
   "News",
   "Services",

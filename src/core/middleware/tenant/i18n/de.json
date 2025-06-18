@@ -1,0 +1,30 @@
+{
+  "resolveTenant": {
+    "success": "Tenant wurde erfolgreich für {tenant} ermittelt.",
+    "fail": "Tenant konnte nicht ermittelt werden!"
+  },
+  "modelRegistry": {
+    "cacheHit": "Modell {modelName} für Tenant {tenant} aus dem Cache geladen.",
+    "created": "Modell {modelName} für Tenant {tenant} wurde erstellt.",
+    "error": "Fehler beim Erstellen des Modells {modelName} für Tenant {tenant}!"
+  },
+  "tenant": {
+    "override": {
+      "success": "Tenant-Override durch Superadmin ({userId}) auf {tenant}.",
+      "not_found": "Ausgewählter Tenant ist nicht in der Mapping-Liste: {tenant}",
+      "denied": "Tenant-Override ABGELEHNT: Kein Superadmin! (Benutzer: {userId}, Tenant: {tenant})"
+    },
+    "resolve": {
+      "success": "Tenant für Domain {domain} ermittelt: {tenant}",
+      "fail": "Tenant konnte nicht ermittelt werden! Host: {host}, Header: {tenantHeader}"
+    }
+  },
+  "tenantDb": {
+    "envPath": "Env-Pfad aufgelöst: {envPath}",
+    "missingEnv": "Env-Datei nicht gefunden: .env.{tenant}",
+    "missingUri": "MONGO_URI fehlt in .env.{tenant}",
+    "connecting": "Verbindung zur MongoDB für Tenant \"{tenant}\" wird hergestellt...",
+    "connected": "Verbindung zum Tenant \"{tenant}\" erfolgreich.",
+    "connectionFail": "Verbindung zum Tenant \"{tenant}\" fehlgeschlagen."
+  }
+}

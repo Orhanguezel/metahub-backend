@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Blog } from ".";
+//import { Blog } from ".";
 import { isValidObjectId } from "@/core/utils/validation";
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 import logger from "@/core/middleware/logger/logger";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "@/templates/i18n";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // Tek noktadan blog için çeviri fonksiyonu (user response veya log için kullanılabilir)
 function blogT(
@@ -27,7 +28,7 @@ export const getAllBlog = asyncHandler(async (req: Request, res: Response) => {
       ? (language as SupportedLocale)
       : (process.env.LOG_LOCALE as SupportedLocale) || "en");
 
-  const filter: any = { isActive: true, isPublished: true };
+  const filter: any = { isActive: true, isPublished: true, tenant: req.tenant };
 
   // Dinamik kategori filtresi
   if (category && isValidObjectId(category.toString())) {
@@ -44,6 +45,7 @@ export const getAllBlog = asyncHandler(async (req: Request, res: Response) => {
     { path: "category", select: "title" },
   ];
 
+  const { Blog } = await getTenantModels(req);
   const blogList = await Blog.find(filter)
     .populate(defaultPopulate)
     .sort({ createdAt: -1 })
@@ -82,8 +84,10 @@ export const getBlogById = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
+  const { Blog } = await getTenantModels(req);
   const blog = await Blog.findOne({
     _id: id,
+    tenant: req.tenant,
     isActive: true,
     isPublished: true,
   })
@@ -120,7 +124,13 @@ export const getBlogBySlug = asyncHandler(
         ? (language as SupportedLocale)
         : (process.env.LOG_LOCALE as SupportedLocale) || "en");
 
-    const blog = await Blog.findOne({ slug, isActive: true, isPublished: true })
+    const { Blog } = await getTenantModels(req);
+    const blog = await Blog.findOne({
+      slug,
+      tenant: req.tenant,
+      isActive: true,
+      isPublished: true,
+    })
       .populate("comments")
       .populate("category", "title")
       .lean();

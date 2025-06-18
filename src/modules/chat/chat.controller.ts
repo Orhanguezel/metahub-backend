@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
-import { ChatMessage, ChatSession } from "@/modules/chat";
+//import { ChatMessage, ChatSession } from "@/modules/chat";
 import mongoose from "mongoose";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // Kullanıcı tipi (opsiyonel)
 type AuthenticatedRequest = Request & {
@@ -15,9 +16,10 @@ type AuthenticatedRequest = Request & {
 // ✅ Get messages by room
 export const getMessagesByRoom = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { ChatMessage } = await getTenantModels(req);
     try {
       const { roomId } = req.params;
-      const messages = await ChatMessage.find({ roomId })
+      const messages = await ChatMessage.find({ roomId, tenant: req.tenant })
         .populate("sender", "name email")
         .sort({ createdAt: 1 });
 
@@ -31,8 +33,10 @@ export const getMessagesByRoom = asyncHandler(
 // ✅ Get last message of all rooms
 export const getAllRoomsLastMessages = asyncHandler(
   async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { ChatMessage } = await getTenantModels(_req);
     try {
       const latestMessages = await ChatMessage.aggregate([
+        { $match: { tenant: _req.tenant } },
         { $sort: { createdAt: -1 } },
         { $group: { _id: "$roomId", latestMessage: { $first: "$$ROOT" } } },
         { $replaceRoot: { newRoot: "$latestMessage" } },
@@ -53,8 +57,12 @@ export const getAllRoomsLastMessages = asyncHandler(
 // ✅ Delete single message
 export const deleteMessage = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { ChatMessage } = await getTenantModels(req);
     try {
-      const message = await ChatMessage.findByIdAndDelete(req.params.id);
+      const message = await ChatMessage.findByIdAndDelete({
+        _id: req.params.id,
+        tenant: req.tenant,
+      });
       if (!message) {
         res.status(404).json({ message: "Message not found." });
         return;
@@ -70,6 +78,7 @@ export const deleteMessage = asyncHandler(
 // ✅ Delete messages in bulk
 export const deleteMessagesBulk = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { ChatMessage } = await getTenantModels(req);
     try {
       const { ids } = req.body;
 
@@ -81,7 +90,10 @@ export const deleteMessagesBulk = asyncHandler(
         return;
       }
 
-      const result = await ChatMessage.deleteMany({ _id: { $in: ids } });
+      const result = await ChatMessage.deleteMany({
+        _id: { $in: ids },
+        tenant: req.tenant,
+      });
       res
         .status(200)
         .json({ message: `${result.deletedCount} messages deleted.` });
@@ -98,6 +110,7 @@ export const sendManualMessage = asyncHandler(
     res: Response,
     next: NextFunction
   ): Promise<void> => {
+    const { ChatMessage, ChatSession } = await getTenantModels(req);
     try {
       const { roomId, message, close } = req.body;
       const senderId = req.user?.id;
@@ -111,6 +124,7 @@ export const sendManualMessage = asyncHandler(
       const newMessage = await ChatMessage.create({
         roomId,
         sender: senderId,
+        tenant: req.tenant,
         message,
         isFromAdmin: true,
         isRead: true,
@@ -151,11 +165,12 @@ export const sendManualMessage = asyncHandler(
 // ✅ Mark messages as read
 export const markMessagesAsRead = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { ChatMessage } = await getTenantModels(req);
     try {
       const { roomId } = req.params;
 
       await ChatMessage.updateMany(
-        { roomId, isRead: false, isFromBot: false },
+        { roomId, isRead: false, isFromBot: false, tenant: req.tenant },
         { $set: { isRead: true } }
       );
 
@@ -169,9 +184,10 @@ export const markMessagesAsRead = asyncHandler(
 // ✅ Get archived sessions
 export const getArchivedSessions = asyncHandler(
   async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { ChatMessage } = await getTenantModels(_req);
     try {
       const sessions = await ChatMessage.aggregate([
-        { $match: { isRead: true, isFromAdmin: true } },
+        { $match: { isRead: true, isFromAdmin: true, tenant: _req.tenant } },
         { $sort: { createdAt: -1 } },
         { $group: { _id: "$roomId", lastMessage: { $first: "$$ROOT" } } },
         { $replaceRoot: { newRoot: "$lastMessage" } },
@@ -199,8 +215,12 @@ export const getArchivedSessions = asyncHandler(
 // ✅ Get active chat sessions
 export const getActiveChatSessions = asyncHandler(
   async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { ChatSession } = await getTenantModels(_req);
     try {
-      const sessions = await ChatSession.find({ closedAt: { $exists: false } })
+      const sessions = await ChatSession.find({
+        closedAt: { $exists: false },
+        tenant: _req.tenant,
+      })
         .sort({ createdAt: -1 })
         .populate("user", "name email");
 
@@ -213,9 +233,10 @@ export const getActiveChatSessions = asyncHandler(
 
 // ✅ Get all chat sessions
 export const getAllChatSessions = asyncHandler(
-  async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { ChatSession } = await getTenantModels(req);
     try {
-      const sessions = await ChatSession.find()
+      const sessions = await ChatSession.find({ tenant: req.tenant })
         .sort({ createdAt: -1 })
         .populate("user", "name email");
 

@@ -1,4 +1,4 @@
-import { generateMeta as generateMetaInner } from "./generate";
+import { generateMeta as generateMetaInner } from "./generateMeta";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "@/scripts/generateMeta/i18n";

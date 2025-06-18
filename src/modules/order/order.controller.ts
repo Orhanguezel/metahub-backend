@@ -1,18 +1,13 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Order } from "@/modules/order";
-import { Bike } from "@/modules/bikes";
-import { Address } from "@/modules/address";
-import { Coupon } from "@/modules/coupon";
-import { Payment } from "@/modules/payment";
-import { User } from "@/modules/users";
 import { sendEmail } from "@/services/emailService";
 import { orderConfirmationTemplate } from "@/modules/order/templates/orderConfirmation";
-import { Notification } from "@/modules/notification";
+//import { Notification } from "@/modules/notification";
 import type { SupportedLocale } from "@/types/common";
 import { t } from "@/core/utils/i18n/translate";
 import orderTranslations from "@/modules/order/i18n";
 import logger from "@/core/middleware/logger/logger";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // i18n kısa yol fonksiyonu
 function orderT(
@@ -25,6 +20,7 @@ function orderT(
 
 // 🟢 Sipariş Oluştur
 export const createOrder = asyncHandler(async (req: Request, res: Response) => {
+  const { Order } = await getTenantModels(req);
   const { items, addressId, shippingAddress, paymentMethod, couponCode } =
     req.body;
   const userId = req.user?._id;
@@ -34,7 +30,11 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   // 1️⃣ Adres bul/gönder
   let finalShippingAddress = shippingAddress;
   if (addressId) {
-    const addressDoc = await Address.findById(addressId).lean();
+    const { Address } = await getTenantModels(req);
+    const addressDoc = await Address.findOne({
+      _id: addressId,
+      tenant: req.tenant,
+    }).lean();
     if (!addressDoc) {
       logger.warn(orderT("error.addressNotFound", reqLocale));
       res.status(400).json({
@@ -80,7 +80,11 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   const itemsForMail: string[] = [];
 
   for (const item of items) {
-    const product = await Bike.findById(item.product);
+    const { Bike } = await getTenantModels(req);
+    const product = await Bike.findOne({
+      _id: item.product,
+      tenant: req.tenant,
+    }).lean();
     if (!product) {
       logger.warn(orderT("error.productNotFound", reqLocale));
       res.status(404).json({
@@ -128,9 +132,11 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   let discount = 0;
   let coupon = null;
   if (couponCode) {
+    const { Coupon } = await getTenantModels(req);
     coupon = await Coupon.findOne({
       code: couponCode.trim().toUpperCase(),
       isActive: true,
+      tenant: req.tenant,
       expiresAt: { $gte: new Date() },
     });
     if (coupon) {
@@ -157,8 +163,11 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   }
 
   // 5️⃣ Siparişi oluştur
+  const { Payment } = await getTenantModels(req);
+  const { User } = await getTenantModels(req);
   const order = await Order.create({
     user: userId,
+    tenant: req.tenant,
     addressId: addressId || undefined,
     items: enrichedItems,
     shippingAddress: finalShippingAddress,
@@ -175,6 +184,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   if (["credit_card", "paypal"].includes(method)) {
     paymentDoc = await Payment.create({
       order: order._id,
+      tenant: req.tenant,
       amount: total - discount,
       method,
       status: "pending",
@@ -187,7 +197,9 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
 
   // 7️⃣ Email & Notification
   const user = userId
-    ? await User.findById(userId).select("email name language")
+    ? await User.findOne({ _id: userId, tenant: req.tenant }).select(
+        "email name language"
+      )
     : null;
   const locale: SupportedLocale = reqLocale || user?.language || "en";
   const customerEmail = finalShippingAddress?.email || user?.email || "";
@@ -211,6 +223,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     })}</p>`,
   });
 
+  const { Notification } = await getTenantModels(req);
   await Notification.create({
     user: userId,
     type: "success",
@@ -243,7 +256,8 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
 // 🟠 Sipariş detay (sadece sahibi veya admin görebilir)
 export const getOrderById = asyncHandler(
   async (req: Request, res: Response) => {
-    const order = await Order.findById(req.params.id)
+    const { Order } = await getTenantModels(req);
+    const order = await Order.findOne({ tenant: req.tenant })
       .populate("items.product")
       .populate("addressId");
 
@@ -280,7 +294,8 @@ export const getOrderById = asyncHandler(
 // 🟢 Siparişin adresini güncelle (sadece sahibi!)
 export const updateShippingAddress = asyncHandler(
   async (req: Request, res: Response) => {
-    const order = await Order.findById(req.params.id);
+    const { Order } = await getTenantModels(req);
+    const order = await Order.findOne({ tenant: req.tenant });
     const locale: SupportedLocale = (req.locale as SupportedLocale) || "en";
 
     if (!order) {

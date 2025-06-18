@@ -1,20 +1,30 @@
+// src/core/middleware/analyticsLogger.ts
 import { Request, Response, NextFunction } from "express";
 import { Analytics } from "@/modules/analytics";
 import geoip from "geoip-lite";
 import { ModuleSetting } from "@/modules/admin";
-import logger from "@/core/middleware/logger/logger";
+import { getTenantLogger } from "@/core/middleware/logger/tenantLogger";
 
-export const analyticsLogger = async (req: Request, res: Response, next: NextFunction) => {
+export const analyticsLogger = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  // Her zaman request üzerinden al
+  const tenant = req.tenant || "unknown";
   try {
     const pathParts = req.originalUrl.split("/").filter(Boolean);
     const moduleName = pathParts[1]?.toLowerCase() || "unknown";
     const project = process.env.APP_ENV;
 
-    // 🧠 Module ayarı kontrolü (multi-tenant uyumlu)
-    const setting = await ModuleSetting.findOne({ module: moduleName, project });
+    // Multi-tenant module setting
+    const setting = await ModuleSetting.findOne({
+      module: moduleName,
+      project,
+    });
 
     if (!setting || setting.useAnalytics !== true) {
-      return next(); // ⏭️ Analytics pasifse atla
+      return next(); // Analytics kapalıysa devam et
     }
 
     const eventType =
@@ -40,13 +50,16 @@ export const analyticsLogger = async (req: Request, res: Response, next: NextFun
     const geo = geoip.lookup(ip);
 
     const analyticsData = {
-      userId: (req as any).user?._id || null,
+      tenant,
+      userId: req.user?._id || null,
       path: req.originalUrl,
       method: req.method,
       ip,
       country: geo?.country,
       city: geo?.city,
-      location: geo?.ll ? { type: "Point", coordinates: [geo.ll[1], geo.ll[0]] } : undefined,
+      location: geo?.ll
+        ? { type: "Point", coordinates: [geo.ll[1], geo.ll[0]] }
+        : undefined,
       userAgent: req.headers["user-agent"] || "",
       query: req.query,
       body: req.method !== "GET" ? req.body : undefined,
@@ -54,24 +67,28 @@ export const analyticsLogger = async (req: Request, res: Response, next: NextFun
       eventType,
       uploadedFiles: uploadedFiles.length > 0 ? uploadedFiles : undefined,
       status: res.statusCode,
-      locale: (req as any).locale || "en",
+      locale: req.locale || "en",
       timestamp: new Date(),
     };
 
+    // --- DB'ye kaydet (her zaman tenant alanı ile!)
     await Analytics.create(analyticsData);
 
-    // 📘 Terminal ve JSON log
-    logger.info("Analytics event logged", {
-      module: moduleName,
+    // --- Dosyaya ve terminale logla (tenant'a özel!)
+    const tenantLogger = getTenantLogger(tenant);
+    tenantLogger.info("Analytics event logged", {
+      ...analyticsData, // Tam context!
       project,
-      eventType,
-      path: req.originalUrl,
-      ip,
-      location: analyticsData.location,
     });
-
   } catch (error) {
-    logger.error("Analytics logging failed", { error });
+    // Her zaman ilgili tenant logger'a yaz!
+    const tenantLogger = getTenantLogger(req.tenant || "unknown");
+    tenantLogger.error("Analytics logging failed", {
+      error,
+      tenant: req.tenant,
+      path: req.originalUrl,
+      method: req.method,
+    });
   }
 
   next();

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Bike } from "@/modules/bikes";
+//import { Bike } from "@/modules/bikes";
 import { IBike } from "@/modules/bikes/types";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
@@ -21,6 +21,7 @@ import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import type { SupportedLocale } from "@/types/common";
 import translations from "./i18n";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 const parseIfJson = (value: any) => {
   try {
@@ -33,6 +34,7 @@ const parseIfJson = (value: any) => {
 // ✅ CREATE
 export const createBike = asyncHandler(async (req: Request, res: Response) => {
   const locale: SupportedLocale = req.locale || getLogLocale();
+  const { Bike } = await getTenantModels(req);
   const t = (key: string, vars?: Record<string, string | number>) =>
     translate(key, locale, translations, vars);
 
@@ -44,6 +46,7 @@ export const createBike = asyncHandler(async (req: Request, res: Response) => {
       category,
       brand,
       price,
+      tenant,
       stock,
       stockThreshold,
       frameMaterial,
@@ -60,33 +63,45 @@ export const createBike = asyncHandler(async (req: Request, res: Response) => {
     } = req.body;
 
     // Çok dilli alanlar için otomatik locale doldurma
-    name = fillAllLocales(parseIfJson(name));
-    description = fillAllLocales(parseIfJson(description));
+    name = fillAllLocales(parseIfJson(name), locale);
+    description = fillAllLocales(parseIfJson(description), locale);
 
     // String diziler: virgüllü veya JSON array olarak gelebilir!
     tags = parseIfJson(tags);
     if (typeof tags === "string") {
-      try { tags = JSON.parse(tags); } catch { tags = [tags]; }
+      try {
+        tags = JSON.parse(tags);
+      } catch {
+        tags = [tags];
+      }
     }
     if (!Array.isArray(tags)) tags = [];
 
     color = parseIfJson(color);
     if (typeof color === "string") {
-      try { color = JSON.parse(color); } catch { color = [color]; }
+      try {
+        color = JSON.parse(color);
+      } catch {
+        color = [color];
+      }
     }
     if (!Array.isArray(color)) color = [];
-
-    const altTexts = parseIfJson(req.body.altTexts);
 
     // Görsel işlemleri
     const images: IBike["images"] = [];
     if (Array.isArray(req.files)) {
-      for (const [index, file] of (req.files as Express.Multer.File[]).entries()) {
+      for (const [index, file] of (
+        req.files as Express.Multer.File[]
+      ).entries()) {
         let imageUrl = getImagePath(file);
         let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
 
         if (shouldProcessImage()) {
-          const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+          const processed = await processImageLocal(
+            file.path,
+            file.filename,
+            path.dirname(file.path)
+          );
           thumbnail = processed.thumbnail;
           webp = processed.webp;
         }
@@ -96,7 +111,6 @@ export const createBike = asyncHandler(async (req: Request, res: Response) => {
           thumbnail,
           webp,
           publicId: (file as any).public_id,
-          altText: fillAllLocales(altTexts?.[index] || {}),
         });
       }
     }
@@ -113,6 +127,7 @@ export const createBike = asyncHandler(async (req: Request, res: Response) => {
       brand,
       price,
       stock,
+      tenant: req.tenant,
       stockThreshold,
       frameMaterial,
       brakeType,
@@ -136,7 +151,9 @@ export const createBike = asyncHandler(async (req: Request, res: Response) => {
       bikeId: product._id,
     });
 
-    res.status(201).json({ success: true, message: t("log.created"), data: product });
+    res
+      .status(201)
+      .json({ success: true, message: t("log.created"), data: product });
   } catch (err: any) {
     logger.error(t("error.create_fail"), {
       ...getRequestContext(req),
@@ -155,18 +172,23 @@ export const updateBike = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const updates = req.body;
   const locale: SupportedLocale = req.locale || getLogLocale();
-  const t = (key: string, vars?: Record<string, any>) => translate(key, locale, translations, vars);
+  const { Bike } = await getTenantModels(req);
+  const t = (key: string, vars?: Record<string, any>) =>
+    translate(key, locale, translations, vars);
 
   if (!isValidObjectId(id)) {
-     res.status(400).json({ success: false, message: t("error.invalid_id") });return;
+    res.status(400).json({ success: false, message: t("error.invalid_id") });
+    return;
   }
 
-  const product = await Bike.findById(id);
+  const product = await Bike.findOne({
+    _id: id,
+    tenant: req.tenant,
+  });
   if (!product) {
-    res.status(404).json({ success: false, message: t("error.not_found") });return;
+    res.status(404).json({ success: false, message: t("error.not_found") });
+    return;
   }
-
-  const altTexts = parseIfJson(updates.altTexts);
 
   // Çok dilli alanlar (sadece varsa güncelle)
   if (updates.name !== undefined) {
@@ -180,24 +202,43 @@ export const updateBike = asyncHandler(async (req: Request, res: Response) => {
   if (updates.tags !== undefined) {
     let newTags = parseIfJson(updates.tags);
     if (typeof newTags === "string") {
-      try { newTags = JSON.parse(newTags); } catch { newTags = [newTags]; }
+      try {
+        newTags = JSON.parse(newTags);
+      } catch {
+        newTags = [newTags];
+      }
     }
     product.tags = Array.isArray(newTags) ? newTags : [];
   }
   if (updates.color !== undefined) {
     let newColors = parseIfJson(updates.color);
     if (typeof newColors === "string") {
-      try { newColors = JSON.parse(newColors); } catch { newColors = [newColors]; }
+      try {
+        newColors = JSON.parse(newColors);
+      } catch {
+        newColors = [newColors];
+      }
     }
     product.color = Array.isArray(newColors) ? newColors : [];
   }
 
   // Diğer alanlar
   const directFields: (keyof IBike)[] = [
-    "category", "brand", "price", "stock", "stockThreshold",
-    "frameMaterial", "brakeType", "wheelSize", "gearCount",
-    "suspensionType", "weightKg", "isElectric", "batteryRangeKm",
-    "motorPowerW", "isPublished"
+    "category",
+    "brand",
+    "price",
+    "stock",
+    "stockThreshold",
+    "frameMaterial",
+    "brakeType",
+    "wheelSize",
+    "gearCount",
+    "suspensionType",
+    "weightKg",
+    "isElectric",
+    "batteryRangeKm",
+    "motorPowerW",
+    "isPublished",
   ];
   for (const field of directFields) {
     if (updates[field] !== undefined) {
@@ -208,12 +249,18 @@ export const updateBike = asyncHandler(async (req: Request, res: Response) => {
   // Görseller
   if (!Array.isArray(product.images)) product.images = [];
   if (Array.isArray(req.files)) {
-    for (const [index, file] of (req.files as Express.Multer.File[]).entries()) {
+    for (const [index, file] of (
+      req.files as Express.Multer.File[]
+    ).entries()) {
       const imageUrl = getImagePath(file);
       let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
 
       if (shouldProcessImage()) {
-        const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+        const processed = await processImageLocal(
+          file.path,
+          file.filename,
+          path.dirname(file.path)
+        );
         thumbnail = processed.thumbnail;
         webp = processed.webp;
       }
@@ -223,7 +270,6 @@ export const updateBike = asyncHandler(async (req: Request, res: Response) => {
         thumbnail,
         webp,
         publicId: (file as any).public_id,
-        altText: fillAllLocales(altTexts?.[index] || {}),
       });
     }
   }
@@ -232,9 +278,15 @@ export const updateBike = asyncHandler(async (req: Request, res: Response) => {
   if (updates.removedImages) {
     try {
       const removed = JSON.parse(updates.removedImages);
-      product.images = product.images.filter((img: any) => !removed.includes(img.url));
+      product.images = product.images.filter(
+        (img: any) => !removed.includes(img.url)
+      );
       for (const img of removed) {
-        const localPath = path.join("uploads", "bike-images", path.basename(img.url));
+        const localPath = path.join(
+          "uploads",
+          "bike-images",
+          path.basename(img.url)
+        );
         if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
         if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
       }
@@ -252,16 +304,16 @@ export const updateBike = asyncHandler(async (req: Request, res: Response) => {
     bikeId: id,
   });
 
-  res.status(200).json({ success: true, message: t("log.updated"), data: product });
+  res
+    .status(200)
+    .json({ success: true, message: t("log.updated"), data: product });
 });
- 
-
-
 
 // ✅ DELETE
 export const deleteBike = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const locale: SupportedLocale = req.locale || getLogLocale();
+  const { Bike } = await getTenantModels(req);
   const t = (key: string) => translate(key, locale, translations);
 
   if (!isValidObjectId(id)) {
@@ -269,14 +321,21 @@ export const deleteBike = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  const product = await Bike.findById(id);
+  const product = await Bike.findOne({
+    _id: id,
+    tenant: req.tenant,
+  });
   if (!product) {
     res.status(404).json({ success: false, message: t("error.not_found") });
     return;
   }
 
   for (const img of product.images) {
-    const localPath = path.join("uploads", "bike-images", path.basename(img.url));
+    const localPath = path.join(
+      "uploads",
+      "bike-images",
+      path.basename(img.url)
+    );
     if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
     if (img.publicId) {
       try {
@@ -300,36 +359,53 @@ export const deleteBike = asyncHandler(async (req: Request, res: Response) => {
 });
 
 // ✅ GET ALL
-export const adminGetAllBike = asyncHandler(async (_req: Request, res: Response) => {
-  const products = await Bike.find()
-    .populate("comments")
-    .populate("category", "name")
-    .sort({ createdAt: -1 })
-    .lean();
+export const adminGetAllBike = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { Bike } = await getTenantModels(req);
+    const products = await Bike.find({
+      tenant: req.tenant,
+    })
+      .populate("comments")
+      .populate("category", "name")
+      .sort({ createdAt: -1 })
+      .lean();
 
-  res.status(200).json({ success: true, message: "Product list fetched successfully.", data: products });
-});
+    res.status(200).json({
+      success: true,
+      message: "Product list fetched successfully.",
+      data: products,
+    });
+  }
+);
 
 // ✅ GET BY ID
-export const adminGetBikeById = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const t = (key: string) => translate(key, locale, translations);
+export const adminGetBikeById = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const locale: SupportedLocale = req.locale || getLogLocale();
+    const { Bike } = await getTenantModels(req);
+    const t = (key: string) => translate(key, locale, translations);
 
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ success: false, message: t("error.invalid_id") });
-    return;
+    if (!isValidObjectId(id)) {
+      res.status(400).json({ success: false, message: t("error.invalid_id") });
+      return;
+    }
+
+    const product = await Bike.findOne({
+      _id: id,
+      tenant: req.tenant,
+    })
+      .populate("comments")
+      .populate("category", "name")
+      .lean();
+
+    if (!product || !product.isActive) {
+      res.status(404).json({ success: false, message: t("error.not_found") });
+      return;
+    }
+
+    res
+      .status(200)
+      .json({ success: true, message: t("log.fetched"), data: product });
   }
-
-  const product = await Bike.findById(id)
-    .populate("comments")
-    .populate("category", "name")
-    .lean();
-
-  if (!product || !product.isActive) {
-    res.status(404).json({ success: false, message: t("error.not_found") });
-    return;
-  }
-
-  res.status(200).json({ success: true, message: t("log.fetched"), data: product });
-});
+);

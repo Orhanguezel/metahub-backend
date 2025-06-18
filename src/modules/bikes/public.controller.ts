@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Bike } from "@/modules/bikes";
+//import { Bike } from "@/modules/bikes";
 import { isValidObjectId } from "@/core/utils/validation";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
@@ -8,15 +8,19 @@ import { t as translate } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import type { SupportedLocale } from "@/types/common";
 import translations from "../bikes/i18n";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // ✅ Get All Published Products (Public)
 export const getAllBike = asyncHandler(async (req: Request, res: Response) => {
   const { category, onlyLocalized } = req.query;
+
   const locale: SupportedLocale =
     (req.locale as SupportedLocale) || getLogLocale() || "en";
   const t = (key: string) => translate(key, locale, translations);
+  const { Bike } = await getTenantModels(req);
 
   const filter: Record<string, any> = {
+    tenant: req.tenant,
     isActive: true,
     isPublished: true,
   };
@@ -31,7 +35,7 @@ export const getAllBike = asyncHandler(async (req: Request, res: Response) => {
 
   const products = await Bike.find(filter)
     .populate("comments")
-    .populate("category", "name")
+    .populate("category", "name slug")
     .sort({ createdAt: -1 })
     .lean();
 
@@ -55,6 +59,7 @@ export const getBikeById = asyncHandler(async (req: Request, res: Response) => {
   const locale: SupportedLocale =
     (req.locale as SupportedLocale) || getLogLocale() || "en";
   const t = (key: string) => translate(key, locale, translations);
+  const { Bike } = await getTenantModels(req);
 
   if (!isValidObjectId(id)) {
     logger.warn(t("error.invalid_id"), {
@@ -70,6 +75,7 @@ export const getBikeById = asyncHandler(async (req: Request, res: Response) => {
 
   const product = await Bike.findOne({
     _id: id,
+    tenant: req.tenant,
     isActive: true,
     isPublished: true,
   })
@@ -107,6 +113,7 @@ export const getBikeById = asyncHandler(async (req: Request, res: Response) => {
 export const getBikeBySlug = asyncHandler(
   async (req: Request, res: Response) => {
     const { slug } = req.params;
+    const { Bike } = await getTenantModels(req);
     const locale: SupportedLocale =
       (req.locale as SupportedLocale) || getLogLocale() || "en";
     const t = (key: string) => translate(key, locale, translations);
@@ -118,11 +125,12 @@ export const getBikeBySlug = asyncHandler(
 
     const product = await Bike.findOne({
       slug,
+      tenant: req.tenant,
       isActive: true,
       isPublished: true,
     })
       .populate("comments")
-      .populate("category", "name")
+      .populate("category", "name slug")
       .lean();
 
     if (!product) {

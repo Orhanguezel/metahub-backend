@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { User } from "@/modules/users";
 import { getUserOrFail, validateJsonField } from "@/core/utils/validation";
 import { checkPassword, hashNewPassword } from "@/services/authService";
 import { safelyDeleteFile } from "@/core/utils/fileUtils";
@@ -55,7 +54,7 @@ export const getMyProfile = asyncHandler(
     const locale = getLocale(req);
     const { User } = await getTenantModels(req);
 
-    const user = await User.findById(req.user!.id)
+    const user = await User.findOne({ _id: req.user!.id, tenant: req.tenant })
       .select("-password")
       .populate("addresses profile payment cart orders favorites");
 
@@ -80,7 +79,7 @@ export const updateMyProfile = asyncHandler(
   async (req: Request, res: Response) => {
     const locale = getLocale(req);
     const { User } = await getTenantModels(req);
-    const user = await getUserOrFail(req.user!.id, res);
+    const user = await User.findOne({ _id: req.user!.id, tenant: req.tenant });
     if (!user) return;
 
     const { name, email, phone, language } = req.body;
@@ -111,7 +110,10 @@ export const updateMyPassword = asyncHandler(
   async (req: Request, res: Response) => {
     const locale = getLocale(req);
     const { User } = await getTenantModels(req);
-    const user = await User.findById(req.user!.id).select("+password");
+    const user = await User.findOne({
+      _id: req.user!.id,
+      tenant: req.tenant,
+    }).select("+password");
     if (!user) {
       logger.warn(
         `[PROFILE] User not found for password change: ${req.user!.id}`
@@ -147,7 +149,10 @@ export const updateNotificationSettings = asyncHandler(
   async (req: Request, res: Response) => {
     const locale = getLocale(req);
     const { User } = await getTenantModels(req);
-    const user = await getUserOrFail(req.user!.id, res);
+    const user = await User.findOne(
+      { _id: req.user!.id, tenant: req.tenant },
+      User
+    );
     if (!user) return;
 
     const { emailNotifications, smsNotifications } = req.body;
@@ -172,7 +177,10 @@ export const updateSocialMediaLinks = asyncHandler(
   async (req: Request, res: Response) => {
     const locale = getLocale(req);
     const { User } = await getTenantModels(req);
-    const user = await getUserOrFail(req.user!.id, res);
+    const user = await User.findOne(
+      { _id: req.user!.id, tenant: req.tenant },
+      User
+    );
     if (!user) return;
     const { facebook, instagram, twitter } = req.body;
     user.socialMedia = {
@@ -203,7 +211,7 @@ export const updateProfileImage = asyncHandler(
       });
       return;
     }
-    const user = await User.findById(req.user!.id);
+    const user = await User.findOne({ _id: req.user!.id, tenant: req.tenant });
     if (!user) {
       logger.warn(
         `[PROFILE] User not found for profile image: ${req.user!.id}`
@@ -278,11 +286,12 @@ export const updateFullProfile = asyncHandler(
         return;
       }
     }
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user!.id,
-      updateFields,
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: req.user!.id, tenant: req.tenant },
+      { ...updateFields },
       { new: true, runValidators: true }
     ).select("-password");
+
     if (!updatedUser) {
       logger.warn(`[PROFILE] User not found for full update: ${req.user!.id}`);
       res
@@ -290,6 +299,7 @@ export const updateFullProfile = asyncHandler(
         .json({ success: false, message: userT("error.userNotFound", locale) });
       return;
     }
+
     logger.info(`[PROFILE] Full profile updated for: ${updatedUser.email}`);
     res.status(200).json({
       success: true,
@@ -305,7 +315,10 @@ export const deleteMyAccount = asyncHandler(
     const locale = getLocale(req);
     const { User } = await getTenantModels(req);
     const { password } = req.body;
-    const user = await User.findById(req.user!.id);
+    const user = await User.findOne({
+      _id: req.user!.id,
+      tenant: req.tenant,
+    }).select("+password");
     if (!user) {
       logger.warn(`[PROFILE] User not found for delete: ${req.user!.id}`);
       res
@@ -353,7 +366,7 @@ export const deleteMyAccount = asyncHandler(
         } catch {}
       }
     }
-    await User.findByIdAndDelete(req.user!.id);
+    await User.findByIdAndDelete(req.user!.id, { tenant: req.tenant });
     logger.info(`[PROFILE] Account deleted: ${user.email}`);
     res.status(200).json({
       success: true,

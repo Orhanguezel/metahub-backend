@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import dayjs from "dayjs";
-import { Booking } from "@/modules/booking";
+//import { Booking } from "@/modules/booking";
 import { Notification } from "@/modules/notification";
 import { sendEmail } from "@/services/emailService";
 import { BookingReceivedTemplate } from "@/modules/booking/templates/bookingReceived";
@@ -11,6 +11,7 @@ import { t } from "@/core/utils/i18n/translate";
 import translations from "@/templates/i18n";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import type { SupportedLocale } from "@/types/common";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // Yardımcı fonksiyon: Hem response, hem log için locale destekli
 function bookingT(
@@ -72,6 +73,7 @@ export const createBooking = asyncHandler(
       10
     );
 
+    const { Booking } = await getTenantModels(req);
     const overlappingBookings = await Booking.find({
       date,
       $expr: {
@@ -114,6 +116,7 @@ export const createBooking = asyncHandler(
       name,
       email,
       phone,
+      tenant: req.tenant,
       serviceType,
       note,
       date,
@@ -183,6 +186,7 @@ export const createBooking = asyncHandler(
     // Admin notification (i18n)
     await Notification.create({
       title: bookingT("public.notification.title", userLocale),
+      tenant: req.tenant,
       message: bookingT("public.notification.message", userLocale, {
         name: name[userLocale],
         service: serviceType,

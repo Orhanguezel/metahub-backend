@@ -1,8 +1,8 @@
 import { Types } from "mongoose";
-import { IRadonarProd } from "@/modules/radonarprod/types"; 
+import { IBike } from "@/modules/bikes/types";
 
 export interface ICartItem {
-  product: Types.ObjectId | IRadonarProd;
+  product: Types.ObjectId | IBike;
   quantity: number;
   priceAtAddition: number;
   totalPriceAtAddition: number;

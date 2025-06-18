@@ -1,13 +1,15 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { EmailMessage } from "@/modules/email";
+//import { EmailMessage } from "@/modules/email";
 import { sendEmail } from "@/services/emailService";
 import { readInboxEmails } from "@/services/emailReader";
 import { isValidObjectId } from "@/core/utils/validation";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // ✅ Test e-posta gönder (Admin)
 export const sendTestEmail = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
+    const { EmailMessage } = await getTenantModels(req);
     const {
       to,
       subject,
@@ -47,6 +49,7 @@ export const sendTestEmail = asyncHandler(
 // ✅ Tüm mailleri getir (opsiyonel dil filtresi)
 export const getAllMails = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
+    const { EmailMessage } = await getTenantModels(req);
     const { lang } = req.query;
     const filter: any = {};
 
@@ -63,6 +66,7 @@ export const getAllMails = asyncHandler(
 // ✅ Tek mail getir
 export const getMailById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
+    const { EmailMessage } = await getTenantModels(req);
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -70,7 +74,7 @@ export const getMailById = asyncHandler(
       return;
     }
 
-    const mail = await EmailMessage.findById(id);
+    const mail = await EmailMessage.findOne({ _id: id, tenant: req.tenant });
     if (!mail) {
       res.status(404).json({
         message:
@@ -90,6 +94,7 @@ export const getMailById = asyncHandler(
 // ✅ Mail sil
 export const deleteMail = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
+    const { EmailMessage } = await getTenantModels(req);
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -97,7 +102,7 @@ export const deleteMail = asyncHandler(
       return;
     }
 
-    const mail = await EmailMessage.findByIdAndDelete(id);
+    const mail = await EmailMessage.deleteOne({ _id: id, tenant: req.tenant });
     if (!mail) {
       res.status(404).json({
         message:
@@ -140,6 +145,7 @@ export const fetchEmailsManually = asyncHandler(
 // ✅ Okundu/okunmadı olarak işaretle
 export const markAsReadOrUnread = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
+    const { EmailMessage } = await getTenantModels(req);
     const { id } = req.params;
     const { isRead }: { isRead: boolean } = req.body;
 
@@ -148,7 +154,7 @@ export const markAsReadOrUnread = asyncHandler(
       return;
     }
 
-    const mail = await EmailMessage.findById(id);
+    const mail = await EmailMessage.findOne({ _id: id, tenant: req.tenant });
     if (!mail) {
       res.status(404).json({
         message:

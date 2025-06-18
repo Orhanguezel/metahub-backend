@@ -1,5 +1,7 @@
+// src/modules/bikecategory/validation.ts
 import { body, param } from "express-validator";
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import { validateRequest } from "@/core/middleware/validateRequest";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import { t as translate } from "@/core/utils/i18n/translate";
@@ -14,7 +16,6 @@ export function handleValidationError(req, res, next) {
   const locale: SupportedLocale = req.locale || getLogLocale();
   const t = (key: string) => translate(key, locale, translations);
 
-  // İlk hatayı al
   const errorMsg = errors[0]?.msg || t("validation.default");
 
   logger.warn(errorMsg, {
@@ -22,7 +23,7 @@ export function handleValidationError(req, res, next) {
     module: "bikeCategory",
     event: "validation",
     errors,
-    status: "fail"
+    status: "fail",
   });
 
   return res.status(400).json({
@@ -32,62 +33,73 @@ export function handleValidationError(req, res, next) {
   });
 }
 
+// ✅ Dinamik locale ile isIn validator helper
+const supportedLocalesMsg = `Language must be one of: ${SUPPORTED_LOCALES.join(
+  ", "
+)}.`;
+
 // 🟢 ObjectId validasyonu
 export const validateObjectId = (field: string) => [
   param(field)
     .isMongoId()
-    .withMessage((value, { req }) => {
-      const locale: SupportedLocale = req.locale || getLogLocale();
-      const t = (key: string) => translate(key, locale, translations);
-      return t("error.invalidId");
-    }),
-  handleValidationError,
+    .withMessage(`${field} must be a valid MongoDB ObjectId.`),
+  validateRequest,
 ];
 
-// 🟢 Create Bike Category — En az bir locale zorunlu, i18n error mesajı
+// ✅ En az bir locale key’i olan ve string/dolu olan obje kontrolü
+const hasAtLeastOneLocale = (value: any) => {
+  try {
+    const parsed = typeof value === "string" ? JSON.parse(value) : value;
+    return (
+      parsed &&
+      typeof parsed === "object" &&
+      SUPPORTED_LOCALES.some(
+        (lang) =>
+          parsed[lang] &&
+          typeof parsed[lang] === "string" &&
+          parsed[lang].trim()
+      )
+    );
+  } catch {
+    return false;
+  }
+};
+
+// 🟢 Create Bike Category — en az bir locale zorunlu (tamamı gerekmiyor)
 export const validateCreateBikeCategory = [
-  body("name").custom((value, { req }) => {
-    try {
-      const obj = typeof value === "string" ? JSON.parse(value) : value;
-      // En az bir locale dolu ve string mi?
-      return (
-        obj &&
-        typeof obj === "object" &&
-        SUPPORTED_LOCALES.some(
-          (lang) => obj[lang] && typeof obj[lang] === "string" && obj[lang].trim()
-        )
-      );
-    } catch {
-      return false;
-    }
-  }).withMessage((value, { req }) => {
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const t = (key: string) => translate(key, locale, translations);
-    return t("validation.atLeastOneLocale");
-  }),
-  handleValidationError,
+  body("name")
+    .custom(hasAtLeastOneLocale)
+    .withMessage(
+      `Name must be a JSON object with at least one supported locale: ${SUPPORTED_LOCALES.join(
+        ", "
+      )}.`
+    ),
+  body("description")
+    .optional()
+    .custom(hasAtLeastOneLocale)
+    .withMessage(
+      `Description must be a JSON object with at least one supported locale: ${SUPPORTED_LOCALES.join(
+        ", "
+      )}.`
+    ),
 ];
 
-// 🟢 Update Bike Category — Diller opsiyonel, her gönderilen string olmalı
+// 🟢 Update Bike Category — Alanlar opsiyonel, sadece tip kontrolü
 export const validateUpdateBikeCategory = [
-  body("name").optional().custom((value, { req }) => {
-    try {
-      const obj = typeof value === "string" ? JSON.parse(value) : value;
-      // Sadece gönderilen dillerde string tip kontrolü
-      return (
-        obj &&
-        typeof obj === "object" &&
-        Object.keys(obj).every(
-          (lang) => SUPPORTED_LOCALES.includes(lang as any) && typeof obj[lang] === "string"
-        )
-      );
-    } catch {
-      return false;
-    }
-  }).withMessage((value, { req }) => {
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const t = (key: string) => translate(key, locale, translations);
-    return t("validation.invalidLocales");
-  }),
-  handleValidationError,
+  body("name")
+    .optional()
+    .custom(hasAtLeastOneLocale)
+    .withMessage(
+      `Name must be a JSON object with at least one supported locale: ${SUPPORTED_LOCALES.join(
+        ", "
+      )}.`
+    ),
+  body("description")
+    .optional()
+    .custom(hasAtLeastOneLocale)
+    .withMessage(
+      `Description must be a JSON object with at least one supported locale: ${SUPPORTED_LOCALES.join(
+        ", "
+      )}.`
+    ),
 ];

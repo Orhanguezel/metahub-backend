@@ -80,7 +80,7 @@ export const upsertSettingImage = asyncHandler(
       return;
     }
 
-    let setting = await Setting.findOne({ key });
+    let setting = await Setting.findOne({ key, tenant: req.tenant });
 
     if (setting?.value && typeof setting.value === "object") {
       await cleanupLogoFiles(setting.value as ILogoSettingValue);
@@ -102,7 +102,12 @@ export const upsertSettingImage = asyncHandler(
       setting.value = newLogo;
       await setting.save();
     } else {
-      setting = await Setting.create({ key, value: newLogo, isActive: true });
+      setting = await Setting.create({
+        key,
+        value: newLogo,
+        isActive: true,
+        tenant: req.tenant,
+      });
     }
 
     logger.info(t("setting.upload.success"), {
@@ -153,7 +158,7 @@ export const updateSettingImage = asyncHandler(
       return;
     }
 
-    const setting = await Setting.findOne({ key });
+    const setting = await Setting.findOne({ key, tenant: req.tenant });
     if (!setting) {
       logger.warn("Setting not found", {
         ...logContext,
@@ -229,7 +234,7 @@ export const deleteSetting = asyncHandler(async (req, res) => {
     return;
   }
 
-  const setting = await Setting.findOneAndDelete({ key });
+  const setting = await Setting.findOneAndDelete({ key, tenant: req.tenant });
   if (!setting) {
     logger.warn("Setting not found", {
       ...logContext,
@@ -274,13 +279,16 @@ export const upsertSetting = asyncHandler(async (req, res) => {
   }
 
   const trimmedKey = key.trim();
-  let setting = await Setting.findOne({ key: trimmedKey });
+  let setting = await Setting.findOne({ key: trimmedKey, tenant: req.tenant });
 
   const normalizedValue =
     typeof value === "object" ? fillAllLocales(value) : value;
 
   if (trimmedKey === "site_template") {
-    const themeSetting = await Setting.findOne({ key: "available_themes" });
+    const themeSetting = await Setting.findOne({
+      key: "available_themes",
+      tenant: req.tenant,
+    });
     const availableThemes = Array.isArray(themeSetting?.value)
       ? themeSetting.value
       : [];
@@ -337,7 +345,9 @@ export const upsertSetting = asyncHandler(async (req, res) => {
 export const getAllSettings = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { Setting } = await getTenantModels(req);
-    const settings = await Setting.find().sort({ createdAt: -1 });
+    const settings = await Setting.find({ tenant: req.tenant }).sort({
+      createdAt: -1,
+    });
     res.status(200).json({ success: true, data: settings });
   }
 );
@@ -355,7 +365,10 @@ export const getSettingByKey = asyncHandler(
       return;
     }
 
-    const setting = await Setting.findOne({ key: key.trim() });
+    const setting = await Setting.findOne({
+      key: key.trim(),
+      tenant: req.tenant,
+    });
     if (!setting) {
       res
         .status(404)

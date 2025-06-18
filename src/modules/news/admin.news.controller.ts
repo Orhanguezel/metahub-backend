@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { News } from "@/modules/news";
+//import { News } from "@/modules/news";
 import { INews } from "@/modules/news/news.models";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
@@ -13,6 +13,7 @@ import {
   processImageLocal,
   shouldProcessImage,
 } from "@/core/utils/uploadUtils";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 const parseIfJson = (value: any) => {
   try {
@@ -23,7 +24,10 @@ const parseIfJson = (value: any) => {
 };
 
 export const createNews = asyncHandler(async (req: Request, res: Response) => {
-  let { title, summary, content, tags, category, isPublished, publishedAt } = req.body;
+  let { title, summary, content, tags, category, isPublished, publishedAt } =
+    req.body;
+
+  const { News } = await getTenantModels(req);
 
   title = parseIfJson(title);
   summary = parseIfJson(summary);
@@ -38,7 +42,11 @@ export const createNews = asyncHandler(async (req: Request, res: Response) => {
       let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
 
       if (shouldProcessImage()) {
-        const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+        const processed = await processImageLocal(
+          file.path,
+          file.filename,
+          path.dirname(file.path)
+        );
         thumbnail = processed.thumbnail;
         webp = processed.webp;
       }
@@ -60,6 +68,7 @@ export const createNews = asyncHandler(async (req: Request, res: Response) => {
   const news = await News.create({
     title,
     slug,
+    tenant: req.tenant,
     summary,
     content,
     tags,
@@ -71,72 +80,94 @@ export const createNews = asyncHandler(async (req: Request, res: Response) => {
     isActive: true,
   });
 
-  res.status(201).json({ success: true, message: "News created successfully.", data: news });
+  res
+    .status(201)
+    .json({ success: true, message: "News created successfully.", data: news });
 });
 
-export const adminGetAllNews = asyncHandler(async (req: Request, res: Response) => {
-  const { language, category, isPublished, isActive } = req.query;
-  const filter: Record<string, any> = {};
+export const adminGetAllNews = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { News } = await getTenantModels(req);
+    const { language, category, isPublished, isActive } = req.query;
+    const filter: Record<string, any> = { tenant: req.tenant };
 
-  if (typeof language === "string" && ["tr", "en", "de"].includes(language)) {
-    filter[`title.${language}`] = { $exists: true };
+    if (typeof language === "string" && ["tr", "en", "de"].includes(language)) {
+      filter[`title.${language}`] = { $exists: true };
+    }
+
+    if (typeof category === "string" && isValidObjectId(category)) {
+      filter.category = category;
+    }
+
+    if (typeof isPublished === "string") {
+      filter.isPublished = isPublished === "true";
+    }
+
+    if (typeof isActive === "string") {
+      filter.isActive = isActive === "true";
+    } else {
+      filter.isActive = true;
+    }
+
+    const newsList = await News.find(filter)
+      .populate([
+        { path: "comments", strictPopulate: false },
+        { path: "category", select: "name" },
+      ])
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.status(200).json({
+      success: true,
+      message: "News list fetched successfully.",
+      data: newsList,
+    });
   }
+);
 
-  if (typeof category === "string" && isValidObjectId(category)) {
-    filter.category = category;
+export const adminGetNewsById = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { News } = await getTenantModels(req);
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      res.status(400).json({ success: false, message: "Invalid news ID." });
+      return;
+    }
+
+    const news = await News.findOne({ _id: id, tenant: req.tenant })
+      .populate([{ path: "comments" }, { path: "category", select: "title" }])
+      .lean();
+
+    if (!news || !news.isActive) {
+      res
+        .status(404)
+        .json({ success: false, message: "News not found or inactive." });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "News fetched successfully.",
+      data: news,
+    });
   }
-
-  if (typeof isPublished === "string") {
-    filter.isPublished = isPublished === "true";
-  }
-
-  if (typeof isActive === "string") {
-    filter.isActive = isActive === "true";
-  } else {
-    filter.isActive = true;
-  }
-
-  const newsList = await News.find(filter)
-    .populate([{ path: "comments", strictPopulate: false }, { path: "category", select: "name" }])
-    .sort({ createdAt: -1 })
-    .lean();
-
-  res.status(200).json({ success: true, message: "News list fetched successfully.", data: newsList });
-});
-
-export const adminGetNewsById = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-
-  if (!isValidObjectId(id)) {
-     res.status(400).json({ success: false, message: "Invalid news ID." });
-     return
-  }
-
-  const news = await News.findById(id)
-    .populate([{ path: "comments" }, { path: "category", select: "title" }])
-    .lean();
-
-  if (!news || !news.isActive) {
-    res.status(404).json({ success: false, message: "News not found or inactive." });
-    return 
-  }
-
-  res.status(200).json({ success: true, message: "News fetched successfully.", data: news });
-});
+);
 
 export const updateNews = asyncHandler(async (req: Request, res: Response) => {
+  const { News } = await getTenantModels(req);
   const { id } = req.params;
   const updates = req.body;
 
   if (!isValidObjectId(id)) {
     res.status(400).json({ success: false, message: "Invalid news ID." });
-    return 
+    return;
   }
 
-  const news = await News.findById(id);
+  const news = await News.findOne({ _id: id, tenant: req.tenant });
   if (!news) {
-     res.status(404).json({ success: false, message: "News not found." });
-     return
+    res.status(404).json({ success: false, message: "News not found." });
+    return;
   }
 
   const updatableFields: (keyof INews)[] = [
@@ -163,7 +194,11 @@ export const updateNews = asyncHandler(async (req: Request, res: Response) => {
       let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
 
       if (shouldProcessImage()) {
-        const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+        const processed = await processImageLocal(
+          file.path,
+          file.filename,
+          path.dirname(file.path)
+        );
         thumbnail = processed.thumbnail;
         webp = processed.webp;
       }
@@ -180,10 +215,16 @@ export const updateNews = asyncHandler(async (req: Request, res: Response) => {
   if (updates.removedImages) {
     try {
       const removed = JSON.parse(updates.removedImages);
-      news.images = news.images.filter((img: any) => !removed.includes(img.url));
+      news.images = news.images.filter(
+        (img: any) => !removed.includes(img.url)
+      );
 
       for (const img of removed) {
-        const localPath = path.join("uploads", "news-images", path.basename(img.url));
+        const localPath = path.join(
+          "uploads",
+          "news-images",
+          path.basename(img.url)
+        );
         if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
         if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
       }
@@ -194,25 +235,32 @@ export const updateNews = asyncHandler(async (req: Request, res: Response) => {
 
   await news.save();
 
-  res.status(200).json({ success: true, message: "News updated successfully.", data: news });
+  res
+    .status(200)
+    .json({ success: true, message: "News updated successfully.", data: news });
 });
 
 export const deleteNews = asyncHandler(async (req: Request, res: Response) => {
+  const { News } = await getTenantModels(req);
   const { id } = req.params;
 
   if (!isValidObjectId(id)) {
-     res.status(400).json({ success: false, message: "Invalid news ID." });
-     return
+    res.status(400).json({ success: false, message: "Invalid news ID." });
+    return;
   }
 
-  const news = await News.findById(id);
+  const news = await News.findOne({ _id: id, tenant: req.tenant });
   if (!news) {
-     res.status(404).json({ success: false, message: "News not found." });
-     return
+    res.status(404).json({ success: false, message: "News not found." });
+    return;
   }
 
   for (const img of news.images) {
-    const localPath = path.join("uploads", "news-images", path.basename(img.url));
+    const localPath = path.join(
+      "uploads",
+      "news-images",
+      path.basename(img.url)
+    );
     if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
     if (img.publicId) {
       try {
@@ -225,5 +273,7 @@ export const deleteNews = asyncHandler(async (req: Request, res: Response) => {
 
   await news.deleteOne();
 
-  res.status(200).json({ success: true, message: "News deleted successfully." });
+  res
+    .status(200)
+    .json({ success: true, message: "News deleted successfully." });
 });

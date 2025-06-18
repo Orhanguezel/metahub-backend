@@ -1,0 +1,32 @@
+{
+  "createModule": {
+    "noModuleName": "Modül adı gereklidir.",
+    "notEnabled": "\"{{moduleName}}\" modülü ENABLED_MODULES içinde değil.",
+    "alreadyExists": "\"{{moduleName}}\" modülü zaten var.",
+    "dirCreated": "Modül klasörü oluşturuldu.",
+    "dirCreateFail": "Modül klasörü oluşturulamadı.",
+    "filesWritten": "Boilerplate dosyaları oluşturuldu.",
+    "filesWriteFail": "Boilerplate dosyaları yazılamadı.",
+    "success": "\"{{moduleName}}\" modülü başarıyla oluşturuldu.",
+    "metaFail": "Meta dosyası oluşturulamadı."
+  },
+  "createMetaFile": {
+    "noTenant": "Tenant gereklidir.",
+    "dirCreated": "Meta-config klasörü oluşturuldu.",
+    "success": "Meta dosyası başarıyla oluşturuldu.",
+    "fail": "Meta dosyası oluşturulamadı."
+  },
+  "meta": {
+    "created": "Meta dosyası oluşturuldu.",
+    "version": {
+      "bumped": "Meta versiyonu {{version}} olarak artırıldı.",
+      "invalidFormat": "Geçersiz versiyon formatı.",
+      "noLabel": "{{name}} için label eksik."
+    }
+  },
+  "log": {
+    "success": "Başarılı",
+    "fail": "Başarısız",
+    "warning": "Uyarı"
+  }
+}

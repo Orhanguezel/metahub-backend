@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Sport } from "./sport.models";
+//import { Sport } from "./sport.models";
 import { ISport } from "./types/index";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
@@ -13,6 +13,7 @@ import {
   processImageLocal,
   shouldProcessImage,
 } from "@/core/utils/uploadUtils";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 const parseIfJson = (value: any) => {
   try {
@@ -24,7 +25,17 @@ const parseIfJson = (value: any) => {
 
 // ✅ CREATE SPORT
 export const createSport = asyncHandler(async (req: Request, res: Response) => {
-  let { title, summary, content, tags, category, isPublished, publishedAt } = req.body;
+  const { Sport } = await getTenantModels(req);
+  let {
+    title,
+    summary,
+    content,
+    tags,
+    category,
+    isPublished,
+    publishedAt,
+    tenant,
+  } = req.body;
 
   title = parseIfJson(title);
   summary = parseIfJson(summary);
@@ -39,7 +50,11 @@ export const createSport = asyncHandler(async (req: Request, res: Response) => {
       let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
 
       if (shouldProcessImage()) {
-        const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+        const processed = await processImageLocal(
+          file.path,
+          file.filename,
+          path.dirname(file.path)
+        );
         thumbnail = processed.thumbnail;
         webp = processed.webp;
       }
@@ -60,6 +75,7 @@ export const createSport = asyncHandler(async (req: Request, res: Response) => {
 
   const sport = await Sport.create({
     title,
+    tenant,
     slug,
     summary,
     content,
@@ -72,63 +88,84 @@ export const createSport = asyncHandler(async (req: Request, res: Response) => {
     isActive: true,
   });
 
-  res.status(201).json({ success: true, message: "Sport created successfully.", data: sport });
+  res.status(201).json({
+    success: true,
+    message: "Sport created successfully.",
+    data: sport,
+  });
 });
 
 // ✅ GET ALL (ADMIN)
-export const adminGetAllSport = asyncHandler(async (req: Request, res: Response) => {
-  const { language, category, isPublished, isActive } = req.query;
-  const filter: Record<string, any> = {};
+export const adminGetAllSport = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { Sport } = await getTenantModels(req);
+    const { language, category, isPublished, isActive } = req.query;
+    const filter: Record<string, any> = { tenant: req.tenant };
 
-  if (typeof language === "string" && ["tr", "en", "de"].includes(language)) {
-    filter[`title.${language}`] = { $exists: true };
+    if (typeof language === "string" && ["tr", "en", "de"].includes(language)) {
+      filter[`title.${language}`] = { $exists: true };
+    }
+
+    if (typeof category === "string" && isValidObjectId(category)) {
+      filter.category = category;
+    }
+
+    if (typeof isPublished === "string") {
+      filter.isPublished = isPublished === "true";
+    }
+
+    if (typeof isActive === "string") {
+      filter.isActive = isActive === "true";
+    } else {
+      filter.isActive = true;
+    }
+
+    const list = await Sport.find(filter)
+      .populate([{ path: "category", select: "title" }])
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.status(200).json({
+      success: true,
+      message: "Sport list fetched successfully.",
+      data: list,
+    });
   }
-
-  if (typeof category === "string" && isValidObjectId(category)) {
-    filter.category = category;
-  }
-
-  if (typeof isPublished === "string") {
-    filter.isPublished = isPublished === "true";
-  }
-
-  if (typeof isActive === "string") {
-    filter.isActive = isActive === "true";
-  } else {
-    filter.isActive = true;
-  }
-
-  const list = await Sport.find(filter)
-    .populate([{ path: "category", select: "title" }])
-    .sort({ createdAt: -1 })
-    .lean();
-
-  res.status(200).json({ success: true, message: "Sport list fetched successfully.", data: list });
-});
+);
 
 // ✅ GET BY ID
-export const adminGetSportById = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
+export const adminGetSportById = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { Sport } = await getTenantModels(req);
+    const { id } = req.params;
 
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ success: false, message: "Invalid Sport ID." });
-    return;
+    if (!isValidObjectId(id)) {
+      res.status(400).json({ success: false, message: "Invalid Sport ID." });
+      return;
+    }
+
+    const sport = await Sport.findOne({ _id: id, tenant: req.tenant })
+      .populate([{ path: "category", select: "title" }])
+      .lean();
+
+    if (!sport || !sport.isActive) {
+      res
+        .status(404)
+        .json({ success: false, message: "Sport not found or inactive." });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Sport fetched successfully.",
+      data: sport,
+    });
   }
-
-  const sport = await Sport.findById(id)
-    .populate([{ path: "category", select: "title" }])
-    .lean();
-
-  if (!sport || !sport.isActive) {
-    res.status(404).json({ success: false, message: "Sport not found or inactive." });
-    return;
-  }
-
-  res.status(200).json({ success: true, message: "Sport fetched successfully.", data: sport });
-});
+);
 
 // ✅ UPDATE
 export const updateSport = asyncHandler(async (req: Request, res: Response) => {
+  const { Sport } = await getTenantModels(req);
   const { id } = req.params;
   const updates = req.body;
 
@@ -137,7 +174,7 @@ export const updateSport = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  const sport = await Sport.findById(id);
+  const sport = await Sport.findOne({ _id: id, tenant: req.tenant });
   if (!sport) {
     res.status(404).json({ success: false, message: "Sport not found." });
     return;
@@ -167,7 +204,11 @@ export const updateSport = asyncHandler(async (req: Request, res: Response) => {
       let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
 
       if (shouldProcessImage()) {
-        const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+        const processed = await processImageLocal(
+          file.path,
+          file.filename,
+          path.dirname(file.path)
+        );
         thumbnail = processed.thumbnail;
         webp = processed.webp;
       }
@@ -184,10 +225,16 @@ export const updateSport = asyncHandler(async (req: Request, res: Response) => {
   if (updates.removedImages) {
     try {
       const removed = JSON.parse(updates.removedImages);
-      sport.images = sport.images.filter((img: any) => !removed.includes(img.url));
+      sport.images = sport.images.filter(
+        (img: any) => !removed.includes(img.url)
+      );
 
       for (const img of removed) {
-        const localPath = path.join("uploads", "Sport-images", path.basename(img.url));
+        const localPath = path.join(
+          "uploads",
+          "Sport-images",
+          path.basename(img.url)
+        );
         if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
         if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
       }
@@ -198,11 +245,16 @@ export const updateSport = asyncHandler(async (req: Request, res: Response) => {
 
   await sport.save();
 
-  res.status(200).json({ success: true, message: "Sport updated successfully.", data: sport });
+  res.status(200).json({
+    success: true,
+    message: "Sport updated successfully.",
+    data: sport,
+  });
 });
 
 // ✅ DELETE
 export const deleteSport = asyncHandler(async (req: Request, res: Response) => {
+  const { Sport } = await getTenantModels(req);
   const { id } = req.params;
 
   if (!isValidObjectId(id)) {
@@ -210,14 +262,18 @@ export const deleteSport = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  const sport = await Sport.findById(id);
+  const sport = await Sport.findOne({ _id: id, tenant: req.tenant });
   if (!sport) {
     res.status(404).json({ success: false, message: "Sport not found." });
     return;
   }
 
   for (const img of sport.images) {
-    const localPath = path.join("uploads", "Sport-images", path.basename(img.url));
+    const localPath = path.join(
+      "uploads",
+      "Sport-images",
+      path.basename(img.url)
+    );
     if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
     if (img.publicId) {
       try {
@@ -230,20 +286,27 @@ export const deleteSport = asyncHandler(async (req: Request, res: Response) => {
 
   await sport.deleteOne();
 
-  res.status(200).json({ success: true, message: "Sport deleted successfully." });
+  res
+    .status(200)
+    .json({ success: true, message: "Sport deleted successfully." });
 });
 
+export const publicGetAllSport = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { Sport } = await getTenantModels(req);
+    const sports = await Sport.find({
+      isActive: true,
+      isPublished: true,
+      tenant: req.tenant,
+    })
+      .populate({ path: "category", select: "title" })
+      .sort({ createdAt: -1 })
+      .lean();
 
-export const publicGetAllSport = asyncHandler(async (_req: Request, res: Response) => {
-  const sports = await Sport.find({ isActive: true, isPublished: true })
-    .populate({ path: "category", select: "title" })
-    .sort({ createdAt: -1 })
-    .lean();
-
-  res.status(200).json({
-    success: true,
-    message: "Sport list fetched successfully.",
-    data: sports,
-  });
-});
-
+    res.status(200).json({
+      success: true,
+      message: "Sport list fetched successfully.",
+      data: sports,
+    });
+  }
+);
