@@ -12,6 +12,7 @@ export interface IFAQ  {
     en: string;
     de: string;
   };
+  tenant?: string; // Optional tenant field for multi-tenancy
   category?: string;
   isActive: boolean;
   isPublished: boolean;
@@ -28,6 +29,7 @@ const faqSchema = new Schema<IFAQ>(
       en: { type: String, required: true, trim: true },
       de: { type: String, required: true, trim: true },
     },
+    tenant: { type: String, required: true, index: true },
     answer: {
       tr: { type: String, required: true, trim: true },
       en: { type: String, required: true, trim: true },

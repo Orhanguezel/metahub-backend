@@ -11,6 +11,11 @@ const nameFields = SUPPORTED_LOCALES.reduce((acc, lang) => {
 const ArticlesCategorySchema = new Schema<IArticlesCategory>(
   {
     name: nameFields,
+    tenant: {
+      type: String,
+      required: true,
+      index: true,
+    },
 
     slug: {
       type: String,

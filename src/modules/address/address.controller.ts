@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { Address } from "@/modules/address";
-//import { User } from "@/modules/users";
 import { isValidObjectId } from "@/core/utils/validation";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 

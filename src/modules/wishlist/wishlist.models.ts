@@ -4,6 +4,7 @@ import { Schema, model, Types, Model, models } from "mongoose";
 // ✅ Interface
 export interface IWishlist  {
   user: Types.ObjectId;
+  tenant: string; // Optional tenant field for multi-tenancy
   products: Types.ObjectId[];
   language?: "tr" | "en" | "de";
   isActive: boolean;
@@ -18,6 +19,11 @@ const wishlistSchema = new Schema<IWishlist>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    tenant: {
+      type: String,
+      required: true,
+      index: true,
     },
     products: [
       {

@@ -22,6 +22,7 @@ interface IUserModel extends Model<IUser> {}
 const userSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
+    tenant: { type: String, required: true, index: true },
     email: {
       type: String,
       required: true,
@@ -31,7 +32,7 @@ const userSchema = new Schema<IUser>(
     password: { type: String, required: true, select: false },
     role: {
       type: String,
-      enum: ["admin", "user", "customer", "moderator", "staff"],
+      enum: ["superadmin", "admin", "user", "customer", "moderator", "staff"],
       default: "user",
     },
     profile: { type: Schema.Types.ObjectId, ref: "Profile" },

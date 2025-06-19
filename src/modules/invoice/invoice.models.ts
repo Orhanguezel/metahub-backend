@@ -2,6 +2,7 @@ import { Schema, model, models, Types, Model } from "mongoose";
 
 interface InvoiceItem {
   product: Types.ObjectId;
+  tenant: string; // Optional tenant field for multi-tenancy
   name: string;
   quantity: number;
   unitPrice: number;
@@ -9,6 +10,7 @@ interface InvoiceItem {
 
 export interface IInvoice  {
   order: Types.ObjectId;
+  tenant: string; // Optional tenant field for multi-tenancy
   user: Types.ObjectId;
   company: Types.ObjectId;
   items: InvoiceItem[];
@@ -24,6 +26,7 @@ export interface IInvoice  {
 
 const invoiceItemSchema = new Schema<InvoiceItem>({
   product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
+  tenant: { type: String, required: true, index: true },
   name: { type: String, required: true },
   quantity: { type: Number, required: true },
   unitPrice: { type: Number, required: true },
@@ -32,6 +35,7 @@ const invoiceItemSchema = new Schema<InvoiceItem>({
 const invoiceSchema = new Schema<IInvoice>(
   {
     order: { type: Schema.Types.ObjectId, ref: "Order", required: true },
+    tenant: { type: String, required: true, index: true },
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     company: { type: Schema.Types.ObjectId, ref: "Company", required: true },
     items: [invoiceItemSchema],

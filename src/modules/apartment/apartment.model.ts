@@ -23,6 +23,7 @@ const ApartmentSchema: Schema = new Schema<IApartment>(
       en: { type: String, trim: true },
       de: { type: String, trim: true },
     },
+    tenant: { type: String, required: true, index: true },
     slug: { type: String, required: true, unique: true, lowercase: true },
     description: {
       tr: { type: String },

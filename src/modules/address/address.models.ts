@@ -1,9 +1,9 @@
 import mongoose, { Schema, Model, Types } from "mongoose";
 import { onlyLetters as names } from "@/core/utils/regex";
 
-
 export interface IAddress {
   userId: Types.ObjectId;
+  tenant: string; // Optional tenant field for multi-tenancy
   street: string;
   houseNumber: string;
   city: string;
@@ -22,6 +22,11 @@ const addressSchema = new Schema<IAddress>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    tenant: {
+      type: String,
+      required: true,
+      index: true,
     },
     street: {
       type: String,
@@ -75,7 +80,7 @@ const addressSchema = new Schema<IAddress>(
       maxLength: 20,
       validate: {
         validator: function (val: string) {
-          return /^[0-9+\s()-]+$/.test(val); 
+          return /^[0-9+\s()-]+$/.test(val);
         },
         message: "Phone must be a valid phone number",
       },

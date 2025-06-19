@@ -5,6 +5,7 @@ import { SUPPORTED_LOCALES } from "@/types/common";
 const orderItemSchema = new Schema<IOrderItem>(
   {
     product: { type: Schema.Types.ObjectId, ref: "Bike", required: true },
+    tenant: { type: String, required: true, index: true },
     quantity: { type: Number, required: true, min: 1 },
     unitPrice: { type: Number, required: true, min: 0 },
   },
@@ -14,6 +15,7 @@ const orderItemSchema = new Schema<IOrderItem>(
 const shippingAddressSchema = new Schema<IShippingAddress>(
   {
     name: { type: String, required: true, trim: true },
+    tenant: { type: String, required: true, index: true },
     phone: { type: String, required: true, trim: true },
     email: { type: String, required: true, trim: true, lowercase: true },
     street: { type: String, required: true, trim: true },
@@ -27,6 +29,7 @@ const shippingAddressSchema = new Schema<IShippingAddress>(
 const orderSchema = new Schema<IOrder>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    tenant: { type: String, required: true, index: true },
     addressId: { type: Schema.Types.ObjectId, ref: "Address" },
     items: {
       type: [orderItemSchema],

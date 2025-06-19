@@ -2,7 +2,6 @@
 
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { Analytics } from "@/modules/analytics";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // ✅ GET /api/dashboard/logs

@@ -5,6 +5,7 @@ export interface ICustomer  {
   companyName: string;
   contactName: string;
   email: string;
+  tenant: string; // Optional tenant field for multi-tenancy
   phone: string;
   address: {
     street: string;
@@ -20,6 +21,7 @@ export interface ICustomer  {
 const customerSchema = new Schema<ICustomer>(
   {
     companyName: { type: String, required: true, unique: true },
+    tenant: { type: String, required: true, index: true },
     contactName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     phone: { type: String, required: true },

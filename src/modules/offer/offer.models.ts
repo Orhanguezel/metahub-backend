@@ -3,6 +3,7 @@ import { Schema, model, Types, Model, models } from "mongoose";
 // ✅ Alt Tip: Teklif Ürünleri
 interface IOfferItem {
   product: Types.ObjectId;
+  tenant: string; // Optional tenant field for multi-tenancy
   quantity: number;
   unitPrice: number;
   customPrice: number;
@@ -12,6 +13,7 @@ interface IOfferItem {
 export interface IOffer  {
   offerNumber: string;
   user: Types.ObjectId;
+  tenant: string; // Optional tenant field for multi-tenancy
   company: Types.ObjectId;
   customer: Types.ObjectId;
   items: IOfferItem[];
@@ -34,6 +36,7 @@ const offerItemSchema = new Schema<IOfferItem>(
   {
     product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
     quantity: { type: Number, required: true },
+    tenant: { type: String, required: true, index: true },
     unitPrice: { type: Number, required: true },
     customPrice: { type: Number, required: true },
   },
@@ -44,6 +47,7 @@ const offerItemSchema = new Schema<IOfferItem>(
 const offerSchema = new Schema<IOffer>(
   {
     offerNumber: { type: String, required: true, unique: true },
+    tenant: { type: String, required: true, index: true },
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     company: { type: Schema.Types.ObjectId, ref: "Company", required: true },
     customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },

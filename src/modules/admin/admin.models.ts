@@ -12,6 +12,7 @@ const labelSchemaFields = SUPPORTED_LOCALES.reduce((fields, lang) => {
 const ModuleMetaSchema = new Schema<IModuleMeta>(
   {
     name: { type: String, required: true, unique: true },
+    tenant: { type: String, required: true, index: true },
     label: labelSchemaFields, // Dinamik yapı!
     icon: { type: String, default: "box" },
     roles: { type: [String], default: ["admin"] },

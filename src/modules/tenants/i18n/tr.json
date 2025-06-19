@@ -1,0 +1,13 @@
+{
+  "section.invalidLabel": "Tüm dillerde başlık (label) zorunludur.",
+  "section.validation.invalidJSON": "Etiket verisi geçersiz JSON formatında.",
+  "section.validation.missingLocale": "Bazı diller için eksik veya boş etiket var.",
+  "section.create.success": "{{name}} bölümü başarıyla oluşturuldu.",
+  "section.create.labelMissing": "Başlık (label) tüm dillerde zorunludur.",
+  "section.update.success": "{{name}} bölümü başarıyla güncellendi.",
+  "section.update.notFound": "Bölüm bulunamadı.",
+  "section.update.labelMissing": "Başlık (label) tüm dillerde zorunludur.",
+  "section.list.success": "Bölümler başarıyla listelendi.",
+  "section.delete.success": "{{name}} bölümü silindi.",
+  "section.delete.notFound": "Bölüm bulunamadı."
+}

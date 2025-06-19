@@ -6,6 +6,7 @@ interface IExperience extends Document {
     en: string;
     de: string;
   };
+  tenant: string; // Optional tenant field for multi-tenancy
   company: {
     tr: string;
     en: string;
@@ -30,6 +31,7 @@ const experienceSchema = new Schema<IExperience>(
       en: { type: String, required: true, trim: true },
       de: { type: String, required: true, trim: true },
     },
+    tenant: { type: String, required: true, index: true },
     company: {
       tr: { type: String, required: true, trim: true },
       en: { type: String, required: true, trim: true },

@@ -1,6 +1,6 @@
 rm -rf dist
 npx tsc --noEmit
-npm run build
+bun run build
 
 bun run dev
 
@@ -15,7 +15,7 @@ rm -rf .turbo
 rm -rf .next
 rm -rf node_modules/.cache
 npx tsc --noEmit
-npm run build
+bun run build
 
 bun run dev
 

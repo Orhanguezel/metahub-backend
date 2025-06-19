@@ -8,12 +8,13 @@ export interface IActivityImage {
   publicId?: string;
 }
 
-export interface IActivity  {
+export interface IActivity {
   title: {
     tr?: string;
     en?: string;
     de?: string;
   };
+  tenant: string; // Optional tenant field for multi-tenancy
   slug: string;
   summary: {
     tr?: string;
@@ -52,6 +53,7 @@ const ActivitySchema: Schema = new Schema<IActivity>(
       en: { type: String, trim: true },
       de: { type: String, trim: true },
     },
+    tenant: { type: String, required: true, index: true },
     slug: { type: String, required: true, unique: true, lowercase: true },
     summary: {
       tr: { type: String, maxlength: 300 },
@@ -99,9 +101,6 @@ ActivitySchema.pre("validate", async function (next) {
 
   next();
 });
-
-
-
 
 const Activity: Model<IActivity> =
   models.Activity || mongoose.model<IActivity>("Activity", ActivitySchema);

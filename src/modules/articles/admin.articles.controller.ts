@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { Articles } from "@/modules/articles";
 import { IArticles } from "@/modules/articles/types";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
@@ -14,10 +13,8 @@ import {
   shouldProcessImage,
 } from "@/core/utils/uploadUtils";
 import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
-import {
-  fillAllLocales,
-  extractMultilangValue,
-} from "@/core/utils/i18n/parseMultilangField";
+import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
+import { extractMultilangValue } from "@/core/utils/i18n/parseMultilangField";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 import logger from "@/core/middleware/logger/logger";

@@ -110,8 +110,7 @@ export const updateOrderStatus = asyncHandler(
 
 export const markOrderAsDelivered = asyncHandler(
   async (req: Request, res: Response) => {
-    const { Order } = await getTenantModels(req);
-    const { Notification } = await getTenantModels(req);
+    const { Order, Notification } = await getTenantModels(req);
     const order = await Order.findOne({ tenant: req.tenant }).populate(
       "user",
       "name email language"

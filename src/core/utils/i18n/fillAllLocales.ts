@@ -1,10 +1,8 @@
-// src/core/utils/i18n/translate.ts
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 
 /**
- * Fills all locales based on the first valid input.
- * - Accepts string or partial locale object
- * - Returns all locales filled
+ * Her alan için tüm locale'leri doldurur.
+ * - String, partial obje veya tam obje alır
  */
 export function fillAllLocales(
   input: any,

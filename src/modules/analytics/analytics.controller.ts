@@ -1,10 +1,8 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { Analytics } from "./analytics.models";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import type { SupportedLocale } from "@/types/common";
-//import { ModuleSetting } from "@/modules/admin";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // 1️⃣ Event Kaydı (POST /analytics/events)

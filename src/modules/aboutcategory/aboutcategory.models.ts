@@ -1,18 +1,18 @@
 import mongoose, { Schema, model, models, Model } from "mongoose";
 
-export interface IAboutCategory  {
+export interface IAboutCategory {
   name: {
     tr: string;
     en: string;
     de: string;
   };
   slug: string;
+  tenant: string;
   description?: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
-
 
 const AboutCategorySchema = new Schema<IAboutCategory>(
   {
@@ -21,6 +21,7 @@ const AboutCategorySchema = new Schema<IAboutCategory>(
       en: { type: String, required: true, trim: true },
       de: { type: String, required: true, trim: true },
     },
+    tenant: { type: String, required: true, index: true },
     slug: {
       type: String,
       required: true,
@@ -51,8 +52,8 @@ AboutCategorySchema.pre("validate", function (next) {
   next();
 });
 
-
 const AboutCategory: Model<IAboutCategory> =
-  models.AboutCategory || model<IAboutCategory>("AboutCategory", AboutCategorySchema);
+  models.AboutCategory ||
+  model<IAboutCategory>("AboutCategory", AboutCategorySchema);
 
 export { AboutCategory };

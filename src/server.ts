@@ -64,6 +64,7 @@ app.use(
   server.listen(Number(port), () => {
     const baseUrl = process.env.BASE_URL || `http://localhost:${port}`;
     logger.info(t("server.started", lang, translations, { baseUrl }));
+    console.log(t("server.started", lang, translations, { baseUrl }));
   });
 
   initializeSocket(server);

@@ -6,6 +6,7 @@ import { SUPPORTED_LOCALES } from "@/types/common";
 const analyticsSchema = new Schema<IAnalyticsLog>(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: false },
+    tenant: { type: String, required: true, index: true },
     module: { type: String, required: true },
     eventType: { type: String, required: true },
     path: { type: String },

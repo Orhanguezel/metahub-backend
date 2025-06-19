@@ -11,6 +11,7 @@ interface IGallerySubItem {
     en?: string;
     de?: string;
   };
+  tenant: string; // Optional tenant field for multi-tenancy
   description?: {
     tr?: string;
     en?: string;
@@ -22,6 +23,7 @@ interface IGallerySubItem {
 // ✅ Main Item interface
 export interface IGalleryItem {
   items: IGallerySubItem[];
+  tenant: string; // Optional tenant field for multi-tenancy
   category: Types.ObjectId;
   type: "image" | "video";
   isPublished: boolean;
@@ -42,6 +44,7 @@ const gallerySubItemSchema = new Schema<IGallerySubItem>(
       en: { type: String, trim: true },
       de: { type: String, trim: true },
     },
+    tenant: { type: String, required: true, index: true },
     description: {
       tr: { type: String, trim: true },
       en: { type: String, trim: true },
@@ -61,6 +64,7 @@ const gallerySchema = new Schema<IGalleryItem>(
       ref: "GalleryCategory",
       required: true,
     },
+    tenant: { type: String, required: true, index: true },
     type: {
       type: String,
       enum: ["image", "video"],

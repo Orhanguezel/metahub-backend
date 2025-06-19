@@ -155,6 +155,7 @@ export const addToCart = asyncHandler(
     } else {
       cart.items.push({
         product: Types.ObjectId.createFromHexString(productId),
+        tenant: req.tenant,
         quantity,
         priceAtAddition: product.price,
         totalPriceAtAddition: quantity * product.price,

@@ -63,6 +63,7 @@ import { NewsCategory } from "@/modules/newscategory";
 import { Analytics } from "@/modules/analytics/analytics.models";
 import { ModuleMeta, ModuleSetting } from "@/modules/admin/admin.models";
 import { Sparepart } from "@/modules/sparepart/sparepart.models";
+import { Tenants } from "@/modules/tenants/tenants.model";
 
 export const getTenantModels = async (req: Request) => ({
   Setting: await req.getModel("Setting", Setting.schema),
@@ -155,4 +156,5 @@ export const getTenantModels = async (req: Request) => ({
   FAQ: await req.getModel("FAQ", FAQ.schema),
   Stockmovement: await req.getModel("Stockmovement", Stockmovement.schema),
   Sparepart: await req.getModel("Sparepart", Sparepart.schema),
+  Tenants: await req.getModel("Tenants", Tenants.schema),
 });

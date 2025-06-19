@@ -1,7 +1,6 @@
 // 📁 modules/apartment/controllers/apartment.controller.ts
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { Apartment } from ".";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
 import path from "path";

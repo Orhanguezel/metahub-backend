@@ -4,6 +4,7 @@ export type TranslatedLabel = { [key in SupportedLocale]: string };
 
 export interface ISection {
   label: TranslatedLabel;
+  tenant: string; // Optional tenant field for multi-tenancy
   description?: TranslatedLabel;
   icon?: string;
   order?: number;

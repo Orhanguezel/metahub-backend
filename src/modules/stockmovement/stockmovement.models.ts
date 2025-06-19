@@ -12,6 +12,7 @@ export interface IStockmovement {
   product: Types.ObjectId;
   type: MovementType;
   quantity: number;
+  tenant: string; // Optional tenant field for multi-tenancy
   note?: {
     tr?: string;
     en?: string;
@@ -29,6 +30,7 @@ const StockmovementSchema = new Schema<IStockmovement>(
       enum: ["increase", "decrease", "adjust", "order", "return", "manual"],
       required: true,
     },
+    tenant: { type: String, required: true, index: true },
     quantity: { type: Number, required: true },
     note: {
       tr: { type: String },

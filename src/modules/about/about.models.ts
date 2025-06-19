@@ -8,7 +8,7 @@ export interface IAboutImage {
   publicId?: string;
 }
 
-export interface IAbout  {
+export interface IAbout {
   title: {
     tr?: string;
     en?: string;
@@ -25,6 +25,7 @@ export interface IAbout  {
     en?: string;
     de?: string;
   };
+  tenant: string;
   images?: IAboutImage[];
   category?: Types.ObjectId;
   isPublished: boolean;
@@ -51,6 +52,7 @@ const AboutSchema: Schema = new Schema<IAbout>(
       en: { type: String, trim: true },
       de: { type: String, trim: true },
     },
+    tenant: { type: String, required: true, index: true },
     slug: { type: String, required: true, unique: true, lowercase: true },
     summary: {
       tr: { type: String, maxlength: 300 },
@@ -98,10 +100,7 @@ AboutSchema.pre("validate", async function (next) {
   next();
 });
 
-
-
-
 const About: Model<IAbout> =
   models.About || mongoose.model<IAbout>("About", AboutSchema);
 
-export { About};
+export { About };

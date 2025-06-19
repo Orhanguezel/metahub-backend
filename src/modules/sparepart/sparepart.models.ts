@@ -6,6 +6,7 @@ export interface ISparepart {
     en: string;
     de: string;
   };
+  tenant: string; // Optional tenant field for multi-tenancy
   slug: string;
   code?: string;
   description?: {
@@ -32,6 +33,7 @@ const SparepartSchema = new Schema<ISparepart>(
       en: { type: String, required: true },
       de: { type: String, required: true },
     },
+    tenant: { type: String, required: true, index: true },
     slug: { type: String, required: true, unique: true },
     code: { type: String, unique: true, sparse: true },
     description: {

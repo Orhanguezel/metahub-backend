@@ -8,6 +8,7 @@ const TaskSchema = new Schema<ITask>(
       en: { type: String, trim: true },
       de: { type: String, trim: true },
     },
+    tenant: { type: String, required: true, index: true },
     description: {
       tr: { type: String },
       en: { type: String },

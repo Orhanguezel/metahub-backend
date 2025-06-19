@@ -2,11 +2,20 @@ import { Schema, model, models, Types, Model } from "mongoose";
 
 export interface ICarrierDetails {
   company?: string;
+  address?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  trackingUrl?: string;
+  customerService?: string;
+  supportEmail?: string;
   contactNumber?: string;
+  tenant?: string; // Optional tenant field for multi-tenancy
 }
 
 export interface IShipment  {
   order: Types.ObjectId;
+  tenant: string; // Optional tenant field for multi-tenancy
   trackingNumber: string;
   status: "pending" | "shipped" | "delivered" | "returned";
   estimatedDelivery?: Date;
@@ -21,6 +30,7 @@ export interface IShipment  {
 const shipmentSchema = new Schema<IShipment>(
   {
     order: { type: Schema.Types.ObjectId, ref: "Order", required: true },
+    tenant: { type: String, required: true, index: true },
     trackingNumber: { type: String, required: true, unique: true },
     status: {
       type: String,

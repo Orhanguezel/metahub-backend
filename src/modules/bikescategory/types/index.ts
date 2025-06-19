@@ -15,6 +15,7 @@ export interface ICategoryImage {
 
 export interface IBikeCategory extends Document {
   name: TranslatedLabel;
+  tenant: string; // Optional tenant field for multi-tenancy
   description: TranslatedLabel;
   slug: string;
   images: ICategoryImage[];

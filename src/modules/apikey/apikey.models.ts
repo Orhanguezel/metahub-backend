@@ -5,6 +5,7 @@ export interface IApikey {
   key: string;
   status: "active" | "revoked";
   lastUsedAt?: Date;
+  tenant: string; // Optional tenant field for multi-tenancy
   createdAt: Date;
   updatedAt: Date;
 }
@@ -12,6 +13,7 @@ export interface IApikey {
 const ApikeySchema = new Schema<IApikey>(
   {
     name: { type: String, required: true },
+    tenant: { type: String, required: true, index: true },
     key: { type: String, required: true, unique: true },
     status: { type: String, enum: ["active", "revoked"], default: "active" },
     lastUsedAt: { type: Date },
@@ -26,6 +28,7 @@ const Apikey: Model<IApikey> =
 export interface IApikeylog {
   apiKey: Types.ObjectId;
   route: string;
+  tenant: string; // Optional tenant field for multi-tenancy
   method: string;
   statusCode: number;
   ip: string;
@@ -36,6 +39,7 @@ export interface IApikeylog {
 const ApikeylogSchema = new Schema<IApikeylog>(
   {
     apiKey: { type: Schema.Types.ObjectId, ref: "Apikey", required: true },
+    tenant: { type: String, required: true, index: true },
     route: { type: String, required: true },
     method: { type: String, required: true },
     statusCode: { type: Number, required: true },

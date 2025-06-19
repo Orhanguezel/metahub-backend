@@ -3,9 +3,12 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import logger from "@/core/middleware/logger/logger";
-import { t, getLogLocale } from "@/core/utils/i18n/translate";
-import translations from "./i18n";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
+import translations from "./i18n";
+import { t as translate } from "@/core/utils/i18n/translate";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
+import { parseMultilangField } from "@/core/utils/i18n/parseMultilangField";
 
 // ➕ Create
 export const create${CapName} = asyncHandler(async (req: Request, res: Response) => {

@@ -25,6 +25,7 @@ const CategoryImageSchema = new Schema<ICategoryImage>(
 const BikeCategorySchema = new Schema<IBikeCategory>(
   {
     name: localizedStringField(),
+    tenant: { type: String, required: true, index: true },
     description: localizedStringField(),
     slug: { type: String, required: true, unique: true, lowercase: true },
     images: { type: [CategoryImageSchema], default: [] },

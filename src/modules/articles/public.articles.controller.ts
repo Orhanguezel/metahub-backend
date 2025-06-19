@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Articles } from "@/modules/articles";
 import { isValidObjectId } from "@/core/utils/validation";
 import { extractMultilangValue } from "@/core/utils/i18n/parseMultilangField";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";

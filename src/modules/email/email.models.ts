@@ -8,6 +8,7 @@ export interface IEmailMessage {
     en: string;
     de: string;
   };
+  tenant: string; // Optional tenant field for multi-tenancy
   body: {
     tr: string;
     en: string;
@@ -24,6 +25,7 @@ export interface IEmailMessage {
 const EmailSchema = new Schema<IEmailMessage>(
   {
     from: { type: String, required: true },
+    tenant: { type: String, required: true, index: true },
     subject: {
       tr: { type: String, required: true },
       en: { type: String, required: true },

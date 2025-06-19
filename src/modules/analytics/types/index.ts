@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 
 export interface IAnalyticsLog {
   userId?: mongoose.Types.ObjectId | string | null;
+  tenant: string;
   module: string;
   eventType: string;
   path?: string;

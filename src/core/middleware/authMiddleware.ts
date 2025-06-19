@@ -61,15 +61,7 @@ export const authenticate = asyncHandler(
         isActive: user.isActive,
       };
 
-      logger.info("User authenticated", {
-        tenant,
-        module: "auth",
-        event: "auth.authenticate",
-        status: "success",
-        userId: user.id.toString(),
-        userRole: user.role,
-        ip: req.ip,
-      });
+      // --- Başarıyı loglama ---
 
       next();
     } catch (error: any) {
@@ -93,7 +85,6 @@ export const authenticate = asyncHandler(
   }
 );
 
-// ✅ GÜNCELLENMİŞ authorizeRoles (tenant-aware log ile, superadmin override)
 export const authorizeRoles = (...roles: string[]): RequestHandler => {
   return (req: Request, res: Response, next: NextFunction): void => {
     const user = (req as AuthRequest).user;
@@ -146,17 +137,7 @@ export const authorizeRoles = (...roles: string[]): RequestHandler => {
       return;
     }
 
-    logger.info("Role access granted", {
-      tenant,
-      module: "auth",
-      event: "auth.authorizeRoles",
-      status: "success",
-      userId: user.id,
-      userRole: user.role,
-      requiredRoles: roles,
-      ip: req.ip,
-    });
-
+    // --- Başarıyı loglama ---
     next();
   };
 };

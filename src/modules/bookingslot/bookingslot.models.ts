@@ -8,6 +8,7 @@ import mongoose, { Schema, Model, models, Document } from "mongoose";
  */
 export interface IBookingSlotRule extends Document {
   appliesToAll?: boolean;              // true: tüm günler için geçerli (default weekly rule)
+  tenant: string;                       // Optional tenant field for multi-tenancy
   dayOfWeek?: number;                  // 0 = Sunday, 6 = Saturday (opsiyonel)
   startTime: string;                   // e.g. "09:00"
   endTime: string;                     // e.g. "23:00"
@@ -26,6 +27,7 @@ export interface IBookingSlotOverride extends Document {
 const bookingSlotRuleSchema = new Schema<IBookingSlotRule>(
   {
     appliesToAll: { type: Boolean, default: false },            // Tüm günlere mi?
+    tenant: { type: String, required: true, index: true },
     dayOfWeek: { type: Number, min: 0, max: 6, required: false }, // Sadece belirli bir gün için mi?
     startTime: { type: String, required: true },  // "HH:mm"
     endTime: { type: String, required: true },

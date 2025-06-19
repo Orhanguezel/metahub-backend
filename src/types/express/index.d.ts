@@ -52,6 +52,7 @@ declare global {
         | "setting"
         | "company"
         | "apartment"
+        | "tenant"
         | "default";
 
       uploadSizeLimit?: number;

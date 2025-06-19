@@ -3,6 +3,7 @@ import { Schema, model, Document, Model, models } from "mongoose";
 // ✅ Coupon Interface
 interface ICoupon extends Document {
   code: string;
+  tenant: string; // Optional tenant field for multi-tenancy
   label: {
     title: {
       tr: string;
@@ -31,6 +32,11 @@ const couponSchema = new Schema<ICoupon>(
       unique: true,
       uppercase: true,
       trim: true,
+    },
+    tenant: {
+      type: String,
+      required: true,
+      index: true,
     },
     label: {
       title: {

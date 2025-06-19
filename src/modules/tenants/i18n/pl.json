@@ -1,0 +1,13 @@
+{
+  "section.invalidLabel": "Etykieta jest wymagana we wszystkich obsługiwanych językach.",
+  "section.validation.invalidJSON": "Wartość etykiety nie jest poprawnym JSON.",
+  "section.validation.missingLocale": "Brakuje etykiety lub jest pusta w niektórych językach.",
+  "section.create.success": "Sekcja {{name}} została pomyślnie utworzona.",
+  "section.create.labelMissing": "Etykieta jest wymagana we wszystkich językach.",
+  "section.update.success": "Sekcja {{name}} została pomyślnie zaktualizowana.",
+  "section.update.notFound": "Nie znaleziono sekcji.",
+  "section.update.labelMissing": "Etykieta jest wymagana we wszystkich językach.",
+  "section.list.success": "Sekcje zostały pomyślnie wyświetlone.",
+  "section.delete.success": "Sekcja {{name}} została usunięta.",
+  "section.delete.notFound": "Nie znaleziono sekcji."
+}

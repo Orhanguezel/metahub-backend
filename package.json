@@ -8,9 +8,7 @@
   "scripts": {
     "generate:meta": "npx ts-node -r tsconfig-paths/register src/generateMeta.ts",
     "build": "tsc && cp -r src/meta-configs dist/meta-configs",
-    "prestart": "npm run generate:meta",
     "start": "node -r module-alias/register dist/server.js",
-    "predev": "npm run generate:meta",
     "dev": "npx ts-node -r tsconfig-paths/register src/server.ts"
   },
   "keywords": [],

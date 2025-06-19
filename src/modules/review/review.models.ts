@@ -2,6 +2,7 @@ import { Schema, model, Types, Model, models } from "mongoose";
 
 export interface IReview  {
   user: Types.ObjectId;
+  tenant: string; // Optional tenant field for multi-tenancy
   product: Types.ObjectId;
   rating: number;
   comment: string;
@@ -17,6 +18,7 @@ export interface ReviewModel extends Model<IReview> {
 const reviewSchema = new Schema<IReview>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    tenant: { type: String, required: true, index: true },
     product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
     rating: { type: Number, required: true, min: 1, max: 5 },
     comment: { type: String, required: true },
