@@ -13,6 +13,7 @@ export interface ISport {
     en?: string;
     de?: string;
   };
+  tenant: string; // Optional tenant field for multi-tenancy
   slug: string;
   summary?: {
     tr?: string;

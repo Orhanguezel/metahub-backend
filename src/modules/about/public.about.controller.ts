@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { About } from ".";
 import { isValidObjectId } from "@/core/utils/validation";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
@@ -21,7 +20,7 @@ export const getAllAbout = asyncHandler(
     if (typeof language === "string" && ["tr", "en", "de"].includes(language)) {
       filter[`title.${language}`] = { $exists: true };
     }
-
+    const { About } = await getTenantModels(req);
     const aboutList = await About.find(filter)
       .populate("category", "title")
       .sort({ createdAt: -1 })
@@ -44,7 +43,7 @@ export const getAboutById = asyncHandler(
       res.status(400).json({ success: false, message: "Invalid service ID." });
       return;
     }
-
+    const { About } = await getTenantModels(req);
     const about = await About.findOne({
       _id: id,
       tenant: req.tenant,
@@ -71,7 +70,7 @@ export const getAboutById = asyncHandler(
 export const getAboutBySlug = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { slug } = req.params;
-
+    const { About } = await getTenantModels(req);
     const about = await About.findOne({
       slug,
       tenant: req.tenant,

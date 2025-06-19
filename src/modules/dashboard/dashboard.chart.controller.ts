@@ -2,12 +2,12 @@
 
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { Order } from "@/modules/order/order.models"; // Net path kullan!
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // 📊 Aylık sipariş sayıları (son 12 ay)
 export const getMonthlyOrders = asyncHandler(
-  async (_req: Request, res: Response): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
+    const { Order } = await getTenantModels(req);
     const orders = await Order.aggregate([
       {
         $group: {
@@ -37,7 +37,8 @@ export const getMonthlyOrders = asyncHandler(
 
 // 💸 Aylık gelir (son 12 ay)
 export const getMonthlyRevenue = asyncHandler(
-  async (_req: Request, res: Response): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
+    const { Order } = await getTenantModels(req);
     const revenue = await Order.aggregate([
       {
         $group: {

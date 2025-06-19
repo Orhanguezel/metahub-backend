@@ -7,6 +7,7 @@ export interface IApartmentCategory  {
     de: string;
   };
   slug: string;
+  tenant: string; // Optional tenant field for multi-tenancy
   description?: string;
   isActive: boolean;
   createdAt: Date;
@@ -21,6 +22,7 @@ const ApartmentCategorySchema = new Schema<IApartmentCategory>(
       en: { type: String, required: true, trim: true },
       de: { type: String, required: true, trim: true },
     },
+    tenant: { type: String, required: true, index: true },
     slug: {
       type: String,
       required: true,

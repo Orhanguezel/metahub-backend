@@ -70,19 +70,495 @@
   ],
   "useAnalytics": false,
   "language": "en",
-  "version": "1.0.1",
+  "version": "1.0.69",
   "updatedBy": {
     "username": "Orhan Güzel",
-    "commitHash": "769653ecb5b74af7ad3b0a3aa68f987ade5a9167"
+    "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0"
   },
-  "commitHash": "769653ecb5b74af7ad3b0a3aa68f987ade5a9167",
-  "lastUpdatedAt": "2025-06-18T17:18:05.919Z",
+  "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+  "lastUpdatedAt": "2025-06-19T11:19:45.750Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
-      "commitHash": "769653ecb5b74af7ad3b0a3aa68f987ade5a9167",
-      "date": "2025-06-18T17:18:05.919Z",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:01:17.792Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.2",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:01:27.057Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.3",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:01:32.040Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.4",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:01:33.501Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.5",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:01:34.940Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.6",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:01:45.714Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.7",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:01:48.342Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.8",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:01:50.638Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.9",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:01:51.299Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.10",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:01:51.932Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.11",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:19:43.387Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.12",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:19:55.029Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.13",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:20:01.411Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.14",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:20:03.655Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.15",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:20:05.852Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.16",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:20:18.551Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.17",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:20:22.328Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.18",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:20:24.881Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.19",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:20:25.766Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.20",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:20:26.564Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.21",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:50:39.134Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.22",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:50:48.026Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.23",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:50:52.522Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.24",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:50:54.038Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.25",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:50:55.601Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.26",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:51:06.838Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.27",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:51:09.697Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.28",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:51:11.842Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.29",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:51:12.506Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.30",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T21:51:13.216Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.31",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T22:02:59.951Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.32",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T22:03:10.136Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.33",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T22:03:15.845Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.34",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T22:03:17.538Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.35",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T22:04:04.627Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.36",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T22:04:12.911Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.37",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T22:04:18.161Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.38",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T22:04:19.922Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.39",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-18T22:04:21.537Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.40",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T00:11:35.016Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.41",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T00:11:42.758Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.42",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T00:11:46.746Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.43",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T00:11:48.081Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.44",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T00:11:49.505Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.45",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T00:32:09.039Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.46",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T00:32:18.440Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.47",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T00:32:23.624Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.48",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T00:32:25.504Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.49",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T00:32:27.367Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.50",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T01:22:51.748Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.51",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T01:23:03.922Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.52",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T01:23:11.880Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.53",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T01:23:14.719Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.54",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T01:23:17.463Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.55",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T11:02:48.931Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.56",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T11:02:57.567Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.57",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T11:03:03.302Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.58",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T11:03:05.236Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.59",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T11:03:07.199Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.60",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T11:07:09.860Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.61",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T11:07:15.704Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.62",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T11:07:20.081Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.63",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T11:07:21.645Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.64",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T11:07:23.113Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.65",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T11:19:30.578Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.66",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T11:19:38.126Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.67",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T11:19:42.960Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.68",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T11:19:44.391Z",
+      "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
+    },
+    {
+      "version": "1.0.69",
+      "by": "Orhan Güzel",
+      "commitHash": "8da4e9a8d6a12db1d202422029178363f046a7c0",
+      "date": "2025-06-19T11:19:45.750Z",
       "note": "Meta versiyonu {version} olarak {by} tarafından yükseltildi."
     }
   ]

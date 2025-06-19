@@ -14,6 +14,7 @@ export interface IServices  {
     en?: string;
     de?: string;
   };
+  tenant: string; // Optional tenant field for multi-tenancy
   slug: string;
   summary: {
     tr?: string;
@@ -55,6 +56,7 @@ const servicesSchema: Schema = new Schema<IServices>(
       en: { type: String, trim: true },
       de: { type: String, trim: true },
     },
+    tenant: { type: String, required: true, index: true },
     slug: { type: String, required: true, unique: true, lowercase: true },
     summary: {
       tr: { type: String, maxlength: 300 },

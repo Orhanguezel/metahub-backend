@@ -21,6 +21,7 @@ export interface SocialMedia {
 // Main User Interface
 export interface IUser {
   name: string;
+  tenant: string; // Optional tenant field for multi-tenancy
   email: string;
   password: string;
   role: "admin" | "user" | "customer" | "moderator" | "staff";

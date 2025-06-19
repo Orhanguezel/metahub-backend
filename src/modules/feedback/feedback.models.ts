@@ -3,6 +3,7 @@ import { Schema, model, Model, models } from "mongoose";
 // ✅ Interface
 export interface IFeedback  {
   name: string;
+  tenant: string; // Optional tenant field for multi-tenancy
   email: string;
   message: {
     tr: string;
@@ -20,6 +21,7 @@ export interface IFeedback  {
 const feedbackSchema = new Schema<IFeedback>(
   {
     name: { type: String, required: true, trim: true },
+    tenant: { type: String, required: true, index: true },
     email: { type: String, required: true, trim: true },
     message: {
       tr: { type: String, required: true, trim: true },

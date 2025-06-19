@@ -1,0 +1,13 @@
+{
+  "section.invalidLabel": "Le libellé est requis dans toutes les langues prises en charge.",
+  "section.validation.invalidJSON": "La valeur du libellé n'est pas un JSON valide.",
+  "section.validation.missingLocale": "Le libellé est manquant ou vide dans certaines langues.",
+  "section.create.success": "La section {{name}} a été créée avec succès.",
+  "section.create.labelMissing": "Le libellé est requis dans toutes les langues.",
+  "section.update.success": "La section {{name}} a été mise à jour avec succès.",
+  "section.update.notFound": "Section non trouvée.",
+  "section.update.labelMissing": "Le libellé est requis dans toutes les langues.",
+  "section.list.success": "Sections listées avec succès.",
+  "section.delete.success": "La section {{name}} a été supprimée.",
+  "section.delete.notFound": "Section non trouvée."
+}

@@ -52,15 +52,7 @@ if (!moduleName) {
   process.exit(1);
 }
 
-// --- Sadece tenant'ın ENABLED_MODULES içindeyse devam et ---
-const enabledModules = getEnabledModulesFromEnv(tenant);
-if (!enabledModules.includes(moduleName)) {
-  logger.error(
-    t("createModule.notEnabled", lang, translations, { moduleName, tenant }),
-    { tenant, module: "createModule", status: "fail", ...getCliContext(tenant) }
-  );
-  process.exit(1);
-}
+
 
 // --- Tenant-aware dosya yolları ---
 const modulesPath = path.resolve(process.cwd(), "src/modules");

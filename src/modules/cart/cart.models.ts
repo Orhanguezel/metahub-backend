@@ -6,6 +6,7 @@ import { SUPPORTED_LOCALES } from "@/types/common";
 const cartItemSchema = new Schema<ICartItem>(
   {
     product: { type: Types.ObjectId, ref: "Bike", required: true },
+    tenant: { type: String, required: true, index: true },
     quantity: { type: Number, required: true, min: 1, default: 1 },
     priceAtAddition: { type: Number, required: true },
     totalPriceAtAddition: { type: Number, required: true, default: 0 },
@@ -17,6 +18,7 @@ const cartItemSchema = new Schema<ICartItem>(
 const cartSchema = new Schema<ICart>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    tenant: { type: String, required: true, index: true },
     items: { type: [cartItemSchema], default: [] },
     totalPrice: { type: Number, required: true, default: 0 },
     couponCode: { type: String, default: null },

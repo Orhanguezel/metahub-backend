@@ -9,6 +9,7 @@ export interface ICompanyImage {
 
 export interface ICompany {
   companyName: string;
+  tenant: string; // Optional tenant field for multi-tenancy
   taxNumber: string;
   handelsregisterNumber?: string;
   email: string;
@@ -49,6 +50,7 @@ const CompanyImageSchema = new Schema<ICompanyImage>(
 const companySchema = new Schema<ICompany>(
   {
     companyName: { type: String, required: true, unique: true },
+    tenant: { type: String, required: true, index: true },
     taxNumber: { type: String, required: true },
     handelsregisterNumber: { type: String },
     email: { type: String, required: true, unique: true },

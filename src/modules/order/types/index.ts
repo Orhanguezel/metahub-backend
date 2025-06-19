@@ -7,12 +7,14 @@ export type OrderStatus = "pending" | "preparing" | "shipped" | "completed" | "c
 export interface IOrderItem {
   product: Types.ObjectId;
   quantity: number;
+  tenant: string; // Optional tenant field for multi-tenancy
   unitPrice: number;
 }
 
 export interface IShippingAddress {
   name: string;
   phone: string;
+  tenant: string; // Optional tenant field for multi-tenancy
   email: string;
   street: string;
   city: string;
@@ -24,6 +26,7 @@ export interface IOrder {
   user: Types.ObjectId;
   addressId?: Types.ObjectId;
   items: IOrderItem[];
+  tenant: string; // Optional tenant field for multi-tenancy
   shippingAddress: IShippingAddress;
   totalPrice: number;
   discount?: number;

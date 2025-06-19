@@ -1,4 +1,3 @@
-// src/core/middleware/logger/tenantLogger.ts
 import winston from "winston";
 import "winston-daily-rotate-file";
 import path from "path";
@@ -32,7 +31,7 @@ export function getTenantLogger(tenant: string = "unknown"): winston.Logger {
     zippedArchive: false,
     maxSize: "50m",
     maxFiles: "30d",
-    level: env === "production" ? "info" : "debug",
+    level: "debug", // her şeyi dosyaya yaz
     format: winston.format.json(),
   });
 
@@ -43,7 +42,7 @@ export function getTenantLogger(tenant: string = "unknown"): winston.Logger {
   );
 
   const logger = winston.createLogger({
-    level: env === "production" ? "info" : "debug",
+    level: "debug",
     format: logFormat,
     defaultMeta: { tenant },
     transports: [
@@ -53,25 +52,11 @@ export function getTenantLogger(tenant: string = "unknown"): winston.Logger {
         level: "error",
         format: winston.format.json(),
       }),
+      // *** Console transport YOK ***
     ],
   });
 
-  if (env !== "production") {
-    logger.add(
-      new winston.transports.Console({
-        format: winston.format.combine(
-          winston.format.colorize(),
-          winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-          winston.format.printf(
-            ({ timestamp, level, message, ...meta }) =>
-              `${timestamp} [${level}] [${tenant}] ${message}${
-                Object.keys(meta).length ? " " + JSON.stringify(meta) : ""
-              }`
-          )
-        ),
-      })
-    );
-  }
+  // Hiçbir koşulda console log ekleme!
 
   tenantLoggers[tenant] = logger;
   return logger;

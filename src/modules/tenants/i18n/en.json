@@ -1,0 +1,6 @@
+{
+  "validation": {
+    "nameRequired": "Name ({lang}) field is required.",
+    "atLeastOneLangRequired": "At least one language for name is required."
+  }
+}

@@ -20,6 +20,7 @@ const ArticlesImageSchema = new Schema<IArticlesImage>(
 const ArticlesSchema = new Schema<IArticles>(
   {
     title: translatedFieldSchema,
+    tenant: { type: String, required: true, index: true },
     summary: translatedFieldSchema,
     content: translatedFieldSchema,
     slug: { type: String, required: true, unique: true, lowercase: true },

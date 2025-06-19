@@ -11,6 +11,7 @@ export type RouteMeta = {
 
 export interface IModuleMeta {
   name: string;
+  tenant: string; // Optional tenant field for multi-tenancy
   label: TranslatedLabel;
   icon: string;
   roles: string[];

@@ -91,6 +91,45 @@ export const writeModuleFiles = (basePath: string, moduleName: string) => {
       2
     )
   );
+  fs.writeFileSync(
+    path.join(i18nPath, "de.json"),
+    JSON.stringify(
+      {
+        create: {
+          success: "Erfolgreich erstellt!",
+          fail: "Erstellung fehlgeschlagen.",
+        },
+      },
+      null,
+      2
+    )
+  );
+  fs.writeFileSync(
+    path.join(i18nPath, "pl.json"),
+    JSON.stringify(
+      {
+        create: {
+          success: "Utworzono pomyślnie!",
+          fail: "Tworzenie nie powiodło się.",
+        },
+      },
+      null,
+      2
+    )
+  );
+  fs.writeFileSync(
+    path.join(i18nPath, "fr.json"),
+    JSON.stringify(
+      {
+        create: {
+          success: "Créé avec succès !",
+          fail: "Échec de la création.",
+        },
+      },
+      null,
+      2
+    )
+  );
 
   // Optionally: add a type file, documentation, etc.
 

@@ -3,6 +3,7 @@ import { Schema, model, Model, models } from "mongoose";
 // ✅ Contact Message Interface
 export interface IContactMessage {
   name: string;
+  tenant: string; // Optional tenant field for multi-tenancy
   email: string;
   label: {
     subject: {
@@ -26,6 +27,7 @@ export interface IContactMessage {
 const ContactMessageSchema = new Schema<IContactMessage>(
   {
     name: { type: String, required: true },
+    tenant: { type: String, required: true, index: true },
     email: { type: String, required: true },
     label: {
       subject: {

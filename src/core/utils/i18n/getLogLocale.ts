@@ -1,4 +1,3 @@
-// src/core/utils/i18n/getLogLocale.ts
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 
 /** Logger ve fallback dil belirleyici */

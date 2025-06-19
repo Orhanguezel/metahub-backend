@@ -17,6 +17,7 @@ export interface IBikeImage {
 // 🚲 Ana Bike tipi
 export interface IBike extends Document {
   name: TranslatedLabel;
+  tenant: string; // Çok kiracılılık için isteğe bağlı tenant
   slug: string;
   description: TranslatedLabel;
   brand: string;

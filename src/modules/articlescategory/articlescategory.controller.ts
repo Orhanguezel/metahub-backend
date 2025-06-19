@@ -2,10 +2,8 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 //import { ArticlesCategory } from ".";
 import { isValidObjectId } from "@/core/utils/validation";
-import {
-  fillAllLocales,
-  extractMultilangValue,
-} from "@/core/utils/i18n/parseMultilangField";
+import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
+import { extractMultilangValue } from "@/core/utils/i18n/parseMultilangField";
 import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { SupportedLocale } from "@/types/common";

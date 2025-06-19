@@ -1,4 +1,3 @@
-// src/modules/admin/admin.controller.ts (veya uygun modül path'in)
 import fs from "fs";
 import path from "path";
 import { Request, Response, NextFunction } from "express";

@@ -29,7 +29,8 @@ export const validateApiKey = asyncHandler(
     const key = (req.headers["x-api-key"] || "").toString().trim();
 
     if (!key) {
-      logger.warn(t("apikey.error.missing"), {
+      // Sadece hata durumunda logla (ve error seviyesinde)
+      logger.error(t("apikey.error.missing"), {
         ...logContext,
         event: "apikey.validate",
         status: "fail",
@@ -43,7 +44,7 @@ export const validateApiKey = asyncHandler(
 
     const apiKey = await Apikey.findOne({ key, status: "active" });
     if (!apiKey) {
-      logger.warn(t("apikey.error.invalid"), {
+      logger.error(t("apikey.error.invalid"), {
         ...logContext,
         event: "apikey.validate",
         status: "fail",
@@ -55,7 +56,10 @@ export const validateApiKey = asyncHandler(
       return;
     }
 
-    // Yanıt tamamlanınca logla
+    // Başarılı doğrulamada "info" veya "success" log YAZMA!
+    // Sadece hata varsa yaz, yoksa sessizce devam et
+
+    // Yanıt tamamlanınca sadece hata logla
     res.once("finish", async () => {
       try {
         await Apikeylog.create({
@@ -66,14 +70,8 @@ export const validateApiKey = asyncHandler(
           ip: req.ip,
           userAgent: req.headers["user-agent"] || "",
         });
-
-        logger.info(t("apikey.log.success"), {
-          ...logContext,
-          event: "apikey.log",
-          status: "success",
-          apiKeyId: apiKey._id.toString(),
-          statusCode: res.statusCode,
-        });
+        // Info log: çok istenirse bırak, ama bu da çok gerekmiyor
+        // logger.info(t("apikey.log.success"), { ...logContext, ... })
       } catch (error) {
         logger.error("[API key log error]", {
           ...logContext,
@@ -85,6 +83,7 @@ export const validateApiKey = asyncHandler(
     });
 
     apiKey.lastUsedAt = new Date();
+    // Hata varsa logla, başarıda log yazma
     await apiKey.save().catch((err) =>
       logger.error("[API key save error]", {
         ...logContext,
@@ -96,13 +95,7 @@ export const validateApiKey = asyncHandler(
 
     (req as any).apiKey = apiKey;
 
-    // Başarıyı logla
-    logger.info(t("apikey.success.validated"), {
-      ...logContext,
-      event: "apikey.validate",
-      status: "success",
-      apiKeyId: apiKey._id.toString(),
-    });
+    // logger.info(t("apikey.success.validated"), { ... })  // Artık yazılmıyor
 
     next();
   }

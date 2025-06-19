@@ -3,8 +3,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { getDashboardStatsDynamic } from "./dashboard.stats";
-//import { User } from "@/modules/users/users.models";
-//import { Order } from "@/modules/order/order.models";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // 📊 Dashboard ana istatistikleri (dinamik model sayımı, toplam ciro)

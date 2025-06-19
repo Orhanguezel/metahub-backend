@@ -5,6 +5,7 @@ import { SUPPORTED_LOCALES } from "@/types/common";
 const bookingSchema = new Schema<IBooking>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User" },
+    tenant: { type: String, required: true, index: true },
     name: { type: String, required: true, trim: true }, // Artık string
     email: {
       type: String,

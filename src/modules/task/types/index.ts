@@ -6,6 +6,7 @@ export interface ITask {
     en?: string;
     de?: string;
   };
+  tenant: string; // Optional tenant field for multi-tenancy
   description: {
     tr?: string;
     en?: string;

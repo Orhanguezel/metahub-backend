@@ -5,6 +5,7 @@ export type PaymentStatus = "pending" | "paid" | "failed" | "refunded" | "cancel
 
 export interface IPayment {
   order: Types.ObjectId;
+  tenant: string; // Optional tenant field for multi-tenancy
   amount: number;
   method: PaymentMethod;
   status: PaymentStatus;

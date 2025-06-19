@@ -7,6 +7,7 @@ export interface ISportCategory  {
     de: string;
   };
   slug: string;
+  tenant: string; // Optional tenant field for multi-tenancy
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -19,6 +20,7 @@ const SportCategorySchema = new Schema<ISportCategory>(
       en: { type: String, required: true, trim: true },
       de: { type: String, required: true, trim: true },
     },
+    tenant: { type: String, required: true, index: true },
     slug: {
       type: String,
       required: true,

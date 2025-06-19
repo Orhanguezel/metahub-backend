@@ -1,4 +1,4 @@
-// src/core/utils/i18n/translate.ts
+import { fillAllLocales } from "./fillAllLocales";
 import type { SupportedLocale } from "@/types/common";
 
 /**
@@ -22,3 +22,6 @@ export function t(
 
   return str;
 }
+
+export { fillAllLocales };
+

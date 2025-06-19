@@ -26,6 +26,7 @@ const BikeImageSchema = new Schema<IBikeImage>(
 const BikeSchema = new Schema<IBike>(
   {
     name: localizedStringField(),
+    tenant: { type: String, required: true, index: true },
     slug: { type: String, required: true, unique: true, lowercase: true },
     description: localizedStringField(),
     brand: { type: String, required: true },

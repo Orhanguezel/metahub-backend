@@ -7,6 +7,7 @@ export interface IReferenceCategory extends Document {
     en: string;
     de: string;
   };
+  tenant: string; // Optional tenant field for multi-tenancy
   slug: string;
   description: {
     tr: string;
@@ -25,6 +26,7 @@ const ReferenceCategorySchema = new Schema<IReferenceCategory>(
       en: { type: String, required: true, trim: true },
       de: { type: String, required: true, trim: true },
     },
+    tenant: { type: String, required: true, index: true },
     slug: {
       type: String,
       required: true,

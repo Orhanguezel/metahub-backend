@@ -252,6 +252,7 @@ export const updateGalleryItem = asyncHandler(
           title: { tr: "", en: "", de: "" },
           description: { tr: "", en: "", de: "" },
           order: 0,
+          tenant: req.tenant,
         });
       }
     }

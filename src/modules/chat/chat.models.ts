@@ -5,6 +5,7 @@ import { Schema, model, models, Types, Model } from "mongoose";
 --------------------------------------- */
 export interface IChatMessage {
   sender: Types.ObjectId | null;
+  tenant: string; // Optional tenant field for multi-tenancy
   roomId: string;
   message: string;
   isFromBot?: boolean;
@@ -22,6 +23,7 @@ export interface IChatMessage {
 const ChatMessageSchema = new Schema<IChatMessage>(
   {
     sender: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    tenant: { type: String, required: true, index: true },
     roomId: { type: String, required: true },
     message: { type: String, required: true, trim: true },
     isFromBot: { type: Boolean, default: false },
@@ -44,6 +46,7 @@ export const ChatMessage: Model<IChatMessage> =
 --------------------------------------- */
 export interface IChatSession {
   roomId: string;
+  tenant: string; // Optional tenant field for multi-tenancy
   user?: Types.ObjectId;
   createdAt: Date;
   closedAt?: Date;
@@ -51,6 +54,7 @@ export interface IChatSession {
 
 const ChatSessionSchema = new Schema<IChatSession>({
   roomId: { type: String, required: true, unique: true },
+  tenant: { type: String, required: true, index: true },
   user: { type: Schema.Types.ObjectId, ref: "User" },
   createdAt: { type: Date, default: Date.now },
   closedAt: { type: Date },

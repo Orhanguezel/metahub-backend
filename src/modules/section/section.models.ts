@@ -11,6 +11,7 @@ const labelSchemaFields = SUPPORTED_LOCALES.reduce((fields, lang) => {
 const SectionSchema = new Schema<ISection>(
   {
     label: labelSchemaFields,
+    tenant: { type: String, required: true, index: true },
     description: labelSchemaFields,
     icon: { type: String, default: "MdViewModule" },
     order: { type: Number, default: 0 },

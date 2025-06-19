@@ -8,6 +8,7 @@ export interface INotification  {
     en?: string;
     de?: string;
   };
+  tenant: string; // Optional tenant field for multi-tenancy
   message: {
     tr?: string;
     en?: string;
@@ -29,6 +30,7 @@ const notificationSchema = new Schema<INotification>(
       en: { type: String, trim: true },
       de: { type: String, trim: true },
     },
+    tenant: { type: String, required: true, index: true },
     message: {
       tr: { type: String, trim: true },
       en: { type: String, trim: true },

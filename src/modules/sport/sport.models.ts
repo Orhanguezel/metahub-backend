@@ -18,6 +18,7 @@ const SportSchema = new Schema<ISport>(
       en: { type: String, trim: true },
       de: { type: String, trim: true },
     },
+    tenant: { type: String, required: true, index: true },
     slug: { type: String, required: true, unique: true, lowercase: true },
     summary: {
       tr: { type: String, maxlength: 300 },

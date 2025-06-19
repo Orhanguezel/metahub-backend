@@ -12,6 +12,7 @@ export interface IArticlesImage {
 
 export interface IArticles {
   title: TranslatedLabel;
+  tenant: string; // Optional tenant field for multi-tenancy
   slug: string;
   summary: TranslatedLabel;
   content: TranslatedLabel;

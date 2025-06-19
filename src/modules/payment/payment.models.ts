@@ -4,6 +4,7 @@ import type { IPayment } from "./types";
 const paymentSchema = new Schema<IPayment>({
   order: { type: Schema.Types.ObjectId, ref: "Order", required: true },
   amount: { type: Number, required: true, min: 0 },
+  tenant: { type: String, required: true, index: true },
   method: {
     type: String,
     enum: ["cash_on_delivery", "credit_card", "paypal"],

@@ -321,6 +321,7 @@ export const updateGalleryItem = asyncHandler(
         );
 
         item.items.push({
+          tenant: req.tenant,
           image: imagePath,
           thumbnail,
           webp,

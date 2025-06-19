@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { FAQ } from "@/modules/faq";
 import { pinecone } from "@/scripts/faq/pinecone";
 import { askWithOllama } from "@/scripts/faq/askWithOllama";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
@@ -9,6 +8,7 @@ import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 export const getPublishedFAQs = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const lang = (req.query.lang as string) || "en";
+    const { FAQ } = await getTenantModels(req);
 
     const faqs = await FAQ.find({
       isActive: true,

@@ -34,15 +34,6 @@ import {
   validateToggleUserStatus,
 } from "./users.admin.validation";
 
-console.log({
-  registerUser,
-  loginUser,
-  changePassword,
-  logoutUser,
-  forgotPassword,
-  resetPassword,
-});
-
 const router = express.Router();
 
 // 🔐 Auth Routes

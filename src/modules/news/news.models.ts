@@ -13,6 +13,7 @@ export interface INews  {
     en?: string;
     de?: string;
   };
+  tenant: string; // Optional tenant field for multi-tenancy
   slug: string;
   summary: {
     tr?: string;
@@ -53,6 +54,7 @@ const newsSchema: Schema = new Schema<INews>(
       en: { type: String, trim: true },
       de: { type: String, trim: true },
     },
+    tenant: { type: String, required: true, index: true },
     slug: { type: String, required: true, unique: true, lowercase: true },
     summary: {
       tr: { type: String, maxlength: 300 },

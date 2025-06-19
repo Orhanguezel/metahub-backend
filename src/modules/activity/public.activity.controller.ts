@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { Activity } from ".";
 import { isValidObjectId } from "@/core/utils/validation";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 

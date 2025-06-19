@@ -28,6 +28,7 @@ const BlogImageSchema = new Schema<IBlogImage>(
 const BlogSchema: Schema = new Schema<IBlog>(
   {
     title: multilingualField(),
+    tenant: { type: String, required: true, index: true },
     slug: { type: String, required: true, unique: true, lowercase: true },
     summary: multilingualField(300),
     content: multilingualField(),

@@ -22,6 +22,7 @@ export const uploadSizeLimits: Record<UploadFolderKeys, number> = {
   default: 20 * 1024 * 1024,
   activity: 10 * 1024 * 1024,
   apartment: 15 * 1024 * 1024,
+  tenant: 20 * 1024 * 1024,
   about: 10 * 1024 * 1024,
 };
 

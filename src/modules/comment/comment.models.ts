@@ -7,6 +7,7 @@ import {
 interface IComment  {
   userId?: Types.ObjectId;
   name?: string;
+  tenant?: string; // Optional tenant field for multi-tenancy
   email?: string;
   label: { tr: string; en: string; de: string };
   contentType: CommentContentType;
@@ -36,6 +37,11 @@ const commentSchema = new Schema<IComment>(
       required: function () {
         return !this.userId;
       },
+    },
+    tenant: {
+      type: String,
+      required: true,
+      index: true,
     },
 
     email: {

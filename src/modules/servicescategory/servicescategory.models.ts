@@ -6,6 +6,7 @@ export interface IServicesCategory  {
     en: string;
     de: string;
   };
+  tenant: string; // Optional tenant field for multi-tenancy
   slug: string;
   description?: string;
   isActive: boolean;
@@ -21,6 +22,7 @@ const ServicesCategorySchema = new Schema<IServicesCategory>(
       en: { type: String, required: true, trim: true },
       de: { type: String, required: true, trim: true },
     },
+    tenant: { type: String, required: true, index: true },
     slug: {
       type: String,
       required: true,
