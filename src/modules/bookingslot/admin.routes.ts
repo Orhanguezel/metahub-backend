@@ -6,7 +6,7 @@ import {
   createSlotOverride,
   deleteSlotRule,
   deleteSlotOverride,
-   getAllSlotRules,
+  getAllSlotRules,
   getAllSlotOverrides,
 } from "./bookingslot.controller";
 

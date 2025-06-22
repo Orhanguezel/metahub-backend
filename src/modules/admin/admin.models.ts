@@ -2,18 +2,18 @@ import mongoose, { Schema, Model, models } from "mongoose";
 import type { IModuleMeta, IModuleSetting } from "@/modules/admin/types";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
-// Dinamik label alanı oluşturucu
+// Dinamik label alanı
 const labelSchemaFields = SUPPORTED_LOCALES.reduce((fields, lang) => {
   fields[lang] = { type: String, required: true };
   return fields;
-}, {} as Record<string, any>);
+}, {});
 
 // --- ModuleMeta Schema ---
 const ModuleMetaSchema = new Schema<IModuleMeta>(
   {
     name: { type: String, required: true, unique: true },
-    tenant: { type: String, required: true, index: true },
-    label: labelSchemaFields, // Dinamik yapı!
+    tenants: [{ type: String, ref: "Tenant", required: true }], // DİZİ!
+    label: labelSchemaFields,
     icon: { type: String, default: "box" },
     roles: { type: [String], default: ["admin"] },
     visibleInSidebar: { type: Boolean, default: true },
@@ -56,14 +56,14 @@ export const ModuleMeta: Model<IModuleMeta> =
 // --- ModuleSetting Schema ---
 const ModuleSettingsSchema = new Schema<IModuleSetting>(
   {
-    project: { type: String, required: true },
     module: { type: String, required: true },
+    tenant: { type: String, required: true },
     enabled: { type: Boolean, default: true },
     visibleInSidebar: { type: Boolean, default: true },
     useAnalytics: { type: Boolean, default: false },
     roles: { type: [String], default: ["admin"] },
     icon: { type: String, default: "box" },
-    label: labelSchemaFields, // Dinamik yapı!
+    label: labelSchemaFields,
     language: {
       type: String,
       enum: SUPPORTED_LOCALES,

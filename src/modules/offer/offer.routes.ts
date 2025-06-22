@@ -25,7 +25,13 @@ router
   .route("/:id")
   .get(authenticate, idParamValidator, validateRequest, getOfferById)
   .put(authenticate, idParamValidator, validateRequest, updateOffer)
-  .delete(authenticate, authorizeRoles("admin"), idParamValidator, validateRequest, deleteOffer);
+  .delete(
+    authenticate,
+    authorizeRoles("admin"),
+    idParamValidator,
+    validateRequest,
+    deleteOffer
+  );
 
 // 🔄 Teklif durumu güncelleme
 router.patch(

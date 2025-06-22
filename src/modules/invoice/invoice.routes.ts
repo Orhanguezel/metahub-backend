@@ -7,7 +7,10 @@ import {
   getInvoicePDF,
 } from "./invoice.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { validateCreateInvoice, validateInvoiceIdParam } from "./invoice.validation";
+import {
+  validateCreateInvoice,
+  validateInvoiceIdParam,
+} from "./invoice.validation";
 
 const router = express.Router();
 

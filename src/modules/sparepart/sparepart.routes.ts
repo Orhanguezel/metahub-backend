@@ -7,11 +7,8 @@ import {
   updateSparePart,
   deleteSparePart,
 } from "./sparepart.controller";
-import {
-  authenticate,
-  authorizeRoles,
-} from "@/core/middleware/authMiddleware";
-import {upload} from "@/core/middleware/uploadMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { upload } from "@/core/middleware/uploadMiddleware";
 import {
   validateCreateSparePart,
   validateUpdateSparePart,

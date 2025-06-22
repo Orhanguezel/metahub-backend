@@ -20,8 +20,27 @@ router.get("/", getAllExperiences);
 router.get("/:id", validateExperienceId, getExperienceById);
 
 // Admin routes
-router.post("/", authenticate, authorizeRoles("admin"), validateCreateExperience, createExperience);
-router.put("/:id", authenticate, authorizeRoles("admin"), validateExperienceId, validateUpdateExperience, updateExperience);
-router.delete("/:id", authenticate, authorizeRoles("admin"), validateExperienceId, deleteExperience);
+router.post(
+  "/",
+  authenticate,
+  authorizeRoles("admin"),
+  validateCreateExperience,
+  createExperience
+);
+router.put(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateExperienceId,
+  validateUpdateExperience,
+  updateExperience
+);
+router.delete(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateExperienceId,
+  deleteExperience
+);
 
 export default router;

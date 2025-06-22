@@ -1,11 +1,7 @@
 import { Schema, model, models, Model } from "mongoose";
-import {
-  SUPPORTED_LOCALES,
-  SupportedLocale,
-  TranslatedLabel,
-} from "@/types/common";
+import type { SupportedLocale, TranslatedLabel } from "@/types/common";
 
-// ✅ Logo tipi
+// Sadece logo için gerekli tip
 export interface ILogoSettingValue {
   light?: {
     url: string;
@@ -21,33 +17,42 @@ export interface ILogoSettingValue {
   };
 }
 
-// ✅ Setting tipi
+// Temalar ve bazı özel alanlar için sadece string/string[] yeterlidir.
+// Çoklu dil gerektiren alanlar için sadece TranslatedLabel kullanılacak.
+
+// Ana değer tipi — sadece gerekli union'lar bırakıldı
+export type SettingValue =
+  | string
+  | string[]
+  | ILogoSettingValue
+  | TranslatedLabel
+  | Record<string, any>; // Diğer özel alanlar için (ör: sosyal linkler, labele sahip objeler)
+
 export interface ISetting {
   key: string;
-  value:
-    | string
-    | string[]
-    | TranslatedLabel
-    | Record<string, any>
-    | ILogoSettingValue;
+  tenant: string;            // Tenant context zorunlu
+  value: SettingValue;       // Standart ve sade union
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// ✔ Gelişmiş şema
 const SettingSchema = new Schema<ISetting>(
   {
     key: {
       type: String,
       required: [true, "Key is required."],
-      unique: true,
       trim: true,
       minlength: [2, "Key must be at least 2 characters."],
       maxlength: [100, "Key cannot exceed 100 characters."],
     },
+    tenant: {
+      type: String,
+      required: [true, "Tenant is required."], // Mutlaka tenant contexti zorunlu
+      index: true,                            // Performans için
+    },
     value: {
-      type: Schema.Types.Mixed, // Çok dilli veya generic olabilir
+      type: Schema.Types.Mixed,
       required: [true, "Value is required."],
     },
     isActive: {
@@ -58,8 +63,10 @@ const SettingSchema = new Schema<ISetting>(
   { timestamps: true }
 );
 
-// 🚫 Hardcoded model guard yok, tenant-aware çağrılmalı!
-const Setting: Model<ISetting> =
-  models.Setting || model<ISetting>("Setting", SettingSchema);
+// Tenant + key birleşik index: Her tenant kendi settingini benzersiz saklar!
+SettingSchema.index({ tenant: 1, key: 1 }, { unique: true });
+
+// Global model kullanılmaz, mutlaka tenant-aware injection yapılmalı!
+const Setting: Model<ISetting> = models.Setting || model<ISetting>("Setting", SettingSchema);
 
 export { Setting };

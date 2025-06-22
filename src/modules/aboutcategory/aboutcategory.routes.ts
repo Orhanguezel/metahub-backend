@@ -22,11 +22,7 @@ router.use(authenticate, authorizeRoles("admin"));
  * @route   POST /admin/About-categories
  * @desc    Create new category
  */
-router.post(
-  "/",
-  validateCreateAboutCategory,
-  createAboutCategory
-);
+router.post("/", validateCreateAboutCategory, createAboutCategory);
 
 /**
  * @route   GET /admin/About-categories
@@ -38,11 +34,7 @@ router.get("/", getAllAboutCategories);
  * @route   GET /admin/About-categories/:id
  * @desc    Get category by ID
  */
-router.get(
-  "/:id",
-  validateObjectIdParam,
-  getAboutCategoryById
-);
+router.get("/:id", validateObjectIdParam, getAboutCategoryById);
 
 /**
  * @route   PUT /admin/About-categories/:id
@@ -59,10 +51,6 @@ router.put(
  * @route   DELETE /admin/About-categories/:id
  * @desc    Delete category
  */
-router.delete(
-  "/:id",
-  validateObjectIdParam,
-  deleteAboutCategory
-);
+router.delete("/:id", validateObjectIdParam, deleteAboutCategory);
 
 export default router;

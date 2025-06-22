@@ -38,12 +38,25 @@ if (!fs.existsSync(envPath)) {
 
   // Minimum dummy env (her ortamda fallback için)
   process.env.MONGO_URI =
-    process.env.MONGO_URI || "mongodb://localhost:27017/metahub";
-  process.env.PORT = process.env.PORT || "5019";
+    process.env.MONGO_URI ||
+    "mongodb://admin:adminpassword@141.136.36.40:27017/metahub-db?authSource=admin";
+  process.env.PORT = process.env.PORT || "5018";
   process.env.JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
-  process.env.SMTP_HOST = process.env.SMTP_HOST || "smtp.test.com";
-  process.env.SMTP_USER = process.env.SMTP_USER || "test@test.com";
-  process.env.SMTP_PASS = process.env.SMTP_PASS || "test";
+  process.env.SMTP_HOST = process.env.SMTP_HOST || "smtp.hostinger.com";
+  process.env.SMTP_USER = process.env.SMTP_USER || "info@koenigsmassage.com";
+  process.env.SMTP_PASS = process.env.SMTP_PASS || "Kaman@12!";
+  process.env.SMTP_PORT = process.env.SMTP_PORT || "465";
+  process.env.SMTP_SECURE = process.env.SMTP_SECURE || "true";
+
+  process.env.SMTP_FROM = process.env.SMTP_FROM || "info@koenigsmassage.com";
+  process.env.SMTP_FROM_NAME =
+    process.env.SMTP_FROM_NAME || "anastasia Support";
+
+  process.env.IMAP_HOST = process.env.IMAP_HOST || "imap.hostinger.com";
+  process.env.IMAP_PORT = process.env.IMAP_PORT || "993";
+  process.env.IMAP_USER = process.env.IMAP_USER || "info@koenigsmassage.com";
+  process.env.IMAP_PASS = process.env.IMAP_PASS || "Kaman@12!";
+
   // ... Diğer zorunlu env'leri buraya ekle!
 } else {
   const result = dotenv.config({ path: envPath });

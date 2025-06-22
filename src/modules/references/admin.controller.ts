@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { Reference } from "@/modules/references";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
 import path from "path";
@@ -53,7 +52,7 @@ export const createReference = asyncHandler(
   async (req: Request, res: Response) => {
     let { title, summary, content, tags, category, isPublished, publishedAt } =
       req.body;
-    const { Reference } = await getTenantModels(req);
+    const { References } = await getTenantModels(req);
 
     title = parseIfJsonString(title);
     summary = parseIfJsonString(summary);
@@ -69,7 +68,7 @@ export const createReference = asyncHandler(
       strict: true,
     });
 
-    const reference = await Reference.create({
+    const reference = await References.create({
       title,
       slug,
       tenant: req.tenant,
@@ -95,7 +94,7 @@ export const createReference = asyncHandler(
 // ✅ Admin - Get All References
 export const adminGetAllReferences = asyncHandler(
   async (req: Request, res: Response) => {
-    const { Reference } = await getTenantModels(req);
+    const { References } = await getTenantModels(req);
     const { language, category, isPublished, isActive } = req.query;
 
     const filter: Record<string, any> = { tenant: req.tenant };
@@ -118,7 +117,7 @@ export const adminGetAllReferences = asyncHandler(
       filter.isActive = true;
     }
 
-    const referenceList = await Reference.find(filter)
+    const referenceList = await References.find(filter)
       .populate([{ path: "category", select: "name" }])
       .sort({ createdAt: -1 })
       .lean();
@@ -134,7 +133,7 @@ export const adminGetAllReferences = asyncHandler(
 // ✅ Admin - Get Reference By ID
 export const adminGetReferenceById = asyncHandler(
   async (req: Request, res: Response) => {
-    const { Reference } = await getTenantModels(req);
+    const { References } = await getTenantModels(req);
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -144,7 +143,7 @@ export const adminGetReferenceById = asyncHandler(
       return;
     }
 
-    const reference = await Reference.findOne({ _id: id, tenant: req.tenant })
+    const reference = await References.findOne({ _id: id, tenant: req.tenant })
       .populate([{ path: "category", select: "name" }])
       .lean();
 
@@ -167,7 +166,7 @@ export const adminGetReferenceById = asyncHandler(
 export const updateReference = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { Reference } = await getTenantModels(req);
+    const { References } = await getTenantModels(req);
     const updates = req.body;
 
     if (!isValidObjectId(id)) {
@@ -177,7 +176,7 @@ export const updateReference = asyncHandler(
       return;
     }
 
-    const reference = await Reference.findOne({ _id: id, tenant: req.tenant });
+    const reference = await References.findOne({ _id: id, tenant: req.tenant });
     if (!reference) {
       res.status(404).json({ success: false, message: "Reference not found." });
       return;
@@ -245,7 +244,7 @@ export const updateReference = asyncHandler(
 // ✅ Delete Reference
 export const deleteReference = asyncHandler(
   async (req: Request, res: Response) => {
-    const { Reference } = await getTenantModels(req);
+    const { References } = await getTenantModels(req);
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -255,7 +254,7 @@ export const deleteReference = asyncHandler(
       return;
     }
 
-    const reference = await Reference.findOne({ _id: id, tenant: req.tenant });
+    const reference = await References.findOne({ _id: id, tenant: req.tenant });
     if (!reference) {
       res.status(404).json({ success: false, message: "Reference not found." });
       return;

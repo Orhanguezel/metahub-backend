@@ -20,9 +20,7 @@ router.use(authenticate, authorizeRoles("admin"));
 
 router.post("/", validateCreateGalleryCategory, createGalleryCategory);
 
-
 router.get("/", getAllGalleryCategories);
-
 
 router.get("/:id", validateObjectIdParam, getGalleryCategoryById);
 

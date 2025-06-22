@@ -2,10 +2,10 @@ import { Types } from "mongoose";
 import type { SupportedLocale } from "@/types/common";
 
 export interface IUserProfileImage {
-  url: string;         
-  thumbnail: string;   
-  webp?: string;      
-  publicId?: string;   
+  url: string;
+  thumbnail: string;
+  webp?: string;
+  publicId?: string;
 }
 
 export interface Notifications {
@@ -24,7 +24,7 @@ export interface IUser {
   tenant: string; // Optional tenant field for multi-tenancy
   email: string;
   password: string;
-  role: "admin" | "user" | "customer" | "moderator" | "staff";
+  role: "superadmin" | "admin" | "user" | "customer" | "moderator" | "staff";
   phone?: string;
   cart?: Types.ObjectId;
   orders?: Types.ObjectId[];
@@ -41,7 +41,7 @@ export interface IUser {
   favorites?: Types.ObjectId[];
   bio?: string;
   birthDate?: Date;
-  language?: SupportedLocale; 
+  language?: SupportedLocale;
   socialMedia?: SocialMedia;
   notifications?: Notifications;
   passwordResetToken?: string;

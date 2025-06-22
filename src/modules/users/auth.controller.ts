@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import type { IUserProfileImage } from "@/modules/users/types";
 import crypto from "crypto";
@@ -10,6 +10,7 @@ import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import userTranslations from "@/modules/users/i18n";
 import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+import { sendEmailVerification } from "@/modules/users/auth.advanced.controller";
 
 import {
   loginAndSetToken,
@@ -42,7 +43,6 @@ export const registerUser = asyncHandler(
 
     const {
       name,
-      tenant,
       email,
       password,
       role = "user",
@@ -54,8 +54,6 @@ export const registerUser = asyncHandler(
       notifications = { emailNotifications: true, smsNotifications: false },
     } = req.body;
 
-    logger.info(`[REGISTER] Yeni kayıt: ${email} | locale: ${locale}`);
-
     // --- Validasyonlar ---
     if (!validateEmailFormat(email)) {
       logger.warn(`[REGISTER] Geçersiz e-posta: ${email}`);
@@ -65,14 +63,7 @@ export const registerUser = asyncHandler(
       });
       return;
     }
-    if (!password || password.length < 6) {
-      logger.warn(`[REGISTER] Şifre kısa: ${email}`);
-      res.status(400).json({
-        success: false,
-        message: userT("auth.register.invalidPassword", locale),
-      });
-      return;
-    }
+
     const normalizedRole = role.toLowerCase();
     if (!isValidRole(normalizedRole)) {
       logger.warn(`[REGISTER] Geçersiz rol: ${role}`);
@@ -94,6 +85,7 @@ export const registerUser = asyncHandler(
       return;
     }
 
+    // Profil resmi objesi
     let profileImageObj: IUserProfileImage = {
       url: "/defaults/profile.png",
       thumbnail: "/defaults/profile-thumbnail.png",
@@ -121,15 +113,15 @@ export const registerUser = asyncHandler(
       }
     }
 
-    const hashedPassword = await hashNewPassword(req, password);
+    // Kayıt işlemi
     let user;
     try {
       const { User } = await getTenantModels(req);
       user = await User.create({
         name,
-        tenant,
+        tenant: req.tenant,
         email,
-        password: hashedPassword,
+        password: await hashNewPassword(req, password),
         role: normalizedRole,
         phone,
         addresses: parsedAddresses,
@@ -139,8 +131,9 @@ export const registerUser = asyncHandler(
         notifications: parsedNotifications,
         profileImage: profileImageObj,
       });
-      logger.info(`[REGISTER] Kullanıcı kaydedildi: ${email}`);
-    } catch (err: any) {
+
+      logger.info(`[REGISTER] Yeni kayıt: ${email} | locale: ${locale}`);
+    } catch (err) {
       logger.error(`[REGISTER] Kayıt başarısız: ${email} | ${err.message}`);
       res.status(500).json({
         success: false,
@@ -149,23 +142,18 @@ export const registerUser = asyncHandler(
       return;
     }
 
+    // Doğrulama e-posta gönder
     try {
-      const verificationToken = crypto.randomBytes(32).toString("hex");
-      user.emailVerificationToken = verificationToken;
-      user.emailVerificationExpires = new Date(Date.now() + 1000 * 60 * 60 * 6); // 6 saat
-      await user.save();
-
-      const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
-      await sendEmail({
-        to: user.email,
-        subject: userT("auth.emailVerification.subject", locale),
-        html: `<p>${userT("auth.emailVerification.body", locale)}</p>
-               <a href="${verifyUrl}">${verifyUrl}</a>`,
+      await sendEmailVerification(req, res);
+      res.status(201).json({
+        success: true,
+        emailVerificationRequired: true,
+        message: userT("auth.register.success", locale),
       });
-      logger.info(`[REGISTER] Email verification gönderildi: ${user.email}`);
+      return;
     } catch (err) {
       logger.error(
-        `[REGISTER] Email verification gönderilemedi: ${user.email}`
+        `[REGISTER] E-posta doğrulama gönderilemedi: ${user.email} | ${err.message}`
       );
       res.status(500).json({
         success: false,
@@ -173,12 +161,6 @@ export const registerUser = asyncHandler(
       });
       return;
     }
-
-    res.status(201).json({
-      success: true,
-      emailVerificationRequired: true,
-      message: userT("auth.register.success", locale),
-    });
   }
 );
 

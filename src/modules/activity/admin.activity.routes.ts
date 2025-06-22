@@ -13,7 +13,7 @@ import {
   validateUpdateActivity,
   validateAdminQuery,
 } from "./activity.validation";
-import {upload} from "@/core/middleware/uploadMiddleware";
+import { upload } from "@/core/middleware/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 

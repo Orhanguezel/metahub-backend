@@ -9,7 +9,11 @@ import {
   deleteAllReviewsByProduct,
 } from "./review.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { validateCreateReview, validateUpdateReview, validateObjectIdParam } from "./review.validation";
+import {
+  validateCreateReview,
+  validateUpdateReview,
+  validateObjectIdParam,
+} from "./review.validation";
 
 const router = express.Router();
 
@@ -20,7 +24,11 @@ router.get("/", authenticate, authorizeRoles("admin"), fetchReviews);
 router.post("/", authenticate, validateCreateReview, addReview);
 
 // ✅ Ürünün tüm yorumları
-router.get("/product/:productId", validateObjectIdParam("productId"), fetchProductReviews);
+router.get(
+  "/product/:productId",
+  validateObjectIdParam("productId"),
+  fetchProductReviews
+);
 
 // ✅ Admin ürüne ait tüm yorumları sil
 router.delete(
@@ -43,7 +51,12 @@ router.get(
 // ✅ Yorumu güncelle + sil
 router
   .route("/:id")
-  .put(authenticate, validateObjectIdParam("id"), validateUpdateReview, updateReview)
+  .put(
+    authenticate,
+    validateObjectIdParam("id"),
+    validateUpdateReview,
+    updateReview
+  )
   .delete(authenticate, validateObjectIdParam("id"), deleteReview);
 
 export default router;

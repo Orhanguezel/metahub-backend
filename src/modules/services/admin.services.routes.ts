@@ -7,13 +7,13 @@ import {
   deleteServices,
   createServices,
 } from "./admin.services.controller";
-import { 
+import {
   validateObjectId,
   validateCreateServices,
   validateUpdateServices,
   validateAdminQuery,
 } from "./services.validation";
-import {upload} from "@/core/middleware/uploadMiddleware";
+import { upload } from "@/core/middleware/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 

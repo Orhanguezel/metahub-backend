@@ -1,8 +1,6 @@
 // src/core/middleware/tenant/injectTenantModel.ts
 import { Request, Response, NextFunction } from "express";
-import { getTenantModel } from "@/core/middleware/tenant/modelRegistry";
-import { Schema } from "mongoose";
-import { resolveTenantFromRequest } from "./resolveTenant";
+import { getTenantDbConnection } from "@/core/config/tenantDb";
 import logger from "@/core/middleware/logger/logger";
 import translations from "./i18n";
 import { t } from "@/core/utils/i18n/translate";
@@ -10,35 +8,40 @@ import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 
 /**
- * Her istekte tenant belirler ve req üstüne dinamik tenant-aware getModel fonksiyonu ekler.
- * - tenant, header/domain ile tespit edilir
- * - Hatalar descriptive, log ve response ile döner
+ * Artık tenant resolve işlemi önde (resolveTenant middleware'ı ile) yapılıyor.
+ * Bu middleware, tenant slug'ı ve tenant verisini req üstüne ekler.
+ * Bu middleware sadece, dinamik model getter fonksiyonunu req'e inject eder.
+ *
+ * ÖNEMLİ: resolveTenant middleware'ı ÖNCE kullanılmalı!
  */
-export const injectTenantModel = (
+export const injectTenantModel = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // 1. Tenant tespit
-    const tenant = resolveTenantFromRequest(req);
-    req.tenant = tenant;
+    const tenantSlug = req.tenant;
+    if (!tenantSlug) {
+      throw new Error(
+        "Tenant slug not found on request object. (Did you forget to use resolveTenant middleware?)"
+      );
+    }
 
-    // 2. Dinamik model injection (her modül kendi schema'sını verir)
-    req.getModel = async <T = any>(modelName: string, schema: Schema<T>) => {
-      return getTenantModel<T>(tenant, modelName, schema);
+    // Dinamik tenant connection'dan model getter fonksiyonunu ekle
+    req.getModel = async <T = any>(modelName: string, schema: any) => {
+      const connection = await getTenantDbConnection(tenantSlug);
+      return connection.model<T>(modelName, schema);
     };
 
-    // 3. Tenant ve i18n log
     logger.info(
       t("resolveTenant.success", req.locale || getLogLocale(), translations, {
-        tenant,
+        tenant: tenantSlug,
       }),
       {
-        tenant,
+        tenant: tenantSlug,
         ...getRequestContext(req),
         module: "tenant",
-        event: "tenant.resolveTenant",
+        event: "tenant.injectTenantModel",
         status: "success",
         host: req.hostname,
         headers: {
@@ -49,14 +52,13 @@ export const injectTenantModel = (
     );
     next();
   } catch (err: any) {
-    // Hatalı tenant veya resolve hatası
     logger.error(
       t("resolveTenant.fail", req.locale || getLogLocale(), translations),
       {
         tenant: req.tenant || "unknown",
         ...getRequestContext(req),
         module: "tenant",
-        event: "tenant.resolveTenant",
+        event: "tenant.injectTenantModel",
         status: "fail",
         error: err?.message || err,
         host: req.hostname,

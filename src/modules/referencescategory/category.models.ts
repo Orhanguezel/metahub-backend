@@ -1,7 +1,7 @@
 import mongoose, { Schema, Model, models, model, Document } from "mongoose";
 
 // Çok dilli kategori tipi
-export interface IReferenceCategory extends Document {
+export interface IReferencesCategory extends Document {
   name: {
     tr: string;
     en: string;
@@ -19,7 +19,7 @@ export interface IReferenceCategory extends Document {
   updatedAt: Date;
 }
 
-const ReferenceCategorySchema = new Schema<IReferenceCategory>(
+const ReferencesCategorySchema = new Schema<IReferencesCategory>(
   {
     name: {
       tr: { type: String, required: true, trim: true },
@@ -45,8 +45,8 @@ const ReferenceCategorySchema = new Schema<IReferenceCategory>(
 );
 
 // Slug otomasyonu (herhangi bir dil varsa çalışır)
-ReferenceCategorySchema.pre("validate", function (next) {
-  const doc = this as IReferenceCategory;
+ReferencesCategorySchema.pre("validate", function (next) {
+  const doc = this as IReferencesCategory;
   // Varsayılan dil sırası: en > tr > de
   const base =
     doc.name?.en?.toLowerCase() ||
@@ -64,8 +64,8 @@ ReferenceCategorySchema.pre("validate", function (next) {
   next();
 });
 
-const ReferenceCategory: Model<IReferenceCategory> =
-  models.ReferenceCategory ||
-  model<IReferenceCategory>("ReferenceCategory", ReferenceCategorySchema);
+const ReferencesCategory: Model<IReferencesCategory> =
+  models.ReferencesCategory ||
+  model<IReferencesCategory>("ReferencesCategory", ReferencesCategorySchema);
 
-export { ReferenceCategory };
+export { ReferencesCategory };

@@ -3,7 +3,7 @@ import {
   getCompanyInfo,
   createCompany,
   updateCompanyInfo,
-  deleteCompany
+  deleteCompany,
 } from "./company.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import { upload } from "@/core/middleware/uploadMiddleware";

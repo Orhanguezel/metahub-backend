@@ -42,8 +42,8 @@ import { ActivityCategory } from "@/modules/activitycategory/activitycategory.mo
 import { About } from "@/modules/about/about.models";
 import { AboutCategory } from "@/modules/aboutcategory/aboutcategory.models";
 import { Experience } from "@/modules/experience/experience.models";
-import { Reference } from "@/modules/references/models";
-import { ReferenceCategory } from "@/modules/referencescategory/category.models";
+import { References } from "@/modules/references/models";
+import { ReferencesCategory } from "@/modules/referencescategory/category.models";
 import { Articles } from "@/modules/articles/articles.models";
 import { ArticlesCategory } from "@/modules/articlescategory/articlescategory.models";
 import { Library } from "@/modules/library/library.models";
@@ -118,10 +118,10 @@ export const getTenantModels = async (req: Request) => ({
   About: await req.getModel("About", About.schema),
   AboutCategory: await req.getModel("AboutCategory", AboutCategory.schema),
   Experience: await req.getModel("Experience", Experience.schema),
-  Reference: await req.getModel("Reference", Reference.schema),
-  ReferenceCategory: await req.getModel(
-    "ReferenceCategory",
-    ReferenceCategory.schema
+  References: await req.getModel("References", References.schema),
+  ReferencesCategory: await req.getModel(
+    "ReferencesCategory",
+    ReferencesCategory.schema
   ),
   Articles: await req.getModel("Articles", Articles.schema),
   ArticlesCategory: await req.getModel(

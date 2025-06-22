@@ -32,12 +32,7 @@ router.post(
   createSport
 );
 
-router.get(
-  "/admin",
-  authenticate,
-  authorizeRoles("admin"),
-  adminGetAllSport
-);
+router.get("/admin", authenticate, authorizeRoles("admin"), adminGetAllSport);
 
 router.get(
   "/admin/:id",

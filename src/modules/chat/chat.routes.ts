@@ -21,12 +21,7 @@ import {
 const router = express.Router();
 
 // ✅ Public + Auth: Get all messages for a room
-router.get(
-  "/:roomId",
-  authenticate,
-  validateRoomIdParam,
-  getMessagesByRoom
-);
+router.get("/:roomId", authenticate, validateRoomIdParam, getMessagesByRoom);
 
 // ✅ Admin-only routes
 router.use(authenticate, authorizeRoles("admin"));

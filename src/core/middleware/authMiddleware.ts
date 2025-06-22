@@ -2,7 +2,7 @@ import asyncHandler from "express-async-handler";
 import { Request, Response, NextFunction, RequestHandler } from "express";
 import { getTokenFromRequest } from "@/core/utils/authHelpers";
 import { verifyToken } from "@/core/utils/token";
-import { UserPayload } from "@/types/userPayload";
+import { UserPayload } from "@/types/express";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import logger from "@/core/middleware/logger/logger";
 
@@ -59,6 +59,7 @@ export const authenticate = asyncHandler(
         email: user.email,
         name: user.name,
         isActive: user.isActive,
+        isSuperadmin: user.role === "superadmin",
       };
 
       // --- Başarıyı loglama ---

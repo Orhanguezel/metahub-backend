@@ -7,15 +7,15 @@ import {
   deleteNews,
   createNews,
 } from "./admin.news.controller";
-import { 
+import {
   validateObjectId,
   validateCreateNews,
   validateUpdateNews,
   validateAdminQuery,
- } from "./news.validation";
-import {upload} from "@/core/middleware/uploadMiddleware";
+} from "./news.validation";
+import { upload } from "@/core/middleware/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
-import {transformNestedFields} from "@/core/middleware/transformNestedFields";
+import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
 
@@ -32,7 +32,7 @@ router.post(
   uploadTypeWrapper("news"),
   upload.array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
-  validateCreateNews, 
+  validateCreateNews,
   createNews
 );
 
@@ -42,7 +42,7 @@ router.put(
   upload.array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateObjectId("id"),
-  validateUpdateNews, 
+  validateUpdateNews,
   updateNews
 );
 

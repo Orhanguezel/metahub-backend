@@ -20,4 +20,4 @@ bun run build
 bun run dev
 
 
-npx ts-node -r tsconfig-paths/register src/generateMeta.ts --tenant=metahub
+npx ts-node -r tsconfig-paths/register src/generateMeta.ts

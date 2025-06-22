@@ -36,7 +36,6 @@ export const createAddress = asyncHandler(
       tenant: req.tenant, // 🟢 Eklendi
       country,
       phone,
-      email: req.user!.email,
       isDefault,
     });
 

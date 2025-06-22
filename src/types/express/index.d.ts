@@ -26,6 +26,7 @@ declare global {
         email?: string;
         name?: string;
         isActive?: boolean;
+        isSuperadmin?: boolean;
         iat?: number;
         exp?: number;
       };
@@ -64,6 +65,18 @@ declare global {
 
   // 🎫 Token tipi (opsiyonel alanları destekler)
   interface IUserToken extends Express.Request["user"] {}
+}
+
+export interface UserPayload {
+  id: string;
+  _id?: string;
+  role: "superadmin" | "admin" | "user" | "customer" | "moderator" | "staff";
+  email?: string;
+  name?: string;
+  isActive?: boolean;
+  isSuperadmin?: boolean;
+  iat?: number;
+  exp?: number;
 }
 
 export {};

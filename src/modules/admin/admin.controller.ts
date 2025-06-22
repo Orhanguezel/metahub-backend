@@ -14,33 +14,14 @@ import { writeModuleFiles } from "@/scripts/createModule/writeModuleFiles";
 import { getPaths } from "@/scripts/createModule/utils";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import type { SupportedLocale, TranslatedLabel } from "@/types/common";
+import { SUPPORTED_LOCALES } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
-// --- ENV/Config ---
-const PROJECT_ENV = process.env.APP_ENV;
-if (!PROJECT_ENV) {
-  throw new Error(
-    "❌ APP_ENV is not defined. Please set the environment before running the server."
-  );
-}
-
-// Yardımcı: Büyük harf başlatıcı
-const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-// Yardımcı: Varsayılan çok dilli label
-const generateDefaultLabel = (name: string): TranslatedLabel => ({
-  tr: capitalize(name),
-  en: capitalize(name),
-  de: capitalize(name),
-  pl: capitalize(name),
-  fr: capitalize(name),
-  es: capitalize(name),
-});
-
-// --- Yeni modül oluştur ---
+// --- Modül Oluştur (dosya+DB zorunlu, çok tenantlı, audit tam) ---
 export const createModule = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const locale: SupportedLocale = req.locale || "en";
-    const tenant: string = req.tenant; // Tenant middleware'den gelmeli!
+    const tenant: string = req.tenant;
     if (!tenant) {
       logger.error("Tenant bulunamadı (createModule)!", {
         module: "admin",
@@ -56,104 +37,129 @@ export const createModule = asyncHandler(
     }
 
     const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
+    const {
+      name,
+      icon = "box",
+      roles = ["admin"],
+      language = "en",
+      visibleInSidebar = true,
+      useAnalytics = false,
+      tenants = [tenant], // Dizi!
+      enabled = true,
+      label,
+      showInDashboard = true,
+      order = 0,
+      statsKey = "",
+    } = req.body;
 
-    try {
-      const {
-        name,
-        icon = "box",
-        roles = ["admin"],
-        language = "en",
-        visibleInSidebar = true,
-        useAnalytics = false,
-        tenant = req.tenant,
-        enabled = true,
-        label,
-        showInDashboard = true,
-        order = 0,
-        statsKey = "",
-      } = req.body;
-
-      if (!name) {
-        logger.warn("Modül adı girilmedi.", {
-          module: "admin",
-          fn: "createModule",
-          tenant,
-        });
-        res.status(400).json({
-          success: false,
-          message: t("admin.module.nameRequired", locale, translations),
-        });
-        return;
-      }
-
-      // Aynı isimde var mı?
-      const existing = await ModuleMeta.findOne({
-        name,
-        tenant: req.tenant,
+    if (!name) {
+      logger.warn("Modül adı girilmedi.", {
+        module: "admin",
+        fn: "createModule",
+        tenant,
       });
-      if (existing) {
-        logger.warn(`Module '${name}' already exists.`, {
-          module: "admin",
-          tenant: req.tenant,
-        });
-        res.status(400).json({
-          success: false,
-          message: t("admin.module.exists", locale, translations, { name }),
-        });
-        return;
-      }
+      res.status(400).json({
+        success: false,
+        message: t("admin.module.nameRequired", locale, translations),
+      });
+      return;
+    }
 
-      // Kullanıcı ve commit bilgisi (audit)
-      const username = await getGitUser();
-      const commitHash = await getGitCommitHash();
-      const now = new Date().toISOString();
+    // Aynı isim ve tenantlardan biri için var mı?
+    const existing = await ModuleMeta.findOne({
+      name,
+      tenants: { $in: tenants },
+    });
+    if (existing) {
+      logger.warn(`Module '${name}' already exists for these tenants.`, {
+        module: "admin",
+        tenants,
+      });
+      res.status(400).json({
+        success: false,
+        message: t("admin.module.exists", locale, translations, { name }),
+      });
+      return;
+    }
 
-      // Çoklu dil label normalizasyonu
-      let finalLabel: TranslatedLabel;
-      if (label && typeof label === "object") {
-        finalLabel = fillAllLocales(label);
-      } else if (typeof label === "string") {
-        finalLabel = fillAllLocales(label);
-      } else {
-        finalLabel = generateDefaultLabel(name);
-      }
-
-      // --- Meta dosyasını oluştur ve versiyon logla
-      const metaContent = updateMetaVersionLog(
-        {
-          name,
-          tenant,
-          icon,
-          visibleInSidebar,
-          useAnalytics,
-          enabled,
-          roles,
-          language,
-          label: finalLabel,
-          routes: [],
-          updatedBy: { username, commitHash },
-          lastUpdatedAt: now,
-          history: [],
-          showInDashboard,
-          order,
-          statsKey,
-        },
-        t("meta.created", locale, translations, { name, tenant }), // note
-        tenant
+    // Çoklu dil label doldur
+    let finalLabel: TranslatedLabel;
+    if (label && typeof label === "object") {
+      finalLabel = fillAllLocales(label);
+    } else if (typeof label === "string") {
+      finalLabel = fillAllLocales(label);
+    } else {
+      finalLabel = SUPPORTED_LOCALES.reduce(
+        (acc, lng) => ({ ...acc, [lng]: name }),
+        {} as TranslatedLabel
       );
+    }
 
-      // Dosya yolları (tenant context ile)
-      const { metaPath, modulePath } = getPaths(name, tenant);
+    // AUDIT ve GIT bilgileri
+    const now = new Date().toISOString();
+    const gitUser = await getGitUser();
+    const commitHash = await getGitCommitHash();
+    const userDisplayName =
+      req.user?.name || req.user?.email || gitUser || "system";
 
-      // --- Meta dosyasını yaz
-      fs.mkdirSync(path.dirname(metaPath), { recursive: true });
-      fs.writeFileSync(metaPath, JSON.stringify(metaContent, null, 2));
+    // --- Meta dosyası ve versiyon logu oluştur ---
+    // Tüm tenants için bir meta dosyası, tenant ismiyle (ilk tenant) path belirle!
+    const mainTenant = tenants[0];
+    const metaContent = updateMetaVersionLog(
+      {
+        name,
+        tenants,
+        icon,
+        visibleInSidebar,
+        useAnalytics,
+        enabled,
+        roles,
+        language,
+        label: finalLabel,
+        routes: [],
+        updatedBy: { username: userDisplayName, commitHash },
+        lastUpdatedAt: now,
+        history: [
+          {
+            version: "1.0.0",
+            by: userDisplayName,
+            gitUser,
+            commitHash,
+            date: now,
+            note: "Module created",
+          },
+        ],
+        showInDashboard,
+        order,
+        statsKey,
+        createdBy: userDisplayName,
+        gitUser,
+        commitHash,
+        createdAt: now,
+        updatedAt: now,
+      },
+      t("meta.created", locale, translations, { name, tenant: mainTenant }),
+      mainTenant
+    );
 
-      // --- MongoDB kayıtları (tenant-aware)
-      await ModuleMeta.create(metaContent);
-      await ModuleSetting.create({
-        tenant: req.tenant,
-        project: PROJECT_ENV,
+    // Dosya yolları (ilk tenant context ile - dizi olabilir, path içinde ilk tenant kullanılabilir)
+    const { metaPath, modulePath } = getPaths(name, mainTenant);
+
+    // Meta dosyasını oluştur (JSON, zorunlu)
+    fs.mkdirSync(path.dirname(metaPath), { recursive: true });
+    fs.writeFileSync(metaPath, JSON.stringify(metaContent, null, 2));
+
+    // Modül dizini oluştur (isteğe bağlı)
+    fs.mkdirSync(modulePath, { recursive: true });
+    await writeModuleFiles(modulePath, name);
+
+    // MongoDB kayıtları (Meta + Settings)
+    const createdMeta = await ModuleMeta.create(metaContent);
+
+    // Her tenant için ayar satırı oluştur (tenant alanı zorunlu)
+    const settingsCreated: any[] = [];
+    for (const tnt of tenants) {
+      const settingData = {
         module: name,
         enabled,
         visibleInSidebar,
@@ -162,72 +168,199 @@ export const createModule = asyncHandler(
         icon,
         label: finalLabel,
         language,
-      });
+        tenant: tnt,
+        createdBy: userDisplayName,
+        gitUser,
+        commitHash,
+      };
+      const setting = await ModuleSetting.create(settingData);
+      settingsCreated.push(setting);
+    }
 
-      // --- Modül dosyalarını oluştur (tenant bağımsız)
-      fs.mkdirSync(modulePath, { recursive: true });
-      await writeModuleFiles(modulePath, name);
-
-      logger.info(`Module created: ${name}`, {
+    logger.info(
+      `Module '${name}' created for tenants: [${tenants.join(", ")}]`,
+      {
         module: "admin",
-        tenant,
-        user: username,
+        user: userDisplayName,
         locale,
+        gitUser,
+        commitHash,
+      }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: t("admin.module.created", locale, translations, { name }),
+      data: metaContent,
+      db: createdMeta,
+      settings: settingsCreated,
+    });
+    return;
+  }
+);
+
+// --- Modül güncelle ---
+export const updateModule = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const locale: SupportedLocale = req.locale || "en";
+    const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
+
+    try {
+      const { name } = req.params;
+      const updates = req.body;
+
+      // --- Label normalize
+      if (updates.label) {
+        updates.label = fillAllLocales(updates.label);
+      }
+
+      let updatedTenants: string[] | undefined;
+      if (updates.tenants && Array.isArray(updates.tenants)) {
+        updatedTenants = updates.tenants;
+      }
+
+      // --- Ana Meta kaydı güncelle
+      const meta = await ModuleMeta.findOne({
+        name,
+        tenants: { $in: updatedTenants || [] },
       });
 
-      res.status(201).json({
+      if (!meta) {
+        logger.warn(`Module not found for update: ${name}`, {
+          module: "admin",
+        });
+        res.status(404).json({
+          success: false,
+          message: t("admin.module.notFound", locale, translations),
+        });
+        return;
+      }
+
+      // --- Git bilgilerini al
+      const now = new Date().toISOString();
+      const userDisplayName = req.user?.name || req.user?.email || "system";
+      meta.history = meta.history || [];
+      meta.history.push({
+        version: meta.version || "1.0.0",
+        by: userDisplayName,
+        date: now,
+        note: "Module updated",
+      });
+
+      // --- Meta kaydını güncelle
+      Object.entries(updates).forEach(([key, value]) => {
+        if (key !== "tenants") meta[key] = value;
+      });
+      if (updatedTenants) {
+        meta.tenants = updatedTenants;
+      }
+      meta.version = meta.version ? `${meta.version}-updated` : "1.0.0-updated";
+      await meta.save();
+
+      // --- Her tenant için ayarları güncelle (veya oluştur)
+      const tenantsToUpdate = updatedTenants || meta.tenants || [];
+      const updateSettingFields = {
+        enabled: updates.enabled,
+        visibleInSidebar: updates.visibleInSidebar,
+        useAnalytics: updates.useAnalytics,
+        roles: updates.roles,
+        icon: updates.icon,
+        label: updates.label,
+        language: updates.language,
+      };
+
+      // Mevcut ayarları güncelle
+      for (const tnt of tenantsToUpdate) {
+        const existingSetting = await ModuleSetting.findOne({
+          module: name,
+          tenant: tnt,
+        });
+
+        if (existingSetting) {
+          // Yalnızca gelen alanlar güncellenir (boş ise eskiyi koru)
+          Object.entries(updateSettingFields).forEach(([key, value]) => {
+            if (value !== undefined) existingSetting[key] = value;
+          });
+          await existingSetting.save();
+        } else {
+          // Eğer yeni tenant eklenmişse, ayarı oluştur
+          await ModuleSetting.create({
+            module: name,
+            tenant: tnt,
+            ...updateSettingFields,
+          });
+        }
+      }
+
+      // Silinen tenant’lardan ayarı sil (opsiyonel, burada bırakabilirsin)
+      if (updatedTenants) {
+        const tenantsToRemove = (meta.tenants as string[]).filter(
+          (oldTnt) => !updatedTenants!.includes(oldTnt)
+        );
+        if (tenantsToRemove.length) {
+          await ModuleSetting.deleteMany({
+            module: name,
+            tenant: { $in: tenantsToRemove },
+          });
+        }
+      }
+
+      logger.info(`Module updated: ${name}`, { module: "admin", locale });
+      res.status(200).json({
         success: true,
-        message: t("admin.module.created", locale, translations, { name }),
-        data: metaContent,
+        message: t("admin.module.updated", locale, translations),
+        data: meta,
       });
     } catch (error) {
-      logger.error("Module create error:", {
-        module: "admin",
-        error,
-        tenant,
-        locale,
-      });
-      return next(error);
+      logger.error("Update module error:", { module: "admin", error, locale });
+      next(error);
     }
   }
 );
 
-// --- Tüm modülleri getir (opsiyonel project query) ---
+// --- Tüm modülleri getir (aktif tenant context) ---
 export const getModules = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const locale: SupportedLocale = req.locale || "en";
+    const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
 
     try {
-      const project = req.query.project as string | undefined;
-      if (!project) {
-        logger.warn("Project query param eksik.", { module: "admin" });
+      const tenant = req.tenant;
+      if (!tenant) {
+        logger.warn("Tenant context yok!", { module: "admin" });
         res.status(400).json({
           success: false,
-          message: t("admin.module.projectRequired", locale, translations),
+          message: t("admin.module.tenantRequired", locale, translations),
         });
         return;
       }
-      const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
 
+      // Bu tenant için aktif/görünür tüm ayarları getir
       const settings = await ModuleSetting.find({
-        project,
-        tenant: req.tenant,
+        tenant,
+        enabled: true,
+        visibleInSidebar: true,
       });
+
       if (!settings || settings.length === 0) {
         res.status(200).json({
           success: true,
-          message: t("admin.module.noneForProject", locale, translations),
+          message: t("admin.module.noneForTenant", locale, translations),
           data: [],
         });
         return;
       }
 
+      // Ayarlardaki modül isimleriyle meta datası çek
       const moduleNames = settings.map((s) => s.module);
       const modules = await ModuleMeta.find({
         name: { $in: moduleNames },
-      }).sort({ name: 1 });
+        tenants: tenant, // Tenant array'inde bu tenant atanmış mı?
+        enabled: true,
+        visibleInSidebar: true,
+      }).sort({ order: 1, name: 1 });
 
-      logger.info(`Modules fetched for project: ${project}`, {
+      logger.info(`Modules fetched for tenant: ${tenant}`, {
         module: "admin",
         locale,
       });
@@ -243,17 +376,34 @@ export const getModules = asyncHandler(
   }
 );
 
-// --- Tek modül getir (by name) ---
+// --- Tek modül getir (by name, aktif tenant için) ---
 export const getModuleByName = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const locale: SupportedLocale = req.locale || "en";
     const { ModuleMeta } = await getTenantModels(req);
+
     try {
       const { name } = req.params;
-      const module = await ModuleMeta.findOne({ name, tenant: req.tenant });
+      const tenant = req.tenant;
+      if (!tenant) {
+        logger.warn("Tenant context yok!", { module: "admin" });
+        res.status(400).json({
+          success: false,
+          message: t("admin.module.tenantRequired", locale, translations),
+        });
+        return;
+      }
+
+      const module = await ModuleMeta.findOne({
+        name,
+        tenants: tenant,
+        enabled: true,
+      });
 
       if (!module) {
-        logger.warn(`Module not found: ${name}`, { module: "admin" });
+        logger.warn(`Module not found for tenant: ${name}`, {
+          module: "admin",
+        });
         res.status(404).json({
           success: false,
           message: t("admin.module.notFound", locale, translations),
@@ -261,7 +411,10 @@ export const getModuleByName = asyncHandler(
         return;
       }
 
-      logger.info(`Module fetched: ${name}`, { module: "admin", locale });
+      logger.info(`Module fetched: ${name} (tenant: ${tenant})`, {
+        module: "admin",
+        locale,
+      });
       res.status(200).json({
         success: true,
         message: t("admin.module.fetched", locale, translations),
@@ -278,62 +431,26 @@ export const getModuleByName = asyncHandler(
   }
 );
 
-// --- Modül güncelle ---
-export const updateModule = asyncHandler(
+// --- Modül sil (tenant-aware) ---
+export const deleteModule = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const locale: SupportedLocale = req.locale || "en";
-    const { ModuleMeta } = await getTenantModels(req);
+    const tenant = req.tenant;
+    const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
+
     try {
       const { name } = req.params;
-      const updates = req.body;
-
-      // Label için fillAllLocales uygula (Partial destekler!)
-      if (updates.label) {
-        updates.label = fillAllLocales(updates.label);
-      }
-
-      const updated = await ModuleMeta.findOneAndUpdate(
-        { name, tenant: req.tenant },
-        { $set: updates },
-        { new: true }
-      );
-      if (!updated) {
-        logger.warn(`Module not found for update: ${name}`, {
-          module: "admin",
-        });
-        res.status(404).json({
+      if (!tenant) {
+        res.status(400).json({
           success: false,
-          message: t("admin.module.notFound", locale, translations),
+          message: t("admin.module.tenantRequired", locale, translations),
         });
         return;
       }
 
-      logger.info(`Module updated: ${name}`, { module: "admin", locale });
-      res.status(200).json({
-        success: true,
-        message: t("admin.module.updated", locale, translations),
-        data: updated,
-      });
-    } catch (error) {
-      logger.error("Update module error:", { module: "admin", error, locale });
-      next(error);
-    }
-  }
-);
-
-// --- Modül sil ---
-export const deleteModule = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const locale: SupportedLocale = req.locale || "en";
-    const { ModuleMeta } = await getTenantModels(req);
-    try {
-      const { name } = req.params;
-
-      const deleted = await ModuleMeta.findOneAndDelete({
-        name,
-        tenant: req.tenant,
-      });
-      if (!deleted) {
+      // 1. ModuleMeta: tenants dizisinden çıkar
+      const meta = await ModuleMeta.findOne({ name });
+      if (!meta) {
         logger.warn(`Module not found for delete: ${name}`, {
           module: "admin",
         });
@@ -344,22 +461,41 @@ export const deleteModule = asyncHandler(
         return;
       }
 
-      // Meta dosyasını sil
-      const metaPath = path.resolve(
-        process.cwd(),
-        "src/meta-configs",
-        PROJECT_ENV,
-        `${name}.meta.json`
+      // Tenants dizisinden ilgili tenantı çıkar
+      meta.tenants = (meta.tenants || []).filter(
+        (tnt: string) => tnt !== tenant
       );
-      if (fs.existsSync(metaPath)) {
-        fs.unlinkSync(metaPath);
+
+      if (meta.tenants.length === 0) {
+        // Hiç tenant kalmadıysa meta kaydını sil + meta dosyasını sil
+        await ModuleMeta.deleteOne({ name });
+        // JSON meta dosyasını da sil
+        const metaPath = path.resolve(
+          process.cwd(),
+          "src/meta-configs",
+          process.env.APP_ENV || "default",
+          `${name}.meta.json`
+        );
+        if (fs.existsSync(metaPath)) {
+          fs.unlinkSync(metaPath);
+        }
+      } else {
+        // Tenant listesini güncelle
+        await meta.save();
       }
 
-      logger.info(`Module deleted: ${name}`, { module: "admin", locale });
+      // 2. ModuleSetting: Bu tenant ve modül için olan ayarı sil
+      await ModuleSetting.deleteOne({ module: name, tenant });
+
+      logger.info(`Module deleted from tenant: ${tenant} (${name})`, {
+        module: "admin",
+        locale,
+      });
       res.status(200).json({
         success: true,
         message: t("admin.module.deleted", locale, translations),
       });
+      return;
     } catch (error) {
       logger.error("Delete module error:", { module: "admin", error, locale });
       next(error);
@@ -367,111 +503,153 @@ export const deleteModule = asyncHandler(
   }
 );
 
-// --- Mevcut projeleri getir (dinamik DEFAULT_PROJECT ile) ---
-export const getProjects = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { ModuleSetting } = await getTenantModels(req);
-      const distinctProjects = await ModuleSetting.distinct("project");
-      const DEFAULT_PROJECT = process.env.DEFAULT_PROJECT;
-      if (!DEFAULT_PROJECT)
-        throw new Error("❌ DEFAULT_PROJECT env variable is not defined.");
-
-      const projects =
-        distinctProjects.length > 0 ? distinctProjects : [DEFAULT_PROJECT];
-      logger.info(`Projects listed: ${projects.length}`);
-      res.status(200).json({
-        success: true,
-        message: t("admin.module.projectsFetched", "en", translations), // Anahtar önerisi
-        data: projects,
+// --- Seçili tenant'ın aktif/görünür modüllerini getir ---
+export const getTenantModules = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { ModuleSetting } = await getTenantModels(req);
+    const tenant = req.tenant;
+    if (!tenant) {
+      res.status(400).json({
+        success: false,
+        message: t("admin.module.tenantRequired", req.locale, translations),
       });
-    } catch (error) {
-      logger.error("Get projects error:", { module: "admin", error });
-      next(error);
+      return;
     }
+    // Tüm ayarları veya filtreli (örn. sadece enabled) modülleri getir
+    const modules = await ModuleSetting.find({ tenant, enabled: true });
+    res.status(200).json({
+      success: true,
+      data: modules,
+    });
   }
 );
 
-// --- Enabled modules (public) ---
+// --- Aktif tenantlara göre benzersiz modül isimleri (opsiyonel) ---
+export const getDistinctTenantModules = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { ModuleSetting } = await getTenantModels(req);
+    const tenant = req.tenant;
+    if (!tenant) {
+      res.status(400).json({
+        success: false,
+        message: t("admin.module.tenantRequired", req.locale, translations),
+      });
+      return;
+    }
+    const moduleNames = await ModuleSetting.distinct("module", { tenant });
+    res.status(200).json({
+      success: true,
+      data: moduleNames,
+    });
+  }
+);
+
+// --- Enabled & Sidebar & Analytics modules (public, tenant-aware) ---
 export const getEnabledModules = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || "en";
+    const tenant = req.tenant;
     const { ModuleSetting } = await getTenantModels(req);
-    const project = req.query.project as string;
 
-    if (!project) {
+    if (!tenant) {
       res.status(400).json({
         success: false,
-        message: t("admin.module.projectRequired", locale, translations),
+        message: t("admin.module.tenantRequired", locale, translations),
       });
       return;
     }
 
-    const settings = await ModuleSetting.find({
-      project,
-      enabled: true,
-      tenant: req.tenant,
+    // Query string ile filtre desteği (opsiyonel)
+    const onlySidebar = req.query.visibleInSidebar === "true";
+    const onlyAnalytics = req.query.useAnalytics === "true";
+
+    // Dinamik filtre objesi
+    const filter: any = { tenant, enabled: true };
+    if (onlySidebar) filter.visibleInSidebar = true;
+    if (onlyAnalytics) filter.useAnalytics = true;
+
+    // Tüm tenant'a atanmış ve filtreye uyan modüller
+    const settings = await ModuleSetting.find(filter).sort({
+      order: 1,
+      module: 1,
     });
+
+    // Modül isimleri (kısa array)
     const moduleNames = settings.map((s) => s.module);
 
-    logger.info(`Enabled modules listed for: ${project}`, {
+    logger.info(`Enabled modules listed for tenant: ${tenant}`, {
       module: "admin",
       locale,
+      visibleInSidebar: onlySidebar,
+      useAnalytics: onlyAnalytics,
     });
 
     res.status(200).json({
       success: true,
       message: t("admin.module.enabledFetched", locale, translations),
-      data: moduleNames,
+      modules: moduleNames,
+      data: settings, // Her biri: { module, label, icon, ... }
     });
   }
 );
 
-// --- Analytics aktif modülleri getir (public) ---
+// --- Analytics aktif modülleri getir (public, tenant-aware) ---
 export const getAnalyticsModules = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || "en";
+    const tenant = req.tenant;
     const { ModuleSetting } = await getTenantModels(req);
-    const project = req.query.project as string;
 
-    if (!project) {
+    if (!tenant) {
       res.status(400).json({
         success: false,
-        message: t("admin.module.projectRequired", locale, translations),
+        message: t("admin.module.tenantRequired", locale, translations),
       });
       return;
     }
 
-    const settings = await ModuleSetting.find({
-      project,
-      tenant: req.tenant,
+    // İsteğe bağlı: visibleInSidebar filtresi de query’den alınabilir
+    const onlySidebar = req.query.visibleInSidebar === "true";
+
+    // Filtre objesi
+    const filter: any = {
+      tenant,
       enabled: true,
       useAnalytics: true,
+    };
+    if (onlySidebar) filter.visibleInSidebar = true;
+
+    const settings = await ModuleSetting.find(filter).sort({
+      order: 1,
+      module: 1,
     });
     const moduleNames = settings.map((s) => s.module);
 
-    logger.info(`Analytics modules listed for: ${project}`, {
+    logger.info(`Analytics modules listed for tenant: ${tenant}`, {
       module: "admin",
       locale,
+      visibleInSidebar: onlySidebar,
     });
 
     res.status(200).json({
       success: true,
       message: t("admin.module.analyticsFetched", locale, translations),
-      data: moduleNames,
+      modules: moduleNames,
+      data: settings, // Modül ayarlarının tamamı
     });
   }
 );
 
-// --- useAnalytics toggle ---
+// --- useAnalytics toggle (tenant + module bazlı) ---
 export const toggleUseAnalytics = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || "en";
+    const tenant = req.tenant;
     const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
-    const { name } = req.params;
-    const { value, project } = req.body; // boolean + project
 
-    if (typeof value !== "boolean" || !project) {
+    const { module, value } = req.body; // module adı ve yeni boolean value
+
+    if (!tenant || !module || typeof value !== "boolean") {
       res.status(400).json({
         success: false,
         message: t("admin.module.toggleAnalyticsInvalid", locale, translations),
@@ -479,14 +657,16 @@ export const toggleUseAnalytics = asyncHandler(
       return;
     }
 
+    // ModuleSetting update
     const setting = await ModuleSetting.findOneAndUpdate(
-      { name, tenant: req.tenant, project },
+      { module, tenant },
       { $set: { useAnalytics: value } },
       { new: true }
     );
 
+    // ModuleMeta update (tenants içinde varsa günceller)
     const meta = await ModuleMeta.findOneAndUpdate(
-      { name, tenant: req.tenant },
+      { name: module, tenants: tenant },
       { $set: { useAnalytics: value } },
       { new: true }
     );
@@ -499,8 +679,9 @@ export const toggleUseAnalytics = asyncHandler(
       return;
     }
 
-    logger.info(`Analytics toggled for '${name}' -> ${value}`, {
+    logger.info(`Analytics toggled for '${module}' -> ${value}`, {
       module: "admin",
+      tenant,
       locale,
     });
 

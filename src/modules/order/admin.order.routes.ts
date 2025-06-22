@@ -29,11 +29,6 @@ router.put(
   markOrderAsDelivered
 );
 
-router.delete(
-  "/:id",
-  authenticate,
-  authorizeRoles("admin"),
-  deleteOrder
-);
+router.delete("/:id", authenticate, authorizeRoles("admin"), deleteOrder);
 
 export default router;

@@ -9,10 +9,7 @@ import {
 } from "./address.controller";
 
 import { authenticate } from "@/core/middleware/authMiddleware";
-import {
-  validateAddress,
-  validateUpdateAddresses,
-} from "./address.validation";
+import { validateAddress, validateUpdateAddresses } from "./address.validation";
 
 const router = express.Router();
 
@@ -32,6 +29,11 @@ router.put("/:id", authenticate, validateAddress, updateAddress);
 router.delete("/:id", authenticate, deleteAddress);
 
 // 🔄 Tüm adresleri topluca güncelle (replace)
-router.put("/all/replace", authenticate, validateUpdateAddresses, updateAllUserAddresses);
+router.put(
+  "/all/replace",
+  authenticate,
+  validateUpdateAddresses,
+  updateAllUserAddresses
+);
 
 export default router;

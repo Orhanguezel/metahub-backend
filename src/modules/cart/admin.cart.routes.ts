@@ -8,10 +8,7 @@ import {
   deleteCart,
   toggleCartActiveStatus,
 } from "./admin.cart.controller";
-import {
-  updateCartValidator,
-  cartIdParamValidator,
-} from "./cart.validation";
+import { updateCartValidator, cartIdParamValidator } from "./cart.validation";
 
 const router = Router();
 
@@ -22,10 +19,21 @@ router.get("/", getAllCarts);
 
 router.get("/:id", cartIdParamValidator, validateRequest, getSingleCart);
 
-router.put("/:id", cartIdParamValidator, updateCartValidator, validateRequest, updateCart);
+router.put(
+  "/:id",
+  cartIdParamValidator,
+  updateCartValidator,
+  validateRequest,
+  updateCart
+);
 
 router.delete("/:id", cartIdParamValidator, validateRequest, deleteCart);
 
-router.patch("/:id/toggle-active", cartIdParamValidator, validateRequest, toggleCartActiveStatus);
+router.patch(
+  "/:id/toggle-active",
+  cartIdParamValidator,
+  validateRequest,
+  toggleCartActiveStatus
+);
 
 export default router;
