@@ -17,9 +17,6 @@ export const createOrderValidator = [
   body("shippingAddress.phone")
     .notEmpty()
     .withMessage("Shipping phone is required."),
-  body("shippingAddress.email")
-    .isEmail()
-    .withMessage("Valid shipping email is required."),
   body("shippingAddress.street")
     .notEmpty()
     .withMessage("Shipping street is required."),
@@ -54,10 +51,6 @@ export const updateShippingAddressValidator = [
     .optional()
     .notEmpty()
     .withMessage("Shipping phone cannot be empty."),
-  body("shippingAddress.email")
-    .optional()
-    .isEmail()
-    .withMessage("Valid shipping email is required."),
   body("shippingAddress.street")
     .optional()
     .notEmpty()

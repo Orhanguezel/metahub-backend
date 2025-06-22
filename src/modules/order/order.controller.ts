@@ -47,7 +47,6 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       name: userName,
       tenant: req.tenant,
       phone: addressDoc.phone,
-      email: addressDoc.email,
       street: addressDoc.street,
       city: addressDoc.city,
       postalCode: addressDoc.zipCode,

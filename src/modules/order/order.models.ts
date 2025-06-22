@@ -17,7 +17,6 @@ const shippingAddressSchema = new Schema<IShippingAddress>(
     name: { type: String, required: true, trim: true },
     tenant: { type: String, required: true, index: true },
     phone: { type: String, required: true, trim: true },
-    email: { type: String, required: true, trim: true, lowercase: true },
     street: { type: String, required: true, trim: true },
     city: { type: String, required: true, trim: true },
     postalCode: { type: String, required: true, trim: true },
