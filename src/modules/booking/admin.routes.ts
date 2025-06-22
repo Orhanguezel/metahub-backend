@@ -17,7 +17,12 @@ router.use(authenticate, authorizeRoles("admin"));
 
 router.get("/", getAllBookings);
 router.get("/:id", validateObjectId("id"), getBookingById);
-router.put("/:id/status", validateObjectId("id"), validateUpdateBookingStatus, updateBookingStatus);
+router.put(
+  "/:id/status",
+  validateObjectId("id"),
+  validateUpdateBookingStatus,
+  updateBookingStatus
+);
 router.delete("/:id", validateObjectId("id"), deleteBooking);
 
 export default router;

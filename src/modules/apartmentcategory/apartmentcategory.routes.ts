@@ -22,11 +22,7 @@ router.use(authenticate, authorizeRoles("admin"));
  * @route   POST /admin/Apartment-categories
  * @desc    Create new category
  */
-router.post(
-  "/",
-  validateCreateApartmentCategory,
-  createApartmentCategory
-);
+router.post("/", validateCreateApartmentCategory, createApartmentCategory);
 
 /**
  * @route   GET /admin/Apartment-categories
@@ -38,11 +34,7 @@ router.get("/", getAllApartmentCategories);
  * @route   GET /admin/Apartment-categories/:id
  * @desc    Get category by ID
  */
-router.get(
-  "/:id",
-  validateObjectIdParam,
-  getApartmentCategoryById
-);
+router.get("/:id", validateObjectIdParam, getApartmentCategoryById);
 
 /**
  * @route   PUT /admin/Apartment-categories/:id
@@ -59,10 +51,6 @@ router.put(
  * @route   DELETE /admin/Apartment-categories/:id
  * @desc    Delete category
  */
-router.delete(
-  "/:id",
-  validateObjectIdParam,
-  deleteApartmentCategory
-);
+router.delete("/:id", validateObjectIdParam, deleteApartmentCategory);
 
 export default router;

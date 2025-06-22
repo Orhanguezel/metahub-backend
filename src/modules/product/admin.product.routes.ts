@@ -5,10 +5,13 @@ import {
   deleteProduct,
   togglePublishStatus,
 } from "./admin.product.controller";
-import { createProductValidator, updateProductValidator } from "./product.validation";
+import {
+  createProductValidator,
+  updateProductValidator,
+} from "./product.validation";
 import { validateRequest } from "@/core/middleware/validateRequest";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import {upload} from "@/core/middleware/uploadMiddleware";
+import { upload } from "@/core/middleware/uploadMiddleware";
 import { validateApiKey } from "@/core/middleware/validateApiKey";
 
 const router = express.Router();

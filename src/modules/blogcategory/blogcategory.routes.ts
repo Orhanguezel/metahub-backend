@@ -7,10 +7,13 @@ import {
   deleteBlogCategory,
 } from "./blogcategory.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { validateCreateBlogCategory, validateUpdateBlogCategory, validateObjectId } from "./blogcategory.validation";
+import {
+  validateCreateBlogCategory,
+  validateUpdateBlogCategory,
+  validateObjectId,
+} from "./blogcategory.validation";
 
 const router = express.Router();
-
 
 router.get("/", getAllBlogCategories);
 router.get("/:id", validateObjectId("id"), getBlogCategoryById);
@@ -39,6 +42,5 @@ router.delete(
   validateObjectId("id"),
   deleteBlogCategory
 );
-
 
 export default router;

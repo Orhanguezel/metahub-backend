@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
 import slugify from "slugify";
 
 // Image tipi
-export interface IReferenceImage {
+export interface IReferencesImage {
   url: string;
   thumbnail: string;
   webp?: string;
@@ -10,7 +10,7 @@ export interface IReferenceImage {
 }
 
 // Reference tipi
-export interface IReference extends Document {
+export interface IReferences extends Document {
   title: {
     tr?: string;
     en?: string;
@@ -28,7 +28,7 @@ export interface IReference extends Document {
     en?: string;
     de?: string;
   };
-  images: IReferenceImage[];
+  images: IReferencesImage[];
   tags: string[];
   // Sektör = kategori olarak yönetilecek
   category: Types.ObjectId; // ZORUNLU! (sektör)
@@ -39,7 +39,7 @@ export interface IReference extends Document {
   updatedAt: Date;
 }
 
-const ReferenceImageSchema = new Schema<IReferenceImage>(
+const ReferencesImageSchema = new Schema<IReferencesImage>(
   {
     url: { type: String, required: true },
     thumbnail: { type: String, required: true },
@@ -49,7 +49,7 @@ const ReferenceImageSchema = new Schema<IReferenceImage>(
   { _id: false }
 );
 
-const ReferenceSchema = new Schema<IReference>(
+const ReferencesSchema = new Schema<IReferences>(
   {
     title: {
       tr: { type: String, trim: true },
@@ -68,7 +68,7 @@ const ReferenceSchema = new Schema<IReference>(
       en: { type: String },
       de: { type: String },
     },
-    images: { type: [ReferenceImageSchema], default: [] },
+    images: { type: [ReferencesImageSchema], default: [] },
     tags: [{ type: String, trim: true }],
     category: {
       type: mongoose.Schema.Types.ObjectId,
@@ -83,8 +83,8 @@ const ReferenceSchema = new Schema<IReference>(
 );
 
 // Slug middleware
-ReferenceSchema.pre("validate", async function (next) {
-  const doc = this as IReference;
+ReferencesSchema.pre("validate", async function (next) {
+  const doc = this as IReferences;
 
   if (!doc.slug) {
     const base =
@@ -96,7 +96,7 @@ ReferenceSchema.pre("validate", async function (next) {
     let slug = slugify(base, { lower: true, strict: true });
     let count = 1;
 
-    while (await Reference.exists({ slug })) {
+    while (await References.exists({ slug })) {
       slug = `${slugify(base, { lower: true, strict: true })}-${count++}`;
     }
 
@@ -106,7 +106,8 @@ ReferenceSchema.pre("validate", async function (next) {
   next();
 });
 
-const Reference: Model<IReference> =
-  models.Reference || mongoose.model<IReference>("Reference", ReferenceSchema);
+const References: Model<IReferences> =
+  models.References ||
+  mongoose.model<IReferences>("References", ReferencesSchema);
 
-export { Reference };
+export { References };

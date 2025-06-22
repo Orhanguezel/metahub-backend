@@ -14,7 +14,6 @@ import {
   validateCommentIdParam,
   validateContentIdParam,
   validateReplyToComment,
-
 } from "./comment.validation";
 
 const router = express.Router();
@@ -30,7 +29,5 @@ router.get("/", getAllComments);
 router.put("/:id/toggle", validateCommentIdParam, togglePublishComment);
 router.delete("/:id", validateCommentIdParam, deleteComment);
 router.put("/:id/reply", validateReplyToComment, replyToComment);
-
-
 
 export default router;

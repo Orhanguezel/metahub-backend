@@ -1,16 +1,16 @@
 
 ---
 
-# 🚀 **MetaHub Multi-Tenant Backend Tenant Sistemi Dokümantasyonu**
+# 🚀 **MetaHub Multi-Tenant Backend Tenant Sistemi Dokümantasyonu (2025)**
 
 ---
 
 ## 1. **Genel Mimari:**
 
 * Tek bir backend kod tabanından **birden fazla müşteri (tenant)** izole şekilde servis alır.
-* Her tenant’ın **farklı MongoDB veritabanı** ve **.env dosyası** vardır.
+* Her tenant’ın **farklı MongoDB veritabanı** bulunur; bağlantı bilgisi (mongoUri) doğrudan veritabanındaki Tenant koleksiyonunda saklanır.
 * Her istek, hangi tenant’a aitse onunla bağlantı kurar; hiçbir veri başka tenant ile karışmaz.
-* Tenant tespiti **header, domain/subdomain veya port** ile otomatik yapılır.
+* Tenant tespiti **header veya domain (host)** ile otomatik yapılır.
 * **Modül bazlı model injection** ile her endpoint, doğru tenant context’inde çalışır.
 * **Logger ve analytics** tüm işlemlerde tenant bazında ayrı ayrı log üretir.
 
@@ -18,21 +18,21 @@
 
 ## 2. **Tenant Tespiti & Injection Akışı**
 
-### A) **Tenant Tespiti** (`resolveTenantFromRequest.ts`)
+### A) **Tenant Tespiti** (`resolveTenant.ts`)
 
 * Her istek geldiğinde şu sıralama ile tenant belirlenir:
 
-  1. **Header:** `X-Tenant` header’ı önceliklidir ve whitelist’teki (tenants.json) bir tenant olmalıdır.
-  2. **Host/Domain:** Domain veya subdomain, `tenants.json` mapping’inden eşlenir.
+  1. **Header:** Eğer `X-Tenant` header'ı varsa, sadece superadmin için override olarak kullanılır.
+  2. **Host/Domain:** Domain veya subdomain, doğrudan veritabanındaki Tenants koleksiyonunda `domain.main` ile eşlenir.
   3. **Fallback:** Tanımlı değilse hata döner.
-* Tenant tespit edildikten sonra, `req.tenant` alanına atanır ve loglanır.
-* (Opsiyonel) Sadece superadmin’e tenant override hakkı tanıyabilirsin (`allowTenantOverride`).
+* Tenant tespit edildikten sonra, `req.tenant` (slug) ve `req.tenantData` alanlarına atanır ve loglanır.
+* (Opsiyonel) Sadece superadmin’e tenant override hakkı tanınabilir.
 
 ---
 
 ### B) **Tenant Middleware ile Model Injection** (`injectTenantModel.ts`)
 
-* Tespit edilen tenant ile request’e dinamik model bağlama fonksiyonu eklenir:
+* Tespit edilen tenant slug ile request’e dinamik model bağlama fonksiyonu eklenir:
 
   * `req.getModel(modelName, schema) → Model`
 * Tenant injection işlemi başarılı ise loglanır (tenant, host, event vs.).
@@ -50,29 +50,28 @@
 ### D) **DB Connection Yönetimi** (`tenantDb.ts`)
 
 * Her tenant için ayrı bir Mongoose Connection açılır ve cache edilir (`connections[tenant]`).
-* DB bağlantı bilgisi `.env.{tenant}` dosyasından okunur.
+* DB bağlantı bilgisi **veritabanındaki Tenant kaydındaki** `mongoUri` alanından okunur.
 * Bağlantı açılırken, hata ve başarı loglanır.
 * Eksik veya hatalı bağlantıda descriptive error ve log üretilir.
 * Bağlantı açıldıktan sonra tekrar kullanılmak üzere cache edilir.
 
 ---
 
-## 3. **Tenant Mapping ve Konfigürasyon** (`tenants.json`)
+## 3. **Tenant Mapping ve Konfigürasyon** (Artık Sadece DB’de!)
 
-```json
-{
-  "koenigsmassage.com": "anastasia",
-  "guezelwebdesign.com": "metahub",
-  "ensotek.de": "ensotek",
-  "radanor.de": "radanor",
-  "radanor.localhost": "radanor",
-  "localhost": "metahub",
-  ...
-}
-```
+* Her domain/subdomain için Tenants koleksiyonunda bir kayıt bulunur:
 
-* Her domain/subdomain veya development host-port kombinasyonu belirli bir tenant’a karşılık gelir.
-* Buradaki mapping, sistemin **izin verdiği** tenant listesidir (beyaz liste).
+  ```json
+  {
+    "name": { "en": "Demo Tenant" },
+    "slug": "demo",
+    "mongoUri": "mongodb://admin:adminpw@localhost:27017/demo-tenant",
+    "domain": { "main": "demo.example.com" },
+    ...
+  }
+  ```
+* Mapping ya da `.env.{tenant}` dosyası gereksizdir.
+* Tenant eklemek için sadece Tenants koleksiyonuna yeni bir kayıt eklemek yeterlidir.
 
 ---
 
@@ -115,13 +114,12 @@
 
 * **Yeni tenant eklemek için:**
 
-  1. `tenants.json`’a yeni mapping ekle.
-  2. `.env.{tenant}` dosyası oluştur (MONGO\_URI, vs.).
-  3. Gerekirse ilgili domain için DNS yönlendirmesi yap.
-  4. Sistem yeniden başlatıldığında yeni tenant otomatik olarak tanınır.
+  1. **Tenants koleksiyonuna yeni kayıt ekle** (gerekli tüm alanlarla, özellikle mongoUri ve domain.main).
+  2. Gerekirse ilgili domain için DNS yönlendirmesi yap.
+  3. Sistem canlı çalışırken bile yeni tenant otomatik olarak tanınır.
 * Silmek için:
 
-  * Mapping’i kaldır, DB’yi sil, .env dosyasını temizle.
+  * Tenants koleksiyonundan kaydı sil, ilgili tenant DB’sini temizle.
 
 ---
 
@@ -129,7 +127,7 @@
 
 * Hiçbir tenant başka bir tenant’ın datasına erişemez (model ve connection tamamen izole).
 * Tenant header’ı override etmek için yetki kontrolü (ör: sadece superadmin) kullanılabilir.
-* Hatalı tenant, eksik mapping, env veya bağlantı sorununda descriptive log ve error üretilir.
+* Hatalı tenant, eksik mapping veya bağlantı sorununda descriptive log ve error üretilir.
 
 ---
 
@@ -137,9 +135,9 @@
 
 | Kontrol Noktası                               | Açıklama                             |
 | --------------------------------------------- | ------------------------------------ |
-| Her istekte doğru tenant tespiti var mı?      | Header, domain veya port ile         |
+| Her istekte doğru tenant tespiti var mı?      | Header veya domain ile               |
 | Her model tenant context’i ile mi üretiliyor? | Global yerine tenant özel model      |
-| .env.{tenant} ve mapping güncel mi?           | Yeni tenant için ikisi de ekli mi?   |
+| Her tenant’ın mongoUri alanı güncel mi?       | Tenants koleksiyonunda               |
 | Her modülün modeli export schema ile mi?      | Model injection’da schema gereklidir |
 | Loglar tenant bazında tutuluyor mu?           | /logs/{tenant}/ klasöründe           |
 | Tenant override sadece yetkiliye mi açık?     | Superadmin kontrolü var mı?          |
@@ -151,7 +149,7 @@
 ### **injectTenantModel.ts**
 
 * Express middleware olarak her request’te tenant’ı tespit eder ve
-* Request objesine `tenant` ve dinamik `getModel` fonksiyonunu ekler.
+* Request objesine `tenant` (slug) ve dinamik `getModel` fonksiyonunu ekler.
 
 ### **modelRegistry.ts**
 
@@ -160,12 +158,11 @@
 
 ### **tenantDb.ts**
 
-* Tenant’a özel .env dosyasından MongoDB bağlantısı açar ve cache’ler.
+* Tenant’a özel bağlantıyı, Tenants koleksiyonundaki `mongoUri` ile açar ve cache’ler.
 
 ### **resolveTenant.ts**
 
-* Header ve domain üzerinden tenant tespiti ve doğrulaması yapar.
-* Tenant mapping beyaz listede olmalı.
+* Header ve domain üzerinden tenant tespiti ve doğrulaması yapar (artık DB üzerinden).
 * (Opsiyonel) Sadece superadmin’e tenant override izni tanır.
 
 ### **getTenantModels.ts / getTenantModelsFromConnection.ts**
@@ -179,7 +176,9 @@
 
 * Tüm sistem **modüler, dinamik, tenant-aware ve scalable** olarak tasarlanmıştır.
 * Her istek başında tenant tespit edilir, izole model ve bağlantı ile işlem yapılır.
-* Tenant ekleme/çıkarma, domain ve .env ile son derece kolaydır.
+* Tenant ekleme/çıkarma sadece DB’ye kayıt ekle/sil ile mümkündür.
 * Her model, her bağlantı ve her log **tamamen tenant’a izole** çalışır.
 
 ---
+
+### Herhangi bir dosya/alan/kod örneği ya da örnek tenant kaydı istersen yazabilirsin!

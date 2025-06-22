@@ -1,7 +1,6 @@
 // src/modules/referencescategory/admin.controller.ts
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { ReferenceCategory } from "@/modules/referencescategory";
 import { isValidObjectId } from "@/core/utils/validation";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
@@ -9,7 +8,7 @@ import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 export const createReferenceCategory = asyncHandler(
   async (req: Request, res: Response) => {
     let { name, description } = req.body;
-    const { ReferenceCategory } = await getTenantModels(req);
+    const { ReferencesCategory } = await getTenantModels(req);
     if (typeof name === "string") name = JSON.parse(name);
     if (typeof description === "string") description = JSON.parse(description);
 
@@ -20,7 +19,7 @@ export const createReferenceCategory = asyncHandler(
       return;
     }
 
-    const newCategory = await ReferenceCategory.create({
+    const newCategory = await ReferencesCategory.create({
       name,
       description,
       tenant: req.tenant,
@@ -36,8 +35,8 @@ export const createReferenceCategory = asyncHandler(
 // GET ALL
 export const getAllReferenceCategories = asyncHandler(
   async (req: Request, res: Response) => {
-    const { ReferenceCategory } = await getTenantModels(req);
-    const categories = await ReferenceCategory.find({
+    const { ReferencesCategory } = await getTenantModels(req);
+    const categories = await ReferencesCategory.find({
       tenant: req.tenant,
     }).sort({ createdAt: -1 });
     res.status(200).json({
@@ -51,13 +50,13 @@ export const getAllReferenceCategories = asyncHandler(
 // GET BY ID
 export const getReferenceCategoryById = asyncHandler(
   async (req: Request, res: Response) => {
-    const { ReferenceCategory } = await getTenantModels(req);
+    const { ReferencesCategory } = await getTenantModels(req);
     const { id } = req.params;
     if (!isValidObjectId(id)) {
       res.status(400).json({ success: false, message: "Invalid category ID." });
       return;
     }
-    const category = await ReferenceCategory.findOne({
+    const category = await ReferencesCategory.findOne({
       _id: id,
       tenant: req.tenant,
     });
@@ -78,13 +77,13 @@ export const getReferenceCategoryById = asyncHandler(
 // UPDATE
 export const updateReferenceCategory = asyncHandler(
   async (req: Request, res: Response) => {
-    const { ReferenceCategory } = await getTenantModels(req);
+    const { ReferencesCategory } = await getTenantModels(req);
     const { id } = req.params;
     if (!isValidObjectId(id)) {
       res.status(400).json({ success: false, message: "Invalid category ID." });
       return;
     }
-    const category = await ReferenceCategory.findOne({
+    const category = await ReferencesCategory.findOne({
       _id: id,
       tenant: req.tenant,
     });
@@ -118,13 +117,13 @@ export const updateReferenceCategory = asyncHandler(
 // DELETE
 export const deleteReferenceCategory = asyncHandler(
   async (req: Request, res: Response) => {
-    const { ReferenceCategory } = await getTenantModels(req);
+    const { ReferencesCategory } = await getTenantModels(req);
     const { id } = req.params;
     if (!isValidObjectId(id)) {
       res.status(400).json({ success: false, message: "Invalid category ID." });
       return;
     }
-    const deleted = await ReferenceCategory.deleteOne({
+    const deleted = await ReferencesCategory.deleteOne({
       _id: id,
       tenant: req.tenant,
     });

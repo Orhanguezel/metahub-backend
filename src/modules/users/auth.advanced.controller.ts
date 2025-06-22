@@ -25,60 +25,65 @@ function userT(
   return t(key, locale, userTranslations, vars);
 }
 
-// ✅ E-posta Doğrulama Gönder
-export const sendEmailVerification = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { email } = req.body;
-    const locale = getLocale(req);
-    const { User } = await getTenantModels(req);
+// ✅ E-posta Doğrulama Gönder (next parametresiz)
+export const sendEmailVerification = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  // next parametresi kaldırıldı
+  const { email } = req.body;
+  const locale = getLocale(req);
+  const { User } = await getTenantModels(req);
 
-    if (!email) {
-      logger.warn(`[EMAIL-VERIFICATION] E-posta eksik.`);
-      res.status(400).json({
-        success: false,
-        message: userT("error.emailRequired", locale),
-      });
-      return;
-    }
-    const user = await User.findOne({ email, tenant: req.tenant });
-    if (!user) {
-      logger.warn(`[EMAIL-VERIFICATION] Kullanıcı bulunamadı: ${email}`);
-      res
-        .status(404)
-        .json({ success: false, message: userT("error.userNotFound", locale) });
-      return;
-    }
-    if (user.emailVerified) {
-      logger.info(`[EMAIL-VERIFICATION] Zaten doğrulanmış: ${email}`);
-      res.status(200).json({
-        success: true,
-        message: userT("email.alreadyVerified", locale),
-      });
-      return;
-    }
-
-    const token = crypto.randomBytes(32).toString("hex");
-    user.emailVerificationToken = token;
-    user.emailVerificationExpires = new Date(Date.now() + 1000 * 60 * 60 * 6);
-    await user.save();
-
-    const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${token}`;
-    await sendEmail({
-      to: user.email,
-      subject: userT("email.verification.subject", locale),
-      html: `
-      <p>${userT("email.verification.body", locale)}</p>
-      <a href="${verifyUrl}">${verifyUrl}</a>
-    `,
+  if (!email) {
+    logger.warn(`[EMAIL-VERIFICATION] E-posta eksik.`);
+    res.status(400).json({
+      success: false,
+      message: userT("error.emailRequired", locale),
     });
+    return;
+  }
 
-    logger.info(`[EMAIL-VERIFICATION] E-posta gönderildi: ${email}`);
+  const user = await User.findOne({ email, tenant: req.tenant });
+  if (!user) {
+    logger.warn(`[EMAIL-VERIFICATION] Kullanıcı bulunamadı: ${email}`);
+    res.status(404).json({
+      success: false,
+      message: userT("error.userNotFound", locale),
+    });
+    return;
+  }
+
+  if (user.emailVerified) {
+    logger.info(`[EMAIL-VERIFICATION] Zaten doğrulanmış: ${email}`);
     res.status(200).json({
       success: true,
-      message: userT("email.verification.sent", locale),
+      message: userT("email.alreadyVerified", locale),
     });
+    return;
   }
-);
+
+  const token = crypto.randomBytes(32).toString("hex");
+  user.emailVerificationToken = token;
+  user.emailVerificationExpires = new Date(Date.now() + 1000 * 60 * 60 * 6); // 6 saat
+  await user.save();
+
+  const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${token}`;
+  await sendEmail({
+    to: user.email,
+    subject: userT("email.verification.subject", locale),
+    html: `
+    <p>${userT("email.verification.body", locale)}</p>
+    <a href="${verifyUrl}">${verifyUrl}</a>
+  `,
+  });
+
+  logger.info(`[EMAIL-VERIFICATION] E-posta gönderildi: ${email}`);
+  res.status(200).json({
+    success: true,
+    message: userT("email.verification.sent", locale),
+  });
+};
 
 // ✅ E-posta doğrula
 export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
@@ -95,7 +100,7 @@ export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const user = await User.findOne({
-    tenant: req.tenant,
+    tenant: req.tenant, // tenant burada kontrol ediliyor
     emailVerificationToken: token,
     emailVerificationExpires: { $gt: new Date() },
   });

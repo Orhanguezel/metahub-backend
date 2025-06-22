@@ -1,7 +1,13 @@
 import { Types } from "mongoose";
+import type { SupportedLocale } from "@/types/common";
 
 export type PaymentMethod = "cash_on_delivery" | "credit_card" | "paypal";
-export type PaymentStatus = "pending" | "paid" | "failed" | "refunded" | "cancelled";
+export type PaymentStatus =
+  | "pending"
+  | "paid"
+  | "failed"
+  | "refunded"
+  | "cancelled";
 
 export interface IPayment {
   order: Types.ObjectId;
@@ -13,7 +19,7 @@ export interface IPayment {
   paidAt?: Date;
   currency: string;
   details?: Record<string, any>;
-  language: "tr" | "en" | "de";
+  language?: SupportedLocale;
   isActive: boolean;
   createdAt?: Date;
   updatedAt?: Date;

@@ -40,7 +40,12 @@ router.get("/:id", validateObjectIdParam, getServicesCategoryById);
  * @route   PUT /admin/services-categories/:id
  * @desc    Update category
  */
-router.put("/:id", validateObjectIdParam, validateUpdateServicesCategory, updateServicesCategory);
+router.put(
+  "/:id",
+  validateObjectIdParam,
+  validateUpdateServicesCategory,
+  updateServicesCategory
+);
 
 /**
  * @route   DELETE /admin/services-categories/:id

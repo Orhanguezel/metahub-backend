@@ -4,71 +4,41 @@ import path from "path";
 import { analyticsLogger } from "@/core/middleware/logger/analyticsLogger";
 import logger from "@/core/middleware/logger/logger";
 
-// ---- Tenant ve Dil tespiti örneği ----
-function getCurrentTenant(): string {
-  // Bunu ortamına göre değiştir!
-  return process.env.TENANT || "metahub";
-}
-function getDefaultLocale(): string {
-  return process.env.DEFAULT_LOCALE || "en";
-}
-
-// ---- Router Factory ----
 export const getRouter = async (): Promise<Router> => {
   const router = express.Router();
 
-  const tenant = getCurrentTenant();
-  const locale = getDefaultLocale();
-
-  // Modül yolu ve tenant’a özel meta-config yolu
+  // --- Tüm modülleri başta mount et ---
   const modulesPath = path.join(__dirname, "..", "modules");
-  const metaConfigDir = path.resolve(process.cwd(), "src/meta-configs", tenant);
-
-  // ENV üzerinden gelen enabled modüller (küçük harfe çevir)
-  const enabledModules =
-    process.env.ENABLED_MODULES?.split(",").map((m) =>
-      m.trim().toLowerCase()
-    ) ?? [];
-
-  // Directory exists check
-  try {
-    await fs.access(metaConfigDir);
-  } catch {
-    throw new Error(
-      `❌ Meta config directory not found for tenant: ${tenant} (${metaConfigDir})`
-    );
-  }
-
-  // Modülleri tara
   const modules = await fs.readdir(modulesPath, { withFileTypes: true });
+
+  console.log(
+    `📦 [ROUTER] Bulunan modüller:`,
+    modules.map((m) => m.name).join(", ")
+  );
 
   for (const mod of modules) {
     if (!mod.isDirectory()) continue;
-
     const moduleName = mod.name;
     const moduleNameLower = moduleName.toLowerCase();
 
-    if (!enabledModules.includes(moduleNameLower)) {
-      logger.info(
-        `[ROUTER][${tenant}] ⏭️  [SKIP] ${moduleName} is not listed in ENABLED_MODULES`,
-        {
-          tenant,
-          locale,
-          module: moduleName,
-          event: "router.skip",
-        }
-      );
-      continue;
-    }
-
     const moduleDir = path.join(modulesPath, moduleName);
-    const metaFile = path.join(metaConfigDir, `${moduleNameLower}.meta.json`);
+    const metaFile = path.join(
+      process.cwd(),
+      "src/meta-configs/default",
+      `${moduleNameLower}.meta.json`
+    );
 
+    let meta: any = {};
     try {
       const metaRaw = await fs.readFile(metaFile, "utf-8");
-      const meta = JSON.parse(metaRaw);
+      meta = JSON.parse(metaRaw);
+    } catch {
+      meta = { prefix: `/${moduleNameLower}` };
+    }
 
-      // Dinamik import (CJS/TS)
+    const prefix = meta.prefix || `/${moduleNameLower}`;
+
+    try {
       const indexImport = await import(
         path.join(moduleDir, "index.ts").replace(".ts", "")
       );
@@ -76,52 +46,45 @@ export const getRouter = async (): Promise<Router> => {
 
       if (!modRouter) {
         logger.warn(
-          `[ROUTER][${tenant}] ⚠️  [WARN] ${moduleName}/index.ts has no default export.`,
-          {
-            tenant,
-            locale,
-            module: moduleName,
-            event: "router.noDefaultExport",
-          }
+          `[ROUTER] ⚠️  [WARN] ${moduleName}/index.ts has no default export.`,
+          { module: moduleName, event: "router.noDefaultExport" }
+        );
+        console.log(
+          `[ROUTER] [WARN] ${moduleName}/index.ts has no default export.`
         );
         continue;
       }
 
-      const prefix = meta.prefix || `/${moduleNameLower}`;
-
-      // Analytics middleware sadece gerektiğinde
       if (meta.useAnalytics === true) {
         router.use(prefix, analyticsLogger, modRouter);
-        logger.info(
-          `[ROUTER][${tenant}] ✅ [OK] Mounted ${prefix} with analytics`,
-          {
-            tenant,
-            locale,
-            module: moduleName,
-            prefix,
-            event: "router.mount.analytics",
-          }
-        );
+        logger.info(`[ROUTER] ✅ [OK] Mounted ${prefix} with analytics`, {
+          module: moduleName,
+          prefix,
+          event: "router.mount.analytics",
+        });
+        console.log(`[ROUTER] ✅ [OK] Mounted ${prefix} with analytics`);
       } else {
         router.use(prefix, modRouter);
-        logger.info(
-          `[ROUTER][${tenant}] ✅ [OK] Mounted ${prefix} without analytics`,
-          { tenant, locale, module: moduleName, prefix, event: "router.mount" }
-        );
+        logger.info(`[ROUTER] ✅ [OK] Mounted ${prefix} without analytics`, {
+          module: moduleName,
+          prefix,
+          event: "router.mount",
+        });
+        console.log(`[ROUTER] ✅ [OK] Mounted ${prefix} without analytics`);
       }
     } catch (err: any) {
       logger.error(
-        `[ROUTER][${tenant}] ❌ [FAIL] Failed to load module "${moduleName}": ${err.message}`,
-        {
-          tenant,
-          locale,
-          module: moduleName,
-          event: "router.loadFail",
-          error: err,
-        }
+        `[ROUTER] ❌ [FAIL] Failed to load module "${moduleName}": ${err.message}`,
+        { module: moduleName, event: "router.loadFail", error: err }
       );
+      console.log(
+        `[ROUTER] ❌ [FAIL] Failed to load module "${moduleName}": ${err.message}`
+      );
+      continue;
     }
   }
 
+  // Modül mounting bitti
+  console.log("✅ [ROUTER] Tüm modüller mount edildi ve router hazır.");
   return router;
 };

@@ -1,17 +1,30 @@
 import express from "express";
-import { createOrder, getOrderById, updateShippingAddress } from "./order.controller";
+import {
+  createOrder,
+  getOrderById,
+  updateShippingAddress,
+  getMyOrders,
+} from "./order.controller";
 import { authenticate } from "@/core/middleware/authMiddleware";
-import { createOrderValidator, updateShippingAddressValidator } from "./order.validation";
+import {
+  createOrderValidator,
+  updateShippingAddressValidator,
+} from "./order.validation";
 import { validateRequest } from "@/core/middleware/validateRequest";
 
 const router = express.Router();
 
+router.post(
+  "/",
+  authenticate,
+  createOrderValidator,
+  validateRequest,
+  createOrder
+);
 
-router.post("/", authenticate, createOrderValidator, validateRequest, createOrder);
-
+router.get("/", authenticate, getMyOrders);
 
 router.get("/:id", authenticate, getOrderById);
-
 
 router.put(
   "/:id/address",

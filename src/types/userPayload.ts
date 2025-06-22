@@ -6,6 +6,7 @@ export interface UserPayload {
   email?: string;
   name?: string;
   isActive?: boolean;
+  isSuperadmin?: boolean;
   iat?: number;
   exp?: number;
 }

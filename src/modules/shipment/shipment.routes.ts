@@ -19,15 +19,40 @@ const router = express.Router();
 router.get("/", authenticate, authorizeRoles("admin"), getShipments);
 
 // POST /shipments -> Add a new shipment
-router.post("/", authenticate, authorizeRoles("admin"), validateCreateShipment, addShipment);
+router.post(
+  "/",
+  authenticate,
+  authorizeRoles("admin"),
+  validateCreateShipment,
+  addShipment
+);
 
 // GET /shipments/:id -> Get shipment by ID
-router.get("/:id", authenticate, authorizeRoles("admin"), validateShipmentId, getShipmentById);
+router.get(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateShipmentId,
+  getShipmentById
+);
 
 // PUT /shipments/:id -> Update shipment
-router.put("/:id", authenticate, authorizeRoles("admin"), validateShipmentId, validateUpdateShipment, updateShipment);
+router.put(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateShipmentId,
+  validateUpdateShipment,
+  updateShipment
+);
 
 // DELETE /shipments/:id -> Delete shipment
-router.delete("/:id", authenticate, authorizeRoles("admin"), validateShipmentId, deleteShipment);
+router.delete(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateShipmentId,
+  deleteShipment
+);
 
 export default router;

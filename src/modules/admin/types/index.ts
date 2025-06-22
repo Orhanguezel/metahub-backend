@@ -1,4 +1,3 @@
-// src/types/module.ts veya ilgili module types dosyası
 import type { SupportedLocale, TranslatedLabel } from "@/types/common";
 
 export type RouteMeta = {
@@ -11,7 +10,7 @@ export type RouteMeta = {
 
 export interface IModuleMeta {
   name: string;
-  tenant: string; // Optional tenant field for multi-tenancy
+  tenants: string[]; // DİKKAT: tenant dizisi!
   label: TranslatedLabel;
   icon: string;
   roles: string[];
@@ -34,9 +33,10 @@ export interface IModuleMeta {
   updatedAt?: Date;
 }
 
+// Ayarlar artık tenant’a özel değil, sadece project->modül, (ileride project kalkacak)
 export interface IModuleSetting {
-  project: string;
   module: string;
+  tenant: string;
   enabled: boolean;
   visibleInSidebar: boolean;
   useAnalytics: boolean;

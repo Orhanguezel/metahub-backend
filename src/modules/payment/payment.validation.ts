@@ -4,18 +4,24 @@ import { validateRequest } from "@/core/middleware/validateRequest";
 // ✅ Yeni ödeme oluşturma validasyonu
 export const validatePaymentCreate = [
   body("order")
-    .notEmpty().withMessage("Order ID is required.")
-    .isMongoId().withMessage("Order ID must be a valid Mongo ID."),
-  
+    .notEmpty()
+    .withMessage("payment.validation.order_required") // i18n anahtarı olarak
+    .isMongoId()
+    .withMessage("payment.validation.order_mongoid"),
+
   body("amount")
-    .notEmpty().withMessage("Amount is required.")
-    .isNumeric().withMessage("Amount must be a number.")
-    .isFloat({ min: 0.01 }).withMessage("Amount must be greater than 0."),
-  
+    .notEmpty()
+    .withMessage("payment.validation.amount_required")
+    .isNumeric()
+    .withMessage("payment.validation.amount_number")
+    .isFloat({ min: 0.01 })
+    .withMessage("payment.validation.amount_min"),
+
   body("method")
-    .notEmpty().withMessage("Payment method is required.")
+    .notEmpty()
+    .withMessage("payment.validation.method_required")
     .isIn(["cash_on_delivery", "credit_card", "paypal"])
-    .withMessage("Invalid payment method."),
+    .withMessage("payment.validation.method_invalid"),
 
   validateRequest,
 ];
@@ -23,20 +29,22 @@ export const validatePaymentCreate = [
 // ✅ Ödeme metodunu güncelleme validasyonu
 export const validatePaymentUpdateMethod = [
   param("id")
-    .notEmpty().withMessage("Payment ID is required.")
-    .isMongoId().withMessage("Invalid payment ID."),
-  
+    .notEmpty()
+    .withMessage("payment.validation.id_required")
+    .isMongoId()
+    .withMessage("payment.validation.id_invalid"),
+
   body("method")
-    .notEmpty().withMessage("Payment method is required.")
+    .notEmpty()
+    .withMessage("payment.validation.method_required")
     .isIn(["cash_on_delivery", "credit_card", "paypal"])
-    .withMessage("Invalid payment method."),
+    .withMessage("payment.validation.method_invalid"),
 
   validateRequest,
 ];
 
 // ✅ Ödeme ID'si validasyonu
 export const validatePaymentIdParam = [
-  param("id").isMongoId().withMessage("Valid payment ID is required."),
+  param("paymentId").isMongoId().withMessage("payment.validation.id_invalid"),
   validateRequest,
 ];
-

@@ -2,8 +2,14 @@ import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import { getAnalyticsLogs } from "./dashboard.log.controller";
 import { getDashboardStats } from "./dashboard.controller";
-import { getMonthlyOrders, getMonthlyRevenue } from "./dashboard.chart.controller";
-import { getTopProducts, getUserRoleStats } from "./dashboard.report.controller";
+import {
+  getMonthlyOrders,
+  getMonthlyRevenue,
+} from "./dashboard.chart.controller";
+import {
+  getTopProducts,
+  getUserRoleStats,
+} from "./dashboard.report.controller";
 import { getDailyOverview } from "./dashboard.overview.controller";
 
 // ✅ VALIDATION

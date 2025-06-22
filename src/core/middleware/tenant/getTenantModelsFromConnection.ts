@@ -44,8 +44,8 @@ import { ActivityCategory } from "@/modules/activitycategory/activitycategory.mo
 import { About } from "@/modules/about/about.models";
 import { AboutCategory } from "@/modules/aboutcategory/aboutcategory.models";
 import { Experience } from "@/modules/experience/experience.models";
-import { Reference } from "@/modules/references/models";
-import { ReferenceCategory } from "@/modules/referencescategory/category.models";
+import { References } from "@/modules/references/models";
+import { ReferencesCategory } from "@/modules/referencescategory/category.models";
 import { Articles } from "@/modules/articles/articles.models";
 import { ArticlesCategory } from "@/modules/articlescategory/articlescategory.models";
 import { Library } from "@/modules/library/library.models";
@@ -65,6 +65,7 @@ import { NewsCategory } from "@/modules/newscategory";
 import { Analytics } from "@/modules/analytics/analytics.models";
 import { ModuleMeta, ModuleSetting } from "@/modules/admin/admin.models";
 import { Sparepart } from "@/modules/sparepart/sparepart.models";
+import { Tenants } from "@/modules/tenants/tenants.model";
 
 // ✅ Ana export
 export const getTenantModelsFromConnection = (conn: Connection) => ({
@@ -85,8 +86,7 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   Gallery: conn.model("Gallery", Gallery.schema),
   GalleryCategory: conn.model("GalleryCategory", GalleryCategory.schema),
   Services: conn.model("Services", Services.schema),
-  ServiceCategory: conn.model("ServiceCategory", ServicesCategory.schema),
-  StockMovement: conn.model("StockMovement", Stockmovement.schema),
+  ServicesCategory: conn.model("ServicesCategory", ServicesCategory.schema),
   Notification: conn.model("Notification", Notification.schema),
   Comment: conn.model("Comment", Comment.schema),
   Review: conn.model("Review", Review.schema),
@@ -108,10 +108,10 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   About: conn.model("About", About.schema),
   AboutCategory: conn.model("AboutCategory", AboutCategory.schema),
   Experience: conn.model("Experience", Experience.schema),
-  References: conn.model("References", Reference.schema),
+  References: conn.model("References", References.schema),
   ReferencesCategory: conn.model(
     "ReferencesCategory",
-    ReferenceCategory.schema
+    ReferencesCategory.schema
   ),
   Articles: conn.model("Articles", Articles.schema),
   ArticlesCategory: conn.model("ArticlesCategory", ArticlesCategory.schema),
@@ -138,4 +138,5 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   FAQ: conn.model("FAQ", FAQ.schema),
   Stockmovement: conn.model("Stockmovement", Stockmovement.schema),
   Sparepart: conn.model("Sparepart", Sparepart.schema),
+  Tenants: conn.model("Tenants", Tenants.schema),
 });

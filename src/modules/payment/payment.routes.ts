@@ -1,10 +1,15 @@
 import { Router } from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { validatePaymentCreate, validatePaymentUpdateMethod, validatePaymentIdParam } from "./payment.validation";
+import {
+  validatePaymentCreate,
+  validatePaymentUpdateMethod,
+  validatePaymentIdParam,
+} from "./payment.validation";
 import {
   createPayment,
   getAllPayments,
   getPaymentByOrderId,
+  getUserPaymentById, // ✅ eklendi!
   markPaymentAsPaid,
   markPaymentAsFailed,
   updatePaymentMethod,
@@ -34,6 +39,12 @@ router.post("/", authenticate, validatePaymentCreate, createPayment);
 router.get("/", authenticate, authorizeRoles("admin"), getAllPayments);
 router.get("/user", authenticate, getPaymentsByUser);
 router.get("/order/:orderId", authenticate, getPaymentByOrderId);
+router.get(
+  "/user/:paymentId",
+  authenticate,
+  validatePaymentIdParam,
+  getUserPaymentById
+); // ✅ yeni endpoint
 
 // 🛠️ Admin-only Actions
 router.put(

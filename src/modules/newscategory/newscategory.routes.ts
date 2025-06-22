@@ -7,10 +7,13 @@ import {
   deleteNewsCategory,
 } from "./newscategory.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { validateCreateNewsCategory, validateUpdateNewsCategory, validateObjectId } from "./newscategory.validation";
+import {
+  validateCreateNewsCategory,
+  validateUpdateNewsCategory,
+  validateObjectId,
+} from "./newscategory.validation";
 
 const router = express.Router();
-
 
 router.get("/", getAllNewsCategories);
 router.get("/:id", validateObjectId("id"), getNewsCategoryById);
@@ -39,6 +42,5 @@ router.delete(
   validateObjectId("id"),
   deleteNewsCategory
 );
-
 
 export default router;

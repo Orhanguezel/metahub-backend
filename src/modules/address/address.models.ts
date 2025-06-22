@@ -10,7 +10,6 @@ export interface IAddress {
   zipCode: string;
   country?: string;
   phone: string;
-  email: string;
   isDefault?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -83,18 +82,6 @@ const addressSchema = new Schema<IAddress>(
           return /^[0-9+\s()-]+$/.test(val);
         },
         message: "Phone must be a valid phone number",
-      },
-    },
-    email: {
-      type: String,
-      required: true,
-      trim: true,
-      lowercase: true,
-      validate: {
-        validator: function (val: string) {
-          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
-        },
-        message: "Email must be a valid email address",
       },
     },
     isDefault: {

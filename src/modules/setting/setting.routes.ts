@@ -1,17 +1,15 @@
-// src/modules/setting/setting.routes.ts
-
 import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { 
-  upsertSetting, 
-  getAllSettings, 
-  getSettingByKey, 
-  deleteSetting, 
-  upsertSettingImage, 
+import {
+  upsertSetting,
+  getAllSettings,
+  getSettingByKey,
+  deleteSetting,
+  upsertSettingImage,
   updateSettingImage,
 } from "./setting.controller";
-import { 
-  validateUpsertSetting, 
+import {
+  validateUpsertSetting,
   validateSettingKeyParam,
 } from "./setting.validation";
 import { upload } from "@/core/middleware/uploadMiddleware";
@@ -22,7 +20,7 @@ const router = express.Router();
 router.get("/", getAllSettings);
 router.get("/:key", validateSettingKeyParam, getSettingByKey);
 
-// 🔒 Admin korumalı
+// 🔒 Admin only
 router.use(authenticate, authorizeRoles("admin"));
 
 // CRUD endpoints

@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { sendEmail } from "@/services/emailService";
 import { orderConfirmationTemplate } from "@/modules/order/templates/orderConfirmation";
-//import { Notification } from "@/modules/notification";
 import type { SupportedLocale } from "@/types/common";
 import { t } from "@/core/utils/i18n/translate";
 import orderTranslations from "@/modules/order/i18n";
@@ -28,7 +27,8 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   const reqLocale: SupportedLocale = req.locale || "en";
 
   // 1️⃣ Adres bul/gönder
-  let finalShippingAddress = shippingAddress;
+  let shippingAddressWithTenant;
+
   if (addressId) {
     const { Address } = await getTenantModels(req);
     const addressDoc = await Address.findOne({
@@ -43,8 +43,9 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       });
       return;
     }
-    finalShippingAddress = {
+    shippingAddressWithTenant = {
       name: userName,
+      tenant: req.tenant,
       phone: addressDoc.phone,
       email: addressDoc.email,
       street: addressDoc.street,
@@ -53,16 +54,22 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       country: addressDoc.country || "Germany",
       ...(shippingAddress || {}),
     };
+  } else {
+    shippingAddressWithTenant = {
+      ...shippingAddress,
+      tenant: req.tenant,
+    };
   }
+
   if (
-    !finalShippingAddress ||
-    !finalShippingAddress.name ||
-    !finalShippingAddress.phone ||
-    !finalShippingAddress.email ||
-    !finalShippingAddress.street ||
-    !finalShippingAddress.city ||
-    !finalShippingAddress.postalCode ||
-    !finalShippingAddress.country
+    !shippingAddressWithTenant ||
+    !shippingAddressWithTenant.name ||
+    !shippingAddressWithTenant.phone ||
+    !shippingAddressWithTenant.email ||
+    !shippingAddressWithTenant.street ||
+    !shippingAddressWithTenant.city ||
+    !shippingAddressWithTenant.postalCode ||
+    !shippingAddressWithTenant.country
   ) {
     logger.warn(orderT("error.shippingAddressRequired", reqLocale));
     res.status(400).json({
@@ -84,7 +91,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     const product = await Bike.findOne({
       _id: item.product,
       tenant: req.tenant,
-    }).lean();
+    });
     if (!product) {
       logger.warn(orderT("error.productNotFound", reqLocale));
       res.status(404).json({
@@ -119,6 +126,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       product: product._id,
       quantity: item.quantity,
       unitPrice: product.price,
+      tenant: req.tenant,
     });
     itemsForMail.push(
       `• ${
@@ -170,7 +178,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     tenant: req.tenant,
     addressId: addressId || undefined,
     items: enrichedItems,
-    shippingAddress: finalShippingAddress,
+    shippingAddress: shippingAddressWithTenant,
     totalPrice: total,
     discount,
     coupon: coupon?._id,
@@ -202,13 +210,13 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       )
     : null;
   const locale: SupportedLocale = reqLocale || user?.language || "en";
-  const customerEmail = finalShippingAddress?.email || user?.email || "";
+  const customerEmail = shippingAddressWithTenant?.email || user?.email || "";
 
   await sendEmail({
     to: customerEmail,
     subject: orderT("email.subject", locale),
     html: orderConfirmationTemplate({
-      name: finalShippingAddress.name || user?.name || "",
+      name: shippingAddressWithTenant.name || user?.name || "",
       itemsList: itemsForMail.join("<br/>"),
       totalPrice: total - discount,
       locale,
@@ -226,6 +234,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   const { Notification } = await getTenantModels(req);
   await Notification.create({
     user: userId,
+    tenant: req.tenant,
     type: "success",
     message: orderT("notification.orderReceived", locale, {
       total: total - discount,
@@ -346,3 +355,28 @@ export const updateShippingAddress = asyncHandler(
     });
   }
 );
+
+export const getMyOrders = asyncHandler(async (req, res) => {
+  const { Order } = await getTenantModels(req);
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || "en";
+
+  const orders = await Order.find({ user: req.user?._id, tenant: req.tenant })
+    .populate("items.product")
+    .populate("addressId")
+    .sort({ createdAt: -1 });
+
+  if (!orders || orders.length === 0) {
+    logger.info(orderT("order.noOrdersFound", locale));
+    res.status(404).json({
+      success: false,
+      message: orderT("order.noOrdersFound", locale),
+    });
+    return;
+  }
+
+  res.status(200).json({
+    success: true,
+    message: orderT("order.fetched.success", locale),
+    data: orders,
+  });
+});

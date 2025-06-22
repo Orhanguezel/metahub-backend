@@ -1,11 +1,11 @@
 import express from "express";
-import { 
-  getAllMails, 
-  getMailById, 
-  deleteMail, 
+import {
+  getAllMails,
+  getMailById,
+  deleteMail,
   sendTestEmail,
   fetchEmailsManually,
-  markAsReadOrUnread
+  markAsReadOrUnread,
 } from "./email.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 
@@ -21,4 +21,3 @@ router.delete("/:id", deleteMail);
 router.patch("/:id/read", markAsReadOrUnread);
 
 export default router;
-

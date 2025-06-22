@@ -1,13 +1,12 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { Reference } from "@/modules/references/models";
 import { isValidObjectId } from "@/core/utils/validation";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // ✅ Public - Get all references (optional: filter by category, language)
 export const getAllReferences = asyncHandler(
   async (req: Request, res: Response) => {
-    const { Reference } = await getTenantModels(req);
+    const { References } = await getTenantModels(req);
     const { category, language } = req.query;
     const filter: Record<string, any> = {
       isActive: true,
@@ -23,7 +22,7 @@ export const getAllReferences = asyncHandler(
       filter[`title.${language}`] = { $exists: true };
     }
 
-    const referenceList = await Reference.find(filter)
+    const referenceList = await References.find(filter)
       .populate("category", "name")
       .sort({ createdAt: -1 })
       .lean();
@@ -39,7 +38,7 @@ export const getAllReferences = asyncHandler(
 // ✅ Public - Get reference by ID
 export const getReferenceById = asyncHandler(
   async (req: Request, res: Response) => {
-    const { Reference } = await getTenantModels(req);
+    const { References } = await getTenantModels(req);
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -49,7 +48,7 @@ export const getReferenceById = asyncHandler(
       return;
     }
 
-    const reference = await Reference.findOne({
+    const reference = await References.findOne({
       _id: id,
       tenant: req.tenant,
       isActive: true,
@@ -74,10 +73,10 @@ export const getReferenceById = asyncHandler(
 // ✅ Public - Get reference by Slug
 export const getReferenceBySlug = asyncHandler(
   async (req: Request, res: Response) => {
-    const { Reference } = await getTenantModels(req);
+    const { References } = await getTenantModels(req);
     const { slug } = req.params;
 
-    const reference = await Reference.findOne({
+    const reference = await References.findOne({
       slug,
       tenant: req.tenant,
       isActive: true,
