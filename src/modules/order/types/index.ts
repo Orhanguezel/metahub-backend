@@ -2,7 +2,12 @@ import { Types } from "mongoose";
 import type { SupportedLocale } from "@/types/common";
 
 export type PaymentMethod = "cash_on_delivery" | "credit_card" | "paypal";
-export type OrderStatus = "pending" | "preparing" | "shipped" | "completed" | "cancelled";
+export type OrderStatus =
+  | "pending"
+  | "preparing"
+  | "shipped"
+  | "completed"
+  | "cancelled";
 
 export interface IOrderItem {
   product: Types.ObjectId;
@@ -15,7 +20,6 @@ export interface IShippingAddress {
   name: string;
   phone: string;
   tenant: string; // Optional tenant field for multi-tenancy
-  email: string;
   street: string;
   city: string;
   postalCode: string;
@@ -37,7 +41,7 @@ export interface IOrder {
   isDelivered: boolean;
   isPaid: boolean;
   deliveredAt?: Date;
-  language?: SupportedLocale; 
+  language?: SupportedLocale;
   createdAt?: Date;
   updatedAt?: Date;
 }
