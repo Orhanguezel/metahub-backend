@@ -6,18 +6,19 @@ import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import authTranslations from "@/services/i18n";
+import { RequestWithTenant } from "@/core/middleware/tenant/resolveTenant";
 
 // ✅ Login & Token Set
 // ✅ Login & Token Set
 export const loginAndSetToken = async (
-  req: Request,
+  req: RequestWithTenant, // veya tenantData içeren kendi genişletilmiş tipin!
   res: Response,
   userId: string,
   role: string
 ): Promise<string> => {
   const token = generateToken({ id: userId, role });
 
-  setTokenCookie(res, token, req.tenant);
+  setTokenCookie(res, token, req.tenantData); // <-- DÜZELTİLDİ
 
   logger.info(
     t("auth.token.set", req.locale || getLogLocale(), authTranslations, {
@@ -36,8 +37,8 @@ export const loginAndSetToken = async (
 };
 
 // ✅ Logout & Clear Token
-export const logoutAndClearToken = (req: Request, res: Response) => {
-  clearTokenCookie(res);
+export const logoutAndClearToken = (req: RequestWithTenant, res: Response) => {
+  clearTokenCookie(res, req.tenantData); // <-- DÜZELTİLDİ
 
   logger.info(
     t("auth.token.cleared", req.locale || getLogLocale(), authTranslations),
