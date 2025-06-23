@@ -11,11 +11,11 @@ const COOKIE_MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 gün
 export const setTokenCookie = (
   res: Response,
   token: string,
-  tenantData: any // Tenant kaydı (ör. req.tenantData)
+  tenant: any // Tenant kaydı (ör. req.tenantData)
 ): void => {
   // Ana domaini al (başında nokta olması cross-domain için önerilir)
-  const mainDomain = tenantData?.domain?.main
-    ? "." + tenantData.domain.main.replace(/^\./, "")
+  const mainDomain = tenant?.domain?.main
+    ? "." + tenant.domain.main.replace(/^\./, "")
     : undefined;
 
   res.cookie(COOKIE_NAME, token, {
@@ -28,9 +28,9 @@ export const setTokenCookie = (
   });
 };
 
-export const clearTokenCookie = (res: Response, tenantData: any): void => {
-  const mainDomain = tenantData?.domain?.main
-    ? "." + tenantData.domain.main.replace(/^\./, "")
+export const clearTokenCookie = (res: Response, tenant: any): void => {
+  const mainDomain = tenant?.domain?.main
+    ? "." + tenant.domain.main.replace(/^\./, "")
     : undefined;
 
   res.clearCookie(COOKIE_NAME, {
