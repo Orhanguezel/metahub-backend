@@ -13,18 +13,20 @@ export interface RequestWithTenant extends Request {
   enabledModules?: string[];
 }
 
-// Hostname'den portu atlatmak için aşağıdaki satırı kullanabilirsin:
-// hostname.split(":")[0]
 function normalizeHost(hostname: string) {
-  // Portu kaldırma ve küçük harfe çevirme
   return hostname
     .replace(/^www\./, "")
     .trim()
     .toLowerCase()
-    .replace(/:\d+$/, ""); // Portu kaldır
+    .replace(/:\d+$/, "");
 }
 
-// Tenant tespiti ve injection işlemi
+// --- API subdomainlerini tanımla (gerekirse env'den oku) ---
+const API_DOMAINS = [
+  "api.guezelwebdesign.com",
+  // Diğer API subdomainleri de eklenebilir!
+];
+
 export const resolveTenant = async (
   req: RequestWithTenant,
   res: Response,
@@ -35,7 +37,6 @@ export const resolveTenant = async (
 
   let tenantDoc = null;
 
-  // Loglama (istenirse geliştirilebilir)
   logger.info(
     `Resolving tenant for request: ${req.hostname}, X-Tenant: ${tenantHeader}`,
     {
@@ -56,17 +57,35 @@ export const resolveTenant = async (
   }
 
   // 2. Domain/subdomain üzerinden tenant çözümü
-  if (!tenantDoc) {
-    const normalizedHost = normalizeHost(
-      req.hostname || (req.headers.host as string) || ""
-    );
+  let normalizedHost = normalizeHost(
+    req.hostname || (req.headers.host as string) || ""
+  );
 
-    // Subdomain kontrolü
+  if (!tenantDoc) {
+    // Eğer API domainine istek geldiyse, Origin/Referer ile tenant tespit etmeye çalış!
+    if (API_DOMAINS.includes(normalizedHost)) {
+      // Origin veya Referer'dan tenant domainini tespit et
+      const origin =
+        (req.headers.origin as string) || (req.headers.referer as string) || "";
+      if (origin) {
+        const originHost = normalizeHost(origin.replace(/^https?:\/\//, ""));
+        normalizedHost = originHost;
+      }
+    }
+
+    // Subdomain ve main domain kontrolü
     tenantDoc = await Tenants.findOne({
       $or: [
         { "domain.main": normalizedHost }, // Ana domain kontrolü
         { "domain.customDomains": normalizedHost }, // Custom domains kontrolü
       ],
+    }).lean();
+  }
+
+  // 3. Yine bulamazsa, fallback olarak x-tenant header'a bak (herkes için)
+  if (!tenantDoc && tenantHeader) {
+    tenantDoc = await Tenants.findOne({
+      slug: tenantHeader.toLowerCase(),
     }).lean();
   }
 
@@ -100,7 +119,6 @@ export const resolveTenant = async (
     typeof userAgent === "string" &&
     userAgent.toLowerCase().includes("postman");
 
-  // Prod ortamında hata döndürülür
   if (process.env.NODE_ENV === "production" || !isPostman) {
     return res.status(404).json({
       success: false,
@@ -113,7 +131,6 @@ export const resolveTenant = async (
     });
   }
 
-  // DEV ortamında hata döndürülmeli, artık devde de hata alıyoruz
   return res.status(404).json({
     success: false,
     message: t("tenant.resolve.fail", locale, translations, {
