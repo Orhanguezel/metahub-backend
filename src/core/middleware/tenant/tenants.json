@@ -10,5 +10,6 @@
   "localhost": "metahub",
   "127.0.0.1": "metahub",
   "localhost:3000": "metahub",
-  "localhost:5173": "radanor"
+  "localhost:5173": "radanor",
+  "api.guezelwebdesign.com": "metahub"
 }
