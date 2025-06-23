@@ -96,43 +96,31 @@ export const resolveTenant = async (
 
   // Tenant bulunamadı, logla ve hata döndür
   const userAgent = req.headers["user-agent"] || "";
-  const isDev = process.env.NODE_ENV !== "production";
   const isPostman =
     typeof userAgent === "string" &&
     userAgent.toLowerCase().includes("postman");
 
-  logger.error(
-    t("tenant.resolve.fail", locale, translations, {
-      host: req.hostname || (req.headers.host as string),
-      tenantHeader: tenantHeader,
-    }),
-    {
-      ...getRequestContext(req),
-      tenant: "unknown",
-      module: "tenant",
-      event: "tenant.resolve",
-      status: "fail",
-      host: req.hostname || (req.headers.host as string),
-      tenantHeader: tenantHeader,
-    }
-  );
-
-  // DEVELOPMENT veya POSTMAN için hata vermez, sadece loglar ve devam eder!
-  if (isDev || isPostman) {
-    console.warn(
-      "[resolveTenant] WARNING: Tenant bulunamadı, DEV/POSTMAN devam ediyor."
-    );
-    return next();
+  // Prod ortamında hata döndürülür
+  if (process.env.NODE_ENV === "production" || !isPostman) {
+    return res.status(404).json({
+      success: false,
+      message: t("tenant.resolve.fail", locale, translations, {
+        host: req.hostname || (req.headers.host as string),
+        tenantHeader: tenantHeader,
+      }),
+      detail:
+        "Tenant slug not found on request object. (Did you forget to use resolveTenant middleware?)",
+    });
   }
 
-  // PROD ortamında hata döndürülür
+  // DEV ortamında hata döndürülmeli, artık devde de hata alıyoruz
   return res.status(404).json({
     success: false,
     message: t("tenant.resolve.fail", locale, translations, {
       host: req.hostname || (req.headers.host as string),
-      tenantHeader,
+      tenantHeader: tenantHeader,
     }),
     detail:
-      "Tenant slug not found on request object. (Did you forget to use resolveTenant middleware?)",
+      "Tenant slug not found on request object in DEV environment. Please check your request and tenant setup.",
   });
 };

@@ -3,13 +3,10 @@
   "guezelwebdesign.com": "metahub",
   "ensotek.de": "ensotek",
   "radanor.de": "radanor",
-  "radanor.localhost": "radanor",
   "metahub.localhost": "metahub",
-  "anastasia.localhost": "anastasia",
-  "ensotek.localhost": "ensotek",
   "localhost": "metahub",
   "127.0.0.1": "metahub",
   "localhost:3000": "metahub",
-  "localhost:5173": "radanor",
+  "localhost:5173": "metahub",
   "api.guezelwebdesign.com": "metahub"
 }
