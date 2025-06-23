@@ -16,34 +16,37 @@ export interface RequestWithTenant extends Request {
 // Hostname'den portu atlatmak için aşağıdaki satırı kullanabilirsin:
 // hostname.split(":")[0]
 function normalizeHost(hostname: string) {
-  // Eğer portu kaldırmak istersen: .replace(/:\d+$/, "")
+  // Portu kaldırma ve küçük harfe çevirme
   return hostname
     .replace(/^www\./, "")
     .trim()
     .toLowerCase()
-    .replace(/:\d+$/, "");
+    .replace(/:\d+$/, ""); // Portu kaldır
 }
 
+// Tenant tespiti ve injection işlemi
 export const resolveTenant = async (
   req: RequestWithTenant,
   res: Response,
   next: NextFunction
 ) => {
   const locale = req.locale || getLogLocale();
-
-  console.log("RESOLVE TENANT:", {
-    hostname: req.hostname,
-    headersHost: req.headers.host,
-    xTenant: req.headers["x-tenant"],
-    user: req.user,
-  });
-
-  // X-Tenant header'ı normalize et
-  let tenantHeader = req.headers["x-tenant"];
-  if (Array.isArray(tenantHeader)) tenantHeader = tenantHeader[0];
-  tenantHeader = (tenantHeader || "").trim();
+  const tenantHeader = req.headers["x-tenant"]?.toString().trim() || "";
 
   let tenantDoc = null;
+
+  // Loglama (istenirse geliştirilebilir)
+  logger.info(
+    `Resolving tenant for request: ${req.hostname}, X-Tenant: ${tenantHeader}`,
+    {
+      ...getRequestContext(req),
+      tenant: tenantHeader || "unknown",
+      module: "tenant",
+      event: "tenant.resolve",
+      status: "start",
+      domain: req.hostname,
+    }
+  );
 
   // 1. Superadmin için header override kontrolü
   if (tenantHeader && req.user && req.user.role === "superadmin") {
@@ -52,12 +55,19 @@ export const resolveTenant = async (
     }).lean();
   }
 
-  // 2. Domain (hostname) üzerinden tenant çözümü
+  // 2. Domain/subdomain üzerinden tenant çözümü
   if (!tenantDoc) {
     const normalizedHost = normalizeHost(
       req.hostname || (req.headers.host as string) || ""
     );
-    tenantDoc = await Tenants.findOne({ "domain.main": normalizedHost }).lean();
+
+    // Subdomain kontrolü
+    tenantDoc = await Tenants.findOne({
+      $or: [
+        { "domain.main": normalizedHost }, // Ana domain kontrolü
+        { "domain.customDomains": normalizedHost }, // Custom domains kontrolü
+      ],
+    }).lean();
   }
 
   if (tenantDoc) {
@@ -84,14 +94,13 @@ export const resolveTenant = async (
     return next();
   }
 
-  // Not: user-agent bazen undefined olabilir
+  // Tenant bulunamadı, logla ve hata döndür
   const userAgent = req.headers["user-agent"] || "";
   const isDev = process.env.NODE_ENV !== "production";
   const isPostman =
     typeof userAgent === "string" &&
     userAgent.toLowerCase().includes("postman");
 
-  // 3. Hata: tenant bulunamadı
   logger.error(
     t("tenant.resolve.fail", locale, translations, {
       host: req.hostname || (req.headers.host as string),
@@ -108,7 +117,7 @@ export const resolveTenant = async (
     }
   );
 
-  // DEVELOPMENT veya POSTMAN İÇİN: Hata vermez, sadece loglar ve devam eder!
+  // DEVELOPMENT veya POSTMAN için hata vermez, sadece loglar ve devam eder!
   if (isDev || isPostman) {
     console.warn(
       "[resolveTenant] WARNING: Tenant bulunamadı, DEV/POSTMAN devam ediyor."
@@ -116,7 +125,7 @@ export const resolveTenant = async (
     return next();
   }
 
-  // PROD ortamında: Hata ile durdurur
+  // PROD ortamında hata döndürülür
   return res.status(404).json({
     success: false,
     message: t("tenant.resolve.fail", locale, translations, {
