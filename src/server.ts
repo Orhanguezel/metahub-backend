@@ -61,7 +61,7 @@ const lang = getLogLocale();
 
     // Router ve diğer sistemler
     const router = await getRouter();
-    app.use("", router);
+    app.use("/api", router);
 
     await setupSwagger(app);
 

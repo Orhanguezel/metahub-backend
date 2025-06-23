@@ -7,6 +7,5 @@
   "localhost": "metahub_local",
   "127.0.0.1": "metahub_local",
   "localhost:3000": "metahub_local",
-  "localhost:5173": "metahub_local",
-  "api.guezelwebdesign.com": "metahub"
+  "localhost:5173": "metahub_local"
 }
