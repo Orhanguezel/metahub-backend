@@ -47,7 +47,7 @@ const CompanyImageSchema = new Schema<ICompanyImage>(
   { _id: false }
 );
 
-const companySchema = new Schema<ICompany>(
+const CompanySchema = new Schema<ICompany>(
   {
     companyName: { type: String, required: true, unique: true },
     tenant: { type: String, required: true, index: true },
@@ -79,6 +79,6 @@ const companySchema = new Schema<ICompany>(
 );
 
 const Company: Model<ICompany> =
-  models.Company || mongoose.model<ICompany>("Company", companySchema);
+  models.Company || mongoose.model<ICompany>("Company", CompanySchema);
 
 export { Company };

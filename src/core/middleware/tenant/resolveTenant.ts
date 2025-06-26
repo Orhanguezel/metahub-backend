@@ -21,10 +21,10 @@ function normalizeHost(hostname: string) {
     .replace(/:\d+$/, "");
 }
 
-// --- API subdomainlerini tanımla (gerekirse env'den oku) ---
+// Subdomain olarak gelen API domainleri (gerekirse ENV'den oku)
 const API_DOMAINS = [
   "api.guezelwebdesign.com",
-  // Diğer API subdomainleri de eklenebilir!
+  // ... diğer API subdomainleri
 ];
 
 export const resolveTenant = async (
@@ -34,61 +34,79 @@ export const resolveTenant = async (
 ) => {
   const locale = req.locale || getLogLocale();
   const tenantHeader = req.headers["x-tenant"]?.toString().trim() || "";
-
   let tenantDoc = null;
 
-  logger.info(
-    `Resolving tenant for request: ${req.hostname}, X-Tenant: ${tenantHeader}`,
-    {
-      ...getRequestContext(req),
-      tenant: tenantHeader || "unknown",
-      module: "tenant",
-      event: "tenant.resolve",
-      status: "start",
-      domain: req.hostname,
-    }
-  );
+  logger.info(`[DEBUG] [TENANT] Giriş isteği:`, {
+    hostname: req.hostname,
+    xTenant: tenantHeader,
+    headers: req.headers,
+  });
 
-  // 1. Superadmin için header override kontrolü
+  // 1️⃣ Süperadmin için x-tenant override (PROD ve DEV)
   if (tenantHeader && req.user && req.user.role === "superadmin") {
     tenantDoc = await Tenants.findOne({
       slug: tenantHeader.toLowerCase(),
     }).lean();
+    logger.info(
+      `[DEBUG] [TENANT] Süperadmin override ile çözümlendi. tenant: ${
+        tenantDoc?.slug || "null"
+      }, mongoUri: ${tenantDoc?.mongoUri}`
+    );
   }
 
-  // 2. Domain/subdomain üzerinden tenant çözümü
-  let normalizedHost = normalizeHost(
-    req.hostname || (req.headers.host as string) || ""
-  );
-
+  // 2️⃣ Domain/subdomain mapping ile tenant bul
   if (!tenantDoc) {
-    // Eğer API domainine istek geldiyse, Origin/Referer ile tenant tespit etmeye çalış!
+    let normalizedHost = normalizeHost(
+      req.hostname || (req.headers.host as string) || ""
+    );
+
+    // Eğer API subdomain ise, origin/referer üzerinden tenantı bul
     if (API_DOMAINS.includes(normalizedHost)) {
-      // Origin veya Referer'dan tenant domainini tespit et
       const origin =
         (req.headers.origin as string) || (req.headers.referer as string) || "";
       if (origin) {
         const originHost = normalizeHost(origin.replace(/^https?:\/\//, ""));
         normalizedHost = originHost;
       }
+      logger.info(
+        `[DEBUG] [TENANT] API_SUBDOMAIN. Origin/Referer ile host normalize edildi: ${normalizedHost}`
+      );
     }
 
-    // Subdomain ve main domain kontrolü
     tenantDoc = await Tenants.findOne({
       $or: [
-        { "domain.main": normalizedHost }, // Ana domain kontrolü
-        { "domain.customDomains": normalizedHost }, // Custom domains kontrolü
+        { "domain.main": normalizedHost },
+        { "domain.customDomains": normalizedHost },
       ],
     }).lean();
+    logger.info(
+      `[DEBUG] [TENANT] Domain mapping ile tenant çözümlendi mi?: ${
+        tenantDoc?.slug || "null"
+      }, mongoUri: ${tenantDoc?.mongoUri}`
+    );
   }
 
-  // 3. Yine bulamazsa, fallback olarak x-tenant header'a bak (herkes için)
-  if (!tenantDoc && tenantHeader) {
-    tenantDoc = await Tenants.findOne({
-      slug: tenantHeader.toLowerCase(),
-    }).lean();
+  // 3️⃣ DEV ortamında localhost/127.0.0.1 için fallback (production'da asla yok!)
+  if (!tenantDoc && process.env.NODE_ENV !== "production") {
+    const normalizedHost = normalizeHost(
+      req.hostname || (req.headers.host as string) || ""
+    );
+    if (
+      normalizedHost === "localhost" ||
+      normalizedHost === "127.0.0.1" ||
+      normalizedHost.startsWith("localhost:") ||
+      normalizedHost.startsWith("127.0.0.1:")
+    ) {
+      tenantDoc = await Tenants.findOne({ slug: "metahub" }).lean();
+      logger.info(
+        `[DEBUG] [TENANT] DEV fallback: localhost/127.0.0.1 için metahub kullanıldı. tenant: ${
+          tenantDoc?.slug || "null"
+        }, mongoUri: ${tenantDoc?.mongoUri}`
+      );
+    }
   }
 
+  // 4️⃣ Final Sonuç: Tenant bulunduysa requeste ekle ve devam et
   if (tenantDoc) {
     req.tenant = tenantDoc.slug;
     req.tenantData = tenantDoc;
@@ -108,29 +126,17 @@ export const resolveTenant = async (
         event: "tenant.resolve",
         status: "success",
         domain: tenantDoc.domain?.main,
+        mongoUri: tenantDoc.mongoUri,
       }
+    );
+    logger.info(
+      `[DEBUG] [TENANT] FINAL tenant: ${tenantDoc.slug} mongoUri: ${tenantDoc.mongoUri}`
     );
     return next();
   }
 
-  // Tenant bulunamadı, logla ve hata döndür
-  const userAgent = req.headers["user-agent"] || "";
-  const isPostman =
-    typeof userAgent === "string" &&
-    userAgent.toLowerCase().includes("postman");
-
-  if (process.env.NODE_ENV === "production" || !isPostman) {
-    return res.status(404).json({
-      success: false,
-      message: t("tenant.resolve.fail", locale, translations, {
-        host: req.hostname || (req.headers.host as string),
-        tenantHeader: tenantHeader,
-      }),
-      detail:
-        "Tenant slug not found on request object. (Did you forget to use resolveTenant middleware?)",
-    });
-  }
-
+  // 5️⃣ Tenant bulunamazsa her ortamda 404 ve log
+  logger.warn(`[DEBUG] [TENANT] Tenant çözümlenemedi!`);
   return res.status(404).json({
     success: false,
     message: t("tenant.resolve.fail", locale, translations, {
@@ -138,6 +144,8 @@ export const resolveTenant = async (
       tenantHeader: tenantHeader,
     }),
     detail:
-      "Tenant slug not found on request object in DEV environment. Please check your request and tenant setup.",
+      process.env.NODE_ENV === "production"
+        ? "Tenant slug not found on request object."
+        : "Tenant slug not found in DEV environment. Please check your request and tenant setup.",
   });
 };

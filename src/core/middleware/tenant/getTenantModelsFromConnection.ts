@@ -63,7 +63,7 @@ import { Apikey, Apikeylog } from "@/modules/apikey/apikey.models";
 import { News } from "@/modules/news/news.models";
 import { NewsCategory } from "@/modules/newscategory";
 import { Analytics } from "@/modules/analytics/analytics.models";
-import { ModuleMeta, ModuleSetting } from "@/modules/admin/admin.models";
+import { ModuleMeta, ModuleSetting } from "@/modules/modules/admin.models";
 import { Sparepart } from "@/modules/sparepart/sparepart.models";
 import { Tenants } from "@/modules/tenants/tenants.model";
 

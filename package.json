@@ -6,9 +6,14 @@
     "@": "dist"
   },
   "scripts": {
-    "build": "tsc && cp -r src/meta-configs dist/meta-configs",
+    "build": "tsc",
     "start": "node -r module-alias/register dist/server.js",
-    "dev": "npx ts-node -r tsconfig-paths/register src/server.ts"
+    "dev": "npx ts-node -r tsconfig-paths/register src/scripts/sync/masterSync.ts && npx ts-node -r tsconfig-paths/register src/server.ts",
+    "sync:meta": "npx ts-node -r tsconfig-paths/register src/scripts/sync/masterSync.ts",
+    "sync:tenant": "npx ts-node -r tsconfig-paths/register src/scripts/sync/seedSettingsForNewTenant.ts",
+    "sync:module": "npx ts-node -r tsconfig-paths/register src/scripts/sync/seedSettingsForNewModule.ts",
+    "sync:remove-tenant": "npx ts-node -r tsconfig-paths/register src/scripts/sync/removeTenantSettings.ts",
+    "sync:health": "npx ts-node -r tsconfig-paths/register src/scripts/sync/healthCheckMetaSettings.ts"
   },
   "keywords": [],
   "author": "",

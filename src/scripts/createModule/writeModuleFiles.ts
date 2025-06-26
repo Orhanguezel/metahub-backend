@@ -92,19 +92,6 @@ export const writeModuleFiles = (basePath: string, moduleName: string) => {
     )
   );
   fs.writeFileSync(
-    path.join(i18nPath, "de.json"),
-    JSON.stringify(
-      {
-        create: {
-          success: "Erfolgreich erstellt!",
-          fail: "Erstellung fehlgeschlagen.",
-        },
-      },
-      null,
-      2
-    )
-  );
-  fs.writeFileSync(
     path.join(i18nPath, "pl.json"),
     JSON.stringify(
       {

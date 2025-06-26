@@ -2,7 +2,7 @@
 import { Request, Response, NextFunction } from "express";
 import { Analytics } from "@/modules/analytics";
 import geoip from "geoip-lite";
-import { ModuleSetting } from "@/modules/admin";
+import { ModuleSetting } from "@/modules/modules";
 import { getTenantLogger } from "@/core/middleware/logger/tenantLogger";
 
 export const analyticsLogger = async (

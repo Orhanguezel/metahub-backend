@@ -10,7 +10,9 @@ declare global {
       files?: MulterFile[];
       locale?: SupportedLocale;
       tenant?: string;
+      tenantData?: any;
       logger: import("winston").Logger;
+      enabledModules?: string[];
 
       // 👤 Auth bilgileri
       user?: {

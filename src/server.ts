@@ -60,6 +60,7 @@ const lang = getLogLocale();
     );
 
     // Router ve diğer sistemler
+
     const router = await getRouter();
     app.use("/api", router);
 
