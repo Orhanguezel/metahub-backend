@@ -4,7 +4,7 @@ import http from "http";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import "./core/config/envLoader";
-import { connectMainDb } from "@/core/config/mainDb"; // yeni bağlantı fonksiyonunu import et
+import { connectMainDb } from "@/core/config/mainDb";
 
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
