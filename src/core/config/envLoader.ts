@@ -11,36 +11,19 @@ import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 const lang: SupportedLocale =
   (process.env.LOG_LOCALE as SupportedLocale) || "en";
 
-// Tenant adı env veya CLI argümanından alınır
-const tenant =
-  process.env.TENANT_NAME ||
-  process.env.APP_ENV || // default backend env
-  "metahub";
-
-// Sadece eski kullanım/dev/test için tenant .env yükle (opsiyonel)
-// Not: Prod'da tüm tenant özel ayarlar DB'den gelmeli!
-const envFile = `.env.${tenant}`;
+// Tenant env fallbackı kaldırıldı, sadece genel env
+const envFile = `.env`;
 const envPath = path.resolve(process.cwd(), envFile);
 
 if (!fs.existsSync(envPath)) {
   const msg = t("env.notFound", lang, translations, { file: envFile });
-  if (process.env.NODE_ENV === "production") {
-    logger.error(msg, { tenant });
-    // --- DİKKAT! Burada throw etmek yerine minimum dummy env yükle (aşağıda) ---
-    // throw new Error(msg);
-    logger.warn(
-      "Prod ortamında tenant .env bulunamadı! Ortak env ve DB ayarları kullanılacak.",
-      { tenant }
-    );
-  } else {
-    logger.warn(msg + " - DEV MODE: Varsayılan env kullanılacak.", { tenant });
-  }
+  logger.warn(msg + " - Varsayılan dummy env ile devam ediliyor.", {});
 
   // Minimum dummy env (her ortamda fallback için)
   process.env.MONGO_URI =
     process.env.MONGO_URI ||
     "mongodb://admin:adminpassword@141.136.36.40:27017/metahub-db?authSource=admin";
-  process.env.PORT = process.env.PORT || "5018";
+  process.env.PORT = process.env.PORT || "5019";
   process.env.JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
   process.env.SMTP_HOST = process.env.SMTP_HOST || "smtp.hostinger.com";
   process.env.SMTP_USER = process.env.SMTP_USER || "info@koenigsmassage.com";
@@ -51,7 +34,6 @@ if (!fs.existsSync(envPath)) {
   process.env.SMTP_FROM = process.env.SMTP_FROM || "info@koenigsmassage.com";
   process.env.SMTP_FROM_NAME =
     process.env.SMTP_FROM_NAME || "anastasia Support";
-
   process.env.IMAP_HOST = process.env.IMAP_HOST || "imap.hostinger.com";
   process.env.IMAP_PORT = process.env.IMAP_PORT || "993";
   process.env.IMAP_USER = process.env.IMAP_USER || "info@koenigsmassage.com";
@@ -65,17 +47,17 @@ if (!fs.existsSync(envPath)) {
       file: envFile,
       error: result.error.message,
     });
-    logger.error(msg, { tenant });
-    if (process.env.NODE_ENV === "production") throw result.error;
+    logger.error(msg, {});
     logger.warn(
       "Dev ortamında .env hatasına rağmen dummy env ile devam ediliyor.",
-      { tenant }
+      {}
     );
   }
 }
 
-logger.info(t("env.loaded", lang, translations, { file: envFile }), { tenant });
+logger.info(t("env.loaded", lang, translations, { file: envFile }), {});
 
-// Aktif tenant profilini process.env'e kaydet
-process.env.ACTIVE_META_PROFILE = tenant;
-process.env.TENANT_NAME = tenant;
+// process.env.TENANT_NAME ve ACTIVE_META_PROFILE globalde gerekirse tek bir "default" değer atanabilir,
+// ama yeni sistemde kullanımı neredeyse gereksiz:
+process.env.ACTIVE_META_PROFILE = "default";
+process.env.TENANT_NAME = "default";

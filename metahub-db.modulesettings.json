@@ -1,0 +1,1713 @@
+[
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c06"
+    },
+    "module": "shipment",
+    "enabled": true,
+    "icon": "MdLocalShipping",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Kargolar",
+      "en": "Shipments",
+      "de": "Lieferungen",
+      "pl": "Wysyłki",
+      "fr": "Expéditions",
+      "es": "Envíos"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:29.950Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.526Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c16"
+    },
+    "module": "invoice",
+    "enabled": true,
+    "icon": "MdRequestQuote",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Faturalar",
+      "en": "Invoices",
+      "de": "Rechnungen",
+      "pl": "Faktury",
+      "fr": "Factures",
+      "es": "Facturas"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.080Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.751Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c19"
+    },
+    "module": "faq",
+    "enabled": true,
+    "icon": "MdQuiz",
+    "roles": ["admin"],
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Sıkça Sorulan Sorular",
+      "en": "FAQ",
+      "de": "FAQ",
+      "pl": "FAQ",
+      "fr": "FAQ",
+      "es": "FAQ"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.111Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.684Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c1a"
+    },
+    "module": "contact",
+    "enabled": true,
+    "icon": "MdContactMail",
+    "roles": ["admin"],
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "İletişim",
+      "en": "Contact",
+      "de": "Kontakt",
+      "pl": "Kontakt",
+      "fr": "Contact",
+      "es": "Contacto"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.121Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.417Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c1d"
+    },
+    "module": "email",
+    "enabled": true,
+    "icon": "MdEmail",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "E-postalar",
+      "en": "Emails",
+      "de": "E-Mails",
+      "pl": "E-maile",
+      "fr": "E-mails",
+      "es": "Correos"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.128Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.641Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c21"
+    },
+    "module": "stockmovement",
+    "enabled": true,
+    "icon": "MdCompareArrows",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Stok Hareketleri",
+      "en": "Stock Movements",
+      "de": "Lagerbewegungen",
+      "pl": "Ruchy magazynowe",
+      "fr": "Mouvements de stock",
+      "es": "Movimientos de stock"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.165Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.374Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c24"
+    },
+    "module": "apikey",
+    "enabled": true,
+    "icon": "MdVpnKey",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "API Anahtarları",
+      "en": "API Keys",
+      "de": "API-Schlüssel",
+      "pl": "Klucze API",
+      "fr": "Clés API",
+      "es": "Claves API"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.188Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.168Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c25"
+    },
+    "module": "chat",
+    "enabled": true,
+    "icon": "MdChat",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Sohbet",
+      "en": "Chat",
+      "de": "Chat",
+      "pl": "Czat",
+      "fr": "Chat",
+      "es": "Chat"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.033Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.229Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c29"
+    },
+    "module": "order",
+    "enabled": true,
+    "icon": "MdReceiptLong",
+    "roles": ["admin"],
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Siparişler",
+      "en": "Orders",
+      "de": "Bestellungen",
+      "pl": "Zamówienia",
+      "fr": "Commandes",
+      "es": "Pedidos"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.221Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.353Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c2e"
+    },
+    "module": "address",
+    "enabled": true,
+    "icon": "MdLocationOn",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Adresler",
+      "en": "Addresses",
+      "de": "Adressen",
+      "pl": "Adresy",
+      "fr": "Adresses",
+      "es": "Direcciones"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.251Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.532Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c31"
+    },
+    "module": "about",
+    "enabled": true,
+    "icon": "MdInfo",
+    "roles": ["admin"],
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Hakkında",
+      "en": "About",
+      "de": "Über Uns",
+      "pl": "O nas",
+      "fr": "À propos",
+      "es": "Acerca de"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.272Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.456Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c32"
+    },
+    "module": "analytics",
+    "enabled": true,
+    "icon": "MdAnalytics",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Analitik",
+      "en": "Analytics",
+      "de": "Analytik",
+      "pl": "Analizy",
+      "fr": "Analytique",
+      "es": "Analítica"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.272Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.695Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c33"
+    },
+    "module": "comment",
+    "enabled": true,
+    "icon": "MdComment",
+    "roles": ["admin"],
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Yorumlar",
+      "en": "Comments",
+      "de": "Kommentare",
+      "pl": "Komentarze",
+      "fr": "Commentaires",
+      "es": "Comentarios"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.285Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.107Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c34"
+    },
+    "module": "notification",
+    "enabled": true,
+    "icon": "MdNotificationsActive",
+    "roles": ["admin"],
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Bildirimler",
+      "en": "Notifications",
+      "de": "Benachrichtigungen",
+      "pl": "Powiadomienia",
+      "fr": "Notifications",
+      "es": "Notificaciones"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.272Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.987Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c38"
+    },
+    "module": "gallery",
+    "enabled": true,
+    "icon": "MdPhotoLibrary",
+    "roles": ["admin"],
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Galeri",
+      "en": "Gallery",
+      "de": "Galerie",
+      "pl": "Galeria",
+      "fr": "Galerie",
+      "es": "Galería"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.294Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.579Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c3c"
+    },
+    "module": "company",
+    "enabled": true,
+    "icon": "MdBusiness",
+    "roles": ["admin"],
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Şirket",
+      "en": "Company",
+      "de": "Firma",
+      "pl": "Firma",
+      "fr": "Entreprise",
+      "es": "Empresa"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.208Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.436Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c3e"
+    },
+    "module": "review",
+    "enabled": true,
+    "icon": "MdRateReview",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Değerlendirmeler",
+      "en": "Reviews",
+      "de": "Bewertungen",
+      "pl": "Opinie",
+      "fr": "Avis",
+      "es": "Reseñas"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.335Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.130Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c3f"
+    },
+    "module": "product",
+    "enabled": true,
+    "icon": "MdInventory2",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Ürünler",
+      "en": "Products",
+      "de": "Produkte",
+      "pl": "Produkty",
+      "fr": "Produits",
+      "es": "Productos"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.169Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.564Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c46"
+    },
+    "module": "users",
+    "enabled": true,
+    "icon": "MdPeopleAlt",
+    "roles": ["admin"],
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Kullanıcılar",
+      "en": "Users",
+      "de": "Benutzer",
+      "pl": "Użytkownicy",
+      "fr": "Utilisateurs",
+      "es": "Usuarios"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.403Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.094Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c47"
+    },
+    "module": "setting",
+    "enabled": true,
+    "icon": "MdSettings",
+    "roles": ["admin"],
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Ayarlar",
+      "en": "Settings",
+      "de": "Einstellungen",
+      "pl": "Ustawienia",
+      "fr": "Paramètres",
+      "es": "Configuraciones"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.420Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.896Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c49"
+    },
+    "module": "wishlist",
+    "enabled": true,
+    "icon": "MdFavoriteBorder",
+    "roles": ["admin"],
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "İstek Listesi",
+      "en": "Wishlist",
+      "de": "Wunschliste",
+      "pl": "Lista życzeń",
+      "fr": "Liste de souhaits",
+      "es": "Lista de deseos"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.436Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.812Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c4c"
+    },
+    "module": "newscategory",
+    "enabled": true,
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Haber Kategorileri",
+      "en": "News Categories",
+      "de": "Nachrichtenkategorien",
+      "pl": "Kategorie wiadomości",
+      "fr": "Catégories de nouvelles",
+      "es": "Categorías de noticias"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.470Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.659Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c4d"
+    },
+    "module": "cart",
+    "enabled": true,
+    "icon": "MdShoppingCart",
+    "roles": ["admin"],
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Sepet",
+      "en": "Cart",
+      "de": "Warenkorb",
+      "pl": "Koszyk",
+      "fr": "Panier",
+      "es": "Carrito"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.479Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.684Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c4f"
+    },
+    "module": "payment",
+    "enabled": true,
+    "icon": "MdPayment",
+    "roles": ["admin"],
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Ödeme",
+      "en": "Payment",
+      "de": "Zahlung",
+      "pl": "Płatność",
+      "fr": "Paiement",
+      "es": "Pago"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.508Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.751Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c50"
+    },
+    "module": "dashboard",
+    "enabled": true,
+    "icon": "MdSpaceDashboard",
+    "roles": ["admin"],
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Yönetim Paneli",
+      "en": "Dashboard",
+      "de": "Dashboard",
+      "pl": "Panel",
+      "fr": "Tableau de bord",
+      "es": "Panel"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.519Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.731Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c51"
+    },
+    "module": "offer",
+    "enabled": true,
+    "icon": "MdLocalOffer",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Teklifler",
+      "en": "Offers",
+      "de": "Angebote",
+      "pl": "Oferty",
+      "fr": "Offres",
+      "es": "Ofertas"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.532Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.870Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c55"
+    },
+    "module": "admin",
+    "enabled": true,
+    "icon": "MdAdminPanelSettings",
+    "roles": ["admin"],
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Yönetim",
+      "en": "Admin",
+      "de": "Admin",
+      "pl": "Admin",
+      "fr": "Admin",
+      "es": "Admin"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.569Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.684Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c56"
+    },
+    "module": "news",
+    "enabled": true,
+    "icon": "MdNewspaper",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Haberler",
+      "en": "News",
+      "de": "Nachrichten",
+      "pl": "Aktualności",
+      "fr": "Actualités",
+      "es": "Noticias"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.560Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.853Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c57"
+    },
+    "module": "aboutcategory",
+    "enabled": true,
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Hakkında Kategorileri",
+      "en": "About Categories",
+      "de": "Über-Kategorien",
+      "pl": "Kategorie O nas",
+      "fr": "Catégories À propos",
+      "es": "Categorías sobre"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.322Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.065Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c50924b0818ea69432c58"
+    },
+    "module": "feedback",
+    "enabled": true,
+    "icon": "MdFeedback",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Geri Bildirimler",
+      "en": "Feedback",
+      "de": "Feedback",
+      "pl": "Opinie",
+      "fr": "Retours",
+      "es": "Comentarios"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T13:07:30.340Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.971Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c611c4b0818ea69432eac"
+    },
+    "module": "apartmentcategory",
+    "enabled": true,
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Daire Kategorileri",
+      "en": "Apartment Categories",
+      "de": "Wohnungskategorien",
+      "pl": "Kategorie mieszkań",
+      "fr": "Catégories d’appartements",
+      "es": "Categorías de apartamentos"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T14:18:04.145Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.952Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "683c611c4b0818ea69432ef6"
+    },
+    "module": "apartment",
+    "enabled": true,
+    "icon": "MdApartment",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Daireler",
+      "en": "Apartments",
+      "de": "Wohnungen",
+      "pl": "Mieszkania",
+      "fr": "Appartements",
+      "es": "Apartamentos"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-01T14:18:04.550Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.783Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a4ca4b0818ea694345d9"
+    },
+    "module": "gallerycategory",
+    "enabled": true,
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Galeri Kategorileri",
+      "en": "Gallery Categories",
+      "de": "Galeriekategorien",
+      "pl": "Kategorie galerii",
+      "fr": "Catégories de galerie",
+      "es": "Categorías de galería"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:08:09.825Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.247Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a4ca4b0818ea694345f0"
+    },
+    "module": "bookingslot",
+    "enabled": true,
+    "icon": "MdAccessTime",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Rezervasyon Saatleri",
+      "en": "Booking Slots",
+      "de": "Buchungszeiten",
+      "pl": "Godziny rezerwacji",
+      "fr": "Plages de réservation",
+      "es": "Horarios de reserva"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:08:10.024Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.713Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a4ca4b0818ea694345f3"
+    },
+    "module": "booking",
+    "enabled": true,
+    "icon": "MdEventAvailable",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Rezervasyonlar",
+      "en": "Bookings",
+      "de": "Buchungen",
+      "pl": "Rezerwacje",
+      "fr": "Réservations",
+      "es": "Reservas"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:08:10.025Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.274Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ac4b0818ea6943467b"
+    },
+    "module": "references",
+    "enabled": true,
+    "icon": "MdCollectionsBookmark",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Referanslar",
+      "en": "References",
+      "de": "Referenzen",
+      "pl": "Referencje",
+      "fr": "Références",
+      "es": "Referencias"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:12.503Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.587Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ac4b0818ea69434685"
+    },
+    "module": "sportcategory",
+    "enabled": true,
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Spor Kategorileri",
+      "en": "Sport Categories",
+      "de": "Sportkategorien",
+      "pl": "Kategorie sportowe",
+      "fr": "Catégories de sport",
+      "es": "Categorías deportivas"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:12.630Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.336Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ac4b0818ea69434688"
+    },
+    "module": "favorite",
+    "enabled": true,
+    "icon": "MdFavorite",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Favoriler",
+      "en": "Favorites",
+      "de": "Favoriten",
+      "pl": "Ulubione",
+      "fr": "Favoris",
+      "es": "Favoritos"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:12.665Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.310Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ad4b0818ea69434691"
+    },
+    "module": "library",
+    "enabled": true,
+    "icon": "MdMenuBook",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Kütüphane",
+      "en": "Library",
+      "de": "Bibliothek",
+      "pl": "Biblioteka",
+      "fr": "Bibliothèque",
+      "es": "Biblioteca"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:12.772Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.188Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ad4b0818ea69434693"
+    },
+    "module": "customer",
+    "enabled": true,
+    "icon": "MdPeople",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Müşteriler",
+      "en": "Customers",
+      "de": "Kunden",
+      "pl": "Klienci",
+      "fr": "Clients",
+      "es": "Clientes"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:12.772Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.210Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ad4b0818ea6943469a"
+    },
+    "module": "sport",
+    "enabled": true,
+    "icon": "MdSportsSoccer",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Spor",
+      "en": "Sport",
+      "de": "Sport",
+      "pl": "Sport",
+      "fr": "Sport",
+      "es": "Deporte"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:12.896Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.047Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ad4b0818ea6943469c"
+    },
+    "module": "articles",
+    "enabled": true,
+    "icon": "MdDescription",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Makaleler",
+      "en": "Articles",
+      "de": "Artikel",
+      "pl": "Artykuły",
+      "fr": "Articles",
+      "es": "Artículos"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:12.932Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.744Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ad4b0818ea694346a7"
+    },
+    "module": "task",
+    "enabled": true,
+    "icon": "MdChecklist",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Görevler",
+      "en": "Tasks",
+      "de": "Aufgaben",
+      "pl": "Zadania",
+      "fr": "Tâches",
+      "es": "Tareas"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:13.067Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.885Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ad4b0818ea694346ac"
+    },
+    "module": "ensotekprod",
+    "enabled": true,
+    "icon": "MdFactory",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Ensotek Ürünleri",
+      "en": "Ensotek Products",
+      "de": "Ensotek Produkte",
+      "pl": "Produkty Ensotek",
+      "fr": "Produits Ensotek",
+      "es": "Productos Ensotek"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:13.122Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.832Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ad4b0818ea694346b6"
+    },
+    "module": "experience",
+    "enabled": true,
+    "icon": "MdStarRate",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Deneyimler",
+      "en": "Experiences",
+      "de": "Erfahrungen",
+      "pl": "Doświadczenia",
+      "fr": "Expériences",
+      "es": "Experiencias"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:13.217Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.490Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ad4b0818ea694346c7"
+    },
+    "module": "activity",
+    "enabled": true,
+    "icon": "MdEvent",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Aktiviteler",
+      "en": "Activities",
+      "de": "Aktivitäten",
+      "pl": "Aktywności",
+      "fr": "Activités",
+      "es": "Actividades"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:13.402Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.148Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ad4b0818ea694346cb"
+    },
+    "module": "blog",
+    "enabled": true,
+    "icon": "MdArticle",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Blog",
+      "en": "Blog",
+      "de": "Blog",
+      "pl": "Blog",
+      "fr": "Blog",
+      "es": "Blog"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:13.456Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.393Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ad4b0818ea694346ce"
+    },
+    "module": "blogcategory",
+    "enabled": true,
+    "icon": "MdLabel",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Blog Kategorileri",
+      "en": "Blog Categories",
+      "de": "Blog-Kategorien",
+      "pl": "Kategorie blogów",
+      "fr": "Catégories de blogs",
+      "es": "Categorías de blogs"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:13.504Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.511Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ad4b0818ea694346d9"
+    },
+    "module": "sparepart",
+    "enabled": true,
+    "icon": "MdBuildCircle",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Yedek Parçalar",
+      "en": "Spare Parts",
+      "de": "Ersatzteile",
+      "pl": "Części zamienne",
+      "fr": "Pièces détachées",
+      "es": "Repuestos"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:13.643Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.913Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ad4b0818ea694346dc"
+    },
+    "module": "ensotekcategory",
+    "enabled": true,
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Ensotek Kategorileri",
+      "en": "Ensotek Categories",
+      "de": "Ensotek-Kategorien",
+      "pl": "Kategorie Ensotek",
+      "fr": "Catégories Ensotek",
+      "es": "Categorías Ensotek"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:13.656Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.023Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ad4b0818ea694346e0"
+    },
+    "module": "activitycategory",
+    "enabled": true,
+    "icon": "MdEventNote",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Aktivite Kategorileri",
+      "en": "Activity Categories",
+      "de": "Aktivitätskategorien",
+      "pl": "Kategorie aktywności",
+      "fr": "Catégories d'activités",
+      "es": "Categorías de actividades"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:13.658Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.939Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a6ad4b0818ea694346e3"
+    },
+    "module": "services",
+    "enabled": true,
+    "icon": "MdBuild",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Hizmetler",
+      "en": "Services",
+      "de": "Dienstleistungen",
+      "pl": "Usługi",
+      "fr": "Services",
+      "es": "Servicios"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:16:13.704Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.675Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a7294b0818ea694346fd"
+    },
+    "module": "articlescategory",
+    "enabled": true,
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Makale Kategorileri",
+      "en": "Article Categories",
+      "de": "Artikelkategorien",
+      "pl": "Kategorie artykułów",
+      "fr": "Catégories d’articles",
+      "es": "Categorías de artículos"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:18:17.202Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.001Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a72a4b0818ea6943472b"
+    },
+    "module": "referencescategory",
+    "enabled": true,
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Referans Kategorileri",
+      "en": "Reference Categories",
+      "de": "Referenzkategorien",
+      "pl": "Kategorie referencyjne",
+      "fr": "Catégories de référence",
+      "es": "Categorías de referencia"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:18:17.754Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.600Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6841a72a4b0818ea69434737"
+    },
+    "module": "servicescategory",
+    "enabled": true,
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Hizmet Kategorileri",
+      "en": "Service Categories",
+      "de": "Dienstleistungskategorien",
+      "pl": "Kategorie usług",
+      "fr": "Catégories de services",
+      "es": "Categorías de servicios"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T14:18:18.030Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:10.621Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "684212d44b0818ea69434acd"
+    },
+    "module": "coupon",
+    "enabled": true,
+    "icon": "MdLocalOffer",
+    "roles": ["admin"],
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "tenant": "metahub",
+    "label": {
+      "tr": "Kuponlar",
+      "en": "Coupons",
+      "de": "Gutscheine",
+      "pl": "Kupony",
+      "fr": "Coupons",
+      "es": "Cupones"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-05T21:57:39.888Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-06T16:22:09.684Z"
+    },
+    "__v": 0,
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6849d05a23b398b7ce38281d"
+    },
+    "module": "bikes",
+    "enabled": true,
+    "visibleInSidebar": true,
+    "useAnalytics": false,
+    "roles": ["admin"],
+    "icon": "MdDirectionsBike",
+    "label": {
+      "tr": "Bisikletler",
+      "en": "Bikes",
+      "de": "Fahrräder",
+      "pl": "Rowery",
+      "fr": "Vélos",
+      "es": "Bicicletas"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-11T18:52:10.253Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-20T21:51:09.068Z"
+    },
+    "__v": 0,
+    "tenant": "metahub",
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "6849d0ff23b398b7ce3828e4"
+    },
+    "module": "bikescategory",
+    "enabled": true,
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "roles": ["admin"],
+    "icon": "MdCategory",
+    "label": {
+      "tr": "Bisiklet Kategorileri",
+      "en": "Bike Categories",
+      "de": "Fahrradkategorien",
+      "pl": "Kategorie rowerów",
+      "fr": "Catégories de vélos",
+      "es": "Categorías de bicicletas"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-11T18:54:55.711Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-11T18:54:55.711Z"
+    },
+    "__v": 0,
+    "tenant": "metahub",
+    "showInDashboard": true
+  },
+  {
+    "_id": {
+      "$oid": "684a922a9ae0b9d4f059b72f"
+    },
+    "module": "section",
+    "enabled": true,
+    "visibleInSidebar": false,
+    "useAnalytics": false,
+    "roles": ["admin"],
+    "icon": "MdViewAgenda",
+    "label": {
+      "tr": "Bölümler",
+      "en": "Sections",
+      "de": "Abschnitte",
+      "pl": "Sekcje",
+      "fr": "Sections",
+      "es": "Secciones"
+    },
+    "language": "en",
+    "createdAt": {
+      "$date": "2025-06-12T08:39:06.496Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-12T08:39:06.496Z"
+    },
+    "__v": 0,
+    "tenant": "metahub",
+    "showInDashboard": true
+  }
+]

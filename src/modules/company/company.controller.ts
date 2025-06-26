@@ -12,6 +12,7 @@ import path from "path";
 import fs from "fs";
 import { v2 as cloudinary } from "cloudinary";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+import logger from "@/core/middleware/logger/logger";
 
 // Çoklu resim işleme yardımcı fonksiyonu
 async function processUploadedImages(files: Express.Multer.File[]) {
@@ -150,19 +151,66 @@ export const updateCompanyInfo = asyncHandler(
 );
 
 // ✅ Şirket bilgisini getir (çoklu logo ile)
+// ✅ Şirket bilgisini getir (çoklu logo ile, log destekli)
 export const getCompanyInfo = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { Company } = await getTenantModels(req);
-    const company = await Company.findOne({ tenant: req.tenant }).select(
-      "-__v"
-    );
-    if (!company) {
-      res
-        .status(404)
-        .json({ success: false, message: "Company information not found." });
-      return;
+    const tenantSlug = req.tenant;
+    const logContext = {
+      ...req.headers,
+      tenant: tenantSlug,
+      module: "company",
+      event: "company.getInfo",
+      host: req.hostname,
+      ip: req.ip,
+      userId: (req as any).user?._id || null,
+    };
+
+    // [DEBUG] Model ve tenant ile ilgili log (isteğe bağlı)
+    logger.info("[COMPANY] getCompanyInfo endpoint called", {
+      ...logContext,
+      status: "start",
+    });
+
+    try {
+      const company = await Company.findOne({ tenant: tenantSlug }).select(
+        "-__v"
+      );
+
+      if (!company) {
+        logger.warn("[COMPANY] No company info found", {
+          ...logContext,
+          status: "not_found",
+        });
+        res.status(404).json({
+          success: false,
+          message: "Company information not found.",
+        });
+        return;
+      }
+
+      logger.info("[COMPANY] Company info fetched successfully", {
+        ...logContext,
+        status: "success",
+        companyId: company._id?.toString(),
+      });
+
+      res.status(200).json({
+        success: true,
+        data: company,
+      });
+    } catch (err: any) {
+      logger.error("[COMPANY] Company info fetch error", {
+        ...logContext,
+        status: "error",
+        error: err?.message || err,
+      });
+      res.status(500).json({
+        success: false,
+        message: "An error occurred while fetching company information.",
+        detail: err?.message || err,
+      });
     }
-    res.status(200).json({ success: true, data: company });
   }
 );
 

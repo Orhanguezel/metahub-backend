@@ -4,17 +4,14 @@ import fs from "fs";
 import path from "path";
 import logger from "@/core/middleware/logger/logger";
 import { writeModuleFiles } from "./writeModuleFiles";
-import { createMetaFile } from "./createMetaFile";
-import { getEnabledModulesFromEnv } from "@/core/utils/envHelpers";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "./i18n"; // createModule i18n dosyası!
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import type { SupportedLocale } from "@/types/common";
 
 // --- CLI Context (Loglar için) ---
-function getCliContext(tenant: string) {
+function getCliContext() {
   return {
-    tenant,
     pid: process.pid,
     cwd: process.cwd(),
     user: process.env.USER || process.env.USERNAME || "cli",
@@ -23,69 +20,45 @@ function getCliContext(tenant: string) {
   };
 }
 
-// --- Tenant tespiti CLI veya ENV üzerinden ---
-function getTenantFromArgsOrEnv(): string {
-  const arg = process.argv.find((a) => a.startsWith("--tenant="));
-  if (arg) return arg.replace("--tenant=", "");
-  if (process.env.TENANT_NAME) return process.env.TENANT_NAME;
-  logger.error("❌ Tenant is required! Use --tenant=xyz or TENANT_NAME env.", {
-    module: "createModule",
-    status: "fail",
-    ...getCliContext("unknown"),
-  });
-  process.exit(1);
-}
-const tenant = getTenantFromArgsOrEnv();
-const lang: SupportedLocale = getLogLocale();
-
 // --- Module name parametresi kontrolü ---
 const moduleName = process.argv[2];
 const useAnalyticsFlag = process.argv.includes("--analytics");
+const lang: SupportedLocale = getLogLocale();
 
 if (!moduleName) {
-  logger.error(t("createModule.noModuleName", lang, translations, { tenant }), {
-    tenant,
+  logger.error(t("createModule.noModuleName", lang, translations), {
     module: "createModule",
     status: "fail",
-    ...getCliContext(tenant),
+    ...getCliContext(),
   });
   process.exit(1);
 }
 
-
-
-// --- Tenant-aware dosya yolları ---
+// --- Dosya yolları ---
 const modulesPath = path.resolve(process.cwd(), "src/modules");
-const metaConfigDir = path.resolve(process.cwd(), "src/meta-configs", tenant);
-const metaPath = path.join(metaConfigDir, `${moduleName}.meta.json`);
 const modulePath = path.join(modulesPath, moduleName);
 
 // --- Modül klasörünü oluştur ---
 try {
   fs.mkdirSync(modulePath, { recursive: true });
   logger.info(
-    t("createModule.dirCreated", lang, translations, { modulePath, tenant }),
+    t("createModule.dirCreated", lang, translations, { modulePath }),
     {
-      tenant,
       module: "createModule",
       status: "success",
-      ...getCliContext(tenant),
+      ...getCliContext(),
     }
   );
 } catch (err) {
   logger.error(
-    t("createModule.dirCreateFail", lang, translations, {
-      modulePath,
-      tenant,
-    }) +
+    t("createModule.dirCreateFail", lang, translations, { modulePath }) +
       " " +
       String(err),
     {
-      tenant,
       module: "createModule",
       status: "fail",
       error: err,
-      ...getCliContext(tenant),
+      ...getCliContext(),
     }
   );
   process.exit(1);
@@ -95,73 +68,26 @@ try {
 try {
   writeModuleFiles(modulePath, moduleName);
   logger.info(
-    t("createModule.filesWritten", lang, translations, { moduleName, tenant }),
+    t("createModule.filesWritten", lang, translations, { moduleName }),
     {
-      tenant,
       module: "createModule",
       status: "success",
-      ...getCliContext(tenant),
+      ...getCliContext(),
     }
   );
 } catch (err) {
   logger.error(
-    t("createModule.filesWriteFail", lang, translations, {
-      moduleName,
-      tenant,
-    }) +
+    t("createModule.filesWriteFail", lang, translations, { moduleName }) +
       " " +
       String(err),
     {
-      tenant,
       module: "createModule",
       status: "fail",
       error: err,
-      ...getCliContext(tenant),
+      ...getCliContext(),
     }
   );
   process.exit(1);
 }
 
-// --- Tenant meta-config klasörü oluştur (varsa geç) ---
-try {
-  fs.mkdirSync(metaConfigDir, { recursive: true });
-} catch {
-  /* already exists */
-}
-
-// --- Meta dosyasını oluştur ---
-createMetaFile(
-  moduleName,
-  metaConfigDir, // dikkat: burada metaDir yerine metaConfigDir (klasör)
-  tenant, // 3. parametre tenant string!
-  { useAnalytics: useAnalyticsFlag } // 4. parametre opsiyonel ayarlar
-)
-  .then(() => {
-    logger.info(
-      t("createModule.success", lang, translations, { moduleName, tenant }),
-      {
-        tenant,
-        module: "createModule",
-        status: "success",
-        ...getCliContext(tenant),
-      }
-    );
-    console.log(
-      t("createModule.success", lang, translations, { moduleName, tenant })
-    );
-  })
-  .catch((err) => {
-    logger.error(
-      t("createModule.metaFail", lang, translations, { moduleName, tenant }) +
-        " " +
-        String(err),
-      {
-        tenant,
-        module: "createModule",
-        status: "fail",
-        error: err,
-        ...getCliContext(tenant),
-      }
-    );
-    process.exit(1);
-  });
+console.log(t("createModule.success", lang, translations, { moduleName }));
