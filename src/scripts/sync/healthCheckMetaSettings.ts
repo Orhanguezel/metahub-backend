@@ -1,46 +1,83 @@
-// src/scripts/sync/healthCheckMetaSettings.ts
 import "@/core/config/envLoader";
 import mongoose from "mongoose";
 import { ModuleMeta, ModuleSetting } from "@/modules/modules/admin.models";
 import { Tenants } from "@/modules/tenants/tenants.model";
+import logger from "@/core/middleware/logger/logger";
+import { t } from "@/core/utils/i18n/translate";
+import translations from "@/modules/modules/i18n";
 
 /**
- * healthCheckMetaSettings: Zaten bağlantı açılmışsa (import edildiğinde) yeni bağlantı açmaz.
- * CLI'dan standalone çalışınca kendi bağlantısını açar.
+ * Tüm aktif tenant + meta için eksik setting kaydını bulur ve sadece setting alanlarıyla tamamlar.
+ * Sadece IModuleSetting modeline uygun alanlar eklenir!
  */
 export async function healthCheckMetaSettings() {
-  const allTenants = (await Tenants.find({ isActive: true })).map(
-    (t) => t.slug
-  );
-  const allModules = await ModuleMeta.find({});
-  let missing = [];
+  const locale = "en"; // Gerekiyorsa "tr" ile değiştir veya parametreye çek.
+  const tenants = (await Tenants.find({ isActive: true })).map((t) => t.slug);
+  const modules = await ModuleMeta.find({});
 
-  for (const tenant of allTenants) {
-    for (const mod of allModules) {
+  let repaired: { tenant: string; module: string }[] = [];
+
+  for (const tenant of tenants) {
+    for (const mod of modules) {
       const exists = await ModuleSetting.findOne({ module: mod.name, tenant });
       if (!exists) {
-        missing.push({ tenant, module: mod.name });
+        // Sadece override (setting) alanları eklenir!
         await ModuleSetting.create({
           module: mod.name,
           tenant,
           enabled: mod.enabled,
-          roles: mod.roles,
-          icon: mod.icon,
-          label: mod.label,
-          language: mod.language,
+          visibleInSidebar: true,
+          useAnalytics: false,
+          showInDashboard: true,
+          roles:
+            Array.isArray(mod.roles) && mod.roles.length > 0
+              ? mod.roles
+              : ["admin"],
+          order: typeof mod.order === "number" ? mod.order : 0,
         });
+        repaired.push({ tenant, module: mod.name });
+        logger.info(
+          t("sync.settingRepaired", locale, translations, {
+            moduleName: mod.name,
+            tenant,
+          }),
+          {
+            module: "healthCheckMetaSettings",
+            event: "setting.repaired",
+            status: "success",
+            tenant,
+            moduleName: mod.name,
+          }
+        );
         console.log(`[REPAIRED] ${tenant} için ${mod.name} setting tamamlandı`);
       }
     }
   }
-  if (!missing.length) {
+
+  if (!repaired.length) {
+    logger.info(t("sync.settingsOk", locale, translations), {
+      module: "healthCheckMetaSettings",
+      event: "settings.ok",
+      status: "info",
+    });
     console.log("Tüm meta ve settings tam, eksik yok!");
   } else {
-    console.log("Eksikler:", missing);
+    logger.info(
+      t("sync.missingSettings", locale, translations, {
+        count: repaired.length,
+      }),
+      {
+        module: "healthCheckMetaSettings",
+        event: "settings.repaired",
+        status: "warning",
+        repairedCount: repaired.length,
+      }
+    );
+    console.log("Eksikler (eklenenler):", repaired);
   }
 }
 
-// Eğer bu dosya doğrudan çalıştırılırsa (CLI, ts-node vs)
+// CLI ile çalıştırma desteği:
 if (require.main === module) {
   (async () => {
     try {

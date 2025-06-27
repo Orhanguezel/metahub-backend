@@ -1,46 +1,38 @@
+// src/modules/modules/moduleMaintenance.controller.ts
 import fs from "fs";
 import path from "path";
-import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "@/modules/modules/i18n";
-import { updateMetaVersionLog } from "@/scripts/generateMeta/helpers/updateMetaVersion";
-import {
-  getGitUser,
-  getGitCommitHash,
-} from "@/scripts/generateMeta/helpers/gitHelpers";
-import { writeModuleFiles } from "@/scripts/createModule/writeModuleFiles";
-import { getPaths } from "@/scripts/createModule/utils";
-import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
-import type { SupportedLocale, TranslatedLabel } from "@/types/common";
-import { SUPPORTED_LOCALES } from "@/types/common";
-import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
-import type { IModuleMeta, IModuleSetting } from "@/modules/modules/types";
+import { ModuleMeta, ModuleSetting } from "./admin.models";
 import { Tenants } from "@/modules/tenants/tenants.model";
+import type { SupportedLocale } from "@/types/common";
 
-// 1. Tüm modül-tenant matrix: hangi modül, hangi tenant’ta aktif?
+/**
+ * 1️⃣ Tüm modül-tenant matrix: hangi modül hangi tenant'ta var?
+ */
 export const getModuleTenantMatrix = asyncHandler(async (req, res) => {
-  const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
   const modules = await ModuleMeta.find({}).lean();
   const tenants = await Tenants.find({ isActive: true }).lean();
   const matrix: Record<string, any> = {};
-  for (const modRaw of modules) {
-    const mod = modRaw as any;
+
+  for (const mod of modules) {
     matrix[mod.name] = {};
     for (const t of tenants) {
       const setting = await ModuleSetting.findOne({
         module: mod.name,
         tenant: t.slug,
       });
-      matrix[mod.name][t.slug] = setting || false;
+      matrix[mod.name][t.slug] = !!setting;
     }
   }
   res.status(200).json({ success: true, data: matrix });
-  return;
 });
 
-// 2. Tek tenant’a tüm modüllerin eklenmesi (batch onboarding)
+/**
+ * 2️⃣ Tek tenant'a tüm aktif modülleri assign et (eksik mapping’leri oluştur)
+ */
 export const assignAllModulesToTenant = asyncHandler(async (req, res) => {
   const { tenant } = req.body;
   if (!tenant) {
@@ -49,30 +41,31 @@ export const assignAllModulesToTenant = asyncHandler(async (req, res) => {
       .json({ success: false, message: "Tenant parametresi zorunlu." });
     return;
   }
-  const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
-  const modules = await ModuleMeta.find({}).lean();
+  const modules = await ModuleMeta.find({ enabled: true }).lean();
   let count = 0;
-  for (const modRaw of modules) {
-    const mod = modRaw as any;
+  for (const mod of modules) {
     const exists = await ModuleSetting.findOne({ module: mod.name, tenant });
     if (!exists) {
       await ModuleSetting.create({
         module: mod.name,
         tenant,
         enabled: mod.enabled ?? true,
-        visibleInSidebar: mod.visibleInSidebar ?? true,
-        useAnalytics: mod.useAnalytics ?? false,
-        showInDashboard: mod.showInDashboard ?? true,
+        visibleInSidebar: true,
+        useAnalytics: false,
+        showInDashboard: true,
         roles: Array.isArray(mod.roles) ? mod.roles : ["admin"],
+        order: typeof mod.order === "number" ? mod.order : 0,
       });
       count++;
     }
   }
+  logger.info(`[Maintenance] ${count} modül ${tenant} tenant'ına atandı.`);
   res.status(200).json({ success: true, message: `${count} modül atandı.` });
-  return;
 });
 
-// 3. Tüm tenantlara yeni modül ekle (global onboarding)
+/**
+ * 3️⃣ Tüm tenantlara yeni bir modül ekle (global onboarding)
+ */
 export const assignModuleToAllTenants = asyncHandler(async (req, res) => {
   const { module } = req.body;
   if (!module) {
@@ -82,23 +75,32 @@ export const assignModuleToAllTenants = asyncHandler(async (req, res) => {
   const tenants = await Tenants.find({ isActive: true }).lean();
   let count = 0;
   for (const t of tenants) {
-    const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
     const exists = await ModuleSetting.findOne({ module, tenant: t.slug });
     if (!exists) {
-      await ModuleSetting.create({ module, tenant: t.slug });
+      await ModuleSetting.create({
+        module,
+        tenant: t.slug,
+        enabled: true,
+        visibleInSidebar: true,
+        useAnalytics: false,
+        showInDashboard: true,
+        roles: ["admin"],
+        order: 0,
+      });
       count++;
     }
   }
+  logger.info(`[Maintenance] ${module} modülü ${count} tenant’a atandı.`);
   res
     .status(200)
     .json({ success: true, message: `${count} tenant’a eklendi.` });
-  return;
 });
 
-// 4. Tüm modül/setting health check (eksik varsa tamamlama)
+/**
+ * 4️⃣ Tüm modül/setting health check (eksik mapping varsa tamamla)
+ */
 export const repairModuleSettings = asyncHandler(async (req, res) => {
-  const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
-  const modules = await ModuleMeta.find({});
+  const modules = await ModuleMeta.find({ enabled: true });
   const tenants = await Tenants.find({ isActive: true }).lean();
   let repaired: any[] = [];
   for (const mod of modules) {
@@ -108,103 +110,95 @@ export const repairModuleSettings = asyncHandler(async (req, res) => {
         tenant: t.slug,
       });
       if (!exists) {
-        await ModuleSetting.create({ module: mod.name, tenant: t.slug });
+        await ModuleSetting.create({
+          module: mod.name,
+          tenant: t.slug,
+          enabled: mod.enabled ?? true,
+          visibleInSidebar: true,
+          useAnalytics: false,
+          showInDashboard: true,
+          roles: Array.isArray(mod.roles) ? mod.roles : ["admin"],
+          order: typeof mod.order === "number" ? mod.order : 0,
+        });
         repaired.push({ module: mod.name, tenant: t.slug });
       }
     }
   }
+  logger.info(`[Maintenance] ${repaired.length} mapping tamir edildi.`);
   res.status(200).json({ success: true, repaired });
-  return;
 });
 
-// 5. Bir tenant’taki tüm modül mappinglerini sil (cleanup)
+/**
+ * 5️⃣ Bir tenant’taki tüm modül mappinglerini sil (tenant silinirse cleanup)
+ */
 export const removeAllModulesFromTenant = asyncHandler(async (req, res) => {
   const { tenant } = req.body;
   if (!tenant) {
     res.status(400).json({ success: false, message: "Tenant zorunlu." });
     return;
   }
-  const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
   const result = await ModuleSetting.deleteMany({ tenant });
+  logger.info(
+    `[Maintenance] Tenant '${tenant}' mappingleri silindi (${result.deletedCount})`
+  );
   res.status(200).json({ success: true, deletedCount: result.deletedCount });
-  return;
 });
 
-// 6. Bir modülü tüm tenantlardan kaldır (cleanup)
+/**
+ * 6️⃣ Bir modülü tüm tenantlardan kaldır (cleanup)
+ */
 export const removeModuleFromAllTenants = asyncHandler(async (req, res) => {
   const { module } = req.body;
   if (!module) {
     res.status(400).json({ success: false, message: "Modül adı zorunlu." });
     return;
   }
-  const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
   const result = await ModuleSetting.deleteMany({ module });
+  logger.info(
+    `[Maintenance] Modül '${module}' tüm tenantlardan silindi (${result.deletedCount})`
+  );
   res.status(200).json({ success: true, deletedCount: result.deletedCount });
-  return;
 });
 
-// 7. Settings’te orphan kalan (meta kaydı olmayan) modülleri bul/temizle
+/**
+ * 7️⃣ Orphan setting cleanup: meta kaydı olmayan mapping'leri bul ve sil
+ */
 export const cleanupOrphanModuleSettings = asyncHandler(async (req, res) => {
-  const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
   const metaModules = (await ModuleMeta.find({})).map((m) => m.name);
   const orphans = await ModuleSetting.find({ module: { $nin: metaModules } });
   if (orphans.length) {
     await ModuleSetting.deleteMany({ module: { $nin: metaModules } });
   }
+  logger.info(`[Maintenance] ${orphans.length} orphan mapping silindi.`);
   res
     .status(200)
     .json({ success: true, deletedCount: orphans.length, orphans });
-  return;
 });
 
-// 8. Tüm modül usage/analitik durumunu listele
+/**
+ * 8️⃣ Analitik info: tüm meta’larda useAnalytics alanı listesi
+ */
 export const getAllAnalyticsStatus = asyncHandler(async (req, res) => {
-  const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
-  const modules = await ModuleMeta.find({}).lean(); // .lean() ekle, plain objeler gelsin
-  // Burada map içinde as any ile garanti altına al
+  const modules = await ModuleMeta.find({}).lean();
   const analyticsInfo = modules.map((mod) => ({
-    name: (mod as any).name,
-    useAnalytics: (mod as any).useAnalytics, // TS2339 hatası kalkar
+    name: mod.name,
+    useAnalytics: (mod as any).useAnalytics, // Eski legacy field için as any (tercihen modelde olmasın)
   }));
   res.status(200).json({ success: true, analyticsInfo });
-  return;
 });
 
-// 9. Batch update: Bir alanı tüm tenantlarda topluca güncelle
+/**
+ * 9️⃣ Batch update: Bir modülün tüm tenantlardaki mappinglerini topluca güncelle
+ */
 export const batchUpdateModuleSetting = asyncHandler(async (req, res) => {
   const { module, update } = req.body;
   if (!module || !update) {
     res.status(400).json({ success: false, message: "Parametreler eksik." });
     return;
   }
-  const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
   const result = await ModuleSetting.updateMany({ module }, { $set: update });
+  logger.info(
+    `[Maintenance] '${module}' için batch update yapıldı (${result.modifiedCount})`
+  );
   res.status(200).json({ success: true, modifiedCount: result.modifiedCount });
-  return;
-});
-
-// 10. Belirli bir tenant’ın sahip olduğu tüm modülleri ve ayarları getir
-export const getTenantModuleSettings = asyncHandler(async (req, res) => {
-  const { tenant } = req.params;
-  if (!tenant) {
-    res.status(400).json({ success: false, message: "Tenant zorunlu." });
-    return;
-  }
-  const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
-  const modules = await ModuleSetting.find({ tenant });
-  res.status(200).json({ success: true, data: modules });
-  return;
-});
-
-// 11. Tenant silindiğinde ilgili tüm mapping/setting kayıtlarını temizle (otomatik/manual endpoint)
-export const removeTenantMappingsOnDelete = asyncHandler(async (req, res) => {
-  const { tenant } = req.body;
-  if (!tenant) {
-    res.status(400).json({ success: false, message: "Tenant zorunlu." });
-    return;
-  }
-  const { ModuleMeta, ModuleSetting } = await getTenantModels(req);
-  const result = await ModuleSetting.deleteMany({ tenant });
-  res.status(200).json({ success: true, deletedCount: result.deletedCount });
-  return;
 });

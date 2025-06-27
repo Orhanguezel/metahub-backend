@@ -36,22 +36,12 @@ export const resolveTenant = async (
   const tenantHeader = req.headers["x-tenant"]?.toString().trim() || "";
   let tenantDoc = null;
 
-  logger.info(`[DEBUG] [TENANT] Giriş isteği:`, {
-    hostname: req.hostname,
-    xTenant: tenantHeader,
-    headers: req.headers,
-  });
 
   // 1️⃣ Süperadmin için x-tenant override (PROD ve DEV)
   if (tenantHeader && req.user && req.user.role === "superadmin") {
     tenantDoc = await Tenants.findOne({
       slug: tenantHeader.toLowerCase(),
     }).lean();
-    logger.info(
-      `[DEBUG] [TENANT] Süperadmin override ile çözümlendi. tenant: ${
-        tenantDoc?.slug || "null"
-      }, mongoUri: ${tenantDoc?.mongoUri}`
-    );
   }
 
   // 2️⃣ Domain/subdomain mapping ile tenant bul
@@ -68,9 +58,6 @@ export const resolveTenant = async (
         const originHost = normalizeHost(origin.replace(/^https?:\/\//, ""));
         normalizedHost = originHost;
       }
-      logger.info(
-        `[DEBUG] [TENANT] API_SUBDOMAIN. Origin/Referer ile host normalize edildi: ${normalizedHost}`
-      );
     }
 
     tenantDoc = await Tenants.findOne({
@@ -79,11 +66,6 @@ export const resolveTenant = async (
         { "domain.customDomains": normalizedHost },
       ],
     }).lean();
-    logger.info(
-      `[DEBUG] [TENANT] Domain mapping ile tenant çözümlendi mi?: ${
-        tenantDoc?.slug || "null"
-      }, mongoUri: ${tenantDoc?.mongoUri}`
-    );
   }
 
   // 3️⃣ DEV ortamında localhost/127.0.0.1 için fallback (production'da asla yok!)
@@ -112,25 +94,6 @@ export const resolveTenant = async (
     req.tenantData = tenantDoc;
     req.enabledModules = (tenantDoc.enabledModules || []).map((m: string) =>
       m.trim().toLowerCase()
-    );
-
-    logger.info(
-      t("tenant.resolve.success", locale, translations, {
-        domain: tenantDoc.domain?.main,
-        tenant: tenantDoc.slug,
-      }),
-      {
-        ...getRequestContext(req),
-        tenant: tenantDoc.slug,
-        module: "tenant",
-        event: "tenant.resolve",
-        status: "success",
-        domain: tenantDoc.domain?.main,
-        mongoUri: tenantDoc.mongoUri,
-      }
-    );
-    logger.info(
-      `[DEBUG] [TENANT] FINAL tenant: ${tenantDoc.slug} mongoUri: ${tenantDoc.mongoUri}`
     );
     return next();
   }
