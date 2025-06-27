@@ -1,14 +1,15 @@
+// admin.models.ts
 import mongoose, { Schema, Model, models } from "mongoose";
 import type { IModuleMeta, IModuleSetting } from "@/modules/modules/types";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
-// Dinamik label alanı
+// Çoklu dil label alanı (Sadece meta için!)
 const labelSchemaFields = SUPPORTED_LOCALES.reduce((fields, lang) => {
   fields[lang] = { type: String, required: true };
   return fields;
 }, {});
 
-// --- ModuleMeta Schema ---
+// ModuleMeta Schema
 const ModuleMetaSchema = new Schema<IModuleMeta>(
   {
     name: { type: String, required: true, unique: true },
@@ -22,19 +23,12 @@ const ModuleMetaSchema = new Schema<IModuleMeta>(
     statsKey: { type: String },
     history: [
       {
-        version: { type: String, required: true },
-        by: { type: String, required: true },
-        date: { type: String, required: true },
-        note: { type: String, default: "" },
+        /* ... */
       },
     ],
     routes: [
       {
-        method: { type: String, required: true },
-        path: { type: String, required: true },
-        auth: { type: Boolean },
-        summary: { type: String },
-        body: { type: Schema.Types.Mixed },
+        /* ... */
       },
     ],
   },
@@ -45,20 +39,21 @@ export const ModuleMeta: Model<IModuleMeta> =
   models.ModuleMeta ||
   mongoose.model<IModuleMeta>("ModuleMeta", ModuleMetaSchema);
 
-// --- ModuleSetting Schema ---
-const ModuleSettingsSchema = new Schema<IModuleSetting>(
+// ModuleSetting Schema (KISA & TEMİZ!)
+const ModuleSettingSchema = new Schema<IModuleSetting>(
   {
-    module: { type: String, required: true },
-    tenant: { type: String, required: true },
-    enabled: { type: Boolean, default: true },
-    visibleInSidebar: { type: Boolean, default: true },
-    useAnalytics: { type: Boolean, default: false },
-    showInDashboard: { type: Boolean, default: true },
-    roles: { type: [String], default: ["admin"] },
+    module: { type: String, required: true, index: true }, // FK (ModuleMeta.name)
+    tenant: { type: String, required: true, index: true },
+    enabled: { type: Boolean },
+    visibleInSidebar: { type: Boolean },
+    useAnalytics: { type: Boolean },
+    showInDashboard: { type: Boolean },
+    roles: { type: [String] },
+    order: { type: Number },
   },
   { timestamps: true }
 );
 
 export const ModuleSetting: Model<IModuleSetting> =
   models.ModuleSetting ||
-  mongoose.model<IModuleSetting>("ModuleSetting", ModuleSettingsSchema);
+  mongoose.model<IModuleSetting>("ModuleSetting", ModuleSettingSchema);

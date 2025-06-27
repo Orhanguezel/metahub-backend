@@ -1,62 +1,88 @@
 import "@/core/config/envLoader";
-import mongoose from "mongoose";
-import { ModuleMeta, ModuleSetting } from "@/modules/modules/admin.models";
+import fs from "fs/promises";
+import path from "path";
+import { seedSettingsForNewModule } from "./seedSettingsForNewModule";
+import { Tenants } from "@/modules/tenants/tenants.model";
+import logger from "@/core/middleware/logger/logger";
+import { t } from "@/core/utils/i18n/translate";
+import translations from "@/modules/modules/i18n";
 
-// --- Sadece settings şemasındaki alanları toplayan yardımcı fonksiyon
-function getSettingFieldsFromMeta(mod: any, tenantSlug: string) {
-  return {
-    module: mod.name,
-    tenant: tenantSlug,
-    enabled: typeof mod.enabled === "boolean" ? mod.enabled : true,
-    visibleInSidebar:
-      typeof mod.visibleInSidebar === "boolean" ? mod.visibleInSidebar : true,
-    useAnalytics:
-      typeof mod.useAnalytics === "boolean" ? mod.useAnalytics : false,
-    showInDashboard:
-      typeof mod.showInDashboard === "boolean" ? mod.showInDashboard : true,
-    roles:
-      Array.isArray(mod.roles) && mod.roles.length > 0 ? mod.roles : ["admin"],
-    // NOT: createdAt, updatedAt mongoose tarafından otomatik atanır!
-  };
-}
+export const getAllModuleNames = async (): Promise<string[]> => {
+  const modulesPath = path.resolve(process.cwd(), "src/modules");
+  const modules = await fs.readdir(modulesPath, { withFileTypes: true });
+  return modules
+    .filter((m) => m.isDirectory())
+    .map((m) => m.name.toLowerCase());
+};
 
-async function seedSettingsForNewTenant(tenantSlug: string) {
-  // 1. Tüm aktif modül meta kayıtlarını çek
-  const allModules = await ModuleMeta.find({ enabled: true });
-  let count = 0;
+export const seedAllModulesForAllTenants = async () => {
+  const locale = "en"; // tek noktadan değiştir
+  const moduleNames = await getAllModuleNames();
+  const allTenants = await Tenants.find({ isActive: true }).lean();
 
-  for (const mod of allModules) {
-    // 2. Mevcut setting var mı kontrol et
-    const exists = await ModuleSetting.findOne({
-      module: mod.name,
-      tenant: tenantSlug,
+  let successCount = 0,
+    failCount = 0;
+  if (!moduleNames.length || !allTenants.length) {
+    logger.warn(t("sync.noModuleOrTenant", locale, translations), {
+      module: "seedAllModulesForAllTenants",
+      event: "no.data",
+      status: "warning",
     });
-    if (!exists) {
-      // 3. Sadece settings şemasındaki alanları kullan!
-      const doc = getSettingFieldsFromMeta(mod, tenantSlug);
-      await ModuleSetting.create(doc);
-      count++;
-      console.log(
-        `[SYNC] ${mod.name} modülüne setting açıldı -> ${tenantSlug}`
-      );
+    return;
+  }
+
+  for (const moduleName of moduleNames) {
+    for (const tenant of allTenants) {
+      try {
+        await seedSettingsForNewModule(moduleName, tenant.slug);
+        successCount++;
+        logger.info(
+          t("sync.settingCreated", locale, translations, {
+            moduleName,
+            tenant: tenant.slug,
+          }),
+          {
+            module: "seedAllModulesForAllTenants",
+            event: "setting.created",
+            status: "success",
+            tenant: tenant.slug,
+            moduleName,
+          }
+        );
+        console.log(`✅ [Seed] ${moduleName} → ${tenant.slug} tamamlandı.`);
+      } catch (e) {
+        failCount++;
+        logger.error(
+          t("sync.settingSeedError", locale, translations, {
+            moduleName,
+            tenant: tenant.slug,
+            message: (e as any)?.message,
+          }),
+          {
+            module: "seedAllModulesForAllTenants",
+            event: "setting.error",
+            status: "fail",
+            tenant: tenant.slug,
+            moduleName,
+            error: (e as any)?.message,
+          }
+        );
+        console.error(
+          `❌ [Seed] ${moduleName} → ${tenant.slug} hata:`,
+          (e as any)?.message
+        );
+      }
     }
   }
-  console.log(`[RESULT] ${count} setting açıldı`);
-}
-
-// -- Kullanım: NODE_ENV=production bun run ts-node scripts/sync/seedSettingsForNewTenant.ts metahub
-const tenantSlug = process.argv[2];
-if (!tenantSlug) {
-  console.error("Kullanım: node seedSettingsForNewTenant.js <tenantSlug>");
-  process.exit(1);
-}
-
-mongoose
-  .connect(process.env.MONGODB_URI!)
-  .then(() => seedSettingsForNewTenant(tenantSlug))
-  .catch((err) => {
-    console.error("MongoDB bağlantı hatası:", err);
-    process.exit(2);
-  });
-
-export { seedSettingsForNewTenant };
+  logger.info(
+    t("sync.seedSummary", locale, translations, { successCount, failCount }),
+    {
+      module: "seedAllModulesForAllTenants",
+      event: "seed.summary",
+      status: "info",
+      successCount,
+      failCount,
+    }
+  );
+  console.log(`[RESULT] Toplam başarılı: ${successCount}, hata: ${failCount}`);
+};

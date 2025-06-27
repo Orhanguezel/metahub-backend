@@ -27,39 +27,8 @@ const labelValidator = body("label")
     }
     return true;
   });
-
-/** Tenant dizi validasyonu (body.tenant veya tenants) */
-export const tenantValidator = body("tenant")
-  .optional()
-  .isString()
-  .notEmpty()
-  .withMessage("admin.module.tenantStringRequired");
-
-export const tenantsValidator = body("tenants")
-  .optional()
-  .isArray({ min: 1 })
-  .withMessage("admin.module.tenantsType")
-  .custom((tenants) => {
-    if (!Array.isArray(tenants)) return false;
-    if (tenants.some((t) => typeof t !== "string" || !t.trim())) {
-      throw new Error("admin.module.tenantStringRequired");
-    }
-    return true;
-  });
-
-/** Module body/module alanı zorunlu (ör: assign, cleanup, update) */
-export const moduleNameBodyValidator = body("module")
-  .isString()
-  .notEmpty()
-  .withMessage("admin.module.nameRequired");
-
-/** Batch update için update alanı zorunlu */
-export const updateBodyValidator = body("update")
-  .isObject()
-  .withMessage("admin.module.updateObjectRequired");
-
-/** Modül oluşturma validasyonu */
-export const validateCreateModule = [
+// validateCreateModuleMeta
+export const validateCreateModuleMeta = [
   body("name").isString().notEmpty().withMessage("admin.module.nameRequired"),
   body("icon").optional().isString().withMessage("admin.module.iconType"),
   body("roles").optional().isArray().withMessage("admin.module.rolesType"),
@@ -67,60 +36,35 @@ export const validateCreateModule = [
     .optional()
     .isIn(SUPPORTED_LOCALES)
     .withMessage("admin.module.languageInvalid"),
-  body("visibleInSidebar")
-    .optional()
-    .isBoolean()
-    .withMessage("admin.module.visibleInSidebarType"),
-  body("useAnalytics")
-    .optional()
-    .isBoolean()
-    .withMessage("admin.module.useAnalyticsType"),
   body("enabled")
     .optional()
     .isBoolean()
     .withMessage("admin.module.enabledType"),
-  body("showInDashboard")
-    .optional()
-    .isBoolean()
-    .withMessage("admin.module.showInDashboardType"),
-  body("order").optional().isInt().withMessage("admin.module.orderType"),
-  tenantsValidator,
+  body("label").exists().withMessage("admin.module.labelRequired"), // mutlaka olmalı
   labelValidator,
+  body("version").optional().isString(),
+  body("order").optional().isInt(),
+  body("statsKey").optional().isString(),
+  // history, routes backend'de default eklenir, validasyon gerekmez!
   validateRequest,
 ];
 
-/** Modül güncelleme validasyonu (partial) */
-export const validateUpdateModule = [
-  body("name").optional().isString(),
-  body("icon").optional().isString().withMessage("admin.module.iconType"),
-  body("roles").optional().isArray().withMessage("admin.module.rolesType"),
-  body("language")
-    .optional()
-    .isIn(SUPPORTED_LOCALES)
-    .withMessage("admin.module.languageInvalid"),
-  body("visibleInSidebar")
-    .optional()
-    .isBoolean()
-    .withMessage("admin.module.visibleInSidebarType"),
-  body("useAnalytics")
-    .optional()
-    .isBoolean()
-    .withMessage("admin.module.useAnalyticsType"),
-  body("enabled")
-    .optional()
-    .isBoolean()
-    .withMessage("admin.module.enabledType"),
-  body("showInDashboard")
-    .optional()
-    .isBoolean()
-    .withMessage("admin.module.showInDashboardType"),
-  body("order").optional().isInt().withMessage("admin.module.orderType"),
-  tenantsValidator,
+// validateUpdateModuleMeta
+export const validateUpdateModuleMeta = [
+  body("icon").optional().isString(),
+  body("roles").optional().isArray(),
+  body("language").optional().isIn(SUPPORTED_LOCALES),
+  body("enabled").optional().isBoolean(),
+  body("label").optional(),
   labelValidator,
+  body("version").optional().isString(),
+  body("order").optional().isInt(),
+  body("statsKey").optional().isString(),
+  // Diğer alanlara asla izin yok!
   validateRequest,
 ];
 
-/** Paramdan modül adı */
+// validateModuleNameParam
 export const validateModuleNameParam = [
   param("name")
     .isString()
@@ -129,35 +73,19 @@ export const validateModuleNameParam = [
   validateRequest,
 ];
 
-/** Query’den tenant */
-export const validateTenantQuery = [
-  query("tenant").optional().isString().withMessage("admin.module.tenantType"),
+// validateTenantModuleSetting (PATCH)
+export const validateTenantModuleSetting = [
+  body("module").isString().notEmpty().withMessage("admin.module.nameRequired"),
+  body("enabled").optional().isBoolean(),
+  body("visibleInSidebar").optional().isBoolean(),
+  body("useAnalytics").optional().isBoolean(),
+  body("showInDashboard").optional().isBoolean(),
+  body("roles").optional().isArray(),
+  body("order").optional().isInt(),
   validateRequest,
 ];
 
-/** Modül filtreleri için (ör: enabled, analytics vs) */
-export const validateModuleFilters = [
-  query("visibleInSidebar").optional().isBoolean(),
-  query("useAnalytics").optional().isBoolean(),
-  validateRequest,
-];
-
-/** --- EKSTRA ENDPOINTLERİN VALIDASYONLARI --- */
-
-/** Tek tenant’a tüm modüllerin atanması (body: { tenant }) */
-export const validateBatchAssign = [tenantValidator, validateRequest];
-
-/** Tüm tenantlara bir modül atanması (body: { module }) */
-export const validateGlobalAssign = [moduleNameBodyValidator, validateRequest];
-
-/** Batch update (body: { module, update }) */
-export const validateBatchUpdate = [
-  moduleNameBodyValidator,
-  updateBodyValidator,
-  validateRequest,
-];
-
-/** Belirli bir tenant parametresi (/modules/tenant/:tenant) */
+// validateTenantParam (GET/DELETE)
 export const validateTenantParam = [
   param("tenant")
     .isString()
@@ -166,9 +94,24 @@ export const validateTenantParam = [
   validateRequest,
 ];
 
-/** Modül-tenant cleanup işlemleri (body: { tenant } veya { module }) */
-export const validateCleanup = [
-  body("tenant").optional().isString(),
-  body("module").optional().isString(),
+// validateBatchUpdate (PATCH: batch update)
+export const validateBatchUpdate = [
+  body("module").isString().notEmpty(),
+  body("update").isObject().notEmpty(),
+  validateRequest,
+];
+
+// validateBatchAssign (POST: bir tenant'a tüm modüller)
+export const validateBatchAssign = [
+  body("tenant")
+    .isString()
+    .notEmpty()
+    .withMessage("admin.module.tenantStringRequired"),
+  validateRequest,
+];
+
+// validateGlobalAssign (POST: tüm tenantlara bir modül)
+export const validateGlobalAssign = [
+  body("module").isString().notEmpty().withMessage("admin.module.nameRequired"),
   validateRequest,
 ];

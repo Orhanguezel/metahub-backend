@@ -1,32 +1,58 @@
-// scripts/sync/seedSettingsForNewModule.ts
 import "@/core/config/envLoader";
 import mongoose from "mongoose";
 import { ModuleMeta, ModuleSetting } from "@/modules/modules/admin.models";
 import { Tenants } from "@/modules/tenants/tenants.model";
+import logger from "@/core/middleware/logger/logger";
+import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
+import { t } from "@/core/utils/i18n/translate";
+import translations from "@/modules/modules/i18n";
 
-/**
- * Tek modül için istenen tenant(lar)a setting açar.
- * Eğer tenantSlug verilirse sadece o tenant için;
- * verilmezse tüm aktif tenantlar için açar.
- */
+const DEFAULT_SETTING = {
+  enabled: true,
+  visibleInSidebar: true,
+  useAnalytics: false,
+  showInDashboard: true,
+  roles: ["admin"],
+  order: 0,
+};
+
+// --- Context guard: Eğer CLI veya seed call ise, güvenli şekilde tenant info ekle ---
+function safeGetContext(obj: any) {
+  try {
+    // Express req nesnesi mi? headers varsa
+    if (obj && obj.headers) return getRequestContext(obj);
+    // Değilse sadece tenant parametresini ekle
+    if (obj && obj.tenant) return { tenant: obj.tenant };
+    // Parametresiz ise boş obje
+    return {};
+  } catch (e) {
+    // Her ihtimale karşı hata durumunda context ekleme
+    return {};
+  }
+}
+
 export async function seedSettingsForNewModule(
   moduleName: string,
   tenantSlug?: string
 ) {
-  // mod'u as any olarak force cast ile kullan!
-  const mod = (await ModuleMeta.findOne({ name: moduleName }).lean()) as any;
+  const locale = "en";
+  const mod = await ModuleMeta.findOne({ name: moduleName }).lean();
   if (!mod) {
-    console.error("Modül bulunamadı:", moduleName);
+    logger.error(
+      t("sync.moduleNotFound", locale, translations, { moduleName }),
+      {
+        module: "seedSettingsForNewModule",
+        event: "module.notfound",
+        status: "fail",
+        ...safeGetContext({ tenant: tenantSlug }), // Sadece tenant parametresi logda yer alsın
+      }
+    );
     return;
   }
 
-  // Tenant: sadece tenantSlug verilmişse onu kullan, yoksa tüm aktif tenantlar
-  let tenants: string[] = [];
-  if (tenantSlug) {
-    tenants = [tenantSlug];
-  } else {
-    tenants = (await Tenants.find({ isActive: true })).map((t) => t.slug);
-  }
+  const tenants: string[] = tenantSlug
+    ? [tenantSlug]
+    : (await Tenants.find({ isActive: true })).map((t) => t.slug);
 
   let count = 0;
   for (const tenant of tenants) {
@@ -35,16 +61,46 @@ export async function seedSettingsForNewModule(
       await ModuleSetting.create({
         module: mod.name,
         tenant,
-        enabled: mod.enabled ?? true,
-        visibleInSidebar: mod.visibleInSidebar ?? true,
-        useAnalytics: mod.useAnalytics ?? false,
-        showInDashboard: mod.showInDashboard ?? true,
-        roles: Array.isArray(mod.roles) ? mod.roles : ["admin"],
-        // diğer otomatik alanlar mongoose tarafından set edilir
+        enabled: mod.enabled ?? DEFAULT_SETTING.enabled,
+        visibleInSidebar: DEFAULT_SETTING.visibleInSidebar,
+        useAnalytics: DEFAULT_SETTING.useAnalytics,
+        showInDashboard: DEFAULT_SETTING.showInDashboard,
+        roles: Array.isArray(mod.roles) ? mod.roles : DEFAULT_SETTING.roles,
+        order:
+          typeof mod.order === "number" ? mod.order : DEFAULT_SETTING.order,
       });
       count++;
-      console.log(`[SYNC] ${tenant} için ${moduleName} setting açıldı`);
+      logger.info(
+        t("sync.settingCreated", locale, translations, { moduleName, tenant }),
+        {
+          module: "seedSettingsForNewModule",
+          event: "setting.created",
+          status: "success",
+          tenant,
+          ...safeGetContext({ tenant }),
+        }
+      );
+    } else {
+      logger.info(
+        t("sync.settingExists", locale, translations, { moduleName, tenant }),
+        {
+          module: "seedSettingsForNewModule",
+          event: "setting.exists",
+          status: "warning",
+          tenant,
+          ...safeGetContext({ tenant }),
+        }
+      );
     }
   }
-  console.log(`[RESULT] ${count} setting açıldı`);
+  logger.info(
+    t("sync.seedSummary", locale, translations, { moduleName, count }),
+    {
+      module: "seedSettingsForNewModule",
+      event: "setting.summary",
+      status: "info",
+      count,
+      ...safeGetContext({ tenant: tenantSlug }),
+    }
+  );
 }

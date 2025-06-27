@@ -18,11 +18,6 @@ export const injectTenantModel = async (
   try {
     const tenantSlug = req.tenant;
 
-    logger.info(`[DEBUG] [INJECT_MODEL] Tenant çözümleme başlatıldı:`, {
-      tenant: tenantSlug,
-      headers: req.headers,
-    });
-
     if (!tenantSlug) {
       logger.error(
         `[DEBUG] [INJECT_MODEL] Tenant slug eksik! resolveTenant çağrıldı mı?`,
@@ -65,58 +60,11 @@ export const injectTenantModel = async (
         );
         return connection.models[modelName] as any;
       }
-      logger.info(
-        `[DEBUG] [INJECT_MODEL] Model yeni oluşturuluyor: ${modelName}`,
-        { tenant: tenantSlug }
-      );
       return connection.model<T>(modelName, schema);
     };
 
-    logger.info(
-      t("resolveTenant.success", req.locale || getLogLocale(), translations, {
-        tenant: tenantSlug,
-      }),
-      {
-        tenant: tenantSlug,
-        ...getRequestContext(req),
-        module: "tenant",
-        event: "tenant.injectTenantModel",
-        status: "success",
-        host: req.hostname,
-        headers: {
-          host: req.headers.host,
-          "x-tenant": req.headers["x-tenant"],
-        },
-      }
-    );
-
-    logger.info(
-      `[DEBUG] [INJECT_MODEL] Tenant model getter başarıyla eklendi.`,
-      {
-        tenant: tenantSlug,
-      }
-    );
-
     next();
   } catch (err: any) {
-    logger.error(
-      `[DEBUG] [INJECT_MODEL] HATA! Model inject edilemedi: ${
-        err?.message || err
-      }`,
-      {
-        tenant: req.tenant || "unknown",
-        ...getRequestContext(req),
-        module: "tenant",
-        event: "tenant.injectTenantModel",
-        status: "fail",
-        error: err?.message || err,
-        host: req.hostname,
-        headers: {
-          host: req.headers.host,
-          "x-tenant": req.headers["x-tenant"],
-        },
-      }
-    );
     res.status(500).json({
       success: false,
       message: t(

@@ -1,20 +1,29 @@
 import express from "express";
-import routes from "./admin.routes";
-import extraRoutes from "./admin.extras.routes";
 
-// ✅ Modeller ve Controller importları
+// ✅ Tüm modeller (tek yerden export!)
 import { ModuleMeta, ModuleSetting } from "./admin.models";
 
-import * as adminController from "./admin.controller";
-import * as adminExtrasController from "./admin.module.extras.controller";
+// ✅ Tüm controller exportları (isteğe bağlı; genelde direkt kullanılmaz)
+export * from "./moduleMeta.controller";
+export * from "./moduleSetting.controller";
+export * from "./moduleMaintenance.controller";
 
-// ✅ Router
-const router = express.Router();
-router.use("/", routes, extraRoutes);
-
-// ✅ Guard + Export (standart)
-export { ModuleMeta, ModuleSetting, adminController };
-
+// ✅ Validation fonksiyonlarını tek seferde dışa aktar
 export * from "./admin.validation";
 
+// ✅ Ana router
+import moduleMetaRoutes from "./ moduleMeta.routes";
+import moduleSettingRoutes from "./moduleSetting.routes";
+import moduleMaintenanceRoutes from "./moduleMaintenance.routes";
+
+// Tüm modül routerlarını ana router'a bağla
+const router = express.Router();
+
+// Sıralama önemli değil, mantıken gruplu yazıldı:
+router.use("/meta", moduleMetaRoutes); // /modules/meta/...
+router.use("/setting", moduleSettingRoutes); // /modules/setting/...
+router.use("/maintenance", moduleMaintenanceRoutes); // /modules/maintenance/...
+
+// Ana exportlar
+export { ModuleMeta, ModuleSetting };
 export default router;
