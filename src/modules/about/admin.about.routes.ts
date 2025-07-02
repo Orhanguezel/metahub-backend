@@ -1,3 +1,4 @@
+// src/modules/about/admin.about.routes.ts
 import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
@@ -7,28 +8,28 @@ import {
   deleteAbout,
   createAbout,
 } from "./admin.about.controller";
+
 import {
   validateObjectId,
   validateCreateAbout,
   validateUpdateAbout,
   validateAdminQuery,
 } from "./about.validation";
+
 import { upload } from "@/core/middleware/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
 
-// 🔐 Admin erişim kontrolü
+// 🌟 Admin Middleware
 router.use(authenticate, authorizeRoles("admin", "moderator"));
 
-// 🔍 Listeleme
+// 🌟 Admin Endpoints
 router.get("/", validateAdminQuery, adminGetAllAbout);
 
-// 🔍 Detay
 router.get("/:id", validateObjectId("id"), adminGetAboutById);
 
-// ➕ Oluşturma
 router.post(
   "/",
   uploadTypeWrapper("about"),
@@ -38,7 +39,6 @@ router.post(
   createAbout
 );
 
-// ✏️ Güncelleme
 router.put(
   "/:id",
   uploadTypeWrapper("about"),
@@ -49,7 +49,6 @@ router.put(
   updateAbout
 );
 
-// 🗑 Silme
 router.delete("/:id", validateObjectId("id"), deleteAbout);
 
 export default router;

@@ -46,6 +46,9 @@ export const getRouter = async (): Promise<Router> => {
         `[ROUTER] ❌ [FAIL] Failed to load module "${moduleName}": ${err.message}`,
         { module: moduleName, event: "router.loadFail", error: err }
       );
+
+      // Yeni log: Modül mount edilemediyse
+      console.log(`[ROUTER] ❌ Failed to mount /${moduleName.toLowerCase()}`);
       continue;
     }
   }

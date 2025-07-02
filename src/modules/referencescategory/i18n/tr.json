@@ -1,0 +1,14 @@
+{
+  "referencescategory.validation.invalidNameType": "İsim, dillerle birlikte bir nesne olmalıdır.",
+  "referencescategory.validation.localeMissing": "Name.{{lang}} zorunludur ve boş olamaz.",
+  "referencescategory.validation.localeInvalid": "Name.{{lang}} bir metin (string) olmalıdır.",
+  "referencescategory.create.success": "'{{name}}' kategorisi başarıyla oluşturuldu.",
+  "referencescategory.create.error": "Kategori oluşturulamadı.",
+  "referencescategory.update.success": "'{{name}}' kategorisi başarıyla güncellendi.",
+  "referencescategory.delete.success": "'{{name}}' kategorisi başarıyla silindi.",
+  "referencescategory.list.success": "Kategoriler başarıyla listelendi.",
+  "referencescategory.list.error": "Kategoriler alınırken hata oluştu.",
+  "referencescategory.fetch.success": "Kategori başarıyla getirildi.",
+  "referencescategory.notFound": "Kategori bulunamadı.",
+  "referencescategory.invalidId": "Geçersiz kategori ID’si."
+}

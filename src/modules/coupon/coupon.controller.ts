@@ -1,143 +1,233 @@
-// src/modules/coupon/coupon.controller.ts
-
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { Coupon } from "./coupon.models";
+import path from "path";
+import fs from "fs";
+import { v2 as cloudinary } from "cloudinary";
+import { ICoupon, ICouponImage } from "./types";
 import { isValidObjectId } from "@/core/utils/validation";
+import { getImagePath, getFallbackThumbnail, processImageLocal, shouldProcessImage } from "@/core/utils/uploadUtils";
+import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
+import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
+import logger from "@/core/middleware/logger/logger";
+import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+import { t as translate } from "@/core/utils/i18n/translate";
+import translations from "./i18n";
+import { SupportedLocale } from "@/types/common";
 
-// ✅ Create Coupon
-export const createCoupon = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { code, discount, expiresAt, label } = req.body;
-    const { Coupon } = await getTenantModels(req);
-
-    const codeUpper = code.toUpperCase().trim();
-    const exists = await Coupon.findOne({
-      code: codeUpper,
-      tenant: req.tenant,
-    });
-    if (exists) {
-      res
-        .status(409)
-        .json({ success: false, message: "Coupon code already exists." });
-      return;
-    }
-
-    const coupon = await Coupon.create({
-      code: codeUpper,
-      tenant: req.tenant,
-      discount,
-      expiresAt,
-      label,
-      isActive: true,
-    });
-
-    res.status(201).json({
-      success: true,
-      message: "Coupon created successfully.",
-      data: coupon,
-    });
+const parseIfJson = (value: any) => {
+  try {
+    return typeof value === "string" ? JSON.parse(value) : value;
+  } catch {
+    return value;
   }
-);
+};
 
-// ✅ Get All Coupons (Admin)
-export const getAllCoupons = asyncHandler(
-  async (req: Request, res: Response) => {
-    const lang = (req.query.lang as string) || "en";
-    const { Coupon } = await getTenantModels(req);
-    const coupons = await Coupon.find({ lang, tenant: req.tenant }).sort({
-      createdAt: -1,
-    });
+// ✅ CREATE - Coupon Creation with Images
+export const createCoupon = asyncHandler(async (req: Request, res: Response) => {
+  const locale: SupportedLocale = req.locale || "en"; // Default to "en" if locale is undefined.
+  const { Coupon } = await getTenantModels(req);
+  const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
 
-    // Eğer frontend diline göre filtrelemek istiyorsan:
-    // const coupons = await Coupon.find({ [`label.title.${lang}`]: { $exists: true } }).sort({ createdAt: -1 });
+  let { code, title, description, discount, expiresAt, isPublished, publishedAt,isActive } = req.body;
 
-    res.status(200).json({ success: true, data: coupons });
+  title = fillAllLocales(parseIfJson(title));// Çoklu dil desteği
+  description = fillAllLocales(parseIfJson(description)); // Çoklu dil desteği
+
+  // Resimleri işle
+  const images: ICouponImage[] = [];
+  if (Array.isArray(req.files)) {
+    for (const file of req.files as Express.Multer.File[]) {
+      const imageUrl = getImagePath(file);
+      let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
+      if (shouldProcessImage()) {
+        const processed = await processImageLocal(
+          file.path,
+          file.filename,
+          path.dirname(file.path)
+        );
+        thumbnail = processed.thumbnail;
+        webp = processed.webp;
+      }
+      images.push({
+        url: imageUrl,
+        thumbnail,
+        webp,
+        publicId: (file as any).public_id,
+      });
+    }
   }
-);
 
-// ✅ Get Coupon By Code (Public — Kullanıcı checkout'ta girdiğinde)
-export const getCouponByCode = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { code } = req.params;
-    const lang = (req.query.lang as string) || "en";
-    const { Coupon } = await getTenantModels(req);
+  const coupon = await Coupon.create({
+    code,
+    tenant: req.tenant,
+    title,
+    description,
+    discount,
+    expiresAt,
+    isPublished: isPublished === "true" || isPublished === true,
+      publishedAt: isPublished ? publishedAt || new Date() : undefined,
+    images, 
+    isActive: true,
+  });
 
-    const coupon = await Coupon.findOne({
-      code: code.toUpperCase(),
-      tenant: req.tenant,
-      isActive: true,
-      expiresAt: { $gte: new Date() },
-      [`label.title.${lang}`]: { $exists: true },
-    });
+  logger.info(t("created"), { ...getRequestContext(req), id: coupon._id });
+  res.status(201).json({ success: true, message: t("created"), data: coupon });
+});
 
-    if (!coupon) {
-      res
-        .status(404)
-        .json({ success: false, message: "Coupon not found or expired." });
-      return;
-    }
+// ✅ UPDATE - Coupon Update with Image Handling
+export const updateCoupon = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const locale: SupportedLocale = req.locale || "en";
+  const { Coupon } = await getTenantModels(req);
+  const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
 
-    res.status(200).json({ success: true, data: coupon });
+  if (!isValidObjectId(id)) {
+    logger.warn(t("invalidId"), { ...getRequestContext(req), id });
+    res.status(400).json({ success: false, message: t("invalidId") });
+    return;
   }
-);
 
-// ✅ Update Coupon (Admin)
-export const updateCoupon = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { code, discount, expiresAt, isActive, label } = req.body;
-    const { Coupon } = await getTenantModels(req);
-
-    if (!isValidObjectId(id)) {
-      res.status(400).json({ success: false, message: "Invalid coupon ID." });
-      return;
-    }
-
-    const coupon = await Coupon.findOne({ _id: id, tenant: req.tenant });
-    if (!coupon) {
-      res.status(404).json({ success: false, message: "Coupon not found." });
-      return;
-    }
-
-    if (code) coupon.code = code.toUpperCase().trim();
-    if (discount !== undefined) coupon.discount = discount;
-    if (expiresAt) coupon.expiresAt = new Date(expiresAt);
-    if (typeof isActive === "boolean") coupon.isActive = isActive;
-    if (label) coupon.label = label;
-
-    await coupon.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Coupon updated successfully.",
-      data: coupon,
-    });
+  const coupon = await Coupon.findOne({ _id: id, tenant: req.tenant });
+  if (!coupon) {
+    logger.warn(t("notFound"), { ...getRequestContext(req), id });
+    res.status(404).json({ success: false, message: t("notFound") });
+    return;
   }
-);
 
-// ✅ Delete Coupon (Admin)
-export const deleteCoupon = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { Coupon } = await getTenantModels(req);
-
-    if (!isValidObjectId(id)) {
-      res.status(400).json({ success: false, message: "Invalid coupon ID." });
-      return;
-    }
-
-    const coupon = await Coupon.deleteOne({ _id: id, tenant: req.tenant });
-
-    if (!coupon) {
-      res.status(404).json({ success: false, message: "Coupon not found." });
-      return;
-    }
-
-    res.status(200).json({
-      success: true,
-      message: "Coupon deleted successfully.",
-    });
+  const updates = req.body;
+  if (updates.title) {
+    coupon.title = mergeLocalesForUpdate(coupon.title, parseIfJson(updates.title));
   }
-);
+  if (updates.description) {
+    coupon.description = mergeLocalesForUpdate(coupon.description, parseIfJson(updates.description));
+  }
+
+  if (updates.discount) coupon.discount = updates.discount;
+  if (updates.expiresAt) coupon.expiresAt = updates.expiresAt;
+  if (updates.isActive !== undefined) coupon.isActive = updates.isActive;
+
+  // Handle images
+  if (!Array.isArray(coupon.images)) coupon.images = [];
+  if (Array.isArray(req.files)) {
+    for (const file of req.files as Express.Multer.File[]) {
+      const imageUrl = getImagePath(file);
+      let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
+      if (shouldProcessImage()) {
+        const processed = await processImageLocal(
+          file.path,
+          file.filename,
+          path.dirname(file.path)
+        );
+        thumbnail = processed.thumbnail;
+        webp = processed.webp;
+      }
+      coupon.images.push({
+        url: imageUrl,
+        thumbnail,
+        webp,
+        publicId: (file as any).public_id,
+      });
+    }
+  }
+
+  // Handle removed images
+  if (updates.removedImages) {
+    try {
+      const removed = JSON.parse(updates.removedImages);
+      coupon.images = coupon.images.filter((img: any) => !removed.includes(img.url));
+      for (const img of removed) {
+        const localPath = path.join("uploads", "coupons-images", path.basename(img.url));
+        if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+        if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
+      }
+    } catch (e) {
+      logger.warn(t("invalidRemovedImages"), { ...getRequestContext(req), error: e });
+    }
+  }
+
+  await coupon.save();
+  logger.info(t("updated"), { ...getRequestContext(req), id });
+  res.status(200).json({ success: true, message: t("updated"), data: coupon });
+});
+
+// ✅ DELETE - Coupon Delete
+export const deleteCoupon = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { Coupon } = await getTenantModels(req);
+  const locale: SupportedLocale = req.locale || "en";
+  const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
+
+  if (!isValidObjectId(id)) {
+    logger.warn(t("invalidId"), { ...getRequestContext(req), id });
+    res.status(400).json({ success: false, message: t("invalidId") });
+    return;
+  }
+
+  const coupon = await Coupon.findOne({ _id: id, tenant: req.tenant });
+  if (!coupon) {
+    logger.warn(t("notFound"), { ...getRequestContext(req), id });
+    res.status(404).json({ success: false, message: t("notFound") });
+    return;
+  }
+
+  // Delete images from Cloudinary
+  for (const img of coupon.images || []) {
+    if (img.publicId) {
+      try {
+        await cloudinary.uploader.destroy(img.publicId);
+      } catch (err) {
+        logger.error("Cloudinary delete error", {
+          ...getRequestContext(req),
+          publicId: img.publicId,
+        });
+      }
+    }
+  }
+
+  await coupon.deleteOne();
+  logger.info(t("deleted"), { ...getRequestContext(req), id });
+  res.status(200).json({ success: true, message: t("deleted") });
+});
+
+// ✅ GET ALL - Public
+export const getAllCoupons = asyncHandler(async (req: Request, res: Response) => {
+  const locale: SupportedLocale = req.locale || "en";
+  const { Coupon } = await getTenantModels(req);
+  const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
+
+  const coupons = await Coupon.find({ tenant: req.tenant, isActive: true })
+    .lean();
+
+  const data = coupons.map((coupon) => ({
+    ...coupon,
+    title: fillAllLocales(coupon.title),
+    description: fillAllLocales(coupon.description),
+  }));
+
+  res.status(200).json({ success: true, message: t("listFetched"), data });
+});
+
+// ✅ GET BY CODE - Public
+export const getCouponByCode = asyncHandler(async (req: Request, res: Response) => {
+  const { code } = req.params;
+  const locale: SupportedLocale = req.locale || "en";
+  const { Coupon } = await getTenantModels(req);
+  const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
+
+  const coupon = await Coupon.findOne({ code, tenant: req.tenant, isActive: true })
+    .lean();
+
+  if (!coupon) {
+    logger.warn(t("notFound"), { ...getRequestContext(req), code });
+    res.status(404).json({ success: false, message: t("notFound") });
+    return;
+  }
+
+  res.status(200).json({ success: true, message: t("fetched"), data: coupon });
+});

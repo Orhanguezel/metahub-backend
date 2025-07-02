@@ -1,0 +1,14 @@
+{
+  "gallerycategory.validation.invalidNameType": "Le nom doit être un objet avec des traductions.",
+  "gallerycategory.validation.localeMissing": "Name.{{lang}} est requis et ne peut pas être vide.",
+  "gallerycategory.validation.localeInvalid": "Name.{{lang}} doit être une chaîne de caractères.",
+  "gallerycategory.create.success": "Catégorie '{{name}}' créée avec succès.",
+  "gallerycategory.create.error": "Échec de la création de la catégorie.",
+  "gallerycategory.update.success": "Catégorie '{{name}}' mise à jour avec succès.",
+  "gallerycategory.delete.success": "Catégorie '{{name}}' supprimée avec succès.",
+  "gallerycategory.list.success": "Catégories listées avec succès.",
+  "gallerycategory.list.error": "Échec de la récupération des catégories.",
+  "gallerycategory.fetch.success": "Catégorie récupérée avec succès.",
+  "gallerycategory.notFound": "Catégorie introuvable.",
+  "gallerycategory.invalidId": "ID de catégorie invalide."
+}

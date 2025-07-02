@@ -9,27 +9,40 @@ import {
 import {
   validateCreateGalleryCategory,
   validateUpdateGalleryCategory,
-  validateObjectIdParam,
+  validateObjectId,
 } from "./gallerycategory.validation";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 
 const router = express.Router();
 
-// 🔐 Admin Auth Middleware
-router.use(authenticate, authorizeRoles("admin"));
-
-router.post("/", validateCreateGalleryCategory, createGalleryCategory);
-
+// 🌿 Public Routes
 router.get("/", getAllGalleryCategories);
+router.get("/:id", validateObjectId("id"), getGalleryCategoryById);
 
-router.get("/:id", validateObjectIdParam, getGalleryCategoryById);
+// 🔐 Admin Routes
+router.post(
+  "/",
+  authenticate,
+  authorizeRoles("admin"),
+  validateCreateGalleryCategory,
+  createGalleryCategory
+);
 
 router.put(
   "/:id",
-  validateObjectIdParam,
+  authenticate,
+  authorizeRoles("admin"),
+  validateObjectId("id"),
   validateUpdateGalleryCategory,
   updateGalleryCategory
 );
-router.delete("/:id", validateObjectIdParam, deleteGalleryCategory);
+
+router.delete(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateObjectId("id"),
+  deleteGalleryCategory
+);
 
 export default router;

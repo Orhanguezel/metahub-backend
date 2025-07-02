@@ -1,7 +1,7 @@
-// /modules/blog/types/index.ts
+import type { SupportedLocale } from "@/types/common";
+import type { Types, Document } from "mongoose";
 
-import type { SupportedLocale, TranslatedLabel } from "@/types/common";
-import type { Types } from "mongoose";
+export type TranslatedLabel = { [key in SupportedLocale]: string };
 
 export interface IBlogImage {
   url: string;
@@ -11,20 +11,20 @@ export interface IBlogImage {
 }
 
 export interface IBlog {
+  _id: Types.ObjectId | string;
   title: TranslatedLabel;
-  tenant: string; // Optional tenant field for multi-tenancy
+  tenant: string;
   slug: string;
   summary: TranslatedLabel;
   content: TranslatedLabel;
   images: IBlogImage[];
   tags: string[];
   author?: string;
-  category?: Types.ObjectId;
+  category: Types.ObjectId;
   isPublished: boolean;
   publishedAt?: Date;
   comments: Types.ObjectId[];
-  isActive: boolean; // Soft delete
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
-

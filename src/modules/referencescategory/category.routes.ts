@@ -1,51 +1,48 @@
 import express from "express";
 import {
-  createReferenceCategory,
-  getAllReferenceCategories,
-  getReferenceCategoryById,
-  updateReferenceCategory,
-  deleteReferenceCategory,
+  createReferencesCategory,
+  getAllReferencesCategories,
+  getReferencesCategoryById,
+  updateReferencesCategory,
+  deleteReferencesCategory,
 } from "./category.controller";
 import {
-  validateCreateReferenceCategory,
-  validateUpdateReferenceCategory,
-  validateObjectIdParam,
+  validateCreateReferencesCategory,
+  validateUpdateReferencesCategory,
+  validateObjectId,
 } from "./category.validation";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 
 const router = express.Router();
 
-// 🔐 Admin Auth Middleware
-router.use(authenticate, authorizeRoles("admin"));
+// 🌿 Public Routes
+router.get("/", getAllReferencesCategories);
+router.get("/:id", validateObjectId("id"), getReferencesCategoryById);
 
-/**
- * @route   POST /admin/referencescategory
- */
-router.post("/", validateCreateReferenceCategory, createReferenceCategory);
-
-/**
- * @route   GET /admin/referencescategory
- */
-router.get("/", getAllReferenceCategories);
-
-/**
- * @route   GET /admin/referencescategory/:id
- */
-router.get("/:id", validateObjectIdParam, getReferenceCategoryById);
-
-/**
- * @route   PUT /admin/referencescategory/:id
- */
-router.put(
-  "/:id",
-  validateObjectIdParam,
-  validateUpdateReferenceCategory,
-  updateReferenceCategory
+// 🔐 Admin Routes
+router.post(
+  "/",
+  authenticate,
+  authorizeRoles("admin"),
+  validateCreateReferencesCategory,
+  createReferencesCategory
 );
 
-/**
- * @route   DELETE /admin/referencescategory/:id
- */
-router.delete("/:id", validateObjectIdParam, deleteReferenceCategory);
+router.put(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateObjectId("id"),
+  validateUpdateReferencesCategory,
+  updateReferencesCategory
+);
+
+router.delete(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateObjectId("id"),
+  deleteReferencesCategory
+);
 
 export default router;

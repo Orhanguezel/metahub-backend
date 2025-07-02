@@ -1,32 +1,22 @@
-import mongoose, { Schema, Model, models, model, Document } from "mongoose";
+import mongoose, { Schema, Types, Model, models } from "mongoose";
+import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import { IReferencesCategory } from "./types";
 
-// Çok dilli kategori tipi
-export interface IReferencesCategory extends Document {
-  name: {
-    tr: string;
-    en: string;
-    de: string;
-  };
-  tenant: string; // Optional tenant field for multi-tenancy
-  slug: string;
-  description: {
-    tr: string;
-    en: string;
-    de: string;
-  };
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// name alanını dinamik olarak oluştur
+const nameFields = SUPPORTED_LOCALES.reduce((acc, lang) => {
+  acc[lang] = { type: String, required: true, trim: true };
+  return acc;
+}, {} as Record<SupportedLocale, any>);
 
 const ReferencesCategorySchema = new Schema<IReferencesCategory>(
   {
-    name: {
-      tr: { type: String, required: true, trim: true },
-      en: { type: String, required: true, trim: true },
-      de: { type: String, required: true, trim: true },
+    name: nameFields,
+    tenant: {
+      type: String,
+      required: true,
+      index: true,
     },
-    tenant: { type: String, required: true, index: true },
+
     slug: {
       type: String,
       required: true,
@@ -34,27 +24,22 @@ const ReferencesCategorySchema = new Schema<IReferencesCategory>(
       lowercase: true,
       trim: true,
     },
-    description: {
-      tr: { type: String, default: "", trim: true },
-      en: { type: String, default: "", trim: true },
-      de: { type: String, default: "", trim: true },
+
+    isActive: {
+      type: Boolean,
+      default: true,
     },
-    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-// Slug otomasyonu (herhangi bir dil varsa çalışır)
 ReferencesCategorySchema.pre("validate", function (next) {
-  const doc = this as IReferencesCategory;
-  // Varsayılan dil sırası: en > tr > de
-  const base =
-    doc.name?.en?.toLowerCase() ||
-    doc.name?.tr?.toLowerCase() ||
-    doc.name?.de?.toLowerCase() ||
-    "category";
-  if (!doc.slug && base) {
-    doc.slug = base
+  if (!this.slug && this.name) {
+    const firstValidName =
+      Object.values(this.name).find(
+        (val) => typeof val === "string" && val.trim()
+      ) || "";
+    this.slug = firstValidName
       .toLowerCase()
       .replace(/ /g, "-")
       .replace(/[^\w-]+/g, "")
@@ -65,7 +50,7 @@ ReferencesCategorySchema.pre("validate", function (next) {
 });
 
 const ReferencesCategory: Model<IReferencesCategory> =
-  models.ReferencesCategory ||
-  model<IReferencesCategory>("ReferencesCategory", ReferencesCategorySchema);
+  (models.ReferencesCategory as Model<IReferencesCategory>) ||
+  mongoose.model<IReferencesCategory>("ReferencesCategory", ReferencesCategorySchema);
 
 export { ReferencesCategory };

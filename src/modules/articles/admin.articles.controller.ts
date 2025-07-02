@@ -14,7 +14,6 @@ import {
 } from "@/core/utils/uploadUtils";
 import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
-import { extractMultilangValue } from "@/core/utils/i18n/parseMultilangField";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 import logger from "@/core/middleware/logger/logger";
@@ -35,66 +34,96 @@ const parseIfJson = (value: any) => {
 export const createArticles = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
-
     const { Articles } = await getTenantModels(req);
     const t = (key: string, params?: any) =>
       translate(key, locale, translations, params);
 
-    let { title, summary, content, tags, category, isPublished, publishedAt } =
-      req.body;
+    try {
+      let {
+        title,
+        summary,
+        content,
+        tags,
+        category,
+        isPublished,
+        publishedAt,
+      } = req.body;
 
-    title = fillAllLocales(parseIfJson(title));
-    summary = fillAllLocales(parseIfJson(summary));
-    content = fillAllLocales(parseIfJson(content));
-    tags = parseIfJson(tags);
+      title = fillAllLocales(parseIfJson(title));
+      summary = fillAllLocales(parseIfJson(summary));
+      content = fillAllLocales(parseIfJson(content));
+      tags = parseIfJson(tags);
 
-    const images: IArticles["images"] = [];
-    if (Array.isArray(req.files)) {
-      for (const file of req.files as Express.Multer.File[]) {
-        const imageUrl = getImagePath(file);
-        let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
-        if (shouldProcessImage()) {
-          const processed = await processImageLocal(
-            file.path,
-            file.filename,
-            path.dirname(file.path)
-          );
-          thumbnail = processed.thumbnail;
-          webp = processed.webp;
+      // String diziler: virgüllü veya JSON array olarak gelebilir!
+      tags = parseIfJson(tags);
+      if (typeof tags === "string") {
+        try {
+          tags = JSON.parse(tags);
+        } catch {
+          tags = [tags];
         }
-        images.push({
-          url: imageUrl,
-          thumbnail,
-          webp,
-          publicId: (file as any).public_id,
-        });
       }
+      if (!Array.isArray(tags)) tags = [];
+
+      const images: IArticles["images"] = [];
+      if (Array.isArray(req.files)) {
+        for (const file of req.files as Express.Multer.File[]) {
+          const imageUrl = getImagePath(file);
+          let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
+          if (shouldProcessImage()) {
+            const processed = await processImageLocal(
+              file.path,
+              file.filename,
+              path.dirname(file.path)
+            );
+            thumbnail = processed.thumbnail;
+            webp = processed.webp;
+          }
+          images.push({
+            url: imageUrl,
+            thumbnail,
+            webp,
+            publicId: (file as any).public_id,
+          });
+        }
+      }
+
+      const nameForSlug = title?.[locale] || title?.en || "articles";
+      const slug = slugify(nameForSlug, { lower: true, strict: true });
+
+      const articles = await Articles.create({
+        title,
+        slug,
+        summary,
+        tenant: req.tenant,
+        content,
+        tags,
+        category: isValidObjectId(category) ? category : undefined,
+        isPublished: isPublished === "true" || isPublished === true,
+        publishedAt: isPublished ? publishedAt || new Date() : undefined,
+        images,
+        author: req.user?.name || "System",
+        isActive: true,
+      });
+
+      logger.info(t("created"), {
+        ...getRequestContext(req),
+        id: articles._id,
+      });
+      res
+        .status(201)
+        .json({ success: true, message: t("created"), data: articles });
+    } catch (err: any) {
+      logger.error(t("error.create_fail"), {
+        ...getRequestContext(req),
+        event: "articles.create",
+        module: "articles",
+        status: "fail",
+        error: err.message,
+      });
+
+      res.status(500).json({ success: false, message: t("error.create_fail") });
     }
-
-    const baseTitle =
-      SUPPORTED_LOCALES.map((l) => title[l]).find((val) => val?.trim()) ||
-      "article";
-    const slug = slugify(baseTitle, { lower: true, strict: true });
-
-    const article = await Articles.create({
-      title,
-      slug,
-      summary,
-      tenant: req.tenant,
-      content,
-      tags,
-      category: isValidObjectId(category) ? category : undefined,
-      isPublished: isPublished === "true" || isPublished === true,
-      publishedAt: isPublished ? publishedAt || new Date() : undefined,
-      images,
-      author: req.user?.name || "System",
-      isActive: true,
-    });
-
-    logger.info(t("created"), { ...getRequestContext(req), id: article._id });
-    res
-      .status(201)
-      .json({ success: true, message: t("created"), data: article });
   }
 );
 
@@ -113,8 +142,8 @@ export const updateArticles = asyncHandler(
       return;
     }
 
-    const article = await Articles.findOne({ _id: id, tenant: req.tenant });
-    if (!article) {
+    const articles = await Articles.findOne({ _id: id, tenant: req.tenant });
+    if (!articles) {
       logger.warn(t("notFound"), { ...getRequestContext(req), id });
       res.status(404).json({ success: false, message: t("notFound") });
       return;
@@ -122,20 +151,20 @@ export const updateArticles = asyncHandler(
 
     const updates = req.body;
     if (updates.title) {
-      article.title = mergeLocalesForUpdate(
-        article.title,
+      articles.title = mergeLocalesForUpdate(
+        articles.title,
         parseIfJson(updates.title)
       );
     }
     if (updates.summary) {
-      article.summary = mergeLocalesForUpdate(
-        article.summary,
+      articles.summary = mergeLocalesForUpdate(
+        articles.summary,
         parseIfJson(updates.summary)
       );
     }
     if (updates.content) {
-      article.content = mergeLocalesForUpdate(
-        article.content,
+      articles.content = mergeLocalesForUpdate(
+        articles.content,
         parseIfJson(updates.content)
       );
     }
@@ -148,10 +177,10 @@ export const updateArticles = asyncHandler(
     ];
     for (const field of updatableFields) {
       if (updates[field] !== undefined)
-        (article as any)[field] = updates[field];
+        (articles as any)[field] = updates[field];
     }
 
-    if (!Array.isArray(article.images)) article.images = [];
+    if (!Array.isArray(articles.images)) articles.images = [];
     if (Array.isArray(req.files)) {
       for (const file of req.files as Express.Multer.File[]) {
         const imageUrl = getImagePath(file);
@@ -165,7 +194,7 @@ export const updateArticles = asyncHandler(
           thumbnail = processed.thumbnail;
           webp = processed.webp;
         }
-        article.images.push({
+        articles.images.push({
           url: imageUrl,
           thumbnail,
           webp,
@@ -177,7 +206,7 @@ export const updateArticles = asyncHandler(
     if (updates.removedImages) {
       try {
         const removed = JSON.parse(updates.removedImages);
-        article.images = article.images.filter(
+        articles.images = articles.images.filter(
           (img: any) => !removed.includes(img.url)
         );
         for (const img of removed) {
@@ -197,11 +226,11 @@ export const updateArticles = asyncHandler(
       }
     }
 
-    await article.save();
+    await articles.save();
     logger.info(t("updated"), { ...getRequestContext(req), id });
     res
       .status(200)
-      .json({ success: true, message: t("updated"), data: article });
+      .json({ success: true, message: t("updated"), data: articles });
   }
 );
 
@@ -245,22 +274,13 @@ export const adminGetAllArticles = asyncHandler(
       .sort({ createdAt: -1 })
       .lean();
 
-    const data = (articlesList as any[]).map((article) => ({
-      ...article,
-      title: extractMultilangValue(article.title, locale),
-      summary: extractMultilangValue(article.summary, locale),
-      content: extractMultilangValue(article.content, locale),
-      category: article.category && {
-        ...article.category,
-        title: extractMultilangValue((article.category as any).title, locale),
-      },
-    }));
-
     logger.info(t("listFetched"), {
       ...getRequestContext(req),
-      resultCount: data.length,
+      resultCount: articlesList.length,
     });
-    res.status(200).json({ success: true, message: t("listFetched"), data });
+    res
+      .status(200)
+      .json({ success: true, message: t("listFetched"), data: articlesList });
   }
 );
 
@@ -278,31 +298,20 @@ export const adminGetArticlesById = asyncHandler(
       return;
     }
 
-    const article = await Articles.findOne({ _id: id, tenant: req.tenant })
+    const articles = await Articles.findOne({ _id: id, tenant: req.tenant })
       .populate([{ path: "comments" }, { path: "category", select: "title" }])
-      .lean();
+      .lean<IArticles | null>();
 
-    if (!article || !article.isActive) {
+    if (!articles || !articles.isActive) {
       logger.warn(t("notFound"), { ...getRequestContext(req), id });
       res.status(404).json({ success: false, message: t("notFound") });
       return;
     }
 
-    const populated = article as any;
-
     res.status(200).json({
       success: true,
       message: t("fetched"),
-      data: {
-        ...populated,
-        title: extractMultilangValue(populated.title, locale),
-        summary: extractMultilangValue(populated.summary, locale),
-        content: extractMultilangValue(populated.content, locale),
-        category: populated.category && {
-          ...populated.category,
-          title: extractMultilangValue(populated.category.title, locale),
-        },
-      },
+      data: articles._id,
     });
   }
 );
@@ -321,14 +330,14 @@ export const deleteArticles = asyncHandler(
       return;
     }
 
-    const article = await Articles.findOne({ _id: id, tenant: req.tenant });
-    if (!article) {
+    const articles = await Articles.findOne({ _id: id, tenant: req.tenant });
+    if (!articles) {
       logger.warn(t("notFound"), { ...getRequestContext(req), id });
       res.status(404).json({ success: false, message: t("notFound") });
       return;
     }
 
-    for (const img of article.images || []) {
+    for (const img of articles.images || []) {
       const localPath = path.join(
         "uploads",
         "articles-images",
@@ -347,7 +356,7 @@ export const deleteArticles = asyncHandler(
       }
     }
 
-    await article.deleteOne();
+    await articles.deleteOne();
 
     logger.info(t("deleted"), { ...getRequestContext(req), id });
     res.status(200).json({ success: true, message: t("deleted") });

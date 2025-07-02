@@ -1,93 +1,154 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { isValidObjectId } from "@/core/utils/validation";
+import logger from "@/core/middleware/logger/logger";
+import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+import translations from "../about/i18n";
+import { t as translate } from "@/core/utils/i18n/translate";
 
-// ✅ Public - Get all About (optional: filter by category, language)
-export const getAllAbout = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const { category, language } = req.query;
-    const filter: Record<string, any> = {
-      isActive: true,
-      tenant: req.tenant,
-      isPublished: true,
-    };
+// 📥 GET /about (Public)
+export const getAllAbout = asyncHandler(async (req: Request, res: Response) => {
+  const { category, onlyLocalized } = req.query;
+  const locale: SupportedLocale =
+    (req.locale as SupportedLocale) || getLogLocale() || "en";
+  const t = (key: string) => translate(key, locale, translations);
+  const { About } = await getTenantModels(req);
 
-    if (category && isValidObjectId(category.toString())) {
-      filter.category = category;
-    }
+  const filter: Record<string, any> = {
+    tenant: req.tenant,
+    isActive: true,
+    isPublished: true,
+  };
 
-    if (typeof language === "string" && ["tr", "en", "de"].includes(language)) {
-      filter[`title.${language}`] = { $exists: true };
-    }
-    const { About } = await getTenantModels(req);
-    const aboutList = await About.find(filter)
-      .populate("category", "title")
-      .sort({ createdAt: -1 })
-      .lean();
-
-    res.status(200).json({
-      success: true,
-      message: "About list fetched successfully.",
-      data: aboutList,
-    });
+  if (typeof category === "string" && isValidObjectId(category)) {
+    filter.category = category;
   }
-);
 
-// ✅ Public - Get service by ID
+  if (onlyLocalized === "true") {
+    filter[`name.${locale}`] = { $exists: true };
+  }
+
+  const aboutList = await About.find(filter)
+    .populate("comments")
+    .populate("category", "name slug")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  logger.info(t("log.listed"), {
+    ...getRequestContext(req),
+    event: "about.public_list",
+    module: "about",
+    resultCount: aboutList.length,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "About list fetched successfully.",
+    data: aboutList,
+  });
+});
+
+// 📥 GET /about/:id (Public)
 export const getAboutById = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  async (req: Request, res: Response) => {
     const { id } = req.params;
+    const locale: SupportedLocale =
+      (req.locale as SupportedLocale) || getLogLocale() || "en";
+    const t = (key: string) => translate(key, locale, translations);
+    const { About } = await getTenantModels(req);
 
     if (!isValidObjectId(id)) {
-      res.status(400).json({ success: false, message: "Invalid service ID." });
+      logger.warn(t("error.invalid_id"), {
+        ...getRequestContext(req),
+        event: "about.public_getById",
+        module: "about",
+        status: "fail",
+        id,
+      });
+      res.status(400).json({ success: false, message: t("error.invalid_id") });
       return;
     }
-    const { About } = await getTenantModels(req);
+
     const about = await About.findOne({
       _id: id,
-      tenant: req.tenant,
       isActive: true,
       isPublished: true,
+      tenant: req.tenant,
     })
+      .populate("comments")
       .populate("category", "title")
       .lean();
 
     if (!about) {
-      res.status(404).json({ success: false, message: "Service not found." });
+      logger.warn(t("error.not_found"), {
+        ...getRequestContext(req),
+        event: "about.public_getById",
+        module: "about",
+        status: "fail",
+        id,
+      });
+      res.status(404).json({ success: false, message: t("error.not_found") });
       return;
     }
+    logger.info(t("log.fetched"), {
+      ...getRequestContext(req),
+      event: "about.public_getById",
+      module: "about",
+      aboutId: about._id,
+    });
 
     res.status(200).json({
       success: true,
-      message: "Service fetched successfully.",
+      message: t("log.fetched"),
       data: about,
     });
   }
 );
 
-// ✅ Public - Get service by Slug
+// 📥 GET /about/slug/:slug (Public)
 export const getAboutBySlug = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const { slug } = req.params;
+  async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
+    const t = (key: string) => translate(key, locale, translations);
     const { About } = await getTenantModels(req);
+    const { slug } = req.params;
+
     const about = await About.findOne({
       slug,
       tenant: req.tenant,
       isActive: true,
       isPublished: true,
     })
+      .populate("comments")
       .populate("category", "title")
       .lean();
 
     if (!about) {
-      res.status(404).json({ success: false, message: "Service not found." });
+      logger.warn(t("error.not_found"), {
+        ...getRequestContext(req),
+        event: "about.public_getBySlug",
+        module: "about",
+        status: "fail",
+        slug,
+      });
+      res.status(404).json({ success: false, message: t("error.not_found") });
       return;
     }
 
+    logger.info(t("log.fetched"), {
+      ...getRequestContext(req),
+      event: "about.public_getBySlug",
+      module: "about",
+      slug,
+      aboutId: about._id,
+    });
+
     res.status(200).json({
       success: true,
-      message: "Service fetched successfully.",
+      message: t("log.fetched"),
       data: about,
     });
   }

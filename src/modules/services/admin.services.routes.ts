@@ -1,3 +1,4 @@
+// src/modules/services/admin.services.routes.ts
 import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
@@ -7,28 +8,28 @@ import {
   deleteServices,
   createServices,
 } from "./admin.services.controller";
+
 import {
   validateObjectId,
   validateCreateServices,
   validateUpdateServices,
   validateAdminQuery,
 } from "./services.validation";
+
 import { upload } from "@/core/middleware/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
 
-// 🔐 Admin erişim kontrolü
+// 🌟 Admin Middleware
 router.use(authenticate, authorizeRoles("admin", "moderator"));
 
-// 🔍 Listeleme
+// 🌟 Admin Endpoints
 router.get("/", validateAdminQuery, adminGetAllServices);
 
-// 🔍 Detay
 router.get("/:id", validateObjectId("id"), adminGetServicesById);
 
-// ➕ Oluşturma
 router.post(
   "/",
   uploadTypeWrapper("services"),
@@ -38,7 +39,6 @@ router.post(
   createServices
 );
 
-// ✏️ Güncelleme
 router.put(
   "/:id",
   uploadTypeWrapper("services"),
@@ -49,7 +49,6 @@ router.put(
   updateServices
 );
 
-// 🗑 Silme
 router.delete("/:id", validateObjectId("id"), deleteServices);
 
 export default router;

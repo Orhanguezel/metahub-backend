@@ -1,31 +1,33 @@
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
+import { validateMultilangField } from "@/core/utils/i18n/validationUtils";
 
-// 🔍 ID parametresi için ObjectId doğrulaması
-export const validateObjectIdParam = [
-  param("id").isMongoId().withMessage("Invalid MongoDB ObjectId."),
+// ✅ ObjectId kontrolü
+export const validateObjectId = (field: string) => [
+  param(field).isMongoId().withMessage(`${field} must be a valid ObjectId.`),
   validateRequest,
 ];
 
-// ➕ Kategori oluşturma doğrulaması (çok dilli description kontrolü)
-export const validateCreateReferenceCategory = [
-  body("name.tr").notEmpty().withMessage("Name (TR) is required."),
-  body("name.en").notEmpty().withMessage("Name (EN) is required."),
-  body("name.de").notEmpty().withMessage("Name (DE) is required."),
-  body("description.tr").optional().isString().withMessage("Description (TR) must be a string."),
-  body("description.en").optional().isString().withMessage("Description (EN) must be a string."),
-  body("description.de").optional().isString().withMessage("Description (DE) must be a string."),
+// ✅ Create (→ En az bir dil zorunlu)
+export const validateCreateReferencesCategory = [
+  validateMultilangField("name"), // merkezi helper kullanıldı
   validateRequest,
 ];
 
-// ✏️ Kategori güncelleme doğrulaması (çok dilli description kontrolü)
-export const validateUpdateReferenceCategory = [
-  body("name.tr").optional().isString().withMessage("Name (TR) must be a string."),
-  body("name.en").optional().isString().withMessage("Name (EN) must be a string."),
-  body("name.de").optional().isString().withMessage("Name (DE) must be a string."),
-  body("description.tr").optional().isString().withMessage("Description (TR) must be a string."),
-  body("description.en").optional().isString().withMessage("Description (EN) must be a string."),
-  body("description.de").optional().isString().withMessage("Description (DE) must be a string."),
-  body("isActive").optional().isBoolean().withMessage("isActive must be a boolean."),
+// ✅ Update (→ Opsiyonel: ama field geldiyse yine geçerli olmalı)
+export const validateUpdateReferencesCategory = [
+  body("name")
+    .optional()
+    .custom((value) => {
+      const obj = typeof value === "string" ? JSON.parse(value) : value;
+      if (obj && typeof obj !== "object")
+        throw new Error(`name must be an object.`);
+      for (const [lang, val] of Object.entries(obj || {})) {
+        if (val && typeof val !== "string") {
+          throw new Error(`name.${lang} must be a string.`);
+        }
+      }
+      return true;
+    }),
   validateRequest,
 ];

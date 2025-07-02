@@ -30,8 +30,8 @@ export type SettingValue =
 
 export interface ISetting {
   key: string;
-  tenant: string;            // Tenant context zorunlu
-  value: SettingValue;       // Standart ve sade union
+  tenant: string; // Tenant context zorunlu
+  value: SettingValue; // Standart ve sade union
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -49,7 +49,7 @@ const SettingSchema = new Schema<ISetting>(
     tenant: {
       type: String,
       required: [true, "Tenant is required."], // Mutlaka tenant contexti zorunlu
-      index: true,                            // Performans için
+      index: true, // Performans için
     },
     value: {
       type: Schema.Types.Mixed,
@@ -67,6 +67,7 @@ const SettingSchema = new Schema<ISetting>(
 SettingSchema.index({ tenant: 1, key: 1 }, { unique: true });
 
 // Global model kullanılmaz, mutlaka tenant-aware injection yapılmalı!
-const Setting: Model<ISetting> = models.Setting || model<ISetting>("Setting", SettingSchema);
+const Setting: Model<ISetting> =
+  models.Setting || model<ISetting>("Setting", SettingSchema);
 
 export { Setting };

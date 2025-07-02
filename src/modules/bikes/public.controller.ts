@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { Bike } from "@/modules/bikes";
 import { isValidObjectId } from "@/core/utils/validation";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
@@ -13,7 +12,6 @@ import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 // ✅ Get All Published Products (Public)
 export const getAllBike = asyncHandler(async (req: Request, res: Response) => {
   const { category, onlyLocalized } = req.query;
-
   const locale: SupportedLocale =
     (req.locale as SupportedLocale) || getLogLocale() || "en";
   const t = (key: string) => translate(key, locale, translations);

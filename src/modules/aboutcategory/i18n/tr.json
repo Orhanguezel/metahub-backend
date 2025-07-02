@@ -1,0 +1,14 @@
+{
+  "aboutcategory.validation.invalidNameType": "İsim, dillerle birlikte bir nesne olmalıdır.",
+  "aboutcategory.validation.localeMissing": "Name.{{lang}} zorunludur ve boş olamaz.",
+  "aboutcategory.validation.localeInvalid": "Name.{{lang}} bir metin (string) olmalıdır.",
+  "aboutcategory.create.success": "'{{name}}' kategorisi başarıyla oluşturuldu.",
+  "aboutcategory.create.error": "Kategori oluşturulamadı.",
+  "aboutcategory.update.success": "'{{name}}' kategorisi başarıyla güncellendi.",
+  "aboutcategory.delete.success": "'{{name}}' kategorisi başarıyla silindi.",
+  "aboutcategory.list.success": "Kategoriler başarıyla listelendi.",
+  "aboutcategory.list.error": "Kategoriler alınırken hata oluştu.",
+  "aboutcategory.fetch.success": "Kategori başarıyla getirildi.",
+  "aboutcategory.notFound": "Kategori bulunamadı.",
+  "aboutcategory.invalidId": "Geçersiz kategori ID’si."
+}

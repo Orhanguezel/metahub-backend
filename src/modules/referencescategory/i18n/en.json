@@ -1,0 +1,14 @@
+{
+  "referencescategory.validation.invalidNameType": "Name must be an object with locales.",
+  "referencescategory.validation.localeMissing": "Name.{{lang}} is required and must be a non-empty string.",
+  "referencescategory.validation.localeInvalid": "Name.{{lang}} must be a string.",
+  "referencescategory.create.success": "Category '{{name}}' created successfully.",
+  "referencescategory.create.error": "Failed to create category.",
+  "referencescategory.update.success": "Category '{{name}}' updated successfully.",
+  "referencescategory.delete.success": "Category '{{name}}' deleted successfully.",
+  "referencescategory.list.success": "Categories listed successfully.",
+  "referencescategory.list.error": "Failed to fetch categories.",
+  "referencescategory.fetch.success": "Category fetched successfully.",
+  "referencescategory.notFound": "Category not found.",
+  "referencescategory.invalidId": "Invalid category ID."
+}

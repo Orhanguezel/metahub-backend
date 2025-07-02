@@ -36,7 +36,6 @@ export const resolveTenant = async (
   const tenantHeader = req.headers["x-tenant"]?.toString().trim() || "";
   let tenantDoc = null;
 
-
   // 1️⃣ Süperadmin için x-tenant override (PROD ve DEV)
   if (tenantHeader && req.user && req.user.role === "superadmin") {
     tenantDoc = await Tenants.findOne({
@@ -80,11 +79,6 @@ export const resolveTenant = async (
       normalizedHost.startsWith("127.0.0.1:")
     ) {
       tenantDoc = await Tenants.findOne({ slug: "metahub" }).lean();
-      logger.info(
-        `[DEBUG] [TENANT] DEV fallback: localhost/127.0.0.1 için metahub kullanıldı. tenant: ${
-          tenantDoc?.slug || "null"
-        }, mongoUri: ${tenantDoc?.mongoUri}`
-      );
     }
   }
 

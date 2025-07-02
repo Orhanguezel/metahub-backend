@@ -6,18 +6,20 @@ import {
   updateBlogCategory,
   deleteBlogCategory,
 } from "./blogcategory.controller";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
   validateCreateBlogCategory,
   validateUpdateBlogCategory,
   validateObjectId,
 } from "./blogcategory.validation";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 
 const router = express.Router();
 
+// 🌿 Public Routes
 router.get("/", getAllBlogCategories);
 router.get("/:id", validateObjectId("id"), getBlogCategoryById);
 
+// 🔐 Admin Routes
 router.post(
   "/",
   authenticate,

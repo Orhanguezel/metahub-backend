@@ -1,26 +1,13 @@
 {
-  "blog.log.created": "Blog erstellt: ID: {id}, Slug: {slug}",
-  "blog.log.admin_list": "Alle Blogs (Admin) aufgelistet. Gesamt: {count}",
-  "blog.log.invalid_id": "Ungültige Blog-ID: {id}",
-  "blog.log.not_found": "Blog nicht gefunden: {id}",
-  "blog.log.admin_detail": "Admin-Blog-Details abgerufen: {id}",
-  "blog.log.updated": "Blog aktualisiert: ID: {id}, Slug: {slug}",
-  "blog.log.invalid_removed_images": "Ungültige removedImages JSON.",
-  "blog.log.cloudinary_delete_error": "Cloudinary-Löschfehler. PublicId: {publicId}",
-  "blog.log.deleted": "Blog gelöscht: ID: {id}, Slug: {slug}",
-  "blog.log.public_list": "Alle öffentlichen Blogs aufgelistet. Gesamt: {count}",
-  "blog.log.public_detail": "Öffentliche Blog-Details abgerufen: {id}",
-  "blog.log.public_detail_slug": "Öffentliche Blog-Details abgerufen: {slug}",
-  "blog.log.not_found_slug": "Blog mit Slug nicht gefunden: {slug}",
-
-  "blog.create.success": "Blog erfolgreich erstellt: {title}",
-  "blog.admin.list.success": "Blogliste erfolgreich abgerufen. Gesamt: {count}",
-  "blog.invalid_id": "Ungültige Blog-ID: {id}",
-  "blog.not_found": "Blog nicht gefunden.",
-  "blog.admin.detail.success": "Blogdetails erfolgreich abgerufen.",
-  "blog.update.success": "Blog erfolgreich aktualisiert: {id}",
-  "blog.delete.success": "Blog erfolgreich gelöscht: {id}",
-  "blog.detail.success": "Blogdetails erfolgreich abgerufen.",
-  "blog.list.success": "Blogliste erfolgreich abgerufen. Gesamt: {count}"
+  "created": "Artikel erfolgreich erstellt.",
+  "updated": "Artikel erfolgreich aktualisiert.",
+  "invalidId": "Ungültige ID.",
+  "notFound": "Artikel nicht gefunden.",
+  "fetched": "Artikel erfolgreich abgerufen.",
+  "deleted": "Artikel erfolgreich gelöscht.",
+  "invalidRemovedImages": "Ungültige entfernte Bilder.",
+  "listFetched": "Artikel Liste erfolgreich abgerufen.",
+  "tagsArray": "Tags-Array ist ungültig.",
+  "invalidCategory": "Ungültige Kategorie.",
+  "booleanField": "Bitte geben Sie einen gültigen booleschen Wert ein."
 }
-

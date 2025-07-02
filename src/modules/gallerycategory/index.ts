@@ -1,12 +1,13 @@
 import express from "express";
 import routes from "./gallerycategory.routes";
-import { GalleryCategory } from "./gallerycategory.models";
-import * as GalleryCategoryController from "./gallerycategory.controller";
+import {GalleryCategory} from "./gallerycategory.models";
+import * as gallerycategoryController from "./gallerycategory.controller";
 
 const router = express.Router();
 router.use("/", routes);
 
-// ✅ Named Exports (standards)
-export { GalleryCategory, GalleryCategoryController };
+export { GalleryCategory, gallerycategoryController };
+export * from "./gallerycategory.models";
 export * from "./gallerycategory.validation";
+
 export default router;

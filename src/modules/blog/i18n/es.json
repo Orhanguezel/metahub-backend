@@ -1,26 +1,13 @@
 {
-  "blog.log.created": "Blog creado: ID: {id}, Slug: {slug}",
-  "blog.log.admin_list": "Todos los blogs (admin) listados. Total: {count}",
-  "blog.log.invalid_id": "ID de blog no válido: {id}",
-  "blog.log.not_found": "Blog no encontrado: {id}",
-  "blog.log.admin_detail": "Detalles del blog de admin obtenidos: {id}",
-  "blog.log.updated": "Blog actualizado: ID: {id}, Slug: {slug}",
-  "blog.log.invalid_removed_images": "JSON removedImages inválido.",
-  "blog.log.cloudinary_delete_error": "Error al eliminar en Cloudinary. PublicId: {publicId}",
-  "blog.log.deleted": "Blog eliminado: ID: {id}, Slug: {slug}",
-  "blog.log.public_list": "Todos los blogs públicos listados. Total: {count}",
-  "blog.log.public_detail": "Detalles del blog público obtenidos: {id}",
-  "blog.log.public_detail_slug": "Detalles del blog público obtenidos: {slug}",
-  "blog.log.not_found_slug": "Blog no encontrado por slug: {slug}",
-
-  "blog.create.success": "Blog creado correctamente: {title}",
-  "blog.admin.list.success": "Lista de blogs obtenida correctamente. Total: {count}",
-  "blog.invalid_id": "ID de blog no válido: {id}",
-  "blog.not_found": "Blog no encontrado.",
-  "blog.admin.detail.success": "Detalles del blog obtenidos correctamente.",
-  "blog.update.success": "Blog actualizado correctamente: {id}",
-  "blog.delete.success": "Blog eliminado correctamente: {id}",
-  "blog.detail.success": "Detalles del blog obtenidos correctamente.",
-  "blog.list.success": "Lista de blogs obtenida correctamente. Total: {count}"
+  "created": "Artículo creado con éxito.",
+  "updated": "Artículo actualizado con éxito.",
+  "invalidId": "ID no válido.",
+  "notFound": "Artículo no encontrado.",
+  "fetched": "Artículo obtenido con éxito.",
+  "deleted": "Artículo eliminado con éxito.",
+  "invalidRemovedImages": "Imágenes eliminadas no válidas.",
+  "listFetched": "Lista de artículos obtenida con éxito.",
+  "tagsArray": "El array de etiquetas no es válido.",
+  "invalidCategory": "Categoría no válida.",
+  "booleanField": "Por favor, ingrese un valor booleano válido."
 }
-

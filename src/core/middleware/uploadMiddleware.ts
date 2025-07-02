@@ -51,6 +51,7 @@ export const UPLOAD_FOLDERS = {
   about: "about-images",
   apartment: "apartment-images",
   tenant: "tenant-images",
+  coupons: "coupons-images",
   default: "misc",
 } as const;
 

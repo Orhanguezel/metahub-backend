@@ -56,6 +56,7 @@ declare global {
         | "company"
         | "apartment"
         | "tenant"
+        | "coupons"
         | "default";
 
       uploadSizeLimit?: number;

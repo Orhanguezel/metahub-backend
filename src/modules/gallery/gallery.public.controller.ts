@@ -1,14 +1,22 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { Gallery } from "@/modules/gallery";
-//import { GalleryCategory } from "@/modules/gallerycategory";
 import { isValidObjectId } from "@/core/utils/validation";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+import { extractMultilangValue } from "@/core/utils/i18n/parseMultilangField";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import {  SupportedLocale } from "@/types/common";
+import logger from "@/core/middleware/logger/logger";
+import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
+import { t as translate } from "@/core/utils/i18n/translate";
+import translations from "./i18n";
+import { IGallerySubItem } from "./types";
 
 // ✅ Get published gallery items
 export const getPublishedGalleryItems = asyncHandler(
   async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
     const { Gallery } = await getTenantModels(req);
+    const t = (key: string) => translate(key, locale, translations);
     const { page = "1", limit = "10", category } = req.query;
     const pageNum = parseInt(page as string);
     const limitNum = parseInt(limit as string);
@@ -30,10 +38,17 @@ export const getPublishedGalleryItems = asyncHandler(
       Gallery.countDocuments(filters),
     ]);
 
+    // Ensuring the proper typing for the item
+    const data = items.map((item: any) => ({
+      ...item,
+      title: extractMultilangValue(item.title, locale),
+      description: extractMultilangValue(item.description, locale),
+    }));
+
     res.status(200).json({
       success: true,
-      message: "Published gallery items fetched successfully.",
-      data: items,
+      message: t("galleryItemsFetched"),
+      data,
       pagination: {
         total,
         page: pageNum,
@@ -43,16 +58,19 @@ export const getPublishedGalleryItems = asyncHandler(
   }
 );
 
+
 // ✅ Get published gallery items by category
 export const getPublishedGalleryItemsByCategory = asyncHandler(
   async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
     const { Gallery } = await getTenantModels(req);
+    const t = (key: string) => translate(key, locale, translations);
     const { category } = req.params;
 
     if (!category) {
       res
         .status(400)
-        .json({ success: false, message: "Category parameter is required." });
+        .json({ success: false, message: t("categoryRequired") });
       return;
     }
 
@@ -65,34 +83,48 @@ export const getPublishedGalleryItemsByCategory = asyncHandler(
       .sort({ priority: -1, createdAt: -1 })
       .lean();
 
+    const data = items.map((item: any) => ({
+      ...item,
+      title: extractMultilangValue(item.title, locale),
+      description: extractMultilangValue(item.description, locale),
+    }));
+
     res.status(200).json({
       success: true,
-      message: "Published gallery items by category fetched successfully.",
-      data: items,
+      message: t("galleryItemsByCategoryFetched"),
+      data,
     });
   }
 );
 
+
 // ✅ Get gallery categories
 export const getGalleryCategories = asyncHandler(
   async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
     const { Gallery } = await getTenantModels(req);
+    const t = (key: string) => translate(key, locale, translations);
+
     const categories = await Gallery.distinct("category", {
       tenant: req.tenant,
     });
 
     res.status(200).json({
       success: true,
-      message: "Gallery categories fetched successfully.",
+      message: t("galleryCategoriesFetched"),
       data: categories,
     });
   }
 );
 
+
 // ✅ Search + filter
 export const searchGalleryItems = asyncHandler(
   async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
     const { Gallery } = await getTenantModels(req);
+    const t = (key: string) => translate(key, locale, translations);
+
     const {
       search,
       isPublished,
@@ -125,10 +157,16 @@ export const searchGalleryItems = asyncHandler(
       Gallery.countDocuments(filters),
     ]);
 
+    const data = items.map((item: any) => ({
+      ...item,
+      title: extractMultilangValue(item.title, locale),
+      description: extractMultilangValue(item.description, locale),
+    }));
+
     res.status(200).json({
       success: true,
-      message: "Filtered gallery items fetched successfully.",
-      data: items,
+      message: t("filteredGalleryItemsFetched"),
+      data,
       pagination: {
         total,
         page: pageNum,
@@ -138,10 +176,14 @@ export const searchGalleryItems = asyncHandler(
   }
 );
 
+
 // ✅ Dashboard stats
 export const getGalleryStats = asyncHandler(
   async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
     const { Gallery } = await getTenantModels(req);
+    const t = (key: string) => translate(key, locale, translations);
+
     const [total, published, active, categories] = await Promise.all([
       Gallery.countDocuments({ tenant: req.tenant }),
       Gallery.countDocuments({ isPublished: true, tenant: req.tenant }),
@@ -152,14 +194,19 @@ export const getGalleryStats = asyncHandler(
       ]),
     ]);
 
+    const categoriesData = categories.map((category) => ({
+      ...category,
+      title: extractMultilangValue(category._id, locale), // Kategori başlığını dil bazlı alıyoruz
+    }));
+
     res.status(200).json({
       success: true,
-      message: "Gallery stats fetched successfully.",
+      message: t("galleryStatsFetched"),
       data: {
         total,
         published,
         active,
-        categories: categories.reduce((acc, cur) => {
+        categories: categoriesData.reduce((acc, cur) => {
           acc[cur._id] = cur.count;
           return acc;
         }, {} as Record<string, number>),
@@ -171,35 +218,56 @@ export const getGalleryStats = asyncHandler(
 // ✅ Get gallery item by ID
 export const getGalleryItemById = asyncHandler(
   async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
     const { Gallery } = await getTenantModels(req);
+    const t = (key: string) => translate(key, locale, translations);
     const { id } = req.params;
 
+    // Validate ObjectId
     if (!isValidObjectId(id)) {
-      res.status(400).json({ success: false, message: "Invalid gallery ID." });
+      res.status(400).json({ success: false, message: t("invalidGalleryId") });
       return;
     }
 
+    // Fetch gallery item from the database
     const item = await Gallery.findOne({ _id: id, tenant: req.tenant }).lean();
 
+    // If item not found
     if (!item) {
       res
         .status(404)
-        .json({ success: false, message: "Gallery item not found." });
+        .json({ success: false, message: t("galleryItemNotFound") });
       return;
     }
 
+    // Assuming the item structure includes localized fields for title and description
+    const data = {
+      ...item,
+      items: item.items.map((subItem: IGallerySubItem) => ({
+        ...subItem,
+        title: extractMultilangValue(subItem.title, locale),  // Localized title
+        description: extractMultilangValue(subItem.description, locale),  // Localized description
+      })),
+    };
+
     res.status(200).json({
       success: true,
-      message: "Gallery item fetched successfully.",
-      data: item,
+      message: t("galleryItemFetched"),
+      data,
     });
   }
 );
 
+
+
+
 // ✅ Get published gallery categories (only isActive: true)
 export const getPublishedGalleryCategories = asyncHandler(
   async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
     const { GalleryCategory } = await getTenantModels(req);
+    const t = (key: string) => translate(key, locale, translations);
+
     const categories = await GalleryCategory.find({
       isActive: true,
       tenant: req.tenant,
@@ -207,10 +275,15 @@ export const getPublishedGalleryCategories = asyncHandler(
       .sort({ createdAt: -1 })
       .lean();
 
+    const data = categories.map((category:any) => ({
+      ...category,
+      title: extractMultilangValue(category.title, locale),
+    }));
+
     res.status(200).json({
       success: true,
-      message: "Published gallery categories fetched successfully.",
-      data: categories,
+      message: t("galleryCategoriesFetched"),
+      data,
     });
   }
 );

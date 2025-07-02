@@ -1,0 +1,25 @@
+{
+  "validation": {
+    "invalidObjectId": "{{field}} geçerli bir MongoDB ObjectId olmalıdır.",
+    "invalidCategory": "Geçersiz kategori ID'si.",
+    "tagsArray": "Etiketler bir dizi olmalıdır.",
+    "booleanField": "Bu alan boolean türünde olmalıdır.",
+    "invalidLanguage": "Dil şu değerlerden biri olmalıdır: tr, en, de, pl, fr, es.",
+    "invalidRemovedImages": "RemovedImages alanı geçersiz formata sahiptir.",
+    "title_tr": "Başlık bir dizi veya metin olmalıdır.",
+    "desc_tr": "Açıklama bir dizi veya metin olmalıdır."
+  },
+  "gallery": {
+    "created": "Galeri öğesi başarıyla oluşturuldu.",
+    "updated": "Galeri öğesi başarıyla güncellendi.",
+    "invalidGalleryId": "Geçersiz galeri ID'si.",
+    "galleryItemNotFound": "Galeri öğesi bulunamadı.",
+    "galleryItemsFetched": "Galeri öğeleri başarıyla getirildi.",
+    "categoryRequired": "Kategori parametresi gereklidir.",
+    "galleryItemPublished": "Galeri öğesi başarıyla yayımlandı.",
+    "galleryItemUnpublished": "Galeri öğesi yayımlandı kaldırıldı.",
+    "galleryCategoriesFetched": "Galeri kategorileri başarıyla getirildi.",
+    "filteredGalleryItemsFetched": "Filtrelenmiş galeri öğeleri başarıyla getirildi.",
+    "galleryStatsFetched": "Galeri istatistikleri başarıyla getirildi."
+  }
+}

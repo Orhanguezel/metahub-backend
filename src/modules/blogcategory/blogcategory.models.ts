@@ -1,26 +1,22 @@
 import mongoose, { Schema, Types, Model, models } from "mongoose";
+import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import { IBlogCategory } from "./types";
 
-export interface IBlogCategory  {
-  name: {
-    tr: string;
-    en: string;
-    de: string;
-  };
-  slug: string;
-  tenant: string; // Optional tenant field for multi-tenancy
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// name alanını dinamik olarak oluştur
+const nameFields = SUPPORTED_LOCALES.reduce((acc, lang) => {
+  acc[lang] = { type: String, required: true, trim: true };
+  return acc;
+}, {} as Record<SupportedLocale, any>);
 
 const BlogCategorySchema = new Schema<IBlogCategory>(
   {
-    name: {
-      tr: { type: String, required: true, trim: true },
-      en: { type: String, required: true, trim: true },
-      de: { type: String, required: true, trim: true },
+    name: nameFields,
+    tenant: {
+      type: String,
+      required: true,
+      index: true,
     },
-    tenant: { type: String, required: true, index: true },
+
     slug: {
       type: String,
       required: true,
@@ -28,6 +24,7 @@ const BlogCategorySchema = new Schema<IBlogCategory>(
       lowercase: true,
       trim: true,
     },
+
     isActive: {
       type: Boolean,
       default: true,
@@ -37,8 +34,12 @@ const BlogCategorySchema = new Schema<IBlogCategory>(
 );
 
 BlogCategorySchema.pre("validate", function (next) {
-  if (!this.slug && this.name?.en) {
-    this.slug = this.name.en
+  if (!this.slug && this.name) {
+    const firstValidName =
+      Object.values(this.name).find(
+        (val) => typeof val === "string" && val.trim()
+      ) || "";
+    this.slug = firstValidName
       .toLowerCase()
       .replace(/ /g, "-")
       .replace(/[^\w-]+/g, "")
@@ -48,10 +49,8 @@ BlogCategorySchema.pre("validate", function (next) {
   next();
 });
 
-
-// ✅ Guard + Model Type
-const BlogCategory: Model<IBlogCategory>=
-(models.BlogCategory as Model<IBlogCategory>) || mongoose.model<IBlogCategory>("BlogCategory", BlogCategorySchema);
+const BlogCategory: Model<IBlogCategory> =
+  (models.BlogCategory as Model<IBlogCategory>) ||
+  mongoose.model<IBlogCategory>("BlogCategory", BlogCategorySchema);
 
 export { BlogCategory };
-

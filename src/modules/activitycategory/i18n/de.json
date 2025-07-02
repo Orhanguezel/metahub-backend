@@ -1,0 +1,14 @@
+{
+  "activitycategory.validation.invalidNameType": "Name muss ein Objekt mit Übersetzungen sein.",
+  "activitycategory.validation.localeMissing": "Name.{{lang}} ist erforderlich und darf nicht leer sein.",
+  "activitycategory.validation.localeInvalid": "Name.{{lang}} muss ein String sein.",
+  "activitycategory.create.success": "Kategorie '{{name}}' wurde erfolgreich erstellt.",
+  "activitycategory.create.error": "Kategorie konnte nicht erstellt werden.",
+  "activitycategory.update.success": "Kategorie '{{name}}' wurde erfolgreich aktualisiert.",
+  "activitycategory.delete.success": "Kategorie '{{name}}' wurde erfolgreich gelöscht.",
+  "activitycategory.list.success": "Kategorien wurden erfolgreich aufgelistet.",
+  "activitycategory.list.error": "Fehler beim Abrufen der Kategorien.",
+  "activitycategory.fetch.success": "Kategorie erfolgreich abgerufen.",
+  "activitycategory.notFound": "Kategorie nicht gefunden.",
+  "activitycategory.invalidId": "Ungültige Kategorie-ID."
+}

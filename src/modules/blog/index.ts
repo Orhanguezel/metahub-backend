@@ -3,7 +3,7 @@
 import express from "express";
 import adminRoutes from "./admin.blog.routes";
 import publicRoutes from "./public.blog.routes";
-import  {Blog} from "./blog.models";
+import { Blog } from "./blog.models";
 import * as adminController from "./admin.blog.controller";
 import * as publicController from "./public.blog.controller";
 import * as validation from "./blog.validation";
@@ -16,14 +16,7 @@ router.use("/admin", adminRoutes);
 // 🌍 Public Routes
 router.use("/", publicRoutes);
 
-
-
 // ✅ Exports (standardized)
-export {
-  Blog,
-  adminController,
-  publicController,
-  validation,
-};
+export { Blog, adminController, publicController, validation };
 
 export default router;

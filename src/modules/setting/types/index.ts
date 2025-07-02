@@ -1,5 +1,8 @@
-import type { SupportedLocale, TranslatedLabel } from "@/types/common";
+// src/modules/setting/types/index.ts
 
+import type { TranslatedLabel, SupportedLocale } from "@/types/common";
+
+// Logo değeri tipi
 export interface ILogoSettingValue {
   light?: {
     url: string;
@@ -15,36 +18,23 @@ export interface ILogoSettingValue {
   };
 }
 
-export interface ISetting {
-  key: string;
-  tenant: string; // Optional tenant field for multi-tenancy
-  value:
-    | string
-    | string[]
-    | TranslatedLabel
-    | Record<string, any>
-    | ILogoSettingValue;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
+// Labeled link (örn: sosyal link)
 export interface ILabeledLink {
   label: TranslatedLabel;
   href?: string;
   url?: string;
   icon?: string;
-  tenant?: string; // Optional tenant field for multi-tenancy
+  tenant?: string;
 }
 
-// Sosyal link
+// Sosyal link tipi
 export interface ISocialLink {
   url: string;
   icon: string;
-  tenant: string; // Optional tenant field for multi-tenancy
+  tenant: string;
 }
 
-// Setting value union
+// Value union
 export type ISettingValue =
   | string
   | string[]
@@ -62,4 +52,15 @@ export type ISettingValue =
     }
   | {
       phone: string;
-    };
+    }
+  | Record<string, any>;
+
+// Asıl Setting Modeli
+export interface ISetting {
+  key: string;
+  tenant: string;
+  value: ISettingValue;
+  isActive: boolean;
+  createdAt: string; // Date yerine string, API’dan öyle geliyor
+  updatedAt: string;
+}

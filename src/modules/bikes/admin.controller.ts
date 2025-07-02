@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { Bike } from "@/modules/bikes";
 import { IBike } from "@/modules/bikes/types";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
@@ -46,7 +45,6 @@ export const createBike = asyncHandler(async (req: Request, res: Response) => {
       category,
       brand,
       price,
-      tenant,
       stock,
       stockThreshold,
       frameMaterial,

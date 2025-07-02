@@ -1,3 +1,4 @@
+// src/modules/news/public.news.routes.ts
 import express from "express";
 import {
   getAllNews,
@@ -9,8 +10,8 @@ import { validateObjectId } from "./news.validation";
 const router = express.Router();
 
 // 🌿 Public Endpoints
-router.get("/", getAllNews); // tüm haberler
-router.get("/slug/:slug", getNewsBySlug); // slug ile haber
-router.get("/:id", validateObjectId("id"), getNewsById); // id ile haber
+router.get("/", getAllNews);
+router.get("/slug/:slug", getNewsBySlug);
+router.get("/:id", validateObjectId("id"), getNewsById);
 
 export default router;

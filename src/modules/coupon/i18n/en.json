@@ -1,0 +1,30 @@
+{
+  "validation": {
+    "invalidObjectId": "Invalid ObjectId.",
+    "requiredField": "{field} is required.",
+    "invalidField": "{field} is an invalid field.",
+    "tagsArray": "Tags must be an array.",
+    "invalidCategory": "Invalid category.",
+    "booleanField": "{field} must be either true or false.",
+    "invalidDiscount": "Invalid discount.",
+    "discountRange": "Discount must be between 1% and 100%.",
+    "invalidDate": "Invalid date format.",
+    "invalidLanguage": "Invalid language.",
+    "invalidRemovedImages": "Invalid removed images.",
+    "created": "Coupon created successfully.",
+    "updated": "Coupon updated successfully.",
+    "deleted": "Coupon deleted successfully.",
+    "listFetched": "Coupons fetched successfully.",
+    "fetched": "Coupon fetched successfully.",
+    "notFound": "Coupon not found.",
+    "invalidId": "Invalid coupon ID."
+  },
+  "coupon": {
+    "created": "Coupon created successfully.",
+    "updated": "Coupon updated successfully.",
+    "deleted": "Coupon deleted successfully.",
+    "listFetched": "Coupons fetched successfully.",
+    "fetched": "Coupon fetched successfully.",
+    "notFound": "Coupon not found."
+  }
+}

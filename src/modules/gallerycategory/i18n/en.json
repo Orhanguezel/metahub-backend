@@ -1,0 +1,14 @@
+{
+  "gallerycategory.validation.invalidNameType": "Name must be an object with locales.",
+  "gallerycategory.validation.localeMissing": "Name.{{lang}} is required and must be a non-empty string.",
+  "gallerycategory.validation.localeInvalid": "Name.{{lang}} must be a string.",
+  "gallerycategory.create.success": "Category '{{name}}' created successfully.",
+  "gallerycategory.create.error": "Failed to create category.",
+  "gallerycategory.update.success": "Category '{{name}}' updated successfully.",
+  "gallerycategory.delete.success": "Category '{{name}}' deleted successfully.",
+  "gallerycategory.list.success": "Categories listed successfully.",
+  "gallerycategory.list.error": "Failed to fetch categories.",
+  "gallerycategory.fetch.success": "Category fetched successfully.",
+  "gallerycategory.notFound": "Category not found.",
+  "gallerycategory.invalidId": "Invalid category ID."
+}

@@ -1,0 +1,14 @@
+{
+  "newscategory.validation.invalidNameType": "Le nom doit être un objet avec des traductions.",
+  "newscategory.validation.localeMissing": "Name.{{lang}} est requis et ne peut pas être vide.",
+  "newscategory.validation.localeInvalid": "Name.{{lang}} doit être une chaîne de caractères.",
+  "newscategory.create.success": "Catégorie '{{name}}' créée avec succès.",
+  "newscategory.create.error": "Échec de la création de la catégorie.",
+  "newscategory.update.success": "Catégorie '{{name}}' mise à jour avec succès.",
+  "newscategory.delete.success": "Catégorie '{{name}}' supprimée avec succès.",
+  "newscategory.list.success": "Catégories listées avec succès.",
+  "newscategory.list.error": "Échec de la récupération des catégories.",
+  "newscategory.fetch.success": "Catégorie récupérée avec succès.",
+  "newscategory.notFound": "Catégorie introuvable.",
+  "newscategory.invalidId": "ID de catégorie invalide."
+}

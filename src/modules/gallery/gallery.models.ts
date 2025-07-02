@@ -1,37 +1,15 @@
 import { Schema, model, Model, models, Types } from "mongoose";
-import { GalleryCategory } from "@/modules/gallerycategory";
+import type { IGalleryItem,IGallerySubItem} from "./types";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
-// ✅ SubItem interface
-interface IGallerySubItem {
-  image: string;
-  thumbnail: string;
-  webp?: string;
-  title?: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  tenant: string; // Optional tenant field for multi-tenancy
-  description?: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  order?: number;
-}
+const translatedFieldSchema = SUPPORTED_LOCALES.reduce((acc, lang) => {
+  acc[lang] = { type: String, trim: true, default: "" };
+  return acc;
+}, {} as Record<string, any>);
 
-// ✅ Main Item interface
-export interface IGalleryItem {
-  items: IGallerySubItem[];
-  tenant: string; // Optional tenant field for multi-tenancy
-  category: Types.ObjectId;
-  type: "image" | "video";
-  isPublished: boolean;
-  isActive: boolean;
-  priority?: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
+
+
+
 
 // ✅ SubItem schema
 const gallerySubItemSchema = new Schema<IGallerySubItem>(
@@ -39,17 +17,8 @@ const gallerySubItemSchema = new Schema<IGallerySubItem>(
     image: { type: String, required: true },
     thumbnail: { type: String, required: true },
     webp: { type: String },
-    title: {
-      tr: { type: String, trim: true },
-      en: { type: String, trim: true },
-      de: { type: String, trim: true },
-    },
-    tenant: { type: String, required: true, index: true },
-    description: {
-      tr: { type: String, trim: true },
-      en: { type: String, trim: true },
-      de: { type: String, trim: true },
-    },
+    title: translatedFieldSchema,
+    description: translatedFieldSchema,
     order: { type: Number, default: 0 },
   },
   { _id: false }

@@ -1,0 +1,14 @@
+{
+  "activitycategory.validation.invalidNameType": "İsim, dillerle birlikte bir nesne olmalıdır.",
+  "activitycategory.validation.localeMissing": "Name.{{lang}} zorunludur ve boş olamaz.",
+  "activitycategory.validation.localeInvalid": "Name.{{lang}} bir metin (string) olmalıdır.",
+  "activitycategory.create.success": "'{{name}}' kategorisi başarıyla oluşturuldu.",
+  "activitycategory.create.error": "Kategori oluşturulamadı.",
+  "activitycategory.update.success": "'{{name}}' kategorisi başarıyla güncellendi.",
+  "activitycategory.delete.success": "'{{name}}' kategorisi başarıyla silindi.",
+  "activitycategory.list.success": "Kategoriler başarıyla listelendi.",
+  "activitycategory.list.error": "Kategoriler alınırken hata oluştu.",
+  "activitycategory.fetch.success": "Kategori başarıyla getirildi.",
+  "activitycategory.notFound": "Kategori bulunamadı.",
+  "activitycategory.invalidId": "Geçersiz kategori ID’si."
+}

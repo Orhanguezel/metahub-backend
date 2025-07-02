@@ -6,18 +6,20 @@ import {
   updateNewsCategory,
   deleteNewsCategory,
 } from "./newscategory.controller";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
   validateCreateNewsCategory,
   validateUpdateNewsCategory,
   validateObjectId,
 } from "./newscategory.validation";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 
 const router = express.Router();
 
+// 🌿 Public Routes
 router.get("/", getAllNewsCategories);
 router.get("/:id", validateObjectId("id"), getNewsCategoryById);
 
+// 🔐 Admin Routes
 router.post(
   "/",
   authenticate,
