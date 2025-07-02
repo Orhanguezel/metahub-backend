@@ -1,3 +1,4 @@
+// src/core/utils/i18n/fillAllLocales.ts
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 
 /** Logger ve fallback dil belirleyici */

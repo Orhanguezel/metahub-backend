@@ -21,16 +21,6 @@ export const getTenantModel = async <T = any>(
 
   // Önce kendi global cache’inde var mı bak
   if (modelCache.has(cacheKey)) {
-    logger.info(
-      t("modelRegistry.cacheHit", locale, translations, { tenant, modelName }),
-      {
-        tenant,
-        module: "modelRegistry",
-        event: "cacheHit",
-        status: "success",
-        model: modelName,
-      }
-    );
     return modelCache.get(cacheKey)!;
   }
 
@@ -46,17 +36,6 @@ export const getTenantModel = async <T = any>(
   }
 
   modelCache.set(cacheKey, model);
-
-  logger.info(
-    t("modelRegistry.created", locale, translations, { tenant, modelName }),
-    {
-      tenant,
-      module: "modelRegistry",
-      event: "createModel",
-      status: "success",
-      model: modelName,
-    }
-  );
 
   return model;
 };

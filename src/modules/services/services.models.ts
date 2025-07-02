@@ -1,45 +1,17 @@
-import mongoose, { Schema, Types, Model, models } from "mongoose";
-import slugify from "slugify";
+import { Schema, Model, Types, models, model } from "mongoose";
+import type { IServices, IServicesImage } from "./types";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
-interface IServicesImage {
-  url: string;
-  thumbnail: string;
-  webp?: string;
-  publicId?: string;
-}
+// 🔤 Çok dilli alan tipi tanımı
+const localizedStringField = () => {
+  const fields: Record<string, any> = {};
+  for (const locale of SUPPORTED_LOCALES) {
+    fields[locale] = { type: String, trim: true };
+  }
+  return fields;
+};
 
-export interface IServices  {
-  title: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  tenant: string; // Optional tenant field for multi-tenancy
-  slug: string;
-  summary: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  content: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  images: IServicesImage[];
-  tags: string[];
-  author?: string;
-  category?: Types.ObjectId;
-  isPublished: boolean;
-  publishedAt?: Date;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  price?: number;
-  durationMinutes?: number;
-}
-
-const servicesImageSchema = new Schema<IServicesImage>(
+const ServicesImageSchema = new Schema<IServicesImage>(
   {
     url: { type: String, required: true },
     thumbnail: { type: String, required: true },
@@ -49,68 +21,45 @@ const servicesImageSchema = new Schema<IServicesImage>(
   { _id: false }
 );
 
-const servicesSchema: Schema = new Schema<IServices>(
+const ServicesSchema = new Schema<IServices>(
   {
-    title: {
-      tr: { type: String, trim: true },
-      en: { type: String, trim: true },
-      de: { type: String, trim: true },
-    },
+    _id: { type: Schema.Types.ObjectId, required: true },
+    title: localizedStringField(),
     tenant: { type: String, required: true, index: true },
+    summary: localizedStringField(),
+    content: localizedStringField(),
     slug: { type: String, required: true, unique: true, lowercase: true },
-    summary: {
-      tr: { type: String, maxlength: 300 },
-      en: { type: String, maxlength: 300 },
-      de: { type: String, maxlength: 300 },
-    },
-    content: {
-      tr: { type: String },
-      en: { type: String },
-      de: { type: String },
-    },
-    images: { type: [servicesImageSchema], default: [] },
-    tags: [{ type: String, trim: true }],
+    images: { type: [ServicesImageSchema], default: [] },
+    tags: [{ type: String }],
+    author: { type: String },
     category: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "ServicesCategory",
+      required: true,
     },
     isPublished: { type: Boolean, default: false },
+    price: { type: Number, default: 0 },
+    durationMinutes: { type: Number, default: 0 },
     publishedAt: { type: Date },
+    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
     isActive: { type: Boolean, default: true },
-    price: { type: Number },
-    durationMinutes: { type: Number },
   },
   { timestamps: true }
 );
 
-// ✅ Slug middleware
-servicesSchema.pre("validate", async function (next) {
-  const doc = this as unknown as IServices;
-
-  if (!doc.slug) {
-    const base =
-      doc.title?.en?.toLowerCase() ||
-      doc.title?.tr?.toLowerCase() ||
-      doc.title?.de?.toLowerCase() ||
-      "service";
-
-    let slug = slugify(base, { lower: true, strict: true });
-    let count = 1;
-
-    while (await Services.exists({ slug })) {
-      slug = `${slugify(base, { lower: true, strict: true })}-${count++}`;
-    }
-
-    doc.slug = slug;
+ServicesSchema.pre("validate", function (next) {
+  if (!this.slug && this.title?.en) {
+    this.slug = this.title.en
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w\-]+/g, "")
+      .replace(/--+/g, "-")
+      .replace(/^-+|-+$/g, "");
   }
-
   next();
 });
 
-
-
-
 const Services: Model<IServices> =
-  models.Services || mongoose.model<IServices>("Services", servicesSchema);
+  models.Services || model<IServices>("Services", ServicesSchema);
 
-export { Services };
+export { Services, ServicesImageSchema, ServicesSchema };

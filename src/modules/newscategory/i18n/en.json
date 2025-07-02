@@ -1,0 +1,14 @@
+{
+  "newscategory.validation.invalidNameType": "Name must be an object with locales.",
+  "newscategory.validation.localeMissing": "Name.{{lang}} is required and must be a non-empty string.",
+  "newscategory.validation.localeInvalid": "Name.{{lang}} must be a string.",
+  "newscategory.create.success": "Category '{{name}}' created successfully.",
+  "newscategory.create.error": "Failed to create category.",
+  "newscategory.update.success": "Category '{{name}}' updated successfully.",
+  "newscategory.delete.success": "Category '{{name}}' deleted successfully.",
+  "newscategory.list.success": "Categories listed successfully.",
+  "newscategory.list.error": "Failed to fetch categories.",
+  "newscategory.fetch.success": "Category fetched successfully.",
+  "newscategory.notFound": "Category not found.",
+  "newscategory.invalidId": "Invalid category ID."
+}

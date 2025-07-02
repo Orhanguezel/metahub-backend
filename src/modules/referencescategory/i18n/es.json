@@ -1,0 +1,14 @@
+{
+  "referencescategory.validation.invalidNameType": "El nombre debe ser un objeto con traducciones.",
+  "referencescategory.validation.localeMissing": "Name.{{lang}} es obligatorio y no puede estar vacío.",
+  "referencescategory.validation.localeInvalid": "Name.{{lang}} debe ser una cadena de texto.",
+  "referencescategory.create.success": "Categoría '{{name}}' creada con éxito.",
+  "referencescategory.create.error": "No se pudo crear la categoría.",
+  "referencescategory.update.success": "Categoría '{{name}}' actualizada con éxito.",
+  "referencescategory.delete.success": "Categoría '{{name}}' eliminada con éxito.",
+  "referencescategory.list.success": "Categorías listadas con éxito.",
+  "referencescategory.list.error": "Error al obtener las categorías.",
+  "referencescategory.fetch.success": "Categoría obtenida con éxito.",
+  "referencescategory.notFound": "Categoría no encontrada.",
+  "referencescategory.invalidId": "ID de categoría no válida."
+}

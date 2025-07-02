@@ -1,151 +1,156 @@
 import { body, param, query } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
+import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import logger from "@/core/middleware/logger/logger";
+import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
+import { t as translate } from "@/core/utils/i18n/translate";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import translations from "./i18n";
+import { validateMultilangField } from "@/core/utils/i18n/validationUtils";
 
-// ✅ Param ID kontrolü
+// ✅ ObjectId Validator
 export const validateObjectId = (field: string) => [
   param(field)
     .isMongoId()
-    .withMessage(`${field} must be a valid MongoDB ObjectId.`),
-  validateRequest,
- ];
- 
- // ✅ Create Activity Validation
- export const validateCreateActivity = [
-   body("title")
-     .custom((value) => {
-       try {
-         const parsed = typeof value === "string" ? JSON.parse(value) : value;
-         return ["tr", "en", "de"].every(
-           (lang) => parsed[lang] && parsed[lang].trim()
-         );
-       } catch {
-         throw new Error("title must be an array or a JSON stringified array.");
-       }
-     })
-     .withMessage("Title must be a valid JSON with tr, en, de."),
- 
-   body("summary")
-     .custom((value) => {
-       try {
-         const parsed = typeof value === "string" ? JSON.parse(value) : value;
-         return ["tr", "en", "de"].every(
-           (lang) => parsed[lang] && parsed[lang].trim()
-         );
-       } catch {
-         throw new Error("Summary must be an array or a JSON stringified array.");
-       }
-     })
-     .withMessage("Summary must be a valid JSON with tr, en, de."),
- 
-   body("content")
-     .custom((value) => {
-       try {
-         const parsed = typeof value === "string" ? JSON.parse(value) : value;
-         return ["tr", "en", "de"].every(
-           (lang) => parsed[lang] && parsed[lang].trim()
-         );
-       } catch {
-         throw new Error(
-           "Content must be an array or a JSON stringified array."
-         );
-       }
-     })
-     .withMessage("Content must be a valid JSON with tr, en, de."),
- 
-   body("category")
-     .optional()
-     .isMongoId()
-     .withMessage("Category must be a valid MongoDB ObjectId."),
- 
-   body("tags")
-
-    .optional()
-    .custom((value) => {
-      if (Array.isArray(value)) return true;
-      if (typeof value === "string") {
-        try {
-          const parsed = JSON.parse(value);
-          return Array.isArray(parsed);
-        } catch {
-          throw new Error("Tags must be a JSON array string or array.");
-        }
-      }
-      throw new Error("Tags must be an array or a JSON stringified array.");
+    .withMessage((_, { req }) => {
+      const t = (key: string) =>
+        translate(key, req.locale || getLogLocale(), translations);
+      return t("validation.invalidObjectId");
     }),
-
   validateRequest,
 ];
 
-// ✅ Update Activity Validation
-export const validateUpdateActivity = [
-  body("title")
-    .optional()
-    .custom((v) => typeof v === "object")
-    .withMessage("Title must be an object."),
+// ✅ Create Validator
+export const validateCreateActivity = [
+  // Çok dilli zorunlu alan: title
+  validateMultilangField("title"),
 
-  body("summary")
+  // Opsiyonel alanlar
+  body("summary").optional().customSanitizer(parseIfJson),
+  body("content").optional().customSanitizer(parseIfJson),
+  body("tags")
     .optional()
-    .custom((v) => typeof v === "object")
-    .withMessage("Summary must be an object."),
-
-  body("content")
-    .optional()
-    .custom((v) => typeof v === "object")
-    .withMessage("Content must be an object."),
-
+    .isArray()
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.tagsArray",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
   body("category")
     .optional()
     .isMongoId()
-    .withMessage("Category must be a valid MongoDB ObjectId."),
-
-  body("tags")
-    .optional()
-    .custom((value) => {
-      if (Array.isArray(value)) return true;
-      if (typeof value === "string") {
-        try {
-          const parsed = JSON.parse(value);
-          return Array.isArray(parsed);
-        } catch {
-          throw new Error("Tags must be a JSON array string or array.");
-        }
-      }
-      throw new Error("Tags must be an array or a JSON stringified array.");
-    }),
-
-  body("isPublished")
-    .optional()
-    .isBoolean()
-    .withMessage("isPublished must be true or false."),
-
-  body("publishedAt")
-    .optional()
-    .isISO8601()
-    .withMessage("publishedAt must be a valid ISO8601 date."),
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.invalidCategory",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
 
   validateRequest,
 ];
 
-// ✅ Admin Query Validation
+// ✅ Update Validator
+export const validateUpdateActivity = [
+  body("title").optional().customSanitizer(parseIfJson),
+  body("summary").optional().customSanitizer(parseIfJson),
+  body("content").optional().customSanitizer(parseIfJson),
+  body("tags")
+    .optional()
+    .isArray()
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.tagsArray",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
+  body("category")
+    .optional()
+    .isMongoId()
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.invalidCategory",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
+  body("removedImages")
+    .optional()
+    .custom((val, { req }) => {
+      try {
+        const parsed = typeof val === "string" ? JSON.parse(val) : val;
+        if (!Array.isArray(parsed)) throw new Error();
+        return true;
+      } catch {
+        const t = (key: string) =>
+          translate(key, req.locale || getLogLocale(), translations);
+        logger.warn(t("validation.invalidRemovedImages"), {
+          ...getRequestContext(req),
+          value: val,
+          path: "removedImages",
+        });
+        throw new Error(t("validation.invalidRemovedImages"));
+      }
+    }),
+
+  validateRequest,
+];
+
+// ✅ Admin Query Validator
 export const validateAdminQuery = [
   query("language")
     .optional()
-    .isIn(["tr", "en", "de"])
-    .withMessage("Invalid language."),
-
-  query("category").optional().isMongoId().withMessage("Invalid category ID."),
-
+    .isIn(SUPPORTED_LOCALES)
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.invalidLanguage",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
+  query("category")
+    .optional()
+    .isMongoId()
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.invalidCategory",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
   query("isPublished")
     .optional()
     .toBoolean()
     .isBoolean()
-    .withMessage("isPublished must be boolean."),
-
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.booleanField",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
   query("isActive")
     .optional()
     .toBoolean()
     .isBoolean()
-    .withMessage("isActive must be boolean."),
-
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.booleanField",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
   validateRequest,
 ];
+
+// ✅ JSON Parse Helper
+function parseIfJson(value: any) {
+  try {
+    return typeof value === "string" ? JSON.parse(value) : value;
+  } catch {
+    return value;
+  }
+}

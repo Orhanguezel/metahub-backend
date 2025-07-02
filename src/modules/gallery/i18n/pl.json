@@ -1,0 +1,25 @@
+{
+  "validation": {
+    "invalidObjectId": "{{field}} musi być prawidłowym MongoDB ObjectId.",
+    "invalidCategory": "Nieprawidłowe ID kategorii.",
+    "tagsArray": "Tagi muszą być tablicą.",
+    "booleanField": "To pole musi być typu boolean.",
+    "invalidLanguage": "Język musi być jednym z: tr, en, de, pl, fr, es.",
+    "invalidRemovedImages": "Nieprawidłowy format dla removedImages.",
+    "title_pl": "Tytuł musi być ciągiem lub tablicą.",
+    "desc_pl": "Opis musi być ciągiem lub tablicą."
+  },
+  "gallery": {
+    "created": "Element galerii został pomyślnie utworzony.",
+    "updated": "Element galerii został pomyślnie zaktualizowany.",
+    "invalidGalleryId": "Nieprawidłowe ID galerii.",
+    "galleryItemNotFound": "Element galerii nie został znaleziony.",
+    "galleryItemsFetched": "Elementy galerii zostały pomyślnie pobrane.",
+    "categoryRequired": "Wymagany parametr kategorii.",
+    "galleryItemPublished": "Element galerii został pomyślnie opublikowany.",
+    "galleryItemUnpublished": "Element galerii został pomyślnie wycofany.",
+    "galleryCategoriesFetched": "Kategorie galerii zostały pomyślnie pobrane.",
+    "filteredGalleryItemsFetched": "Pobrano przefiltrowane elementy galerii.",
+    "galleryStatsFetched": "Statystyki galerii zostały pomyślnie pobrane."
+  }
+}

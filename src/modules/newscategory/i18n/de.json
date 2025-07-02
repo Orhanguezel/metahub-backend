@@ -1,0 +1,14 @@
+{
+  "newscategory.validation.invalidNameType": "Name muss ein Objekt mit Übersetzungen sein.",
+  "newscategory.validation.localeMissing": "Name.{{lang}} ist erforderlich und darf nicht leer sein.",
+  "newscategory.validation.localeInvalid": "Name.{{lang}} muss ein String sein.",
+  "newscategory.create.success": "Kategorie '{{name}}' wurde erfolgreich erstellt.",
+  "newscategory.create.error": "Kategorie konnte nicht erstellt werden.",
+  "newscategory.update.success": "Kategorie '{{name}}' wurde erfolgreich aktualisiert.",
+  "newscategory.delete.success": "Kategorie '{{name}}' wurde erfolgreich gelöscht.",
+  "newscategory.list.success": "Kategorien wurden erfolgreich aufgelistet.",
+  "newscategory.list.error": "Fehler beim Abrufen der Kategorien.",
+  "newscategory.fetch.success": "Kategorie erfolgreich abgerufen.",
+  "newscategory.notFound": "Kategorie nicht gefunden.",
+  "newscategory.invalidId": "Ungültige Kategorie-ID."
+}

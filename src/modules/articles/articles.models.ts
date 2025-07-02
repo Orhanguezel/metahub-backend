@@ -2,10 +2,14 @@ import { Schema, Model, Types, models, model } from "mongoose";
 import type { IArticles, IArticlesImage } from "./types";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
-const translatedFieldSchema = SUPPORTED_LOCALES.reduce((acc, lang) => {
-  acc[lang] = { type: String, trim: true, default: "" };
-  return acc;
-}, {} as Record<string, any>);
+// 🔤 Çok dilli alan tipi tanımı
+const localizedStringField = () => {
+  const fields: Record<string, any> = {};
+  for (const locale of SUPPORTED_LOCALES) {
+    fields[locale] = { type: String, trim: true };
+  }
+  return fields;
+};
 
 const ArticlesImageSchema = new Schema<IArticlesImage>(
   {
@@ -19,10 +23,11 @@ const ArticlesImageSchema = new Schema<IArticlesImage>(
 
 const ArticlesSchema = new Schema<IArticles>(
   {
-    title: translatedFieldSchema,
+    _id: { type: Schema.Types.ObjectId, required: true },
+    title: localizedStringField(),
     tenant: { type: String, required: true, index: true },
-    summary: translatedFieldSchema,
-    content: translatedFieldSchema,
+    summary: localizedStringField(),
+    content: localizedStringField(),
     slug: { type: String, required: true, unique: true, lowercase: true },
     images: { type: [ArticlesImageSchema], default: [] },
     tags: [{ type: String }],

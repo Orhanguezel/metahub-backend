@@ -9,48 +9,40 @@ import {
 import {
   validateCreateActivityCategory,
   validateUpdateActivityCategory,
-  validateObjectIdParam,
+  validateObjectId,
 } from "./activitycategory.validation";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 
 const router = express.Router();
 
-// 🔐 Admin Auth Middleware
-router.use(authenticate, authorizeRoles("admin"));
-
-/**
- * @route   POST /admin/Activity-categories
- * @desc    Create new category
- */
-router.post("/", validateCreateActivityCategory, createActivityCategory);
-
-/**
- * @route   GET /admin/Activity-categories
- * @desc    Get all categories
- */
+// 🌿 Public Routes
 router.get("/", getAllActivityCategories);
+router.get("/:id", validateObjectId("id"), getActivityCategoryById);
 
-/**
- * @route   GET /admin/Activity-categories/:id
- * @desc    Get category by ID
- */
-router.get("/:id", validateObjectIdParam, getActivityCategoryById);
+// 🔐 Admin Routes
+router.post(
+  "/",
+  authenticate,
+  authorizeRoles("admin"),
+  validateCreateActivityCategory,
+  createActivityCategory
+);
 
-/**
- * @route   PUT /admin/Activity-categories/:id
- * @desc    Update category
- */
 router.put(
   "/:id",
-  validateObjectIdParam,
+  authenticate,
+  authorizeRoles("admin"),
+  validateObjectId("id"),
   validateUpdateActivityCategory,
   updateActivityCategory
 );
 
-/**
- * @route   DELETE /admin/Activity-categories/:id
- * @desc    Delete category
- */
-router.delete("/:id", validateObjectIdParam, deleteActivityCategory);
+router.delete(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateObjectId("id"),
+  deleteActivityCategory
+);
 
 export default router;

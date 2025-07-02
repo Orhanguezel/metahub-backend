@@ -1,0 +1,25 @@
+{
+  "validation": {
+    "invalidObjectId": "{{field}} muss eine gültige MongoDB ObjectId sein.",
+    "invalidCategory": "Ungültige Kategoried-ID.",
+    "tagsArray": "Tags müssen ein Array sein.",
+    "booleanField": "Dieses Feld muss vom Typ boolean sein.",
+    "invalidLanguage": "Sprache muss eines der folgenden sein: tr, en, de, pl, fr, es.",
+    "invalidRemovedImages": "Ungültiges Format für removedImages.",
+    "title_de": "Der Titel muss ein String oder ein Array sein.",
+    "desc_de": "Die Beschreibung muss ein String oder ein Array sein."
+  },
+  "gallery": {
+    "created": "Galerieeintrag erfolgreich erstellt.",
+    "updated": "Galerieeintrag erfolgreich aktualisiert.",
+    "invalidGalleryId": "Ungültige Galerie-ID.",
+    "galleryItemNotFound": "Galerieeintrag nicht gefunden.",
+    "galleryItemsFetched": "Galerieeinträge erfolgreich abgerufen.",
+    "categoryRequired": "Kategoriefeld ist erforderlich.",
+    "galleryItemPublished": "Galerieeintrag erfolgreich veröffentlicht.",
+    "galleryItemUnpublished": "Galerieeintrag erfolgreich entpubliziert.",
+    "galleryCategoriesFetched": "Galeriekategorien erfolgreich abgerufen.",
+    "filteredGalleryItemsFetched": "Gefilterte Galerieeinträge erfolgreich abgerufen.",
+    "galleryStatsFetched": "Galerie-Statistiken erfolgreich abgerufen."
+  }
+}

@@ -1,3 +1,4 @@
+// src/modules/services/public.services.routes.ts
 import express from "express";
 import {
   getAllServices,
@@ -8,7 +9,7 @@ import { validateObjectId } from "./services.validation";
 
 const router = express.Router();
 
-// 🌐 Public endpoints
+// 🌿 Public Endpoints
 router.get("/", getAllServices);
 router.get("/slug/:slug", getServicesBySlug);
 router.get("/:id", validateObjectId("id"), getServicesById);

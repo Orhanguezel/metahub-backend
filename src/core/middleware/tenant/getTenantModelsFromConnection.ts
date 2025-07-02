@@ -20,7 +20,7 @@ import { Coupon } from "@/modules/coupon/coupon.models";
 import { Gallery } from "@/modules/gallery/gallery.models";
 import { GalleryCategory } from "@/modules/gallerycategory/gallerycategory.models";
 import { Services } from "@/modules/services/services.models";
-import { ServicesCategory } from "@/modules/servicescategory/servicescategory.models";
+import { ServicesCategory } from "@/modules/servicescategory/category.models";
 import { Stockmovement } from "@/modules/stockmovement/stockmovement.models";
 import { Notification } from "@/modules/notification/notification.models";
 import { Comment } from "@/modules/comment/comment.models";
@@ -44,7 +44,7 @@ import { ActivityCategory } from "@/modules/activitycategory/activitycategory.mo
 import { About } from "@/modules/about/about.models";
 import { AboutCategory } from "@/modules/aboutcategory/aboutcategory.models";
 import { Experience } from "@/modules/experience/experience.models";
-import { References } from "@/modules/references/models";
+import { References } from "@/modules/references/references.models";
 import { ReferencesCategory } from "@/modules/referencescategory/category.models";
 import { Articles } from "@/modules/articles/articles.models";
 import { ArticlesCategory } from "@/modules/articlescategory/articlescategory.models";

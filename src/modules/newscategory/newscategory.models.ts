@@ -1,26 +1,22 @@
 import mongoose, { Schema, Types, Model, models } from "mongoose";
+import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import { INewsCategory } from "./types";
 
-export interface INewsCategory  {
-  name: {
-    tr: string;
-    en: string;
-    de: string;
-  };
-  tenant: string; // Optional tenant field for multi-tenancy
-  slug: string;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// name alanını dinamik olarak oluştur
+const nameFields = SUPPORTED_LOCALES.reduce((acc, lang) => {
+  acc[lang] = { type: String, required: true, trim: true };
+  return acc;
+}, {} as Record<SupportedLocale, any>);
 
-const newsCategorySchema = new Schema<INewsCategory>(
+const NewsCategorySchema = new Schema<INewsCategory>(
   {
-    name: {
-      tr: { type: String, required: true, trim: true },
-      en: { type: String, required: true, trim: true },
-      de: { type: String, required: true, trim: true },
+    name: nameFields,
+    tenant: {
+      type: String,
+      required: true,
+      index: true,
     },
-    tenant: { type: String, required: true, index: true },
+
     slug: {
       type: String,
       required: true,
@@ -28,6 +24,7 @@ const newsCategorySchema = new Schema<INewsCategory>(
       lowercase: true,
       trim: true,
     },
+
     isActive: {
       type: Boolean,
       default: true,
@@ -36,9 +33,13 @@ const newsCategorySchema = new Schema<INewsCategory>(
   { timestamps: true }
 );
 
-newsCategorySchema.pre("validate", function (next) {
-  if (!this.slug && this.name?.en) {
-    this.slug = this.name.en
+NewsCategorySchema.pre("validate", function (next) {
+  if (!this.slug && this.name) {
+    const firstValidName =
+      Object.values(this.name).find(
+        (val) => typeof val === "string" && val.trim()
+      ) || "";
+    this.slug = firstValidName
       .toLowerCase()
       .replace(/ /g, "-")
       .replace(/[^\w-]+/g, "")
@@ -48,10 +49,8 @@ newsCategorySchema.pre("validate", function (next) {
   next();
 });
 
-
-// ✅ Guard + Model Type
-const NewsCategory: Model<INewsCategory>=
-(models.NewsCategory as Model<INewsCategory>) || mongoose.model<INewsCategory>("NewsCategory", newsCategorySchema);
+const NewsCategory: Model<INewsCategory> =
+  (models.NewsCategory as Model<INewsCategory>) ||
+  mongoose.model<INewsCategory>("NewsCategory", NewsCategorySchema);
 
 export { NewsCategory };
-

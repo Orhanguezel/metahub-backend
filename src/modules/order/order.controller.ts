@@ -265,7 +265,10 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
 export const getOrderById = asyncHandler(
   async (req: Request, res: Response) => {
     const { Order } = await getTenantModels(req);
-    const order = await Order.findOne({ tenant: req.tenant })
+    const order = await Order.findOne({
+      _id: req.params.id,
+      tenant: req.tenant,
+    })
       .populate("items.product")
       .populate("addressId");
 
@@ -303,7 +306,10 @@ export const getOrderById = asyncHandler(
 export const updateShippingAddress = asyncHandler(
   async (req: Request, res: Response) => {
     const { Order } = await getTenantModels(req);
-    const order = await Order.findOne({ tenant: req.tenant });
+    const order = await Order.findOne({
+      _id: req.params.id,
+      tenant: req.tenant,
+    });
     const locale: SupportedLocale = (req.locale as SupportedLocale) || "en";
 
     if (!order) {

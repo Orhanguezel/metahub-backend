@@ -62,10 +62,10 @@ export const updateOrderStatus = asyncHandler(
     }
     const { Order } = await getTenantModels(req);
 
-    const order = await Order.findOne({ tenant: req.tenant }).populate(
-      "user",
-      "name email language"
-    );
+    const order = await Order.findOne({
+      _id: req.params.id,
+      tenant: req.tenant,
+    }).populate("user", "name email language");
     if (!order) {
       res.status(404).json({
         success: false,
@@ -111,10 +111,10 @@ export const updateOrderStatus = asyncHandler(
 export const markOrderAsDelivered = asyncHandler(
   async (req: Request, res: Response) => {
     const { Order, Notification } = await getTenantModels(req);
-    const order = await Order.findOne({ tenant: req.tenant }).populate(
-      "user",
-      "name email language"
-    );
+    const order = await Order.findOne({
+      _id: req.params.id,
+      tenant: req.tenant,
+    }).populate("user", "name email language");
     if (!order) {
       res.status(404).json({
         success: false,
@@ -157,7 +157,7 @@ export const markOrderAsDelivered = asyncHandler(
 
 export const deleteOrder = asyncHandler(async (req: Request, res: Response) => {
   const { Order } = await getTenantModels(req);
-  const order = await Order.findOne({ tenant: req.tenant });
+  const order = await Order.findOne({ _id: req.params.id, tenant: req.tenant });
   if (!order) {
     res.status(404).json({
       success: false,

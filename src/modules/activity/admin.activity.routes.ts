@@ -1,3 +1,4 @@
+// src/modules/activity/admin.activity.routes.ts
 import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
@@ -7,28 +8,28 @@ import {
   deleteActivity,
   createActivity,
 } from "./admin.activity.controller";
+
 import {
   validateObjectId,
   validateCreateActivity,
   validateUpdateActivity,
   validateAdminQuery,
 } from "./activity.validation";
+
 import { upload } from "@/core/middleware/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
 
-// 🔐 Admin erişim kontrolü
+// 🌟 Admin Middleware
 router.use(authenticate, authorizeRoles("admin", "moderator"));
 
-// 🔍 Listeleme
+// 🌟 Admin Endpoints
 router.get("/", validateAdminQuery, adminGetAllActivity);
 
-// 🔍 Detay
 router.get("/:id", validateObjectId("id"), adminGetActivityById);
 
-// ➕ Oluşturma
 router.post(
   "/",
   uploadTypeWrapper("activity"),
@@ -38,7 +39,6 @@ router.post(
   createActivity
 );
 
-// ✏️ Güncelleme
 router.put(
   "/:id",
   uploadTypeWrapper("activity"),
@@ -49,7 +49,6 @@ router.put(
   updateActivity
 );
 
-// 🗑 Silme
 router.delete("/:id", validateObjectId("id"), deleteActivity);
 
 export default router;

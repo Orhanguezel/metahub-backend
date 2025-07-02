@@ -1,3 +1,4 @@
+// src/modules/blog/admin.blog.routes.ts
 import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
@@ -7,12 +8,14 @@ import {
   deleteBlog,
   createBlog,
 } from "./admin.blog.controller";
+
 import {
   validateObjectId,
   validateCreateBlog,
   validateUpdateBlog,
   validateAdminQuery,
 } from "./blog.validation";
+
 import { upload } from "@/core/middleware/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";

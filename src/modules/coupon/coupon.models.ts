@@ -1,29 +1,23 @@
-import { Schema, model, Document, Model, models } from "mongoose";
+import { Schema, model, Model, models } from "mongoose";
+import type { ICoupon, ICouponImage, TranslatedLabel } from "./types";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
-// ✅ Coupon Interface
-interface ICoupon extends Document {
-  code: string;
-  tenant: string; // Optional tenant field for multi-tenancy
-  label: {
-    title: {
-      tr: string;
-      en: string;
-      de: string;
-    };
-    description: {
-      tr: string;
-      en: string;
-      de: string;
-    };
-  };
-  discount: number;
-  expiresAt: Date;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Çoklu dil desteği için Map kullanımı
+const translatedFieldSchema = SUPPORTED_LOCALES.reduce((acc, lang) => {
+  acc[lang] = { type: String, trim: true, default: "" };
+  return acc;
+}, {} as Record<string, any>);
 
-// ✅ Coupon Schema
+const CouponImageSchema = new Schema<ICouponImage>(
+  {
+    url: { type: String, required: true },
+    thumbnail: { type: String, required: true },
+    webp: { type: String },
+    publicId: { type: String },
+  },
+  { _id: false }
+);
+
 const couponSchema = new Schema<ICoupon>(
   {
     code: {
@@ -38,18 +32,17 @@ const couponSchema = new Schema<ICoupon>(
       required: true,
       index: true,
     },
-    label: {
-      title: {
-        tr: { type: String, required: true },
-        en: { type: String, required: true },
-        de: { type: String, required: true },
-      },
-      description: {
-        tr: { type: String, required: true },
-        en: { type: String, required: true },
-        de: { type: String, required: true },
-      },
-    },
+    title: {
+      type: Map,
+      of: String,
+      required: true,
+    } as unknown as TranslatedLabel, // Çoklu dil desteği için
+    description: {
+      type: Map,
+      of: String,
+      required: true,
+    } as unknown as TranslatedLabel, // Çoklu dil desteği için
+    images: { type: [CouponImageSchema], default: [] },
     discount: {
       type: Number,
       required: true,
@@ -59,7 +52,10 @@ const couponSchema = new Schema<ICoupon>(
     expiresAt: {
       type: Date,
       required: true,
+      default: Date.now,
     },
+    isPublished: { type: Boolean, default: false },
+    publishedAt: { type: Date },
     isActive: {
       type: Boolean,
       default: true,
@@ -68,9 +64,15 @@ const couponSchema = new Schema<ICoupon>(
   { timestamps: true }
 );
 
-// ✅ Guard + Model Type (This module has been updated and is now standardized)
-const Coupon: Model<ICoupon> =
-  models.Coupon || model<ICoupon>("Coupon", couponSchema);
+// Pre-save hook: Kodun benzersizliği
+couponSchema.pre("save", function(next) {
+  if (!this.code) {
+    this.code = "COUPON_" + Date.now();  // Örnek kod oluşturma
+  }
+  next();
+});
 
-export { Coupon, ICoupon };
+const Coupon: Model<ICoupon> = models.Coupon || model<ICoupon>("Coupon", couponSchema);
+
+export { Coupon };
 export default Coupon;

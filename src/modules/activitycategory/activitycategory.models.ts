@@ -1,28 +1,22 @@
-import mongoose, { Schema, model, models, Model } from "mongoose";
+import mongoose, { Schema, Types, Model, models } from "mongoose";
+import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import { IActivityCategory } from "./types";
 
-export interface IActivityCategory  {
-  name: {
-    tr: string;
-    en: string;
-    de: string;
-  };
-  slug: string;
-  tenant: string;
-  description?: string;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
+// name alanını dinamik olarak oluştur
+const nameFields = SUPPORTED_LOCALES.reduce((acc, lang) => {
+  acc[lang] = { type: String, required: true, trim: true };
+  return acc;
+}, {} as Record<SupportedLocale, any>);
 
 const ActivityCategorySchema = new Schema<IActivityCategory>(
   {
-    name: {
-      tr: { type: String, required: true, trim: true },
-      en: { type: String, required: true, trim: true },
-      de: { type: String, required: true, trim: true },
+    name: nameFields,
+    tenant: {
+      type: String,
+      required: true,
+      index: true,
     },
-    tenant: { type: String, required: true, index: true },
+
     slug: {
       type: String,
       required: true,
@@ -30,20 +24,22 @@ const ActivityCategorySchema = new Schema<IActivityCategory>(
       lowercase: true,
       trim: true,
     },
-    description: {
-      type: String,
-      default: "",
-      trim: true,
+
+    isActive: {
+      type: Boolean,
+      default: true,
     },
-    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
 ActivityCategorySchema.pre("validate", function (next) {
-  const base = this.name?.en || this.name?.tr || this.name?.de || "category";
-  if (!this.slug && base) {
-    this.slug = base
+  if (!this.slug && this.name) {
+    const firstValidName =
+      Object.values(this.name).find(
+        (val) => typeof val === "string" && val.trim()
+      ) || "";
+    this.slug = firstValidName
       .toLowerCase()
       .replace(/ /g, "-")
       .replace(/[^\w-]+/g, "")
@@ -53,8 +49,8 @@ ActivityCategorySchema.pre("validate", function (next) {
   next();
 });
 
-
 const ActivityCategory: Model<IActivityCategory> =
-  models.ActivityCategory || model<IActivityCategory>("ActivityCategory", ActivityCategorySchema);
+  (models.ActivityCategory as Model<IActivityCategory>) ||
+  mongoose.model<IActivityCategory>("ActivityCategory", ActivityCategorySchema);
 
 export { ActivityCategory };

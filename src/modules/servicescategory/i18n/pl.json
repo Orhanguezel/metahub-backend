@@ -1,0 +1,14 @@
+{
+  "servicescategory.validation.invalidNameType": "Nazwa musi być obiektem z tłumaczeniami.",
+  "servicescategory.validation.localeMissing": "Name.{{lang}} jest wymagane i nie może być puste.",
+  "servicescategory.validation.localeInvalid": "Name.{{lang}} musi być ciągiem znaków.",
+  "servicescategory.create.success": "Kategoria '{{name}}' została pomyślnie utworzona.",
+  "servicescategory.create.error": "Nie udało się utworzyć kategorii.",
+  "servicescategory.update.success": "Kategoria '{{name}}' została pomyślnie zaktualizowana.",
+  "servicescategory.delete.success": "Kategoria '{{name}}' została pomyślnie usunięta.",
+  "servicescategory.list.success": "Kategorie zostały pomyślnie wyświetlone.",
+  "servicescategory.list.error": "Nie udało się pobrać kategorii.",
+  "servicescategory.fetch.success": "Kategoria została pomyślnie pobrana.",
+  "servicescategory.notFound": "Nie znaleziono kategorii.",
+  "servicescategory.invalidId": "Nieprawidłowy identyfikator kategorii."
+}

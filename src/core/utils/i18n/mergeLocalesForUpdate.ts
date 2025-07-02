@@ -1,3 +1,5 @@
+// src/core/utils/i18n/mergeLocalesForUpdate.ts
+
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 import { fillAllLocales } from "./fillAllLocales";
 

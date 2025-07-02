@@ -1,43 +1,17 @@
-import mongoose, { Schema, Types, Model, models } from "mongoose";
+import { Schema, Model, Types, models, model } from "mongoose";
+import type { INews, INewsImage } from "./types";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
-interface INewsImage {
-  url: string;
-  thumbnail: string;
-  webp?: string;
-  publicId?: string;
-}
+// 🔤 Çok dilli alan tipi tanımı
+const localizedStringField = () => {
+  const fields: Record<string, any> = {};
+  for (const locale of SUPPORTED_LOCALES) {
+    fields[locale] = { type: String, trim: true };
+  }
+  return fields;
+};
 
-export interface INews  {
-  title: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  tenant: string; // Optional tenant field for multi-tenancy
-  slug: string;
-  summary: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  content: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  images: INewsImage[];
-  tags: string[];
-  author?: string;
-  category?: Types.ObjectId;
-  isPublished: boolean;
-  publishedAt?: Date;
-  comments: Types.ObjectId[];
-  isActive: boolean; // soft delete desteği
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const newsImageSchema = new Schema<INewsImage>(
+const NewsImageSchema = new Schema<INewsImage>(
   {
     url: { type: String, required: true },
     thumbnail: { type: String, required: true },
@@ -47,58 +21,42 @@ const newsImageSchema = new Schema<INewsImage>(
   { _id: false }
 );
 
-const newsSchema: Schema = new Schema<INews>(
+const NewsSchema = new Schema<INews>(
   {
-    title: {
-      tr: { type: String, trim: true },
-      en: { type: String, trim: true },
-      de: { type: String, trim: true },
-    },
+    _id: { type: Schema.Types.ObjectId, required: true },
+    title: localizedStringField(),
     tenant: { type: String, required: true, index: true },
+    summary: localizedStringField(),
+    content: localizedStringField(),
     slug: { type: String, required: true, unique: true, lowercase: true },
-    summary: {
-      tr: { type: String, maxlength: 300 },
-      en: { type: String, maxlength: 300 },
-      de: { type: String, maxlength: 300 },
-    },
-    content: {
-      tr: { type: String },
-      en: { type: String },
-      de: { type: String },
-    },
-    images: { type: [newsImageSchema], default: [] },
+    images: { type: [NewsImageSchema], default: [] },
     tags: [{ type: String }],
     author: { type: String },
     category: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "NewsCategory",
+      required: true,
     },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
-    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
-    isActive: { type: Boolean, default: true }, // soft delete desteği
+    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+    isActive: { type: Boolean, default: true },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-// ✅ Slug oluşturucu middleware
-newsSchema.pre("validate", function (this: INews, next) {
-  const baseTitle = this.title?.en || this.title?.de || this.title?.tr || "news";
-  if (!this.slug && baseTitle) {
-    this.slug = baseTitle
+NewsSchema.pre("validate", function (next) {
+  if (!this.slug && this.title?.en) {
+    this.slug = this.title.en
       .toLowerCase()
-      .replace(/ /g, "-")
-      .replace(/[^\w-]+/g, "");
+      .replace(/\s+/g, "-")
+      .replace(/[^\w\-]+/g, "")
+      .replace(/--+/g, "-")
+      .replace(/^-+|-+$/g, "");
   }
   next();
 });
 
-// ✅ Guard + Model Type
-const News: Model<INews> =
-  (models.News as Model<INews>) || mongoose.model<INews>("News", newsSchema);
+const News: Model<INews> = models.News || model<INews>("News", NewsSchema);
 
-export { News };
-
-
+export { News, NewsImageSchema, NewsSchema };

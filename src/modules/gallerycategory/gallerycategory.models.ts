@@ -1,28 +1,23 @@
-import mongoose, { Schema, model, models, Model } from "mongoose";
+import mongoose, { Schema, Types, Model, models } from "mongoose";
+import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import { IGalleryCategory } from "./types";
 
-export interface IGalleryCategory  {
-  name: {
-    tr: string;
-    en: string;
-    de: string;
-  };
-  tenant: string; // Optional tenant field for multi-tenancy
-  slug: string;
-  description?: string;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
+// name alanını dinamik olarak oluştur
+const nameFields = SUPPORTED_LOCALES.reduce((acc, lang) => {
+  acc[lang] = { type: String, required: true, trim: true };
+  return acc;
+}, {} as Record<SupportedLocale, any>);
 
 const GalleryCategorySchema = new Schema<IGalleryCategory>(
   {
-    name: {
-      tr: { type: String, required: true, trim: true },
-      en: { type: String, required: true, trim: true },
-      de: { type: String, required: true, trim: true },
+    name: nameFields,
+    description:nameFields,
+    tenant: {
+      type: String,
+      required: true,
+      index: true,
     },
-    tenant: { type: String, required: true, index: true },
+
     slug: {
       type: String,
       required: true,
@@ -30,20 +25,22 @@ const GalleryCategorySchema = new Schema<IGalleryCategory>(
       lowercase: true,
       trim: true,
     },
-    description: {
-      type: String,
-      default: "",
-      trim: true,
+
+    isActive: {
+      type: Boolean,
+      default: true,
     },
-    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
 GalleryCategorySchema.pre("validate", function (next) {
-  const base = this.name?.en || this.name?.tr || this.name?.de || "category";
-  if (!this.slug && base) {
-    this.slug = base
+  if (!this.slug && this.name) {
+    const firstValidName =
+      Object.values(this.name).find(
+        (val) => typeof val === "string" && val.trim()
+      ) || "";
+    this.slug = firstValidName
       .toLowerCase()
       .replace(/ /g, "-")
       .replace(/[^\w-]+/g, "")
@@ -53,8 +50,8 @@ GalleryCategorySchema.pre("validate", function (next) {
   next();
 });
 
-
 const GalleryCategory: Model<IGalleryCategory> =
-  models.GalleryCategory || model<IGalleryCategory>("GalleryCategory", GalleryCategorySchema);
+  (models.GalleryCategory as Model<IGalleryCategory>) ||
+  mongoose.model<IGalleryCategory>("GalleryCategory", GalleryCategorySchema);
 
 export { GalleryCategory };

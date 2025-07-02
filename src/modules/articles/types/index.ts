@@ -11,8 +11,9 @@ export interface IArticlesImage {
 }
 
 export interface IArticles {
+  _id: Types.ObjectId | string;
   title: TranslatedLabel;
-  tenant: string; // Optional tenant field for multi-tenancy
+  tenant: string;
   slug: string;
   summary: TranslatedLabel;
   content: TranslatedLabel;

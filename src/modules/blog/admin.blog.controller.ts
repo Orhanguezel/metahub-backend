@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { Blog } from "@/modules/blog";
-import type { IBlog } from "@/modules/blog/types";
+import { IBlog } from "@/modules/blog/types";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
 import path from "path";
@@ -13,21 +12,15 @@ import {
   processImageLocal,
   shouldProcessImage,
 } from "@/core/utils/uploadUtils";
-import logger from "@/core/middleware/logger/logger";
-import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
+import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
-import { t } from "@/core/utils/i18n/translate";
-import translations from "@/templates/i18n";
+import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import logger from "@/core/middleware/logger/logger";
+import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
+import { t as translate } from "@/core/utils/i18n/translate";
+import translations from "./i18n";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
-
-// Yardımcı çeviri fonksiyonu
-function blogT(
-  key: string,
-  locale?: SupportedLocale,
-  vars?: Record<string, any>
-) {
-  return t(key, locale || getLogLocale(), translations, vars);
-}
 
 const parseIfJson = (value: any) => {
   try {
@@ -37,30 +30,145 @@ const parseIfJson = (value: any) => {
   }
 };
 
-// ✅ Blog oluşturma
+// ✅ CREATE
 export const createBlog = asyncHandler(async (req: Request, res: Response) => {
-  let { title, summary, content, tags, category, isPublished, publishedAt } =
-    req.body;
-  // Locale öncelik sırası: req.locale > query.language > env > "en"
-  const reqLang =
-    (req.locale as SupportedLocale) ||
-    (typeof req.query.language === "string" &&
-    SUPPORTED_LOCALES.includes(req.query.language as SupportedLocale)
-      ? (req.query.language as SupportedLocale)
-      : (process.env.LOG_LOCALE as SupportedLocale) || "en");
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const { Blog } = await getTenantModels(req);
+  const t = (key: string, params?: any) =>
+    translate(key, locale, translations, params);
 
-  title = parseIfJson(title);
-  summary = parseIfJson(summary);
-  content = parseIfJson(content);
-  tags = parseIfJson(tags);
+  try {
+    let { title, summary, content, tags, category, isPublished, publishedAt } =
+      req.body;
 
-  const images: IBlog["images"] = [];
+    title = fillAllLocales(parseIfJson(title));
+    summary = fillAllLocales(parseIfJson(summary));
+    content = fillAllLocales(parseIfJson(content));
+    tags = parseIfJson(tags);
 
+    // String diziler: virgüllü veya JSON array olarak gelebilir!
+    tags = parseIfJson(tags);
+    if (typeof tags === "string") {
+      try {
+        tags = JSON.parse(tags);
+      } catch {
+        tags = [tags];
+      }
+    }
+    if (!Array.isArray(tags)) tags = [];
+
+    const images: IBlog["images"] = [];
+    if (Array.isArray(req.files)) {
+      for (const file of req.files as Express.Multer.File[]) {
+        const imageUrl = getImagePath(file);
+        let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
+        if (shouldProcessImage()) {
+          const processed = await processImageLocal(
+            file.path,
+            file.filename,
+            path.dirname(file.path)
+          );
+          thumbnail = processed.thumbnail;
+          webp = processed.webp;
+        }
+        images.push({
+          url: imageUrl,
+          thumbnail,
+          webp,
+          publicId: (file as any).public_id,
+        });
+      }
+    }
+
+    const nameForSlug = title?.[locale] || title?.en || "blog";
+    const slug = slugify(nameForSlug, { lower: true, strict: true });
+
+    const blog = await Blog.create({
+      title,
+      slug,
+      summary,
+      tenant: req.tenant,
+      content,
+      tags,
+      category: isValidObjectId(category) ? category : undefined,
+      isPublished: isPublished === "true" || isPublished === true,
+      publishedAt: isPublished ? publishedAt || new Date() : undefined,
+      images,
+      author: req.user?.name || "System",
+      isActive: true,
+    });
+
+    logger.info(t("created"), {
+      ...getRequestContext(req),
+      id: blog._id,
+    });
+    res.status(201).json({ success: true, message: t("created"), data: blog });
+  } catch (err: any) {
+    logger.error(t("error.create_fail"), {
+      ...getRequestContext(req),
+      event: "blog.create",
+      module: "blog",
+      status: "fail",
+      error: err.message,
+    });
+
+    res.status(500).json({ success: false, message: t("error.create_fail") });
+  }
+});
+
+// ✅ UPDATE
+export const updateBlog = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const { Blog } = await getTenantModels(req);
+  const t = (key: string, params?: any) =>
+    translate(key, locale, translations, params);
+
+  if (!isValidObjectId(id)) {
+    logger.warn(t("invalidId"), { ...getRequestContext(req), id });
+    res.status(400).json({ success: false, message: t("invalidId") });
+    return;
+  }
+
+  const blog = await Blog.findOne({ _id: id, tenant: req.tenant });
+  if (!blog) {
+    logger.warn(t("notFound"), { ...getRequestContext(req), id });
+    res.status(404).json({ success: false, message: t("notFound") });
+    return;
+  }
+
+  const updates = req.body;
+  if (updates.title) {
+    blog.title = mergeLocalesForUpdate(blog.title, parseIfJson(updates.title));
+  }
+  if (updates.summary) {
+    blog.summary = mergeLocalesForUpdate(
+      blog.summary,
+      parseIfJson(updates.summary)
+    );
+  }
+  if (updates.content) {
+    blog.content = mergeLocalesForUpdate(
+      blog.content,
+      parseIfJson(updates.content)
+    );
+  }
+
+  const updatableFields: (keyof IBlog)[] = [
+    "tags",
+    "category",
+    "isPublished",
+    "publishedAt",
+  ];
+  for (const field of updatableFields) {
+    if (updates[field] !== undefined) (blog as any)[field] = updates[field];
+  }
+
+  if (!Array.isArray(blog.images)) blog.images = [];
   if (Array.isArray(req.files)) {
     for (const file of req.files as Express.Multer.File[]) {
-      let imageUrl = getImagePath(file);
+      const imageUrl = getImagePath(file);
       let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
-
       if (shouldProcessImage()) {
         const processed = await processImageLocal(
           file.path,
@@ -70,8 +178,7 @@ export const createBlog = asyncHandler(async (req: Request, res: Response) => {
         thumbnail = processed.thumbnail;
         webp = processed.webp;
       }
-
-      images.push({
+      blog.images.push({
         url: imageUrl,
         thumbnail,
         webp,
@@ -80,61 +187,50 @@ export const createBlog = asyncHandler(async (req: Request, res: Response) => {
     }
   }
 
-  let slugBase: string | undefined = undefined;
-  for (const locale of SUPPORTED_LOCALES) {
-    if (title?.[locale]) {
-      slugBase = title[locale];
-      break;
+  if (updates.removedImages) {
+    try {
+      const removed = JSON.parse(updates.removedImages);
+      blog.images = blog.images.filter(
+        (img: any) => !removed.includes(img.url)
+      );
+      for (const img of removed) {
+        const localPath = path.join(
+          "uploads",
+          "blog-images",
+          path.basename(img.url)
+        );
+        if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+        if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
+      }
+    } catch (e) {
+      logger.warn(t("invalidRemovedImages"), {
+        ...getRequestContext(req),
+        error: e,
+      });
     }
   }
-  const slug = slugify(slugBase || "Blog", { lower: true, strict: true });
-  const { Blog } = await getTenantModels(req);
 
-  const blog = await Blog.create({
-    title,
-    slug,
-    tenant: req.tenant,
-    summary,
-    content,
-    tags,
-    category: isValidObjectId(category) ? category : undefined,
-    isPublished: isPublished === "true" || isPublished === true,
-    publishedAt: isPublished ? publishedAt || new Date() : undefined,
-    images,
-    author: req.user?.name || "System",
-    isActive: true,
-  });
-
-  logger.info(
-    blogT("blog.log.created", getLogLocale(), { id: blog._id, slug: blog.slug })
-  );
-
-  res.status(201).json({
-    success: true,
-    message: blogT("blog.create.success", reqLang, {
-      title: slugBase || "Blog",
-    }),
-    data: blog,
-  });
+  await blog.save();
+  logger.info(t("updated"), { ...getRequestContext(req), id });
+  res.status(200).json({ success: true, message: t("updated"), data: blog });
 });
 
-// ✅ Tüm Blogları Getir (admin)
+// ✅ GET ALL
 export const adminGetAllBlog = asyncHandler(
   async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
+    const { Blog } = await getTenantModels(req);
+    const t = (key: string) => translate(key, locale, translations);
     const { language, category, isPublished, isActive } = req.query;
-    const reqLang: SupportedLocale =
-      (req.locale as SupportedLocale) ||
-      (typeof language === "string" &&
-      SUPPORTED_LOCALES.includes(language as SupportedLocale)
-        ? (language as SupportedLocale)
-        : (process.env.LOG_LOCALE as SupportedLocale) || "en");
-    const filter: Record<string, any> = { tenant: req.tenant };
+    const filter: Record<string, any> = {
+      tenant: req.tenant,
+    };
 
     if (
       typeof language === "string" &&
       SUPPORTED_LOCALES.includes(language as SupportedLocale)
     ) {
-      filter[`title.${language}`] = { $exists: true, $ne: "" };
+      filter[`title.${language}`] = { $exists: true };
     }
 
     if (typeof category === "string" && isValidObjectId(category)) {
@@ -151,221 +247,77 @@ export const adminGetAllBlog = asyncHandler(
       filter.isActive = true;
     }
 
-    const { Blog } = await getTenantModels(req);
     const blogList = await Blog.find(filter)
       .populate([
         { path: "comments", strictPopulate: false },
-        { path: "category", select: "name" },
+        { path: "category", select: "title" },
       ])
       .sort({ createdAt: -1 })
       .lean();
 
-    logger.info(
-      blogT("blog.log.admin_list", getLogLocale(), { count: blogList.length })
-    );
-
-    res.status(200).json({
-      success: true,
-      message: blogT("blog.admin.list.success", reqLang, {
-        count: blogList.length,
-      }),
-      data: blogList,
+    logger.info(t("listFetched"), {
+      ...getRequestContext(req),
+      resultCount: blogList.length,
     });
+    res
+      .status(200)
+      .json({ success: true, message: t("listFetched"), data: blogList });
   }
 );
 
-// ✅ Tek Blog Getir (admin)
+// ✅ GET BY ID
 export const adminGetBlogById = asyncHandler(
   async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
+    const { Blog } = await getTenantModels(req);
+    const t = (key: string) => translate(key, locale, translations);
     const { id } = req.params;
-    const { language } = req.query;
-    const reqLang: SupportedLocale =
-      (req.locale as SupportedLocale) ||
-      (typeof language === "string" &&
-      SUPPORTED_LOCALES.includes(language as SupportedLocale)
-        ? (language as SupportedLocale)
-        : (process.env.LOG_LOCALE as SupportedLocale) || "en");
 
     if (!isValidObjectId(id)) {
-      logger.warn(blogT("blog.log.invalid_id", getLogLocale(), { id }));
-      res.status(400).json({
-        success: false,
-        message: blogT("blog.invalid_id", reqLang, { id }),
-      });
+      logger.warn(t("invalidId"), { ...getRequestContext(req), id });
+      res.status(400).json({ success: false, message: t("invalidId") });
       return;
     }
 
-    const { Blog } = await getTenantModels(req);
-    const blog = await Blog.findOne({
-      _id: id,
-      tenant: req.tenant,
-    })
+    const blog = await Blog.findOne({ _id: id, tenant: req.tenant })
       .populate([{ path: "comments" }, { path: "category", select: "title" }])
-      .lean();
+      .lean<IBlog | null>();
 
     if (!blog || !blog.isActive) {
-      logger.warn(blogT("blog.log.not_found", getLogLocale(), { id }));
-      res.status(404).json({
-        success: false,
-        message: blogT("blog.not_found", reqLang, { id }),
-      });
+      logger.warn(t("notFound"), { ...getRequestContext(req), id });
+      res.status(404).json({ success: false, message: t("notFound") });
       return;
     }
 
-    logger.info(blogT("blog.log.admin_detail", getLogLocale(), { id }));
     res.status(200).json({
       success: true,
-      message: blogT("blog.admin.detail.success", reqLang),
-      data: blog,
+      message: t("fetched"),
+      data: blog._id,
     });
   }
 );
 
-// ✅ Blog Güncelle (admin)
-export const updateBlog = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const updates = req.body;
-  const { language } = req.query;
-  const reqLang: SupportedLocale =
-    (req.locale as SupportedLocale) ||
-    (typeof language === "string" &&
-    SUPPORTED_LOCALES.includes(language as SupportedLocale)
-      ? (language as SupportedLocale)
-      : (process.env.LOG_LOCALE as SupportedLocale) || "en");
-
-  if (!isValidObjectId(id)) {
-    logger.warn(blogT("blog.log.invalid_id", getLogLocale(), { id }));
-    res.status(400).json({
-      success: false,
-      message: blogT("blog.invalid_id", reqLang, { id }),
-    });
-    return;
-  }
-
-  const { Blog } = await getTenantModels(req);
-  const blog = await Blog.findOne({
-    _id: id,
-    tenant: req.tenant,
-  });
-  if (!blog) {
-    logger.warn(blogT("blog.log.not_found", getLogLocale(), { id }));
-    res.status(404).json({
-      success: false,
-      message: blogT("blog.not_found", reqLang, { id }),
-    });
-    return;
-  }
-
-  const updatableFields: (keyof IBlog)[] = [
-    "title",
-    "summary",
-    "content",
-    "tags",
-    "category",
-    "isPublished",
-    "publishedAt",
-  ];
-
-  updatableFields.forEach((field) => {
-    if (updates[field] !== undefined) {
-      (blog as any)[field] = updates[field];
-    }
-  });
-
-  if (!Array.isArray(blog.images)) blog.images = [];
-
-  if (Array.isArray(req.files)) {
-    for (const file of req.files as Express.Multer.File[]) {
-      const imageUrl = getImagePath(file);
-      let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
-
-      if (shouldProcessImage()) {
-        const processed = await processImageLocal(
-          file.path,
-          file.filename,
-          path.dirname(file.path)
-        );
-        thumbnail = processed.thumbnail;
-        webp = processed.webp;
-      }
-
-      blog.images.push({
-        url: imageUrl,
-        thumbnail,
-        webp,
-        publicId: (file as any).public_id,
-      });
-    }
-  }
-
-  if (updates.removedImages) {
-    try {
-      const removed = JSON.parse(updates.removedImages);
-      blog.images = blog.images.filter(
-        (img: any) => !removed.includes(img.url)
-      );
-
-      for (const img of removed) {
-        const localPath = path.join(
-          "uploads",
-          "blog-images",
-          path.basename(img.url)
-        );
-        if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-        if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
-      }
-    } catch (e) {
-      logger.warn(blogT("blog.log.invalid_removed_images", getLogLocale()));
-    }
-  }
-
-  await blog.save();
-  logger.info(
-    blogT("blog.log.updated", getLogLocale(), { id: blog._id, slug: blog.slug })
-  );
-
-  res.status(200).json({
-    success: true,
-    message: blogT("blog.update.success", reqLang, { id: blog._id }),
-    data: blog,
-  });
-});
-
-// ✅ Blog Sil (admin)
+// ✅ DELETE
 export const deleteBlog = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { language } = req.query;
-  const reqLang: SupportedLocale =
-    (req.locale as SupportedLocale) ||
-    (typeof language === "string" &&
-    SUPPORTED_LOCALES.includes(language as SupportedLocale)
-      ? (language as SupportedLocale)
-      : (process.env.LOG_LOCALE as SupportedLocale) || "en");
+  const { Blog } = await getTenantModels(req);
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const t = (key: string) => translate(key, locale, translations);
 
   if (!isValidObjectId(id)) {
-    logger.warn(blogT("blog.log.invalid_id", getLogLocale(), { id }));
-    res.status(400).json({
-      success: false,
-      message: blogT("blog.invalid_id", reqLang, { id }),
-    });
+    logger.warn(t("invalidId"), { ...getRequestContext(req), id });
+    res.status(400).json({ success: false, message: t("invalidId") });
     return;
   }
 
-  const { Blog } = await getTenantModels(req);
-  const blog = await Blog.findOne({
-    _id: id,
-    tenant: req.tenant,
-  });
+  const blog = await Blog.findOne({ _id: id, tenant: req.tenant });
   if (!blog) {
-    logger.warn(blogT("blog.log.not_found", getLogLocale(), { id }));
-    res.status(404).json({
-      success: false,
-      message: blogT("blog.not_found", reqLang, { id }),
-    });
+    logger.warn(t("notFound"), { ...getRequestContext(req), id });
+    res.status(404).json({ success: false, message: t("notFound") });
     return;
   }
 
-  for (const img of blog.images) {
+  for (const img of blog.images || []) {
     const localPath = path.join(
       "uploads",
       "blog-images",
@@ -376,22 +328,16 @@ export const deleteBlog = asyncHandler(async (req: Request, res: Response) => {
       try {
         await cloudinary.uploader.destroy(img.publicId);
       } catch (err) {
-        logger.error(
-          blogT("blog.log.cloudinary_delete_error", getLogLocale(), {
-            publicId: img.publicId,
-          })
-        );
+        logger.error("Cloudinary delete error", {
+          ...getRequestContext(req),
+          publicId: img.publicId,
+        });
       }
     }
   }
 
   await blog.deleteOne();
-  logger.info(
-    blogT("blog.log.deleted", getLogLocale(), { id: blog._id, slug: blog.slug })
-  );
 
-  res.status(200).json({
-    success: true,
-    message: blogT("blog.delete.success", reqLang, { id: blog._id }),
-  });
+  logger.info(t("deleted"), { ...getRequestContext(req), id });
+  res.status(200).json({ success: true, message: t("deleted") });
 });

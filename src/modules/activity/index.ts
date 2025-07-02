@@ -1,21 +1,22 @@
-// src/modules/Activity/index.ts
+// src/modules/activity/index.ts
+
 import express from "express";
-import publicRoutes from "./public.activity.routes";
 import adminRoutes from "./admin.activity.routes";
-import  {Activity } from "./activity.models";
-import * as publicActivityController from "./public.activity.controller";
-import * as adminActivityController from "./admin.activity.controller";
-import * as ActivityValidation from "./activity.validation";
+import publicRoutes from "./public.activity.routes";
+import { Activity } from "./activity.models";
+import * as adminController from "./admin.activity.controller";
+import * as publicController from "./public.activity.controller";
+import * as validation from "./activity.validation";
 
 const router = express.Router();
 
+// 🔐 Admin Routes
 router.use("/admin", adminRoutes);
+
+// 🌍 Public Routes
 router.use("/", publicRoutes);
 
-export {
-  Activity,
-  publicActivityController,
-  adminActivityController,
-  ActivityValidation,
-};
+// ✅ Exports (standardized)
+export { Activity, adminController, publicController, validation };
+
 export default router;

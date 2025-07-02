@@ -1,3 +1,4 @@
+// src/modules/news/admin.news.routes.ts
 import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
@@ -7,12 +8,14 @@ import {
   deleteNews,
   createNews,
 } from "./admin.news.controller";
+
 import {
   validateObjectId,
   validateCreateNews,
   validateUpdateNews,
   validateAdminQuery,
 } from "./news.validation";
+
 import { upload } from "@/core/middleware/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";

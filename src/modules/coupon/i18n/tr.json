@@ -1,0 +1,30 @@
+{
+  "validation": {
+    "invalidObjectId": "Geçersiz ObjectId.",
+    "requiredField": "{field} alanı gereklidir.",
+    "invalidField": "{field} geçersiz bir alandır.",
+    "tagsArray": "Etiketler bir dizi olmalıdır.",
+    "invalidCategory": "Geçersiz kategori.",
+    "booleanField": "{field} yalnızca true veya false olmalıdır.",
+    "invalidDiscount": "Geçersiz indirim.",
+    "discountRange": "İndirim %1 ile %100 arasında olmalıdır.",
+    "invalidDate": "Geçersiz tarih formatı.",
+    "invalidLanguage": "Geçersiz dil.",
+    "invalidRemovedImages": "Geçersiz kaldırılan resimler.",
+    "created": "Kupon başarıyla oluşturuldu.",
+    "updated": "Kupon başarıyla güncellendi.",
+    "deleted": "Kupon başarıyla silindi.",
+    "listFetched": "Kuponlar başarıyla alındı.",
+    "fetched": "Kupon başarıyla alındı.",
+    "notFound": "Kupon bulunamadı.",
+    "invalidId": "Geçersiz kupon ID'si."
+  },
+  "coupon": {
+    "created": "Kupon başarıyla oluşturuldu.",
+    "updated": "Kupon başarıyla güncellendi.",
+    "deleted": "Kupon başarıyla silindi.",
+    "listFetched": "Kuponlar başarıyla alındı.",
+    "fetched": "Kupon başarıyla alındı.",
+    "notFound": "Kupon bulunamadı."
+  }
+}

@@ -32,32 +32,9 @@ export const injectTenantModel = async (
     }
 
     req.getModel = async <T = any>(modelName: string, schema: any) => {
-      logger.info(
-        `[DEBUG] [INJECT_MODEL] Model getirme talebi: tenant=${tenantSlug}, modelName=${modelName}`,
-        {
-          tenant: tenantSlug,
-          modelName,
-        }
-      );
       const connection = await getTenantDbConnection(tenantSlug);
 
-      // Daha güvenli bir debug: Sadece veritabanı adı/log
-      logger.info(
-        `[DEBUG] [INJECT_MODEL] Bağlantı kurulan DB adı: ${connection.name}`,
-        {
-          tenant: tenantSlug,
-          dbName: connection.name,
-          host: connection.host,
-          port: connection.port,
-          // Eğer drivers[0] veya otherProperties varsa buraya ekleyebilirsin
-        }
-      );
-
       if (connection.models[modelName]) {
-        logger.info(
-          `[DEBUG] [INJECT_MODEL] Model tekrar kullanılacak: ${modelName} (tanımlıydı)`,
-          { tenant: tenantSlug }
-        );
         return connection.models[modelName] as any;
       }
       return connection.model<T>(modelName, schema);
