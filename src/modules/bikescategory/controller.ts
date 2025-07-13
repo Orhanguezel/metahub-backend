@@ -14,14 +14,13 @@ import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import { t as translate } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
-import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import slugify from "slugify";
 import translations from "./i18n";
-import { IBikeCategory } from "./types";
+import type { SupportedLocale } from "@/types/common";
+import type { IBikeCategory } from "./types";
 
-// Yardımcı
 const parseIfJson = (value: any) => {
   try {
     return typeof value === "string" ? JSON.parse(value) : value;
@@ -40,15 +39,15 @@ export const createBikeCategory = asyncHandler(
 
     try {
       let { name, description } = req.body;
-      name = fillAllLocales(parseIfJson(name));
-      description = fillAllLocales(parseIfJson(description));
 
-      // Görsel işlemleri
+      // Çok dilli alanlar için otomatik locale doldurma
+      name = fillAllLocales(parseIfJson(name), locale);
+      description = fillAllLocales(parseIfJson(description), locale);
+
+      // 2️⃣ Images
       const images: IBikeCategory["images"] = [];
       if (Array.isArray(req.files)) {
-        for (const [index, file] of (
-          req.files as Express.Multer.File[]
-        ).entries()) {
+        for (const file of req.files as Express.Multer.File[]) {
           let imageUrl = getImagePath(file);
           let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
 
@@ -71,9 +70,10 @@ export const createBikeCategory = asyncHandler(
         }
       }
 
-      const nameForSlug = name?.[locale] || name?.en || "bikeCategory";
+      const nameForSlug = name?.[locale] || name?.en;
       const slug = slugify(nameForSlug, { lower: true, strict: true });
 
+      // 3️⃣ Kayıt ekle
       const category = await BikeCategory.create({
         name,
         description,
@@ -104,6 +104,16 @@ export const createBikeCategory = asyncHandler(
         error: err.message,
       });
 
+      // Eğer duplicate key ise daha anlamlı mesaj!
+      if (err.code === 11000 && err.keyPattern?.slug) {
+        res.status(409).json({
+          success: false,
+          message: t("error.slug_duplicate") || "Slug already exists.",
+          error: err.message,
+        });
+        return;
+      }
+
       res.status(500).json({
         success: false,
         message: t("error.create_fail"),
@@ -113,7 +123,7 @@ export const createBikeCategory = asyncHandler(
   }
 );
 
-// ✅ UPDATE
+// ✅ FINAL: updateBikeCategory
 export const updateBikeCategory = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -125,7 +135,6 @@ export const updateBikeCategory = asyncHandler(
 
     if (!isValidObjectId(id)) {
       res.status(400).json({ success: false, message: t("error.invalid_id") });
-      return;
     }
 
     const category = await BikeCategory.findOne({
@@ -134,93 +143,97 @@ export const updateBikeCategory = asyncHandler(
     });
     if (!category) {
       res.status(404).json({ success: false, message: t("error.notFound") });
-      return;
     }
 
-    // Çok dilli alanlar (gelen dil güncellenir, kalanlar korunur)
+    // Çok dilli alanlar
     if (updates.name !== undefined) {
-      category.name = fillAllLocales(parseIfJson(updates.name));
+      const parsedName = parseIfJson(updates.name);
+      category.name = fillAllLocales(parsedName, locale);
+      const nameForSlug = parsedName?.[locale] || parsedName?.en;
+      if (nameForSlug) {
+        category.slug = slugify(nameForSlug, { lower: true, strict: true });
+      }
     }
     if (updates.description !== undefined) {
-      category.description = fillAllLocales(parseIfJson(updates.description));
-    }
-    if (typeof updates.isActive !== "undefined") {
-      category.isActive =
-        updates.isActive === "true" || updates.isActive === true;
+      category.description = fillAllLocales(
+        parseIfJson(updates.description),
+        locale
+      );
     }
 
-    // Slug'ı tekrar üret (örn. eğer name değiştiyse!)
-    let nameForSlug =
-      category.name[locale] ||
-      category.name.en ||
-      Object.values(category.name).find((v) => !!v) ||
-      "category";
-    category.slug = slugify(nameForSlug, { lower: true, strict: true });
-
-    // Görselleri güncelle (yeni dosya varsa eskiyi sil)
-    if (Array.isArray(req.files) && req.files.length > 0) {
-      // Eski görselleri sil
-      for (const old of category.images || []) {
-        if (old?.url) {
-          const localPath = path.join(
-            "uploads",
-            "bikeCategory",
-            path.basename(old.url)
-          );
-          if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-        }
-        if (old?.publicId) {
-          await cloudinary.uploader.destroy(old.publicId);
-        }
+    // Diğer alanlar
+    const directFields: (keyof IBikeCategory)[] = ["isActive"];
+    for (const field of directFields) {
+      if (updates[field] !== undefined) {
+        (category as any)[field] = parseIfJson(updates[field]);
       }
+    }
 
-      // Görseller
-      if (!Array.isArray(category.images)) category.images = [];
-      if (Array.isArray(req.files)) {
-        for (const [index, file] of (
-          req.files as Express.Multer.File[]
-        ).entries()) {
-          const imageUrl = getImagePath(file);
-          let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
+    // Yeni yüklenen görselleri ekle
+    if (Array.isArray(req.files)) {
+      for (const file of req.files as Express.Multer.File[]) {
+        const imageUrl = getImagePath(file);
+        let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
 
-          if (shouldProcessImage()) {
-            const processed = await processImageLocal(
-              file.path,
-              file.filename,
-              path.dirname(file.path)
-            );
-            thumbnail = processed.thumbnail;
-            webp = processed.webp;
+        if (shouldProcessImage()) {
+          const processed = await processImageLocal(
+            file.path,
+            file.filename,
+            path.dirname(file.path)
+          );
+          thumbnail = processed.thumbnail;
+          webp = processed.webp;
+        }
+
+        category.images.push({
+          url: imageUrl,
+          thumbnail,
+          webp,
+          publicId: (file as any).public_id,
+        });
+      }
+    }
+
+    // Silinen görseller
+    if (updates.removedImages) {
+      try {
+        let removed: string[] = [];
+        if (typeof updates.removedImages === "string") {
+          if (updates.removedImages.trim().startsWith("[")) {
+            removed = JSON.parse(updates.removedImages);
+          } else {
+            removed = [updates.removedImages];
           }
-
-          category.images.push({
-            url: imageUrl,
-            thumbnail,
-            webp,
-            publicId: (file as any).public_id,
-          });
+        } else if (Array.isArray(updates.removedImages)) {
+          removed = updates.removedImages;
         }
-      }
 
-      // Silinen görseller
-      if (updates.removedImages) {
-        try {
-          const removed = JSON.parse(updates.removedImages);
-          category.images = category.images.filter(
-            (img: any) => !removed.includes(img.url)
-          );
-          for (const img of removed) {
+        for (const imgUrl of removed) {
+          // ilgili img objesini bul
+          const imgObj = category.images.find((img) => img.url === imgUrl);
+          if (imgObj) {
             const localPath = path.join(
               "uploads",
-              "bikeCategory",
-              path.basename(img.url)
+              "bikeCategory-images",
+              path.basename(imgObj.url)
             );
             if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-            if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
+            if (imgObj.publicId) {
+              try {
+                await cloudinary.uploader.destroy(imgObj.publicId);
+              } catch (err) {
+                console.error("Cloudinary delete error:", err);
+              }
+            }
           }
-        } catch (e) {
-          console.warn("Invalid removedImages JSON:", e);
         }
+
+        // listeden kaldır
+        category.images = category.images.filter(
+          (img) => !removed.includes(img.url)
+        );
+      } catch (e) {
+        console.warn("Invalid removedImages JSON:", e);
       }
     }
 
@@ -248,18 +261,12 @@ export const getAllBikeCategories = asyncHandler(
     const { BikeCategory } = await getTenantModels(req);
     const t = (key: string) => translate(key, locale, translations);
 
-    const categories = await BikeCategory.find({ tenant: req.tenant }).sort({
+    const filter: Record<string, any> = { tenant: req.tenant };
+    if (req.query.isActive) filter.isActive = req.query.isActive === "true";
+
+    const categories = await BikeCategory.find(filter).sort({
       createdAt: -1,
     });
-
-    if (!categories || categories.length === 0) {
-      logger.warn(t("fetchAll.empty"), {
-        ...getRequestContext(req),
-        module: "bikeCategory",
-        event: "fetchAll",
-        status: "empty",
-      });
-    }
 
     logger.info(t("fetchAll.success"), {
       ...getRequestContext(req),
@@ -271,7 +278,7 @@ export const getAllBikeCategories = asyncHandler(
     res.status(200).json({
       success: true,
       message: t("fetchAll.success"),
-      data: categories,
+      data: categories, // Tüm diller + images!
     });
   }
 );
@@ -293,6 +300,7 @@ export const getBikeCategoryById = asyncHandler(
       _id: id,
       tenant: req.tenant,
     });
+
     if (!category) {
       res.status(404).json({ success: false, message: t("error.notFound") });
       return;
@@ -308,7 +316,7 @@ export const getBikeCategoryById = asyncHandler(
     res.status(200).json({
       success: true,
       message: t("fetch.success"),
-      data: category,
+      data: category, // Tüm diller + images!
     });
   }
 );

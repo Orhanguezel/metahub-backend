@@ -1,12 +1,12 @@
 // src/modules/services/index.ts
 
 import express from "express";
-import adminRoutes from "./admin.services.routes";
-import publicRoutes from "./public.services.routes";
-import { Services } from "./services.models";
-import * as adminController from "./admin.services.controller";
-import * as publicController from "./public.services.controller";
-import * as validation from "./services.validation";
+import adminRoutes from "./admin.routes";
+import publicRoutes from "./public.routes";
+import { Services } from "./models";
+import * as adminController from "./admin.controller";
+import * as publicController from "./public.controller";
+import * as validation from "./validation";
 
 const router = express.Router();
 

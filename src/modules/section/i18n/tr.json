@@ -1,13 +1,30 @@
 {
-  "section.invalidLabel": "Tüm dillerde başlık (label) zorunludur.",
-  "section.validation.invalidJSON": "Etiket verisi geçersiz JSON formatında.",
-  "section.validation.missingLocale": "Bazı diller için eksik veya boş etiket var.",
-  "section.create.success": "{{name}} bölümü başarıyla oluşturuldu.",
-  "section.create.labelMissing": "Başlık (label) tüm dillerde zorunludur.",
-  "section.update.success": "{{name}} bölümü başarıyla güncellendi.",
-  "section.update.notFound": "Bölüm bulunamadı.",
-  "section.update.labelMissing": "Başlık (label) tüm dillerde zorunludur.",
-  "section.list.success": "Bölümler başarıyla listelendi.",
-  "section.delete.success": "{{name}} bölümü silindi.",
-  "section.delete.notFound": "Bölüm bulunamadı."
+  "admin": {
+    "section": {
+      "created": "SectionMeta '{key}' başarıyla oluşturuldu.",
+      "updated": "SectionMeta '{key}' güncellendi.",
+      "deleted": "SectionMeta '{key}' silindi.",
+      "fetchedAll": "Tüm SectionMeta kayıtları getirildi.",
+      "keyExists": "Bu anahtara sahip bir SectionMeta zaten mevcut: '{key}'.",
+      "notFound": "SectionMeta '{key}' bulunamadı.",
+      "labelRequired": "Etiket (label) zorunludur.",
+      "labelLocaleType": "Her bir etiket dili string olmalıdır.",
+      "labelLocaleRequired": "En az bir etiket dili doldurulmalıdır.",
+      "descriptionType": "Açıklama bir string veya obje olmalıdır.",
+      "descriptionLocaleType": "Her bir açıklama dili string olmalıdır.",
+      "keyRequired": "Section anahtarı zorunludur.",
+      "keyParamRequired": "Section anahtar parametresi zorunludur.",
+      "settingCreated": "'{sectionKey}' SectionSetting tenant için oluşturuldu.",
+      "settingUpdated": "'{sectionKey}' SectionSetting güncellendi.",
+      "settingDeleted": "'{sectionKey}' SectionSetting silindi.",
+      "settingExists": "Bu tenant ve section için SectionSetting zaten mevcut: '{sectionKey}'.",
+      "settingNotFound": "SectionSetting '{sectionKey}' bulunamadı.",
+      "settingsFetched": "'{tenant}' tenantına ait SectionSettings getirildi."
+    }
+  },
+  "admin.module": {
+    "tenantAndSectionKeyRequired": "Tenant ve SectionKey zorunludur.",
+    "tenantRequired": "Tenant zorunludur."
+  }
 }
+

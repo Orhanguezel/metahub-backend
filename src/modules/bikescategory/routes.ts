@@ -14,13 +14,11 @@ import {
 } from "./validation";
 import { upload } from "@/core/middleware/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
+import { parseFormDataJson } from "@/core/utils/i18n/parseFormDataJson"; // <-- ekle
 
 const router = express.Router();
 
-// 🔍 List all categories (admin)
 router.get("/", getAllBikeCategories);
-
-// 🔍 Get single category by ID
 router.get("/:id", validateObjectId("id"), getBikeCategoryById);
 
 router.use(authenticate, authorizeRoles("admin", "moderator"));
@@ -28,7 +26,9 @@ router.use(authenticate, authorizeRoles("admin", "moderator"));
 // ➕ Create bike category
 router.post(
   "/",
+  upload.array("images", 5),
   uploadTypeWrapper("bikesCategory"),
+  parseFormDataJson,
   validateCreateBikeCategory,
   createBikeCategory
 );
@@ -36,13 +36,14 @@ router.post(
 // ✏️ Update bike category
 router.put(
   "/:id",
+  upload.array("images", 5),
   uploadTypeWrapper("bikesCategory"),
+  parseFormDataJson,
   validateObjectId("id"),
   validateUpdateBikeCategory,
   updateBikeCategory
 );
 
-// ❌ Delete bike category
 router.delete("/:id", validateObjectId("id"), deleteBikeCategory);
 
 export { router as adminBikeCategoryRoutes };

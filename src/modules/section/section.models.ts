@@ -1,29 +1,50 @@
+// models/section.model.ts
 import mongoose, { Schema, Model, models } from "mongoose";
-import type { ISection } from "./types";
+import type { ISectionMeta,ISectionSetting } from "@/modules/section/types";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
-// --- Dinamik label alanı ---
 const labelSchemaFields = SUPPORTED_LOCALES.reduce((fields, lang) => {
-  fields[lang] = { type: String, trim: true, default: "" }; // İster required: true da ekleyebilirsin!
+  fields[lang] = { type: String, trim: true };
   return fields;
 }, {} as Record<string, any>);
 
-const SectionSchema = new Schema<ISection>(
+const SectionMetaSchema = new Schema<ISectionMeta>(
   {
+    key: { type: String, required: true, unique: true, index: true },
     label: labelSchemaFields,
-    tenant: { type: String, required: true, index: true },
     description: labelSchemaFields,
     icon: { type: String, default: "MdViewModule" },
-    order: { type: Number, default: 0 },
-    isActive: { type: Boolean, default: true },
-    visibleInSidebar: { type: Boolean, default: true },
-    useAnalytics: { type: Boolean, default: false },
-    roles: { type: [String], default: ["admin"] },
+    variant: { type: String },
+    required: { type: Boolean, default: false },
+    defaultOrder: { type: Number, default: 0 },
+    defaultEnabled: { type: Boolean, default: true },
+    params: { type: Schema.Types.Mixed },
   },
   { timestamps: true }
 );
 
-const Section: Model<ISection> =
-  models.Section || mongoose.model<ISection>("Section", SectionSchema);
+const SectionMeta: Model<ISectionMeta> =
+  models.SectionMeta || mongoose.model<ISectionMeta>("SectionMeta", SectionMetaSchema);
 
-export { Section };
+export { SectionMeta };
+
+
+const SectionSettingSchema = new Schema<ISectionSetting>(
+  {
+    tenant: { type: String, required: true, index: true },
+    sectionKey: { type: String, required: true }, // FK
+    enabled: { type: Boolean },
+    order: { type: Number },
+    label: labelSchemaFields,
+    description: labelSchemaFields,
+    params: { type: Schema.Types.Mixed },
+    roles: { type: [String] },
+  },
+  { timestamps: true }
+);
+
+const SectionSetting: Model<ISectionSetting> =
+  models.SectionSetting || mongoose.model<ISectionSetting>("SectionSetting", SectionSettingSchema);
+
+export { SectionSetting };
+

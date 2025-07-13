@@ -1,3 +1,5 @@
+// routes/company.router.ts
+
 import express from "express";
 import {
   getCompanyInfo,
@@ -11,43 +13,43 @@ import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 import {
   validateCreateCompany,
   validateUpdateCompany,
-  validateCompanyId,
+  validateObjectId,  // <-- fonksiyon olarak import
 } from "./company.validation";
 
 const router = express.Router();
 
-// GET: /company
+// GET: /company  — Public info
 router.get("/", getCompanyInfo);
 
-// POST: /company (çoklu logo)
+// POST: /company — Yalnızca admin, çoklu logo upload destekli
 router.post(
   "/",
   authenticate,
   authorizeRoles("admin"),
   uploadTypeWrapper("company"),
-  upload.array("logos", 5),
+  upload.array("images", 5),
   validateCreateCompany,
   createCompany
 );
 
-// PUT: /company/:id (çoklu logo ve silme desteği)
+// PUT: /company/:id — Yalnızca admin, çoklu logo, silme desteği
 router.put(
   "/:id",
   authenticate,
   authorizeRoles("admin"),
   uploadTypeWrapper("company"),
-  upload.array("logos", 5),
-  validateCompanyId,
+  upload.array("images", 5),
+  validateObjectId("id"),    // <-- burada fonksiyon çağrısı ile
   validateUpdateCompany,
   updateCompanyInfo
 );
 
-// DELETE: /company/:id
+// DELETE: /company/:id — Yalnızca admin, tüm logo dosyalarını da siler
 router.delete(
   "/:id",
   authenticate,
   authorizeRoles("admin"),
-  validateCompanyId,
+  validateObjectId("id"),    // <-- burada da fonksiyon çağrısı ile
   deleteCompany
 );
 

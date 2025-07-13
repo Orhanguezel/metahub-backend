@@ -1,0 +1,36 @@
+{
+  "slot": {
+    "validation": {
+      "dayOfWeekOrAll": "Either 'dayOfWeek' (0=Sunday...6=Saturday) or 'appliesToAll': true is required.",
+      "dayOfWeekRange": "dayOfWeek must be between 0 (Sunday) and 6 (Saturday).",
+      "startTimeFormat": "startTime must be in HH:mm format.",
+      "endTimeFormat": "endTime must be in HH:mm format.",
+      "intervalMinutes": "intervalMinutes must be a positive number.",
+      "breakBetweenAppointments": "breakBetweenAppointments must be a non-negative number.",
+      "label": "label must be an object (multi-language).",
+      "description": "description must be an object (multi-language).",
+      "date": "date must be a valid ISO date (YYYY-MM-DD).",
+      "disabledTimes": "disabledTimes must be an array.",
+      "disabledTimesItem": "Each item in disabledTimes must be in HH:mm format.",
+      "fullDayOff": "fullDayOff must be a boolean.",
+      "objectId": "{{field}} must be a valid MongoDB ObjectId."
+    },
+    "rule": {
+      "exists": "A slot rule already exists for this day or 'appliesToAll'.",
+      "created": "Slot rule created successfully.",
+      "deleted": "Slot rule deleted successfully.",
+      "notFound": "Slot rule not found."
+    },
+    "override": {
+      "exists": "A slot override already exists for this date.",
+      "created": "Slot override created successfully.",
+      "deleted": "Slot override deleted successfully.",
+      "notFound": "Slot override not found."
+    },
+    "error": {
+      "noDate": "Date is required.",
+      "invalidId": "ID is not a valid ObjectId."
+    }
+  }
+}
+

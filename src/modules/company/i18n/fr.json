@@ -1,0 +1,32 @@
+{
+  "companyName.required": "Le nom de la société est requis.",
+  "companyName.invalid": "Nom de société non valide.",
+  "taxNumber.required": "Le numéro fiscal est requis.",
+  "taxNumber.invalid": "Numéro fiscal non valide.",
+  "email.invalid": "Adresse e-mail non valide.",
+  "phone.required": "Le numéro de téléphone est requis.",
+  "phone.invalid": "Numéro de téléphone non valide.",
+  "address.street.required": "La rue est requise.",
+  "address.street.invalid": "Rue non valide.",
+  "address.city.required": "La ville est requise.",
+  "address.city.invalid": "Ville non valide.",
+  "address.postalCode.required": "Le code postal est requis.",
+  "address.postalCode.invalid": "Code postal non valide.",
+  "address.country.required": "Le pays est requis.",
+  "address.country.invalid": "Pays non valide.",
+  "bankDetails.bankName.required": "Le nom de la banque est requis.",
+  "bankDetails.bankName.invalid": "Nom de banque non valide.",
+  "bankDetails.iban.required": "L'IBAN est requis.",
+  "bankDetails.iban.invalid": "IBAN non valide.",
+  "bankDetails.swiftCode.required": "Le code SWIFT est requis.",
+  "bankDetails.swiftCode.invalid": "Code SWIFT non valide.",
+  "socialLinks.facebook.invalid": "Lien Facebook non valide.",
+  "socialLinks.instagram.invalid": "Lien Instagram non valide.",
+  "socialLinks.twitter.invalid": "Lien Twitter non valide.",
+  "socialLinks.linkedin.invalid": "Lien LinkedIn non valide.",
+  "socialLinks.youtube.invalid": "Lien YouTube non valide.",
+  "company.id.invalid": "Identifiant de société non valide.",
+  "validation.invalidObjectId": "ObjectId non valide."
+}
+
+

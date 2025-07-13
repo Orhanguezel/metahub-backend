@@ -1,0 +1,36 @@
+{
+  "slot": {
+    "validation": {
+      "dayOfWeekOrAll": "Entweder 'dayOfWeek' (0=Sonntag...6=Samstag) oder 'appliesToAll': true ist erforderlich.",
+      "dayOfWeekRange": "dayOfWeek muss zwischen 0 (Sonntag) und 6 (Samstag) liegen.",
+      "startTimeFormat": "startTime muss im HH:mm-Format sein.",
+      "endTimeFormat": "endTime muss im HH:mm-Format sein.",
+      "intervalMinutes": "intervalMinutes muss eine positive Zahl sein.",
+      "breakBetweenAppointments": "breakBetweenAppointments muss eine nicht-negative Zahl sein.",
+      "label": "label muss ein Objekt (mehrsprachig) sein.",
+      "description": "description muss ein Objekt (mehrsprachig) sein.",
+      "date": "date muss ein gültiges ISO-Datum sein (JJJJ-MM-TT).",
+      "disabledTimes": "disabledTimes muss ein Array sein.",
+      "disabledTimesItem": "Jedes Element in disabledTimes muss im HH:mm-Format sein.",
+      "fullDayOff": "fullDayOff muss ein Boolean sein.",
+      "objectId": "{{field}} muss eine gültige MongoDB ObjectId sein."
+    },
+    "rule": {
+      "exists": "Für diesen Tag oder 'appliesToAll' existiert bereits eine Slot-Regel.",
+      "created": "Slot-Regel erfolgreich erstellt.",
+      "deleted": "Slot-Regel erfolgreich gelöscht.",
+      "notFound": "Slot-Regel nicht gefunden."
+    },
+    "override": {
+      "exists": "Für dieses Datum existiert bereits eine Slot-Überschreibung.",
+      "created": "Slot-Überschreibung erfolgreich erstellt.",
+      "deleted": "Slot-Überschreibung erfolgreich gelöscht.",
+      "notFound": "Slot-Überschreibung nicht gefunden."
+    },
+    "error": {
+      "noDate": "Datum ist erforderlich.",
+      "invalidId": "ID ist keine gültige ObjectId."
+    }
+  }
+}
+

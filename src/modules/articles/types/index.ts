@@ -11,7 +11,6 @@ export interface IArticlesImage {
 }
 
 export interface IArticles {
-  _id: Types.ObjectId | string;
   title: TranslatedLabel;
   tenant: string;
   slug: string;

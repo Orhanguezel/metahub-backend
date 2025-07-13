@@ -11,7 +11,6 @@ export interface INewsImage {
 }
 
 export interface INews {
-  _id: Types.ObjectId | string;
   title: TranslatedLabel;
   tenant: string;
   slug: string;

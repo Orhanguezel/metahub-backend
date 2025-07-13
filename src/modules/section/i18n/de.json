@@ -1,13 +1,30 @@
 {
-  "section.invalidLabel": "Bezeichnung ist in allen unterstützten Sprachen erforderlich.",
-  "section.validation.invalidJSON": "Bezeichnungswert ist kein gültiges JSON.",
-  "section.validation.missingLocale": "Bezeichnung fehlt oder ist in einigen Sprachen leer.",
-  "section.create.success": "{{name}}-Abschnitt erfolgreich erstellt.",
-  "section.create.labelMissing": "Bezeichnung ist in allen Sprachen erforderlich.",
-  "section.update.success": "{{name}}-Abschnitt erfolgreich aktualisiert.",
-  "section.update.notFound": "Abschnitt nicht gefunden.",
-  "section.update.labelMissing": "Bezeichnung ist in allen Sprachen erforderlich.",
-  "section.list.success": "Abschnitte erfolgreich aufgelistet.",
-  "section.delete.success": "{{name}}-Abschnitt gelöscht.",
-  "section.delete.notFound": "Abschnitt nicht gefunden."
+  "admin": {
+    "section": {
+      "created": "SectionMeta '{key}' wurde erfolgreich erstellt.",
+      "updated": "SectionMeta '{key}' wurde aktualisiert.",
+      "deleted": "SectionMeta '{key}' wurde gelöscht.",
+      "fetchedAll": "Alle SectionMetas wurden abgerufen.",
+      "keyExists": "Ein SectionMeta mit diesem Schlüssel existiert bereits: '{key}'.",
+      "notFound": "SectionMeta '{key}' wurde nicht gefunden.",
+      "labelRequired": "Label ist erforderlich.",
+      "labelLocaleType": "Jedes Label-Locale muss ein String sein.",
+      "labelLocaleRequired": "Mindestens ein Label-Locale muss ausgefüllt sein.",
+      "descriptionType": "Beschreibung muss ein String oder ein Objekt sein.",
+      "descriptionLocaleType": "Jede Beschreibungssprache muss ein String sein.",
+      "keyRequired": "Section-Schlüssel ist erforderlich.",
+      "keyParamRequired": "Section-Schlüssel-Parameter ist erforderlich.",
+      "settingCreated": "SectionSetting '{sectionKey}' wurde für den Mandanten erstellt.",
+      "settingUpdated": "SectionSetting '{sectionKey}' wurde aktualisiert.",
+      "settingDeleted": "SectionSetting '{sectionKey}' wurde gelöscht.",
+      "settingExists": "SectionSetting existiert bereits für diesen Mandanten und diese Section: '{sectionKey}'.",
+      "settingNotFound": "SectionSetting '{sectionKey}' wurde nicht gefunden.",
+      "settingsFetched": "SectionSettings für Mandant '{tenant}' wurden abgerufen."
+    }
+  },
+  "admin.module": {
+    "tenantAndSectionKeyRequired": "Tenant und SectionKey sind erforderlich.",
+    "tenantRequired": "Tenant ist erforderlich."
+  }
 }
+

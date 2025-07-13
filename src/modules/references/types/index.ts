@@ -11,7 +11,6 @@ export interface IReferencesImage {
 }
 
 export interface IReferences {
-  _id: Types.ObjectId | string;
   title: TranslatedLabel;
   tenant: string;
   slug: string;

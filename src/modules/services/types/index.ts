@@ -11,7 +11,6 @@ export interface IServicesImage {
 }
 
 export interface IServices {
-  _id: Types.ObjectId | string;
   title: TranslatedLabel;
   tenant: string;
   slug: string;
@@ -22,8 +21,6 @@ export interface IServices {
   author?: string;
   category: Types.ObjectId;
   isPublished: boolean;
-  price?: number;
-  durationMinutes?: number;
   publishedAt?: Date;
   comments: Types.ObjectId[];
   isActive: boolean;

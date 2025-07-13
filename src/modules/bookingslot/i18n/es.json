@@ -1,0 +1,36 @@
+{
+  "slot": {
+    "validation": {
+      "dayOfWeekOrAll": "Se requiere 'dayOfWeek' (0=domingo...6=sábado) o 'appliesToAll': true.",
+      "dayOfWeekRange": "dayOfWeek debe estar entre 0 (domingo) y 6 (sábado).",
+      "startTimeFormat": "startTime debe estar en formato HH:mm.",
+      "endTimeFormat": "endTime debe estar en formato HH:mm.",
+      "intervalMinutes": "intervalMinutes debe ser un número positivo.",
+      "breakBetweenAppointments": "breakBetweenAppointments debe ser un número no negativo.",
+      "label": "label debe ser un objeto (multiidioma).",
+      "description": "description debe ser un objeto (multiidioma).",
+      "date": "date debe ser una fecha ISO válida (AAAA-MM-DD).",
+      "disabledTimes": "disabledTimes debe ser un arreglo.",
+      "disabledTimesItem": "Cada elemento de disabledTimes debe estar en formato HH:mm.",
+      "fullDayOff": "fullDayOff debe ser un booleano.",
+      "objectId": "{{field}} debe ser un ObjectId de MongoDB válido."
+    },
+    "rule": {
+      "exists": "Ya existe una regla de franja para este día o 'appliesToAll'.",
+      "created": "Regla de franja creada con éxito.",
+      "deleted": "Regla de franja eliminada con éxito.",
+      "notFound": "Regla de franja no encontrada."
+    },
+    "override": {
+      "exists": "Ya existe un override de franja para esta fecha.",
+      "created": "Override de franja creada con éxito.",
+      "deleted": "Override de franja eliminada con éxito.",
+      "notFound": "Override de franja no encontrada."
+    },
+    "error": {
+      "noDate": "La fecha es obligatoria.",
+      "invalidId": "El ID no es un ObjectId válido."
+    }
+  }
+}
+

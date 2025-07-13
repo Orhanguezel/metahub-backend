@@ -1,0 +1,21 @@
+{
+  "settings.tenantRequired": "Tenant is required.",
+  "setting.error.missing": "Missing or invalid key.",
+  "setting.error.notFound": "Setting not found.",
+  "setting.error.valueRequired": "Value is required.",
+  "setting.error.arrayNotAllowed": "This field must be an array.",
+  "setting.error.arrayEmpty": "Array cannot be empty.",
+  "setting.error.arrayInvalidItems": "Array items are invalid.",
+  "setting.error.imagesArrayRequired": "Images field must be an array.",
+  "setting.error.imagesInvalidFormat": "Invalid image format.",
+  "setting.error.lightRequired": "Light logo is required.",
+  "setting.error.darkInvalid": "Dark logo format is invalid.",
+  "setting.error.missingLocale": "Missing translation in multi-language field.",
+  "setting.error.localeType": "Translation values must be text.",
+  "settings.removeImagesError": "Error occurred while deleting images.",
+  "settings.deleted": "Setting deleted successfully.",
+  "setting.upload.success": "Images uploaded successfully.",
+  "setting.create.success": "Setting created successfully.",
+  "setting.create.error": "Error while creating setting.",
+  "setting.update.success": "Setting updated successfully."
+}

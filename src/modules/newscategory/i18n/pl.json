@@ -1,14 +1,14 @@
 {
-  "newscategory.validation.invalidNameType": "Nazwa musi być obiektem z tłumaczeniami.",
-  "newscategory.validation.localeMissing": "Name.{{lang}} jest wymagane i nie może być puste.",
-  "newscategory.validation.localeInvalid": "Name.{{lang}} musi być ciągiem znaków.",
-  "newscategory.create.success": "Kategoria '{{name}}' została pomyślnie utworzona.",
-  "newscategory.create.error": "Nie udało się utworzyć kategorii.",
-  "newscategory.update.success": "Kategoria '{{name}}' została pomyślnie zaktualizowana.",
-  "newscategory.delete.success": "Kategoria '{{name}}' została pomyślnie usunięta.",
-  "newscategory.list.success": "Kategorie zostały pomyślnie wyświetlone.",
-  "newscategory.list.error": "Nie udało się pobrać kategorii.",
-  "newscategory.fetch.success": "Kategoria została pomyślnie pobrana.",
-  "newscategory.notFound": "Nie znaleziono kategorii.",
-  "newscategory.invalidId": "Nieprawidłowy identyfikator kategorii."
+  "articlescategory.validation.invalidNameType": "Nazwa musi być obiektem z tłumaczeniami.",
+  "articlescategory.validation.localeMissing": "Name.{{lang}} jest wymagane i nie może być puste.",
+  "articlescategory.validation.localeInvalid": "Name.{{lang}} musi być ciągiem znaków.",
+  "articlescategory.create.success": "Kategoria '{{name}}' została pomyślnie utworzona.",
+  "articlescategory.create.error": "Nie udało się utworzyć kategorii.",
+  "articlescategory.update.success": "Kategoria '{{name}}' została pomyślnie zaktualizowana.",
+  "articlescategory.delete.success": "Kategoria '{{name}}' została pomyślnie usunięta.",
+  "articlescategory.list.success": "Kategorie zostały pomyślnie wyświetlone.",
+  "articlescategory.list.error": "Nie udało się pobrać kategorii.",
+  "articlescategory.fetch.success": "Kategoria została pomyślnie pobrana.",
+  "articlescategory.notFound": "Nie znaleziono kategorii.",
+  "articlescategory.invalidId": "Nieprawidłowy identyfikator kategorii."
 }

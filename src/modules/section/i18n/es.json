@@ -1,13 +1,29 @@
 {
-  "section.invalidLabel": "La etiqueta es obligatoria en todos los idiomas soportados.",
-  "section.validation.invalidJSON": "El valor de la etiqueta no es un JSON válido.",
-  "section.validation.missingLocale": "Falta la etiqueta o está vacía en algunos idiomas.",
-  "section.create.success": "La sección {{name}} se creó correctamente.",
-  "section.create.labelMissing": "La etiqueta es obligatoria en todos los idiomas.",
-  "section.update.success": "La sección {{name}} se actualizó correctamente.",
-  "section.update.notFound": "Sección no encontrada.",
-  "section.update.labelMissing": "La etiqueta es obligatoria en todos los idiomas.",
-  "section.list.success": "Secciones listadas correctamente.",
-  "section.delete.success": "La sección {{name}} fue eliminada.",
-  "section.delete.notFound": "Sección no encontrada."
+  "admin": {
+    "section": {
+      "created": "SectionMeta '{key}' creado con éxito.",
+      "updated": "SectionMeta '{key}' actualizado.",
+      "deleted": "SectionMeta '{key}' eliminado.",
+      "fetchedAll": "Todos los SectionMeta recuperados.",
+      "keyExists": "Ya existe un SectionMeta con esta clave: '{key}'.",
+      "notFound": "SectionMeta '{key}' no encontrado.",
+      "labelRequired": "La etiqueta es obligatoria.",
+      "labelLocaleType": "Cada idioma de la etiqueta debe ser una cadena.",
+      "labelLocaleRequired": "Al menos un idioma de la etiqueta debe estar completado.",
+      "descriptionType": "La descripción debe ser una cadena o un objeto.",
+      "descriptionLocaleType": "Cada idioma de la descripción debe ser una cadena.",
+      "keyRequired": "La clave de la sección es obligatoria.",
+      "keyParamRequired": "El parámetro de clave de sección es obligatorio.",
+      "settingCreated": "SectionSetting '{sectionKey}' creado para el tenant.",
+      "settingUpdated": "SectionSetting '{sectionKey}' actualizado.",
+      "settingDeleted": "SectionSetting '{sectionKey}' eliminado.",
+      "settingExists": "SectionSetting ya existe para este tenant y sección: '{sectionKey}'.",
+      "settingNotFound": "SectionSetting '{sectionKey}' no encontrado.",
+      "settingsFetched": "SectionSettings para el tenant '{tenant}' recuperados."
+    }
+  },
+  "admin.module": {
+    "tenantAndSectionKeyRequired": "Tenant y SectionKey son obligatorios.",
+    "tenantRequired": "Tenant es obligatorio."
+  }
 }

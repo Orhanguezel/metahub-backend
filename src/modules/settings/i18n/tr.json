@@ -1,0 +1,22 @@
+{
+  "settings.tenantRequired": "Tenant zorunlu.",
+  "setting.error.missing": "Eksik veya hatalı anahtar.",
+  "setting.error.notFound": "Ayar bulunamadı.",
+  "setting.error.valueRequired": "Değer zorunludur.",
+  "setting.error.arrayNotAllowed": "Bu alan bir dizi olmalı.",
+  "setting.error.arrayEmpty": "Dizi boş olamaz.",
+  "setting.error.arrayInvalidItems": "Dizi elemanları geçersiz.",
+  "setting.error.imagesArrayRequired": "Resim alanı bir dizi olmalı.",
+  "setting.error.imagesInvalidFormat": "Resim formatı geçersiz.",
+  "setting.error.lightRequired": "Aydınlık logo zorunludur.",
+  "setting.error.darkInvalid": "Karanlık logo formatı geçersiz.",
+  "setting.error.missingLocale": "Çoklu dil alanında eksik çeviri.",
+  "setting.error.localeType": "Çeviri değerleri metin olmalı.",
+  "settings.removeImagesError": "Resimler silinirken hata oluştu.",
+  "settings.deleted": "Ayar başarıyla silindi.",
+  "setting.upload.success": "Resimler başarıyla yüklendi.",
+  "setting.create.success": "Ayar başarıyla oluşturuldu.",
+  "setting.create.error": "Ayar oluşturulurken hata oluştu.",
+  "setting.update.success": "Ayar başarıyla güncellendi."
+}
+

@@ -1,41 +1,8 @@
+// models/company.model.ts
+
 import mongoose, { Schema, Model, models } from "mongoose";
-
-export interface ICompanyImage {
-  url: string;
-  thumbnail: string;
-  webp?: string;
-  publicId?: string;
-}
-
-export interface ICompany {
-  companyName: string;
-  tenant: string; // Optional tenant field for multi-tenancy
-  taxNumber: string;
-  handelsregisterNumber?: string;
-  email: string;
-  phone: string;
-  address: {
-    street: string;
-    city: string;
-    postalCode: string;
-    country: string;
-  };
-  bankDetails: {
-    bankName: string;
-    iban: string;
-    swiftCode: string;
-  };
-  logos?: ICompanyImage[];
-  socialLinks?: {
-    facebook?: string;
-    instagram?: string;
-    twitter?: string;
-    linkedin?: string;
-    youtube?: string;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-}
+import type { ICompany, ICompanyImage } from "./types";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
 const CompanyImageSchema = new Schema<ICompanyImage>(
   {
@@ -51,6 +18,12 @@ const CompanySchema = new Schema<ICompany>(
   {
     companyName: { type: String, required: true, unique: true },
     tenant: { type: String, required: true, index: true },
+    language: {
+      type: String,
+      enum: SUPPORTED_LOCALES,
+      required: true,
+      default: "en",
+    },
     taxNumber: { type: String, required: true },
     handelsregisterNumber: { type: String },
     email: { type: String, required: true, unique: true },
@@ -66,7 +39,7 @@ const CompanySchema = new Schema<ICompany>(
       iban: { type: String, required: true },
       swiftCode: { type: String, required: true },
     },
-    logos: { type: [CompanyImageSchema], default: [] },
+    images: { type: [CompanyImageSchema], default: [] },
     socialLinks: {
       facebook: { type: String },
       instagram: { type: String },

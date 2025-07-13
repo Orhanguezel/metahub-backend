@@ -1,30 +1,97 @@
 {
-  "public.create.success": "Randevu başarıyla oluşturuldu.",
-  "public.create.missingFields": "Lütfen gerekli tüm alanları doldurun.",
-  "public.create.slotsFull": "Bu saat için tüm randevu slotları dolu.",
-  "public.create.created": "{name}, {date} {time} için randevu oluşturdu.",
-  "public.email.subject.customer": "📬 Randevu Talebiniz Alındı",
-  "public.email.subject.admin": "🆕 Yeni Randevu Talebi",
-  "public.adminMail.newBooking": "Yeni Randevu",
-  "public.adminMail.name": "İsim",
-  "public.adminMail.phone": "Telefon",
-  "public.adminMail.service": "Hizmet",
-  "public.adminMail.date": "Tarih",
-  "public.adminMail.time": "Saat",
-  "public.adminMail.note": "Not",
-  "public.notification.title": "Yeni Randevu",
-  "public.notification.message": "{name} adlı kişi {service} için {date} {time} tarihinde randevu aldı.",
-  "admin.bookings.fetched": "Tüm randevular başarıyla getirildi.",
-  "admin.bookings.invalidId": "Geçersiz randevu ID'si.",
-  "admin.bookings.notFound": "Randevu bulunamadı.",
-  "admin.bookings.fetchedOne": "Randevu başarıyla getirildi.",
-  "admin.bookings.statusUpdated": "Randevu durumu güncellendi.",
-  "admin.bookings.notFoundOrDeleted": "Randevu bulunamadı veya zaten silinmiş.",
-  "admin.bookings.deleted": "Randevu başarıyla silindi.",
-  "booking.confirmed.subject": "✅ Randevunuz Onaylandı",
-  "booking.confirmed.emailSent": "Onay e-postası gönderildi.",
-  "booking.confirmed.emailError": "Onay e-postası gönderilemedi.",
-  "booking.rejected.subject": "❌ Randevu Talebiniz Reddedildi",
-  "booking.rejected.emailSent": "Red e-postası gönderildi.",
-  "booking.rejected.emailError": "Red e-postası gönderilemedi."
+  "validation": {
+    "nameRequired": "İsim zorunludur.",
+    "nameString": "İsim metin olmalıdır.",
+    "email": "Geçerli bir e-posta gereklidir.",
+    "phone": "Telefon metin olmalıdır.",
+    "serviceTypeRequired": "Hizmet türü zorunludur.",
+    "serviceTypeString": "Hizmet türü metin olmalıdır.",
+    "note": "Not metin olmalıdır.",
+    "dateRequired": "Tarih zorunludur.",
+    "dateFormat": "Geçerli bir tarih giriniz (YYYY-MM-DD).",
+    "timeRequired": "Saat zorunludur.",
+    "timeFormat": "Saat HH:mm formatında olmalıdır.",
+    "serviceRequired": "Hizmet ID zorunludur.",
+    "serviceId": "Hizmet ID geçerli bir ObjectId olmalıdır.",
+    "duration": "Süre pozitif bir tam sayı olmalıdır.",
+    "languageRequired": "Dil zorunludur.",
+    "language": "Dil şu seçeneklerden biri olmalıdır: {{supported}}",
+    "status": "Durum: pending, confirmed veya cancelled olmalıdır.",
+    "mongoId": "{{field}} geçerli bir MongoDB ObjectId olmalıdır."
+  },
+  "admin": {
+    "bookings": {
+      "fetched": "Tüm randevular başarıyla getirildi.",
+      "invalidId": "Geçersiz randevu ID.",
+      "notFound": "Randevu bulunamadı.",
+      "fetchedOne": "Randevu başarıyla getirildi.",
+      "statusUpdated": "Randevu durumu güncellendi. (Durum: {{status}})",
+      "notFoundOrDeleted": "Randevu bulunamadı veya silindi.",
+      "deleted": "Randevu başarıyla silindi."
+    }
+  },
+  "public": {
+    "create": {
+      "missingFields": "Zorunlu alanları doldurun.",
+      "slotsFull": "Bu saat aralığı tamamen dolu.",
+      "created": "Randevunuz başarıyla oluşturuldu.",
+      "success": "Randevu oluşturma işlemi başarılı."
+    },
+    "email": {
+      "subject": {
+        "customer": "Randevunuz alındı",
+        "admin": "Yeni randevu talebi"
+      }
+    },
+    "adminMail": {
+      "newBooking": "Yeni Randevu Talebi",
+      "name": "Ad Soyad",
+      "phone": "Telefon",
+      "service": "Hizmet",
+      "date": "Tarih",
+      "time": "Saat",
+      "note": "Not"
+    },
+    "notification": {
+      "title": "Yeni randevu oluşturuldu",
+      "message": "{{name}}, {{service}} için {{date}} tarihinde saat {{time}}'de randevu aldı."
+    }
+  },
+  "booking": {
+    "confirmed": {
+      "subject": "Randevunuz onaylandı",
+      "emailSent": "Onay e-postası gönderildi.",
+      "emailError": "Onay e-postası gönderilemedi."
+    },
+    "rejected": {
+      "subject": "Randevunuz iptal edildi",
+      "emailSent": "İptal e-postası gönderildi.",
+      "emailError": "İptal e-postası gönderilemedi."
+    },
+     "title": "Randevu Onayı",
+    "greeting": "Merhaba {{name}},",
+    "info": "{{brand}} ile randevunuz başarıyla onaylanmıştır.",
+    "instructions": "Lütfen randevu saatinizden 5 dakika önce hazır olunuz.",
+    "serviceLabel": "Hizmet",
+    "dateLabel": "Tarih",
+    "timeLabel": "Saat",
+    "note": "Herhangi bir sorunuz olursa bizimle iletişime geçebilirsiniz.",
+    "sign": "Sevgilerle, {{brand}} Ekibi",
+    "received": {
+      "title": "Randevu Talebiniz Alındı",
+      "greeting": "Merhaba {{name}},",
+      "info": "{{brand}} ile randevu talebiniz başarıyla alınmıştır.",
+      "wait": "Randevunuzun onaylanması için ekibimiz en kısa sürede sizinle iletişime geçecektir.",
+      "note": "Herhangi bir sorunuz olursa bize e-posta ile ulaşabilirsiniz.",
+      "sign": "Sevgilerle, {{brand}} Ekibi"
+    },
+    "rejection": {
+      "title": "Randevu İptali",
+      "greeting": "Merhaba {{name}},",
+      "info": "{{date}} tarihinde saat {{time}} için planlanan \"{{service}}\" randevunuz iptal edilmiştir.",
+      "closing": "Dilerseniz yeni bir randevu alabilirsiniz.",
+      "sign": "Sevgilerle, {{brand}} Ekibi"
+    }
+  }
+  
 }

@@ -11,7 +11,6 @@ export interface IAboutImage {
 }
 
 export interface IAbout {
-  _id: Types.ObjectId | string;
   title: TranslatedLabel;
   tenant: string;
   slug: string;

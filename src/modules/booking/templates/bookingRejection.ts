@@ -1,9 +1,8 @@
 // src/templates/bookingRejection.ts
 import { baseTemplate } from "@/templates/baseTemplate";
 import logger from "@/core/middleware/logger/logger";
-import { t } from "@/core/utils/i18n/translate";
+import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "@/templates/i18n";
-import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import type { SupportedLocale } from "@/types/common";
 
 interface BookingRejectionParams {
@@ -11,6 +10,9 @@ interface BookingRejectionParams {
   service: string;
   date: string;
   time: string;
+  locale: SupportedLocale;
+  brandName: string;     // EKLENDİ
+  senderEmail?: string;  // Gerekirse
 }
 
 export function BookingRejectionTemplate({
@@ -18,23 +20,21 @@ export function BookingRejectionTemplate({
   service,
   date,
   time,
+  locale,
+  brandName,
 }: BookingRejectionParams): string {
-  const lang = getLogLocale();
-  const tTrans = translations[lang] || translations["en"];
-  const BRAND_NAME = process.env.BRAND_NAME ?? "anastasia";
+  const t = (key: string, params?: any) => translate(key, locale, translations, params);
 
   const content = `
-    <h2>${t("booking.rejection.greeting", lang, tTrans, { name })}</h2>
-    <p>${t("booking.rejection.info", lang, tTrans, { service, date, time })}</p>
-    <p>${t("booking.rejection.closing", lang, tTrans)}</p>
-    <p style="margin-top: 30px;">${t("booking.rejection.sign", lang, tTrans, {
-      brand: BRAND_NAME,
-    })}</p>
+    <h2>${t("booking.rejection.greeting", { name })}</h2>
+    <p>${t("booking.rejection.info", { service, date, time })}</p>
+    <p>${t("booking.rejection.closing")}</p>
+    <p style="margin-top: 30px;">${t("booking.rejection.sign", { brand: brandName })}</p>
   `;
 
   logger.debug(
-    `[EmailTemplate] Booking REJECTION generated for ${name} | lang: ${lang}`
+    `[EmailTemplate] Booking REJECTION generated for ${name} | lang: ${locale}`
   );
 
-  return baseTemplate(content, t("booking.rejection.title", lang, tTrans));
+  return baseTemplate(content, t("booking.rejection.title"));
 }

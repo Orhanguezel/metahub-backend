@@ -20,9 +20,7 @@ if (!fs.existsSync(envPath)) {
   logger.warn(msg + " - Varsayılan dummy env ile devam ediliyor.", {});
 
   // Minimum dummy env (her ortamda fallback için)
-  process.env.MONGO_URI =
-    process.env.MONGO_URI ||
-    "mongodb://admin:adminpassword@141.136.36.40:27017/metahub-db?authSource=admin";
+  process.env.MONGO_URI = process.env.MONGO_URI;
   process.env.PORT = process.env.PORT || "5019";
   process.env.JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
   process.env.SMTP_HOST = process.env.SMTP_HOST || "smtp.hostinger.com";
@@ -33,7 +31,7 @@ if (!fs.existsSync(envPath)) {
 
   process.env.SMTP_FROM = process.env.SMTP_FROM || "info@koenigsmassage.com";
   process.env.SMTP_FROM_NAME =
-    process.env.SMTP_FROM_NAME || "anastasia Support";
+    process.env.SMTP_FROM_NAME || "Ensotek Support";
   process.env.IMAP_HOST = process.env.IMAP_HOST || "imap.hostinger.com";
   process.env.IMAP_PORT = process.env.IMAP_PORT || "993";
   process.env.IMAP_USER = process.env.IMAP_USER || "info@koenigsmassage.com";

@@ -1,0 +1,21 @@
+{
+  "settings.tenantRequired": "Mandant ist erforderlich.",
+  "setting.error.missing": "Fehlender oder ungültiger Schlüssel.",
+  "setting.error.notFound": "Einstellung nicht gefunden.",
+  "setting.error.valueRequired": "Wert ist erforderlich.",
+  "setting.error.arrayNotAllowed": "Dieses Feld muss ein Array sein.",
+  "setting.error.arrayEmpty": "Array darf nicht leer sein.",
+  "setting.error.arrayInvalidItems": "Ungültige Array-Elemente.",
+  "setting.error.imagesArrayRequired": "Bildfeld muss ein Array sein.",
+  "setting.error.imagesInvalidFormat": "Ungültiges Bildformat.",
+  "setting.error.lightRequired": "Helles Logo ist erforderlich.",
+  "setting.error.darkInvalid": "Dunkles Logo-Format ist ungültig.",
+  "setting.error.missingLocale": "Fehlende Übersetzung im Mehrsprachenfeld.",
+  "setting.error.localeType": "Übersetzungswerte müssen Text sein.",
+  "settings.removeImagesError": "Fehler beim Löschen der Bilder.",
+  "settings.deleted": "Einstellung erfolgreich gelöscht.",
+  "setting.upload.success": "Bilder wurden erfolgreich hochgeladen.",
+  "setting.create.success": "Einstellung erfolgreich erstellt.",
+  "setting.create.error": "Fehler beim Erstellen der Einstellung.",
+  "setting.update.success": "Einstellung erfolgreich aktualisiert."
+}

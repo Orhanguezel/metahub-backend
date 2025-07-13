@@ -1,14 +1,14 @@
 {
-  "referencescategory.validation.invalidNameType": "Name must be an object with locales.",
-  "referencescategory.validation.localeMissing": "Name.{{lang}} is required and must be a non-empty string.",
-  "referencescategory.validation.localeInvalid": "Name.{{lang}} must be a string.",
-  "referencescategory.create.success": "Category '{{name}}' created successfully.",
-  "referencescategory.create.error": "Failed to create category.",
-  "referencescategory.update.success": "Category '{{name}}' updated successfully.",
-  "referencescategory.delete.success": "Category '{{name}}' deleted successfully.",
-  "referencescategory.list.success": "Categories listed successfully.",
-  "referencescategory.list.error": "Failed to fetch categories.",
-  "referencescategory.fetch.success": "Category fetched successfully.",
-  "referencescategory.notFound": "Category not found.",
-  "referencescategory.invalidId": "Invalid category ID."
+  "articlescategory.validation.invalidNameType": "Name must be an object with locales.",
+  "articlescategory.validation.localeMissing": "Name.{{lang}} is required and must be a non-empty string.",
+  "articlescategory.validation.localeInvalid": "Name.{{lang}} must be a string.",
+  "articlescategory.create.success": "Category '{{name}}' created successfully.",
+  "articlescategory.create.error": "Failed to create category.",
+  "articlescategory.update.success": "Category '{{name}}' updated successfully.",
+  "articlescategory.delete.success": "Category '{{name}}' deleted successfully.",
+  "articlescategory.list.success": "Categories listed successfully.",
+  "articlescategory.list.error": "Failed to fetch categories.",
+  "articlescategory.fetch.success": "Category fetched successfully.",
+  "articlescategory.notFound": "Category not found.",
+  "articlescategory.invalidId": "Invalid category ID."
 }

@@ -59,7 +59,7 @@ function completeMissingLocales(data: any) {
   }
 }
 
-// ➕ CREATE TENANT
+// ➕ CREATE TENANT (Admin)
 export const createTenant = asyncHandler(
   async (req: Request, res: Response) => {
     const { Tenants } = await getTenantModels(req);
@@ -82,7 +82,7 @@ export const createTenant = asyncHandler(
       phone: req.body.phone,
     };
 
-    // Images (aynı kalıyor)
+    // Images
     let images: ITenant["images"] = [];
     if (Array.isArray(req.files)) {
       for (const file of req.files as Express.Multer.File[]) {
@@ -128,7 +128,7 @@ export const createTenant = asyncHandler(
   }
 );
 
-// ✏️ UPDATE TENANT
+// ✏️ UPDATE TENANT (Admin)
 export const updateTenant = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { Tenants } = await getTenantModels(req);
@@ -143,7 +143,7 @@ export const updateTenant = asyncHandler(
 
     const { removedImages, ...updates } = req.body;
 
-    // Görsel ekleme ve çıkarma aynı kalıyor
+    // Görsel ekleme ve çıkarma
     if (Array.isArray(req.files)) {
       tenant.images = tenant.images || [];
       for (const file of req.files as Express.Multer.File[]) {
@@ -169,16 +169,12 @@ export const updateTenant = asyncHandler(
 
     if (removedImages) {
       const removed = parseIfJson(removedImages);
-
       tenant.images = tenant.images.filter((img) => !removed.includes(img.url));
-
       for (const imgUrl of removed) {
         const isCloudinaryImage = imgUrl.startsWith(
           "https://res.cloudinary.com/"
         );
-
         if (!isCloudinaryImage) {
-          // Yalnızca yerel dosyalar için silme işlemi yap
           const localPath = path.join(
             "uploads",
             "tenant-images",
@@ -190,8 +186,6 @@ export const updateTenant = asyncHandler(
             console.warn(`File not found: ${localPath}`);
           }
         }
-
-        // Cloudinary silme işlemi
         const imgObj = tenant.images.find((img) => img.url === imgUrl);
         if (imgObj?.publicId) {
           await cloudinary.uploader.destroy(imgObj.publicId);
@@ -199,7 +193,7 @@ export const updateTenant = asyncHandler(
       }
     }
 
-    // Çok dilli alanları merge ile güncelle (önemli fark!)
+    // Çok dilli alanlar merge ile güncelle
     i18nFields.forEach((field) => {
       if (updates[field]) {
         tenant[field] = mergeLocalesForUpdate(
@@ -209,7 +203,7 @@ export const updateTenant = asyncHandler(
       }
     });
 
-    // Diğer alanları güncelle
+    // Diğer alanlar
     [
       "slug",
       "mongoUri",
@@ -252,8 +246,8 @@ export const updateTenant = asyncHandler(
   }
 );
 
-// 📝 GET ALL
-export const getAllTenants = asyncHandler(
+// 📝 GET ALL TENANTS (Admin — panelde hepsi)
+export const getAllTenantsAdmin = asyncHandler(
   async (req: Request, res: Response) => {
     const { Tenants } = await getTenantModels(req);
     const items = await Tenants.find();
@@ -268,7 +262,24 @@ export const getAllTenants = asyncHandler(
   }
 );
 
-// 🗑️ DELETE
+// 📝 GET PUBLIC TENANTS (aktif ve public görünenler)
+export const getAllTenantsPublic = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { Tenants } = await getTenantModels(req);
+    // Örneğin, sadece isActive true ve public görünenleri getiriyoruz
+    const items = await Tenants.find({ isActive: true });
+    const data = items.map((item) =>
+      normalizeTenantI18nFields(item.toObject())
+    );
+    res.status(200).json({
+      success: true,
+      data,
+      message: t("list.success", req),
+    });
+  }
+);
+
+// 🗑️ DELETE TENANT (Admin)
 export const deleteTenant = asyncHandler(
   async (req: Request, res: Response) => {
     const { Tenants } = await getTenantModels(req);

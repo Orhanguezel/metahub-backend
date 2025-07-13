@@ -1,5 +1,4 @@
 import "@/core/config/envLoader";
-import mongoose from "mongoose";
 import { ModuleMeta, ModuleSetting } from "@/modules/modules/admin.models";
 import { Tenants } from "@/modules/tenants/tenants.model";
 import logger from "@/core/middleware/logger/logger";
@@ -16,17 +15,12 @@ const DEFAULT_SETTING = {
   order: 0,
 };
 
-// --- Context guard: Eğer CLI veya seed call ise, güvenli şekilde tenant info ekle ---
 function safeGetContext(obj: any) {
   try {
-    // Express req nesnesi mi? headers varsa
     if (obj && obj.headers) return getRequestContext(obj);
-    // Değilse sadece tenant parametresini ekle
     if (obj && obj.tenant) return { tenant: obj.tenant };
-    // Parametresiz ise boş obje
     return {};
   } catch (e) {
-    // Her ihtimale karşı hata durumunda context ekleme
     return {};
   }
 }
@@ -44,18 +38,34 @@ export async function seedSettingsForNewModule(
         module: "seedSettingsForNewModule",
         event: "module.notfound",
         status: "fail",
-        ...safeGetContext({ tenant: tenantSlug }), // Sadece tenant parametresi logda yer alsın
+        ...safeGetContext({ tenant: tenantSlug }),
       }
     );
     return;
   }
 
+  // Tüm aktif tenantların sadece string olan slug'larını al
   const tenants: string[] = tenantSlug
     ? [tenantSlug]
-    : (await Tenants.find({ isActive: true })).map((t) => t.slug);
+    : (await Tenants.find({ isActive: true }).lean())
+        .map((t) => typeof t.slug === "string" ? t.slug : "")
+        .filter(Boolean);
 
   let count = 0;
   for (const tenant of tenants) {
+    // Burada da sadece string kontrolü
+    if (!tenant || typeof tenant !== "string") {
+      logger.error(
+        `[Seed] Tenant slug geçersiz: ${tenant}`,
+        {
+          module: "seedSettingsForNewModule",
+          event: "invalid.tenant",
+          status: "fail",
+          moduleName,
+        }
+      );
+      continue;
+    }
     const exists = await ModuleSetting.findOne({ module: moduleName, tenant });
     if (!exists) {
       await ModuleSetting.create({

@@ -1,18 +1,17 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { isValidObjectId } from "@/core/utils/validation";
-import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
-import { extractMultilangValue } from "@/core/utils/i18n/parseMultilangField";
-import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
-import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
-import { SupportedLocale } from "@/types/common";
-import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import logger from "@/core/middleware/logger/logger";
-import { t as translate } from "@/core/utils/i18n/translate";
-import translations from "./i18n";
+import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+import translations from "../services/i18n";
+import { t as translate } from "@/core/utils/i18n/translate";
+import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
+import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
 
-// ✅ CREATE
+// ✅ CREATE (Tüm dilleri kaydeder)
 export const createServicesCategory = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
@@ -29,84 +28,87 @@ export const createServicesCategory = asyncHandler(
       });
 
       logger.info(
-        t("referencescategory.create.success", { name: name[locale] }),
+        t("servicescategory.create.success", { name: name[locale] }),
         {
           ...getRequestContext(req),
-          event: "referencescategory.create",
-          module: "referencescategory",
+          event: "servicescategory.create",
+          module: "servicescategory",
           status: "success",
         }
       );
 
       res.status(201).json({
         success: true,
-        message: t("referencescategory.create.success", { name: name[locale] }),
-        data: category,
+        message: t("servicescategory.create.success", { name: name[locale] }),
+        data: category, // .name burada tüm diller ile döner!
       });
     } catch (err: any) {
-      logger.error(t("referencescategory.create.error"), {
+      logger.error(t("servicescategory.create.error"), {
         ...getRequestContext(req),
-        event: "referencescategory.create",
-        module: "referencescategory",
+        event: "servicescategory.create",
+        module: "servicescategory",
         status: "fail",
         error: err.message,
       });
 
       res.status(500).json({
         success: false,
-        message: t("referencescategory.create.error"),
+        message: t("servicescategory.create.error"),
       });
     }
   }
 );
 
-// ✅ GET ALL
+// ✅ GET ALL (Tüm dillerle gönderir)
 export const getAllServicesCategories = asyncHandler(
   async (req: Request, res: Response) => {
-    const locale: SupportedLocale = req.locale || getLogLocale();
+    const locale: SupportedLocale = req.locale || getLogLocale() || "en";
     const t = (key: string) => translate(key, locale, translations);
 
     try {
       const { ServicesCategory } = await getTenantModels(req);
-      const categories = await ServicesCategory.find({ tenant: req.tenant })
+
+      const filter: Record<string, any> = {
+        tenant: req.tenant,
+      };
+      if (req.query.isActive) {
+        filter.isActive = req.query.isActive === "true";
+      }
+
+      const categories = await ServicesCategory.find(filter)
         .sort({ createdAt: -1 })
         .lean();
 
-      const localized = categories.map((cat) => ({
-        ...cat,
-        name: extractMultilangValue(cat.name, locale),
-      }));
-
-      logger.info(t("referencescategory.list.success"), {
+      logger.info(t("servicescategory.list.success"), {
         ...getRequestContext(req),
-        event: "referencescategory.list",
-        module: "referencescategory",
-        resultCount: localized.length,
+        event: "servicescategory.list",
+        module: "servicescategory",
+        resultCount: categories.length,
       });
 
       res.status(200).json({
         success: true,
-        message: t("referencescategory.list.success"),
-        data: localized,
+        message: t("servicescategory.list.success"),
+        data: categories, // <--- .name: {tr, en, ...} tüm dillerle gelir!
       });
     } catch (err: any) {
-      logger.error(t("referencescategory.list.error"), {
+      logger.error(t("servicescategory.list.error"), {
         ...getRequestContext(req),
-        event: "referencescategory.list",
-        module: "referencescategory",
+        event: "servicescategory.list",
+        module: "servicescategory",
         status: "fail",
         error: err.message,
       });
 
       res.status(500).json({
         success: false,
-        message: t("referencescategory.list.error"),
+        message: t("servicescategory.list.error"),
       });
     }
   }
 );
 
-// ✅ GET BY ID
+// ✅ GET BY ID (Tüm dillerle)
 export const getServicesCategoryById = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
@@ -114,10 +116,10 @@ export const getServicesCategoryById = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("referencescategory.invalidId"), getRequestContext(req));
+      logger.warn(t("servicescategory.invalidId"), getRequestContext(req));
       res
         .status(400)
-        .json({ success: false, message: t("referencescategory.invalidId") });
+        .json({ success: false, message: t("servicescategory.invalidId") });
       return;
     }
 
@@ -128,25 +130,22 @@ export const getServicesCategoryById = asyncHandler(
     }).lean();
 
     if (!category) {
-      logger.warn(t("referencescategory.notFound"), getRequestContext(req));
+      logger.warn(t("servicescategory.notFound"), getRequestContext(req));
       res
         .status(404)
-        .json({ success: false, message: t("referencescategory.notFound") });
+        .json({ success: false, message: t("servicescategory.notFound") });
       return;
     }
 
     res.status(200).json({
       success: true,
-      message: t("referencescategory.fetch.success"),
-      data: {
-        ...category,
-        name: extractMultilangValue(category.name, locale),
-      },
+      message: t("servicescategory.fetch.success"),
+      data: category, // .name tüm dillerle!
     });
   }
 );
 
-// ✅ UPDATE
+// ✅ UPDATE (Tüm dilleri merge ederek günceller)
 export const updateServicesCategory = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
@@ -156,10 +155,10 @@ export const updateServicesCategory = asyncHandler(
     const { name, isActive } = req.body;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("referencescategory.invalidId"), getRequestContext(req));
+      logger.warn(t("servicescategory.invalidId"), getRequestContext(req));
       res
         .status(400)
-        .json({ success: false, message: t("referencescategory.invalidId") });
+        .json({ success: false, message: t("servicescategory.invalidId") });
       return;
     }
 
@@ -169,10 +168,10 @@ export const updateServicesCategory = asyncHandler(
       tenant: req.tenant,
     });
     if (!category) {
-      logger.warn(t("referencescategory.notFound"), getRequestContext(req));
+      logger.warn(t("servicescategory.notFound"), getRequestContext(req));
       res
         .status(404)
-        .json({ success: false, message: t("referencescategory.notFound") });
+        .json({ success: false, message: t("servicescategory.notFound") });
       return;
     }
 
@@ -187,21 +186,21 @@ export const updateServicesCategory = asyncHandler(
     await category.save();
 
     logger.info(
-      t("referencescategory.update.success", { name: category.name[locale] }),
+      t("servicescategory.update.success", { name: category.name[locale] }),
       {
         ...getRequestContext(req),
-        event: "referencescategory.update",
-        module: "referencescategory",
+        event: "servicescategory.update",
+        module: "servicescategory",
         status: "success",
       }
     );
 
     res.status(200).json({
       success: true,
-      message: t("referencescategory.update.success", {
+      message: t("servicescategory.update.success", {
         name: category.name[locale],
       }),
-      data: category,
+      data: category, // .name tüm dillerle!
     });
   }
 );
@@ -215,10 +214,10 @@ export const deleteServicesCategory = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("referencescategory.invalidId"), getRequestContext(req));
+      logger.warn(t("servicescategory.invalidId"), getRequestContext(req));
       res
         .status(400)
-        .json({ success: false, message: t("referencescategory.invalidId") });
+        .json({ success: false, message: t("servicescategory.invalidId") });
       return;
     }
 
@@ -231,27 +230,25 @@ export const deleteServicesCategory = asyncHandler(
     });
 
     if (!deleted) {
-      logger.warn(t("referencescategory.notFound"), getRequestContext(req));
+      logger.warn(t("servicescategory.notFound"), getRequestContext(req));
       res
         .status(404)
-        .json({ success: false, message: t("referencescategory.notFound") });
+        .json({ success: false, message: t("servicescategory.notFound") });
       return;
     }
 
-    const name = deleted.name
-      ? extractMultilangValue(deleted.name, locale)
-      : "Category";
+    const name = deleted.name?.[locale] || "Category";
 
-    logger.info(t("referencescategory.delete.success", { name }), {
+    logger.info(t("servicescategory.delete.success", { name }), {
       ...getRequestContext(req),
-      event: "referencescategory.delete",
-      module: "referencescategory",
+      event: "servicescategory.delete",
+      module: "servicescategory",
       status: "success",
     });
 
     res.status(200).json({
       success: true,
-      message: t("referencescategory.delete.success", { name }),
+      message: t("servicescategory.delete.success", { name }),
     });
   }
 );

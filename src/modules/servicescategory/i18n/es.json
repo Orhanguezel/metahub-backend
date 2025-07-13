@@ -1,14 +1,14 @@
 {
-  "servicescategory.validation.invalidNameType": "El nombre debe ser un objeto con traducciones.",
-  "servicescategory.validation.localeMissing": "Name.{{lang}} es obligatorio y no puede estar vacío.",
-  "servicescategory.validation.localeInvalid": "Name.{{lang}} debe ser una cadena de texto.",
-  "servicescategory.create.success": "Categoría '{{name}}' creada con éxito.",
-  "servicescategory.create.error": "No se pudo crear la categoría.",
-  "servicescategory.update.success": "Categoría '{{name}}' actualizada con éxito.",
-  "servicescategory.delete.success": "Categoría '{{name}}' eliminada con éxito.",
-  "servicescategory.list.success": "Categorías listadas con éxito.",
-  "servicescategory.list.error": "Error al obtener las categorías.",
-  "servicescategory.fetch.success": "Categoría obtenida con éxito.",
-  "servicescategory.notFound": "Categoría no encontrada.",
-  "servicescategory.invalidId": "ID de categoría no válida."
+  "articlescategory.validation.invalidNameType": "El nombre debe ser un objeto con traducciones.",
+  "articlescategory.validation.localeMissing": "Name.{{lang}} es obligatorio y no puede estar vacío.",
+  "articlescategory.validation.localeInvalid": "Name.{{lang}} debe ser una cadena de texto.",
+  "articlescategory.create.success": "Categoría '{{name}}' creada con éxito.",
+  "articlescategory.create.error": "No se pudo crear la categoría.",
+  "articlescategory.update.success": "Categoría '{{name}}' actualizada con éxito.",
+  "articlescategory.delete.success": "Categoría '{{name}}' eliminada con éxito.",
+  "articlescategory.list.success": "Categorías listadas con éxito.",
+  "articlescategory.list.error": "Error al obtener las categorías.",
+  "articlescategory.fetch.success": "Categoría obtenida con éxito.",
+  "articlescategory.notFound": "Categoría no encontrada.",
+  "articlescategory.invalidId": "ID de categoría no válida."
 }

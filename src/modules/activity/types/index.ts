@@ -11,7 +11,6 @@ export interface IActivityImage {
 }
 
 export interface IActivity {
-  _id: Types.ObjectId | string;
   title: TranslatedLabel;
   tenant: string;
   slug: string;

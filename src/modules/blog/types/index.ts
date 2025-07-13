@@ -11,7 +11,6 @@ export interface IBlogImage {
 }
 
 export interface IBlog {
-  _id: Types.ObjectId | string;
   title: TranslatedLabel;
   tenant: string;
   slug: string;

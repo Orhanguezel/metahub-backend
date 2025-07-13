@@ -1,40 +1,88 @@
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
+import { t as translate } from "@/core/utils/i18n/translate";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import translations from "./i18n";
+import type { SupportedLocale } from "@/types/common";
 
+// Contact message gönderimi
 export const validateSendMessage = [
   body("name")
-    .trim()
     .notEmpty()
-    .withMessage("Name is required.")
+    .withMessage((_, { req }) => {
+      const locale: SupportedLocale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.nameRequired");
+    })
     .isLength({ min: 2, max: 50 })
-    .withMessage("Name must be between 2 and 50 characters."),
-  
+    .withMessage((_, { req }) => {
+      const locale: SupportedLocale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.nameLength", { min: 2, max: 50 });
+    }),
+
   body("email")
-    .trim()
+    .notEmpty()
+    .withMessage((_, { req }) => {
+      const locale: SupportedLocale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.emailRequired");
+    })
     .isEmail()
-    .withMessage("A valid email address is required.")
-    .normalizeEmail(),
+    .withMessage((_, { req }) => {
+      const locale: SupportedLocale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.emailInvalid");
+    }),
 
   body("subject")
-    .trim()
     .notEmpty()
-    .withMessage("Subject is required.")
+    .withMessage((_, { req }) => {
+      const locale: SupportedLocale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.subjectRequired");
+    })
     .isLength({ min: 3, max: 100 })
-    .withMessage("Subject must be between 3 and 100 characters."),
+    .withMessage((_, { req }) => {
+      const locale: SupportedLocale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.subjectLength", { min: 3, max: 100 });
+    }),
 
   body("message")
-    .trim()
     .notEmpty()
-    .withMessage("Message is required.")
+    .withMessage((_, { req }) => {
+      const locale: SupportedLocale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.messageRequired");
+    })
     .isLength({ min: 5, max: 1000 })
-    .withMessage("Message must be between 5 and 1000 characters."),
+    .withMessage((_, { req }) => {
+      const locale: SupportedLocale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.messageLength", { min: 5, max: 1000 });
+    }),
 
   validateRequest,
 ];
 
+// Contact mesaj id validasyonu
 export const validateContactIdParam = [
   param("id")
     .isMongoId()
-    .withMessage("Message ID must be a valid MongoDB ObjectId."),
+    .withMessage((_, { req }) => {
+      const locale: SupportedLocale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.invalidMessageId");
+    }),
   validateRequest,
 ];

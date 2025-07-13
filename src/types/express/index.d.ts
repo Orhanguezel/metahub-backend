@@ -52,7 +52,7 @@ declare global {
         | "about"
         | "sport"
         | "spareparts"
-        | "setting"
+        | "settings"
         | "company"
         | "apartment"
         | "tenant"

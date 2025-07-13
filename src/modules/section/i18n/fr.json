@@ -1,13 +1,30 @@
 {
-  "section.invalidLabel": "Le libellé est requis dans toutes les langues prises en charge.",
-  "section.validation.invalidJSON": "La valeur du libellé n'est pas un JSON valide.",
-  "section.validation.missingLocale": "Le libellé est manquant ou vide dans certaines langues.",
-  "section.create.success": "La section {{name}} a été créée avec succès.",
-  "section.create.labelMissing": "Le libellé est requis dans toutes les langues.",
-  "section.update.success": "La section {{name}} a été mise à jour avec succès.",
-  "section.update.notFound": "Section non trouvée.",
-  "section.update.labelMissing": "Le libellé est requis dans toutes les langues.",
-  "section.list.success": "Sections listées avec succès.",
-  "section.delete.success": "La section {{name}} a été supprimée.",
-  "section.delete.notFound": "Section non trouvée."
+  "admin": {
+    "section": {
+      "created": "SectionMeta '{key}' créé avec succès.",
+      "updated": "SectionMeta '{key}' mis à jour.",
+      "deleted": "SectionMeta '{key}' supprimé.",
+      "fetchedAll": "Tous les SectionMeta ont été récupérés.",
+      "keyExists": "Un SectionMeta avec cette clé existe déjà : '{key}'.",
+      "notFound": "SectionMeta '{key}' non trouvé.",
+      "labelRequired": "Le label est obligatoire.",
+      "labelLocaleType": "Chaque langue du label doit être une chaîne.",
+      "labelLocaleRequired": "Au moins une langue du label doit être remplie.",
+      "descriptionType": "La description doit être une chaîne ou un objet.",
+      "descriptionLocaleType": "Chaque langue de la description doit être une chaîne.",
+      "keyRequired": "La clé de la section est obligatoire.",
+      "keyParamRequired": "Le paramètre clé de section est obligatoire.",
+      "settingCreated": "SectionSetting '{sectionKey}' créé pour le locataire.",
+      "settingUpdated": "SectionSetting '{sectionKey}' mis à jour.",
+      "settingDeleted": "SectionSetting '{sectionKey}' supprimé.",
+      "settingExists": "SectionSetting existe déjà pour ce locataire et cette section : '{sectionKey}'.",
+      "settingNotFound": "SectionSetting '{sectionKey}' non trouvé.",
+      "settingsFetched": "SectionSettings pour le locataire '{tenant}' récupérés."
+    }
+  },
+  "admin.module": {
+    "tenantAndSectionKeyRequired": "Le locataire et la clé de section sont obligatoires.",
+    "tenantRequired": "Le locataire est obligatoire."
+  }
 }
+

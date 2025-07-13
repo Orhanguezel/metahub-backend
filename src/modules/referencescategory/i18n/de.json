@@ -1,14 +1,14 @@
 {
-  "referencescategory.validation.invalidNameType": "Name muss ein Objekt mit Übersetzungen sein.",
-  "referencescategory.validation.localeMissing": "Name.{{lang}} ist erforderlich und darf nicht leer sein.",
-  "referencescategory.validation.localeInvalid": "Name.{{lang}} muss ein String sein.",
-  "referencescategory.create.success": "Kategorie '{{name}}' wurde erfolgreich erstellt.",
-  "referencescategory.create.error": "Kategorie konnte nicht erstellt werden.",
-  "referencescategory.update.success": "Kategorie '{{name}}' wurde erfolgreich aktualisiert.",
-  "referencescategory.delete.success": "Kategorie '{{name}}' wurde erfolgreich gelöscht.",
-  "referencescategory.list.success": "Kategorien wurden erfolgreich aufgelistet.",
-  "referencescategory.list.error": "Fehler beim Abrufen der Kategorien.",
-  "referencescategory.fetch.success": "Kategorie erfolgreich abgerufen.",
-  "referencescategory.notFound": "Kategorie nicht gefunden.",
-  "referencescategory.invalidId": "Ungültige Kategorie-ID."
+  "articlescategory.validation.invalidNameType": "Name muss ein Objekt mit Übersetzungen sein.",
+  "articlescategory.validation.localeMissing": "Name.{{lang}} ist erforderlich und darf nicht leer sein.",
+  "articlescategory.validation.localeInvalid": "Name.{{lang}} muss ein String sein.",
+  "articlescategory.create.success": "Kategorie '{{name}}' wurde erfolgreich erstellt.",
+  "articlescategory.create.error": "Kategorie konnte nicht erstellt werden.",
+  "articlescategory.update.success": "Kategorie '{{name}}' wurde erfolgreich aktualisiert.",
+  "articlescategory.delete.success": "Kategorie '{{name}}' wurde erfolgreich gelöscht.",
+  "articlescategory.list.success": "Kategorien wurden erfolgreich aufgelistet.",
+  "articlescategory.list.error": "Fehler beim Abrufen der Kategorien.",
+  "articlescategory.fetch.success": "Kategorie erfolgreich abgerufen.",
+  "articlescategory.notFound": "Kategorie nicht gefunden.",
+  "articlescategory.invalidId": "Ungültige Kategorie-ID."
 }

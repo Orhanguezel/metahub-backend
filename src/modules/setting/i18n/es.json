@@ -1,8 +1,0 @@
-{
-  "setting.upload.success": "Los logotipos se han subido y guardado correctamente.",
-  "setting.update.success": "Configuración actualizada con éxito.",
-  "setting.delete.success": "Configuración eliminada con éxito.",
-  "setting.create.success": "Configuración creada con éxito.",
-  "setting.error.missing": "Se requieren los campos clave y valor.",
-  "setting.notFound": "No se encontró ninguna configuración con la clave proporcionada."
-}

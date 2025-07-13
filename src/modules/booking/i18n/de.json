@@ -1,30 +1,97 @@
 {
-  "public.create.success": "Buchung erfolgreich erstellt.",
-  "public.create.missingFields": "Bitte füllen Sie alle erforderlichen Felder aus.",
-  "public.create.slotsFull": "Alle Buchungsplätze für diese Zeit sind belegt.",
-  "public.create.created": "{name} hat für {date} {time} gebucht.",
-  "public.email.subject.customer": "📬 Ihre Buchungsanfrage wurde erhalten",
-  "public.email.subject.admin": "🆕 Neue Buchungsanfrage",
-  "public.adminMail.newBooking": "Neue Buchung",
-  "public.adminMail.name": "Name",
-  "public.adminMail.phone": "Telefon",
-  "public.adminMail.service": "Service",
-  "public.adminMail.date": "Datum",
-  "public.adminMail.time": "Uhrzeit",
-  "public.adminMail.note": "Notiz",
-  "public.notification.title": "Neue Buchung",
-  "public.notification.message": "{name} hat {service} für {date} {time} gebucht.",
-  "admin.bookings.fetched": "Alle Buchungen erfolgreich abgerufen.",
-  "admin.bookings.invalidId": "Ungültige Buchungs-ID.",
-  "admin.bookings.notFound": "Buchung nicht gefunden.",
-  "admin.bookings.fetchedOne": "Buchung erfolgreich abgerufen.",
-  "admin.bookings.statusUpdated": "Buchungsstatus erfolgreich aktualisiert.",
-  "admin.bookings.notFoundOrDeleted": "Buchung nicht gefunden oder bereits gelöscht.",
-  "admin.bookings.deleted": "Buchung erfolgreich gelöscht.",
-  "booking.confirmed.subject": "✅ Ihre Buchung wurde bestätigt",
-  "booking.confirmed.emailSent": "Bestätigungs-E-Mail gesendet.",
-  "booking.confirmed.emailError": "Fehler beim Senden der Bestätigungs-E-Mail.",
-  "booking.rejected.subject": "❌ Buchung abgelehnt",
-  "booking.rejected.emailSent": "Ablehnungs-E-Mail gesendet.",
-  "booking.rejected.emailError": "Fehler beim Senden der Ablehnungs-E-Mail."
+  "validation": {
+    "nameRequired": "Name ist erforderlich.",
+    "nameString": "Name muss ein Text sein.",
+    "email": "Eine gültige E-Mail ist erforderlich.",
+    "phone": "Telefon muss ein Text sein.",
+    "serviceTypeRequired": "Servicetyp ist erforderlich.",
+    "serviceTypeString": "Servicetyp muss ein Text sein.",
+    "note": "Notiz muss ein Text sein.",
+    "dateRequired": "Datum ist erforderlich.",
+    "dateFormat": "Bitte ein gültiges Datum eingeben (JJJJ-MM-TT).",
+    "timeRequired": "Uhrzeit ist erforderlich.",
+    "timeFormat": "Uhrzeit muss im HH:mm-Format sein.",
+    "serviceRequired": "Service-ID ist erforderlich.",
+    "serviceId": "Service-ID muss eine gültige MongoDB ObjectId sein.",
+    "duration": "Dauer muss eine positive ganze Zahl sein.",
+    "languageRequired": "Sprache ist erforderlich.",
+    "language": "Sprache muss eine der folgenden sein: {{supported}}",
+    "status": "Status muss pending, confirmed oder cancelled sein.",
+    "mongoId": "{{field}} muss eine gültige MongoDB ObjectId sein."
+  },
+  "admin": {
+    "bookings": {
+      "fetched": "Alle Buchungen wurden erfolgreich geladen.",
+      "invalidId": "Ungültige Buchungs-ID.",
+      "notFound": "Buchung nicht gefunden.",
+      "fetchedOne": "Buchung erfolgreich geladen.",
+      "statusUpdated": "Buchungsstatus wurde aktualisiert. (Status: {{status}})",
+      "notFoundOrDeleted": "Buchung nicht gefunden oder bereits gelöscht.",
+      "deleted": "Buchung wurde erfolgreich gelöscht."
+    }
+  },
+  "public": {
+    "create": {
+      "missingFields": "Bitte alle Pflichtfelder ausfüllen.",
+      "slotsFull": "Dieses Zeitfenster ist bereits ausgebucht.",
+      "created": "Ihre Buchung wurde erstellt.",
+      "success": "Buchung erfolgreich erstellt."
+    },
+    "email": {
+      "subject": {
+        "customer": "Ihre Buchung wurde empfangen",
+        "admin": "Neue Buchungsanfrage"
+      }
+    },
+    "adminMail": {
+      "newBooking": "Neue Buchungsanfrage",
+      "name": "Name",
+      "phone": "Telefon",
+      "service": "Dienstleistung",
+      "date": "Datum",
+      "time": "Uhrzeit",
+      "note": "Notiz"
+    },
+    "notification": {
+      "title": "Neue Buchung erstellt",
+      "message": "{{name}} hat {{service}} am {{date}} um {{time}} gebucht."
+    }
+  },
+  "booking": {
+    "confirmed": {
+      "subject": "Ihre Buchung wurde bestätigt",
+      "emailSent": "Bestätigungs-E-Mail gesendet.",
+      "emailError": "Bestätigungs-E-Mail konnte nicht gesendet werden."
+    },
+    "rejected": {
+      "subject": "Ihre Buchung wurde storniert",
+      "emailSent": "Stornierungs-E-Mail gesendet.",
+      "emailError": "Stornierungs-E-Mail konnte nicht gesendet werden."
+    },
+    "title": "Terminbestätigung",
+    "greeting": "Hallo {{name}},",
+    "info": "Ihr Termin bei {{brand}} wurde bestätigt.",
+    "instructions": "Bitte seien Sie 5 Minuten vor Ihrem Termin bereit.",
+    "serviceLabel": "Leistung",
+    "dateLabel": "Datum",
+    "timeLabel": "Uhrzeit",
+    "note": "Bei Fragen können Sie uns jederzeit kontaktieren.",
+    "sign": "Mit freundlichen Grüßen, Ihr {{brand}} Team",
+    "received": {
+      "title": "Ihre Termin-Anfrage wurde erhalten",
+      "greeting": "Hallo {{name}},",
+      "info": "Ihre Terminanfrage bei {{brand}} ist eingegangen.",
+      "wait": "Unser Team wird sich in Kürze mit Ihnen zur Bestätigung in Verbindung setzen.",
+      "note": "Bei Fragen können Sie uns per E-Mail erreichen.",
+      "sign": "Mit freundlichen Grüßen, Ihr {{brand}} Team"
+    },
+     "rejection": {
+      "title": "Terminabsage",
+      "greeting": "Hallo {{name}},",
+      "info": "Ihr Termin \"{{service}}\" am {{date}} um {{time}} wurde storniert.",
+      "closing": "Sie können jederzeit einen neuen Termin vereinbaren.",
+      "sign": "Mit freundlichen Grüßen, Ihr {{brand}} Team"
+    }
+  }
 }
+

@@ -1,12 +1,12 @@
 import express from "express";
-import routes from "./activitycategory.routes";
-import { ActivityCategory } from "./activitycategory.models";
-import * as ActivityCategoryController from "./activitycategory.controller";
+import routes from "./category.routes";
+import { ActivityCategory } from "./category.models";
+import * as activityCategoryController from "./category.controller";
 
 const router = express.Router();
 router.use("/", routes);
 
 // ✅ Named Exports (standards)
-export { ActivityCategory, ActivityCategoryController };
-export * from "./activitycategory.validation";
+export { ActivityCategory, activityCategoryController };
+export * from "./category.validation";
 export default router;

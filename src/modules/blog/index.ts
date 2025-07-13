@@ -1,12 +1,12 @@
 // src/modules/blog/index.ts
 
 import express from "express";
-import adminRoutes from "./admin.blog.routes";
-import publicRoutes from "./public.blog.routes";
-import { Blog } from "./blog.models";
-import * as adminController from "./admin.blog.controller";
-import * as publicController from "./public.blog.controller";
-import * as validation from "./blog.validation";
+import adminRoutes from "./admin.routes";
+import publicRoutes from "./public.routes";
+import { Blog } from "./models";
+import * as adminController from "./admin.controller";
+import * as publicController from "./public.controller";
+import * as validation from "./validation";
 
 const router = express.Router();
 
