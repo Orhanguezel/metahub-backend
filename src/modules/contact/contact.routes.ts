@@ -3,6 +3,7 @@ import {
   sendMessage,
   getAllMessages,
   deleteMessage,
+  markMessageAsRead,
 } from "./contact.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
@@ -12,10 +13,10 @@ import {
 
 const router = express.Router();
 
-// ✅ Public route
+// ✅ Public
 router.post("/", validateSendMessage, sendMessage);
 
-// ✅ Admin-only routes
+// ✅ Admin
 router.get("/", authenticate, authorizeRoles("admin"), getAllMessages);
 router.delete(
   "/:id",
@@ -23,6 +24,14 @@ router.delete(
   authorizeRoles("admin"),
   validateContactIdParam,
   deleteMessage
+);
+// ✅ Admin: Mesajı okundu işaretle
+router.patch(
+  "/:id/read",
+  authenticate,
+  authorizeRoles("admin"),
+  validateContactIdParam,
+  markMessageAsRead
 );
 
 export default router;

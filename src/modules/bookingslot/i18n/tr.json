@@ -1,0 +1,35 @@
+{
+  "slot": {
+    "validation": {
+      "dayOfWeekOrAll": "'dayOfWeek' (0=Pazar...6=Cumartesi) ya da 'appliesToAll': true alanı zorunludur.",
+      "dayOfWeekRange": "dayOfWeek 0 (Pazar) ile 6 (Cumartesi) arasında olmalıdır.",
+      "startTimeFormat": "startTime HH:mm formatında olmalıdır.",
+      "endTimeFormat": "endTime HH:mm formatında olmalıdır.",
+      "intervalMinutes": "intervalMinutes pozitif bir sayı olmalıdır.",
+      "breakBetweenAppointments": "breakBetweenAppointments negatif olmayan bir sayı olmalıdır.",
+      "label": "label çoklu dil içeren bir obje olmalıdır.",
+      "description": "description çoklu dil içeren bir obje olmalıdır.",
+      "date": "date geçerli bir ISO tarih olmalıdır (YYYY-MM-DD).",
+      "disabledTimes": "disabledTimes bir dizi olmalıdır.",
+      "disabledTimesItem": "disabledTimes içindeki her öğe HH:mm formatında olmalıdır.",
+      "fullDayOff": "fullDayOff boolean olmalıdır.",
+      "objectId": "{{field}} geçerli bir MongoDB ObjectId olmalıdır."
+    },
+    "rule": {
+      "exists": "Bu gün için veya 'appliesToAll' için bir slot kuralı zaten mevcut.",
+      "created": "Slot kuralı başarıyla oluşturuldu.",
+      "deleted": "Slot kuralı başarıyla silindi.",
+      "notFound": "Slot kuralı bulunamadı."
+    },
+    "override": {
+      "exists": "Bu tarih için bir slot override zaten mevcut.",
+      "created": "Slot override başarıyla oluşturuldu.",
+      "deleted": "Slot override başarıyla silindi.",
+      "notFound": "Slot override bulunamadı."
+    },
+    "error": {
+      "noDate": "Tarih zorunludur.",
+      "invalidId": "ID geçerli bir ObjectId değil."
+    }
+  }
+}

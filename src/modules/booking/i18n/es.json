@@ -1,30 +1,97 @@
 {
-  "public.create.success": "Reserva creada con éxito.",
-  "public.create.missingFields": "Por favor, rellena todos los campos obligatorios.",
-  "public.create.slotsFull": "No quedan espacios disponibles para esta hora.",
-  "public.create.created": "{name} reservó para el {date} a las {time}.",
-  "public.email.subject.customer": "📬 Su solicitud de reserva ha sido recibida",
-  "public.email.subject.admin": "🆕 Nueva reserva recibida",
-  "public.adminMail.newBooking": "Nueva Reserva",
-  "public.adminMail.name": "Nombre",
-  "public.adminMail.phone": "Teléfono",
-  "public.adminMail.service": "Servicio",
-  "public.adminMail.date": "Fecha",
-  "public.adminMail.time": "Hora",
-  "public.adminMail.note": "Nota",
-  "public.notification.title": "Nueva reserva",
-  "public.notification.message": "{name} reservó {service} para el {date} a las {time}.",
-  "admin.bookings.fetched": "Todas las reservas recuperadas con éxito.",
-  "admin.bookings.invalidId": "ID de reserva inválido.",
-  "admin.bookings.notFound": "Reserva no encontrada.",
-  "admin.bookings.fetchedOne": "Reserva recuperada con éxito.",
-  "admin.bookings.statusUpdated": "Estado de la reserva actualizado con éxito.",
-  "admin.bookings.notFoundOrDeleted": "Reserva no encontrada o ya eliminada.",
-  "admin.bookings.deleted": "Reserva eliminada con éxito.",
-  "booking.confirmed.subject": "✅ Su reserva está confirmada",
-  "booking.confirmed.emailSent": "Correo de confirmación enviado.",
-  "booking.confirmed.emailError": "No se pudo enviar el correo de confirmación.",
-  "booking.rejected.subject": "❌ Reserva rechazada",
-  "booking.rejected.emailSent": "Correo de rechazo enviado.",
-  "booking.rejected.emailError": "No se pudo enviar el correo de rechazo."
+  "validation": {
+    "nameRequired": "El nombre es obligatorio.",
+    "nameString": "El nombre debe ser una cadena.",
+    "email": "Se requiere un correo electrónico válido.",
+    "phone": "El teléfono debe ser una cadena.",
+    "serviceTypeRequired": "El tipo de servicio es obligatorio.",
+    "serviceTypeString": "El tipo de servicio debe ser una cadena.",
+    "note": "La nota debe ser una cadena.",
+    "dateRequired": "La fecha es obligatoria.",
+    "dateFormat": "Por favor, introduzca una fecha válida (AAAA-MM-DD).",
+    "timeRequired": "La hora es obligatoria.",
+    "timeFormat": "La hora debe tener formato HH:mm.",
+    "serviceRequired": "El ID del servicio es obligatorio.",
+    "serviceId": "El ID del servicio debe ser un ObjectId válido de MongoDB.",
+    "duration": "La duración debe ser un número entero positivo.",
+    "languageRequired": "El idioma es obligatorio.",
+    "language": "El idioma debe ser uno de: {{supported}}",
+    "status": "El estado debe ser pending, confirmed o cancelled.",
+    "mongoId": "{{field}} debe ser un ObjectId válido de MongoDB."
+  },
+  "admin": {
+    "bookings": {
+      "fetched": "Todas las reservas se han obtenido correctamente.",
+      "invalidId": "ID de reserva inválido.",
+      "notFound": "Reserva no encontrada.",
+      "fetchedOne": "Reserva obtenida correctamente.",
+      "statusUpdated": "El estado de la reserva se actualizó. (Estado: {{status}})",
+      "notFoundOrDeleted": "Reserva no encontrada o ya eliminada.",
+      "deleted": "Reserva eliminada correctamente."
+    }
+  },
+  "public": {
+    "create": {
+      "missingFields": "Por favor, complete todos los campos obligatorios.",
+      "slotsFull": "Este intervalo horario está completo.",
+      "created": "Su reserva ha sido creada.",
+      "success": "Reserva creada correctamente."
+    },
+    "email": {
+      "subject": {
+        "customer": "Hemos recibido su reserva",
+        "admin": "Nueva solicitud de reserva"
+      }
+    },
+    "adminMail": {
+      "newBooking": "Nueva solicitud de reserva",
+      "name": "Nombre",
+      "phone": "Teléfono",
+      "service": "Servicio",
+      "date": "Fecha",
+      "time": "Hora",
+      "note": "Nota"
+    },
+    "notification": {
+      "title": "Nueva reserva creada",
+      "message": "{{name}} reservó {{service}} el {{date}} a las {{time}}."
+    }
+  },
+  "booking": {
+    "confirmed": {
+      "subject": "Su reserva ha sido confirmada",
+      "emailSent": "Correo de confirmación enviado.",
+      "emailError": "No se pudo enviar el correo de confirmación."
+    },
+    "rejected": {
+      "subject": "Su reserva ha sido cancelada",
+      "emailSent": "Correo de cancelación enviado.",
+      "emailError": "No se pudo enviar el correo de cancelación."
+    },
+    "title": "Confirmación de cita",
+    "greeting": "Hola {{name}},",
+    "info": "Su cita con {{brand}} ha sido confirmada.",
+    "instructions": "Por favor, llegue 5 minutos antes de la hora programada.",
+    "serviceLabel": "Servicio",
+    "dateLabel": "Fecha",
+    "timeLabel": "Hora",
+    "note": "Si tiene alguna pregunta, no dude en contactarnos.",
+    "sign": "Saludos cordiales, El equipo de {{brand}}",
+    "received": {
+      "title": "Solicitud de cita recibida",
+      "greeting": "Hola {{name}},",
+      "info": "Hemos recibido su solicitud de cita con {{brand}}.",
+      "wait": "Nuestro equipo se pondrá en contacto con usted pronto para confirmar la cita.",
+      "note": "Si tiene preguntas, puede contactarnos por correo electrónico.",
+      "sign": "Saludos cordiales, El equipo de {{brand}}"
+    },
+     "rejection": {
+      "title": "Cancelación de cita",
+      "greeting": "Hola {{name}},",
+      "info": "Su cita \"{{service}}\" programada para el {{date}} a las {{time}} ha sido cancelada.",
+      "closing": "Puede reservar una nueva cita si lo desea.",
+      "sign": "Saludos cordiales, El equipo de {{brand}}"
+    }
+  }
 }
+

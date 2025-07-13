@@ -108,25 +108,17 @@ export const createModuleMeta = asyncHandler(
  * Modül Meta Güncelle (Sadece GLOBAL alanlar)
  */
 export const updateModuleMeta = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || "en";
     const { name } = req.params;
     const updates = req.body;
 
-    // --- Yalnızca şu alanlar güncellenebilir ---
-    const allowedFields: (keyof typeof updates)[] = [
-      "label",
-      "icon",
-      "roles",
-      "enabled",
-      "language",
-      "order",
-      "version",
-      "statsKey",
-      "routes",
+    // Sadece şu alanlar güncellenebilir
+    const allowedFields = [
+      "label", "icon", "roles", "enabled", "language", "order", "version", "statsKey", "routes"
     ];
     Object.keys(updates).forEach((key) => {
-      if (!allowedFields.includes(key as any)) delete updates[key];
+      if (!allowedFields.includes(key)) delete updates[key];
     });
 
     // Çoklu dil label normalize
@@ -134,35 +126,37 @@ export const updateModuleMeta = asyncHandler(
       updates.label = fillAllLocales(updates.label);
     }
 
-    const meta = await ModuleMeta.findOne({ name });
-    if (!meta) {
-      logger.warn(`Module not found for update: ${name}`, {
-        module: "moduleMeta",
-      });
-      res.status(404).json({
-        success: false,
-        message: t("admin.module.notFound", locale, translations),
-      });
-      return;
-    }
-
-    // Audit/History
+    // Audit/History hazırlığı
     const now = new Date();
     const userDisplayName = req.user?.name || req.user?.email || "system";
-    meta.history = meta.history || [];
-    meta.history.push({
-      version: updates.version || meta.version || "1.0.0",
+    const newHistoryEntry = {
+      version: updates.version,
       by: userDisplayName,
       date: now.toISOString(),
       note: "Module meta updated",
-    });
+    };
 
-    // Sadece global field'lar güncelleniyor
-    for (const key of allowedFields) {
-      if (updates[key] !== undefined) (meta as any)[key] = updates[key];
+    // --- EN TEMİZ: findOneAndUpdate ile atomik güncelleme ---
+    // History'yi push et, diğer alanları set et
+    const meta = await ModuleMeta.findOneAndUpdate(
+      { name },
+      {
+        $set: {
+          ...updates,
+          updatedAt: now,
+        },
+        $push: { history: newHistoryEntry }
+      },
+      { new: true }
+    );
+
+    if (!meta) {
+      logger.warn(`Module not found for update: ${name}`, { module: "moduleMeta" });
+       res.status(404).json({
+        success: false,
+        message: t("admin.module.notFound", locale, translations),
+      });return;
     }
-    meta.updatedAt = now;
-    await meta.save();
 
     logger.info(`Global moduleMeta updated: ${name}`, {
       module: "moduleMeta",
@@ -175,6 +169,7 @@ export const updateModuleMeta = asyncHandler(
     });
   }
 );
+
 
 /**
  * Tüm Modül Meta Kayıtlarını Listele (Global)

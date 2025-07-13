@@ -1,52 +1,81 @@
-// @/modules/bookingslot/bookingslot.validation.ts
-
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
+import { t as translate } from "@/core/utils/i18n/translate";
+import translations from "@/templates/i18n";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 
-// 🔐 SlotRule oluşturma (haftalık veya genel kurallar)
+// Standart çeviri fonksiyonu
+const t = (req: any, key: string, params?: any) =>
+  translate(key, req?.locale || getLogLocale(), translations, params);
+
+// --- SlotRule: Weekly/General Rule ---
 export const validateCreateSlotRule = [
-  // Ya dayOfWeek, ya appliesToAll zorunlu olacak (ikisi de gelirse dayOfWeek öncelikli)
-  body().custom((value) => {
-    if (
-      !(
-        typeof value.dayOfWeek === "number" ||
-        value.appliesToAll === true
-      )
-    ) {
+  body().custom((val, { req }) => {
+    if (!((typeof val.dayOfWeek === "number") || val.appliesToAll === true)) {
       throw new Error(
-        "Either 'dayOfWeek' (0=Sunday...6=Saturday) or 'appliesToAll': true is required."
+        t(req, "slot.validation.dayOfWeekOrAll")
+        // Çeviri dosyasında: "slot.validation.dayOfWeekOrAll": "Either 'dayOfWeek' (0=Sunday...6=Saturday) or 'appliesToAll': true is required."
       );
     }
-    // dayOfWeek gelmişse kontrol et
     if (
-      value.dayOfWeek !== undefined &&
-      (typeof value.dayOfWeek !== "number" || value.dayOfWeek < 0 || value.dayOfWeek > 6)
+      val.dayOfWeek !== undefined &&
+      (typeof val.dayOfWeek !== "number" || val.dayOfWeek < 0 || val.dayOfWeek > 6)
     ) {
-      throw new Error("dayOfWeek must be between 0 (Sunday) and 6 (Saturday)");
+      throw new Error(
+        t(req, "slot.validation.dayOfWeekRange")
+        // "slot.validation.dayOfWeekRange": "dayOfWeek must be between 0 (Sunday) and 6 (Saturday)."
+      );
     }
     return true;
   }),
-  body("startTime").matches(/^([0-1]\d|2[0-3]):([0-5]\d)$/).withMessage("startTime must be in HH:mm format"),
-  body("endTime").matches(/^([0-1]\d|2[0-3]):([0-5]\d)$/).withMessage("endTime must be in HH:mm format"),
-  body("intervalMinutes").isInt({ min: 1 }).withMessage("intervalMinutes must be a positive number"),
-  body("breakBetweenAppointments").optional().isInt({ min: 0 }).withMessage("breakBetweenAppointments must be a non-negative number"),
+  body("startTime")
+    .matches(/^([0-1]\d|2[0-3]):([0-5]\d)$/)
+    .withMessage((_, { req }) => t(req, "slot.validation.startTimeFormat")),
+  body("endTime")
+    .matches(/^([0-1]\d|2[0-3]):([0-5]\d)$/)
+    .withMessage((_, { req }) => t(req, "slot.validation.endTimeFormat")),
+  body("intervalMinutes")
+    .isInt({ min: 1 })
+    .withMessage((_, { req }) => t(req, "slot.validation.intervalMinutes")),
+  body("breakBetweenAppointments")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage((_, { req }) => t(req, "slot.validation.breakBetweenAppointments")),
+  body("label")
+    .optional()
+    .isObject()
+    .withMessage((_, { req }) => t(req, "slot.validation.label")),
+  body("description")
+    .optional()
+    .isObject()
+    .withMessage((_, { req }) => t(req, "slot.validation.description")),
   validateRequest,
 ];
 
-// 🔐 SlotOverride oluşturma (tarih bazlı iptaller)
+// --- SlotOverride: Special Day ---
 export const validateCreateSlotOverride = [
-  body("date").isISO8601().withMessage("date must be a valid ISO date (YYYY-MM-DD)"),
-  body("disabledTimes").optional().isArray().withMessage("disabledTimes must be an array"),
+  body("date")
+    .isISO8601()
+    .withMessage((_, { req }) => t(req, "slot.validation.date")),
+  body("disabledTimes")
+    .optional()
+    .isArray()
+    .withMessage((_, { req }) => t(req, "slot.validation.disabledTimes")),
   body("disabledTimes.*")
     .optional()
     .matches(/^([0-1]\d|2[0-3]):([0-5]\d)$/)
-    .withMessage("Each time in disabledTimes must be in HH:mm format"),
-  body("fullDayOff").optional().isBoolean().withMessage("fullDayOff must be a boolean"),
+    .withMessage((_, { req }) => t(req, "slot.validation.disabledTimesItem")),
+  body("fullDayOff")
+    .optional()
+    .isBoolean()
+    .withMessage((_, { req }) => t(req, "slot.validation.fullDayOff")),
   validateRequest,
 ];
 
-// ♻️ ID validasyonu (reuse)
+// --- ObjectId Validator (Reuse everywhere) ---
 export const validateObjectId = (field: string) => [
-  param(field).isMongoId().withMessage(`${field} must be a valid MongoDB ObjectId.`),
+  param(field)
+    .isMongoId()
+    .withMessage((_, { req }) => t(req, "slot.validation.objectId", { field })),
   validateRequest,
 ];

@@ -1,0 +1,314 @@
+[
+  {
+    "key": "heroSlider",
+    "label": {
+      "tr": "Manşet Slaytı",
+      "en": "Hero Slider",
+      "de": "Haupt-Slider",
+      "pl": "Slider główny",
+      "fr": "Slider principal",
+      "es": "Slider principal"
+    },
+    "description": {
+      "tr": "Ana sayfadaki manşet slaytı bölümü",
+      "en": "Main slider section on homepage",
+      "de": "Hauptslider auf der Startseite",
+      "pl": "Główny slider na stronie głównej",
+      "fr": "Slider principal sur la page d'accueil",
+      "es": "Slider principal en la página de inicio"
+    },
+    "icon": "MdSlideshow",
+    "variant": "slider",
+    "required": false,
+    "defaultOrder": 1,
+    "defaultEnabled": false
+  },
+  {
+    "key": "heroSection",
+    "label": {
+      "tr": "Manşet Bölümü",
+      "en": "Hero Section",
+      "de": "Hauptbereich",
+      "pl": "Sekcja główna",
+      "fr": "Section principale",
+      "es": "Sección principal"
+    },
+    "description": {
+      "tr": "Ana manşet/banner alanı (kullanımdan kalktı)",
+      "en": "Main hero/banner area (deprecated)",
+      "de": "Hauptbereich/Banner (veraltet)",
+      "pl": "Główna sekcja/banner (przestarzała)",
+      "fr": "Zone principale/bannière (obsolète)",
+      "es": "Área principal/banner (obsoleto)"
+    },
+    "icon": "MdWeb",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 1,
+    "defaultEnabled": true
+  },
+  {
+    "key": "heroSectionSlayt",
+    "label": {
+      "tr": "Manşet Slayt Bölümü",
+      "en": "Hero Section Slideshow",
+      "de": "Hauptbereich Slideshow",
+      "pl": "Sekcja slajdów głównych",
+      "fr": "Section principale diaporama",
+      "es": "Sección principal de diapositivas"
+    },
+    "description": {
+      "tr": "Slaytlı manşet bölümü (kullanımdan kalktı)",
+      "en": "Hero section with slides (deprecated)",
+      "de": "Hauptbereich mit Slides (veraltet)",
+      "pl": "Sekcja główna ze slajdami (przestarzała)",
+      "fr": "Section principale avec diaporama (obsolète)",
+      "es": "Sección principal con diapositivas (obsoleto)"
+    },
+    "icon": "MdSlideshow",
+    "variant": "slider",
+    "required": false,
+    "defaultOrder": 1,
+    "defaultEnabled": false
+  },
+  {
+    "key": "couponBanner",
+    "label": {
+      "tr": "Kupon Bannerı",
+      "en": "Coupon Banner",
+      "de": "Coupon-Banner",
+      "pl": "Baner kuponowy",
+      "fr": "Bannière de coupon",
+      "es": "Banner de cupón"
+    },
+    "description": {
+      "tr": "İndirim/kupon duyuru bannerı",
+      "en": "Discount/coupon announcement banner",
+      "de": "Rabatt/Coupon Ankündigungsbanner",
+      "pl": "Baner ogłaszający zniżkę/kupon",
+      "fr": "Bannière d'annonce de réduction/coupon",
+      "es": "Banner de anuncio de descuento/cupón"
+    },
+    "icon": "MdLocalOffer",
+    "variant": "banner",
+    "required": false,
+    "defaultOrder": 2,
+    "defaultEnabled": true
+  },
+  {
+    "key": "services",
+    "label": {
+      "tr": "Hizmetler",
+      "en": "Services",
+      "de": "Dienstleistungen",
+      "pl": "Usługi",
+      "fr": "Services",
+      "es": "Servicios"
+    },
+    "description": {
+      "tr": "Sunulan hizmetler listesi",
+      "en": "List of provided services",
+      "de": "Liste der angebotenen Dienstleistungen",
+      "pl": "Lista oferowanych usług",
+      "fr": "Liste des services fournis",
+      "es": "Lista de servicios ofrecidos"
+    },
+    "icon": "MdBuild",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 3,
+    "defaultEnabled": true
+  },
+  {
+    "key": "about",
+    "label": {
+      "tr": "Hakkında",
+      "en": "About",
+      "de": "Über uns",
+      "pl": "O nas",
+      "fr": "À propos",
+      "es": "Sobre nosotros"
+    },
+    "description": {
+      "tr": "Hakkında alanı",
+      "en": "About section",
+      "de": "Über uns Bereich",
+      "pl": "Sekcja o nas",
+      "fr": "Section à propos",
+      "es": "Sección sobre nosotros"
+    },
+    "icon": "MdInfo",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 4,
+    "defaultEnabled": true
+  },
+  {
+    "key": "news",
+    "label": {
+      "tr": "Haberler",
+      "en": "News",
+      "de": "Nachrichten",
+      "pl": "Aktualności",
+      "fr": "Nouvelles",
+      "es": "Noticias"
+    },
+    "description": {
+      "tr": "Güncel haberler ve duyurular",
+      "en": "Latest news and announcements",
+      "de": "Aktuelle Nachrichten und Ankündigungen",
+      "pl": "Najnowsze wiadomości i ogłoszenia",
+      "fr": "Dernières nouvelles et annonces",
+      "es": "Últimas noticias y anuncios"
+    },
+    "icon": "MdAnnouncement",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 5,
+    "defaultEnabled": true
+  },
+  {
+    "key": "bikes",
+    "label": {
+      "tr": "Bisikletler",
+      "en": "Bikes",
+      "de": "Fahrräder",
+      "pl": "Rowery",
+      "fr": "Vélos",
+      "es": "Bicicletas"
+    },
+    "description": {
+      "tr": "Öne çıkan bisikletler/ürünler",
+      "en": "Featured bikes/products",
+      "de": "Vorgestellte Fahrräder/Produkte",
+      "pl": "Polecane rowery/produkty",
+      "fr": "Vélos/produits en vedette",
+      "es": "Bicicletas/productos destacados"
+    },
+    "icon": "MdDirectionsBike",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 6,
+    "defaultEnabled": true
+  },
+  {
+    "key": "blog",
+    "label": {
+      "tr": "Blog",
+      "en": "Blog",
+      "de": "Blog",
+      "pl": "Blog",
+      "fr": "Blog",
+      "es": "Blog"
+    },
+    "description": {
+      "tr": "Son blog yazıları ve makaleler",
+      "en": "Latest blog posts and articles",
+      "de": "Neueste Blogbeiträge und Artikel",
+      "pl": "Najnowsze wpisy i artykuły na blogu",
+      "fr": "Derniers articles et billets de blog",
+      "es": "Últimas entradas y artículos del blog"
+    },
+    "icon": "MdLibraryBooks",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 7,
+    "defaultEnabled": true
+  },
+  {
+    "key": "contact",
+    "label": {
+      "tr": "İletişim",
+      "en": "Contact",
+      "de": "Kontakt",
+      "pl": "Kontakt",
+      "fr": "Contact",
+      "es": "Contacto"
+    },
+    "description": {
+      "tr": "İletişim formu ve bilgi alanı",
+      "en": "Contact form and information section",
+      "de": "Kontaktformular und Informationsbereich",
+      "pl": "Formularz kontaktowy i informacje",
+      "fr": "Section formulaire de contact et informations",
+      "es": "Formulario de contacto e información"
+    },
+    "icon": "MdContactMail",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 8,
+    "defaultEnabled": false
+  },
+  {
+    "key": "activity",
+    "label": {
+      "tr": "Aktiviteler",
+      "en": "Activities",
+      "de": "Aktivitäten",
+      "pl": "Aktywności",
+      "fr": "Activités",
+      "es": "Actividades"
+    },
+    "description": {
+      "tr": "Etkinlikler ve aktiviteler",
+      "en": "Events and activities",
+      "de": "Veranstaltungen und Aktivitäten",
+      "pl": "Wydarzenia i aktywności",
+      "fr": "Événements et activités",
+      "es": "Eventos y actividades"
+    },
+    "icon": "MdEvent",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 9,
+    "defaultEnabled": true
+  },
+  {
+    "key": "articles",
+    "label": {
+      "tr": "Makaleler",
+      "en": "Articles",
+      "de": "Artikel",
+      "pl": "Artykuły",
+      "fr": "Articles",
+      "es": "Artículos"
+    },
+    "description": {
+      "tr": "Makaleler ve kaynaklar",
+      "en": "Articles and resources",
+      "de": "Artikel und Ressourcen",
+      "pl": "Artykuły i zasoby",
+      "fr": "Articles et ressources",
+      "es": "Artículos y recursos"
+    },
+    "icon": "MdDescription",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 10,
+    "defaultEnabled": true
+  },
+  {
+    "key": "references",
+    "label": {
+      "tr": "Referanslar",
+      "en": "References",
+      "de": "Referenzen",
+      "pl": "Referencje",
+      "fr": "Références",
+      "es": "Referencias"
+    },
+    "description": {
+      "tr": "Müşteri referansları ve görüşleri",
+      "en": "Customer references and testimonials",
+      "de": "Kundenreferenzen und Erfahrungsberichte",
+      "pl": "Referencje i opinie klientów",
+      "fr": "Références et témoignages clients",
+      "es": "Referencias y testimonios de clientes"
+    },
+    "icon": "MdStar",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 11,
+    "defaultEnabled": true
+  }
+]

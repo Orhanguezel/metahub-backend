@@ -1,0 +1,21 @@
+{
+  "settings.tenantRequired": "Le tenant est requis.",
+  "setting.error.missing": "Clé manquante ou invalide.",
+  "setting.error.notFound": "Paramètre introuvable.",
+  "setting.error.valueRequired": "La valeur est requise.",
+  "setting.error.arrayNotAllowed": "Ce champ doit être un tableau.",
+  "setting.error.arrayEmpty": "Le tableau ne peut pas être vide.",
+  "setting.error.arrayInvalidItems": "Éléments de tableau non valides.",
+  "setting.error.imagesArrayRequired": "Le champ des images doit être un tableau.",
+  "setting.error.imagesInvalidFormat": "Format d'image invalide.",
+  "setting.error.lightRequired": "Le logo clair est requis.",
+  "setting.error.darkInvalid": "Format du logo foncé invalide.",
+  "setting.error.missingLocale": "Traduction manquante dans le champ multilingue.",
+  "setting.error.localeType": "Les valeurs de traduction doivent être du texte.",
+  "settings.removeImagesError": "Erreur lors de la suppression des images.",
+  "settings.deleted": "Paramètre supprimé avec succès.",
+  "setting.upload.success": "Images téléchargées avec succès.",
+  "setting.create.success": "Paramètre créé avec succès.",
+  "setting.create.error": "Erreur lors de la création du paramètre.",
+  "setting.update.success": "Paramètre mis à jour avec succès."
+}

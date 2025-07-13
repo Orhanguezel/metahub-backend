@@ -36,8 +36,8 @@ export const resolveTenant = async (
   const tenantHeader = req.headers["x-tenant"]?.toString().trim() || "";
   let tenantDoc = null;
 
-  // 1️⃣ Süperadmin için x-tenant override (PROD ve DEV)
-  if (tenantHeader && req.user && req.user.role === "superadmin") {
+  // 1️⃣ DEV ortamında x-tenant ile override (kullanıcı login olmasa da çalışsın!)
+  if (process.env.NODE_ENV !== "production" && tenantHeader) {
     tenantDoc = await Tenants.findOne({
       slug: tenantHeader.toLowerCase(),
     }).lean();
@@ -67,19 +67,13 @@ export const resolveTenant = async (
     }).lean();
   }
 
-  // 3️⃣ DEV ortamında localhost/127.0.0.1 için fallback (production'da asla yok!)
+  // 3️⃣ DEV ortamında localhost/127.0.0.1 için .env fallback (sadece hiçbiri bulunamazsa)
   if (!tenantDoc && process.env.NODE_ENV !== "production") {
-    const normalizedHost = normalizeHost(
-      req.hostname || (req.headers.host as string) || ""
-    );
-    if (
-      normalizedHost === "localhost" ||
-      normalizedHost === "127.0.0.1" ||
-      normalizedHost.startsWith("localhost:") ||
-      normalizedHost.startsWith("127.0.0.1:")
-    ) {
-      tenantDoc = await Tenants.findOne({ slug: "metahub" }).lean();
-    }
+    const envTenant =
+      process.env.NEXT_PUBLIC_APP_ENV ||
+      process.env.NEXT_PUBLIC_TENANT_NAME ||
+      process.env.TENANT_NAME;
+    tenantDoc = await Tenants.findOne({ slug: envTenant }).lean();
   }
 
   // 4️⃣ Final Sonuç: Tenant bulunduysa requeste ekle ve devam et

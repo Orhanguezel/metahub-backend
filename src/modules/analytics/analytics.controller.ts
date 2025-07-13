@@ -12,9 +12,38 @@ export const createAnalyticsEvent = asyncHandler(
     const language: SupportedLocale =
       req.body.language || req.body.locale || req.locale || "en";
 
+    // Orijinal body clone
     const sanitizedBody = { ...req.body };
 
-    // 🔍 0️⃣ Analytics açık mı kontrol et
+    // 1️⃣ Eğer eski { lat, lon } formatı gelirse GeoJSON Point'e çevir
+    if (
+      sanitizedBody.location &&
+      typeof sanitizedBody.location === "object" &&
+      typeof sanitizedBody.location.lat === "number" &&
+      typeof sanitizedBody.location.lon === "number"
+    ) {
+      sanitizedBody.location = {
+        type: "Point",
+        coordinates: [
+          sanitizedBody.location.lon,
+          sanitizedBody.location.lat,
+        ], // GeoJSON: [lon, lat]
+      };
+    }
+
+    // 2️⃣ Body'deki hatalı location verisini sil
+    if (
+      sanitizedBody.location &&
+      (sanitizedBody.location.type !== "Point" ||
+        !Array.isArray(sanitizedBody.location.coordinates) ||
+        sanitizedBody.location.coordinates.length !== 2 ||
+        typeof sanitizedBody.location.coordinates[0] !== "number" ||
+        typeof sanitizedBody.location.coordinates[1] !== "number")
+    ) {
+      delete sanitizedBody.location;
+    }
+
+    // 🔍 Analytics açık mı kontrol et
     const moduleName = sanitizedBody.module;
     const project = process.env.APP_ENV;
     const { Analytics, ModuleSetting } = await getTenantModels(req);
@@ -42,19 +71,7 @@ export const createAnalyticsEvent = asyncHandler(
       return; // No content
     }
 
-    // 1️⃣ Body'deki hatalı location verisini sil
-    if (
-      sanitizedBody.location &&
-      (sanitizedBody.location.type !== "Point" ||
-        !Array.isArray(sanitizedBody.location.coordinates) ||
-        sanitizedBody.location.coordinates.length !== 2 ||
-        typeof sanitizedBody.location.coordinates[0] !== "number" ||
-        typeof sanitizedBody.location.coordinates[1] !== "number")
-    ) {
-      delete sanitizedBody.location;
-    }
-
-    // 2️⃣ IP'den gelen location'ı kontrol et
+    // 3️⃣ IP'den gelen location'ı kontrol et (override önceliği)
     let geoLocation:
       | { type: "Point"; coordinates: [number, number] }
       | undefined = undefined;
@@ -69,7 +86,7 @@ export const createAnalyticsEvent = asyncHandler(
       geoLocation = ctx.location;
     }
 
-    // 3️⃣ Final veri objesi (location sadece geçerliyse eklenecek!)
+    // 4️⃣ Final veri objesi (location sadece geçerliyse eklenecek!)
     const eventData: Record<string, any> = {
       ...sanitizedBody,
       timestamp: sanitizedBody.timestamp || new Date(),
@@ -86,7 +103,7 @@ export const createAnalyticsEvent = asyncHandler(
       eventData.location = geoLocation;
     }
 
-    // 4️⃣ Mongo'ya kaydet
+    // 5️⃣ Mongo'ya kaydet
     const event = await Analytics.create(eventData);
 
     logger.info("analytics.event_created", {
@@ -109,6 +126,7 @@ export const createAnalyticsEvent = asyncHandler(
     });
   }
 );
+
 
 // 2️⃣ Event Listesi (GET /analytics/events)
 export const getAnalyticsEvents = asyncHandler(

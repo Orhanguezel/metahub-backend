@@ -1,0 +1,21 @@
+{
+  "settings.tenantRequired": "El tenant es obligatorio.",
+  "setting.error.missing": "Clave faltante o inválida.",
+  "setting.error.notFound": "Configuración no encontrada.",
+  "setting.error.valueRequired": "El valor es obligatorio.",
+  "setting.error.arrayNotAllowed": "Este campo debe ser un array.",
+  "setting.error.arrayEmpty": "El array no puede estar vacío.",
+  "setting.error.arrayInvalidItems": "Elementos del array inválidos.",
+  "setting.error.imagesArrayRequired": "El campo de imágenes debe ser un array.",
+  "setting.error.imagesInvalidFormat": "Formato de imagen inválido.",
+  "setting.error.lightRequired": "El logo claro es obligatorio.",
+  "setting.error.darkInvalid": "Formato de logo oscuro inválido.",
+  "setting.error.missingLocale": "Falta traducción en el campo multilingüe.",
+  "setting.error.localeType": "Los valores de traducción deben ser texto.",
+  "settings.removeImagesError": "Error al eliminar imágenes.",
+  "settings.deleted": "Configuración eliminada con éxito.",
+  "setting.upload.success": "Imágenes subidas con éxito.",
+  "setting.create.success": "Configuración creada con éxito.",
+  "setting.create.error": "Error al crear la configuración.",
+  "setting.update.success": "Configuración actualizada con éxito."
+}

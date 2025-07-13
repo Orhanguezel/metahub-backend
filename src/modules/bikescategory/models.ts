@@ -1,4 +1,3 @@
-// models/BikeCategory.ts
 import mongoose, { Schema, Model, models } from "mongoose";
 import type { IBikeCategory, ICategoryImage } from "./types";
 import { SUPPORTED_LOCALES } from "@/types/common";
@@ -25,8 +24,8 @@ const CategoryImageSchema = new Schema<ICategoryImage>(
 const BikeCategorySchema = new Schema<IBikeCategory>(
   {
     name: localizedStringField(),
-    tenant: { type: String, required: true, index: true },
     description: localizedStringField(),
+    tenant: { type: String, required: true, index: true },
     slug: { type: String, required: true, unique: true, lowercase: true },
     images: { type: [CategoryImageSchema], default: [] },
     isActive: { type: Boolean, default: true },
@@ -47,6 +46,7 @@ BikeCategorySchema.pre("validate", function (next) {
 });
 
 const BikeCategory: Model<IBikeCategory> =
-  models.BikeCategory || mongoose.model<IBikeCategory>("BikeCategory", BikeCategorySchema);
+  models.BikeCategory ||
+  mongoose.model<IBikeCategory>("BikeCategory", BikeCategorySchema);
 
 export { BikeCategory };

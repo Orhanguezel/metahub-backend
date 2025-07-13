@@ -46,7 +46,7 @@ export const UPLOAD_FOLDERS = {
   references: "references",
   sport: "sport-images",
   spareparts: "spareparts-images",
-  setting: "setting-images",
+  settings: "settings-images",
   company: "company-images",
   about: "about-images",
   apartment: "apartment-images",

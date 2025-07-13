@@ -4,9 +4,7 @@
   "metahub.guezelwebdesign.com": "metahub",
   "ensotek.de": "ensotek",
   "metahub.localhost": "metahub",
-  "localhost": "metahub",
-  "127.0.0.1": "metahub",
-  "localhost:3000": "metahub",
-  "localhost:5173": "metahub",
-  "test.guezelwebdesign.com": "ensotek"
+  "test.guezelwebdesign.com": "ensotek",
+  "localhost": "ensotek",
+  "localhost:3000": "ensotek"
 }

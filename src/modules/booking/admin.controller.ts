@@ -1,34 +1,26 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { Booking } from "@/modules/booking";
 import { isValidObjectId } from "@/core/utils/validation";
 import { BookingConfirmedTemplate } from "@/modules/booking/templates/bookingConfirmation";
 import { BookingRejectionTemplate } from "@/modules/booking/templates/bookingRejection";
 import { sendEmail } from "@/services/emailService";
 import logger from "@/core/middleware/logger/logger";
-import { t } from "@/core/utils/i18n/translate";
-import translations from "@/templates/i18n";
-import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import { t as translate } from "@/core/utils/i18n/translate";
+import translations from "./i18n";
 import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 
-// Çok dilli çeviri fonksiyonu (user response veya log için kullanılabilir)
-function bookingT(
-  key: string,
-  vars?: Record<string, any>,
-  locale?: SupportedLocale
-) {
-  return t(key, locale || getLogLocale(), translations, vars);
-}
-
+// Get all bookings (admin)
 export const getAllBookings = asyncHandler(
   async (req: Request, res: Response) => {
     const { language } = req.query;
-    const userLocale = req.locale as SupportedLocale | undefined; // setLocale middleware varsa
+    const locale = req.locale as SupportedLocale | undefined;
+    const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
 
-    const filter = language
-      ? { language: { $eq: language } }
-      : { tenant: req.tenant };
+    const filter: any = { tenant: req.tenant };
+    if (language) filter.language = language;
 
     const { Booking } = await getTenantModels(req);
     const bookings = await Booking.find(filter)
@@ -36,28 +28,28 @@ export const getAllBookings = asyncHandler(
       .populate("user", "name email")
       .sort({ createdAt: -1 });
 
-    // Log mesajı log locale ile
-    logger.info(bookingT("admin.bookings.fetched", undefined, getLogLocale()));
-
-    // Response mesajı user locale ile
+    logger.info(t("admin.bookings.fetched", getRequestContext(req)));
     res.status(200).json({
       success: true,
       data: bookings,
-      message: bookingT("admin.bookings.fetched", undefined, userLocale),
+      message: t("admin.bookings.fetched"),
     });
   }
 );
 
+// Get single booking (admin)
 export const getBookingById = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const userLocale = req.locale as SupportedLocale | undefined;
+    const locale = req.locale as SupportedLocale | undefined;
+    const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
 
     if (!isValidObjectId(id)) {
-      logger.warn(bookingT("admin.bookings.invalidId", { id }, getLogLocale()));
+      logger.warn(t("admin.bookings.invalidId", { id }));
       res.status(400).json({
         success: false,
-        message: bookingT("admin.bookings.invalidId", { id }, userLocale),
+        message: t("admin.bookings.invalidId", { id }),
       });
       return;
     }
@@ -67,74 +59,86 @@ export const getBookingById = asyncHandler(
       tenant: req.tenant,
     }).populate("service");
     if (!booking) {
-      logger.warn(bookingT("admin.bookings.notFound", { id }, getLogLocale()));
+      logger.warn(t("admin.bookings.notFound", { id }));
       res.status(404).json({
         success: false,
-        message: bookingT("admin.bookings.notFound", { id }, userLocale),
+        message: t("admin.bookings.notFound", { id }),
       });
       return;
     }
 
-    logger.info(bookingT("admin.bookings.fetchedOne", { id }, getLogLocale()));
+    logger.info(t("admin.bookings.fetchedOne", { id }));
     res.status(200).json({
       success: true,
       data: booking,
-      message: bookingT("admin.bookings.fetchedOne", { id }, userLocale),
+      message: t("admin.bookings.fetchedOne", { id }),
     });
   }
 );
 
+// Update booking status (admin)
 export const updateBookingStatus = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const { status } = req.body;
-    const userLocale = req.locale as SupportedLocale | undefined;
+    const locale = req.locale as SupportedLocale | undefined;
+    const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
 
     if (!isValidObjectId(id)) {
-      logger.warn(bookingT("admin.bookings.invalidId", { id }, getLogLocale()));
+      logger.warn(t("admin.bookings.invalidId", { id }));
       res.status(400).json({
         success: false,
-        message: bookingT("admin.bookings.invalidId", { id }, userLocale),
+        message: t("admin.bookings.invalidId", { id }),
       });
       return;
     }
 
     const { Booking } = await getTenantModels(req);
-    const booking = await Booking.findByIdAndUpdate(
-      id,
-      { tenant: req.tenant, status },
+    const booking = await Booking.findOneAndUpdate(
+      { _id: id, tenant: req.tenant },
+      { status },
       { new: true }
     );
     if (!booking) {
-      logger.warn(bookingT("admin.bookings.notFound", { id }, getLogLocale()));
+      logger.warn(t("admin.bookings.notFound", { id }));
       res.status(404).json({
         success: false,
-        message: bookingT("admin.bookings.notFound", { id }, userLocale),
+        message: t("admin.bookings.notFound", { id }),
       });
       return;
     }
 
-    // E-posta gönderimi: confirmed/cancelled için
+    // -------------- ✨ EN KRİTİK KISIM: TENANT DATA VE DİL -------------- //
+    const tenantData = req.tenantData; // resolveTenant’dan
+    const bookingLang = booking.language || locale || "en";
+    const brandName =
+      (tenantData?.name?.[bookingLang] || tenantData?.name?.en || tenantData?.name) ?? "Brand";
+    const senderEmail =
+      tenantData?.emailSettings?.senderEmail || "noreply@example.com";
+    // ------------------------------------------------------------- //
+
+    // E-mail logic
     if (status === "confirmed") {
       try {
         await sendEmail({
           to: booking.email,
-          subject: bookingT("booking.confirmed.subject", undefined, userLocale),
+          subject: t("booking.confirmed.subject"),
           html: BookingConfirmedTemplate({
             name: booking.name,
             service: booking.serviceType,
             date: booking.date,
             time: booking.time,
+            locale: bookingLang,
+            brandName,
+            senderEmail,
           }),
         });
-        logger.info(
-          bookingT("booking.confirmed.emailSent", { id }, getLogLocale())
-        );
+
+        logger.info(t("booking.confirmed.emailSent", { id }));
       } catch (err) {
         logger.error(
-          bookingT("booking.confirmed.emailError", { id }, getLogLocale()) +
-            " " +
-            String(err)
+          t("booking.confirmed.emailError", { id }) + " " + String(err)
         );
       }
     }
@@ -142,76 +146,67 @@ export const updateBookingStatus = asyncHandler(
       try {
         await sendEmail({
           to: booking.email,
-          subject: bookingT("booking.rejected.subject", undefined, userLocale),
+          subject: t("booking.rejected.subject"),
           html: BookingRejectionTemplate({
             name: booking.name,
             service: booking.serviceType,
             date: booking.date,
             time: booking.time,
+            locale: bookingLang,
+            brandName,
+            senderEmail,
           }),
         });
-        logger.info(
-          bookingT("booking.rejected.emailSent", { id }, getLogLocale())
-        );
+
+        logger.info(t("booking.rejected.emailSent", { id }));
       } catch (err) {
         logger.error(
-          bookingT("booking.rejected.emailError", { id }, getLogLocale()) +
-            " " +
-            String(err)
+          t("booking.rejected.emailError", { id }) + " " + String(err)
         );
       }
     }
 
-    logger.info(
-      bookingT("admin.bookings.statusUpdated", { id, status }, getLogLocale())
-    );
+    logger.info(t("admin.bookings.statusUpdated", { id, status }));
     res.status(200).json({
       success: true,
-      message: bookingT(
-        "admin.bookings.statusUpdated",
-        { id, status },
-        userLocale
-      ),
+      message: t("admin.bookings.statusUpdated", { id, status }),
       booking,
     });
   }
 );
 
+// Delete booking (admin)
 export const deleteBooking = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const userLocale = req.locale as SupportedLocale | undefined;
+    const locale = req.locale as SupportedLocale | undefined;
+    const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
 
     if (!isValidObjectId(id)) {
-      logger.warn(bookingT("admin.bookings.invalidId", { id }, getLogLocale()));
+      logger.warn(t("admin.bookings.invalidId", { id }));
       res.status(400).json({
         success: false,
-        message: bookingT("admin.bookings.invalidId", { id }, userLocale),
+        message: t("admin.bookings.invalidId", { id }),
       });
       return;
     }
 
     const { Booking } = await getTenantModels(req);
-    const booking = await Booking.deleteOne({ _id: id, tenant: req.tenant });
-    if (!booking) {
-      logger.warn(
-        bookingT("admin.bookings.notFoundOrDeleted", { id }, getLogLocale())
-      );
+    const result = await Booking.deleteOne({ _id: id, tenant: req.tenant });
+    if (!result.deletedCount) {
+      logger.warn(t("admin.bookings.notFoundOrDeleted", { id }));
       res.status(404).json({
         success: false,
-        message: bookingT(
-          "admin.bookings.notFoundOrDeleted",
-          { id },
-          userLocale
-        ),
+        message: t("admin.bookings.notFoundOrDeleted", { id }),
       });
       return;
     }
 
-    logger.info(bookingT("admin.bookings.deleted", { id }, getLogLocale()));
+    logger.info(t("admin.bookings.deleted", { id }));
     res.status(200).json({
       success: true,
-      message: bookingT("admin.bookings.deleted", { id }, userLocale),
+      message: t("admin.bookings.deleted", { id }),
     });
   }
 );

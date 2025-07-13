@@ -1,54 +1,47 @@
-import { Request, Response, NextFunction } from "express";
+// controllers/company.controller.ts
+
+import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { Company } from "@/modules/company";
-import { isValidObjectId } from "@/core/utils/validation";
+import path from "path";
+import fs from "fs";
+import { v2 as cloudinary } from "cloudinary";
 import {
   getImagePath,
   getFallbackThumbnail,
   processImageLocal,
   shouldProcessImage,
 } from "@/core/utils/uploadUtils";
-import path from "path";
-import fs from "fs";
-import { v2 as cloudinary } from "cloudinary";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import logger from "@/core/middleware/logger/logger";
+import { t as translate } from "@/core/utils/i18n/translate";
+import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
+import translations from "./i18n";
+import type { SupportedLocale } from "@/types/common";
+import type { ICompany } from "./types";
 
-// Çoklu resim işleme yardımcı fonksiyonu
-async function processUploadedImages(files: Express.Multer.File[]) {
-  const images = [];
-  for (const file of files) {
-    const imageUrl = getImagePath(file);
-    let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
-    let publicId = (file as any).public_id;
-    if (shouldProcessImage()) {
-      const processed = await processImageLocal(
-        file.path,
-        file.filename,
-        path.dirname(file.path)
-      );
-      thumbnail = processed.thumbnail;
-      webp = processed.webp;
+// ✅ CREATE
+export const createCompany = asyncHandler(async (req: Request, res: Response) => {
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const t = (key: string, params?: any) => translate(key, locale, translations, params);
+  const { Company } = await getTenantModels(req);
+
+  try {
+    if (!req.tenant) {
+      res.status(400).json({ success: false, message: t("company.tenantRequired") });return; 
     }
-    images.push({ url: imageUrl, thumbnail, webp, publicId });
-  }
-  return images;
-}
 
-// ✅ Şirket bilgisi oluştur (çoklu logo)
-export const createCompany = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { Company } = await getTenantModels(req);
+    // Tek bir tenant = tek bir company!
     const exists = await Company.findOne({ tenant: req.tenant });
     if (exists) {
-      res
-        .status(400)
-        .json({ success: false, message: "A company is already registered." });
-      return;
+      res.status(400).json({ success: false, message: t("company.alreadyExists") });return;
     }
-    const body = req.body;
 
-    // Sosyal linkler için default objesi
+    const body = req.body;
+    body.tenant = req.tenant;
+    body.language = body.language || locale || "en";
+
+    // Sosyal linkler default
     body.socialLinks = {
       facebook: body.socialLinks?.facebook || "",
       instagram: body.socialLinks?.instagram || "",
@@ -57,199 +50,220 @@ export const createCompany = asyncHandler(
       youtube: body.socialLinks?.youtube || "",
     };
 
-    let logos: any[] = [];
+    // Çoklu resim desteği
+    const images: ICompany["images"] = [];
     if (Array.isArray(req.files)) {
-      logos = await processUploadedImages(req.files as Express.Multer.File[]);
+      for (const file of req.files as Express.Multer.File[]) {
+        const imageUrl = getImagePath(file);
+        let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
+        if (shouldProcessImage()) {
+          const processed = await processImageLocal(
+            file.path,
+            file.filename,
+            path.dirname(file.path)
+          );
+          thumbnail = processed.thumbnail;
+          webp = processed.webp;
+        }
+        images.push({
+          url: imageUrl,
+          thumbnail,
+          webp,
+          publicId: (file as any).public_id,
+        });
+      }
     }
-    body.logos = logos;
+    body.images = images;
 
     const newCompany = await Company.create(body);
 
+    logger.info(t("company.created"), { ...getRequestContext(req), id: newCompany._id });
     res.status(201).json({
       success: true,
-      message: "Company created successfully.",
+      message: t("company.created"),
       data: newCompany,
     });
+  } catch (error) {
+    logger.error(t("company.createError"), { ...getRequestContext(req), error });
+    res.status(500).json({
+      success: false,
+      message: t("company.createError"),
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
-);
+});
 
-// ✅ Şirket bilgisi güncelle (çoklu logo ve silme desteği)
-export const updateCompanyInfo = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
-    const { Company } = await getTenantModels(req);
+// ✅ UPDATE
+// controllers/company.controller.ts
 
-    if (!isValidObjectId(id)) {
-      res.status(400).json({ success: false, message: "Invalid company ID." });
-      return;
-    }
+export const updateCompanyInfo = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const t = (key: string, params?: any) => translate(key, locale, translations, params);
 
-    const company = await Company.findOne({ _id: id, tenant: req.tenant });
-    if (!company) {
-      res.status(404).json({ success: false, message: "Company not found." });
-      return;
-    }
+  if (!req.tenant) {
+    res.status(400).json({ success: false, message: t("company.tenantRequired") });return;
+  }
 
-    const updates = req.body;
-    updates.socialLinks = {
-      facebook: updates.socialLinks?.facebook || "",
-      instagram: updates.socialLinks?.instagram || "",
-      twitter: updates.socialLinks?.twitter || "",
-      linkedin: updates.socialLinks?.linkedin || "",
-      youtube: updates.socialLinks?.youtube || "",
+  const { Company } = await getTenantModels(req);
+  const company = await Company.findOne({ _id: id, tenant: req.tenant });
+  if (!company) {
+    res.status(404).json({ success: false, message: t("company.notFound") });return;
+  }
+
+  const updates = req.body;
+
+  // Dil
+  company.language = updates.language || locale || "en";
+
+  // Sosyal linkler default
+  company.socialLinks = {
+    facebook: updates.socialLinks?.facebook || "",
+    instagram: updates.socialLinks?.instagram || "",
+    twitter: updates.socialLinks?.twitter || "",
+    linkedin: updates.socialLinks?.linkedin || "",
+    youtube: updates.socialLinks?.youtube || "",
+  };
+
+  // --- Nested alanlar
+  if (updates.address) {
+    company.address = {
+      ...company.address,
+      ...updates.address,
     };
-
-    // Yeni eklenen logolar
-    if (Array.isArray(req.files)) {
-      const newImages = await processUploadedImages(
-        req.files as Express.Multer.File[]
-      );
-      company.logos.push(...newImages);
+  }
+  if (updates.bankDetails) {
+    company.bankDetails = {
+      ...company.bankDetails,
+      ...updates.bankDetails,
+    };
+  }
+  // Primitive alanlar
+  const primitiveFields = [
+    "companyName", "taxNumber", "handelsregisterNumber", "email", "phone"
+  ];
+  for (const field of primitiveFields) {
+    if (typeof updates[field] === "string" && updates[field].length > 0) {
+      (company as any)[field] = updates[field];
     }
+  }
 
-    // Silinmek istenen logolar
-    if (updates.removedLogos) {
-      try {
-        const removed: string[] = JSON.parse(updates.removedLogos);
-        // Kalan logoları filtrele
-        company.logos = company.logos.filter(
-          (img: any) => !removed.includes(img.url)
+  // --- Yeni resimler (images)
+  if (Array.isArray(req.files)) {
+    for (const file of req.files as Express.Multer.File[]) {
+      const imageUrl = getImagePath(file);
+      let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
+      if (shouldProcessImage()) {
+        const processed = await processImageLocal(
+          file.path,
+          file.filename,
+          path.dirname(file.path)
         );
-        // Fiziksel dosyaları ve Cloudinary'den sil
-        for (const imgUrl of removed) {
-          const filename = path.basename(imgUrl);
-          const localPath = path.join("uploads", "company-images", filename);
-          if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-          // Cloudinary
-          const match = company.logos.find(
-            (img: any) => img.url === imgUrl && img.publicId
-          );
-          if (match && match.publicId) {
-            await cloudinary.uploader.destroy(match.publicId);
-          }
-        }
-      } catch (e) {
-        console.warn("Invalid removedLogos JSON:", e);
+        thumbnail = processed.thumbnail;
+        webp = processed.webp;
       }
+      company.images.push({
+        url: imageUrl,
+        thumbnail,
+        webp,
+        publicId: (file as any).public_id,
+      });
     }
-
-    // Diğer alanlar
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value !== undefined && key !== "removedLogos") {
-        (company as any)[key] = value;
-      }
-    });
-
-    await company.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Company info updated.",
-      data: company,
-    });
   }
-);
 
-// ✅ Şirket bilgisini getir (çoklu logo ile)
-// ✅ Şirket bilgisini getir (çoklu logo ile, log destekli)
-export const getCompanyInfo = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { Company } = await getTenantModels(req);
-    const tenantSlug = req.tenant;
-    const logContext = {
-      ...req.headers,
-      tenant: tenantSlug,
-      module: "company",
-      event: "company.getInfo",
-      host: req.hostname,
-      ip: req.ip,
-      userId: (req as any).user?._id || null,
-    };
-
-    // [DEBUG] Model ve tenant ile ilgili log (isteğe bağlı)
-    logger.info("[COMPANY] getCompanyInfo endpoint called", {
-      ...logContext,
-      status: "start",
-    });
-
+  // --- Silinecek resimler (removedImages)
+  if (updates.removedImages) {
     try {
-      const company = await Company.findOne({ tenant: tenantSlug }).select(
-        "-__v"
-      );
+      const removed: string[] = Array.isArray(updates.removedImages)
+        ? updates.removedImages
+        : JSON.parse(updates.removedImages);
 
-      if (!company) {
-        logger.warn("[COMPANY] No company info found", {
-          ...logContext,
-          status: "not_found",
-        });
-        res.status(404).json({
-          success: false,
-          message: "Company information not found.",
-        });
-        return;
-      }
+      // Sadece URL bazında filter ve silme
+      const toRemove = new Set(removed);
+      for (const imgUrl of removed) {
+        // Local sil
+        const localPath = path.join("uploads", "company-images", path.basename(imgUrl));
+        if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
 
-      logger.info("[COMPANY] Company info fetched successfully", {
-        ...logContext,
-        status: "success",
-        companyId: company._id?.toString(),
-      });
-
-      res.status(200).json({
-        success: true,
-        data: company,
-      });
-    } catch (err: any) {
-      logger.error("[COMPANY] Company info fetch error", {
-        ...logContext,
-        status: "error",
-        error: err?.message || err,
-      });
-      res.status(500).json({
-        success: false,
-        message: "An error occurred while fetching company information.",
-        detail: err?.message || err,
-      });
-    }
-  }
-);
-
-// ✅ Şirket bilgisini sil (ve logoları da siler)
-export const deleteCompany = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
-    const { Company } = await getTenantModels(req);
-
-    if (!isValidObjectId(id)) {
-      res.status(400).json({ success: false, message: "Invalid company ID." });
-      return;
-    }
-
-    const company = await Company.findOne({ _id: id, tenant: req.tenant });
-    if (!company) {
-      res.status(404).json({ success: false, message: "Company not found." });
-      return;
-    }
-
-    // Tüm logoları sil
-    for (const img of company.logos || []) {
-      const localPath = path.join(
-        "uploads",
-        "company-images",
-        path.basename(img.url)
-      );
-      if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-      if (img.publicId) {
-        try {
+        // Cloudinary sil
+        const img = company.images.find((img: any) => img.url === imgUrl && img.publicId);
+        if (img && img.publicId) {
           await cloudinary.uploader.destroy(img.publicId);
-        } catch (err) {
-          console.error(`Cloudinary delete error for ${img.publicId}:`, err);
         }
       }
+      company.images = company.images.filter((img: any) => !toRemove.has(img.url));
+    } catch (err) {
+      logger.error(t("company.removeImagesError"), { ...getRequestContext(req), error: err });
+      res.status(400).json({ success: false, message: t("company.removeImagesError") });return;
     }
-
-    await company.deleteOne();
-
-    res.status(200).json({ success: true, message: "Company deleted." });
   }
-);
+
+  await company.save();
+
+  logger.info(t("company.updated"), { ...getRequestContext(req), id: company._id });
+  res.status(200).json({
+    success: true,
+    message: t("company.updated"),
+    data: company,
+  });
+});
+
+
+// ✅ GET
+export const getCompanyInfo = asyncHandler(async (req: Request, res: Response) => {
+  const locale: SupportedLocale = req.locale;
+  const t = (key: string, params?: any) => translate(key, locale, translations, params);
+
+  if (!req.tenant) {
+    res.status(400).json({ success: false, message: t("company.tenantRequired") });return;
+  }
+
+  const { Company } = await getTenantModels(req);
+  const company = await Company.findOne({ tenant: req.tenant }).select("-__v");
+  if (!company) {
+    logger.warn(t("company.notFound"), { ...getRequestContext(req) });
+    res.status(404).json({ success: false, message: t("company.notFound") });
+    return;
+  }
+
+  logger.info(t("company.fetched"), { ...getRequestContext(req), id: company._id });
+  res.status(200).json({
+    success: true,
+    message: t("company.fetched"),
+    data: company,
+  });
+});
+
+// ✅ DELETE
+export const deleteCompany = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const locale: SupportedLocale = req.locale;
+  const t = (key: string, params?: any) => translate(key, locale, translations, params);
+
+  if (!req.tenant) {
+    res.status(400).json({ success: false, message: t("company.tenantRequired") });return;
+  }
+
+  const { Company } = await getTenantModels(req);
+  const company = await Company.findOne({ _id: id, tenant: req.tenant });
+  if (!company) {
+    res.status(404).json({ success: false, message: t("company.notFound") });return;
+  }
+
+  for (const img of company.images || []) {
+    const localPath = path.join("uploads", "company-images", path.basename(img.url));
+    if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+    if (img.publicId) {
+      try {
+        await cloudinary.uploader.destroy(img.publicId);
+      } catch (err) {
+        logger.error(`Cloudinary delete error for ${img.publicId}:`, { ...getRequestContext(req), error: err });
+      }
+    }
+  }
+
+  await company.deleteOne();
+
+  logger.info(t("company.deleted"), { ...getRequestContext(req), id });
+  res.status(200).json({ success: true, message: t("company.deleted") });
+});

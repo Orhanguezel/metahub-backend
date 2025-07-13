@@ -1,14 +1,14 @@
 {
-  "blogcategory.validation.invalidNameType": "Name must be an object with locales.",
-  "blogcategory.validation.localeMissing": "Name.{{lang}} is required and must be a non-empty string.",
-  "blogcategory.validation.localeInvalid": "Name.{{lang}} must be a string.",
-  "blogcategory.create.success": "Category '{{name}}' created successfully.",
-  "blogcategory.create.error": "Failed to create category.",
-  "blogcategory.update.success": "Category '{{name}}' updated successfully.",
-  "blogcategory.delete.success": "Category '{{name}}' deleted successfully.",
-  "blogcategory.list.success": "Categories listed successfully.",
-  "blogcategory.list.error": "Failed to fetch categories.",
-  "blogcategory.fetch.success": "Category fetched successfully.",
-  "blogcategory.notFound": "Category not found.",
-  "blogcategory.invalidId": "Invalid category ID."
+  "articlescategory.validation.invalidNameType": "Name must be an object with locales.",
+  "articlescategory.validation.localeMissing": "Name.{{lang}} is required and must be a non-empty string.",
+  "articlescategory.validation.localeInvalid": "Name.{{lang}} must be a string.",
+  "articlescategory.create.success": "Category '{{name}}' created successfully.",
+  "articlescategory.create.error": "Failed to create category.",
+  "articlescategory.update.success": "Category '{{name}}' updated successfully.",
+  "articlescategory.delete.success": "Category '{{name}}' deleted successfully.",
+  "articlescategory.list.success": "Categories listed successfully.",
+  "articlescategory.list.error": "Failed to fetch categories.",
+  "articlescategory.fetch.success": "Category fetched successfully.",
+  "articlescategory.notFound": "Category not found.",
+  "articlescategory.invalidId": "Invalid category ID."
 }

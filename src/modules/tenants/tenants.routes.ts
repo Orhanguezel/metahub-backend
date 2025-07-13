@@ -7,7 +7,8 @@ import {
 } from "./tenants.validation";
 import {
   createTenant,
-  getAllTenants,
+  getAllTenantsAdmin,
+  getAllTenantsPublic,
   updateTenant,
   deleteTenant,
 } from "./tenants.controller";
@@ -18,11 +19,19 @@ import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
 
-router.use(authenticate, authorizeRoles("admin"));
+// --- PUBLIC: sadece aktif ve public tenantlar ---
+// Sadece login gerektirmez!
+router.get("/", getAllTenantsPublic);
 
-// ➕ Create Tenant
+// --- ADMIN: panel işlemleri (TAMAMI admin ve login ister) ---
+router.use("/admin", authenticate, authorizeRoles("admin"));
+
+// Admin: Tüm tenants (panelde) 
+router.get("/admin", getAllTenantsAdmin);
+
+// Admin: Create Tenant
 router.post(
-  "/",
+  "/admin",
   uploadTypeWrapper("tenant"),
   upload.array("images", 5),
   transformNestedFields([
@@ -40,12 +49,9 @@ router.post(
   createTenant
 );
 
-// 📝 Tüm Tenants
-router.get("/", getAllTenants);
-
-// ✏️ Update Tenant
+// Admin: Update Tenant
 router.put(
-  "/:id",
+  "/admin/:id",
   uploadTypeWrapper("tenant"),
   upload.array("images", 5),
   transformNestedFields([
@@ -65,7 +71,7 @@ router.put(
   updateTenant
 );
 
-// 🗑️ Delete Tenant
-router.delete("/:id", validateObjectId("id"), deleteTenant);
+// Admin: Delete Tenant
+router.delete("/admin/:id", validateObjectId("id"), deleteTenant);
 
 export default router;

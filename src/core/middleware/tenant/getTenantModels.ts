@@ -2,13 +2,13 @@
 import { Request } from "express";
 
 // ✅ Doğrudan model export edilen modüller
-import { Setting } from "@/modules/setting/setting.models";
+import { Settings } from "@/modules/settings/settings.models";
 import { User } from "@/modules/users/users.models";
 import { Product } from "@/modules/product/product.models";
 import { Order } from "@/modules/order/order.models";
 import { Cart } from "@/modules/cart/cart.models";
-import { Blog } from "@/modules/blog/blog.models";
-import { BlogCategory } from "@/modules/blogcategory/blogcategory.models";
+import { Blog } from "@/modules/blog/models";
+import { BlogCategory } from "@/modules/blogcategory/category.models";
 import { Booking } from "@/modules/booking/booking.models";
 import {
   BookingSlotRule,
@@ -17,7 +17,7 @@ import {
 import { Coupon } from "@/modules/coupon/coupon.models";
 import { Gallery } from "@/modules/gallery/gallery.models";
 import { GalleryCategory } from "@/modules/gallerycategory/gallerycategory.models";
-import { Services } from "@/modules/services/services.models";
+import { Services } from "@/modules/services/models";
 import { ServicesCategory } from "@/modules/servicescategory/category.models";
 import { Stockmovement } from "@/modules/stockmovement/stockmovement.models";
 import { Notification } from "@/modules/notification/notification.models";
@@ -37,15 +37,15 @@ import { Offer } from "@/modules/offer/offer.models";
 import { Payment } from "@/modules/payment/payment.models";
 import { Shipment } from "@/modules/shipment/shipment.models";
 import { Task } from "@/modules/task/task.models";
-import { Activity } from "@/modules/activity/activity.models";
-import { ActivityCategory } from "@/modules/activitycategory/activitycategory.models";
-import { About } from "@/modules/about/about.models";
-import { AboutCategory } from "@/modules/aboutcategory/aboutcategory.models";
+import { Activity } from "@/modules/activity/models";
+import { ActivityCategory } from "@/modules/activitycategory/category.models";
+import { About } from "@/modules/about/models";
+import { AboutCategory } from "@/modules/aboutcategory/category.models";
 import { Experience } from "@/modules/experience/experience.models";
-import { References } from "@/modules/references/references.models";
+import { References } from "@/modules/references/models";
 import { ReferencesCategory } from "@/modules/referencescategory/category.models";
-import { Articles } from "@/modules/articles/articles.models";
-import { ArticlesCategory } from "@/modules/articlescategory/articlescategory.models";
+import { Articles } from "@/modules/articles/models";
+import { ArticlesCategory } from "@/modules/articlescategory/category.models";
 import { Library } from "@/modules/library/library.models";
 import { ChatMessage, ChatSession } from "@/modules/chat/chat.models";
 import { EnsotekProd } from "@/modules/ensotekprod/ensotekprod.models";
@@ -54,19 +54,19 @@ import { Sport } from "@/modules/sport/sport.models";
 import { SportCategory } from "@/modules/sportcategory/sportcategory.models";
 import { Bike } from "@/modules/bikes/model";
 import { BikeCategory } from "@/modules/bikescategory/models";
-import { Section } from "@/modules/section/section.models";
+import { SectionSetting } from "@/modules/section/section.models";
 import { Apartment } from "@/modules/apartment/apartment.model";
 import { ApartmentCategory } from "@/modules/apartmentcategory/apartmentcategory.models";
 import { Apikey, Apikeylog } from "@/modules/apikey/apikey.models";
-import { News } from "@/modules/news/news.models";
-import { NewsCategory } from "@/modules/newscategory";
+import { News } from "@/modules/news/models";
+import { NewsCategory } from "@/modules/newscategory/category.models";
 import { Analytics } from "@/modules/analytics/analytics.models";
 import { ModuleMeta, ModuleSetting } from "@/modules/modules/admin.models";
 import { Sparepart } from "@/modules/sparepart/sparepart.models";
 import { Tenants } from "@/modules/tenants/tenants.model";
 
 export const getTenantModels = async (req: Request) => ({
-  Setting: await req.getModel("Setting", Setting.schema),
+  Settings: await req.getModel("Settings", Settings.schema),
   User: await req.getModel("User", User.schema),
   Product: await req.getModel("Product", Product.schema),
   Order: await req.getModel("Order", Order.schema),
@@ -140,7 +140,7 @@ export const getTenantModels = async (req: Request) => ({
   SportCategory: await req.getModel("SportCategory", SportCategory.schema),
   Bike: await req.getModel("Bike", Bike.schema),
   BikeCategory: await req.getModel("BikeCategory", BikeCategory.schema),
-  Section: await req.getModel("Section", Section.schema),
+  SectionSetting: await req.getModel("SectionSetting", SectionSetting.schema),
   Apartment: await req.getModel("Apartment", Apartment.schema),
   ApartmentCategory: await req.getModel(
     "ApartmentCategory",

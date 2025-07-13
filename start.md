@@ -24,6 +24,8 @@ npx ts-node -r tsconfig-paths/register src/scripts/sync/masterSync.ts
 
 npx ts-node -r tsconfig-paths/register src/generateMeta.ts
 
+npx ts-node -r tsconfig-paths/register src/scripts/section/masterSyncSections.ts
+
 
 Alternatif olarak:
 ```sh

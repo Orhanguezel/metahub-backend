@@ -24,7 +24,7 @@ router.get("/search", publicController.searchGalleryItems);
 router.get("/stats", publicController.getGalleryStats);
 
 // Get all categories with published gallery items
-router.get("/categories", publicController.getPublishedGalleryCategories);
+router.get("/categories", publicController.getPublishedGalleryItemsByCategory);
 
 // 🛡️ Important: place this at the END to avoid route collisions
 // Get a single gallery item by ID

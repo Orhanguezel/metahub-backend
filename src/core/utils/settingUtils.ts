@@ -1,4 +1,4 @@
-import { Setting } from "@/modules/setting";
+import { Settings } from "@/modules/settings";
 
 // Çeviri value’sunu ayıklayan güvenli yardımcı fonksiyon
 function extractMultiLangValue(obj: any, lang: "tr" | "en" | "de") {
@@ -19,10 +19,12 @@ export const getSettingValue = async (
   key: string,
   language: "tr" | "en" | "de" = "en"
 ): Promise<string | null> => {
-  const setting = await Setting.findOne({ key, isActive: true });
+  const setting = await Settings.findOne({ key, isActive: true });
 
   if (!setting || !setting.value) {
-    console.warn(`[getSettingValue] Setting key "${key}" not found or inactive.`);
+    console.warn(
+      `[getSettingValue] Setting key "${key}" not found or inactive.`
+    );
     return null;
   }
 

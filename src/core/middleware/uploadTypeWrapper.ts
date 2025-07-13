@@ -17,7 +17,7 @@ export const uploadSizeLimits: Record<UploadFolderKeys, number> = {
   references: 20 * 1024 * 1024,
   sport: 10 * 1024 * 1024,
   spareparts: 10 * 1024 * 1024,
-  setting: 5 * 1024 * 1024,
+  settings: 5 * 1024 * 1024,
   company: 5 * 1024 * 1024,
   default: 20 * 1024 * 1024,
   activity: 10 * 1024 * 1024,

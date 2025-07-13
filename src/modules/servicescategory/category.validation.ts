@@ -2,9 +2,11 @@ import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 import { validateMultilangField } from "@/core/utils/i18n/validationUtils";
 
-// ✅ ObjectId kontrolü
+// 🟢 ObjectId validasyonu
 export const validateObjectId = (field: string) => [
-  param(field).isMongoId().withMessage(`${field} must be a valid ObjectId.`),
+  param(field)
+    .isMongoId()
+    .withMessage(`${field} must be a valid MongoDB ObjectId.`),
   validateRequest,
 ];
 

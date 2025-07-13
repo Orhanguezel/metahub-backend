@@ -1,5 +1,5 @@
 import { Schema, model, Model, models, Types } from "mongoose";
-import type { IGalleryItem,IGallerySubItem} from "./types";
+import type { IGallery, IGalleryItem } from "./types";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
 const translatedFieldSchema = SUPPORTED_LOCALES.reduce((acc, lang) => {
@@ -7,17 +7,14 @@ const translatedFieldSchema = SUPPORTED_LOCALES.reduce((acc, lang) => {
   return acc;
 }, {} as Record<string, any>);
 
-
-
-
-
-// ✅ SubItem schema
-const gallerySubItemSchema = new Schema<IGallerySubItem>(
+// ✅ Item schema
+const galleryItemSchema = new Schema<IGalleryItem>(
   {
-    image: { type: String, required: true },
+    url: { type: String, required: true },
     thumbnail: { type: String, required: true },
     webp: { type: String },
-    title: translatedFieldSchema,
+    publicId: { type: String },
+    name: translatedFieldSchema,
     description: translatedFieldSchema,
     order: { type: Number, default: 0 },
   },
@@ -25,9 +22,9 @@ const gallerySubItemSchema = new Schema<IGallerySubItem>(
 );
 
 // ✅ Main schema
-const gallerySchema = new Schema<IGalleryItem>(
+const gallerySchema = new Schema<IGallery>(
   {
-    items: [gallerySubItemSchema],
+    images: [galleryItemSchema],
     category: {
       type: Schema.Types.ObjectId,
       ref: "GalleryCategory",
@@ -49,8 +46,8 @@ const gallerySchema = new Schema<IGalleryItem>(
 gallerySchema.index({ category: 1, isPublished: 1, isActive: 1 });
 
 // ✅ Model
-const Gallery: Model<IGalleryItem> =
-  models.Gallery || model<IGalleryItem>("Gallery", gallerySchema);
+const Gallery: Model<IGallery> =
+  models.Gallery || model<IGallery>("Gallery", gallerySchema);
 
 // ✅ Export
 export { Gallery };

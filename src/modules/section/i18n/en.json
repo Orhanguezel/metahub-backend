@@ -1,13 +1,30 @@
 {
-  "section.invalidLabel": "Label is required in all supported languages.",
-  "section.validation.invalidJSON": "Label value is not valid JSON.",
-  "section.validation.missingLocale": "Label is missing or empty in some languages.",
-  "section.create.success": "{{name}} section created successfully.",
-  "section.create.labelMissing": "Label is required in all languages.",
-  "section.update.success": "{{name}} section updated successfully.",
-  "section.update.notFound": "Section not found.",
-  "section.update.labelMissing": "Label is required in all languages.",
-  "section.list.success": "Sections listed successfully.",
-  "section.delete.success": "{{name}} section deleted.",
-  "section.delete.notFound": "Section not found."
+  "admin": {
+    "section": {
+      "created": "SectionMeta '{key}' created successfully.",
+      "updated": "SectionMeta '{key}' updated.",
+      "deleted": "SectionMeta '{key}' deleted.",
+      "fetchedAll": "All SectionMetas fetched.",
+      "keyExists": "A SectionMeta with this key already exists: '{key}'.",
+      "notFound": "SectionMeta '{key}' not found.",
+      "labelRequired": "Label is required.",
+      "labelLocaleType": "Each label locale must be a string.",
+      "labelLocaleRequired": "At least one label locale must be filled.",
+      "descriptionType": "Description must be a string or an object.",
+      "descriptionLocaleType": "Each description locale must be a string.",
+      "keyRequired": "Section key is required.",
+      "keyParamRequired": "Section key parameter is required.",
+      "settingCreated": "SectionSetting '{sectionKey}' created for tenant.",
+      "settingUpdated": "SectionSetting '{sectionKey}' updated.",
+      "settingDeleted": "SectionSetting '{sectionKey}' deleted.",
+      "settingExists": "SectionSetting already exists for this tenant and section: '{sectionKey}'.",
+      "settingNotFound": "SectionSetting '{sectionKey}' not found.",
+      "settingsFetched": "SectionSettings for tenant '{tenant}' fetched."
+    }
+  },
+  "admin.module": {
+    "tenantAndSectionKeyRequired": "Tenant and SectionKey are required.",
+    "tenantRequired": "Tenant is required."
+  }
 }
+

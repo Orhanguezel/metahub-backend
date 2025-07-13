@@ -1,12 +1,12 @@
 // src/modules/news/index.ts
 
 import express from "express";
-import adminRoutes from "./admin.news.routes";
-import publicRoutes from "./public.news.routes";
-import { News } from "./news.models";
-import * as adminController from "./admin.news.controller";
-import * as publicController from "./public.news.controller";
-import * as validation from "./news.validation";
+import adminRoutes from "./admin.routes";
+import publicRoutes from "./public.routes";
+import { News } from "./models";
+import * as adminController from "./admin.controller";
+import * as publicController from "./public.controller";
+import * as validation from "./validation";
 
 const router = express.Router();
 

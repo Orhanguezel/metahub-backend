@@ -1,7 +1,8 @@
 // src/core/middleware/logger/logRequestContext.ts
 import geoip from "geoip-lite";
 
-// Genişletilmiş tip ile Express'ten tenant, user, locale gibi bilgileri oku!
+const failedGeoIpCache = new Set<string>(); // Her process restartında sıfırlanır
+
 export function getRequestContext(req: any) {
   const ip =
     req.headers["x-forwarded-for"]?.split(",").shift() ||
@@ -32,9 +33,16 @@ export function getRequestContext(req: any) {
       coordinates: [geo.ll[1], geo.ll[0]], // [longitude, latitude]
     };
   }
-  if (!geo) {
-    // Konsola tenant ile birlikte uyarı bas
-    // (prod'da istersen susturabilirsin)
+
+  // Sadece prod ortamında, local IP değilse ve ilk defa fail oluyorsa logla!
+  const isLocalIp = ip === "127.0.0.1" || ip === "::1" || ip === "localhost";
+  if (
+    !geo &&
+    process.env.NODE_ENV === "production" &&
+    !isLocalIp &&
+    !failedGeoIpCache.has(ip)
+  ) {
+    failedGeoIpCache.add(ip); // Bir daha loglama!
     console.warn(`[${tenant}] 📍 Geo lookup failed for IP:`, ip);
   }
 

@@ -1,0 +1,32 @@
+{
+  "createModule": {
+    "noModuleName": "Nazwa modułu jest wymagana.",
+    "notEnabled": "Moduł \"{{moduleName}}\" nie znajduje się na liście ENABLED_MODULES.",
+    "alreadyExists": "Moduł \"{{moduleName}}\" już istnieje.",
+    "dirCreated": "Folder modułu został utworzony.",
+    "dirCreateFail": "Nie udało się utworzyć folderu modułu.",
+    "filesWritten": "Pliki szablonu zostały utworzone.",
+    "filesWriteFail": "Nie udało się zapisać plików szablonu.",
+    "success": "Moduł \"{{moduleName}}\" został pomyślnie utworzony.",
+    "metaFail": "Nie udało się utworzyć pliku meta."
+  },
+  "createMetaFile": {
+    "noTenant": "Tenant jest wymagany.",
+    "dirCreated": "Katalog meta-config został utworzony.",
+    "success": "Plik meta został pomyślnie utworzony.",
+    "fail": "Nie udało się utworzyć pliku meta."
+  },
+  "meta": {
+    "created": "Plik meta został utworzony.",
+    "version": {
+      "bumped": "Wersja meta zwiększona do {{version}}.",
+      "invalidFormat": "Nieprawidłowy format wersji.",
+      "noLabel": "Brak etykiety dla {{name}}."
+    }
+  },
+  "log": {
+    "success": "Sukces",
+    "fail": "Niepowodzenie",
+    "warning": "Ostrzeżenie"
+  }
+}

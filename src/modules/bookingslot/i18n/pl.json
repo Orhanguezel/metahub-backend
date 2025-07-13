@@ -1,0 +1,35 @@
+{
+  "slot": {
+    "validation": {
+      "dayOfWeekOrAll": "Pole 'dayOfWeek' (0=niedziela...6=sobota) lub 'appliesToAll': true jest wymagane.",
+      "dayOfWeekRange": "dayOfWeek musi być liczbą od 0 (niedziela) do 6 (sobota).",
+      "startTimeFormat": "startTime musi być w formacie HH:mm.",
+      "endTimeFormat": "endTime musi być w formacie HH:mm.",
+      "intervalMinutes": "intervalMinutes musi być dodatnią liczbą.",
+      "breakBetweenAppointments": "breakBetweenAppointments musi być liczbą nieujemną.",
+      "label": "label musi być obiektem (wielojęzycznym).",
+      "description": "description musi być obiektem (wielojęzycznym).",
+      "date": "date musi być poprawną datą ISO (RRRR-MM-DD).",
+      "disabledTimes": "disabledTimes musi być tablicą.",
+      "disabledTimesItem": "Każdy element disabledTimes musi być w formacie HH:mm.",
+      "fullDayOff": "fullDayOff musi być wartością typu boolean.",
+      "objectId": "{{field}} musi być prawidłowym identyfikatorem MongoDB (ObjectId)."
+    },
+    "rule": {
+      "exists": "Reguła przedziału czasowego już istnieje dla tego dnia lub dla 'appliesToAll'.",
+      "created": "Reguła przedziału czasowego została poprawnie utworzona.",
+      "deleted": "Reguła przedziału czasowego została poprawnie usunięta.",
+      "notFound": "Nie znaleziono reguły przedziału czasowego."
+    },
+    "override": {
+      "exists": "Wyjątek dla tego dnia już istnieje.",
+      "created": "Wyjątek został poprawnie utworzony.",
+      "deleted": "Wyjątek został poprawnie usunięty.",
+      "notFound": "Nie znaleziono wyjątku."
+    },
+    "error": {
+      "noDate": "Data jest wymagana.",
+      "invalidId": "ID nie jest poprawnym identyfikatorem ObjectId."
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "createModule": {
+    "noModuleName": "Se requiere el nombre del módulo.",
+    "notEnabled": "El módulo \"{{moduleName}}\" no está en ENABLED_MODULES.",
+    "alreadyExists": "El módulo \"{{moduleName}}\" ya existe.",
+    "dirCreated": "Directorio del módulo creado.",
+    "dirCreateFail": "No se pudo crear el directorio del módulo.",
+    "filesWritten": "Archivos de plantilla creados.",
+    "filesWriteFail": "Error al escribir los archivos de plantilla.",
+    "success": "El módulo \"{{moduleName}}\" se creó correctamente.",
+    "metaFail": "No se pudo crear el archivo meta."
+  },
+  "createMetaFile": {
+    "noTenant": "Se requiere tenant.",
+    "dirCreated": "Directorio de meta-config creado.",
+    "success": "Archivo meta creado correctamente.",
+    "fail": "No se pudo crear el archivo meta."
+  },
+  "meta": {
+    "created": "Archivo meta creado.",
+    "version": {
+      "bumped": "Versión meta aumentada a {{version}}.",
+      "invalidFormat": "Formato de versión no válido.",
+      "noLabel": "Falta la etiqueta para {{name}}."
+    }
+  },
+  "log": {
+    "success": "Éxito",
+    "fail": "Error",
+    "warning": "Advertencia"
+  }
+}

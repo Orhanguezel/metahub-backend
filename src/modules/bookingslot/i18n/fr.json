@@ -1,0 +1,37 @@
+{
+  "slot": {
+    "validation": {
+      "dayOfWeekOrAll": "Le champ 'dayOfWeek' (0=dimanche...6=samedi) ou 'appliesToAll': true est requis.",
+      "dayOfWeekRange": "dayOfWeek doit être entre 0 (dimanche) et 6 (samedi).",
+      "startTimeFormat": "startTime doit être au format HH:mm.",
+      "endTimeFormat": "endTime doit être au format HH:mm.",
+      "intervalMinutes": "intervalMinutes doit être un nombre positif.",
+      "breakBetweenAppointments": "breakBetweenAppointments doit être un nombre positif ou zéro.",
+      "label": "label doit être un objet (multi-langue).",
+      "description": "description doit être un objet (multi-langue).",
+      "date": "date doit être une date ISO valide (AAAA-MM-JJ).",
+      "disabledTimes": "disabledTimes doit être un tableau.",
+      "disabledTimesItem": "Chaque élément de disabledTimes doit être au format HH:mm.",
+      "fullDayOff": "fullDayOff doit être un booléen.",
+      "objectId": "{{field}} doit être un ObjectId MongoDB valide."
+    },
+    "rule": {
+      "exists": "Une règle de créneau existe déjà pour ce jour ou 'appliesToAll'.",
+      "created": "Règle de créneau créée avec succès.",
+      "deleted": "Règle de créneau supprimée avec succès.",
+      "notFound": "Règle de créneau introuvable."
+    },
+    "override": {
+      "exists": "Une override de créneau existe déjà pour cette date.",
+      "created": "Override de créneau créée avec succès.",
+      "deleted": "Override de créneau supprimée avec succès.",
+      "notFound": "Override de créneau introuvable."
+    },
+    "error": {
+      "noDate": "La date est obligatoire.",
+      "invalidId": "ID n'est pas un ObjectId valide."
+    }
+  }
+}
+
+

@@ -1,19 +1,17 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-//import { ReferencesCategory } from ".";
 import { isValidObjectId } from "@/core/utils/validation";
-import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
-import { extractMultilangValue } from "@/core/utils/i18n/parseMultilangField";
-import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
-import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
-import { SupportedLocale } from "@/types/common";
-import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import logger from "@/core/middleware/logger/logger";
-import { t as translate } from "@/core/utils/i18n/translate";
-import translations from "./i18n";
+import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+import translations from "../references/i18n";
+import { t as translate } from "@/core/utils/i18n/translate";
+import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
+import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
 
-// ✅ CREATE
+// ✅ CREATE (Tüm dilleri kaydeder)
 export const createReferencesCategory = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
@@ -42,7 +40,7 @@ export const createReferencesCategory = asyncHandler(
       res.status(201).json({
         success: true,
         message: t("referencescategory.create.success", { name: name[locale] }),
-        data: category,
+        data: category, // .name burada tüm diller ile döner!
       });
     } catch (err: any) {
       logger.error(t("referencescategory.create.error"), {
@@ -61,34 +59,37 @@ export const createReferencesCategory = asyncHandler(
   }
 );
 
-// ✅ GET ALL
+// ✅ GET ALL (Tüm dillerle gönderir)
 export const getAllReferencesCategories = asyncHandler(
   async (req: Request, res: Response) => {
-    const locale: SupportedLocale = req.locale || getLogLocale();
+    const locale: SupportedLocale = req.locale || getLogLocale() || "en";
     const t = (key: string) => translate(key, locale, translations);
 
     try {
       const { ReferencesCategory } = await getTenantModels(req);
-      const categories = await ReferencesCategory.find({ tenant: req.tenant })
+
+      const filter: Record<string, any> = {
+        tenant: req.tenant,
+      };
+      if (req.query.isActive) {
+        filter.isActive = req.query.isActive === "true";
+      }
+
+      const categories = await ReferencesCategory.find(filter)
         .sort({ createdAt: -1 })
         .lean();
-
-      const localized = categories.map((cat) => ({
-        ...cat,
-        name: extractMultilangValue(cat.name, locale),
-      }));
 
       logger.info(t("referencescategory.list.success"), {
         ...getRequestContext(req),
         event: "referencescategory.list",
         module: "referencescategory",
-        resultCount: localized.length,
+        resultCount: categories.length,
       });
 
       res.status(200).json({
         success: true,
         message: t("referencescategory.list.success"),
-        data: localized,
+        data: categories, // <--- .name: {tr, en, ...} tüm dillerle gelir!
       });
     } catch (err: any) {
       logger.error(t("referencescategory.list.error"), {
@@ -107,7 +108,7 @@ export const getAllReferencesCategories = asyncHandler(
   }
 );
 
-// ✅ GET BY ID
+// ✅ GET BY ID (Tüm dillerle)
 export const getReferencesCategoryById = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
@@ -139,15 +140,12 @@ export const getReferencesCategoryById = asyncHandler(
     res.status(200).json({
       success: true,
       message: t("referencescategory.fetch.success"),
-      data: {
-        ...category,
-        name: extractMultilangValue(category.name, locale),
-      },
+      data: category, // .name tüm dillerle!
     });
   }
 );
 
-// ✅ UPDATE
+// ✅ UPDATE (Tüm dilleri merge ederek günceller)
 export const updateReferencesCategory = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
@@ -202,7 +200,7 @@ export const updateReferencesCategory = asyncHandler(
       message: t("referencescategory.update.success", {
         name: category.name[locale],
       }),
-      data: category,
+      data: category, // .name tüm dillerle!
     });
   }
 );
@@ -239,9 +237,7 @@ export const deleteReferencesCategory = asyncHandler(
       return;
     }
 
-    const name = deleted.name
-      ? extractMultilangValue(deleted.name, locale)
-      : "Category";
+    const name = deleted.name?.[locale] || "Category";
 
     logger.info(t("referencescategory.delete.success", { name }), {
       ...getRequestContext(req),

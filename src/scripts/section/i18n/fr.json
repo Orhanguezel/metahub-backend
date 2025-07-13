@@ -1,0 +1,32 @@
+{
+  "createModule": {
+    "noModuleName": "Le nom du module est requis.",
+    "notEnabled": "Le module \"{{moduleName}}\" n'est pas dans ENABLED_MODULES.",
+    "alreadyExists": "Le module \"{{moduleName}}\" existe déjà.",
+    "dirCreated": "Répertoire du module créé.",
+    "dirCreateFail": "Impossible de créer le répertoire du module.",
+    "filesWritten": "Fichiers de base créés.",
+    "filesWriteFail": "Échec lors de l'écriture des fichiers de base.",
+    "success": "Le module \"{{moduleName}}\" a été créé avec succès.",
+    "metaFail": "Échec de la création du fichier meta."
+  },
+  "createMetaFile": {
+    "noTenant": "Le tenant est requis.",
+    "dirCreated": "Répertoire meta-config créé.",
+    "success": "Fichier meta créé avec succès.",
+    "fail": "Échec de la création du fichier meta."
+  },
+  "meta": {
+    "created": "Fichier meta créé.",
+    "version": {
+      "bumped": "Version meta incrémentée à {{version}}.",
+      "invalidFormat": "Format de version invalide.",
+      "noLabel": "Label manquant pour {{name}}."
+    }
+  },
+  "log": {
+    "success": "Succès",
+    "fail": "Échec",
+    "warning": "Avertissement"
+  }
+}

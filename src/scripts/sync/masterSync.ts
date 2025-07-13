@@ -13,9 +13,7 @@ import { healthCheckMetaSettings } from "./healthCheckMetaSettings";
 import { seedSettingsForNewModule } from "./seedSettingsForNewModule";
 
 // --- Ortak Sabitler ---
-const MONGO_URI =
-  process.env.MONGO_URI ||
-  "mongodb://admin:adminpassword@localhost:27017/metahub-db?authSource=admin";
+const MONGO_URI = process.env.MONGO_URI;
 const MODULES_PATH = path.resolve(process.cwd(), "src/modules");
 
 // --- 1. Fiziksel modül klasörlerini getir ---
@@ -142,43 +140,36 @@ async function seedMissingSettingsForAllTenantsAndModules() {
       module: "fullSyncModulesAndSettings",
     });
     await mongoose.connect(MONGO_URI);
-    logger.info("[Sync] MongoDB bağlantısı başarılı.", {
-      module: "fullSyncModulesAndSettings",
-    });
 
-    // 1. Modül dizinlerini bul
+    // Modül adlarını bul
     const allModuleNames = await getAllModuleNames();
     if (!allModuleNames.length) {
       logger.warn("Hiç modül bulunamadı.", {
         module: "fullSyncModulesAndSettings",
       });
-      await mongoose.disconnect();
-      process.exit(0);
+      return process.exit(0);
     }
+
     logger.info(`[Sync] ${allModuleNames.length} modül klasörü bulundu.`, {
       module: "fullSyncModulesAndSettings",
     });
 
-    // 2. Orphan meta/setting temizliği
     await cleanupOrphanModules(allModuleNames);
-
-    // 3. Sadece fiziksel olarak var olan modüller için meta seed et
     await seedAllModuleMeta();
-
-    // 4. Meta/setting tutarlılığı kontrol et ve eksikleri tamamla
     await healthCheckMetaSettings();
-
-    // 5. Her tenant-modül için eksik setting seed et
     await seedMissingSettingsForAllTenantsAndModules();
 
-    await mongoose.disconnect();
+    logger.info(`[Sync] Tüm işlemler başarıyla tamamlandı.`, {
+      module: "fullSyncModulesAndSettings",
+    });
     process.exit(0);
   } catch (e) {
     logger.error("❌ [Sync] Hata oluştu:", {
       module: "fullSyncModulesAndSettings",
-      error: (e as any)?.message || e,
+      error: (e as any)?.stack || (e as any)?.message || e,
     });
-    await mongoose.disconnect();
     process.exit(1);
+  } finally {
+    await mongoose.disconnect();
   }
 })();

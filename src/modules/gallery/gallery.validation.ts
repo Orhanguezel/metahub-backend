@@ -12,18 +12,19 @@ export const validateUploadGallery = [
   body("category").isString().notEmpty().withMessage("Category is required."),
 
   // Type validation for gallery item
-  body("type")
-    .optional()
-    .isIn(["image", "video"])
-    .withMessage("Invalid type."),
+  body("type").optional().isIn(["image", "video"]).withMessage("Invalid type."),
 
-  // Dynamic validation for title in all supported languages
+  // Dynamic validation for name in all supported languages
   ...SUPPORTED_LOCALES.map((lang) =>
-    body(`title_${lang}`)
+    body(`name_${lang}`)
       .optional()
       .custom((v) => Array.isArray(v) || typeof v === "string")
       .withMessage((_, { req }) =>
-        translate(`validation.title_${lang}`, req.locale || getLogLocale(), translations)
+        translate(
+          `validation.name_${lang}`,
+          req.locale || getLogLocale(),
+          translations
+        )
       )
   ),
 
@@ -33,7 +34,11 @@ export const validateUploadGallery = [
       .optional()
       .custom((v) => Array.isArray(v) || typeof v === "string")
       .withMessage((_, { req }) =>
-        translate(`validation.desc_${lang}`, req.locale || getLogLocale(), translations)
+        translate(
+          `validation.desc_${lang}`,
+          req.locale || getLogLocale(),
+          translations
+        )
       )
   ),
 
@@ -63,27 +68,43 @@ export const validateAdminQuery = [
     .optional()
     .isIn(SUPPORTED_LOCALES)
     .withMessage((_, { req }) =>
-      translate("validation.invalidLanguage", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.invalidLanguage",
+        req.locale || getLogLocale(),
+        translations
+      )
     ),
   query("category")
     .optional()
     .isMongoId()
     .withMessage((_, { req }) =>
-      translate("validation.invalidCategory", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.invalidCategory",
+        req.locale || getLogLocale(),
+        translations
+      )
     ),
   query("isPublished")
     .optional()
     .toBoolean()
     .isBoolean()
     .withMessage((_, { req }) =>
-      translate("validation.booleanField", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.booleanField",
+        req.locale || getLogLocale(),
+        translations
+      )
     ),
   query("isActive")
     .optional()
     .toBoolean()
     .isBoolean()
     .withMessage((_, { req }) =>
-      translate("validation.booleanField", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.booleanField",
+        req.locale || getLogLocale(),
+        translations
+      )
     ),
   validateRequest,
 ];

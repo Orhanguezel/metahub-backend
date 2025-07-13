@@ -18,17 +18,21 @@ function getTenantCookieDomain(tenantData: any): string | undefined {
 export const setTokenCookie = (
   res: Response,
   token: string,
-  tenantData: any // Tenant verisi (örn. req.tenantData)
+  tenantData: any
 ): void => {
-  const domain = getTenantCookieDomain(tenantData);
-  res.cookie(COOKIE_NAME, token, {
+  const isProduction = process.env.NODE_ENV === "production";
+  const cookieOpts: any = {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? "none" : "lax", // CORS uyumu için
-    domain, // --> ".guezelwebdesign.com"
+    sameSite: isProduction ? "none" : "lax",
     path: "/",
     maxAge: COOKIE_MAX_AGE,
-  });
+  };
+  if (isProduction) {
+    const domain = getTenantCookieDomain(tenantData);
+    if (domain) cookieOpts.domain = domain;
+  }
+  res.cookie(COOKIE_NAME, token, cookieOpts);
 };
 
 export const clearTokenCookie = (res: Response, tenantData: any): void => {

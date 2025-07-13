@@ -1,0 +1,21 @@
+{
+  "settings.tenantRequired": "Tenant jest wymagany.",
+  "setting.error.missing": "Brakujący lub nieprawidłowy klucz.",
+  "setting.error.notFound": "Ustawienie nie znalezione.",
+  "setting.error.valueRequired": "Wartość jest wymagana.",
+  "setting.error.arrayNotAllowed": "To pole musi być tablicą.",
+  "setting.error.arrayEmpty": "Tablica nie może być pusta.",
+  "setting.error.arrayInvalidItems": "Nieprawidłowe elementy tablicy.",
+  "setting.error.imagesArrayRequired": "Pole obrazów musi być tablicą.",
+  "setting.error.imagesInvalidFormat": "Nieprawidłowy format obrazu.",
+  "setting.error.lightRequired": "Jasne logo jest wymagane.",
+  "setting.error.darkInvalid": "Nieprawidłowy format ciemnego logo.",
+  "setting.error.missingLocale": "Brak tłumaczenia w polu wielojęzycznym.",
+  "setting.error.localeType": "Wartości tłumaczeń muszą być tekstem.",
+  "settings.removeImagesError": "Wystąpił błąd podczas usuwania obrazów.",
+  "settings.deleted": "Ustawienie zostało usunięte.",
+  "setting.upload.success": "Obrazy przesłane pomyślnie.",
+  "setting.create.success": "Ustawienie zostało utworzone.",
+  "setting.create.error": "Błąd podczas tworzenia ustawienia.",
+  "setting.update.success": "Ustawienie zostało zaktualizowane."
+}

@@ -144,7 +144,7 @@ export const registerUser = asyncHandler(
 
     // Doğrulama e-posta gönder
     try {
-      await sendEmailVerification(req, res);
+      await sendEmailVerification(req, user); // Sadece user'ı ver, res'i verme!
       res.status(201).json({
         success: true,
         emailVerificationRequired: true,

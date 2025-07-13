@@ -1,27 +1,7 @@
-import { Schema, model, Model, models } from "mongoose";
+// models/contact.model.ts
 
-// ✅ Contact Message Interface
-export interface IContactMessage {
-  name: string;
-  tenant: string; // Optional tenant field for multi-tenancy
-  email: string;
-  label: {
-    subject: {
-      tr: string;
-      en: string;
-      de: string;
-    };
-    message: {
-      tr: string;
-      en: string;
-      de: string;
-    };
-  };
-  isRead: boolean;
-  isArchived: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { Schema, model, Model, models } from "mongoose";
+import type { IContactMessage } from "@/modules/contact/types";
 
 // ✅ Contact Message Schema
 const ContactMessageSchema = new Schema<IContactMessage>(
@@ -29,25 +9,15 @@ const ContactMessageSchema = new Schema<IContactMessage>(
     name: { type: String, required: true },
     tenant: { type: String, required: true, index: true },
     email: { type: String, required: true },
-    label: {
-      subject: {
-        tr: { type: String, required: true },
-        en: { type: String, required: true },
-        de: { type: String, required: true },
-      },
-      message: {
-        tr: { type: String, required: true },
-        en: { type: String, required: true },
-        de: { type: String, required: true },
-      },
-    },
+    subject: { type: String, required: true },   // Düz string
+    message: { type: String, required: true },   // Düz string
     isRead: { type: Boolean, default: false },
     isArchived: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
 
-// ✅ Guard + Model Type (This module has been updated and is now standardized)
+// ✅ Model
 const ContactMessage: Model<IContactMessage> =
   models.ContactMessage ||
   model<IContactMessage>("ContactMessage", ContactMessageSchema);

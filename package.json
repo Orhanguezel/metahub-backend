@@ -13,7 +13,8 @@
     "sync:tenant": "npx ts-node -r tsconfig-paths/register src/scripts/sync/seedSettingsForNewTenant.ts",
     "sync:module": "npx ts-node -r tsconfig-paths/register src/scripts/sync/seedSettingsForNewModule.ts",
     "sync:remove-tenant": "npx ts-node -r tsconfig-paths/register src/scripts/sync/removeTenantSettings.ts",
-    "sync:health": "npx ts-node -r tsconfig-paths/register src/scripts/sync/healthCheckMetaSettings.ts"
+    "sync:health": "npx ts-node -r tsconfig-paths/register src/scripts/sync/healthCheckMetaSettings.ts",
+    "sync:section": "npx ts-node -r tsconfig-paths/register src/scripts/section/masterSyncSections.ts"
   },
   "keywords": [],
   "author": "",

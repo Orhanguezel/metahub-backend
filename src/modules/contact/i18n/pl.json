@@ -1,0 +1,22 @@
+{
+  "contact.replyGreeting": "Cześć, {{name}}",
+  "contact.replyInfo": "Otrzymaliśmy Twoją wiadomość w {{brand}} i odpowiemy najszybciej jak to możliwe.",
+  "contact.subject": "Temat",
+  "contact.message": "Wiadomość",
+  "contact.sign": "Pozdrawiamy,<br />Zespół {{brand}}",
+  "contact.replyTitle": "Odpowiedź kontaktowa",
+  "allFieldsRequired": "Wszystkie pola są wymagane.",
+  "messageSent": "Twoja wiadomość została wysłana.",
+  "messagesFetched": "Wiadomości pobrane pomyślnie.",
+  "invalidMessageId": "Nieprawidłowy identyfikator wiadomości.",
+  "messageNotFound": "Nie znaleziono wiadomości.",
+  "messageDeleted": "Wiadomość została pomyślnie usunięta.",
+  "validation.nameRequired": "Imię jest wymagane.",
+  "validation.nameLength": "Imię musi mieć od {{min}} do {{max}} znaków.",
+  "validation.emailRequired": "Adres e-mail jest wymagany.",
+  "validation.emailInvalid": "Wprowadź poprawny adres e-mail.",
+  "validation.subjectRequired": "Temat jest wymagany.",
+  "validation.subjectLength": "Temat musi mieć od {{min}} do {{max}} znaków.",
+  "validation.messageRequired": "Wiadomość jest wymagana.",
+  "validation.messageLength": "Wiadomość musi mieć od {{min}} do {{max}} znaków."
+}

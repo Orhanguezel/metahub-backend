@@ -1,72 +1,173 @@
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 import { SUPPORTED_LOCALES } from "@/types/common";
+import { t as translate } from "@/core/utils/i18n/translate";
+import translations from "@/templates/i18n";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import type { SupportedLocale } from "@/types/common";
 
-// ✅ Create Booking — Public (Dinamik Diller)
+// Her validator içinde, locale'a göre t fonksiyonu tanımlı!
 export const validateCreateBooking = [
   body("name")
     .notEmpty()
-    .isObject()
-    .withMessage(
-      `Name must be an object with all language keys: ${SUPPORTED_LOCALES.join(", ")}`
-    ),
-  ...SUPPORTED_LOCALES.map((lang) =>
-    body(`name.${lang}`)
-      .notEmpty()
-      .isString()
-      .withMessage(`name.${lang} is required and must be a string.`)
-  ),
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.nameRequired");
+    })
+    .isString()
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.nameString");
+    }),
+
   body("email")
     .isEmail()
-    .withMessage("Valid email is required."),
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.email");
+    }),
+
   body("phone")
     .optional()
     .isString()
-    .withMessage("Phone must be a string."),
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.phone");
+    }),
+
   body("serviceType")
     .notEmpty()
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.serviceTypeRequired");
+    })
     .isString()
-    .withMessage("Service type is required."),
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.serviceTypeString");
+    }),
+
   body("note")
     .optional()
     .isString()
-    .withMessage("Note must be a string."),
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.note");
+    }),
+
   body("date")
     .notEmpty()
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.dateRequired");
+    })
     .isISO8601()
-    .withMessage("Valid date is required (YYYY-MM-DD)."),
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.dateFormat");
+    }),
+
   body("time")
     .notEmpty()
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.timeRequired");
+    })
     .matches(/^([0-1]\d|2[0-3]):([0-5]\d)$/)
-    .withMessage("Time must be in HH:mm format."),
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.timeFormat");
+    }),
+
   body("service")
+    .notEmpty()
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.serviceRequired");
+    })
     .isMongoId()
-    .withMessage("Service ID must be a valid MongoDB ObjectId."),
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.serviceId");
+    }),
+
   body("durationMinutes")
     .optional()
     .isInt({ min: 1 })
-    .withMessage("Duration must be a positive integer."),
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.duration");
+    }),
+
   body("language")
     .notEmpty()
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.languageRequired");
+    })
     .isIn(SUPPORTED_LOCALES)
-    .withMessage(
-      `Language must be one of: ${SUPPORTED_LOCALES.join(", ")}`
-    ),
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.language", { supported: SUPPORTED_LOCALES.join(", ") });
+    }),
+
   validateRequest,
 ];
 
-// ✅ Status Update — Admin
+// Status Update (Admin)
 export const validateUpdateBookingStatus = [
   body("status")
     .isIn(["pending", "confirmed", "cancelled"])
-    .withMessage("Status must be pending, confirmed or cancelled."),
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.status");
+    }),
   validateRequest,
 ];
 
-// ✅ ID Validation
+// ID Validation (dinamik alan adı)
 export const validateObjectId = (field: string) => [
   param(field)
     .isMongoId()
-    .withMessage(`${field} must be a valid MongoDB ObjectId.`),
+    .withMessage((_, { req }) => {
+      const locale = req?.locale || getLogLocale();
+      const t = (key: string, params?: any) =>
+        translate(key, locale, translations, params);
+      return t("validation.mongoId", { field });
+    }),
   validateRequest,
 ];
