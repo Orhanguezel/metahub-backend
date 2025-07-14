@@ -47,7 +47,7 @@ import { ReferencesCategory } from "@/modules/referencescategory/category.models
 import { Articles } from "@/modules/articles/models";
 import { ArticlesCategory } from "@/modules/articlescategory/category.models";
 import { Library } from "@/modules/library/library.models";
-import { ChatMessage, ChatSession } from "@/modules/chat/chat.models";
+import { ChatMessage, ChatSession } from "@/modules/chat/models";
 import { EnsotekProd } from "@/modules/ensotekprod/ensotekprod.models";
 import { EnsotekCategory } from "@/modules/ensotekcategory/ensotekcategory.models";
 import { Sport } from "@/modules/sport/sport.models";

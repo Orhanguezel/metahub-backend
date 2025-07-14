@@ -1,10 +1,15 @@
 {
-  "socket.env.error": "❌ CORS_ORIGIN ve JWT_SECRET .env'de tanımlanmalı.",
-  "socket.auth.tokenParseError": "❌ [Socket Auth] Token çözümlemesi hatası:",
-  "socket.session.saveError": "❌ [Socket] ChatSession kaydı hatası:",
-  "socket.connection": "🟢 [Socket] Bağlandı: {user} | Oda: {room}",
-  "socket.adminMessage.success": "✅ [Admin Message] {email} → {room}",
-  "socket.adminMessage.error": "❌ [Socket] Admin mesajı hatası:",
-  "socket.disconnect": "🔴 [Socket] Bağlantı kesildi: {user}"
-}
+  "socket.env.error": "❌ CORS_ORIGIN ve JWT_SECRET .env dosyasında tanımlı olmalı.",
+  "socket.auth.tokenParseError": "❌ [Socket Auth] Token çözümlemesi sırasında hata oluştu:",
+  "socket.session.saveError": "❌ [Socket] ChatSession kaydı sırasında hata oluştu:",
+  "socket.connection": "🟢 [Socket] Kullanıcı bağlandı: {user} | Oda: {room} | Tenant: {tenant}",
+  "socket.adminMessage.success": "✅ [Admin Mesajı] {email} → {room} | Tenant: {tenant}",
+  "socket.adminMessage.error": "❌ [Socket] Admin mesajı gönderilemedi:",
+  "socket.disconnect": "🔴 [Socket] Kullanıcı bağlantısı kesildi: {user}",
 
+  "socket.room.assigned": "Odaya atandınız: {room}",
+  "socket.onlineUsers.update": "Çevrimiçi kullanıcılar güncellendi.",
+  "socket.tenant.missing": "❌ [Socket] Tenant eksik veya geçersiz.",
+  "socket.chat.received": "Yeni mesaj alındı.",
+  "socket.chat.error": "❌ [Socket] Mesaj iletiminde hata oluştu."
+}

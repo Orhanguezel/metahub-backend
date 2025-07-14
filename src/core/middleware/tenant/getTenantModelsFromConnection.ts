@@ -48,7 +48,7 @@ import { ReferencesCategory } from "@/modules/referencescategory/category.models
 import { Articles } from "@/modules/articles/models";
 import { ArticlesCategory } from "@/modules/articlescategory/category.models";
 import { Library } from "@/modules/library/library.models";
-import { ChatMessage, ChatSession } from "@/modules/chat/chat.models";
+import { ChatMessage, ChatSession } from "@/modules/chat/models";
 import { EnsotekProd } from "@/modules/ensotekprod/ensotekprod.models";
 import { EnsotekCategory } from "@/modules/ensotekcategory/ensotekcategory.models";
 import { Sport } from "@/modules/sport/sport.models";
@@ -60,7 +60,7 @@ import { Apartment } from "@/modules/apartment/apartment.model";
 import { ApartmentCategory } from "@/modules/apartmentcategory/apartmentcategory.models";
 import { Apikey, Apikeylog } from "@/modules/apikey/apikey.models";
 import { News } from "@/modules/news/models";
-import { NewsCategory } from "@/modules/newscategory";
+import { NewsCategory } from "@/modules/newscategory/category.models";
 import { Analytics } from "@/modules/analytics/analytics.models";
 import { ModuleMeta, ModuleSetting } from "@/modules/modules/admin.models";
 import { Sparepart } from "@/modules/sparepart/sparepart.models";
