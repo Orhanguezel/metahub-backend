@@ -1,5 +1,5 @@
 // src/core/middleware/logger/logger.ts
-import tenantLoggerModule from "./tenantLogger";
+import * as tenantLoggerModule from "./tenantLogger";
 import type { Logger } from "winston";
 
 // Minimum global context, pratik çözüm:
