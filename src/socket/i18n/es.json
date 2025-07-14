@@ -1,9 +1,15 @@
 {
-  "socket.env.error": "❌ CORS_ORIGIN y JWT_SECRET deben estar definidos en .env.",
+  "socket.env.error": "❌ CORS_ORIGIN y JWT_SECRET deben estar definidos en el archivo .env.",
   "socket.auth.tokenParseError": "❌ [Socket Auth] Error al analizar el token:",
-  "socket.session.saveError": "❌ [Socket] Error al guardar ChatSession:",
-  "socket.connection": "🟢 [Socket] Conectado: {user} | Sala: {room}",
-  "socket.adminMessage.success": "✅ [Admin Message] {email} → {room}",
-  "socket.adminMessage.error": "❌ [Socket] Error de mensaje de administrador:",
-  "socket.disconnect": "🔴 [Socket] Desconectado: {user}"
+  "socket.session.saveError": "❌ [Socket] Error al guardar la sesión de chat:",
+  "socket.connection": "🟢 [Socket] Usuario conectado: {user} | Sala: {room} | Inquilino: {tenant}",
+  "socket.adminMessage.success": "✅ [Mensaje de administrador] {email} → {room} | Inquilino: {tenant}",
+  "socket.adminMessage.error": "❌ [Socket] No se pudo enviar el mensaje del administrador:",
+  "socket.disconnect": "🔴 [Socket] Usuario desconectado: {user}",
+
+  "socket.room.assigned": "Has sido asignado a la sala: {room}",
+  "socket.onlineUsers.update": "Usuarios en línea actualizados.",
+  "socket.tenant.missing": "❌ [Socket] Inquilino ausente o inválido.",
+  "socket.chat.received": "Nuevo mensaje recibido.",
+  "socket.chat.error": "❌ [Socket] Ocurrió un error al entregar el mensaje."
 }

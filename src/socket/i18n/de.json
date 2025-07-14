@@ -1,9 +1,16 @@
 {
-  "socket.env.error": "❌ CORS_ORIGIN und JWT_SECRET müssen in der .env definiert sein.",
-  "socket.auth.tokenParseError": "❌ [Socket Auth] Token-Parsing-Fehler:",
-  "socket.session.saveError": "❌ [Socket] ChatSession-Speicherfehler:",
-  "socket.connection": "🟢 [Socket] Verbunden: {user} | Raum: {room}",
-  "socket.adminMessage.success": "✅ [Admin Message] {email} → {room}",
-  "socket.adminMessage.error": "❌ [Socket] Admin-Nachrichtenfehler:",
-  "socket.disconnect": "🔴 [Socket] Verbindung getrennt: {user}"
+  "socket.env.error": "❌ CORS_ORIGIN und JWT_SECRET müssen in der .env-Datei definiert sein.",
+  "socket.auth.tokenParseError": "❌ [Socket Auth] Fehler beim Parsen des Tokens:",
+  "socket.session.saveError": "❌ [Socket] Fehler beim Speichern der ChatSession:",
+  "socket.connection": "🟢 [Socket] Benutzer verbunden: {user} | Raum: {room} | Mandant: {tenant}",
+  "socket.adminMessage.success": "✅ [Admin Nachricht] {email} → {room} | Mandant: {tenant}",
+  "socket.adminMessage.error": "❌ [Socket] Admin-Nachricht konnte nicht gesendet werden:",
+  "socket.disconnect": "🔴 [Socket] Benutzer getrennt: {user}",
+
+  "socket.room.assigned": "Sie wurden dem Raum zugewiesen: {room}",
+  "socket.onlineUsers.update": "Online-Benutzer aktualisiert.",
+  "socket.tenant.missing": "❌ [Socket] Mandant fehlt oder ist ungültig.",
+  "socket.chat.received": "Neue Nachricht erhalten.",
+  "socket.chat.error": "❌ [Socket] Beim Senden der Nachricht ist ein Fehler aufgetreten."
 }
+

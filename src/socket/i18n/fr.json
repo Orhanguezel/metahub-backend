@@ -1,9 +1,15 @@
 {
-  "socket.env.error": "❌ CORS_ORIGIN et JWT_SECRET doivent être définis dans .env.",
-  "socket.auth.tokenParseError": "❌ [Socket Auth] Erreur d'analyse du jeton :",
-  "socket.session.saveError": "❌ [Socket] Erreur d'enregistrement de ChatSession :",
-  "socket.connection": "🟢 [Socket] Connecté : {user} | Salle : {room}",
-  "socket.adminMessage.success": "✅ [Admin Message] {email} → {room}",
-  "socket.adminMessage.error": "❌ [Socket] Erreur de message administrateur :",
-  "socket.disconnect": "🔴 [Socket] Déconnecté : {user}"
+  "socket.env.error": "❌ CORS_ORIGIN et JWT_SECRET doivent être définis dans le fichier .env.",
+  "socket.auth.tokenParseError": "❌ [Socket Auth] Erreur lors de l'analyse du jeton :",
+  "socket.session.saveError": "❌ [Socket] Erreur lors de l'enregistrement de la session de chat :",
+  "socket.connection": "🟢 [Socket] Utilisateur connecté : {user} | Salon : {room} | Locataire : {tenant}",
+  "socket.adminMessage.success": "✅ [Message Admin] {email} → {room} | Locataire : {tenant}",
+  "socket.adminMessage.error": "❌ [Socket] Le message admin n'a pas pu être envoyé :",
+  "socket.disconnect": "🔴 [Socket] Utilisateur déconnecté : {user}",
+
+  "socket.room.assigned": "Vous avez été affecté au salon : {room}",
+  "socket.onlineUsers.update": "Utilisateurs en ligne mis à jour.",
+  "socket.tenant.missing": "❌ [Socket] Locataire manquant ou invalide.",
+  "socket.chat.received": "Nouveau message reçu.",
+  "socket.chat.error": "❌ [Socket] Une erreur s'est produite lors de la transmission du message."
 }

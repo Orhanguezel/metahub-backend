@@ -1,6 +1,5 @@
 import express from "express";
 import {
-  getMessagesByRoom,
   getAllRoomsLastMessages,
   deleteMessage,
   deleteMessagesBulk,
@@ -9,45 +8,42 @@ import {
   getArchivedSessions,
   getActiveChatSessions,
   getAllChatSessions,
-} from "./chat.controller";
+} from "./admin.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
   validateManualMessage,
   validateBulkDelete,
   validateIdParam,
   validateRoomIdParam,
-} from "./chat.validation";
+} from "./validation";
 
 const router = express.Router();
 
-// ✅ Public + Auth: Get all messages for a room
-router.get("/:roomId", authenticate, validateRoomIdParam, getMessagesByRoom);
-
-// ✅ Admin-only routes
+// 🛡️ Tüm admin endpointleri için auth + yetki zorunlu!
 router.use(authenticate, authorizeRoles("admin"));
 
 // ✅ Admin: Get last messages (grouped by rooms)
 router.get("/", getAllRoomsLastMessages);
 
-// ✅ Admin: Delete a single message
+// ✅ Admin: Delete a single message by ID
 router.delete("/:id", validateIdParam, deleteMessage);
 
-// ✅ Admin: Bulk delete messages
+// ✅ Admin: Bulk delete messages by IDs
 router.post("/bulk", validateBulkDelete, deleteMessagesBulk);
 
-// ✅ Admin: Send manual message
+// ✅ Admin: Send manual message to a room
 router.post("/manual", validateManualMessage, sendManualMessage);
 
 // ✅ Admin: Mark all messages in a room as read
 router.patch("/read/:roomId", validateRoomIdParam, markMessagesAsRead);
 
-// ✅ Admin: Get archived sessions
+// ✅ Admin: Get archived (closed) chat sessions
 router.get("/archived", getArchivedSessions);
 
-// ✅ Admin: Get active chat sessions
+// ✅ Admin: Get active (open) chat sessions
 router.get("/sessions/active", getActiveChatSessions);
 
-// ✅ Admin: Get all chat sessions
+// ✅ Admin: Get all chat sessions (active+closed)
 router.get("/sessions", getAllChatSessions);
 
 export default router;

@@ -78,6 +78,7 @@
     "sharp": "^0.34.1",
     "slugify": "^1.6.6",
     "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "source-map-support": "^0.5.21",
     "speakeasy": "^2.0.0",
     "swagger-jsdoc": "^6.2.8",

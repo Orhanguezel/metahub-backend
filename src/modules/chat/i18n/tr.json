@@ -1,0 +1,32 @@
+{
+  "delete": {
+    "success": "Mesaj silindi.",
+    "notFound": "Mesaj bulunamadı.",
+    "invalidIds": "Geçersiz mesaj ID'leri."
+  },
+  "sendMessage": {
+    "success": "Mesaj gönderildi.",
+    "missingParams": "Eksik parametre(ler)."
+  },
+  "markAsRead": {
+    "success": "Mesajlar okundu olarak işaretlendi."
+  },
+  "manualMessage": {
+    "roomIdRequired": "Oda ID'si zorunludur.",
+    "roomIdString": "Oda ID'si bir string olmalı.",
+    "messageRequired": "Mesaj zorunludur.",
+    "messageString": "Mesaj bir string olmalı.",
+    "closeBoolean": "Kapat parametresi boolean olmalı."
+  },
+  "bulkDelete": {
+    "idsArray": "ID'ler en az bir eleman içeren bir dizi olmalı.",
+    "idMongo": "Her ID geçerli bir MongoDB ObjectId olmalı."
+  },
+  "singleId": {
+    "invalid": "Geçersiz mesaj ID'si."
+  },
+  "roomIdParam": {
+    "required": "Oda ID'si zorunludur.",
+    "string": "Oda ID'si bir string olmalı."
+  }
+}
