@@ -1,9 +1,8 @@
-// src/core/utils/i18n/translate.ts
 import { fillAllLocales } from "./fillAllLocales";
 import type { SupportedLocale } from "@/types/common";
 
 /**
- * i18n çeviri fonksiyonu
+ * i18n çeviri fonksiyonu (safe, parametreli ve future-proof)
  * - Modül i18n dosyasından alır
  * - `t("key", "de", translations, { name: "Test" })`
  */
@@ -15,9 +14,16 @@ export function t(
 ): string {
   let str = translations[locale]?.[key] || translations["en"]?.[key] || key;
 
-  if (vars) {
+  if (vars && typeof str === "string") {
     for (const [k, v] of Object.entries(vars)) {
-      str = str.replace(new RegExp(`{${k}}`, "g"), String(v));
+      // key boşsa veya undefined'sa regex oluşturma!
+      if (!k) continue;
+      try {
+        str = str.replace(new RegExp(`{${k}}`, "g"), String(v));
+      } catch (err) {
+        // Eğer regex hatası olursa, o değişkeni atla
+        continue;
+      }
     }
   }
 
@@ -25,4 +31,3 @@ export function t(
 }
 
 export { fillAllLocales };
-

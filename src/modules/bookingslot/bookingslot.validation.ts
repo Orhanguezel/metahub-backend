@@ -1,20 +1,21 @@
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 import { t as translate } from "@/core/utils/i18n/translate";
-import translations from "@/templates/i18n";
+import translations from "./i18n";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 
 // Standart çeviri fonksiyonu
 const t = (req: any, key: string, params?: any) =>
   translate(key, req?.locale || getLogLocale(), translations, params);
 
-// --- SlotRule: Weekly/General Rule ---
+// --- SlotRule: Haftalık Genel Kural ---
 export const validateCreateSlotRule = [
   body().custom((val, { req }) => {
+    // dayOfWeek veya appliesToAll zorunlu!
     if (!((typeof val.dayOfWeek === "number") || val.appliesToAll === true)) {
       throw new Error(
         t(req, "slot.validation.dayOfWeekOrAll")
-        // Çeviri dosyasında: "slot.validation.dayOfWeekOrAll": "Either 'dayOfWeek' (0=Sunday...6=Saturday) or 'appliesToAll': true is required."
+        // Çeviri dosyası: "slot.validation.dayOfWeekOrAll": "Either 'dayOfWeek' (0=Sunday...6=Saturday) or 'appliesToAll': true is required."
       );
     }
     if (
@@ -29,12 +30,15 @@ export const validateCreateSlotRule = [
     return true;
   }),
   body("startTime")
+    .exists().withMessage((_, { req }) => t(req, "slot.validation.startTimeRequired"))
     .matches(/^([0-1]\d|2[0-3]):([0-5]\d)$/)
     .withMessage((_, { req }) => t(req, "slot.validation.startTimeFormat")),
   body("endTime")
+    .exists().withMessage((_, { req }) => t(req, "slot.validation.endTimeRequired"))
     .matches(/^([0-1]\d|2[0-3]):([0-5]\d)$/)
     .withMessage((_, { req }) => t(req, "slot.validation.endTimeFormat")),
   body("intervalMinutes")
+    .exists().withMessage((_, { req }) => t(req, "slot.validation.intervalMinutesRequired"))
     .isInt({ min: 1 })
     .withMessage((_, { req }) => t(req, "slot.validation.intervalMinutes")),
   body("breakBetweenAppointments")
@@ -52,9 +56,10 @@ export const validateCreateSlotRule = [
   validateRequest,
 ];
 
-// --- SlotOverride: Special Day ---
+// --- SlotOverride: Özel Gün ---
 export const validateCreateSlotOverride = [
   body("date")
+    .exists().withMessage((_, { req }) => t(req, "slot.validation.dateRequired"))
     .isISO8601()
     .withMessage((_, { req }) => t(req, "slot.validation.date")),
   body("disabledTimes")
@@ -72,7 +77,7 @@ export const validateCreateSlotOverride = [
   validateRequest,
 ];
 
-// --- ObjectId Validator (Reuse everywhere) ---
+// --- ObjectId Validator (Reusable) ---
 export const validateObjectId = (field: string) => [
   param(field)
     .isMongoId()
