@@ -38,7 +38,7 @@ export const getAllArticles = asyncHandler(
       .sort({ createdAt: -1 })
       .lean();
 
-    logger.info(t("log.listed"), {
+    logger.withReq.info(req, t("log.listed"), {
       ...getRequestContext(req),
       event: "articles.public_list",
       module: "articles",
@@ -63,7 +63,7 @@ export const getArticlesById = asyncHandler(
     const { Articles } = await getTenantModels(req);
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("error.invalid_id"), {
+      logger.withReq.warn(req, t("error.invalid_id"), {
         ...getRequestContext(req),
         event: "articles.public_getById",
         module: "articles",
@@ -85,7 +85,7 @@ export const getArticlesById = asyncHandler(
       .lean();
 
     if (!articles) {
-      logger.warn(t("error.not_found"), {
+      logger.withReq.warn(req, t("error.not_found"), {
         ...getRequestContext(req),
         event: "articles.public_getById",
         module: "articles",
@@ -95,7 +95,7 @@ export const getArticlesById = asyncHandler(
       res.status(404).json({ success: false, message: t("error.not_found") });
       return;
     }
-    logger.info(t("log.fetched"), {
+    logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
       event: "articles.public_getById",
       module: "articles",
@@ -129,7 +129,7 @@ export const getArticlesBySlug = asyncHandler(
       .lean();
 
     if (!articles) {
-      logger.warn(t("error.not_found"), {
+      logger.withReq.warn(req, t("error.not_found"), {
         ...getRequestContext(req),
         event: "articles.public_getBySlug",
         module: "articles",
@@ -140,7 +140,7 @@ export const getArticlesBySlug = asyncHandler(
       return;
     }
 
-    logger.info(t("log.fetched"), {
+    logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
       event: "articles.public_getBySlug",
       module: "articles",

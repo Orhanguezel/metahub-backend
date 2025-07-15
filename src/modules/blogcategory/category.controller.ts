@@ -27,12 +27,16 @@ export const createBlogCategory = asyncHandler(
         tenant: req.tenant,
       });
 
-      logger.info(t("blogcategory.create.success", { name: name[locale] }), {
-        ...getRequestContext(req),
-        event: "blogcategory.create",
-        module: "blogcategory",
-        status: "success",
-      });
+      logger.withReq.info(
+        req,
+        t("blogcategory.create.success", { name: name[locale] }),
+        {
+          ...getRequestContext(req),
+          event: "blogcategory.create",
+          module: "blogcategory",
+          status: "success",
+        }
+      );
 
       res.status(201).json({
         success: true,
@@ -40,7 +44,7 @@ export const createBlogCategory = asyncHandler(
         data: category, // .name burada tüm diller ile döner!
       });
     } catch (err: any) {
-      logger.error(t("blogcategory.create.error"), {
+      logger.withReq.error(req, t("blogcategory.create.error"), {
         ...getRequestContext(req),
         event: "blogcategory.create",
         module: "blogcategory",
@@ -76,7 +80,7 @@ export const getAllBlogCategories = asyncHandler(
         .sort({ createdAt: -1 })
         .lean();
 
-      logger.info(t("blogcategory.list.success"), {
+      logger.withReq.info(req, t("blogcategory.list.success"), {
         ...getRequestContext(req),
         event: "blogcategory.list",
         module: "blogcategory",
@@ -89,7 +93,7 @@ export const getAllBlogCategories = asyncHandler(
         data: categories, // <--- .name: {tr, en, ...} tüm dillerle gelir!
       });
     } catch (err: any) {
-      logger.error(t("blogcategory.list.error"), {
+      logger.withReq.error(req, t("blogcategory.list.error"), {
         ...getRequestContext(req),
         event: "blogcategory.list",
         module: "blogcategory",
@@ -113,7 +117,11 @@ export const getBlogCategoryById = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("blogcategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("blogcategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("blogcategory.invalidId") });
@@ -127,7 +135,11 @@ export const getBlogCategoryById = asyncHandler(
     }).lean();
 
     if (!category) {
-      logger.warn(t("blogcategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("blogcategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("blogcategory.notFound") });
@@ -152,7 +164,11 @@ export const updateBlogCategory = asyncHandler(
     const { name, isActive } = req.body;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("blogcategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("blogcategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("blogcategory.invalidId") });
@@ -165,7 +181,11 @@ export const updateBlogCategory = asyncHandler(
       tenant: req.tenant,
     });
     if (!category) {
-      logger.warn(t("blogcategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("blogcategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("blogcategory.notFound") });
@@ -182,7 +202,8 @@ export const updateBlogCategory = asyncHandler(
 
     await category.save();
 
-    logger.info(
+    logger.withReq.info(
+      req,
       t("blogcategory.update.success", { name: category.name[locale] }),
       {
         ...getRequestContext(req),
@@ -211,7 +232,11 @@ export const deleteBlogCategory = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("blogcategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("blogcategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("blogcategory.invalidId") });
@@ -227,7 +252,11 @@ export const deleteBlogCategory = asyncHandler(
     });
 
     if (!deleted) {
-      logger.warn(t("blogcategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("blogcategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("blogcategory.notFound") });
@@ -236,7 +265,7 @@ export const deleteBlogCategory = asyncHandler(
 
     const name = deleted.name?.[locale] || "Category";
 
-    logger.info(t("blogcategory.delete.success", { name }), {
+    logger.withReq.info(req, t("blogcategory.delete.success", { name }), {
       ...getRequestContext(req),
       event: "blogcategory.delete",
       module: "blogcategory",

@@ -10,6 +10,7 @@ interface ContactReplyParams {
   message: string;
   locale?: SupportedLocale;
   brandName: string; // Tenant brand name
+  req?: any; // Gerekirse, örneğin logger için
 }
 
 export const ContactReplyTemplate = ({
@@ -18,6 +19,7 @@ export const ContactReplyTemplate = ({
   message,
   locale,
   brandName,
+  req
 }: ContactReplyParams): string => {
   const lang: SupportedLocale = locale || "en";
   const t = (key: string, params?: any) =>
@@ -28,18 +30,23 @@ export const ContactReplyTemplate = ({
     <p>${t("contact.replyInfo", { brand: brandName })}</p>
     <table style="margin-top: 20px; border-collapse: collapse;">
       <tr>
-        <td style="padding: 8px 12px;"><strong>${t("contact.subject")}:</strong></td>
+        <td style="padding: 8px 12px;"><strong>${t(
+          "contact.subject"
+        )}:</strong></td>
         <td style="padding: 8px 12px;">${subject}</td>
       </tr>
       <tr>
-        <td style="padding: 8px 12px;"><strong>${t("contact.message")}:</strong></td>
+        <td style="padding: 8px 12px;"><strong>${t(
+          "contact.message"
+        )}:</strong></td>
         <td style="padding: 8px 12px;">${message}</td>
       </tr>
     </table>
     <p style="margin-top: 30px;">${t("contact.sign", { brand: brandName })}</p>
   `;
 
-  logger.debug(
+  logger.withReq.debug(
+    req,
     `[EmailTemplate] Contact reply generated for ${name} | lang: ${lang}`
   );
 

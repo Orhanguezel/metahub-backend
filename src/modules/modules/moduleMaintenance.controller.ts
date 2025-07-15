@@ -59,7 +59,10 @@ export const assignAllModulesToTenant = asyncHandler(async (req, res) => {
       count++;
     }
   }
-  logger.info(`[Maintenance] ${count} modül ${tenant} tenant'ına atandı.`);
+  logger.withReq.info(
+    req,
+    `[Maintenance] ${count} modül ${tenant} tenant'ına atandı.`
+  );
   res.status(200).json({ success: true, message: `${count} modül atandı.` });
 });
 
@@ -90,7 +93,10 @@ export const assignModuleToAllTenants = asyncHandler(async (req, res) => {
       count++;
     }
   }
-  logger.info(`[Maintenance] ${module} modülü ${count} tenant’a atandı.`);
+  logger.withReq.info(
+    req,
+    `[Maintenance] ${module} modülü ${count} tenant’a atandı.`
+  );
   res
     .status(200)
     .json({ success: true, message: `${count} tenant’a eklendi.` });
@@ -124,7 +130,10 @@ export const repairModuleSettings = asyncHandler(async (req, res) => {
       }
     }
   }
-  logger.info(`[Maintenance] ${repaired.length} mapping tamir edildi.`);
+  logger.withReq.info(
+    req,
+    `[Maintenance] ${repaired.length} mapping tamir edildi.`
+  );
   res.status(200).json({ success: true, repaired });
 });
 
@@ -138,7 +147,8 @@ export const removeAllModulesFromTenant = asyncHandler(async (req, res) => {
     return;
   }
   const result = await ModuleSetting.deleteMany({ tenant });
-  logger.info(
+  logger.withReq.info(
+    req,
     `[Maintenance] Tenant '${tenant}' mappingleri silindi (${result.deletedCount})`
   );
   res.status(200).json({ success: true, deletedCount: result.deletedCount });
@@ -154,7 +164,8 @@ export const removeModuleFromAllTenants = asyncHandler(async (req, res) => {
     return;
   }
   const result = await ModuleSetting.deleteMany({ module });
-  logger.info(
+  logger.withReq.info(
+    req,
     `[Maintenance] Modül '${module}' tüm tenantlardan silindi (${result.deletedCount})`
   );
   res.status(200).json({ success: true, deletedCount: result.deletedCount });
@@ -169,7 +180,10 @@ export const cleanupOrphanModuleSettings = asyncHandler(async (req, res) => {
   if (orphans.length) {
     await ModuleSetting.deleteMany({ module: { $nin: metaModules } });
   }
-  logger.info(`[Maintenance] ${orphans.length} orphan mapping silindi.`);
+  logger.withReq.info(
+    req,
+    `[Maintenance] ${orphans.length} orphan mapping silindi.`
+  );
   res
     .status(200)
     .json({ success: true, deletedCount: orphans.length, orphans });
@@ -197,7 +211,8 @@ export const batchUpdateModuleSetting = asyncHandler(async (req, res) => {
     return;
   }
   const result = await ModuleSetting.updateMany({ module }, { $set: update });
-  logger.info(
+  logger.withReq.info(
+    req,
     `[Maintenance] '${module}' için batch update yapıldı (${result.modifiedCount})`
   );
   res.status(200).json({ success: true, modifiedCount: result.modifiedCount });

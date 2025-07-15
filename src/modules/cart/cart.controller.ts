@@ -52,7 +52,7 @@ export const getUserCart = asyncHandler(
     const userId = req.user?.id;
 
     if (!userId) {
-      logger.warn(cartT("cart.authRequired", locale));
+      logger.withReq.warn(req, cartT("cart.authRequired", locale));
       res
         .status(401)
         .json({ success: false, message: cartT("cart.authRequired", locale) });
@@ -72,7 +72,7 @@ export const getUserCart = asyncHandler(
         language: locale,
       });
       await cart.save();
-      logger.info(cartT("cart.created", locale, { userId }));
+      logger.withReq.info(req, cartT("cart.created", locale, { userId }));
       res.status(201).json({
         success: true,
         message: cartT("cart.created", locale),
@@ -84,7 +84,7 @@ export const getUserCart = asyncHandler(
     cart.totalPrice = recalculateTotal(cart.items);
     await cart.save();
 
-    logger.info(cartT("cart.fetched", locale, { userId }));
+    logger.withReq.info(req, cartT("cart.fetched", locale, { userId }));
     res.status(200).json({
       success: true,
       data: cart,
@@ -100,7 +100,7 @@ export const addToCart = asyncHandler(
     const { productId, quantity } = req.body;
 
     if (!userId || !productId || quantity <= 0) {
-      logger.warn(cartT("cart.add.invalidInput", locale));
+      logger.withReq.warn(req, cartT("cart.add.invalidInput", locale));
       res.status(400).json({
         success: false,
         message: cartT("cart.add.invalidInput", locale),
@@ -110,7 +110,10 @@ export const addToCart = asyncHandler(
 
     const product = await getProduct(req, productId);
     if (!product) {
-      logger.warn(cartT("cart.add.productNotFound", locale, { productId }));
+      logger.withReq.warn(
+        req,
+        cartT("cart.add.productNotFound", locale, { productId })
+      );
       res.status(404).json({
         success: false,
         message: cartT("cart.add.productNotFound", locale),
@@ -119,7 +122,8 @@ export const addToCart = asyncHandler(
     }
 
     if (product.stock < quantity) {
-      logger.warn(
+      logger.withReq.warn(
+        req,
         cartT("cart.add.stockNotEnough", locale, { stock: product.stock })
       );
       res.status(400).json({
@@ -171,7 +175,8 @@ export const addToCart = asyncHandler(
       ? cartT("cart.add.criticalStock", locale)
       : undefined;
 
-    logger.info(
+    logger.withReq.info(
+      req,
       cartT("cart.add.success", locale, { product: productId, userId })
     );
     res.status(201).json({
@@ -191,7 +196,7 @@ export const increaseQuantity = asyncHandler(
     const { productId } = req.params;
 
     if (!userId || !productId) {
-      logger.warn(cartT("cart.inc.invalidInput", locale));
+      logger.withReq.warn(req, cartT("cart.inc.invalidInput", locale));
       res.status(400).json({
         success: false,
         message: cartT("cart.inc.invalidInput", locale),
@@ -201,7 +206,7 @@ export const increaseQuantity = asyncHandler(
 
     const cart = await getCartForUser(req, userId, true);
     if (!cart) {
-      logger.warn(cartT("cart.notFound", locale));
+      logger.withReq.warn(req, cartT("cart.notFound", locale));
       res
         .status(404)
         .json({ success: false, message: cartT("cart.notFound", locale) });
@@ -212,7 +217,7 @@ export const increaseQuantity = asyncHandler(
       (item) => (item.product as any)._id?.toString() === productId
     );
     if (itemIndex === -1) {
-      logger.warn(cartT("cart.inc.notInCart", locale));
+      logger.withReq.warn(req, cartT("cart.inc.notInCart", locale));
       res
         .status(404)
         .json({ success: false, message: cartT("cart.inc.notInCart", locale) });
@@ -221,7 +226,10 @@ export const increaseQuantity = asyncHandler(
 
     const product = await getProduct(req, productId);
     if (!product) {
-      logger.warn(cartT("cart.add.productNotFound", locale, { productId }));
+      logger.withReq.warn(
+        req,
+        cartT("cart.add.productNotFound", locale, { productId })
+      );
       res.status(404).json({
         success: false,
         message: cartT("cart.add.productNotFound", locale),
@@ -230,7 +238,7 @@ export const increaseQuantity = asyncHandler(
     }
 
     if (cart.items[itemIndex].quantity >= product.stock) {
-      logger.warn(cartT("cart.inc.stockLimit", locale));
+      logger.withReq.warn(req, cartT("cart.inc.stockLimit", locale));
       res.status(400).json({
         success: false,
         message: cartT("cart.inc.stockLimit", locale),
@@ -253,7 +261,8 @@ export const increaseQuantity = asyncHandler(
       ? cartT("cart.add.criticalStock", locale)
       : undefined;
 
-    logger.info(
+    logger.withReq.info(
+      req,
       cartT("cart.inc.success", locale, { product: productId, userId })
     );
     res.status(200).json({
@@ -273,7 +282,7 @@ export const decreaseQuantity = asyncHandler(
     const { productId } = req.params;
 
     if (!userId || !productId) {
-      logger.warn(cartT("cart.dec.invalidInput", locale));
+      logger.withReq.warn(req, cartT("cart.dec.invalidInput", locale));
       res.status(400).json({
         success: false,
         message: cartT("cart.dec.invalidInput", locale),
@@ -283,7 +292,7 @@ export const decreaseQuantity = asyncHandler(
 
     const cart = await getCartForUser(req, userId, true);
     if (!cart) {
-      logger.warn(cartT("cart.notFound", locale));
+      logger.withReq.warn(req, cartT("cart.notFound", locale));
       res
         .status(404)
         .json({ success: false, message: cartT("cart.notFound", locale) });
@@ -294,7 +303,7 @@ export const decreaseQuantity = asyncHandler(
       (item) => (item.product as any)._id?.toString() === productId
     );
     if (itemIndex === -1) {
-      logger.warn(cartT("cart.dec.notInCart", locale));
+      logger.withReq.warn(req, cartT("cart.dec.notInCart", locale));
       res
         .status(404)
         .json({ success: false, message: cartT("cart.dec.notInCart", locale) });
@@ -312,7 +321,8 @@ export const decreaseQuantity = asyncHandler(
     cart.totalPrice = recalculateTotal(cart.items);
     await cart.save();
 
-    logger.info(
+    logger.withReq.info(
+      req,
       cartT("cart.dec.success", locale, { product: productId, userId })
     );
     res.status(200).json({
@@ -331,7 +341,7 @@ export const removeFromCart = asyncHandler(
     const { productId } = req.params;
 
     if (!userId || !productId) {
-      logger.warn(cartT("cart.remove.invalidInput", locale));
+      logger.withReq.warn(req, cartT("cart.remove.invalidInput", locale));
       res.status(400).json({
         success: false,
         message: cartT("cart.remove.invalidInput", locale),
@@ -341,7 +351,7 @@ export const removeFromCart = asyncHandler(
 
     const cart = await getCartForUser(req, userId, true);
     if (!cart) {
-      logger.warn(cartT("cart.notFound", locale));
+      logger.withReq.warn(req, cartT("cart.notFound", locale));
       res
         .status(404)
         .json({ success: false, message: cartT("cart.notFound", locale) });
@@ -352,7 +362,7 @@ export const removeFromCart = asyncHandler(
       (item) => (item.product as any)._id?.toString() === productId
     );
     if (itemIndex === -1) {
-      logger.warn(cartT("cart.remove.notInCart", locale));
+      logger.withReq.warn(req, cartT("cart.remove.notInCart", locale));
       res.status(404).json({
         success: false,
         message: cartT("cart.remove.notInCart", locale),
@@ -364,7 +374,8 @@ export const removeFromCart = asyncHandler(
     cart.totalPrice = recalculateTotal(cart.items);
     await cart.save();
 
-    logger.info(
+    logger.withReq.info(
+      req,
       cartT("cart.remove.success", locale, { product: productId, userId })
     );
     res.status(200).json({
@@ -382,7 +393,7 @@ export const clearCart = asyncHandler(
     const userId = req.user?.id;
 
     if (!userId) {
-      logger.warn(cartT("cart.authRequired", locale));
+      logger.withReq.warn(req, cartT("cart.authRequired", locale));
       res.status(401).json({
         success: false,
         message: cartT("cart.authRequired", locale),
@@ -392,7 +403,7 @@ export const clearCart = asyncHandler(
 
     const cart = await getCartForUser(req, userId, true);
     if (!cart) {
-      logger.warn(cartT("cart.notFound", locale));
+      logger.withReq.warn(req, cartT("cart.notFound", locale));
       res
         .status(404)
         .json({ success: false, message: cartT("cart.notFound", locale) });
@@ -400,7 +411,7 @@ export const clearCart = asyncHandler(
     }
 
     if (!cart.items.length) {
-      logger.warn(cartT("cart.clear.alreadyEmpty", locale));
+      logger.withReq.warn(req, cartT("cart.clear.alreadyEmpty", locale));
       res.status(400).json({
         success: false,
         message: cartT("cart.clear.alreadyEmpty", locale),
@@ -412,7 +423,7 @@ export const clearCart = asyncHandler(
     cart.totalPrice = 0;
     await cart.save();
 
-    logger.info(cartT("cart.clear.success", locale, { userId }));
+    logger.withReq.info(req, cartT("cart.clear.success", locale, { userId }));
     res.status(200).json({
       success: true,
       message: cartT("cart.clear.success", locale),

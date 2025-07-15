@@ -106,7 +106,7 @@ export const createServices = asyncHandler(
         isActive: true,
       });
 
-      logger.info(t("created"), {
+      logger.withReq.info(req, t("created"), {
         ...getRequestContext(req),
         id: services._id,
       });
@@ -114,7 +114,7 @@ export const createServices = asyncHandler(
         .status(201)
         .json({ success: true, message: t("created"), data: services });
     } catch (err: any) {
-      logger.error(t("error.create_fail"), {
+      logger.withReq.error(req, t("error.create_fail"), {
         ...getRequestContext(req),
         event: "services.create",
         module: "services",
@@ -137,14 +137,20 @@ export const updateServices = asyncHandler(
       translate(key, locale, translations, params);
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("invalidId"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("invalidId"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(400).json({ success: false, message: t("invalidId") });
       return;
     }
 
     const services = await Services.findOne({ _id: id, tenant: req.tenant });
     if (!services) {
-      logger.warn(t("notFound"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("notFound"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(404).json({ success: false, message: t("notFound") });
       return;
     }
@@ -219,7 +225,7 @@ export const updateServices = asyncHandler(
           if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
         }
       } catch (e) {
-        logger.warn(t("invalidRemovedImages"), {
+        logger.withReq.warn(req, t("invalidRemovedImages"), {
           ...getRequestContext(req),
           error: e,
         });
@@ -227,7 +233,7 @@ export const updateServices = asyncHandler(
     }
 
     await services.save();
-    logger.info(t("updated"), { ...getRequestContext(req), id });
+    logger.withReq.info(req, t("updated"), { ...getRequestContext(req), id });
     res
       .status(200)
       .json({ success: true, message: t("updated"), data: services });
@@ -276,7 +282,7 @@ export const adminGetAllServices = asyncHandler(
 
     const data = servicesList;
 
-    logger.info(t("listFetched"), {
+    logger.withReq.info(req, t("listFetched"), {
       ...getRequestContext(req),
       resultCount: data.length,
     });
@@ -293,7 +299,10 @@ export const adminGetServicesById = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("invalidId"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("invalidId"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(400).json({ success: false, message: t("invalidId") });
       return;
     }
@@ -303,7 +312,10 @@ export const adminGetServicesById = asyncHandler(
       .lean();
 
     if (!services || Array.isArray(services) || !services.isActive) {
-      logger.warn(t("notFound"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("notFound"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(404).json({ success: false, message: t("notFound") });
       return;
     }
@@ -327,14 +339,20 @@ export const deleteServices = asyncHandler(
     const t = (key: string) => translate(key, locale, translations);
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("invalidId"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("invalidId"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(400).json({ success: false, message: t("invalidId") });
       return;
     }
 
     const services = await Services.findOne({ _id: id, tenant: req.tenant });
     if (!services) {
-      logger.warn(t("notFound"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("notFound"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(404).json({ success: false, message: t("notFound") });
       return;
     }
@@ -350,7 +368,7 @@ export const deleteServices = asyncHandler(
         try {
           await cloudinary.uploader.destroy(img.publicId);
         } catch (err) {
-          logger.error("Cloudinary delete error", {
+          logger.withReq.error(req, t("Cloudinary delete error"), {
             ...getRequestContext(req),
             publicId: img.publicId,
           });
@@ -360,7 +378,7 @@ export const deleteServices = asyncHandler(
 
     await services.deleteOne();
 
-    logger.info(t("deleted"), { ...getRequestContext(req), id });
+    logger.withReq.info(req, t("deleted"), { ...getRequestContext(req), id });
     res.status(200).json({ success: true, message: t("deleted") });
   }
 );

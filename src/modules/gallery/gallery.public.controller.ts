@@ -50,7 +50,7 @@ export const getPublishedGalleryItems = asyncHandler(
         },
       });
     } catch (err: any) {
-      logger.error(t("error.fetching_items"), {
+      logger.withReq.error(req, t("error.fetching_items"), {
         module: "gallery",
         error: err.message,
       });
@@ -92,7 +92,7 @@ export const getPublishedGalleryItemsByCategory = asyncHandler(
         data: items,
       });
     } catch (err: any) {
-      logger.error(t("error.fetching_items"), {
+      logger.withReq.error(req, t("error.fetching_items"), {
         module: "gallery",
         error: err.message,
       });
@@ -120,7 +120,7 @@ export const getGalleryCategories = asyncHandler(
         data: categories,
       });
     } catch (err: any) {
-      logger.error(t("error.fetching_categories"), {
+      logger.withReq.error(req, t("error.fetching_categories"), {
         module: "gallery",
         error: err.message,
       });
@@ -182,7 +182,7 @@ export const searchGalleryItems = asyncHandler(
         },
       });
     } catch (err: any) {
-      logger.error(t("error.searching_items"), {
+      logger.withReq.error(req, t("error.searching_items"), {
         module: "gallery",
         error: err.message,
       });
@@ -226,7 +226,7 @@ export const getGalleryStats = asyncHandler(
         },
       });
     } catch (err: any) {
-      logger.error(t("error.fetching_stats"), {
+      logger.withReq.error(req, t("error.fetching_stats"), {
         module: "gallery",
         error: err.message,
       });
@@ -269,7 +269,7 @@ export const getGalleryItemById = asyncHandler(
         data: item,
       });
     } catch (err: any) {
-      logger.error(t("error.fetching_item"), {
+      logger.withReq.error(req, t("error.fetching_item"), {
         module: "gallery",
         error: err.message,
       });

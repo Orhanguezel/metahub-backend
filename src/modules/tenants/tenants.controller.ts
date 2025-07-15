@@ -293,7 +293,7 @@ export const deleteTenant = asyncHandler(
       return;
     }
     const output = normalizeTenantI18nFields(deleted.toObject());
-    logger.info(t("delete.success", req), {
+    logger.withReq.info(req, t("delete.success", req), {
       ...getRequestContext(req),
       module: "tenants",
       event: "tenants.delete",

@@ -30,8 +30,7 @@ if (!fs.existsSync(envPath)) {
   process.env.SMTP_SECURE = process.env.SMTP_SECURE || "true";
 
   process.env.SMTP_FROM = process.env.SMTP_FROM || "info@koenigsmassage.com";
-  process.env.SMTP_FROM_NAME =
-    process.env.SMTP_FROM_NAME || "Ensotek Support";
+  process.env.SMTP_FROM_NAME = process.env.SMTP_FROM_NAME || "Ensotek Support";
   process.env.IMAP_HOST = process.env.IMAP_HOST || "imap.hostinger.com";
   process.env.IMAP_PORT = process.env.IMAP_PORT || "993";
   process.env.IMAP_USER = process.env.IMAP_USER || "info@koenigsmassage.com";
@@ -53,7 +52,10 @@ if (!fs.existsSync(envPath)) {
   }
 }
 
-logger.info(t("env.loaded", lang, translations, { file: envFile }), {});
+logger.info(
+  t("env.loaded", lang, translations, { file: envFile }),
+  {}
+);
 
 // process.env.TENANT_NAME ve ACTIVE_META_PROFILE globalde gerekirse tek bir "default" değer atanabilir,
 // ama yeni sistemde kullanımı neredeyse gereksiz:

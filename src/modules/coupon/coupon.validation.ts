@@ -31,84 +31,134 @@ export const validateCreateCoupon = [
   body("code")
     .notEmpty()
     .withMessage((_, { req }) =>
-      translate("validation.requiredField", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.requiredField",
+        req.locale || getLogLocale(),
+        translations
+      )
     )
     .isString()
     .withMessage((_, { req }) =>
-      translate("validation.invalidField", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.invalidField",
+        req.locale || getLogLocale(),
+        translations
+      )
     ),
   body("isPublished")
     .optional()
     .isBoolean()
     .withMessage((_, { req }) =>
-      translate("validation.booleanField", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.booleanField",
+        req.locale || getLogLocale(),
+        translations
+      )
     ),
   body("discount")
     .notEmpty()
     .withMessage((_, { req }) =>
-      translate("validation.requiredField", req.locale || getLogLocale(), translations, { field: "discount" })
+      translate(
+        "validation.requiredField",
+        req.locale || getLogLocale(),
+        translations,
+        { field: "discount" }
+      )
     )
     .isNumeric()
     .withMessage((_, { req }) =>
-      translate("validation.invalidDiscount", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.invalidDiscount",
+        req.locale || getLogLocale(),
+        translations
+      )
     )
     .isInt({ min: 1, max: 100 })
     .withMessage((_, { req }) =>
-      translate("validation.discountRange", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.discountRange",
+        req.locale || getLogLocale(),
+        translations
+      )
     ),
-  
+
   body("expiresAt")
     .notEmpty()
     .withMessage((_, { req }) =>
-      translate("validation.requiredField", req.locale || getLogLocale(), translations, { field: "expiresAt" })
+      translate(
+        "validation.requiredField",
+        req.locale || getLogLocale(),
+        translations,
+        { field: "expiresAt" }
+      )
     )
     .isISO8601()
     .withMessage((_, { req }) =>
-      translate("validation.invalidDate", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.invalidDate",
+        req.locale || getLogLocale(),
+        translations
+      )
     ),
 
   body("isActive")
     .optional()
     .isBoolean()
     .withMessage((_, { req }) =>
-      translate("validation.booleanField", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.booleanField",
+        req.locale || getLogLocale(),
+        translations
+      )
     ),
-  
+
   validateRequest,
 ];
 
 // ✅ Update Coupon Validator
 export const validateUpdateCoupon = [
-  body("title")
-    .optional()
-    .customSanitizer(parseIfJson), // Çoklu dilde güncelleme için
-  body("description")
-    .optional()
-    .customSanitizer(parseIfJson), // Çoklu dilde güncelleme için
-  
+  body("title").optional().customSanitizer(parseIfJson), // Çoklu dilde güncelleme için
+  body("description").optional().customSanitizer(parseIfJson), // Çoklu dilde güncelleme için
+
   body("discount")
     .optional()
     .isNumeric()
     .withMessage((_, { req }) =>
-      translate("validation.invalidDiscount", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.invalidDiscount",
+        req.locale || getLogLocale(),
+        translations
+      )
     )
     .isInt({ min: 1, max: 100 })
     .withMessage((_, { req }) =>
-      translate("validation.discountRange", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.discountRange",
+        req.locale || getLogLocale(),
+        translations
+      )
     ),
 
   body("expiresAt")
     .optional()
     .isISO8601()
     .withMessage((_, { req }) =>
-      translate("validation.invalidDate", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.invalidDate",
+        req.locale || getLogLocale(),
+        translations
+      )
     ),
 
   body("isActive")
     .optional()
     .isBoolean()
     .withMessage((_, { req }) =>
-      translate("validation.booleanField", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.booleanField",
+        req.locale || getLogLocale(),
+        translations
+      )
     ),
 
   body("removedImages")
@@ -121,7 +171,7 @@ export const validateUpdateCoupon = [
       } catch {
         const t = (key: string) =>
           translate(key, req.locale || getLogLocale(), translations);
-        logger.warn(t("validation.invalidRemovedImages"), {
+        logger.withReq.warn(req as any, t("validation.invalidRemovedImages"), {
           ...getRequestContext(req),
           value: val,
           path: "removedImages",
@@ -139,50 +189,66 @@ export const validateAdminQuery = [
     .optional()
     .isIn(SUPPORTED_LOCALES)
     .withMessage((_, { req }) =>
-      translate("validation.invalidLanguage", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.invalidLanguage",
+        req.locale || getLogLocale(),
+        translations
+      )
     ),
-  
+
   query("isActive")
     .optional()
     .toBoolean()
     .isBoolean()
     .withMessage((_, { req }) =>
-      translate("validation.booleanField", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.booleanField",
+        req.locale || getLogLocale(),
+        translations
+      )
     ),
-     query("isPublished")
-        .optional()
-        .toBoolean()
-        .isBoolean()
-        .withMessage((_, { req }) =>
-          translate(
-            "validation.booleanField",
-            req.locale || getLogLocale(),
-            translations
-          )
-        ),
-      query("isActive")
-        .optional()
-        .toBoolean()
-        .isBoolean()
-        .withMessage((_, { req }) =>
-          translate(
-            "validation.booleanField",
-            req.locale || getLogLocale(),
-            translations
-          )
-        ),
-  
+  query("isPublished")
+    .optional()
+    .toBoolean()
+    .isBoolean()
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.booleanField",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
+  query("isActive")
+    .optional()
+    .toBoolean()
+    .isBoolean()
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.booleanField",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
+
   query("discount")
     .optional()
     .isNumeric()
     .withMessage((_, { req }) =>
-      translate("validation.invalidDiscount", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.invalidDiscount",
+        req.locale || getLogLocale(),
+        translations
+      )
     )
     .isInt({ min: 1, max: 100 })
     .withMessage((_, { req }) =>
-      translate("validation.discountRange", req.locale || getLogLocale(), translations)
+      translate(
+        "validation.discountRange",
+        req.locale || getLogLocale(),
+        translations
+      )
     ),
-  
+
   validateRequest,
 ];
 

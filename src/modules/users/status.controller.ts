@@ -28,12 +28,13 @@ export const toggleUserStatus = asyncHandler(
     const { id } = req.params;
     const locale: SupportedLocale = req.locale || getLogLocale();
 
-    logger.debug(
+    logger.withReq.debug(
+      req,
       `[Admin] toggleUserStatus called with id=${id} | locale=${locale}`
     );
 
     if (!isValidObjectId(id)) {
-      logger.warn(`[Admin] Invalid user ID: ${id}`);
+      logger.withReq.warn(req, `[Admin] Invalid user ID: ${id}`);
       res.status(400).json({
         success: false,
         message: userT("admin.users.invalidId", locale),
@@ -43,14 +44,15 @@ export const toggleUserStatus = asyncHandler(
 
     const user = await getUserOrFail(id, res);
     if (!user) {
-      logger.warn(`[Admin] User not found: ${id}`);
+      logger.withReq.warn(req, `[Admin] User not found: ${id}`);
       return;
     }
 
     user.isActive = !user.isActive;
     await user.save();
 
-    logger.info(
+    logger.withReq.info(
+      req,
       `[Admin] User status changed: ${user.email} | isActive=${user.isActive}`
     );
 
@@ -74,12 +76,13 @@ export const updateUserRole = asyncHandler(
     const locale: SupportedLocale = req.locale || getLogLocale();
     const { User } = await getTenantModels(req);
 
-    logger.debug(
+    logger.withReq.debug(
+      req,
       `[Admin] updateUserRole called with id=${id} | role=${role} | locale=${locale}`
     );
 
     if (!isValidObjectId(id)) {
-      logger.warn(`[Admin] Invalid user ID: ${id}`);
+      logger.withReq.warn(req, `[Admin] Invalid user ID: ${id}`);
       res.status(400).json({
         success: false,
         message: userT("admin.users.invalidId", locale),
@@ -88,7 +91,7 @@ export const updateUserRole = asyncHandler(
     }
 
     if (!isValidRole(role)) {
-      logger.warn(`[Admin] Invalid role: ${role}`);
+      logger.withReq.warn(req, `[Admin] Invalid role: ${role}`);
       res.status(400).json({
         success: false,
         message: userT("admin.users.invalidRole", locale),
@@ -103,7 +106,7 @@ export const updateUserRole = asyncHandler(
     );
 
     if (!user) {
-      logger.warn(`[Admin] User not found for role update: ${id}`);
+      logger.withReq.warn(req, `[Admin] User not found for role update: ${id}`);
       res.status(404).json({
         success: false,
         message: userT("admin.users.notFound", locale),
@@ -111,7 +114,10 @@ export const updateUserRole = asyncHandler(
       return;
     }
 
-    logger.info(`[Admin] User role updated: ${user.email} | role=${user.role}`);
+    logger.withReq.info(
+      req,
+      `[Admin] User role updated: ${user.email} | role=${user.role}`
+    );
 
     res.status(200).json({
       success: true,

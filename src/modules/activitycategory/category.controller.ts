@@ -27,7 +27,8 @@ export const createActivityCategory = asyncHandler(
         tenant: req.tenant,
       });
 
-      logger.info(
+      logger.withReq.info(
+        req,
         t("activitycategory.create.success", { name: name[locale] }),
         {
           ...getRequestContext(req),
@@ -43,7 +44,7 @@ export const createActivityCategory = asyncHandler(
         data: category, // .name burada tüm diller ile döner!
       });
     } catch (err: any) {
-      logger.error(t("activitycategory.create.error"), {
+      logger.withReq.error(req, t("activitycategory.create.error"), {
         ...getRequestContext(req),
         event: "activitycategory.create",
         module: "activitycategory",
@@ -79,7 +80,7 @@ export const getAllActivityCategories = asyncHandler(
         .sort({ createdAt: -1 })
         .lean();
 
-      logger.info(t("activitycategory.list.success"), {
+      logger.withReq.info(req, t("activitycategory.list.success"), {
         ...getRequestContext(req),
         event: "activitycategory.list",
         module: "activitycategory",
@@ -92,7 +93,7 @@ export const getAllActivityCategories = asyncHandler(
         data: categories, // <--- .name: {tr, en, ...} tüm dillerle gelir!
       });
     } catch (err: any) {
-      logger.error(t("activitycategory.list.error"), {
+      logger.withReq.error(req, t("activitycategory.list.error"), {
         ...getRequestContext(req),
         event: "activitycategory.list",
         module: "activitycategory",
@@ -116,7 +117,11 @@ export const getActivityCategoryById = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("activitycategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("activitycategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("activitycategory.invalidId") });
@@ -130,7 +135,11 @@ export const getActivityCategoryById = asyncHandler(
     }).lean();
 
     if (!category) {
-      logger.warn(t("activitycategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("activitycategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("activitycategory.notFound") });
@@ -155,7 +164,11 @@ export const updateActivityCategory = asyncHandler(
     const { name, isActive } = req.body;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("activitycategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("activitycategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("activitycategory.invalidId") });
@@ -168,7 +181,11 @@ export const updateActivityCategory = asyncHandler(
       tenant: req.tenant,
     });
     if (!category) {
-      logger.warn(t("activitycategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("activitycategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("activitycategory.notFound") });
@@ -185,7 +202,8 @@ export const updateActivityCategory = asyncHandler(
 
     await category.save();
 
-    logger.info(
+    logger.withReq.info(
+      req,
       t("activitycategory.update.success", { name: category.name[locale] }),
       {
         ...getRequestContext(req),
@@ -214,7 +232,11 @@ export const deleteActivityCategory = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("activitycategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("activitycategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("activitycategory.invalidId") });
@@ -230,7 +252,11 @@ export const deleteActivityCategory = asyncHandler(
     });
 
     if (!deleted) {
-      logger.warn(t("activitycategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("activitycategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("activitycategory.notFound") });
@@ -239,7 +265,7 @@ export const deleteActivityCategory = asyncHandler(
 
     const name = deleted.name?.[locale] || "Category";
 
-    logger.info(t("activitycategory.delete.success", { name }), {
+    logger.withReq.info(req, t("activitycategory.delete.success", { name }), {
       ...getRequestContext(req),
       event: "activitycategory.delete",
       module: "activitycategory",

@@ -106,7 +106,7 @@ export const createArticles = asyncHandler(
         isActive: true,
       });
 
-      logger.info(t("created"), {
+      logger.withReq.info(req, t("created"), {
         ...getRequestContext(req),
         id: articles._id,
       });
@@ -114,7 +114,7 @@ export const createArticles = asyncHandler(
         .status(201)
         .json({ success: true, message: t("created"), data: articles });
     } catch (err: any) {
-      logger.error(t("error.create_fail"), {
+      logger.withReq.error(req, t("error.create_fail"), {
         ...getRequestContext(req),
         event: "articles.create",
         module: "articles",
@@ -137,14 +137,20 @@ export const updateArticles = asyncHandler(
       translate(key, locale, translations, params);
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("invalidId"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("invalidId"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(400).json({ success: false, message: t("invalidId") });
       return;
     }
 
     const articles = await Articles.findOne({ _id: id, tenant: req.tenant });
     if (!articles) {
-      logger.warn(t("notFound"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("notFound"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(404).json({ success: false, message: t("notFound") });
       return;
     }
@@ -219,7 +225,7 @@ export const updateArticles = asyncHandler(
           if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
         }
       } catch (e) {
-        logger.warn(t("invalidRemovedImages"), {
+        logger.withReq.warn(req, t("invalidRemovedImages"), {
           ...getRequestContext(req),
           error: e,
         });
@@ -227,7 +233,7 @@ export const updateArticles = asyncHandler(
     }
 
     await articles.save();
-    logger.info(t("updated"), { ...getRequestContext(req), id });
+    logger.withReq.info(req, t("updated"), { ...getRequestContext(req), id });
     res
       .status(200)
       .json({ success: true, message: t("updated"), data: articles });
@@ -276,7 +282,7 @@ export const adminGetAllArticles = asyncHandler(
 
     const data = articlesList;
 
-    logger.info(t("listFetched"), {
+    logger.withReq.info(req, t("listFetched"), {
       ...getRequestContext(req),
       resultCount: data.length,
     });
@@ -293,7 +299,10 @@ export const adminGetArticlesById = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("invalidId"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("invalidId"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(400).json({ success: false, message: t("invalidId") });
       return;
     }
@@ -303,7 +312,10 @@ export const adminGetArticlesById = asyncHandler(
       .lean();
 
     if (!articles || Array.isArray(articles) || !articles.isActive) {
-      logger.warn(t("notFound"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("notFound"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(404).json({ success: false, message: t("notFound") });
       return;
     }
@@ -327,14 +339,20 @@ export const deleteArticles = asyncHandler(
     const t = (key: string) => translate(key, locale, translations);
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("invalidId"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("invalidId"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(400).json({ success: false, message: t("invalidId") });
       return;
     }
 
     const articles = await Articles.findOne({ _id: id, tenant: req.tenant });
     if (!articles) {
-      logger.warn(t("notFound"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("notFound"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(404).json({ success: false, message: t("notFound") });
       return;
     }
@@ -350,7 +368,7 @@ export const deleteArticles = asyncHandler(
         try {
           await cloudinary.uploader.destroy(img.publicId);
         } catch (err) {
-          logger.error("Cloudinary delete error", {
+          logger.withReq.error(req, t("Cloudinary delete error"), {
             ...getRequestContext(req),
             publicId: img.publicId,
           });
@@ -360,7 +378,7 @@ export const deleteArticles = asyncHandler(
 
     await articles.deleteOne();
 
-    logger.info(t("deleted"), { ...getRequestContext(req), id });
+    logger.withReq.info(req, t("deleted"), { ...getRequestContext(req), id });
     res.status(200).json({ success: true, message: t("deleted") });
   }
 );

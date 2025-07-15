@@ -27,7 +27,8 @@ export const createReferencesCategory = asyncHandler(
         tenant: req.tenant,
       });
 
-      logger.info(
+      logger.withReq.info(
+        req,
         t("referencescategory.create.success", { name: name[locale] }),
         {
           ...getRequestContext(req),
@@ -43,7 +44,7 @@ export const createReferencesCategory = asyncHandler(
         data: category, // .name burada tüm diller ile döner!
       });
     } catch (err: any) {
-      logger.error(t("referencescategory.create.error"), {
+      logger.withReq.error(req, t("referencescategory.create.error"), {
         ...getRequestContext(req),
         event: "referencescategory.create",
         module: "referencescategory",
@@ -79,7 +80,7 @@ export const getAllReferencesCategories = asyncHandler(
         .sort({ createdAt: -1 })
         .lean();
 
-      logger.info(t("referencescategory.list.success"), {
+      logger.withReq.info(req, t("referencescategory.list.success"), {
         ...getRequestContext(req),
         event: "referencescategory.list",
         module: "referencescategory",
@@ -92,7 +93,7 @@ export const getAllReferencesCategories = asyncHandler(
         data: categories, // <--- .name: {tr, en, ...} tüm dillerle gelir!
       });
     } catch (err: any) {
-      logger.error(t("referencescategory.list.error"), {
+      logger.withReq.error(req, t("referencescategory.list.error"), {
         ...getRequestContext(req),
         event: "referencescategory.list",
         module: "referencescategory",
@@ -116,7 +117,11 @@ export const getReferencesCategoryById = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("referencescategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("referencescategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("referencescategory.invalidId") });
@@ -130,7 +135,11 @@ export const getReferencesCategoryById = asyncHandler(
     }).lean();
 
     if (!category) {
-      logger.warn(t("referencescategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("referencescategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("referencescategory.notFound") });
@@ -155,7 +164,11 @@ export const updateReferencesCategory = asyncHandler(
     const { name, isActive } = req.body;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("referencescategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("referencescategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("referencescategory.invalidId") });
@@ -168,7 +181,11 @@ export const updateReferencesCategory = asyncHandler(
       tenant: req.tenant,
     });
     if (!category) {
-      logger.warn(t("referencescategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("referencescategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("referencescategory.notFound") });
@@ -185,7 +202,8 @@ export const updateReferencesCategory = asyncHandler(
 
     await category.save();
 
-    logger.info(
+    logger.withReq.info(
+      req,
       t("referencescategory.update.success", { name: category.name[locale] }),
       {
         ...getRequestContext(req),
@@ -214,7 +232,11 @@ export const deleteReferencesCategory = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("referencescategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("referencescategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("referencescategory.invalidId") });
@@ -230,7 +252,11 @@ export const deleteReferencesCategory = asyncHandler(
     });
 
     if (!deleted) {
-      logger.warn(t("referencescategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("referencescategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("referencescategory.notFound") });
@@ -239,7 +265,7 @@ export const deleteReferencesCategory = asyncHandler(
 
     const name = deleted.name?.[locale] || "Category";
 
-    logger.info(t("referencescategory.delete.success", { name }), {
+    logger.withReq.info(req, t("referencescategory.delete.success", { name }), {
       ...getRequestContext(req),
       event: "referencescategory.delete",
       module: "referencescategory",

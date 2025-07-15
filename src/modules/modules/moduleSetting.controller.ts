@@ -18,7 +18,9 @@ export const updateModuleSetting = asyncHandler(
     const updates = req.body;
 
     if (!tenant || !module) {
-      logger.warn("Tenant veya module eksik!", { module: "moduleSetting" });
+      logger.withReq.warn(req, ("Tenant veya module eksik!"), {
+        module: "moduleSetting",
+      });
       res.status(400).json({
         success: false,
         message: t("admin.module.tenantRequired", locale, translations),
@@ -60,7 +62,9 @@ export const updateModuleSetting = asyncHandler(
     );
 
     if (!setting) {
-      logger.warn("Module setting not found!", { module: "moduleSetting" });
+      logger.withReq.warn(req, ("Module setting not found!"), {
+        module: "moduleSetting",
+      });
       res.status(404).json({
         success: false,
         message: t("admin.module.notFound", locale, translations),
@@ -68,7 +72,7 @@ export const updateModuleSetting = asyncHandler(
       return;
     }
 
-    logger.info(`ModuleSetting updated: ${module} (${tenant})`, {
+    logger.withReq.info(req,`ModuleSetting updated: ${module} (${tenant})`, {
       module: "moduleSetting",
       tenant,
     });
@@ -116,7 +120,7 @@ export const deleteModuleSetting = asyncHandler(async (req, res) => {
     return;
   }
   const result = await ModuleSetting.deleteOne({ module, tenant });
-  logger.info(`ModuleSetting deleted: ${module} (${tenant})`, {
+  logger.withReq.info(req,`ModuleSetting deleted: ${module} (${tenant})`, {
     module: "moduleSetting",
     tenant,
   });
@@ -141,7 +145,7 @@ export const deleteAllSettingsForTenant = asyncHandler(async (req, res) => {
     return;
   }
   const result = await ModuleSetting.deleteMany({ tenant });
-  logger.info(`All settings deleted for tenant: ${tenant}`, {
+  logger.withReq.info(req,`All settings deleted for tenant: ${tenant}`, {
     module: "moduleSetting",
     tenant,
   });

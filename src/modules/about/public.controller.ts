@@ -37,7 +37,7 @@ export const getAllAbout = asyncHandler(async (req: Request, res: Response) => {
     .sort({ createdAt: -1 })
     .lean();
 
-  logger.info(t("log.listed"), {
+  logger.withReq.info(req, t("log.listed"), {
     ...getRequestContext(req),
     event: "about.public_list",
     module: "about",
@@ -61,7 +61,7 @@ export const getAboutById = asyncHandler(
     const { About } = await getTenantModels(req);
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("error.invalid_id"), {
+      logger.withReq.warn(req, t("error.invalid_id"), {
         ...getRequestContext(req),
         event: "about.public_getById",
         module: "about",
@@ -83,7 +83,7 @@ export const getAboutById = asyncHandler(
       .lean();
 
     if (!about) {
-      logger.warn(t("error.not_found"), {
+      logger.withReq.warn(req, t("error.not_found"), {
         ...getRequestContext(req),
         event: "about.public_getById",
         module: "about",
@@ -93,7 +93,7 @@ export const getAboutById = asyncHandler(
       res.status(404).json({ success: false, message: t("error.not_found") });
       return;
     }
-    logger.info(t("log.fetched"), {
+    logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
       event: "about.public_getById",
       module: "about",
@@ -127,7 +127,7 @@ export const getAboutBySlug = asyncHandler(
       .lean();
 
     if (!about) {
-      logger.warn(t("error.not_found"), {
+      logger.withReq.warn(req, t("error.not_found"), {
         ...getRequestContext(req),
         event: "about.public_getBySlug",
         module: "about",
@@ -138,7 +138,7 @@ export const getAboutBySlug = asyncHandler(
       return;
     }
 
-    logger.info(t("log.fetched"), {
+    logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
       event: "about.public_getBySlug",
       module: "about",

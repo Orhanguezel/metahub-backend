@@ -29,7 +29,9 @@ export const createModuleMeta = asyncHandler(
     } = req.body;
 
     if (!name) {
-      logger.warn("Modül adı girilmedi.", { module: "moduleMeta" });
+      logger.withReq.warn(req, "Modül adı girilmedi.", {
+        module: "moduleMeta",
+      });
       res.status(400).json({
         success: false,
         message: t("admin.module.nameRequired", locale, translations),
@@ -39,7 +41,9 @@ export const createModuleMeta = asyncHandler(
 
     const existing = await ModuleMeta.findOne({ name });
     if (existing) {
-      logger.warn(`Module '${name}' already exists.`, { module: "moduleMeta" });
+      logger.withReq.warn(req, `Module '${name}' already exists.`, {
+        module: "moduleMeta",
+      });
       res.status(400).json({
         success: false,
         message: t("admin.module.exists", locale, translations, { name }),
@@ -90,7 +94,7 @@ export const createModuleMeta = asyncHandler(
 
     const createdMeta = await ModuleMeta.create(metaContent);
 
-    logger.info(`ModuleMeta '${name}' created.`, {
+    logger.withReq.info(req, `ModuleMeta '${name}' created.`, {
       module: "moduleMeta",
       user: userDisplayName,
       locale,
@@ -115,7 +119,15 @@ export const updateModuleMeta = asyncHandler(
 
     // Sadece şu alanlar güncellenebilir
     const allowedFields = [
-      "label", "icon", "roles", "enabled", "language", "order", "version", "statsKey", "routes"
+      "label",
+      "icon",
+      "roles",
+      "enabled",
+      "language",
+      "order",
+      "version",
+      "statsKey",
+      "routes",
     ];
     Object.keys(updates).forEach((key) => {
       if (!allowedFields.includes(key)) delete updates[key];
@@ -145,20 +157,23 @@ export const updateModuleMeta = asyncHandler(
           ...updates,
           updatedAt: now,
         },
-        $push: { history: newHistoryEntry }
+        $push: { history: newHistoryEntry },
       },
       { new: true }
     );
 
     if (!meta) {
-      logger.warn(`Module not found for update: ${name}`, { module: "moduleMeta" });
-       res.status(404).json({
+      logger.withReq.warn(req, `Module not found for update: ${name}`, {
+        module: "moduleMeta",
+      });
+      res.status(404).json({
         success: false,
         message: t("admin.module.notFound", locale, translations),
-      });return;
+      });
+      return;
     }
 
-    logger.info(`Global moduleMeta updated: ${name}`, {
+    logger.withReq.info(req, `Global moduleMeta updated: ${name}`, {
       module: "moduleMeta",
       locale,
     });
@@ -169,7 +184,6 @@ export const updateModuleMeta = asyncHandler(
     });
   }
 );
-
 
 /**
  * Tüm Modül Meta Kayıtlarını Listele (Global)
@@ -216,7 +230,7 @@ export const deleteModuleMeta = asyncHandler(async (req, res) => {
     return;
   }
   await ModuleMeta.deleteOne({ name });
-  logger.info(`ModuleMeta deleted: ${name}`, {
+  logger.withReq.info(req, `ModuleMeta deleted: ${name}`, {
     module: "moduleMeta",
   });
   res.status(200).json({
@@ -241,7 +255,8 @@ export const importModuleMetas = asyncHandler(
     for (const metaData of metas) {
       const existing = await ModuleMeta.findOne({ name: metaData.name });
       if (existing) {
-        logger.warn(
+        logger.withReq.warn(
+          req,
           `Module '${metaData.name}' already exists. Skipping import.`
         );
         continue;

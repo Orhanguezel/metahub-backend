@@ -87,7 +87,7 @@ export const validateUpdateNews = [
       } catch {
         const t = (key: string) =>
           translate(key, req.locale || getLogLocale(), translations);
-        logger.warn(t("validation.invalidRemovedImages"), {
+        logger.withReq.warn(req as any, t("validation.invalidRemovedImages"), {
           ...getRequestContext(req),
           value: val,
           path: "removedImages",

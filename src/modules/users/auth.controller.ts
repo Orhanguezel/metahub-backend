@@ -57,7 +57,7 @@ export const registerUser = asyncHandler(
 
     // --- Validasyonlar ---
     if (!validateEmailFormat(email)) {
-      logger.warn(`[REGISTER] Geçersiz e-posta: ${email}`);
+      logger.withReq.warn(req, `[REGISTER] Geçersiz e-posta: ${email}`);
       res.status(400).json({
         success: false,
         message: userT("auth.register.invalidEmail", locale),
@@ -67,7 +67,7 @@ export const registerUser = asyncHandler(
 
     const normalizedRole = role.toLowerCase();
     if (!isValidRole(normalizedRole)) {
-      logger.warn(`[REGISTER] Geçersiz rol: ${role}`);
+      logger.withReq.warn(req, `[REGISTER] Geçersiz rol: ${role}`);
       res.status(400).json({
         success: false,
         message: userT("auth.register.invalidRole", locale),
@@ -81,7 +81,10 @@ export const registerUser = asyncHandler(
       parsedSocialMedia = validateJsonField(socialMedia, "socialMedia");
       parsedNotifications = validateJsonField(notifications, "notifications");
     } catch (error: any) {
-      logger.warn(`[REGISTER] JSON parse hatası: ${error.message}`);
+      logger.withReq.warn(
+        req,
+        `[REGISTER] JSON parse hatası: ${error.message}`
+      );
       res.status(400).json({ success: false, message: error.message });
       return;
     }
@@ -117,7 +120,6 @@ export const registerUser = asyncHandler(
     // Kayıt işlemi
     let user;
     try {
-      
       user = await User.create({
         name,
         tenant: req.tenant,
@@ -133,9 +135,15 @@ export const registerUser = asyncHandler(
         profileImage: profileImageObj,
       });
 
-      logger.info(`[REGISTER] Yeni kayıt: ${email} | locale: ${locale}`);
+      logger.withReq.info(
+        req,
+        `[REGISTER] Yeni kayıt: ${email} | locale: ${locale}`
+      );
     } catch (err) {
-      logger.error(`[REGISTER] Kayıt başarısız: ${email} | ${err.message}`);
+      logger.withReq.error(
+        req,
+        `[REGISTER] Kayıt başarısız: ${email} | ${err.message}`
+      );
       res.status(500).json({
         success: false,
         message: userT("auth.register.userCreateFail", locale),
@@ -153,7 +161,8 @@ export const registerUser = asyncHandler(
       });
       return;
     } catch (err) {
-      logger.error(
+      logger.withReq.error(
+        req,
         `[REGISTER] E-posta doğrulama gönderilemedi: ${user.email} | ${err.message}`
       );
       res.status(500).json({
@@ -173,7 +182,7 @@ export const loginUser = asyncHandler(
     const { User } = await getTenantModels(req);
 
     if (!validateEmailFormat(email)) {
-      logger.warn(`[LOGIN] Geçersiz e-posta: ${email}`);
+      logger.withReq.warn(req, `[LOGIN] Geçersiz e-posta: ${email}`);
       res.status(400).json({
         success: false,
         message: userT("auth.login.invalidEmail", locale),
@@ -185,7 +194,7 @@ export const loginUser = asyncHandler(
       "+password +mfaEnabled +emailVerified +isActive"
     );
     if (!user) {
-      logger.warn(`[LOGIN] Kullanıcı bulunamadı: ${email}`);
+      logger.withReq.warn(req, `[LOGIN] Kullanıcı bulunamadı: ${email}`);
       res.status(401).json({
         success: false,
         message: userT("auth.login.invalidCredentials", locale),
@@ -195,7 +204,7 @@ export const loginUser = asyncHandler(
 
     const passwordValid = await checkPassword(req, password, user.password);
     if (!passwordValid) {
-      logger.warn(`[LOGIN] Hatalı şifre: ${email}`);
+      logger.withReq.warn(req, `[LOGIN] Hatalı şifre: ${email}`);
       res.status(401).json({
         success: false,
         message: userT("auth.login.invalidCredentials", locale),
@@ -204,7 +213,7 @@ export const loginUser = asyncHandler(
     }
 
     if (!user.emailVerified) {
-      logger.warn(`[LOGIN] E-posta doğrulanmamış: ${email}`);
+      logger.withReq.warn(req, `[LOGIN] E-posta doğrulanmamış: ${email}`);
       res.status(401).json({
         success: false,
         emailVerificationRequired: true,
@@ -214,7 +223,7 @@ export const loginUser = asyncHandler(
     }
 
     if (!user.isActive) {
-      logger.warn(`[LOGIN] Hesap devre dışı: ${email}`);
+      logger.withReq.warn(req, `[LOGIN] Hesap devre dışı: ${email}`);
       res.status(403).json({
         success: false,
         message: userT("auth.login.accountDisabled", locale),
@@ -223,7 +232,7 @@ export const loginUser = asyncHandler(
     }
 
     if (user.mfaEnabled) {
-      logger.info(`[LOGIN] MFA gerekli: ${email}`);
+      logger.withReq.info(req, `[LOGIN] MFA gerekli: ${email}`);
       res.status(200).json({
         success: true,
         mfaRequired: true,
@@ -234,7 +243,7 @@ export const loginUser = asyncHandler(
 
     await loginAndSetToken(req, res, user.id, user.role);
 
-    logger.info(`[LOGIN] Başarılı giriş: ${email}`);
+    logger.withReq.info(req, `[LOGIN] Başarılı giriş: ${email}`);
 
     res.status(200).json({
       success: true,
@@ -262,7 +271,10 @@ export const changePassword = asyncHandler(
       tenant: req.tenant,
     }).select("+password");
     if (!user) {
-      logger.warn(`[CHANGE-PASSWORD] Kullanıcı bulunamadı: ${req.user!.id}`);
+      logger.withReq.warn(
+        req,
+        `[CHANGE-PASSWORD] Kullanıcı bulunamadı: ${req.user!.id}`
+      );
       res.status(404).json({
         success: false,
         message: userT("auth.password.userNotFound", locale),
@@ -271,7 +283,10 @@ export const changePassword = asyncHandler(
     }
 
     if (!(await checkPassword(req, currentPassword, user.password))) {
-      logger.warn(`[CHANGE-PASSWORD] Yanlış mevcut şifre: ${user.email}`);
+      logger.withReq.warn(
+        req,
+        `[CHANGE-PASSWORD] Yanlış mevcut şifre: ${user.email}`
+      );
       res.status(401).json({
         success: false,
         message: userT("auth.password.invalidCurrent", locale),
@@ -280,7 +295,10 @@ export const changePassword = asyncHandler(
     }
 
     if (currentPassword === newPassword) {
-      logger.warn(`[CHANGE-PASSWORD] Eski ve yeni şifre aynı: ${user.email}`);
+      logger.withReq.warn(
+        req,
+        `[CHANGE-PASSWORD] Eski ve yeni şifre aynı: ${user.email}`
+      );
       res.status(400).json({
         success: false,
         message: userT("auth.password.sameAsCurrent", locale),
@@ -291,7 +309,10 @@ export const changePassword = asyncHandler(
     user.password = await hashNewPassword(req, newPassword);
     await user.save();
 
-    logger.info(`[CHANGE-PASSWORD] Şifre değiştirildi: ${user.email}`);
+    logger.withReq.info(
+      req,
+      `[CHANGE-PASSWORD] Şifre değiştirildi: ${user.email}`
+    );
 
     res
       .status(200)
@@ -304,7 +325,8 @@ export const logoutUser = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const locale = getLocale(req);
     logoutAndClearToken(req, res);
-    logger.info(
+    logger.withReq.info(
+      req,
       `[LOGOUT] Kullanıcı çıkış yaptı: ${req.user?.id ?? "Bilinmiyor"}`
     );
     res
@@ -322,7 +344,10 @@ export const forgotPassword = asyncHandler(
 
     const user = await User.findOne({ email, tenant: req.tenant });
     if (!user) {
-      logger.warn(`[FORGOT-PASSWORD] Kullanıcı bulunamadı: ${email}`);
+      logger.withReq.warn(
+        req,
+        `[FORGOT-PASSWORD] Kullanıcı bulunamadı: ${email}`
+      );
       res.status(404).json({
         success: false,
         message: userT("auth.forgot.userNotFound", locale),
@@ -352,7 +377,8 @@ export const forgotPassword = asyncHandler(
       html,
     });
 
-    logger.info(
+    logger.withReq.info(
+      req,
       `[FORGOT-PASSWORD] Şifre sıfırlama e-postası gönderildi: ${user.email}`
     );
 
@@ -378,7 +404,10 @@ export const resetPassword = asyncHandler(
     });
 
     if (!user) {
-      logger.warn(`[RESET-PASSWORD] Geçersiz veya süresi dolmuş token.`);
+      logger.withReq.warn(
+        req,
+        `[RESET-PASSWORD] Geçersiz veya süresi dolmuş token.`
+      );
       res.status(400).json({
         success: false,
         message: userT("auth.reset.invalidOrExpired", locale),
@@ -387,7 +416,7 @@ export const resetPassword = asyncHandler(
     }
 
     if (!newPassword || newPassword.length < 6) {
-      logger.warn(`[RESET-PASSWORD] Geçersiz yeni şifre.`);
+      logger.withReq.warn(req, `[RESET-PASSWORD] Geçersiz yeni şifre.`);
       res.status(400).json({
         success: false,
         message: userT("auth.reset.invalidNewPassword", locale),
@@ -400,7 +429,10 @@ export const resetPassword = asyncHandler(
     user.passwordResetExpires = undefined;
     await user.save();
 
-    logger.info(`[RESET-PASSWORD] Şifre sıfırlandı: ${user.email}`);
+    logger.withReq.info(
+      req,
+      `[RESET-PASSWORD] Şifre sıfırlandı: ${user.email}`
+    );
 
     res
       .status(200)

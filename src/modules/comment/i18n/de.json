@@ -1,0 +1,32 @@
+{
+  "delete": {
+    "success": "Nachricht gelöscht.",
+    "notFound": "Nachricht nicht gefunden.",
+    "invalidIds": "Ungültige Nachrichten-IDs."
+  },
+  "sendMessage": {
+    "success": "Nachricht gesendet.",
+    "missingParams": "Fehlende Parameter."
+  },
+  "markAsRead": {
+    "success": "Nachrichten als gelesen markiert."
+  },
+  "manualMessage": {
+    "roomIdRequired": "Raum-ID ist erforderlich.",
+    "roomIdString": "Raum-ID muss ein String sein.",
+    "messageRequired": "Nachricht ist erforderlich.",
+    "messageString": "Nachricht muss ein String sein.",
+    "closeBoolean": "Schließen muss ein Boolean sein."
+  },
+  "bulkDelete": {
+    "idsArray": "IDs müssen ein Array mit mindestens einem Element sein.",
+    "idMongo": "Jede ID muss eine gültige MongoDB ObjectId sein."
+  },
+  "singleId": {
+    "invalid": "Ungültige Nachrichten-ID."
+  },
+  "roomIdParam": {
+    "required": "Raum-ID ist erforderlich.",
+    "string": "Raum-ID muss ein String sein."
+  }
+}

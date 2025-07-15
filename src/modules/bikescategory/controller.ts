@@ -83,7 +83,7 @@ export const createBikeCategory = asyncHandler(
         isActive: true,
       });
 
-      logger.info(t("create.success"), {
+      logger.withReq.info(req, t("create.success"), {
         ...getRequestContext(req),
         module: "bikeCategory",
         event: "create",
@@ -96,7 +96,7 @@ export const createBikeCategory = asyncHandler(
         data: category,
       });
     } catch (err: any) {
-      logger.error(t("error.create_fail"), {
+      logger.withReq.error(req, t("error.create_fail"), {
         ...getRequestContext(req),
         event: "category.create",
         module: "bikeCategory",
@@ -239,7 +239,7 @@ export const updateBikeCategory = asyncHandler(
 
     await category.save();
 
-    logger.info(t("update.success"), {
+    logger.withReq.info(req, t("update.success"), {
       ...getRequestContext(req),
       module: "bikeCategory",
       event: "update",
@@ -268,7 +268,7 @@ export const getAllBikeCategories = asyncHandler(
       createdAt: -1,
     });
 
-    logger.info(t("fetchAll.success"), {
+    logger.withReq.info(req, t("fetchAll.success"), {
       ...getRequestContext(req),
       module: "bikeCategory",
       event: "fetchAll",
@@ -306,7 +306,7 @@ export const getBikeCategoryById = asyncHandler(
       return;
     }
 
-    logger.info(t("fetch.success"), {
+    logger.withReq.info(req, t("fetch.success"), {
       ...getRequestContext(req),
       module: "bikeCategory",
       event: "fetch",
@@ -362,7 +362,7 @@ export const deleteBikeCategory = asyncHandler(
 
     await category.deleteOne();
 
-    logger.info(t("delete.success"), {
+    logger.withReq.info(req, t("delete.success"), {
       ...getRequestContext(req),
       module: "bikeCategory",
       event: "delete",

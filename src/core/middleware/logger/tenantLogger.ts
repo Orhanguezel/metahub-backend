@@ -3,22 +3,26 @@ import "winston-daily-rotate-file";
 import path from "path";
 import fs from "fs";
 
-// Kök log klasörünü dışarıdan ayarlamak için
-const BASE_LOG_DIR = process.env.LOG_BASE_DIR || path.join(__dirname, "../../logs");
+// Kök log klasörü environment variable veya fallback ile
+const BASE_LOG_DIR =
+  process.env.LOG_BASE_DIR && process.env.LOG_BASE_DIR.trim()
+    ? process.env.LOG_BASE_DIR
+    : path.join(process.cwd(), "logs");
+
 
 const tenantLoggers: Record<string, winston.Logger> = {};
 
-function safeTenantName(tenant: string) {
+export function safeTenantName(tenant: string) {
   return tenant.replace(/[^a-zA-Z0-9_-]/g, "_");
 }
 
-function getTenantLogDir(tenant: string) {
+export function getTenantLogDir(tenant: string) {
   const safe = safeTenantName(tenant || "unknown");
   const dir = path.join(BASE_LOG_DIR, safe);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
-    // Debug için logla:
-    console.log(`[Logger] Klasör oluşturuldu: ${dir}`);
+    // Sadece debug için:
+    // console.log(`[Logger] Klasör oluşturuldu: ${dir}`);
   }
   return dir;
 }

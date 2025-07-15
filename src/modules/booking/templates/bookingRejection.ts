@@ -11,8 +11,9 @@ interface BookingRejectionParams {
   date: string;
   time: string;
   locale: SupportedLocale;
-  brandName: string;     // EKLENDİ
-  senderEmail?: string;  // Gerekirse
+  brandName: string; // EKLENDİ
+  senderEmail?: string; // Gerekirse
+  req?: any; // Gerekirse, örneğin logger için
 }
 
 export function BookingRejectionTemplate({
@@ -22,17 +23,22 @@ export function BookingRejectionTemplate({
   time,
   locale,
   brandName,
+  req
 }: BookingRejectionParams): string {
-  const t = (key: string, params?: any) => translate(key, locale, translations, params);
+  const t = (key: string, params?: any) =>
+    translate(key, locale, translations, params);
 
   const content = `
     <h2>${t("booking.rejection.greeting", { name })}</h2>
     <p>${t("booking.rejection.info", { service, date, time })}</p>
     <p>${t("booking.rejection.closing")}</p>
-    <p style="margin-top: 30px;">${t("booking.rejection.sign", { brand: brandName })}</p>
+    <p style="margin-top: 30px;">${t("booking.rejection.sign", {
+      brand: brandName,
+    })}</p>
   `;
 
-  logger.debug(
+  logger.withReq.debug(
+    req,
     `[EmailTemplate] Booking REJECTION generated for ${name} | lang: ${locale}`
   );
 

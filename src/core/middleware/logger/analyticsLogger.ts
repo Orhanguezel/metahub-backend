@@ -1,8 +1,6 @@
-// src/core/middleware/analyticsLogger.ts
 import { Request, Response, NextFunction } from "express";
-import { Analytics } from "@/modules/analytics";
 import geoip from "geoip-lite";
-import { ModuleSetting } from "@/modules/modules";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { getTenantLogger } from "@/core/middleware/logger/tenantLogger";
 
 export const analyticsLogger = async (
@@ -10,22 +8,22 @@ export const analyticsLogger = async (
   res: Response,
   next: NextFunction
 ) => {
-  // Her zaman request üzerinden al
   const tenant = req.tenant || "unknown";
   try {
     const pathParts = req.originalUrl.split("/").filter(Boolean);
     const moduleName = pathParts[1]?.toLowerCase() || "unknown";
     const project = process.env.APP_ENV;
 
-    // Multi-tenant module setting
+    // Mutlaka tenant'ın kendi modelini çek!
+    const { ModuleSetting, Analytics } = await getTenantModels(req);
+
     const setting = await ModuleSetting.findOne({
       module: moduleName,
       project,
+      // tenant: req.tenant,  // Sadece aynı DB'de birden fazla tenant varsa ekle!
     });
 
-    if (!setting || setting.useAnalytics !== true) {
-      return next(); // Analytics kapalıysa devam et
-    }
+    if (!setting || !setting.useAnalytics) return next();
 
     const eventType =
       req.method === "GET"
@@ -38,7 +36,7 @@ export const analyticsLogger = async (
         ? "delete"
         : "other";
 
-    const files = (req.files as Express.Multer.File[]) || [];
+    const files = Array.isArray(req.files) ? req.files : [];
     const uploadedFiles = files.map((file) => file.filename);
 
     const ip =
@@ -71,21 +69,16 @@ export const analyticsLogger = async (
       timestamp: new Date(),
     };
 
-    // --- DB'ye kaydet (her zaman tenant alanı ile!)
     await Analytics.create(analyticsData);
 
-    // --- Dosyaya ve terminale logla (tenant'a özel!)
-    const tenantLogger = getTenantLogger(tenant);
-    tenantLogger.info("Analytics event logged", {
-      ...analyticsData, // Tam context!
+    getTenantLogger(tenant).info("Analytics event logged", {
+      ...analyticsData,
       project,
     });
   } catch (error) {
-    // Her zaman ilgili tenant logger'a yaz!
-    const tenantLogger = getTenantLogger(req.tenant || "unknown");
-    tenantLogger.error("Analytics logging failed", {
+    getTenantLogger(tenant).error("Analytics logging failed", {
       error,
-      tenant: req.tenant,
+      tenant,
       path: req.originalUrl,
       method: req.method,
     });
