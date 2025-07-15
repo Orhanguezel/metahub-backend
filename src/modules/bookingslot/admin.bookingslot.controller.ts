@@ -6,7 +6,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { t as translate } from "@/core/utils/i18n/translate";
-import translations from "@/templates/i18n";
+import translations from "./i18n";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import type { SupportedLocale } from "@/types/common";
 
@@ -225,94 +225,44 @@ export const deleteSlotOverride = asyncHandler(async (req: Request, res: Respons
     message: t("slot.override.deleted"),
   });
 });
-
-// 📅 Public: Get slots by specific date (getSlotsByDate)
-export const getSlotsByDate = asyncHandler(async (req: Request, res: Response) => {
-  const { date } = req.query;
+// --- ADMIN: Tüm Slot Kuralları Listele ---
+export const getAllSlotRulesAdmin = asyncHandler(async (req: Request, res: Response) => {
   const t = getT(req);
-  const { BookingSlotRule, BookingSlotOverride, Booking } = await getTenantModels(req);
-
-  if (!date || typeof date !== "string") {
-    res.status(400).json({
-      message: t("slot.error.noDate"),
-    });
-    return;
-  }
-
-  const dayOfWeek = dayjs(date).day();
-
-  let rule = await BookingSlotRule.findOne({
-    dayOfWeek,
-    isActive: true,
-    tenant: req.tenant,
-  });
-  if (!rule)
-    rule = await BookingSlotRule.findOne({
-      appliesToAll: true,
-      isActive: true,
-      tenant: req.tenant,
-    });
-
-  if (!rule) {
-    res.status(200).json({ success: true, slots: [] });
-    return;
-  }
-
-  const override = await BookingSlotOverride.findOne({
-    date,
-    tenant: req.tenant,
-  });
-
-  if (override?.fullDayOff) {
-    res.status(200).json({ success: true, slots: [] });
-    return;
-  }
-
-  const availableSlots: string[] = [];
-  const interval = rule.intervalMinutes;
-  const breakTime = rule.breakBetweenAppointments;
-
-  let current = dayjs(`${date}T${rule.startTime}`);
-  const end = dayjs(`${date}T${rule.endTime}`);
-
-  while (current.add(interval, "minute").isSameOrBefore(end)) {
-    const time = current.format("HH:mm");
-    availableSlots.push(time);
-    current = current.add(interval + breakTime, "minute");
-  }
-
-  const confirmedBookings = await Booking.find({
-    date,
-    tenant: req.tenant,
-    status: "confirmed",
-  }).select("time durationMinutes");
-
-  const bookedTimes = new Set<string>();
-  confirmedBookings.forEach((b) => bookedTimes.add(b.time));
-  const disabledTimes = new Set(override?.disabledTimes || []);
-
-  const finalSlots = availableSlots.filter(
-    (slot) => !bookedTimes.has(slot) && !disabledTimes.has(slot)
-  );
-
-  res.status(200).json({
-    success: true,
-    slots: finalSlots,
-  });
-});
-
-// ✅ Tüm Slot Kurallarını Listele (i18n yok, data response)
-export const getAllSlotRules = asyncHandler(async (req: Request, res: Response) => {
   const { BookingSlotRule } = await getTenantModels(req);
-  const rules = await BookingSlotRule.find({ tenant: req.tenant }).sort("dayOfWeek");
-  res.status(200).json({ success: true, data: rules });
+
+  try {
+    const rules = await BookingSlotRule.find({ tenant: req.tenant }).sort("dayOfWeek");
+    res.status(200).json({
+      success: true,
+      data: rules,
+      message: t("slot.rule.listed", "Slot rules listed successfully."),
+    });return; 
+  } catch (error) {
+     res.status(500).json({
+      success: false,
+      message: t("slot.error.listFailed", "Slot rule listing failed."),
+      error: error instanceof Error ? error.message : error,
+    });return;
+  }
 });
 
-// ✅ Tüm Override'ları Listele
-export const getAllSlotOverrides = asyncHandler(async (req: Request, res: Response) => {
+// --- ADMIN: Tüm Override’ları Listele ---
+export const getAllSlotOverridesAdmin = asyncHandler(async (req: Request, res: Response) => {
+  const t = getT(req);
   const { BookingSlotOverride } = await getTenantModels(req);
-  const overrides = await BookingSlotOverride.find({
-    tenant: req.tenant,
-  }).sort("-date");
-  res.status(200).json({ success: true, data: overrides });
+
+  try {
+    const overrides = await BookingSlotOverride.find({ tenant: req.tenant }).sort("-date");
+    res.status(200).json({
+      success: true,
+      data: overrides,
+      message: t("slot.override.listed", "Slot overrides listed successfully."),
+    });return;
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: t("slot.error.listFailed", "Slot override listing failed."),
+      error: error instanceof Error ? error.message : error,
+    });return; 
+  }
 });

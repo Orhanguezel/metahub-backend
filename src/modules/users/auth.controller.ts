@@ -40,6 +40,7 @@ function userT(
 export const registerUser = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const locale = getLocale(req);
+    const { User } = await getTenantModels(req);
 
     const {
       name,
@@ -116,7 +117,7 @@ export const registerUser = asyncHandler(
     // Kayıt işlemi
     let user;
     try {
-      const { User } = await getTenantModels(req);
+      
       user = await User.create({
         name,
         tenant: req.tenant,

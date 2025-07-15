@@ -4,7 +4,6 @@ import logger from "../logger/logger";
 import translations from "./i18n";
 import { t } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
-import { getRequestContext } from "../logger/logRequestContext";
 
 // Request tipi genişletme
 export interface RequestWithTenant extends Request {
