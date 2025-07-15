@@ -1,0 +1,32 @@
+{
+  "delete": {
+    "success": "Mensaje eliminado.",
+    "notFound": "Mensaje no encontrado.",
+    "invalidIds": "IDs de mensajes no válidos."
+  },
+  "sendMessage": {
+    "success": "Mensaje enviado.",
+    "missingParams": "Faltan parámetros."
+  },
+  "markAsRead": {
+    "success": "Mensajes marcados como leídos."
+  },
+  "manualMessage": {
+    "roomIdRequired": "El ID de la sala es obligatorio.",
+    "roomIdString": "El ID de la sala debe ser una cadena.",
+    "messageRequired": "El mensaje es obligatorio.",
+    "messageString": "El mensaje debe ser una cadena.",
+    "closeBoolean": "Cerrar debe ser un booleano."
+  },
+  "bulkDelete": {
+    "idsArray": "Los IDs deben ser una matriz con al menos un elemento.",
+    "idMongo": "Cada ID debe ser un MongoDB ObjectId válido."
+  },
+  "singleId": {
+    "invalid": "ID de mensaje no válido."
+  },
+  "roomIdParam": {
+    "required": "El ID de la sala es obligatorio.",
+    "string": "El ID de la sala debe ser una cadena."
+  }
+}

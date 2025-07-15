@@ -27,12 +27,17 @@ export const createAboutCategory = asyncHandler(
         tenant: req.tenant,
       });
 
-      logger.info(t("aboutcategory.create.success", { name: name[locale] }), {
-        ...getRequestContext(req),
-        event: "aboutcategory.create",
-        module: "aboutcategory",
-        status: "success",
-      });
+     logger.withReq.info(
+  req,
+  t("aboutcategory.create.success", { name: name[locale] }),
+  {
+    ...getRequestContext(req),
+    event: "aboutcategory.create",
+    module: "aboutcategory",
+    status: "success",
+  }
+);
+        
 
       res.status(201).json({
         success: true,
@@ -40,7 +45,7 @@ export const createAboutCategory = asyncHandler(
         data: category, // .name burada tüm diller ile döner!
       });
     } catch (err: any) {
-      logger.error(t("aboutcategory.create.error"), {
+      logger.withReq.error(req, t("aboutcategory.create.error"), {
         ...getRequestContext(req),
         event: "aboutcategory.create",
         module: "aboutcategory",
@@ -76,7 +81,7 @@ export const getAllAboutCategories = asyncHandler(
         .sort({ createdAt: -1 })
         .lean();
 
-      logger.info(t("aboutcategory.list.success"), {
+      logger.withReq.info(req, t("aboutcategory.list.success"), {
         ...getRequestContext(req),
         event: "aboutcategory.list",
         module: "aboutcategory",
@@ -89,7 +94,7 @@ export const getAllAboutCategories = asyncHandler(
         data: categories, // <--- .name: {tr, en, ...} tüm dillerle gelir!
       });
     } catch (err: any) {
-      logger.error(t("aboutcategory.list.error"), {
+      logger.withReq.error(req, t("aboutcategory.list.error"), {
         ...getRequestContext(req),
         event: "aboutcategory.list",
         module: "aboutcategory",
@@ -113,7 +118,11 @@ export const getAboutCategoryById = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("aboutcategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("aboutcategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("aboutcategory.invalidId") });
@@ -127,7 +136,11 @@ export const getAboutCategoryById = asyncHandler(
     }).lean();
 
     if (!category) {
-      logger.warn(t("aboutcategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("aboutcategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("aboutcategory.notFound") });
@@ -152,7 +165,11 @@ export const updateAboutCategory = asyncHandler(
     const { name, isActive } = req.body;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("aboutcategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("aboutcategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("aboutcategory.invalidId") });
@@ -165,7 +182,11 @@ export const updateAboutCategory = asyncHandler(
       tenant: req.tenant,
     });
     if (!category) {
-      logger.warn(t("aboutcategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("aboutcategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("aboutcategory.notFound") });
@@ -182,7 +203,7 @@ export const updateAboutCategory = asyncHandler(
 
     await category.save();
 
-    logger.info(
+    logger.withReq.info(req,
       t("aboutcategory.update.success", { name: category.name[locale] }),
       {
         ...getRequestContext(req),
@@ -211,7 +232,11 @@ export const deleteAboutCategory = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("aboutcategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("aboutcategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("aboutcategory.invalidId") });
@@ -227,7 +252,11 @@ export const deleteAboutCategory = asyncHandler(
     });
 
     if (!deleted) {
-      logger.warn(t("aboutcategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("aboutcategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("aboutcategory.notFound") });
@@ -236,7 +265,7 @@ export const deleteAboutCategory = asyncHandler(
 
     const name = deleted.name?.[locale] || "Category";
 
-    logger.info(t("aboutcategory.delete.success", { name }), {
+    logger.withReq.info(req, t("aboutcategory.delete.success", { name }), {
       ...getRequestContext(req),
       event: "aboutcategory.delete",
       module: "aboutcategory",

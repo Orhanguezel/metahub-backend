@@ -2,10 +2,9 @@ import nodemailer from "nodemailer";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "@/core/config/i18n";
-import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import { SupportedLocale } from "@/types/common";
 
 // Dil belirle (profil ya da env üzerinden)
-const profile = process.env.ACTIVE_META_PROFILE || process.env.APP_ENV || "en";
 const lang: SupportedLocale =
   (process.env.LOG_LOCALE as SupportedLocale) || "en";
 
@@ -39,7 +38,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Bağlantı testi (opsiyonel, prod hariç)
+// SMTP bağlantı testi (sadece prod dışı)
 if (process.env.NODE_ENV !== "production") {
   transporter.verify((error, success) => {
     if (error) {
@@ -47,7 +46,9 @@ if (process.env.NODE_ENV !== "production") {
         t("smtp.connectionFailed", lang, translations, { error: String(error) })
       );
     } else {
-      logger.info(t("smtp.connectionSuccess", lang, translations));
+      logger.info(
+        t("smtp.connectionSuccess", lang, translations)
+      );
     }
   });
 }

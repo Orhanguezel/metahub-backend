@@ -59,13 +59,13 @@ export const getMyProfile = asyncHandler(
       .populate("addresses profile payment cart orders favorites");
 
     if (!user) {
-      logger.warn(`[PROFILE] User not found: ${req.user!.id}`);
+      logger.withReq.warn(req, `[PROFILE] User not found: ${req.user!.id}`);
       res
         .status(404)
         .json({ success: false, message: userT("error.userNotFound", locale) });
       return;
     }
-    logger.info(`[PROFILE] Profile fetched for: ${user.email}`);
+    logger.withReq.info(req, `[PROFILE] Profile fetched for: ${user.email}`);
     res.status(200).json({
       success: true,
       message: userT("profile.fetch.success", locale),
@@ -90,7 +90,7 @@ export const updateMyProfile = asyncHandler(
 
     const updated = await user.save();
 
-    logger.info(`[PROFILE] Updated for: ${user.email}`);
+    logger.withReq.info(req, `[PROFILE] Updated for: ${user.email}`);
     res.status(200).json({
       success: true,
       message: userT("profile.update.success", locale),
@@ -115,7 +115,8 @@ export const updateMyPassword = asyncHandler(
       tenant: req.tenant,
     }).select("+password");
     if (!user) {
-      logger.warn(
+      logger.withReq.warn(
+        req,
         `[PROFILE] User not found for password change: ${req.user!.id}`
       );
       res
@@ -127,7 +128,10 @@ export const updateMyPassword = asyncHandler(
 
     const isMatch = await checkPassword(req, currentPassword, user.password);
     if (!isMatch) {
-      logger.warn(`[PROFILE] Incorrect current password for: ${user.email}`);
+      logger.withReq.warn(
+        req,
+        `[PROFILE] Incorrect current password for: ${user.email}`
+      );
       res.status(400).json({
         success: false,
         message: userT("error.currentPasswordIncorrect", locale),
@@ -136,7 +140,7 @@ export const updateMyPassword = asyncHandler(
     }
     user.password = await hashNewPassword(req, newPassword);
     await user.save();
-    logger.info(`[PROFILE] Password updated for: ${user.email}`);
+    logger.withReq.info(req, `[PROFILE] Password updated for: ${user.email}`);
     res.status(200).json({
       success: true,
       message: userT("password.update.success", locale),
@@ -163,7 +167,10 @@ export const updateNotificationSettings = asyncHandler(
         smsNotifications ?? user.notifications?.smsNotifications,
     };
     await user.save();
-    logger.info(`[PROFILE] Notification settings updated for: ${user.email}`);
+    logger.withReq.info(
+      req,
+      `[PROFILE] Notification settings updated for: ${user.email}`
+    );
     res.status(200).json({
       success: true,
       message: userT("notification.update.success", locale),
@@ -189,7 +196,10 @@ export const updateSocialMediaLinks = asyncHandler(
       twitter: twitter ?? user.socialMedia?.twitter,
     };
     await user.save();
-    logger.info(`[PROFILE] Social links updated for: ${user.email}`);
+    logger.withReq.info(
+      req,
+      `[PROFILE] Social links updated for: ${user.email}`
+    );
     res.status(200).json({
       success: true,
       message: userT("socialMedia.update.success", locale),
@@ -204,7 +214,7 @@ export const updateProfileImage = asyncHandler(
     const locale = getLocale(req);
     const { User } = await getTenantModels(req);
     if (!req.file) {
-      logger.warn(`[PROFILE] No file uploaded for profile image.`);
+      logger.withReq.warn(req, `[PROFILE] No file uploaded for profile image.`);
       res.status(400).json({
         success: false,
         message: userT("error.noFileUploaded", locale),
@@ -213,7 +223,8 @@ export const updateProfileImage = asyncHandler(
     }
     const user = await User.findOne({ _id: req.user!.id, tenant: req.tenant });
     if (!user) {
-      logger.warn(
+      logger.withReq.warn(
+        req,
         `[PROFILE] User not found for profile image: ${req.user!.id}`
       );
       res
@@ -256,7 +267,10 @@ export const updateProfileImage = asyncHandler(
     user.profileImage = profileImage;
     await user.save();
 
-    logger.info(`[PROFILE] Profile image updated for: ${user.email}`);
+    logger.withReq.info(
+      req,
+      `[PROFILE] Profile image updated for: ${user.email}`
+    );
     res.status(200).json({
       success: true,
       message: userT("profileImage.update.success", locale),
@@ -278,7 +292,7 @@ export const updateFullProfile = asyncHandler(
           updateFields[field] = validateJsonField(updateFields[field], field);
         }
       } catch {
-        logger.warn(`[PROFILE] Invalid JSON for field: ${field}`);
+        logger.withReq.warn(req, `[PROFILE] Invalid JSON for field: ${field}`);
         res.status(400).json({
           success: false,
           message: userT("error.invalidJsonField", locale, { field }),
@@ -293,14 +307,20 @@ export const updateFullProfile = asyncHandler(
     ).select("-password");
 
     if (!updatedUser) {
-      logger.warn(`[PROFILE] User not found for full update: ${req.user!.id}`);
+      logger.withReq.warn(
+        req,
+        `[PROFILE] User not found for full update: ${req.user!.id}`
+      );
       res
         .status(404)
         .json({ success: false, message: userT("error.userNotFound", locale) });
       return;
     }
 
-    logger.info(`[PROFILE] Full profile updated for: ${updatedUser.email}`);
+    logger.withReq.info(
+      req,
+      `[PROFILE] Full profile updated for: ${updatedUser.email}`
+    );
     res.status(200).json({
       success: true,
       message: userT("profile.update.success", locale),
@@ -320,7 +340,10 @@ export const deleteMyAccount = asyncHandler(
       tenant: req.tenant,
     }).select("+password");
     if (!user) {
-      logger.warn(`[PROFILE] User not found for delete: ${req.user!.id}`);
+      logger.withReq.warn(
+        req,
+        `[PROFILE] User not found for delete: ${req.user!.id}`
+      );
       res
         .status(404)
         .json({ success: false, message: userT("error.userNotFound", locale) });
@@ -328,7 +351,10 @@ export const deleteMyAccount = asyncHandler(
     }
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      logger.warn(`[PROFILE] Invalid password for delete: ${user.email}`);
+      logger.withReq.warn(
+        req,
+        `[PROFILE] Invalid password for delete: ${user.email}`
+      );
       res.status(400).json({
         success: false,
         message: userT("error.invalidPassword", locale),
@@ -367,7 +393,7 @@ export const deleteMyAccount = asyncHandler(
       }
     }
     await User.findByIdAndDelete(req.user!.id, { tenant: req.tenant });
-    logger.info(`[PROFILE] Account deleted: ${user.email}`);
+    logger.withReq.info(req, `[PROFILE] Account deleted: ${user.email}`);
     res.status(200).json({
       success: true,
       message: userT("account.delete.success", locale),

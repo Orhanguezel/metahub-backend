@@ -37,7 +37,7 @@ export const getAllNews = asyncHandler(async (req: Request, res: Response) => {
     .sort({ createdAt: -1 })
     .lean();
 
-  logger.info(t("log.listed"), {
+  logger.withReq.info(req, t("log.listed"), {
     ...getRequestContext(req),
     event: "news.public_list",
     module: "news",
@@ -60,7 +60,7 @@ export const getNewsById = asyncHandler(async (req: Request, res: Response) => {
   const { News } = await getTenantModels(req);
 
   if (!isValidObjectId(id)) {
-    logger.warn(t("error.invalid_id"), {
+    logger.withReq.warn(req, t("error.invalid_id"), {
       ...getRequestContext(req),
       event: "news.public_getById",
       module: "news",
@@ -82,7 +82,7 @@ export const getNewsById = asyncHandler(async (req: Request, res: Response) => {
     .lean();
 
   if (!news) {
-    logger.warn(t("error.not_found"), {
+    logger.withReq.warn(req, t("error.not_found"), {
       ...getRequestContext(req),
       event: "news.public_getById",
       module: "news",
@@ -92,7 +92,7 @@ export const getNewsById = asyncHandler(async (req: Request, res: Response) => {
     res.status(404).json({ success: false, message: t("error.not_found") });
     return;
   }
-  logger.info(t("log.fetched"), {
+  logger.withReq.info(req, t("log.fetched"), {
     ...getRequestContext(req),
     event: "news.public_getById",
     module: "news",
@@ -125,7 +125,7 @@ export const getNewsBySlug = asyncHandler(
       .lean();
 
     if (!news) {
-      logger.warn(t("error.not_found"), {
+      logger.withReq.warn(req, t("error.not_found"), {
         ...getRequestContext(req),
         event: "news.public_getBySlug",
         module: "news",
@@ -136,7 +136,7 @@ export const getNewsBySlug = asyncHandler(
       return;
     }
 
-    logger.info(t("log.fetched"), {
+    logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
       event: "news.public_getBySlug",
       module: "news",

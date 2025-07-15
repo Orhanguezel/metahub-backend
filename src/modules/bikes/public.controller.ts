@@ -37,7 +37,7 @@ export const getAllBike = asyncHandler(async (req: Request, res: Response) => {
     .sort({ createdAt: -1 })
     .lean();
 
-  logger.info(t("log.listed"), {
+  logger.withReq.info(req, t("log.listed"), {
     ...getRequestContext(req),
     event: "bike.public_list",
     module: "bike",
@@ -60,7 +60,7 @@ export const getBikeById = asyncHandler(async (req: Request, res: Response) => {
   const { Bike } = await getTenantModels(req);
 
   if (!isValidObjectId(id)) {
-    logger.warn(t("error.invalid_id"), {
+    logger.withReq.warn(req, t("error.invalid_id"), {
       ...getRequestContext(req),
       event: "bike.public_getById",
       module: "bike",
@@ -82,7 +82,7 @@ export const getBikeById = asyncHandler(async (req: Request, res: Response) => {
     .lean();
 
   if (!product) {
-    logger.warn(t("error.not_found"), {
+    logger.withReq.warn(req, t("error.not_found"), {
       ...getRequestContext(req),
       event: "bike.public_getById",
       module: "bike",
@@ -93,7 +93,7 @@ export const getBikeById = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  logger.info(t("log.fetched"), {
+  logger.withReq.info(req, t("log.fetched"), {
     ...getRequestContext(req),
     event: "bike.public_getById",
     module: "bike",
@@ -132,7 +132,7 @@ export const getBikeBySlug = asyncHandler(
       .lean();
 
     if (!product) {
-      logger.warn(t("error.not_found"), {
+      logger.withReq.warn(req, t("error.not_found"), {
         ...getRequestContext(req),
         event: "bike.public_getBySlug",
         module: "bike",
@@ -143,7 +143,7 @@ export const getBikeBySlug = asyncHandler(
       return;
     }
 
-    logger.info(t("log.fetched"), {
+    logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
       event: "bike.public_getBySlug",
       module: "bike",

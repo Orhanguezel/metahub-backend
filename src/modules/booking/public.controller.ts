@@ -12,123 +12,132 @@ import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
-export const createBooking = asyncHandler(async (req: Request, res: Response) => {
-  const {
-    name,
-    email,
-    phone,
-    serviceType,
-    note,
-    date,
-    time,
-    service,
-    durationMinutes = 60,
-    language,
-  } = req.body;
+export const createBooking = asyncHandler(
+  async (req: Request, res: Response) => {
+    const {
+      name,
+      email,
+      phone,
+      serviceType,
+      note,
+      date,
+      time,
+      service,
+      durationMinutes = 60,
+      language,
+    } = req.body;
 
-  // Locale ve aktif tenant bilgileri
-  const locale: SupportedLocale =
-    req.locale ||
-    language ||
-    (process.env.LOG_LOCALE as SupportedLocale) ||
-    "en";
-  const t = (key: string, params?: any) => translate(key, locale, translations, params);
+    // Locale ve aktif tenant bilgileri
+    const locale: SupportedLocale =
+      req.locale ||
+      language ||
+      (process.env.LOG_LOCALE as SupportedLocale) ||
+      "en";
+    const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
 
-  // 🟢 TENANT MARKA ADINI DİL İLE AL
-  const tenantData = req.tenantData;
-  const brandName =
-    (tenantData?.name?.[locale] || tenantData?.name?.en || tenantData?.name) ?? "Brand";
-  const senderEmail = tenantData?.emailSettings?.senderEmail || "noreply@example.com";
+    // 🟢 TENANT MARKA ADINI DİL İLE AL
+    const tenantData = req.tenantData;
+    const brandName =
+      (tenantData?.name?.[locale] ||
+        tenantData?.name?.en ||
+        tenantData?.name) ??
+      "Brand";
+    const senderEmail =
+      tenantData?.emailSettings?.senderEmail || "noreply@example.com";
 
-  // Zorunlu alanlar (empty check)
-  if (!name || !email || !serviceType || !date || !time || !service) {
-    logger.warn(t("public.create.missingFields"));
-    res.status(400).json({
-      success: false,
-      message: t("public.create.missingFields"),
-    });
-    return;
-  }
+    // Zorunlu alanlar (empty check)
+    if (!name || !email || !serviceType || !date || !time || !service) {
+      logger.withReq.warn(req, t("public.create.missingFields"));
+      res.status(400).json({
+        success: false,
+        message: t("public.create.missingFields"),
+      });
+      return;
+    }
 
-  const start = dayjs(`${date}T${time}`);
-  const end = start.add(durationMinutes, "minute");
+    const start = dayjs(`${date}T${time}`);
+    const end = start.add(durationMinutes, "minute");
 
-  // Maksimum aynı anda kaç randevu olabilir?
-  const maxConcurrentBookingsSetting = await getSettingValue("max_concurrent_bookings");
-  const maxConcurrentBookings = parseInt(maxConcurrentBookingsSetting || "1", 10);
+    // Maksimum aynı anda kaç randevu olabilir?
+    const maxConcurrentBookingsSetting = await getSettingValue(
+      "max_concurrent_bookings"
+    );
+    const maxConcurrentBookings = parseInt(
+      maxConcurrentBookingsSetting || "1",
+      10
+    );
 
-  const { Booking } = await getTenantModels(req);
+    const { Booking } = await getTenantModels(req);
 
-  // Çakışma kontrolü (overlap)
-  const overlappingBookings = await Booking.find({
-    date,
-    $expr: {
-      $and: [
-        {
-          $lt: [
-            { $toDate: { $concat: ["$date", "T", "$time"] } },
-            end.toDate(),
-          ],
-        },
-        {
-          $gt: [
-            {
-              $toDate: {
-                $dateAdd: {
-                  startDate: { $concat: ["$date", "T", "$time"] },
-                  unit: "minute",
-                  amount: "$durationMinutes",
+    // Çakışma kontrolü (overlap)
+    const overlappingBookings = await Booking.find({
+      date,
+      $expr: {
+        $and: [
+          {
+            $lt: [
+              { $toDate: { $concat: ["$date", "T", "$time"] } },
+              end.toDate(),
+            ],
+          },
+          {
+            $gt: [
+              {
+                $toDate: {
+                  $dateAdd: {
+                    startDate: { $concat: ["$date", "T", "$time"] },
+                    unit: "minute",
+                    amount: "$durationMinutes",
+                  },
                 },
               },
-            },
-            start.toDate(),
-          ],
-        },
-      ],
-    },
-  });
-
-  if (overlappingBookings.length >= maxConcurrentBookings) {
-    logger.warn(t("public.create.slotsFull"));
-    res.status(409).json({
-      success: false,
-      message: t("public.create.slotsFull"),
+              start.toDate(),
+            ],
+          },
+        ],
+      },
     });
-    return;
-  }
 
-  // Kayıt oluştur
-  const booking = await Booking.create({
-    user: req.user?.id || undefined,
-    name,
-    email,
-    phone,
-    tenant: req.tenant,
-    serviceType,
-    note,
-    date,
-    time,
-    service,
-    durationMinutes,
-    language: locale,
-  });
+    if (overlappingBookings.length >= maxConcurrentBookings) {
+      logger.withReq.warn(req, t("public.create.slotsFull"));
+      res.status(409).json({
+        success: false,
+        message: t("public.create.slotsFull"),
+      });
+      return;
+    }
 
-  logger.info(
-    t("public.create.created", { name, date, time })
-  );
+    // Kayıt oluştur
+    const booking = await Booking.create({
+      user: req.user?.id || undefined,
+      name,
+      email,
+      phone,
+      tenant: req.tenant,
+      serviceType,
+      note,
+      date,
+      time,
+      service,
+      durationMinutes,
+      language: locale,
+    });
 
-  // Mail şablonları (DİL VE MARKA PARAMETRESİYLE!)
-  const htmlToCustomer = BookingReceivedTemplate({
-    name,
-    service: serviceType,
-    date,
-    time,
-    locale,
-    brandName,
-    senderEmail,
-  });
+    logger.withReq.info(req, t("public.create.created", { name, date, time }));
 
-  const htmlToAdmin = `
+    // Mail şablonları (DİL VE MARKA PARAMETRESİYLE!)
+    const htmlToCustomer = BookingReceivedTemplate({
+      name,
+      service: serviceType,
+      date,
+      time,
+      locale,
+      brandName,
+      senderEmail,
+    });
+
+    const htmlToAdmin = `
     <h2>📬 ${t("public.adminMail.newBooking")}</h2>
     <ul>
       <li><strong>${t("public.adminMail.name")}:</strong> ${name}</li>
@@ -140,35 +149,36 @@ export const createBooking = asyncHandler(async (req: Request, res: Response) =>
       <li><strong>${t("public.adminMail.note")}:</strong> ${note || "-"}</li>
     </ul>`;
 
-  await Promise.all([
-    sendEmail({
-      to: email,
-      subject: t("public.email.subject.customer"),
-      html: htmlToCustomer,
-    }),
-    sendEmail({
-      to: senderEmail,
-      subject: t("public.email.subject.admin"),
-      html: htmlToAdmin,
-    }),
-  ]);
+    await Promise.all([
+      sendEmail({
+        to: email,
+        subject: t("public.email.subject.customer"),
+        html: htmlToCustomer,
+      }),
+      sendEmail({
+        to: senderEmail,
+        subject: t("public.email.subject.admin"),
+        html: htmlToAdmin,
+      }),
+    ]);
 
-  await Notification.create({
-    title: t("public.notification.title"),
-    tenant: req.tenant,
-    message: t("public.notification.message", {
-      name,
-      service: serviceType,
-      date,
-      time,
-    }),
-    type: "info",
-    user: req.user?.id || null,
-  });
+    await Notification.create({
+      title: t("public.notification.title"),
+      tenant: req.tenant,
+      message: t("public.notification.message", {
+        name,
+        service: serviceType,
+        date,
+        time,
+      }),
+      type: "info",
+      user: req.user?.id || null,
+    });
 
-  res.status(201).json({
-    success: true,
-    message: t("public.create.success"),
-    booking,
-  });
-});
+    res.status(201).json({
+      success: true,
+      message: t("public.create.success"),
+      booking,
+    });
+  }
+);

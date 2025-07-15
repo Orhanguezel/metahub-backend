@@ -142,7 +142,7 @@ export const createBike = asyncHandler(async (req: Request, res: Response) => {
       isActive: true,
     });
 
-    logger.info(t("log.created"), {
+    logger.withReq.info(req, t("log.created"), {
       ...getRequestContext(req),
       event: "bike.create",
       module: "bike",
@@ -153,7 +153,7 @@ export const createBike = asyncHandler(async (req: Request, res: Response) => {
       .status(201)
       .json({ success: true, message: t("log.created"), data: product });
   } catch (err: any) {
-    logger.error(t("error.create_fail"), {
+    logger.withReq.error(req, t("error.create_fail"), {
       ...getRequestContext(req),
       event: "bike.create",
       module: "bike",
@@ -295,7 +295,7 @@ export const updateBike = asyncHandler(async (req: Request, res: Response) => {
 
   await product.save();
 
-  logger.info(t("log.updated"), {
+  logger.withReq.info(req, t("log.updated"), {
     ...getRequestContext(req),
     event: "bike.update",
     module: "bike",
@@ -346,7 +346,7 @@ export const deleteBike = asyncHandler(async (req: Request, res: Response) => {
 
   await product.deleteOne();
 
-  logger.info(t("log.deleted"), {
+  logger.withReq.info(req, t("log.deleted"), {
     ...getRequestContext(req),
     event: "bike.delete",
     module: "bike",

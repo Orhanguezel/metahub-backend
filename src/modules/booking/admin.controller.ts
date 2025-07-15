@@ -28,7 +28,10 @@ export const getAllBookings = asyncHandler(
       .populate("user", "name email")
       .sort({ createdAt: -1 });
 
-    logger.info(t("admin.bookings.fetched", getRequestContext(req)));
+    logger.withReq.info(
+      req,
+      t("admin.bookings.fetched", getRequestContext(req))
+    );
     res.status(200).json({
       success: true,
       data: bookings,
@@ -46,7 +49,7 @@ export const getBookingById = asyncHandler(
       translate(key, locale, translations, params);
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("admin.bookings.invalidId", { id }));
+      logger.withReq.warn(req, t("admin.bookings.invalidId", { id }));
       res.status(400).json({
         success: false,
         message: t("admin.bookings.invalidId", { id }),
@@ -59,7 +62,7 @@ export const getBookingById = asyncHandler(
       tenant: req.tenant,
     }).populate("service");
     if (!booking) {
-      logger.warn(t("admin.bookings.notFound", { id }));
+      logger.withReq.warn(req, t("admin.bookings.notFound", { id }));
       res.status(404).json({
         success: false,
         message: t("admin.bookings.notFound", { id }),
@@ -67,7 +70,7 @@ export const getBookingById = asyncHandler(
       return;
     }
 
-    logger.info(t("admin.bookings.fetchedOne", { id }));
+    logger.withReq.info(req, t("admin.bookings.fetchedOne", { id }));
     res.status(200).json({
       success: true,
       data: booking,
@@ -86,7 +89,7 @@ export const updateBookingStatus = asyncHandler(
       translate(key, locale, translations, params);
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("admin.bookings.invalidId", { id }));
+      logger.withReq.warn(req, t("admin.bookings.invalidId", { id }));
       res.status(400).json({
         success: false,
         message: t("admin.bookings.invalidId", { id }),
@@ -101,7 +104,7 @@ export const updateBookingStatus = asyncHandler(
       { new: true }
     );
     if (!booking) {
-      logger.warn(t("admin.bookings.notFound", { id }));
+      logger.withReq.warn(req, t("admin.bookings.notFound", { id }));
       res.status(404).json({
         success: false,
         message: t("admin.bookings.notFound", { id }),
@@ -113,7 +116,10 @@ export const updateBookingStatus = asyncHandler(
     const tenantData = req.tenantData; // resolveTenant’dan
     const bookingLang = booking.language || locale || "en";
     const brandName =
-      (tenantData?.name?.[bookingLang] || tenantData?.name?.en || tenantData?.name) ?? "Brand";
+      (tenantData?.name?.[bookingLang] ||
+        tenantData?.name?.en ||
+        tenantData?.name) ??
+      "Brand";
     const senderEmail =
       tenantData?.emailSettings?.senderEmail || "noreply@example.com";
     // ------------------------------------------------------------- //
@@ -135,9 +141,10 @@ export const updateBookingStatus = asyncHandler(
           }),
         });
 
-        logger.info(t("booking.confirmed.emailSent", { id }));
+        logger.withReq.info(req, t("booking.confirmed.emailSent", { id }));
       } catch (err) {
-        logger.error(
+        logger.withReq.error(req,
+          t("booking.confirmed.emailError", { id }),
           t("booking.confirmed.emailError", { id }) + " " + String(err)
         );
       }
@@ -158,15 +165,13 @@ export const updateBookingStatus = asyncHandler(
           }),
         });
 
-        logger.info(t("booking.rejected.emailSent", { id }));
+        logger.withReq.info(req, t("booking.rejected.emailSent", { id }));
       } catch (err) {
-        logger.error(
-          t("booking.rejected.emailError", { id }) + " " + String(err)
-        );
+        logger.withReq.error(req, t("booking.rejected.emailError", { id }) + " " + String(err));
       }
     }
 
-    logger.info(t("admin.bookings.statusUpdated", { id, status }));
+    logger.withReq.info(req, t("admin.bookings.statusUpdated", { id, status }));
     res.status(200).json({
       success: true,
       message: t("admin.bookings.statusUpdated", { id, status }),
@@ -184,7 +189,7 @@ export const deleteBooking = asyncHandler(
       translate(key, locale, translations, params);
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("admin.bookings.invalidId", { id }));
+      logger.withReq.warn(req, t("admin.bookings.invalidId", { id }));
       res.status(400).json({
         success: false,
         message: t("admin.bookings.invalidId", { id }),
@@ -195,7 +200,7 @@ export const deleteBooking = asyncHandler(
     const { Booking } = await getTenantModels(req);
     const result = await Booking.deleteOne({ _id: id, tenant: req.tenant });
     if (!result.deletedCount) {
-      logger.warn(t("admin.bookings.notFoundOrDeleted", { id }));
+      logger.withReq.warn(req, t("admin.bookings.notFoundOrDeleted", { id }));
       res.status(404).json({
         success: false,
         message: t("admin.bookings.notFoundOrDeleted", { id }),
@@ -203,7 +208,7 @@ export const deleteBooking = asyncHandler(
       return;
     }
 
-    logger.info(t("admin.bookings.deleted", { id }));
+    logger.withReq.info(req, t("admin.bookings.deleted", { id }));
     res.status(200).json({
       success: true,
       message: t("admin.bookings.deleted", { id }),

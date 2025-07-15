@@ -38,7 +38,7 @@ export const getAllActivity = asyncHandler(
       .sort({ createdAt: -1 })
       .lean();
 
-    logger.info(t("log.listed"), {
+    logger.withReq.info(req, t("log.listed"), {
       ...getRequestContext(req),
       event: "activity.public_list",
       module: "activity",
@@ -63,7 +63,7 @@ export const getActivityById = asyncHandler(
     const { Activity } = await getTenantModels(req);
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("error.invalid_id"), {
+      logger.withReq.warn(req, t("error.invalid_id"), {
         ...getRequestContext(req),
         event: "activity.public_getById",
         module: "activity",
@@ -85,7 +85,7 @@ export const getActivityById = asyncHandler(
       .lean();
 
     if (!activity) {
-      logger.warn(t("error.not_found"), {
+      logger.withReq.warn(req, t("error.not_found"), {
         ...getRequestContext(req),
         event: "activity.public_getById",
         module: "activity",
@@ -95,7 +95,7 @@ export const getActivityById = asyncHandler(
       res.status(404).json({ success: false, message: t("error.not_found") });
       return;
     }
-    logger.info(t("log.fetched"), {
+    logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
       event: "activity.public_getById",
       module: "activity",
@@ -129,7 +129,7 @@ export const getActivityBySlug = asyncHandler(
       .lean();
 
     if (!activity) {
-      logger.warn(t("error.not_found"), {
+      logger.withReq.warn(req, t("error.not_found"), {
         ...getRequestContext(req),
         event: "activity.public_getBySlug",
         module: "activity",
@@ -140,7 +140,7 @@ export const getActivityBySlug = asyncHandler(
       return;
     }
 
-    logger.info(t("log.fetched"), {
+    logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
       event: "activity.public_getBySlug",
       module: "activity",

@@ -30,7 +30,8 @@ export const createGalleryCategory = asyncHandler(
         tenant: req.tenant,
       });
 
-      logger.info(
+      logger.withReq.info(
+        req,
         t("gallerycategory.create.success", { name: name[locale] }),
         {
           ...getRequestContext(req),
@@ -46,7 +47,7 @@ export const createGalleryCategory = asyncHandler(
         data: category,
       });
     } catch (err: any) {
-      logger.error(t("gallerycategory.create.error"), {
+      logger.withReq.error(req, t("gallerycategory.create.error"), {
         ...getRequestContext(req),
         event: "gallerycategory.create",
         module: "gallerycategory",
@@ -74,13 +75,13 @@ export const getAllGalleryCategories = asyncHandler(
         .sort({ createdAt: -1 })
         .lean();
 
-      const localized = categories.map((cat:any) => ({
+      const localized = categories.map((cat: any) => ({
         ...cat,
         name: extractMultilangValue(cat.name, locale),
         description: extractMultilangValue(cat.description, locale),
       }));
 
-      logger.info(t("gallerycategory.list.success"), {
+      logger.withReq.info(req, t("gallerycategory.list.success"), {
         ...getRequestContext(req),
         event: "gallerycategory.list",
         module: "gallerycategory",
@@ -93,7 +94,7 @@ export const getAllGalleryCategories = asyncHandler(
         data: localized,
       });
     } catch (err: any) {
-      logger.error(t("gallerycategory.list.error"), {
+      logger.withReq.error(req, t("gallerycategory.list.error"), {
         ...getRequestContext(req),
         event: "gallerycategory.list",
         module: "gallerycategory",
@@ -117,7 +118,11 @@ export const getGalleryCategoryById = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("gallerycategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("gallerycategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("gallerycategory.invalidId") });
@@ -131,7 +136,11 @@ export const getGalleryCategoryById = asyncHandler(
     }).lean();
 
     if (!category) {
-      logger.warn(t("gallerycategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("gallerycategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("gallerycategory.notFound") });
@@ -159,7 +168,11 @@ export const updateGalleryCategory = asyncHandler(
     const { name, isActive } = req.body;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("gallerycategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("gallerycategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("gallerycategory.invalidId") });
@@ -172,7 +185,11 @@ export const updateGalleryCategory = asyncHandler(
       tenant: req.tenant,
     });
     if (!category) {
-      logger.warn(t("gallerycategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("gallerycategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("gallerycategory.notFound") });
@@ -189,7 +206,8 @@ export const updateGalleryCategory = asyncHandler(
 
     await category.save();
 
-    logger.info(
+    logger.withReq.info(
+      req,
       t("gallerycategory.update.success", { name: category.name[locale] }),
       {
         ...getRequestContext(req),
@@ -219,7 +237,11 @@ export const deleteGalleryCategory = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("gallerycategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("gallerycategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("gallerycategory.invalidId") });
@@ -235,7 +257,11 @@ export const deleteGalleryCategory = asyncHandler(
     });
 
     if (!deleted) {
-      logger.warn(t("gallerycategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("gallerycategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("gallerycategory.notFound") });
@@ -246,7 +272,7 @@ export const deleteGalleryCategory = asyncHandler(
       ? extractMultilangValue(deleted.name, locale)
       : "Category";
 
-    logger.info(t("gallerycategory.delete.success", { name }), {
+    logger.withReq.info(req, t("gallerycategory.delete.success", { name }), {
       ...getRequestContext(req),
       event: "gallerycategory.delete",
       module: "gallerycategory",

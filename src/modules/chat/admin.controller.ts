@@ -113,12 +113,10 @@ export const deleteMessagesBulk = asyncHandler(async (req, res, next) => {
       _id: { $in: ids },
       tenant: req.tenant,
     });
-    res
-      .status(200)
-      .json({
-        message: t("delete.success"),
-        deletedCount: result.deletedCount,
-      });
+    res.status(200).json({
+      message: t("delete.success"),
+      deletedCount: result.deletedCount,
+    });
   } catch (error) {
     next(error);
   }

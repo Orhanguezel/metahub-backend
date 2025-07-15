@@ -1,0 +1,32 @@
+{
+  "delete": {
+    "success": "Wiadomość została usunięta.",
+    "notFound": "Nie znaleziono wiadomości.",
+    "invalidIds": "Nieprawidłowe identyfikatory wiadomości."
+  },
+  "sendMessage": {
+    "success": "Wiadomość wysłana.",
+    "missingParams": "Brakujące parametry."
+  },
+  "markAsRead": {
+    "success": "Wiadomości oznaczone jako przeczytane."
+  },
+  "manualMessage": {
+    "roomIdRequired": "Identyfikator pokoju jest wymagany.",
+    "roomIdString": "Identyfikator pokoju musi być ciągiem znaków.",
+    "messageRequired": "Wiadomość jest wymagana.",
+    "messageString": "Wiadomość musi być ciągiem znaków.",
+    "closeBoolean": "Zamknij musi być typu boolean."
+  },
+  "bulkDelete": {
+    "idsArray": "Identyfikatory muszą być tablicą z co najmniej jednym elementem.",
+    "idMongo": "Każdy identyfikator musi być poprawnym obiektem MongoDB."
+  },
+  "singleId": {
+    "invalid": "Nieprawidłowy identyfikator wiadomości."
+  },
+  "roomIdParam": {
+    "required": "Identyfikator pokoju jest wymagany.",
+    "string": "Identyfikator pokoju musi być ciągiem znaków."
+  }
+}

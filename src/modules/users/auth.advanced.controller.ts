@@ -36,7 +36,7 @@ export const sendEmailVerification = async (
   const { User } = await getTenantModels(req);
 
   if (!email) {
-    logger.warn(`[EMAIL-VERIFICATION] E-posta eksik.`);
+    logger.withReq.warn(req, `[EMAIL-VERIFICATION] E-posta eksik.`);
     res.status(400).json({
       success: false,
       message: userT("error.emailRequired", locale),
@@ -46,7 +46,10 @@ export const sendEmailVerification = async (
 
   const user = await User.findOne({ email, tenant: req.tenant });
   if (!user) {
-    logger.warn(`[EMAIL-VERIFICATION] Kullanıcı bulunamadı: ${email}`);
+    logger.withReq.warn(
+      req,
+      `[EMAIL-VERIFICATION] Kullanıcı bulunamadı: ${email}`
+    );
     res.status(404).json({
       success: false,
       message: userT("error.userNotFound", locale),
@@ -55,7 +58,10 @@ export const sendEmailVerification = async (
   }
 
   if (user.emailVerified) {
-    logger.info(`[EMAIL-VERIFICATION] Zaten doğrulanmış: ${email}`);
+    logger.withReq.info(
+      req,
+      `[EMAIL-VERIFICATION] Zaten doğrulanmış: ${email}`
+    );
     res.status(200).json({
       success: true,
       message: userT("email.alreadyVerified", locale),
@@ -78,7 +84,7 @@ export const sendEmailVerification = async (
   `,
   });
 
-  logger.info(`[EMAIL-VERIFICATION] E-posta gönderildi: ${email}`);
+  logger.withReq.info(req, `[EMAIL-VERIFICATION] E-posta gönderildi: ${email}`);
   res.status(200).json({
     success: true,
     message: userT("email.verification.sent", locale),
@@ -92,7 +98,7 @@ export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   const { User } = await getTenantModels(req);
 
   if (!token) {
-    logger.warn(`[EMAIL-VERIFY] Token eksik.`);
+    logger.withReq.warn(req, `[EMAIL-VERIFY] Token eksik.`);
     res
       .status(400)
       .json({ success: false, message: userT("error.tokenRequired", locale) });
@@ -106,7 +112,10 @@ export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   });
 
   if (!user) {
-    logger.warn(`[EMAIL-VERIFY] Geçersiz veya süresi dolmuş token.`);
+    logger.withReq.warn(
+      req,
+      `[EMAIL-VERIFY] Geçersiz veya süresi dolmuş token.`
+    );
     res.status(400).json({
       success: false,
       message: userT("error.tokenInvalidOrExpired", locale),
@@ -121,7 +130,10 @@ export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   user.emailVerificationExpires = undefined;
   await user.save();
 
-  logger.info(`[EMAIL-VERIFY] Doğrulama tamamlandı: ${user.email}`);
+  logger.withReq.info(
+    req,
+    `[EMAIL-VERIFY] Doğrulama tamamlandı: ${user.email}`
+  );
   res.status(200).json({
     success: true,
     message: userT("email.verification.success", locale),
@@ -136,7 +148,7 @@ export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
   const { User } = await getTenantModels(req);
 
   if (!email) {
-    logger.warn(`[OTP] E-posta eksik.`);
+    logger.withReq.warn(req, `[OTP] E-posta eksik.`);
     res
       .status(400)
       .json({ success: false, message: userT("error.emailRequired", locale) });
@@ -144,7 +156,7 @@ export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
   }
   const user = await User.findOne({ email, tenant: req.tenant });
   if (!user) {
-    logger.warn(`[OTP] Kullanıcı bulunamadı: ${email}`);
+    logger.withReq.warn(req, `[OTP] Kullanıcı bulunamadı: ${email}`);
     res
       .status(404)
       .json({ success: false, message: userT("error.userNotFound", locale) });
@@ -158,7 +170,7 @@ export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
 
   if (via === "sms" && user.phone) {
     await sendSms(user.phone, `${otpCode} - ${userT("otp.smsBody", locale)}`);
-    logger.info(`[OTP] SMS ile kod gönderildi: ${user.phone}`);
+    logger.withReq.info(req, `[OTP] SMS ile kod gönderildi: ${user.phone}`);
   } else {
     await sendEmail({
       to: user.email,
@@ -168,7 +180,7 @@ export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
         <p>${userT("otp.emailBody", locale)}</p>
       `,
     });
-    logger.info(`[OTP] E-posta ile kod gönderildi: ${user.email}`);
+    logger.withReq.info(req, `[OTP] E-posta ile kod gönderildi: ${user.email}`);
   }
 
   res.status(200).json({
@@ -185,7 +197,7 @@ export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
   const { User } = await getTenantModels(req);
 
   if (!email || !code) {
-    logger.warn(`[OTP-VERIFY] Email veya kod eksik.`);
+    logger.withReq.warn(req, `[OTP-VERIFY] Email veya kod eksik.`);
     res.status(400).json({
       success: false,
       message: userT("error.emailAndCodeRequired", locale),
@@ -199,7 +211,7 @@ export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
     otpExpires: { $gt: new Date() },
   });
   if (!user) {
-    logger.warn(`[OTP-VERIFY] Kod geçersiz veya süresi dolmuş.`);
+    logger.withReq.warn(req, `[OTP-VERIFY] Kod geçersiz veya süresi dolmuş.`);
     res.status(400).json({
       success: false,
       message: userT("error.otpInvalidOrExpired", locale),
@@ -212,7 +224,7 @@ export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
   user.isActive = true;
   await user.save();
 
-  logger.info(`[OTP-VERIFY] Başarıyla doğrulandı: ${email}`);
+  logger.withReq.info(req, `[OTP-VERIFY] Başarıyla doğrulandı: ${email}`);
   res
     .status(200)
     .json({ success: true, message: userT("otp.verified", locale) });
@@ -220,7 +232,7 @@ export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
 
 export const resendOtp = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    logger.info(`[OTP-RESEND] Tekrar gönderiliyor...`);
+    logger.withReq.info(req, `[OTP-RESEND] Tekrar gönderiliyor...`);
     return sendOtp(req, res, next);
   }
 );
@@ -232,7 +244,10 @@ export const enableMfa = asyncHandler(async (req: Request, res: Response) => {
   const user = await User.findOne({ _id: req.user!.id, tenant: req.tenant });
   const locale = getLocale(req);
   if (!user) {
-    logger.warn(`[MFA-ENABLE] Kullanıcı bulunamadı: ${req.user!.id}`);
+    logger.withReq.warn(
+      req,
+      `[MFA-ENABLE] Kullanıcı bulunamadı: ${req.user!.id}`
+    );
     res
       .status(404)
       .json({ success: false, message: userT("error.userNotFound", locale) });
@@ -251,7 +266,7 @@ export const enableMfa = asyncHandler(async (req: Request, res: Response) => {
   const otpauthUrl = secret.otpauth_url!;
   const qrImageUrl = await qrcode.toDataURL(otpauthUrl);
 
-  logger.info(`[MFA-ENABLE] MFA başlatıldı: ${user.email}`);
+  logger.withReq.info(req, `[MFA-ENABLE] MFA başlatıldı: ${user.email}`);
 
   res.status(200).json({
     success: true,
@@ -269,7 +284,7 @@ export const verifyMfa = asyncHandler(async (req: Request, res: Response) => {
   const { User } = await getTenantModels(req);
 
   if (!code) {
-    logger.warn(`[MFA-VERIFY] Kod eksik.`);
+    logger.withReq.warn(req, `[MFA-VERIFY] Kod eksik.`);
     res
       .status(400)
       .json({ success: false, message: userT("error.codeRequired", locale) });
@@ -280,7 +295,7 @@ export const verifyMfa = asyncHandler(async (req: Request, res: Response) => {
     tenant: req.tenant,
   }).select("+mfaSecret");
   if (!user || !user.mfaSecret) {
-    logger.warn(`[MFA-VERIFY] MFA tanımlı değil: ${req.user!.id}`);
+    logger.withReq.warn(req, `[MFA-VERIFY] MFA tanımlı değil: ${req.user!.id}`);
     res
       .status(404)
       .json({ success: false, message: userT("error.mfaNotSet", locale) });
@@ -295,7 +310,7 @@ export const verifyMfa = asyncHandler(async (req: Request, res: Response) => {
   });
 
   if (!verified) {
-    logger.warn(`[MFA-VERIFY] Kod geçersiz: ${user.email}`);
+    logger.withReq.warn(req, `[MFA-VERIFY] Kod geçersiz: ${user.email}`);
     res
       .status(400)
       .json({ success: false, message: userT("error.invalidCode", locale) });
@@ -305,7 +320,7 @@ export const verifyMfa = asyncHandler(async (req: Request, res: Response) => {
   user.mfaEnabled = true;
   await user.save();
 
-  logger.info(`[MFA-VERIFY] MFA etkinleştirildi: ${user.email}`);
+  logger.withReq.info(req, `[MFA-VERIFY] MFA etkinleştirildi: ${user.email}`);
 
   res.status(200).json({
     success: true,

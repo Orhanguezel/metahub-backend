@@ -90,7 +90,7 @@ export const createGalleryItem = asyncHandler(
         images,
       });
 
-      logger.info(t("create.success"), {
+      logger.withReq.info(req, t("create.success"), {
         ...getRequestContext(req),
         module: "gallery",
         event: "create",
@@ -103,7 +103,7 @@ export const createGalleryItem = asyncHandler(
         data: gallery,
       });
     } catch (error: any) {
-      logger.error(t("error.creating_item"), {
+      logger.withReq.error(req, t("error.creating_item"), {
         ...getRequestContext(req),
         module: "gallery",
         event: "create",
@@ -227,7 +227,7 @@ export const updateGalleryItem = asyncHandler(
 
       await gallery.save();
 
-      logger.info(t("update.success"), {
+      logger.withReq.info(req, t("update.success"), {
         ...getRequestContext(req),
         module: "gallery",
         event: "update",
@@ -240,7 +240,7 @@ export const updateGalleryItem = asyncHandler(
         data: gallery,
       });
     } catch (error: any) {
-      logger.error(t("error.updating_item"), {
+      logger.withReq.error(req, t("error.updating_item"), {
         ...getRequestContext(req),
         module: "gallery",
         event: "update",
@@ -309,7 +309,7 @@ export const getAllGalleryItems = asyncHandler(
         },
       });
     } catch (err: any) {
-      logger.error(t("error.fetching_items"), {
+      logger.withReq.error(req, t("error.fetching_items"), {
         module: "gallery",
         error: err.message,
       });
@@ -349,7 +349,7 @@ export const softDeleteGalleryItem = asyncHandler(
         message: t("archive.success"),
       });
     } catch (err: any) {
-      logger.error(t("error.archiving_item"), {
+      logger.withReq.error(req, t("error.archiving_item"), {
         module: "gallery",
         error: err.message,
       });
@@ -386,7 +386,7 @@ export const deleteGalleryItem = asyncHandler(
         message: t("delete.success"),
       });
     } catch (err: any) {
-      logger.error(t("error.deleting_item"), {
+      logger.withReq.error(req, t("error.deleting_item"), {
         module: "gallery",
         error: err.message,
       });
@@ -429,7 +429,7 @@ export const togglePublishGalleryItem = asyncHandler(
         data: item,
       });
     } catch (err: any) {
-      logger.error(t("error.toggling_publish"), {
+      logger.withReq.error(req, t("error.toggling_publish"), {
         module: "gallery",
         error: err.message,
       });
@@ -467,7 +467,7 @@ export const batchPublishGalleryItems = asyncHandler(
           : t("unpublish.success_all"),
       });
     } catch (err: any) {
-      logger.error(t("error.batch_publish"), {
+      logger.withReq.error(req, t("error.batch_publish"), {
         module: "gallery",
         error: err.message,
       });
@@ -500,7 +500,7 @@ export const batchDeleteGalleryItems = asyncHandler(
         message: t("delete.success_all"),
       });
     } catch (err: any) {
-      logger.error(t("error.batch_delete"), {
+      logger.withReq.error(req, t("error.batch_delete"), {
         module: "gallery",
         error: err.message,
       });

@@ -71,7 +71,7 @@ export const validateApiKey = asyncHandler(
           userAgent: req.headers["user-agent"] || "",
         });
         // Info log: çok istenirse bırak, ama bu da çok gerekmiyor
-        // logger.info(t("apikey.log.success"), { ...logContext, ... })
+        // logger.withReq.info(req,t("apikey.log.success"), { ...logContext, ... })
       } catch (error) {
         logger.error("[API key log error]", {
           ...logContext,
@@ -95,7 +95,7 @@ export const validateApiKey = asyncHandler(
 
     (req as any).apiKey = apiKey;
 
-    // logger.info(t("apikey.success.validated"), { ... })  // Artık yazılmıyor
+    // logger.withReq.info(req,t("apikey.success.validated"), { ... })  // Artık yazılmıyor
 
     next();
   }

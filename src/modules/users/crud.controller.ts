@@ -33,11 +33,11 @@ export const getUsers = asyncHandler(async (req: Request, res: Response) => {
   const locale: SupportedLocale = req.locale || getLogLocale();
   const { User } = await getTenantModels(req);
 
-  logger.debug(`[Admin] getUsers called | locale=${locale}`);
+  logger.withReq.debug(req, `[Admin] getUsers called | locale=${locale}`);
 
   const users = await User.find({ tenant: req.tenant }).select("-password");
 
-  logger.info(`[Admin] getUsers success | count=${users.length}`);
+  logger.withReq.info(req, `[Admin] getUsers success | count=${users.length}`);
 
   res.status(200).json({
     success: true,
@@ -52,10 +52,13 @@ export const getUserById = asyncHandler(async (req: Request, res: Response) => {
   const locale: SupportedLocale = req.locale || getLogLocale();
   const { User } = await getTenantModels(req);
 
-  logger.debug(`[Admin] getUserById called | id=${id} | locale=${locale}`);
+  logger.withReq.debug(
+    req,
+    `[Admin] getUserById called | id=${id} | locale=${locale}`
+  );
 
   if (!isValidObjectId(id)) {
-    logger.warn(`[Admin] Invalid user ID: ${id}`);
+    logger.withReq.warn(req, `[Admin] Invalid user ID: ${id}`);
     res.status(400).json({
       success: false,
       message: userT("admin.users.invalidId", locale),
@@ -65,11 +68,11 @@ export const getUserById = asyncHandler(async (req: Request, res: Response) => {
 
   const user = await User.findOne({ _id: id, tenant: req.tenant });
   if (!user) {
-    logger.warn(`[Admin] User not found: ${id}`);
+    logger.withReq.warn(req, `[Admin] User not found: ${id}`);
     return;
   }
 
-  logger.info(`[Admin] User fetched: ${id}`);
+  logger.withReq.info(req, `[Admin] User fetched: ${id}`);
 
   res.status(200).json({
     success: true,
@@ -98,11 +101,14 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   const locale: SupportedLocale = req.locale || getLogLocale();
   const { User } = await getTenantModels(req);
 
-  logger.debug(`[Admin] updateUser called | id=${id} | locale=${locale}`);
+  logger.withReq.debug(
+    req,
+    `[Admin] updateUser called | id=${id} | locale=${locale}`
+  );
 
   const user = await User.findOne({ _id: id, tenant: req.tenant });
   if (!user) {
-    logger.warn(`[Admin] User not found for update: ${id}`);
+    logger.withReq.warn(req, `[Admin] User not found for update: ${id}`);
     return;
   }
 
@@ -110,7 +116,7 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
 
   // Eğer yeni dosya yüklenmişse
   if (req.file) {
-    logger.info(`[Admin] Updating profile image for user: ${id}`);
+    logger.withReq.info(req, `[Admin] Updating profile image for user: ${id}`);
 
     // 1️⃣ Eski resmi sil (Cloudinary ve local)
     if (user.profileImage) {
@@ -118,11 +124,15 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
         if (user.profileImage.publicId) {
           try {
             await cloudinary.uploader.destroy(user.profileImage.publicId);
-            logger.info(
+            logger.withReq.info(
+              req,
               `[Admin] Cloudinary image deleted: ${user.profileImage.publicId}`
             );
           } catch (err) {
-            logger.error(`[Admin] Cloudinary image delete error: ${err}`);
+            logger.withReq.error(
+              req,
+              `[Admin] Cloudinary image delete error: ${err}`
+            );
           }
         }
         if (
@@ -135,18 +145,27 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
               path.basename(user.profileImage.url)
             );
             await fs.promises.unlink(localPath);
-            logger.info(`[Admin] Local profile image deleted: ${localPath}`);
+            logger.withReq.info(
+              req,
+              `[Admin] Local profile image deleted: ${localPath}`
+            );
           } catch (err) {
-            logger.error(`[Admin] Local image delete error: ${err}`);
+            logger.withReq.error(
+              req,
+              `[Admin] Local image delete error: ${err}`
+            );
           }
         }
       } else if (typeof user.profileImage === "string") {
         try {
           const localPath = path.join(PROFILE_IMAGE_DIR, user.profileImage);
           await fs.promises.unlink(localPath);
-          logger.info(`[Admin] Local profile image deleted: ${localPath}`);
+          logger.withReq.info(
+            req,
+            `[Admin] Local profile image deleted: ${localPath}`
+          );
         } catch (err) {
-          logger.error(`[Admin] Local image delete error: ${err}`);
+          logger.withReq.error(req, `[Admin] Local image delete error: ${err}`);
         }
       }
     }
@@ -193,7 +212,10 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
       ? validateJsonField(addresses, "addresses")
       : user.addresses;
   } catch (error: any) {
-    logger.warn(`[Admin] JSON field validation error: ${error.message}`);
+    logger.withReq.warn(
+      req,
+      `[Admin] JSON field validation error: ${error.message}`
+    );
     res.status(400).json({ success: false, message: error.message });
     return;
   }
@@ -204,7 +226,7 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
     tenant: req.tenant,
   });
 
-  logger.info(`[Admin] User updated: ${id}`);
+  logger.withReq.info(req, `[Admin] User updated: ${id}`);
 
   res.status(200).json({
     success: true,
@@ -219,10 +241,13 @@ export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
   const locale: SupportedLocale = req.locale || getLogLocale();
   const { User } = await getTenantModels(req);
 
-  logger.debug(`[Admin] deleteUser called | id=${id} | locale=${locale}`);
+  logger.withReq.debug(
+    req,
+    `[Admin] deleteUser called | id=${id} | locale=${locale}`
+  );
 
   if (!isValidObjectId(id)) {
-    logger.warn(`[Admin] Invalid user ID: ${id}`);
+    logger.withReq.warn(req, `[Admin] Invalid user ID: ${id}`);
     res.status(400).json({
       success: false,
       message: userT("admin.users.invalidId", locale),
@@ -232,7 +257,7 @@ export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
   const user = await User.findOne({ _id: id, tenant: req.tenant });
   await User.deleteOne({ _id: id, tenant: req.tenant });
   if (!user) {
-    logger.warn(`[Admin] User not found for delete: ${id}`);
+    logger.withReq.warn(req, `[Admin] User not found for delete: ${id}`);
     res.status(404).json({
       success: false,
       message: userT("admin.users.notFound", locale),
@@ -246,11 +271,15 @@ export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
       if (user.profileImage.publicId) {
         try {
           await cloudinary.uploader.destroy(user.profileImage.publicId);
-          logger.info(
+          logger.withReq.info(
+            req,
             `[Admin] Cloudinary image deleted: ${user.profileImage.publicId}`
           );
         } catch (err) {
-          logger.error(`[Admin] Cloudinary image delete error: ${err}`);
+          logger.withReq.error(
+            req,
+            `[Admin] Cloudinary image delete error: ${err}`
+          );
         }
       }
       if (
@@ -263,23 +292,29 @@ export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
             path.basename(user.profileImage.url)
           );
           await fs.promises.unlink(localPath);
-          logger.info(`[Admin] Local profile image deleted: ${localPath}`);
+          logger.withReq.info(
+            req,
+            `[Admin] Local profile image deleted: ${localPath}`
+          );
         } catch (err) {
-          logger.error(`[Admin] Local image delete error: ${err}`);
+          logger.withReq.error(req, `[Admin] Local image delete error: ${err}`);
         }
       }
     } else if (typeof user.profileImage === "string") {
       try {
         const localPath = path.join(PROFILE_IMAGE_DIR, user.profileImage);
         await fs.promises.unlink(localPath);
-        logger.info(`[Admin] Local profile image deleted: ${localPath}`);
+        logger.withReq.info(
+          req,
+          `[Admin] Local profile image deleted: ${localPath}`
+        );
       } catch (err) {
-        logger.error(`[Admin] Local image delete error: ${err}`);
+        logger.withReq.error(req, `[Admin] Local image delete error: ${err}`);
       }
     }
   }
 
-  logger.info(`[Admin] User deleted: ${id}`);
+  logger.withReq.info(req, `[Admin] User deleted: ${id}`);
 
   res.status(200).json({
     success: true,

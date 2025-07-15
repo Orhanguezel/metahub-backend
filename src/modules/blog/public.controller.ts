@@ -37,7 +37,7 @@ export const getAllBlog = asyncHandler(async (req: Request, res: Response) => {
     .sort({ createdAt: -1 })
     .lean();
 
-  logger.info(t("log.listed"), {
+  logger.withReq.info(req, t("log.listed"), {
     ...getRequestContext(req),
     event: "blog.public_list",
     module: "blog",
@@ -60,7 +60,7 @@ export const getBlogById = asyncHandler(async (req: Request, res: Response) => {
   const { Blog } = await getTenantModels(req);
 
   if (!isValidObjectId(id)) {
-    logger.warn(t("error.invalid_id"), {
+    logger.withReq.warn(req, t("error.invalid_id"), {
       ...getRequestContext(req),
       event: "blog.public_getById",
       module: "blog",
@@ -82,7 +82,7 @@ export const getBlogById = asyncHandler(async (req: Request, res: Response) => {
     .lean();
 
   if (!blog) {
-    logger.warn(t("error.not_found"), {
+    logger.withReq.warn(req, t("error.not_found"), {
       ...getRequestContext(req),
       event: "blog.public_getById",
       module: "blog",
@@ -92,7 +92,7 @@ export const getBlogById = asyncHandler(async (req: Request, res: Response) => {
     res.status(404).json({ success: false, message: t("error.not_found") });
     return;
   }
-  logger.info(t("log.fetched"), {
+  logger.withReq.info(req, t("log.fetched"), {
     ...getRequestContext(req),
     event: "blog.public_getById",
     module: "blog",
@@ -125,7 +125,7 @@ export const getBlogBySlug = asyncHandler(
       .lean();
 
     if (!blog) {
-      logger.warn(t("error.not_found"), {
+      logger.withReq.warn(req, t("error.not_found"), {
         ...getRequestContext(req),
         event: "blog.public_getBySlug",
         module: "blog",
@@ -136,7 +136,7 @@ export const getBlogBySlug = asyncHandler(
       return;
     }
 
-    logger.info(t("log.fetched"), {
+    logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
       event: "blog.public_getBySlug",
       module: "blog",

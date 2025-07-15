@@ -106,7 +106,7 @@ export const createReferences = asyncHandler(
         isActive: true,
       });
 
-      logger.info(t("created"), {
+      logger.withReq.info(req, t("created"), {
         ...getRequestContext(req),
         id: references._id,
       });
@@ -114,7 +114,7 @@ export const createReferences = asyncHandler(
         .status(201)
         .json({ success: true, message: t("created"), data: references });
     } catch (err: any) {
-      logger.error(t("error.create_fail"), {
+      logger.withReq.error(req, t("error.create_fail"), {
         ...getRequestContext(req),
         event: "references.create",
         module: "references",
@@ -137,7 +137,10 @@ export const updateReferences = asyncHandler(
       translate(key, locale, translations, params);
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("invalidId"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("invalidId"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(400).json({ success: false, message: t("invalidId") });
       return;
     }
@@ -147,7 +150,10 @@ export const updateReferences = asyncHandler(
       tenant: req.tenant,
     });
     if (!references) {
-      logger.warn(t("notFound"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("notFound"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(404).json({ success: false, message: t("notFound") });
       return;
     }
@@ -222,7 +228,7 @@ export const updateReferences = asyncHandler(
           if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
         }
       } catch (e) {
-        logger.warn(t("invalidRemovedImages"), {
+        logger.withReq.warn(req, t("invalidRemovedImages"), {
           ...getRequestContext(req),
           error: e,
         });
@@ -230,7 +236,7 @@ export const updateReferences = asyncHandler(
     }
 
     await references.save();
-    logger.info(t("updated"), { ...getRequestContext(req), id });
+    logger.withReq.info(req, t("updated"), { ...getRequestContext(req), id });
     res
       .status(200)
       .json({ success: true, message: t("updated"), data: references });
@@ -279,7 +285,7 @@ export const adminGetAllReferences = asyncHandler(
 
     const data = referencesList;
 
-    logger.info(t("listFetched"), {
+    logger.withReq.info(req, t("listFetched"), {
       ...getRequestContext(req),
       resultCount: data.length,
     });
@@ -296,7 +302,10 @@ export const adminGetReferencesById = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("invalidId"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("invalidId"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(400).json({ success: false, message: t("invalidId") });
       return;
     }
@@ -306,7 +315,10 @@ export const adminGetReferencesById = asyncHandler(
       .lean();
 
     if (!references || Array.isArray(references) || !references.isActive) {
-      logger.warn(t("notFound"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("notFound"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(404).json({ success: false, message: t("notFound") });
       return;
     }
@@ -330,7 +342,10 @@ export const deleteReferences = asyncHandler(
     const t = (key: string) => translate(key, locale, translations);
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("invalidId"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("invalidId"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(400).json({ success: false, message: t("invalidId") });
       return;
     }
@@ -340,7 +355,10 @@ export const deleteReferences = asyncHandler(
       tenant: req.tenant,
     });
     if (!references) {
-      logger.warn(t("notFound"), { ...getRequestContext(req), id });
+      logger.withReq.warn(req, t("notFound"), {
+        ...getRequestContext(req),
+        id,
+      });
       res.status(404).json({ success: false, message: t("notFound") });
       return;
     }
@@ -356,7 +374,7 @@ export const deleteReferences = asyncHandler(
         try {
           await cloudinary.uploader.destroy(img.publicId);
         } catch (err) {
-          logger.error("Cloudinary delete error", {
+          logger.withReq.error(req, t("Cloudinary delete error"), {
             ...getRequestContext(req),
             publicId: img.publicId,
           });
@@ -366,7 +384,7 @@ export const deleteReferences = asyncHandler(
 
     await references.deleteOne();
 
-    logger.info(t("deleted"), { ...getRequestContext(req), id });
+    logger.withReq.info(req, t("deleted"), { ...getRequestContext(req), id });
     res.status(200).json({ success: true, message: t("deleted") });
   }
 );

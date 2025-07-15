@@ -1,10 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import { v4 as uuidv4 } from "uuid";
-//import { Offer } from "@/modules/offer";
-//import { Product } from "@/modules/product";
-//import { Company } from "@/modules/company";
-//import { Customer } from "@/modules/customer";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // ✅ Yeni teklif oluştur

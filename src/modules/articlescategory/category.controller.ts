@@ -27,7 +27,8 @@ export const createArticlesCategory = asyncHandler(
         tenant: req.tenant,
       });
 
-      logger.info(
+      logger.withReq.info(
+        req,
         t("articlescategory.create.success", { name: name[locale] }),
         {
           ...getRequestContext(req),
@@ -43,7 +44,7 @@ export const createArticlesCategory = asyncHandler(
         data: category, // .name burada tüm diller ile döner!
       });
     } catch (err: any) {
-      logger.error(t("articlescategory.create.error"), {
+      logger.withReq.error(req, t("articlescategory.create.error"), {
         ...getRequestContext(req),
         event: "articlescategory.create",
         module: "articlescategory",
@@ -79,7 +80,7 @@ export const getAllArticlesCategories = asyncHandler(
         .sort({ createdAt: -1 })
         .lean();
 
-      logger.info(t("articlescategory.list.success"), {
+      logger.withReq.info(req, t("articlescategory.list.success"), {
         ...getRequestContext(req),
         event: "articlescategory.list",
         module: "articlescategory",
@@ -92,7 +93,7 @@ export const getAllArticlesCategories = asyncHandler(
         data: categories, // <--- .name: {tr, en, ...} tüm dillerle gelir!
       });
     } catch (err: any) {
-      logger.error(t("articlescategory.list.error"), {
+      logger.withReq.error(req, t("articlescategory.list.error"), {
         ...getRequestContext(req),
         event: "articlescategory.list",
         module: "articlescategory",
@@ -116,7 +117,11 @@ export const getArticlesCategoryById = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("articlescategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("articlescategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("articlescategory.invalidId") });
@@ -130,7 +135,11 @@ export const getArticlesCategoryById = asyncHandler(
     }).lean();
 
     if (!category) {
-      logger.warn(t("articlescategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("articlescategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("articlescategory.notFound") });
@@ -155,7 +164,11 @@ export const updateArticlesCategory = asyncHandler(
     const { name, isActive } = req.body;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("articlescategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("articlescategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("articlescategory.invalidId") });
@@ -168,7 +181,11 @@ export const updateArticlesCategory = asyncHandler(
       tenant: req.tenant,
     });
     if (!category) {
-      logger.warn(t("articlescategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("articlescategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("articlescategory.notFound") });
@@ -185,7 +202,8 @@ export const updateArticlesCategory = asyncHandler(
 
     await category.save();
 
-    logger.info(
+    logger.withReq.info(
+      req,
       t("articlescategory.update.success", { name: category.name[locale] }),
       {
         ...getRequestContext(req),
@@ -214,7 +232,11 @@ export const deleteArticlesCategory = asyncHandler(
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
-      logger.warn(t("articlescategory.invalidId"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("articlescategory.invalidId"),
+        getRequestContext(req)
+      );
       res
         .status(400)
         .json({ success: false, message: t("articlescategory.invalidId") });
@@ -230,7 +252,11 @@ export const deleteArticlesCategory = asyncHandler(
     });
 
     if (!deleted) {
-      logger.warn(t("articlescategory.notFound"), getRequestContext(req));
+      logger.withReq.warn(
+        req,
+        t("articlescategory.notFound"),
+        getRequestContext(req)
+      );
       res
         .status(404)
         .json({ success: false, message: t("articlescategory.notFound") });
@@ -239,7 +265,7 @@ export const deleteArticlesCategory = asyncHandler(
 
     const name = deleted.name?.[locale] || "Category";
 
-    logger.info(t("articlescategory.delete.success", { name }), {
+    logger.withReq.info(req, t("articlescategory.delete.success", { name }), {
       ...getRequestContext(req),
       event: "articlescategory.delete",
       module: "articlescategory",

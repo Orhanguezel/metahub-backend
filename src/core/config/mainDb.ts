@@ -17,9 +17,12 @@ export async function connectMainDb() {
     await mongoose.connect(uri, {
       // useNewUrlParser: true, useUnifiedTopology: true, // opsiyonel modern parametreler
     });
-    logger.info(t("server.mongoConnected", lang, translations, { uri }), {
-      uri,
-    });
+    logger.info(
+      t("server.mongoConnected", lang, translations, { uri }),
+      {
+        uri,
+      }
+    );
     console.log(`🌍 [GLOBAL] MongoDB connected: ${uri}`);
   } catch (err) {
     logger.error(

@@ -39,7 +39,7 @@ export const getAllCarts = asyncHandler(
         .populate("items.product", "name price stock")
         .sort({ createdAt: -1 });
 
-      logger.info(cartT("cart.admin.fetchedAll", locale));
+      logger.withReq.info(req, cartT("cart.admin.fetchedAll", locale));
       res.status(200).json({
         success: true,
         data: carts,
@@ -47,7 +47,8 @@ export const getAllCarts = asyncHandler(
       });
       return;
     } catch (error) {
-      logger.error(
+      logger.withReq.error(
+        req,
         cartT("cart.admin.fetchError", locale) + " " + String(error)
       );
       next(error);
@@ -63,7 +64,7 @@ export const getSingleCart = asyncHandler(
     try {
       const { id } = req.params;
       if (!isValidObjectId(id)) {
-        logger.warn(cartT("cart.admin.invalidId", locale, { id }));
+        logger.withReq.warn(req, cartT("cart.admin.invalidId", locale, { id }));
         res.status(400).json({
           success: false,
           message: cartT("cart.admin.invalidId", locale),
@@ -74,13 +75,16 @@ export const getSingleCart = asyncHandler(
         "items.product"
       );
       if (!cart) {
-        logger.warn(cartT("cart.notFound", locale, { id }));
+        logger.withReq.warn(req, cartT("cart.notFound", locale, { id }));
         res
           .status(404)
           .json({ success: false, message: cartT("cart.notFound", locale) });
         return;
       }
-      logger.info(cartT("cart.admin.fetchedSingle", locale, { id }));
+      logger.withReq.info(
+        req,
+        cartT("cart.admin.fetchedSingle", locale, { id })
+      );
       res.status(200).json({
         success: true,
         data: cart,
@@ -88,7 +92,8 @@ export const getSingleCart = asyncHandler(
       });
       return;
     } catch (error) {
-      logger.error(
+      logger.withReq.error(
+        req,
         cartT("cart.admin.fetchSingleError", locale) + " " + String(error)
       );
       next(error);
@@ -106,7 +111,7 @@ export const updateCart = asyncHandler(
       const { items, status, couponCode, isActive } = req.body;
 
       if (!isValidObjectId(id)) {
-        logger.warn(cartT("cart.admin.invalidId", locale, { id }));
+        logger.withReq.warn(req, cartT("cart.admin.invalidId", locale, { id }));
         res.status(400).json({
           success: false,
           message: cartT("cart.admin.invalidId", locale),
@@ -116,7 +121,7 @@ export const updateCart = asyncHandler(
 
       const cart = await Cart.findOne({ _id: id, tenant: req.tenant });
       if (!cart) {
-        logger.warn(cartT("cart.notFound", locale, { id }));
+        logger.withReq.warn(req, cartT("cart.notFound", locale, { id }));
         res
           .status(404)
           .json({ success: false, message: cartT("cart.notFound", locale) });
@@ -134,7 +139,10 @@ export const updateCart = asyncHandler(
 
       if (status) {
         if (!["open", "ordered", "cancelled"].includes(status)) {
-          logger.warn(cartT("cart.admin.invalidStatus", locale, { status }));
+          logger.withReq.warn(
+            req,
+            cartT("cart.admin.invalidStatus", locale, { status })
+          );
           res.status(400).json({
             success: false,
             message: cartT("cart.admin.invalidStatus", locale),
@@ -149,7 +157,7 @@ export const updateCart = asyncHandler(
 
       await cart.save();
 
-      logger.info(cartT("cart.admin.updated", locale, { id }));
+      logger.withReq.info(req, cartT("cart.admin.updated", locale, { id }));
       res.status(200).json({
         success: true,
         message: cartT("cart.admin.updated", locale),
@@ -157,7 +165,8 @@ export const updateCart = asyncHandler(
       });
       return;
     } catch (error) {
-      logger.error(
+      logger.withReq.error(
+        req,
         cartT("cart.admin.updateError", locale) + " " + String(error)
       );
       next(error);
@@ -173,7 +182,7 @@ export const deleteCart = asyncHandler(
     try {
       const { id } = req.params;
       if (!isValidObjectId(id)) {
-        logger.warn(cartT("cart.admin.invalidId", locale, { id }));
+        logger.withReq.warn(req, cartT("cart.admin.invalidId", locale, { id }));
         res.status(400).json({
           success: false,
           message: cartT("cart.admin.invalidId", locale),
@@ -182,7 +191,7 @@ export const deleteCart = asyncHandler(
       }
       const cart = await Cart.findOne({ _id: id, tenant: req.tenant });
       if (!cart) {
-        logger.warn(cartT("cart.notFound", locale, { id }));
+        logger.withReq.warn(req, cartT("cart.notFound", locale, { id }));
         res
           .status(404)
           .json({ success: false, message: cartT("cart.notFound", locale) });
@@ -190,14 +199,15 @@ export const deleteCart = asyncHandler(
       }
       await cart.deleteOne();
 
-      logger.info(cartT("cart.admin.deleted", locale, { id }));
+      logger.withReq.info(req, cartT("cart.admin.deleted", locale, { id }));
       res.status(200).json({
         success: true,
         message: cartT("cart.admin.deleted", locale),
       });
       return;
     } catch (error) {
-      logger.error(
+      logger.withReq.error(
+        req,
         cartT("cart.admin.deleteError", locale) + " " + String(error)
       );
       next(error);
@@ -214,7 +224,7 @@ export const toggleCartActiveStatus = asyncHandler(
       const { id } = req.params;
 
       if (!isValidObjectId(id)) {
-        logger.warn(cartT("cart.admin.invalidId", locale, { id }));
+        logger.withReq.warn(req, cartT("cart.admin.invalidId", locale, { id }));
         res.status(400).json({
           success: false,
           message: cartT("cart.admin.invalidId", locale),
@@ -224,7 +234,7 @@ export const toggleCartActiveStatus = asyncHandler(
 
       const cart = await Cart.findOne({ _id: id, tenant: req.tenant });
       if (!cart) {
-        logger.warn(cartT("cart.notFound", locale, { id }));
+        logger.withReq.warn(req, cartT("cart.notFound", locale, { id }));
         res
           .status(404)
           .json({ success: false, message: cartT("cart.notFound", locale) });
@@ -237,7 +247,7 @@ export const toggleCartActiveStatus = asyncHandler(
       const msgKey = cart.isActive
         ? "cart.admin.activated"
         : "cart.admin.deactivated";
-      logger.info(cartT(msgKey, locale, { id }));
+      logger.withReq.info(req, cartT(msgKey, locale, { id }));
 
       res.status(200).json({
         success: true,
@@ -246,7 +256,8 @@ export const toggleCartActiveStatus = asyncHandler(
       });
       return;
     } catch (error) {
-      logger.error(
+      logger.withReq.error(
+        req,
         cartT("cart.admin.toggleActiveError", locale) + " " + String(error)
       );
       next(error);

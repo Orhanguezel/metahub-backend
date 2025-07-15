@@ -36,7 +36,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       tenant: req.tenant,
     }).lean();
     if (!addressDoc) {
-      logger.warn(orderT("error.addressNotFound", reqLocale));
+      logger.withReq.warn(req, orderT("error.addressNotFound", reqLocale));
       res.status(400).json({
         success: false,
         message: orderT("error.addressNotFound", reqLocale),
@@ -70,7 +70,10 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     !shippingAddressWithTenant.postalCode ||
     !shippingAddressWithTenant.country
   ) {
-    logger.warn(orderT("error.shippingAddressRequired", reqLocale));
+    logger.withReq.warn(
+      req,
+      orderT("error.shippingAddressRequired", reqLocale)
+    );
     res.status(400).json({
       success: false,
       message: orderT("error.shippingAddressRequired", reqLocale),
@@ -92,7 +95,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       tenant: req.tenant,
     });
     if (!product) {
-      logger.warn(orderT("error.productNotFound", reqLocale));
+      logger.withReq.warn(req, orderT("error.productNotFound", reqLocale));
       res.status(404).json({
         success: false,
         message: orderT("error.productNotFound", reqLocale),
@@ -100,7 +103,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       return;
     }
     if (product.stock < item.quantity) {
-      logger.warn(orderT("error.insufficientStock", reqLocale));
+      logger.withReq.warn(req, orderT("error.insufficientStock", reqLocale));
       res.status(400).json({
         success: false,
         message: orderT("error.insufficientStock", reqLocale),
@@ -149,7 +152,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     if (coupon) {
       discount = Math.round(total * (coupon.discount / 100));
     } else {
-      logger.warn(orderT("error.invalidCoupon", reqLocale));
+      logger.withReq.warn(req, orderT("error.invalidCoupon", reqLocale));
       res.status(400).json({
         success: false,
         message: orderT("error.invalidCoupon", reqLocale),
@@ -161,7 +164,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   // 4️⃣ Payment method kontrol
   const method = (paymentMethod as string) || "cash_on_delivery";
   if (!["cash_on_delivery", "credit_card", "paypal"].includes(method)) {
-    logger.warn(orderT("error.invalidPaymentMethod", reqLocale));
+    logger.withReq.warn(req, orderT("error.invalidPaymentMethod", reqLocale));
     res.status(400).json({
       success: false,
       message: orderT("error.invalidPaymentMethod", reqLocale),
@@ -242,7 +245,8 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     language: locale,
   });
 
-  logger.info(
+  logger.withReq.info(
+    req,
     orderT("order.created.success", locale) +
       ` | User: ${userId} | Order: ${order._id}`
   );
@@ -275,7 +279,7 @@ export const getOrderById = asyncHandler(
     const locale: SupportedLocale = (req.locale as SupportedLocale) || "en";
 
     if (!order) {
-      logger.warn(orderT("error.orderNotFound", locale));
+      logger.withReq.warn(req, orderT("error.orderNotFound", locale));
       res.status(404).json({
         success: false,
         message: orderT("error.orderNotFound", locale),
@@ -286,7 +290,7 @@ export const getOrderById = asyncHandler(
       order.user?.toString() !== req.user?._id.toString() &&
       req.user?.role !== "admin"
     ) {
-      logger.warn(orderT("error.notAuthorizedViewOrder", locale));
+      logger.withReq.warn(req, orderT("error.notAuthorizedViewOrder", locale));
       res.status(403).json({
         success: false,
         message: orderT("error.notAuthorizedViewOrder", locale),
@@ -313,7 +317,7 @@ export const updateShippingAddress = asyncHandler(
     const locale: SupportedLocale = (req.locale as SupportedLocale) || "en";
 
     if (!order) {
-      logger.warn(orderT("error.orderNotFound", locale));
+      logger.withReq.warn(req, orderT("error.orderNotFound", locale));
       res.status(404).json({
         success: false,
         message: orderT("error.orderNotFound", locale),
@@ -322,7 +326,10 @@ export const updateShippingAddress = asyncHandler(
     }
 
     if (order.user?.toString() !== req.user?._id.toString()) {
-      logger.warn(orderT("error.notAuthorizedUpdateOrder", locale));
+      logger.withReq.warn(
+        req,
+        orderT("error.notAuthorizedUpdateOrder", locale)
+      );
       res.status(403).json({
         success: false,
         message: orderT("error.notAuthorizedUpdateOrder", locale),
@@ -333,7 +340,7 @@ export const updateShippingAddress = asyncHandler(
     const { shippingAddress } = req.body;
 
     if (!shippingAddress) {
-      logger.warn(orderT("error.shippingAddressRequired", locale));
+      logger.withReq.warn(req, orderT("error.shippingAddressRequired", locale));
       res.status(400).json({
         success: false,
         message: orderT("error.shippingAddressRequired", locale),
@@ -348,7 +355,8 @@ export const updateShippingAddress = asyncHandler(
 
     await order.save();
 
-    logger.info(
+    logger.withReq.info(
+      req,
       orderT("order.addressUpdated.success", locale) +
         ` | User: ${order.user} | Order: ${order._id}`
     );
@@ -371,7 +379,7 @@ export const getMyOrders = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 });
 
   if (!orders || orders.length === 0) {
-    logger.info(orderT("order.noOrdersFound", locale));
+    logger.withReq.info(req, orderT("order.noOrdersFound", locale));
     res.status(404).json({
       success: false,
       message: orderT("order.noOrdersFound", locale),
