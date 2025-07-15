@@ -35,11 +35,9 @@ export const resolveTenant = async (
   const tenantHeader = req.headers["x-tenant"]?.toString().trim() || "";
   let tenantDoc = null;
 
-  // 1️⃣ DEV ortamında x-tenant ile override (kullanıcı login olmasa da çalışsın!)
-  if (process.env.NODE_ENV !== "production" && tenantHeader) {
-    tenantDoc = await Tenants.findOne({
-      slug: tenantHeader.toLowerCase(),
-    }).lean();
+  // 1️⃣ Her ortamda x-tenant header ile (EN ÖNCE)
+  if (tenantHeader) {
+    tenantDoc = await Tenants.findOne({ slug: tenantHeader.toLowerCase() }).lean();
   }
 
   // 2️⃣ Domain/subdomain mapping ile tenant bul
@@ -48,7 +46,6 @@ export const resolveTenant = async (
       req.hostname || (req.headers.host as string) || ""
     );
 
-    // Eğer API subdomain ise, origin/referer üzerinden tenantı bul
     if (API_DOMAINS.includes(normalizedHost)) {
       const origin =
         (req.headers.origin as string) || (req.headers.referer as string) || "";
@@ -66,7 +63,7 @@ export const resolveTenant = async (
     }).lean();
   }
 
-  // 3️⃣ DEV ortamında localhost/127.0.0.1 için .env fallback (sadece hiçbiri bulunamazsa)
+  // 3️⃣ DEV ortamında localhost/127.0.0.1 için .env fallback
   if (!tenantDoc && process.env.NODE_ENV !== "production") {
     const envTenant =
       process.env.NEXT_PUBLIC_APP_ENV ||
@@ -75,7 +72,7 @@ export const resolveTenant = async (
     tenantDoc = await Tenants.findOne({ slug: envTenant }).lean();
   }
 
-  // 4️⃣ Final Sonuç: Tenant bulunduysa requeste ekle ve devam et
+  // 4️⃣ Tenant bulunduysa ekle
   if (tenantDoc) {
     req.tenant = tenantDoc.slug;
     req.tenantData = tenantDoc;
@@ -85,7 +82,7 @@ export const resolveTenant = async (
     return next();
   }
 
-  // 5️⃣ Tenant bulunamazsa her ortamda 404 ve log
+  // 5️⃣ Bulunamazsa 404 ve log
   logger.warn(`[DEBUG] [TENANT] Tenant çözümlenemedi!`);
   return res.status(404).json({
     success: false,
@@ -99,3 +96,4 @@ export const resolveTenant = async (
         : "Tenant slug not found in DEV environment. Please check your request and tenant setup.",
   });
 };
+
