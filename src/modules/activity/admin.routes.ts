@@ -33,7 +33,7 @@ router.get("/:id", validateObjectId("id"), adminGetActivityById);
 router.post(
   "/",
   uploadTypeWrapper("activity"),
-  upload.array("images", 5),
+  upload("activity").array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateCreateActivity,
   createActivity
@@ -42,7 +42,7 @@ router.post(
 router.put(
   "/:id",
   uploadTypeWrapper("activity"),
-  upload.array("images", 5),
+  upload("activity").array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateObjectId("id"),
   validateUpdateActivity,

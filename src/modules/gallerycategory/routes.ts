@@ -26,7 +26,7 @@ router.use(authenticate, authorizeRoles("admin", "moderator"));
 // ➕ Create gallery category
 router.post(
   "/",
-  upload.array("images", 5),
+  upload("galleryCategory").array("images", 5),
   uploadTypeWrapper("galleryCategory"),
   parseFormDataJson,
   validateCreateGalleryCategory,
@@ -36,7 +36,7 @@ router.post(
 // ✏️ Update gallery category
 router.put(
   "/:id",
-  upload.array("images", 5),
+  upload("galleryCategory").array("images", 5),
   uploadTypeWrapper("galleryCategory"),
   parseFormDataJson,
   validateObjectId("id"),

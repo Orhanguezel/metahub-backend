@@ -33,7 +33,7 @@ router.get("/:id", validateObjectId("id"), adminGetReferencesById);
 router.post(
   "/",
   uploadTypeWrapper("references"),
-  upload.array("images", 5),
+  upload("references").array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateCreateReferences,
   createReferences
@@ -42,7 +42,7 @@ router.post(
 router.put(
   "/:id",
   uploadTypeWrapper("references"),
-  upload.array("images", 5),
+  upload("references").array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateObjectId("id"),
   validateUpdateReferences,

@@ -33,7 +33,7 @@ router.get("/:id", validateObjectId("id"), adminGetNewsById);
 router.post(
   "/",
   uploadTypeWrapper("news"),
-  upload.array("images", 5),
+  upload("news").array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateCreateNews,
   createNews
@@ -42,7 +42,7 @@ router.post(
 router.put(
   "/:id",
   uploadTypeWrapper("news"),
-  upload.array("images", 5),
+  upload("news").array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateObjectId("id"),
   validateUpdateNews,

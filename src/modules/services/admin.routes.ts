@@ -33,7 +33,7 @@ router.get("/:id", validateObjectId("id"), adminGetServicesById);
 router.post(
   "/",
   uploadTypeWrapper("services"),
-  upload.array("images", 5),
+  upload("services").array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateCreateServices,
   createServices
@@ -42,7 +42,7 @@ router.post(
 router.put(
   "/:id",
   uploadTypeWrapper("services"),
-  upload.array("images", 5),
+  upload("services").array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateObjectId("id"),
   validateUpdateServices,

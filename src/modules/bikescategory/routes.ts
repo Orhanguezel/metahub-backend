@@ -26,7 +26,7 @@ router.use(authenticate, authorizeRoles("admin", "moderator"));
 // ➕ Create bike category
 router.post(
   "/",
-  upload.array("images", 5),
+  upload("bikesCategory").array("images", 5),
   uploadTypeWrapper("bikesCategory"),
   parseFormDataJson,
   validateCreateBikeCategory,
@@ -36,7 +36,7 @@ router.post(
 // ✏️ Update bike category
 router.put(
   "/:id",
-  upload.array("images", 5),
+  upload("bikesCategory").array("images", 5),
   uploadTypeWrapper("bikesCategory"),
   parseFormDataJson,
   validateObjectId("id"),

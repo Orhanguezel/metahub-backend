@@ -27,7 +27,7 @@ router.post(
   authenticate,
   authorizeRoles("admin"),
   uploadTypeWrapper("company"),
-  upload.array("images", 5),
+  upload("company").array("images", 5),
   validateCreateCompany,
   createCompany
 );
@@ -38,7 +38,7 @@ router.put(
   authenticate,
   authorizeRoles("admin"),
   uploadTypeWrapper("company"),
-  upload.array("images", 5),
+  upload("company").array("images", 5),
   validateObjectId("id"),    // <-- burada fonksiyon çağrısı ile
   validateUpdateCompany,
   updateCompanyInfo

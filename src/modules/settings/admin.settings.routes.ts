@@ -34,7 +34,7 @@ router.delete("/:key", validateSettingKeyParam, deleteSetting);
 router.post(
   "/upload/:key",
   uploadTypeWrapper("settings"),
-  upload.array("images", 5),
+  upload("settings").array("images", 5),
   validateSettingKeyParam,
   upsertSettingImage
 );
@@ -43,7 +43,7 @@ router.post(
 router.put(
   "/upload/:key",
   uploadTypeWrapper("settings"),
-  upload.array("images", 5),
+  upload("settings").array("images", 5),
   validateSettingKeyParam,
   updateSettingImage
 );

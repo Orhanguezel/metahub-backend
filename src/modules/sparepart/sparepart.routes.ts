@@ -31,7 +31,7 @@ router.post(
     req.uploadType = "spareparts";
     next();
   },
-  upload.array("images", 5),
+  upload("spareparts").array("images", 5),
   validateCreateSparePart,
   createSparePart
 );
@@ -45,7 +45,7 @@ router.put(
     req.uploadType = "spareparts";
     next();
   },
-  upload.array("images", 5),
+  upload("spareparts").array("images", 5),
   validateUpdateSparePart,
   updateSparePart
 );

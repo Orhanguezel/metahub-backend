@@ -28,7 +28,7 @@ router.use(authenticate, authorizeRoles("admin", "moderator"));
 router.post(
   "/",
   uploadTypeWrapper("apartment"),
-  upload.array("images", 10),
+  upload("apartment").array("images", 5),
   transformNestedFields(["title", "description", "tags"]),
   validateCreateApartment,
   createApartment
@@ -38,7 +38,7 @@ router.post(
 router.put(
   "/:id",
   uploadTypeWrapper("apartment"),
-  upload.array("images", 10),
+  upload("apartment").array("images", 5),
   transformNestedFields(["title", "description", "tags"]),
   validateObjectId("id"),
   validateUpdateApartment,

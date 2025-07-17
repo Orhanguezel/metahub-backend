@@ -33,7 +33,7 @@ router.get("/:id", validateObjectId("id"), adminGetAboutById);
 router.post(
   "/",
   uploadTypeWrapper("about"),
-  upload.array("images", 5),
+  upload("about").array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateCreateAbout,
   createAbout
@@ -42,7 +42,7 @@ router.post(
 router.put(
   "/:id",
   uploadTypeWrapper("about"),
-  upload.array("images", 5),
+  upload("about").array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateObjectId("id"),
   validateUpdateAbout,
