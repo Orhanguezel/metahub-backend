@@ -1,14 +1,12 @@
 {
-  "gallerycategory.validation.invalidNameType": "İsim, dillerle birlikte bir nesne olmalıdır.",
-  "gallerycategory.validation.localeMissing": "Name.{{lang}} zorunludur ve boş olamaz.",
-  "gallerycategory.validation.localeInvalid": "Name.{{lang}} bir metin (string) olmalıdır.",
-  "gallerycategory.create.success": "'{{name}}' kategorisi başarıyla oluşturuldu.",
-  "gallerycategory.create.error": "Kategori oluşturulamadı.",
-  "gallerycategory.update.success": "'{{name}}' kategorisi başarıyla güncellendi.",
-  "gallerycategory.delete.success": "'{{name}}' kategorisi başarıyla silindi.",
-  "gallerycategory.list.success": "Kategoriler başarıyla listelendi.",
-  "gallerycategory.list.error": "Kategoriler alınırken hata oluştu.",
-  "gallerycategory.fetch.success": "Kategori başarıyla getirildi.",
-  "gallerycategory.notFound": "Kategori bulunamadı.",
-  "gallerycategory.invalidId": "Geçersiz kategori ID’si."
+  "create.success": "Bisiklet kategorisi başarıyla oluşturuldu.",
+  "update.success": "Bisiklet kategorisi başarıyla güncellendi.",
+  "delete.success": "Bisiklet kategorisi başarıyla silindi.",
+  "fetch.success": "Bisiklet kategorisi başarıyla getirildi.",
+  "fetchAll.success": "Bisiklet kategorileri başarıyla getirildi.",
+  "error.notFound": "Bisiklet kategorisi bulunamadı.",
+  "error.invalidId": "Geçersiz kategori ID'si.",
+  "validation.missingLocales": "Tüm desteklenen dillerde isim zorunludur: {{locales}}.",
+  "validation.invalidLocales": "İsim sadece şu dillerden oluşmalı ve string olmalı: {{locales}}.",
+  "validation.default": "Geçersiz veri. Lütfen kontrol edin."
 }

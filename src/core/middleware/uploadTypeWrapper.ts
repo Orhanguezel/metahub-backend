@@ -25,6 +25,7 @@ export const uploadSizeLimits: Record<UploadFolderKeys, number> = {
   tenant: 20 * 1024 * 1024,
   coupons: 10 * 1024 * 1024, 
   about: 10 * 1024 * 1024,
+  galleryCategory: 30 * 1024 * 1024, // New limit for gallery categories
 };
 
 export const uploadTypeWrapper = (type: UploadFolderKeys) => {

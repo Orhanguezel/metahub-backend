@@ -1,14 +1,10 @@
 {
-  "gallerycategory.validation.invalidNameType": "Name muss ein Objekt mit Übersetzungen sein.",
-  "gallerycategory.validation.localeMissing": "Name.{{lang}} ist erforderlich und darf nicht leer sein.",
-  "gallerycategory.validation.localeInvalid": "Name.{{lang}} muss ein String sein.",
-  "gallerycategory.create.success": "Kategorie '{{name}}' wurde erfolgreich erstellt.",
-  "gallerycategory.create.error": "Kategorie konnte nicht erstellt werden.",
-  "gallerycategory.update.success": "Kategorie '{{name}}' wurde erfolgreich aktualisiert.",
-  "gallerycategory.delete.success": "Kategorie '{{name}}' wurde erfolgreich gelöscht.",
-  "gallerycategory.list.success": "Kategorien wurden erfolgreich aufgelistet.",
-  "gallerycategory.list.error": "Fehler beim Abrufen der Kategorien.",
-  "gallerycategory.fetch.success": "Kategorie erfolgreich abgerufen.",
-  "gallerycategory.notFound": "Kategorie nicht gefunden.",
-  "gallerycategory.invalidId": "Ungültige Kategorie-ID."
+  "create.success": "Fahrradkategorie erfolgreich erstellt.",
+  "update.success": "Fahrradkategorie erfolgreich aktualisiert.",
+  "delete.success": "Fahrradkategorie erfolgreich gelöscht.",
+  "fetch.success": "Fahrradkategorie erfolgreich abgerufen.",
+  "fetchAll.success": "Fahrradkategorien erfolgreich abgerufen.",
+  "error.notFound": "Fahrradkategorie nicht gefunden.",
+  "error.invalidId": "Ungültige Kategorie-ID.",
+  "validation.missingLocales": "In allen unterstützten Sprachen muss ein Name angegeben werden."
 }

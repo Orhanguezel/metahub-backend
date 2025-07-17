@@ -19,7 +19,7 @@ import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import slugify from "slugify";
 import translations from "./i18n";
 import type { SupportedLocale } from "@/types/common";
-import type { IBikeCategory } from "./types";
+import type { IGalleryCategory } from "./types";
 
 const parseIfJson = (value: any) => {
   try {
@@ -30,10 +30,10 @@ const parseIfJson = (value: any) => {
 };
 
 // ✅ CREATE
-export const createBikeCategory = asyncHandler(
+export const createGalleryCategory = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
-    const { BikeCategory } = await getTenantModels(req);
+    const { GalleryCategory } = await getTenantModels(req);
     const t = (key: string, vars?: Record<string, string | number>) =>
       translate(key, locale, translations, vars);
 
@@ -45,7 +45,7 @@ export const createBikeCategory = asyncHandler(
       description = fillAllLocales(parseIfJson(description), locale);
 
       // 2️⃣ Images
-      const images: IBikeCategory["images"] = [];
+      const images: IGalleryCategory["images"] = [];
       if (Array.isArray(req.files)) {
         for (const file of req.files as Express.Multer.File[]) {
           let imageUrl = getImagePath(file);
@@ -74,7 +74,7 @@ export const createBikeCategory = asyncHandler(
       const slug = slugify(nameForSlug, { lower: true, strict: true });
 
       // 3️⃣ Kayıt ekle
-      const category = await BikeCategory.create({
+      const category = await GalleryCategory.create({
         name,
         description,
         slug,
@@ -85,7 +85,7 @@ export const createBikeCategory = asyncHandler(
 
       logger.withReq.info(req, t("create.success"), {
         ...getRequestContext(req),
-        module: "bikeCategory",
+        module: "galleryCategory",
         event: "create",
         categoryId: category._id,
       });
@@ -99,7 +99,7 @@ export const createBikeCategory = asyncHandler(
       logger.withReq.error(req, t("error.create_fail"), {
         ...getRequestContext(req),
         event: "category.create",
-        module: "bikeCategory",
+        module: "galleryCategory",
         status: "fail",
         error: err.message,
       });
@@ -123,13 +123,13 @@ export const createBikeCategory = asyncHandler(
   }
 );
 
-// ✅ FINAL: updateBikeCategory
-export const updateBikeCategory = asyncHandler(
+// ✅ FINAL: updateGalleryCategory
+export const updateGalleryCategory = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const updates = req.body;
     const locale: SupportedLocale = req.locale || getLogLocale();
-    const { BikeCategory } = await getTenantModels(req);
+    const { GalleryCategory } = await getTenantModels(req);
     const t = (key: string, vars?: Record<string, any>) =>
       translate(key, locale, translations, vars);
 
@@ -138,7 +138,7 @@ export const updateBikeCategory = asyncHandler(
       return;
     }
 
-    const category = await BikeCategory.findOne({
+    const category = await GalleryCategory.findOne({
       _id: id,
       tenant: req.tenant,
     });
@@ -164,7 +164,7 @@ export const updateBikeCategory = asyncHandler(
     }
 
     // Diğer alanlar
-    const directFields: (keyof IBikeCategory)[] = ["isActive"];
+    const directFields: (keyof IGalleryCategory)[] = ["isActive"];
     for (const field of directFields) {
       if (updates[field] !== undefined) {
         (category as any)[field] = parseIfJson(updates[field]);
@@ -216,7 +216,7 @@ export const updateBikeCategory = asyncHandler(
           if (imgObj) {
             const localPath = path.join(
               "uploads",
-              "bikeCategory-images",
+              "galleryCategory-images",
               path.basename(imgObj.url)
             );
             if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
@@ -243,7 +243,7 @@ export const updateBikeCategory = asyncHandler(
 
     logger.withReq.info(req, t("update.success"), {
       ...getRequestContext(req),
-      module: "bikeCategory",
+      module: "galleryCategory",
       event: "update",
       categoryId: id,
     });
@@ -257,22 +257,22 @@ export const updateBikeCategory = asyncHandler(
 );
 
 // ✅ GET ALL
-export const getAllBikeCategories = asyncHandler(
+export const getAllGalleryCategories = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale() || "en";
-    const { BikeCategory } = await getTenantModels(req);
+    const { GalleryCategory } = await getTenantModels(req);
     const t = (key: string) => translate(key, locale, translations);
 
     const filter: Record<string, any> = { tenant: req.tenant };
     if (req.query.isActive) filter.isActive = req.query.isActive === "true";
 
-    const categories = await BikeCategory.find(filter).sort({
+    const categories = await GalleryCategory.find(filter).sort({
       createdAt: -1,
     });
 
     logger.withReq.info(req, t("fetchAll.success"), {
       ...getRequestContext(req),
-      module: "bikeCategory",
+      module: "galleryCategory",
       event: "fetchAll",
       count: categories.length,
     });
@@ -286,11 +286,11 @@ export const getAllBikeCategories = asyncHandler(
 );
 
 // ✅ GET BY ID
-export const getBikeCategoryById = asyncHandler(
+export const getGalleryCategoryById = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const locale: SupportedLocale = req.locale || getLogLocale() || "en";
-    const { BikeCategory } = await getTenantModels(req);
+    const { GalleryCategory } = await getTenantModels(req);
     const t = (key: string) => translate(key, locale, translations);
 
     if (!isValidObjectId(id)) {
@@ -298,7 +298,7 @@ export const getBikeCategoryById = asyncHandler(
       return;
     }
 
-    const category = await BikeCategory.findOne({
+    const category = await GalleryCategory.findOne({
       _id: id,
       tenant: req.tenant,
     });
@@ -310,7 +310,7 @@ export const getBikeCategoryById = asyncHandler(
 
     logger.withReq.info(req, t("fetch.success"), {
       ...getRequestContext(req),
-      module: "bikeCategory",
+      module: "galleryCategory",
       event: "fetch",
       categoryId: id,
     });
@@ -324,11 +324,11 @@ export const getBikeCategoryById = asyncHandler(
 );
 
 // ✅ DELETE
-export const deleteBikeCategory = asyncHandler(
+export const deleteGalleryCategory = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const locale: SupportedLocale = req.locale || getLogLocale() || "en";
-    const { BikeCategory } = await getTenantModels(req);
+    const { GalleryCategory } = await getTenantModels(req);
     const t = (key: string) => translate(key, locale, translations);
 
     if (!isValidObjectId(id)) {
@@ -336,7 +336,7 @@ export const deleteBikeCategory = asyncHandler(
       return;
     }
 
-    const category = await BikeCategory.findOne({
+    const category = await GalleryCategory.findOne({
       _id: id,
       tenant: req.tenant,
     });
@@ -349,7 +349,7 @@ export const deleteBikeCategory = asyncHandler(
     for (const img of category.images || []) {
       const localPath = path.join(
         "uploads",
-        "bikeCategory",
+        "galleryCategory",
         path.basename(img.url)
       );
       if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
@@ -366,7 +366,7 @@ export const deleteBikeCategory = asyncHandler(
 
     logger.withReq.info(req, t("delete.success"), {
       ...getRequestContext(req),
-      module: "bikeCategory",
+      module: "galleryCategory",
       event: "delete",
       categoryId: id,
     });
