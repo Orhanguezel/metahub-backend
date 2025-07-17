@@ -52,6 +52,7 @@ export const UPLOAD_FOLDERS = {
   apartment: "apartment-images",
   tenant: "tenant-images",
   coupons: "coupons-images",
+  galleryCategory: "galleryCategory-images",
   default: "misc",
 } as const;
 

@@ -1,14 +1,12 @@
 {
-  "gallerycategory.validation.invalidNameType": "El nombre debe ser un objeto con traducciones.",
-  "gallerycategory.validation.localeMissing": "Name.{{lang}} es obligatorio y no puede estar vacío.",
-  "gallerycategory.validation.localeInvalid": "Name.{{lang}} debe ser una cadena de texto.",
-  "gallerycategory.create.success": "Categoría '{{name}}' creada con éxito.",
-  "gallerycategory.create.error": "No se pudo crear la categoría.",
-  "gallerycategory.update.success": "Categoría '{{name}}' actualizada con éxito.",
-  "gallerycategory.delete.success": "Categoría '{{name}}' eliminada con éxito.",
-  "gallerycategory.list.success": "Categorías listadas con éxito.",
-  "gallerycategory.list.error": "Error al obtener las categorías.",
-  "gallerycategory.fetch.success": "Categoría obtenida con éxito.",
-  "gallerycategory.notFound": "Categoría no encontrada.",
-  "gallerycategory.invalidId": "ID de categoría no válida."
+  "create.success": "Categoría de bicicleta creada con éxito.",
+  "update.success": "Categoría de bicicleta actualizada con éxito.",
+  "delete.success": "Categoría de bicicleta eliminada con éxito.",
+  "fetch.success": "Categoría de bicicleta obtenida con éxito.",
+  "fetchAll.success": "Categorías de bicicletas obtenidas con éxito.",
+  "error.notFound": "Categoría de bicicleta no encontrada.",
+  "error.invalidId": "ID de categoría no válida.",
+  "validation.missingLocales": "Se debe proporcionar un nombre en todos los idiomas compatibles."
 }
+
+

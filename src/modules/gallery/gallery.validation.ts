@@ -1,70 +1,124 @@
 import { body, param, query } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
-import { isValidObjectId } from "@/core/utils/validation";
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import logger from "@/core/middleware/logger/logger";
+import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import { t as translate } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import translations from "./i18n";
 import { validateMultilangField } from "@/core/utils/i18n/validationUtils";
 
-// ✅ Gallery Upload Validation
+// ✅ JSON Parse Helper
+function parseIfJson(value: any) {
+  try {
+    return typeof value === "string" ? JSON.parse(value) : value;
+  } catch {
+    return value;
+  }
+}
+
+
+// ✅ ObjectId Validator
+export const validateObjectId = (field: string) => [
+  param(field)
+    .isMongoId()
+    .withMessage((_, { req }) => {
+      const t = (key: string) =>
+        translate(key, req.locale || getLogLocale(), translations);
+      return t("validation.invalidObjectId");
+    }),
+  validateRequest,
+];
+
+// --- CREATE Validation (Gallery) ---
 export const validateUploadGallery = [
-  body("category").isString().notEmpty().withMessage("Category is required."),
+  // Çok dilli zorunlu alan: name
+  validateMultilangField("name"),
 
-  // Type validation for gallery item
-  body("type").optional().isIn(["image", "video"]).withMessage("Invalid type."),
+  // Çok dilli opsiyonel alan: description
+  body("description").optional().customSanitizer(parseIfJson),
 
-  // Dynamic validation for name in all supported languages
-  ...SUPPORTED_LOCALES.map((lang) =>
-    body(`name_${lang}`)
-      .optional()
-      .custom((v) => Array.isArray(v) || typeof v === "string")
-      .withMessage((_, { req }) =>
-        translate(
-          `validation.name_${lang}`,
-          req.locale || getLogLocale(),
-          translations
-        )
+  // Diğer zorunlu ve opsiyonel alanlar
+  body("category")
+    .optional()
+    .isMongoId()
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.invalidCategory",
+        req.locale || getLogLocale(),
+        translations
       )
-  ),
-
-  // Dynamic validation for description in all supported languages
-  ...SUPPORTED_LOCALES.map((lang) =>
-    body(`desc_${lang}`)
-      .optional()
-      .custom((v) => Array.isArray(v) || typeof v === "string")
-      .withMessage((_, { req }) =>
-        translate(
-          `validation.desc_${lang}`,
-          req.locale || getLogLocale(),
-          translations
-        )
+    ),
+  body("type")
+    .optional()
+    .isIn(["image", "video"])
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.invalidType",
+        req.locale || getLogLocale(),
+        translations
       )
-  ),
-
-  // Order validation for gallery item
+    ),
   body("order")
     .optional()
-    .custom((v) => {
-      if (Array.isArray(v)) return v.every((el) => !isNaN(Number(el)));
-      return !isNaN(Number(v));
-    })
-    .withMessage("Order must be a number or array of numbers."),
+    .custom((v) => !isNaN(Number(v)))
+    .withMessage("Order must be a number."),
 
   validateRequest,
 ];
 
-// ✅ Gallery Item ID Param Validation
+// --- UPDATE Validation (Gallery) ---
+export const validateUpdateGallery = [
+  // Çok dilli opsiyonel alanlar
+  body("name").optional().customSanitizer(parseIfJson),
+  body("description").optional().customSanitizer(parseIfJson),
+
+  body("category").optional(),
+  body("type").optional(),
+  body("order")
+    .optional()
+    .custom((v) => !isNaN(Number(v)))
+    .withMessage("Order must be a number."),
+  body("isPublished").optional().toBoolean(),
+  body("isActive").optional().toBoolean(),
+  body("priority").optional().custom((v) => !isNaN(Number(v))),
+  body("removedImages")
+    .optional()
+    .custom((val, { req }) => {
+      try {
+        const parsed = typeof val === "string" ? JSON.parse(val) : val;
+        if (!Array.isArray(parsed)) throw new Error();
+        return true;
+      } catch {
+        const t = (key: string) =>
+          translate(key, req.locale || getLogLocale(), translations);
+        logger.withReq.warn(req as any, t("validation.invalidRemovedImages"), {
+          ...getRequestContext(req),
+          value: val,
+          path: "removedImages",
+        });
+        throw new Error(t("validation.invalidRemovedImages"));
+      }
+    }),
+
+  validateRequest,
+];
+
+// --- Param Validation (ObjectId için) ---
 export const validateGalleryIdParam = [
   param("id")
-    .custom((value) => isValidObjectId(value))
-    .withMessage("Invalid gallery ID."),
+    .isMongoId()
+    .withMessage((_, { req }) => {
+      const t = (key: string) =>
+        translate(key, req.locale || getLogLocale(), translations);
+      return t("validation.invalidObjectId");
+    }),
   validateRequest,
 ];
 
-// ✅ Admin Query Validation (For filters like language, category, etc.)
+// --- Query Validation (Admin filtreleme vs.) ---
 export const validateAdminQuery = [
-  query("language")
+   query("language")
     .optional()
     .isIn(SUPPORTED_LOCALES)
     .withMessage((_, { req }) =>
@@ -109,11 +163,3 @@ export const validateAdminQuery = [
   validateRequest,
 ];
 
-// ✅ JSON Parse Helper for titles and descriptions
-function parseIfJson(value: any) {
-  try {
-    return typeof value === "string" ? JSON.parse(value) : value;
-  } catch {
-    return value;
-  }
-}

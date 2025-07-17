@@ -1,16 +1,17 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { isValidObjectId } from "@/core/utils/validation";
-import {
-  processImageLocal,
-  getImagePath,
-  shouldProcessImage,
-  getFallbackThumbnail,
-} from "@/core/utils/uploadUtils";
+import slugify from "slugify";
 import path from "path";
 import fs from "fs";
 import { v2 as cloudinary } from "cloudinary";
-import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+import {
+  getImagePath,
+  getFallbackThumbnail,
+  processImageLocal,
+  shouldProcessImage,
+} from "@/core/utils/uploadUtils";
+import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
@@ -18,6 +19,7 @@ import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { IGallery, IGalleryItem } from "./types";
 
 // Utility
@@ -38,10 +40,10 @@ export const createGalleryItem = asyncHandler(
       translate(key, locale, translations, vars);
 
     try {
-      let { name, description, category, type = "image" } = req.body;
+      let { name, description, category, type = "image", order } = req.body;
 
-      name = fillAllLocales(parseIfJson(name), locale);
-      description = fillAllLocales(parseIfJson(description), locale);
+      name = fillAllLocales(parseIfJson(name));
+      description = fillAllLocales(parseIfJson(description));
 
       if (!category || !isValidObjectId(category)) {
         res.status(400).json({
@@ -51,13 +53,12 @@ export const createGalleryItem = asyncHandler(
         return;
       }
 
-      const images: IGalleryItem[] = [];
+      const images: IGallery["images"] = [];
 
       if (Array.isArray(req.files)) {
         for (const file of req.files as Express.Multer.File[]) {
-          let url = getImagePath(file);
-          let { thumbnail, webp } = getFallbackThumbnail(url);
-
+          const imageUrl = getImagePath(file);
+          let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
           if (shouldProcessImage()) {
             const processed = await processImageLocal(
               file.path,
@@ -67,15 +68,14 @@ export const createGalleryItem = asyncHandler(
             thumbnail = processed.thumbnail;
             webp = processed.webp;
           }
-
           images.push({
-            url,
+            url: imageUrl,
             thumbnail,
             webp,
             publicId: (file as any).public_id,
-            name,
-            description,
-            order: 0,
+            name: fillAllLocales({ [locale]: file.originalname }),
+            description: fillAllLocales({ [locale]: "" }),
+            order: order ? Number(order) : 0,
           });
         }
       }
@@ -138,6 +138,8 @@ export const updateGalleryItem = asyncHandler(
       return;
     }
 
+    const updates = req.body;
+
     try {
       let {
         name,
@@ -147,18 +149,22 @@ export const updateGalleryItem = asyncHandler(
         isPublished,
         isActive,
         priority,
+        order,
       } = req.body;
 
-      if (name !== undefined)
-        gallery.images.forEach(
-          (img) => (img.name = fillAllLocales(parseIfJson(name), locale))
-        );
-      if (description !== undefined)
-        gallery.images.forEach(
-          (img) =>
-            (img.description = fillAllLocales(parseIfJson(description), locale))
-        );
-
+      if (name) {
+        gallery.images.forEach((img) => {
+          img.name = mergeLocalesForUpdate(img.name, parseIfJson(name));
+        });
+      }
+      if (description) {
+        gallery.images.forEach((img) => {
+          img.description = mergeLocalesForUpdate(
+            img.description,
+            parseIfJson(description)
+          );
+        });
+      }
       if (category && isValidObjectId(category)) gallery.category = category;
       if (type) gallery.type = type;
       if (isPublished !== undefined)
@@ -166,13 +172,27 @@ export const updateGalleryItem = asyncHandler(
       if (isActive !== undefined)
         gallery.isActive = isActive === "true" || isActive === true;
       if (priority !== undefined) gallery.priority = parseInt(priority);
+      if (order !== undefined) {
+        gallery.images.forEach((img) => (img.order = Number(order)));
+      }
 
-      // Resim ekleme
+      const updatableFields: (keyof IGallery)[] = [
+        "category",
+        "type",
+        "isPublished",
+        "isActive",
+        "priority",
+      ];
+      for (const field of updatableFields) {
+        if (updates[field] !== undefined)
+          (gallery as any)[field] = updates[field];
+      }
+
+      if (!Array.isArray(gallery.images)) gallery.images = [];
       if (Array.isArray(req.files)) {
         for (const file of req.files as Express.Multer.File[]) {
-          let url = getImagePath(file);
-          let { thumbnail, webp } = getFallbackThumbnail(url);
-
+          const imageUrl = getImagePath(file);
+          let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
           if (shouldProcessImage()) {
             const processed = await processImageLocal(
               file.path,
@@ -182,47 +202,39 @@ export const updateGalleryItem = asyncHandler(
             thumbnail = processed.thumbnail;
             webp = processed.webp;
           }
-
           gallery.images.push({
-            url,
+            url: imageUrl,
             thumbnail,
             webp,
+            name: fillAllLocales({ [locale]: file.originalname }),
+            description: fillAllLocales({ [locale]: "" }),
+            order: order ? Number(order) : 0,
             publicId: (file as any).public_id,
-            name: fillAllLocales(parseIfJson(name), locale),
-            description: fillAllLocales(parseIfJson(description), locale),
-            order: 0,
           });
         }
       }
 
-      // Resim silme
-      if (req.body.removedImages) {
-        let removed: string[] = [];
+      if (updates.removedImages) {
         try {
-          removed = Array.isArray(req.body.removedImages)
-            ? req.body.removedImages
-            : JSON.parse(req.body.removedImages);
-        } catch {
-          removed = [req.body.removedImages];
-        }
-
-        for (const imgUrl of removed) {
-          const imgObj = gallery.images.find((img) => img.url === imgUrl);
-          if (imgObj) {
+          const removed = JSON.parse(updates.removedImages);
+          gallery.images = gallery.images.filter(
+            (img: any) => !removed.includes(img.url)
+          );
+          for (const img of removed) {
             const localPath = path.join(
               "uploads",
-              "gallery-images",
-              path.basename(imgObj.url)
+              "about-images",
+              path.basename(img.url)
             );
             if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-            if (imgObj.publicId)
-              await cloudinary.uploader.destroy(imgObj.publicId);
+            if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
           }
+        } catch (e) {
+          logger.withReq.warn(req, t("invalidRemovedImages"), {
+            ...getRequestContext(req),
+            error: e,
+          });
         }
-
-        gallery.images = gallery.images.filter(
-          (img) => !removed.includes(img.url)
-        );
       }
 
       await gallery.save();
