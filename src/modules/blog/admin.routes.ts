@@ -33,7 +33,7 @@ router.get("/:id", validateObjectId("id"), adminGetBlogById);
 router.post(
   "/",
   uploadTypeWrapper("blog"),
-  upload.array("images", 5),
+  upload("blog").array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateCreateBlog,
   createBlog
@@ -42,7 +42,7 @@ router.post(
 router.put(
   "/:id",
   uploadTypeWrapper("blog"),
-  upload.array("images", 5),
+  upload("blog").array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateObjectId("id"),
   validateUpdateBlog,

@@ -32,7 +32,7 @@ router.get("/:id", validateObjectId("id"), adminGetBikeById);
 router.post(
   "/",
   uploadTypeWrapper("bikes"),
-  upload.array("images", 5),
+  upload("bikes").array("images", 5),
   transformNestedFields(["name", "description", "tags"]),
   validateCreateBike,
   createBike
@@ -42,7 +42,7 @@ router.post(
 router.put(
   "/:id",
   uploadTypeWrapper("bikes"),
-  upload.array("images", 5),
+  upload("bikes").array("images", 5),
   transformNestedFields(["name", "description", "tags"]),
   validateObjectId("id"),
   validateUpdateBike,

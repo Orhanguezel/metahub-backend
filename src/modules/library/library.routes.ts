@@ -31,7 +31,7 @@ router.post(
     req.uploadType = "library";
     next();
   },
-  upload.array("files", 2),
+  upload("library").single("files"),
   validateCreateLibrary,
   createLibraryItem
 );
@@ -44,7 +44,7 @@ router.put(
     req.uploadType = "library";
     next();
   },
-  upload.single("file"),
+  upload("library").single("file"),
   validateLibraryIdParam,
   updateLibraryItem
 );

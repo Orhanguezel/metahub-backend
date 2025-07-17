@@ -27,7 +27,7 @@ router.post(
     req.uploadType = "product";
     next();
   },
-  upload.array("images", 5),
+  upload("product").array("images", 5),
   createProductValidator,
   validateRequest,
   validateApiKey,
@@ -43,7 +43,7 @@ router.put(
     req.uploadType = "product";
     next();
   },
-  upload.array("images", 5),
+  upload("product").array("images", 5),
   updateProductValidator,
   validateRequest,
   validateApiKey,

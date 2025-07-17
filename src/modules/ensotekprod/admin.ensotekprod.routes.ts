@@ -30,7 +30,7 @@ router.get("/:id", validateObjectId("id"), adminGetEnsotekProdById);
 router.post(
   "/",
   uploadTypeWrapper("ensotekprod"),
-  upload.array("images", 5),
+  upload("ensotekprod").array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateCreateEnsotekProd,
   createEnsotekProd
@@ -39,7 +39,7 @@ router.post(
 router.put(
   "/:id",
   uploadTypeWrapper("ensotekprod"),
-  upload.array("images", 5),
+  upload("ensotekprod").array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateObjectId("id"),
   validateUpdateEnsotekProd,

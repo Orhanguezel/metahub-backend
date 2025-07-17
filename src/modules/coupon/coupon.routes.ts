@@ -32,8 +32,8 @@ router.get("/", validateAdminQuery, getAllCoupons);
 router.post(
   "/",
   uploadTypeWrapper("coupons"),
-  upload.array("images", 5), // Resimler yükleniyor (maks. 5 resim)
-   transformNestedFields(["title", "description"]),
+  upload("coupons").array("images", 5),
+  transformNestedFields(["title", "description"]),
   validateCreateCoupon,
   createCoupon
 );
@@ -42,7 +42,7 @@ router.post(
 router.put(
   "/:id",
   uploadTypeWrapper("coupons"),
-  upload.array("images", 5), // Resimler yükleniyor (maks. 5 resim)
+  upload("coupons").array("images", 5),
   transformNestedFields(["title", "description"]),
   validateUpdateCoupon,
   updateCoupon

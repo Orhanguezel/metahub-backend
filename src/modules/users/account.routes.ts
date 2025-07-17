@@ -65,7 +65,7 @@ router.put(
   "/me/profile-image",
   authenticate,
   uploadTypeWrapper("profile"),
-  upload.single("profileImage"),
+  upload("profile").single("images"),
   updateProfileImage
 );
 
@@ -74,7 +74,7 @@ router.put(
   "/me/full-profile",
   authenticate,
   uploadTypeWrapper("profile"),
-  upload.single("profileImage"),
+  upload("profile").single("images"),
   updateFullProfile
 );
 

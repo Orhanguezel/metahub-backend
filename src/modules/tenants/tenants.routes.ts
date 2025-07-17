@@ -33,7 +33,7 @@ router.get("/admin", getAllTenantsAdmin);
 router.post(
   "/admin",
   uploadTypeWrapper("tenant"),
-  upload.array("images", 5),
+  upload("tenant").array("images", 5),
   transformNestedFields([
     "name",
     "domain",
@@ -53,7 +53,7 @@ router.post(
 router.put(
   "/admin/:id",
   uploadTypeWrapper("tenant"),
-  upload.array("images", 5),
+  upload("tenant").array("images", 5),
   transformNestedFields([
     "name",
     "domain",

@@ -26,7 +26,7 @@ router.post(
   authenticate,
   authorizeRoles("admin"),
   uploadTypeWrapper("sport"),
-  upload.array("images", 10),
+  upload("sport").array("images", 10),
   transformNestedFields(["label", "description"]),
   validateCreateSport,
   createSport
@@ -47,7 +47,7 @@ router.put(
   authenticate,
   authorizeRoles("admin"),
   uploadTypeWrapper("sport"),
-  upload.array("images", 10),
+  upload("sport").array("images", 10),
   transformNestedFields(["label", "description"]),
   validateObjectId("id"),
   validateUpdateSport,

@@ -20,6 +20,7 @@ import { updateUserRole, toggleUserStatus } from "./status.controller";
 
 import { upload } from "@/core/middleware/uploadMiddleware";
 import { validateApiKey } from "@/core/middleware/validateApiKey";
+import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 
 // ✅ Validations
 import {
@@ -73,11 +74,8 @@ router.put(
   authenticate,
   authorizeRoles("admin"),
   validateUserIdParam,
-  (req, res, next) => {
-    req.uploadType = "profile";
-    next();
-  },
-  upload.single("profileImage"),
+  uploadTypeWrapper("profile"),                     
+  upload("profile").single("profileImage"),     
   validateUpdateUser,
   updateUser
 );
