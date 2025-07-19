@@ -117,8 +117,7 @@ export const createGalleryItem = asyncHandler(
     }
   }
 );
-
-// ✅ Update Gallery Item
+// ✅ Update Gallery Item (EXACT & MODERN)
 export const updateGalleryItem = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -150,45 +149,54 @@ export const updateGalleryItem = asyncHandler(
         isActive,
         priority,
         order,
-      } = req.body;
+        existingImages, // frontend'den gelen (korunacak) url dizisi
+        removedImages,  // frontend'den gelen (silinen) url dizisi
+      } = updates;
 
-      if (name) {
-        gallery.images.forEach((img) => {
-          img.name = mergeLocalesForUpdate(img.name, parseIfJson(name));
-        });
-      }
-      if (description) {
-        gallery.images.forEach((img) => {
-          img.description = mergeLocalesForUpdate(
-            img.description,
-            parseIfJson(description)
-          );
-        });
-      }
-      if (category && isValidObjectId(category)) gallery.category = category;
-      if (type) gallery.type = type;
-      if (isPublished !== undefined)
-        gallery.isPublished = isPublished === "true" || isPublished === true;
-      if (isActive !== undefined)
-        gallery.isActive = isActive === "true" || isActive === true;
-      if (priority !== undefined) gallery.priority = parseInt(priority);
-      if (order !== undefined) {
-        gallery.images.forEach((img) => (img.order = Number(order)));
+      // 1️⃣ Korunacak eski görseller (url dizisi) - frontend mutlaka göndermeli!
+      let keepUrls: string[] = [];
+      if (existingImages) {
+        keepUrls = Array.isArray(existingImages)
+          ? existingImages
+          : JSON.parse(existingImages);
       }
 
-      const updatableFields: (keyof IGallery)[] = [
-        "category",
-        "type",
-        "isPublished",
-        "isActive",
-        "priority",
-      ];
-      for (const field of updatableFields) {
-        if (updates[field] !== undefined)
-          (gallery as any)[field] = updates[field];
+      // 2️⃣ Sadece mevcut kalmasını istediğin eski görselleri bırak!
+      if (keepUrls.length > 0) {
+        gallery.images = gallery.images.filter(img => keepUrls.includes(img.url));
       }
 
-      if (!Array.isArray(gallery.images)) gallery.images = [];
+      // 3️⃣ Silinen görselleri dosyadan/cloudinary'den de sil
+      if (removedImages) {
+        try {
+          const removed = Array.isArray(removedImages)
+            ? removedImages
+            : JSON.parse(removedImages);
+
+          for (const imgUrl of removed) {
+            const imageDoc = gallery.images.find((img: any) => img.url === imgUrl);
+            // Silinen resmin dosya/Cloudinary'den kaldırılması
+            if (imageDoc?.publicId) {
+              await cloudinary.uploader.destroy(imageDoc.publicId);
+            }
+            // Lokalde ise:
+            const localPath = path.join(
+              "uploads",
+              "gallery-images",
+              path.basename(imgUrl)
+            );
+            if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+          }
+          // images array'i zaten keepUrls ile filtrelenmiş oldu
+        } catch (e) {
+          logger.withReq.warn(req, t("invalidRemovedImages"), {
+            ...getRequestContext(req),
+            error: e,
+          });
+        }
+      }
+
+      // 4️⃣ Yeni dosyalar (eklenen)
       if (Array.isArray(req.files)) {
         for (const file of req.files as Express.Multer.File[]) {
           const imageUrl = getImagePath(file);
@@ -214,28 +222,27 @@ export const updateGalleryItem = asyncHandler(
         }
       }
 
-      if (updates.removedImages) {
-        try {
-          const removed = JSON.parse(updates.removedImages);
-          gallery.images = gallery.images.filter(
-            (img: any) => !removed.includes(img.url)
-          );
-          for (const img of removed) {
-            const localPath = path.join(
-              "uploads",
-              "about-images",
-              path.basename(img.url)
-            );
-            if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-            if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
-          }
-        } catch (e) {
-          logger.withReq.warn(req, t("invalidRemovedImages"), {
-            ...getRequestContext(req),
-            error: e,
-          });
-        }
+      // 5️⃣ Name/Description/Order: Sadece tekli resim güncelliyorsa uygula, çoklu ise her bir resim frontend'den ayrı güncellenmeli.
+      if (name && gallery.images.length === 1) {
+        gallery.images[0].name = mergeLocalesForUpdate(gallery.images[0].name, parseIfJson(name));
       }
+      if (description && gallery.images.length === 1) {
+        gallery.images[0].description = mergeLocalesForUpdate(gallery.images[0].description, parseIfJson(description));
+      }
+      if (order !== undefined) {
+        gallery.images.forEach((img) => (img.order = Number(order)));
+      }
+
+      // 6️⃣ Diğer ana alanlar
+      if (category && isValidObjectId(category)) gallery.category = category;
+      if (type) gallery.type = type;
+      if (isPublished !== undefined)
+        gallery.isPublished = isPublished === "true" || isPublished === true;
+      if (isActive !== undefined)
+        gallery.isActive = isActive === "true" || isActive === true;
+      if (priority !== undefined) gallery.priority = parseInt(priority);
+
+      // updatableFields vs gerek yok artık (yukarıda güncelledik zaten)
 
       await gallery.save();
 

@@ -75,6 +75,7 @@ export const getAllReferencesCategories = asyncHandler(
       if (req.query.isActive) {
         filter.isActive = req.query.isActive === "true";
       }
+      
 
       const categories = await ReferencesCategory.find(filter)
         .sort({ createdAt: -1 })

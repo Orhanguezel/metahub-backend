@@ -29,11 +29,10 @@ export const getAllReferences = asyncHandler(
     }
 
     if (onlyLocalized === "true") {
-      filter[`name.${locale}`] = { $exists: true };
-    }
+  filter[`title.${locale}`] = { $exists: true };
+}
 
     const referencesList = await References.find(filter)
-      .populate("comments")
       .populate("category", "name slug")
       .sort({ createdAt: -1 })
       .lean();
@@ -80,8 +79,7 @@ export const getReferencesById = asyncHandler(
       isPublished: true,
       tenant: req.tenant,
     })
-      .populate("comments")
-      .populate("category", "title")
+      .populate("category", "name slug")
       .lean();
 
     if (!references) {
@@ -124,8 +122,7 @@ export const getReferencesBySlug = asyncHandler(
       isActive: true,
       isPublished: true,
     })
-      .populate("comments")
-      .populate("category", "title")
+      .populate("category", "name slug")
       .lean();
 
     if (!references) {

@@ -1,29 +1,29 @@
 import type { SupportedLocale } from "@/types/common";
-import type { Types, Document } from "mongoose";
+import type { Types } from "mongoose";
 
-export type TranslatedLabel = { [key in SupportedLocale]: string };
+// Çok dilli başlık/içerik
+export type TranslatedLabel = { [key in SupportedLocale]?: string };
 
+// Logo görseli
 export interface IReferencesImage {
-  url: string;
-  thumbnail: string;
-  webp?: string;
-  publicId?: string;
+  url: string;           // Zorunlu (orijinal)
+  thumbnail: string;     // Zorunlu (küçük boyut)
+  webp?: string;         // Opsiyonel (webp desteği)
+  publicId?: string;     // Opsiyonel (cloudinary vs. için)
 }
 
+// Referans dokümanı
 export interface IReferences {
-  title: TranslatedLabel;
-  tenant: string;
-  slug: string;
-  summary: TranslatedLabel;
-  content: TranslatedLabel;
-  images: IReferencesImage[];
-  tags: string[];
-  author?: string;
-  category: Types.ObjectId;
-  isPublished: boolean;
+  _id?: Types.ObjectId;
+  title?: TranslatedLabel;               // Opsiyonel
+  tenant: string;                        // Zorunlu
+  slug: string;                          // Zorunlu, unique
+  content?: TranslatedLabel;             // Opsiyonel
+  images: IReferencesImage[];            // Zorunlu (en az 1 logo)
+  category: Types.ObjectId;              // Zorunlu (sektör)
+  isPublished: boolean;                  // Panelde göster/gizle
   publishedAt?: Date;
-  comments: Types.ObjectId[];
-  isActive: boolean;
+  isActive: boolean;                     // Tamamen pasifleştir (genelde true)
   createdAt: Date;
   updatedAt: Date;
 }

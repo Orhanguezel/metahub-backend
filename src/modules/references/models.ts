@@ -2,11 +2,11 @@ import { Schema, Model, Types, models, model } from "mongoose";
 import type { IReferences, IReferencesImage } from "./types";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
-// 🔤 Çok dilli alan tipi tanımı
+// Çok dilli string alanı için şema
 const localizedStringField = () => {
   const fields: Record<string, any> = {};
   for (const locale of SUPPORTED_LOCALES) {
-    fields[locale] = { type: String, trim: true };
+    fields[locale] = { type: String, trim: true, default: "" };
   }
   return fields;
 };
@@ -23,14 +23,11 @@ const ReferencesImageSchema = new Schema<IReferencesImage>(
 
 const ReferencesSchema = new Schema<IReferences>(
   {
-    title: localizedStringField(),
+    title: localizedStringField(),         // Opsiyonel tutulacaksa default "" verildi
     tenant: { type: String, required: true, index: true },
-    summary: localizedStringField(),
     content: localizedStringField(),
-    slug: { type: String, required: true, unique: true, lowercase: true },
-    images: { type: [ReferencesImageSchema], default: [] },
-    tags: [{ type: String }],
-    author: { type: String },
+    slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    images: { type: [ReferencesImageSchema], default: [], required: true },
     category: {
       type: Schema.Types.ObjectId,
       ref: "ReferencesCategory",
@@ -38,12 +35,12 @@ const ReferencesSchema = new Schema<IReferences>(
     },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
-    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
+// Slug otomatik oluşturucu
 ReferencesSchema.pre("validate", function (next) {
   if (!this.slug && this.title?.en) {
     this.slug = this.title.en
