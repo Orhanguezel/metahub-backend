@@ -8,75 +8,66 @@ import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import translations from "./i18n";
 import { validateMultilangField } from "@/core/utils/i18n/validationUtils";
 
-// ✅ ObjectId Validator
+// ObjectId Validator (değişmedi)
 export const validateObjectId = (field: string) => [
   param(field)
     .isMongoId()
-    .withMessage((_, { req }) => {
-      const t = (key: string) =>
-        translate(key, req.locale || getLogLocale(), translations);
-      return t("validation.invalidObjectId");
-    }),
+    .withMessage((_, { req }) =>
+      translate("validation.invalidObjectId", req.locale || getLogLocale(), translations)
+    ),
   validateRequest,
 ];
 
-// ✅ Create Validator
+// CREATE Validator (sadece category ve images zorunlu)
 export const validateCreateReferences = [
-  // Çok dilli zorunlu alan: title
-  validateMultilangField("title"),
-
-  // Opsiyonel alanlar
-  body("summary").optional().customSanitizer(parseIfJson),
+  // Opsiyonel çok dilli alanlar
+  body("title").optional().customSanitizer(parseIfJson),
   body("content").optional().customSanitizer(parseIfJson),
-  body("tags")
-    .optional()
-    .isArray()
-    .withMessage((_, { req }) =>
-      translate(
-        "validation.tagsArray",
-        req.locale || getLogLocale(),
-        translations
-      )
-    ),
+
+  // Zorunlu: category
   body("category")
-    .optional()
+    .notEmpty()
+    .withMessage((_, { req }) =>
+      translate("validation.requiredCategory", req.locale || getLogLocale(), translations)
+    )
     .isMongoId()
     .withMessage((_, { req }) =>
-      translate(
-        "validation.invalidCategory",
-        req.locale || getLogLocale(),
-        translations
-      )
+      translate("validation.invalidCategory", req.locale || getLogLocale(), translations)
     ),
+
+  // Zorunlu: images (en az bir tane)
+  body("images")
+    .custom((val, { req }) => {
+      // images, upload sonrası req.files üzerinden de gelebilir, form-data ile body.images veya files olabilir
+      if (Array.isArray(val) && val.length > 0) return true;
+      // Multer veya başka upload middleware kullandığında req.files üzerinden kontrol et
+      if (req.files && Array.isArray(req.files) && req.files.length > 0) return true;
+      throw new Error(
+        translate("validation.requiredImages", req.locale || getLogLocale(), translations)
+      );
+    }),
 
   validateRequest,
 ];
 
-// ✅ Update Validator
+// UPDATE Validator (hiçbir alan zorunlu değil)
 export const validateUpdateReferences = [
   body("title").optional().customSanitizer(parseIfJson),
-  body("summary").optional().customSanitizer(parseIfJson),
   body("content").optional().customSanitizer(parseIfJson),
-  body("tags")
-    .optional()
-    .isArray()
-    .withMessage((_, { req }) =>
-      translate(
-        "validation.tagsArray",
-        req.locale || getLogLocale(),
-        translations
-      )
-    ),
   body("category")
     .optional()
     .isMongoId()
     .withMessage((_, { req }) =>
-      translate(
-        "validation.invalidCategory",
-        req.locale || getLogLocale(),
-        translations
-      )
+      translate("validation.invalidCategory", req.locale || getLogLocale(), translations)
     ),
+  body("images")
+    .optional()
+    .custom((val, { req }) => {
+      if (val === undefined) return true;
+      if (Array.isArray(val)) return true;
+      // Upload sırasında da kontrol edilebilir ama zorunlu değil
+      return true;
+    }),
   body("removedImages")
     .optional()
     .custom((val, { req }) => {
@@ -99,54 +90,38 @@ export const validateUpdateReferences = [
   validateRequest,
 ];
 
-// ✅ Admin Query Validator
+// Admin Query Validator (değişmedi)
 export const validateAdminQuery = [
   query("language")
     .optional()
     .isIn(SUPPORTED_LOCALES)
     .withMessage((_, { req }) =>
-      translate(
-        "validation.invalidLanguage",
-        req.locale || getLogLocale(),
-        translations
-      )
+      translate("validation.invalidLanguage", req.locale || getLogLocale(), translations)
     ),
   query("category")
     .optional()
     .isMongoId()
     .withMessage((_, { req }) =>
-      translate(
-        "validation.invalidCategory",
-        req.locale || getLogLocale(),
-        translations
-      )
+      translate("validation.invalidCategory", req.locale || getLogLocale(), translations)
     ),
   query("isPublished")
     .optional()
     .toBoolean()
     .isBoolean()
     .withMessage((_, { req }) =>
-      translate(
-        "validation.booleanField",
-        req.locale || getLogLocale(),
-        translations
-      )
+      translate("validation.booleanField", req.locale || getLogLocale(), translations)
     ),
   query("isActive")
     .optional()
     .toBoolean()
     .isBoolean()
     .withMessage((_, { req }) =>
-      translate(
-        "validation.booleanField",
-        req.locale || getLogLocale(),
-        translations
-      )
+      translate("validation.booleanField", req.locale || getLogLocale(), translations)
     ),
   validateRequest,
 ];
 
-// ✅ JSON Parse Helper
+// JSON Parse Helper
 function parseIfJson(value: any) {
   try {
     return typeof value === "string" ? JSON.parse(value) : value;
