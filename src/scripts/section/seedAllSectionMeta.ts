@@ -1,62 +1,79 @@
-// src/scripts/section/seedAllSectionMeta.ts
-import { SectionMeta } from "@/modules/section/section.models";
-import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
-import sectionMetaSeedRaw from "./sectionMetaSeed.json";
+import "@/core/config/envLoader";
+import { Tenants } from "@/modules/tenants/tenants.model";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
-import translations from "./i18n"; // 6 dilli dosya
+import translations from "./i18n";
+
+// Multi-tenant db helpers:
+import { getTenantDbConnection } from "@/core/config/tenantDb";
+import { getTenantModelsFromConnection } from "@/core/middleware/tenant/getTenantModelsFromConnection";
+import sectionMetaSeedRaw from "./sectionMetaSeed.json";
+import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import { SupportedLocale } from "@/types/common";
-import { ISectionMeta } from "@/modules/section";
 
-// 1️⃣ Gerekirse eksik locale otomatik doldur
-const sectionMetaSeed = sectionMetaSeedRaw as unknown as Partial<ISectionMeta>[];
+// --- Seed datasını doldur
+const sectionMetaSeed = sectionMetaSeedRaw.map((s) => ({
+  ...s,
+  label: fillAllLocales(s.label),
+  description: fillAllLocales(s.description),
+  required: "required" in s ? s.required : false,
+  params: "params" in s ? s.params : {},
+  defaultEnabled: "defaultEnabled" in s ? s.defaultEnabled : true,
+  defaultOrder: "defaultOrder" in s ? s.defaultOrder : 9999,
+}));
 
-sectionMetaSeed.forEach((s) => {
-  if (s.label) s.label = fillAllLocales(s.label);
-  if (s.description) s.description = fillAllLocales(s.description);
-  if (!("required" in s)) s.required = false;
-  if (!("params" in s)) s.params = {};
-  if (!("defaultEnabled" in s)) s.defaultEnabled = true;
-  if (!("defaultOrder" in s)) s.defaultOrder = 9999;
-});
-
-// 2️⃣ Seed fonksiyonu
 async function seedAllSectionMeta() {
-  let created = 0;
-  let updated = 0;
+  // 1️⃣ Tüm tenantları al
+  const tenants = await Tenants.find({ isActive: true }, { slug: 1 }).lean();
+  if (!tenants.length) throw new Error("Hiç tenant yok!");
 
-  for (const section of sectionMetaSeed) {
-    const existing = await SectionMeta.findOne({ key: section.key });
-    // Çoklu dil log için ana dil seç, ör: tr
-    const locale: SupportedLocale = "tr";
+  let created = 0, updated = 0, total = 0;
 
-    if (existing) {
-      await SectionMeta.updateOne({ key: section.key }, { $set: section });
-      logger.info(
-        t("sync.sectionMetaUpdated", locale, translations, { key: section.key }),
-        { module: "seedAllSectionMeta", event: "sectionMeta.updated", status: "success", key: section.key }
-      );
-      updated++;
-    } else {
-      await SectionMeta.create(section);
-      logger.info(
-        t("sync.sectionMetaCreated", locale, translations, { key: section.key }),
-        { module: "seedAllSectionMeta", event: "sectionMeta.created", status: "success", key: section.key }
-      );
-      created++;
+  for (const tenant of tenants) {
+    // 2️⃣ Tenant'ın kendi db connection'ını al
+    const conn = await getTenantDbConnection(tenant.slug);
+    const { SectionMeta } = getTenantModelsFromConnection(conn);
+
+    for (const section of sectionMetaSeed) {
+      const sectionKey = String(section.key ?? "");
+      if (!sectionKey) continue;
+
+      // tenant+key unique olacak şekilde kontrol
+      const existing = await SectionMeta.findOne({ tenant: tenant.slug, key: sectionKey });
+      const locale: SupportedLocale = "tr";
+
+      if (existing) {
+        await SectionMeta.updateOne(
+          { tenant: tenant.slug, key: sectionKey },
+          { $set: { ...section, tenant: tenant.slug, key: sectionKey } }
+        );
+        logger.info(
+          t("sync.sectionMetaUpdated", locale, translations, { key: sectionKey, tenant: tenant.slug }),
+          { module: "seedAllSectionMeta", event: "sectionMeta.updated", status: "success", key: sectionKey, tenant: tenant.slug }
+        );
+        updated++;
+      } else {
+        await SectionMeta.create({ ...section, tenant: tenant.slug, key: sectionKey });
+        logger.info(
+          t("sync.sectionMetaCreated", locale, translations, { key: sectionKey, tenant: tenant.slug }),
+          { module: "seedAllSectionMeta", event: "sectionMeta.created", status: "success", key: sectionKey, tenant: tenant.slug }
+        );
+        created++;
+      }
+      total++;
     }
   }
 
-  // Sadece bilgilendirici log (opsiyonel, çoklu dil)
   logger.info(
-    t("sync.sectionMetaSummary", "tr", translations, { created, updated }),
-    { module: "seedAllSectionMeta", event: "sectionMeta.summary", created, updated }
+    t("sync.sectionMetaSummary", "tr", translations, { created, updated, total }),
+    {
+      module: "seedAllSectionMeta",
+      event: "sectionMeta.summary",
+      created,
+      updated,
+      total,
+    }
   );
-
-  // Eğer ortam standalone ise disconnect:
-  // await mongoose.disconnect();
-  // console.log("SectionMeta seed işlemi tamamlandı.");
 }
-
 
 export { seedAllSectionMeta };

@@ -54,7 +54,7 @@ import { Sport } from "@/modules/sport/sport.models";
 import { SportCategory } from "@/modules/sportcategory/sportcategory.models";
 import { Bike } from "@/modules/bikes/model";
 import { BikeCategory } from "@/modules/bikescategory/models";
-import { SectionSetting } from "@/modules/section/section.models";
+import { SectionSetting,SectionMeta } from "@/modules/section/section.models";
 import { Apartment } from "@/modules/apartment/apartment.model";
 import { ApartmentCategory } from "@/modules/apartmentcategory/apartmentcategory.models";
 import { Apikey, Apikeylog } from "@/modules/apikey/apikey.models";
@@ -141,6 +141,7 @@ export const getTenantModels = async (req: Request) => ({
   Bike: await req.getModel("Bike", Bike.schema),
   BikeCategory: await req.getModel("BikeCategory", BikeCategory.schema),
   SectionSetting: await req.getModel("SectionSetting", SectionSetting.schema),
+  SectionMeta: await req.getModel("SectionMeta", SectionMeta.schema),
   Apartment: await req.getModel("Apartment", Apartment.schema),
   ApartmentCategory: await req.getModel(
     "ApartmentCategory",

@@ -121,6 +121,10 @@ export const validateSectionSettingKeyParam = [
 
 // --- Tenant param (opsiyonel) ---
 export const validateTenantParam = [
-  param("tenant").isString().notEmpty().withMessage("admin.section.tenantParamRequired"),
+  param("tenant")
+    .isString()
+    .notEmpty()
+    .withMessage("admin.section.tenantParamRequired"),
   validateRequest,
 ];
+

@@ -1,10 +1,10 @@
-// src/scripts/section/removeSectionSettingFields.ts
 import "@/core/config/envLoader";
-// ❌import mongoose from "mongoose";
-import { SectionSetting, SectionMeta } from "@/modules/section/section.models";
+import { Tenants } from "@/modules/tenants/tenants.model";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
+import { getTenantDbConnection } from "@/core/config/tenantDb";
+import { getTenantModelsFromConnection } from "@/core/middleware/tenant/getTenantModelsFromConnection";
 
 const SETTING_FIELDS_TO_REMOVE = [
   "createdBy",
@@ -26,9 +26,15 @@ const META_FIELDS_TO_REMOVE = [
 
 const DEFAULT_LOCALE = "tr";
 
-// ARTIK connect/disconnect YOK!
 export async function removeSectionSettingFields() {
-  // 1️⃣ Temizlik işlemleri
+  // Tüm aktif tenantları çek
+  const tenants = await Tenants.find({ isActive: true }, { slug: 1 }).lean();
+  if (!tenants.length) {
+    console.error("❌ Hiç aktif tenant yok!");
+    process.exit(1);
+  }
+
+  // Temizlik objesi
   const settingUpdate = SETTING_FIELDS_TO_REMOVE.reduce((obj, key) => {
     obj[key] = "";
     return obj;
@@ -38,40 +44,74 @@ export async function removeSectionSettingFields() {
     return obj;
   }, {} as Record<string, string>);
 
-  const [settingResult, metaResult] = await Promise.all([
-    SectionSetting.updateMany({}, { $unset: settingUpdate }),
-    SectionMeta.updateMany({}, { $unset: metaUpdate }),
-  ]);
+  let totalSettingCount = 0;
+  let totalMetaCount = 0;
 
-  // 2️⃣ Logging
+  // Her tenant için kendi DB'sinde temizlik yap
+  for (const tenant of tenants) {
+    const conn = await getTenantDbConnection(tenant.slug);
+    const { SectionSetting, SectionMeta } = getTenantModelsFromConnection(conn);
+
+    const [settingResult, metaResult] = await Promise.all([
+      SectionSetting.updateMany({}, { $unset: settingUpdate }),
+      SectionMeta.updateMany({}, { $unset: metaUpdate }),
+    ]);
+
+    totalSettingCount += settingResult.modifiedCount;
+    totalMetaCount += metaResult.modifiedCount;
+
+    logger.info(
+      t("sync.sectionSettingFieldsRemoved", DEFAULT_LOCALE, translations, { tenant: tenant.slug, count: settingResult.modifiedCount }),
+      {
+        module: "removeSectionSettingFields",
+        event: "sectionSetting.fieldsRemoved",
+        status: "success",
+        tenant: tenant.slug,
+        modifiedCount: settingResult.modifiedCount,
+      }
+    );
+    logger.info(
+      t("sync.sectionMetaFieldsRemoved", DEFAULT_LOCALE, translations, { tenant: tenant.slug, count: metaResult.modifiedCount }),
+      {
+        module: "removeSectionSettingFields",
+        event: "sectionMeta.fieldsRemoved",
+        status: "success",
+        tenant: tenant.slug,
+        modifiedCount: metaResult.modifiedCount,
+      }
+    );
+
+    console.log(
+      `[${tenant.slug}] ` +
+      t("sync.sectionSettingFieldsRemoved", DEFAULT_LOCALE, translations, { count: settingResult.modifiedCount })
+    );
+    console.log(
+      `[${tenant.slug}] ` +
+      t("sync.sectionMetaFieldsRemoved", DEFAULT_LOCALE, translations, { count: metaResult.modifiedCount })
+    );
+  }
+
+  // Toplu özet
   logger.info(
-    t("sync.sectionSettingFieldsRemoved", DEFAULT_LOCALE, translations, { count: settingResult.modifiedCount }),
+    t("sync.sectionSettingFieldsRemovedTotal", DEFAULT_LOCALE, translations, { count: totalSettingCount }),
     {
       module: "removeSectionSettingFields",
-      event: "sectionSetting.fieldsRemoved",
+      event: "sectionSetting.fieldsRemoved.total",
       status: "success",
-      modifiedCount: settingResult.modifiedCount,
+      modifiedCount: totalSettingCount,
     }
   );
   logger.info(
-    t("sync.sectionMetaFieldsRemoved", DEFAULT_LOCALE, translations, { count: metaResult.modifiedCount }),
+    t("sync.sectionMetaFieldsRemovedTotal", DEFAULT_LOCALE, translations, { count: totalMetaCount }),
     {
       module: "removeSectionSettingFields",
-      event: "sectionMeta.fieldsRemoved",
+      event: "sectionMeta.fieldsRemoved.total",
       status: "success",
-      modifiedCount: metaResult.modifiedCount,
+      modifiedCount: totalMetaCount,
     }
-  );
-
-  console.log(
-    t("sync.sectionSettingFieldsRemoved", DEFAULT_LOCALE, translations, { count: settingResult.modifiedCount })
-  );
-  console.log(
-    t("sync.sectionMetaFieldsRemoved", DEFAULT_LOCALE, translations, { count: metaResult.modifiedCount })
   );
 }
 
-// 🟢 Sadece DOSYA TEK BAŞINA RUN edilirse bağlanır, zincirde asla!
 if (require.main === module) {
   (async () => {
     const mongoose = await import("mongoose");
