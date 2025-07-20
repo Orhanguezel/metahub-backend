@@ -1,18 +1,19 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { SectionMeta } from "@/modules/section/section.models";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "@/modules/modules/i18n";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import type { SupportedLocale, TranslatedLabel } from "@/types/common";
 import { SUPPORTED_LOCALES } from "@/types/common";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 // --- 🔓  Public (No Auth) Get All SectionMetas ---
 export const getSectionMetas = asyncHandler(
   async (req: Request, res: Response) => {
     // locale zorunlu değil, public API'de hata çıkarmaz!
     const locale: SupportedLocale = req.locale || "en";
+    const { SectionMeta } = await getTenantModels(req);
     const metas = await SectionMeta.find().sort({ defaultOrder: 1 });
     res.json({
       success: true,
@@ -25,6 +26,7 @@ export const getSectionMetas = asyncHandler(
 // --- 1️⃣ Create SectionMeta ---
 export const createSectionMeta = asyncHandler(
   async (req: Request, res: Response) => {
+    const { SectionMeta } = await getTenantModels(req);
     const locale: SupportedLocale = req.locale || "en";
     const {
       key,
@@ -89,6 +91,7 @@ export const updateSectionMeta = asyncHandler(
     const { key } = req.params;
     const locale: SupportedLocale = req.locale || "en";
     const updates = req.body;
+    const { SectionMeta } = await getTenantModels(req);
 
     // Sadece belirli alanlara izin ver (modele sadık!)
     const allowed = [
@@ -145,6 +148,7 @@ export const updateSectionMeta = asyncHandler(
 // --- 3️⃣ Get All SectionMetas ---
 export const getAllSectionMetas = asyncHandler(
   async (req: Request, res: Response) => {
+    const { SectionMeta } = await getTenantModels(req);
     const locale: SupportedLocale = req.locale || "en";
     const metas = await SectionMeta.find().sort({ defaultOrder: 1 });
     res.json({
@@ -160,6 +164,7 @@ export const getAllSectionMetas = asyncHandler(
 export const deleteSectionMeta = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || "en";
+    const { SectionMeta } = await getTenantModels(req);
     const { key } = req.params;
     const deleted = await SectionMeta.findOneAndDelete({ key });
     if (!deleted) {

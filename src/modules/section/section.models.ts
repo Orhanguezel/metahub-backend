@@ -10,7 +10,8 @@ const labelSchemaFields = SUPPORTED_LOCALES.reduce((fields, lang) => {
 
 const SectionMetaSchema = new Schema<ISectionMeta>(
   {
-    key: { type: String, required: true, unique: true, index: true },
+    tenant: { type: String, required: true, index: true },
+    key: { type: String, required: true },
     label: labelSchemaFields,
     description: labelSchemaFields,
     icon: { type: String, default: "MdViewModule" },
@@ -23,6 +24,10 @@ const SectionMetaSchema = new Schema<ISectionMeta>(
   { timestamps: true }
 );
 
+// 🔥 Compound index ile tenant+key unique!
+SectionMetaSchema.index({ tenant: 1, key: 1 }, { unique: true });
+
+
 const SectionMeta: Model<ISectionMeta> =
   models.SectionMeta || mongoose.model<ISectionMeta>("SectionMeta", SectionMetaSchema);
 
@@ -32,7 +37,7 @@ export { SectionMeta };
 const SectionSettingSchema = new Schema<ISectionSetting>(
   {
     tenant: { type: String, required: true, index: true },
-    sectionKey: { type: String, required: true }, // FK
+    sectionKey: { type: String, required: true }, // Her zaman tenant context'inde aranmalı!
     enabled: { type: Boolean },
     order: { type: Number },
     label: labelSchemaFields,
@@ -42,6 +47,9 @@ const SectionSettingSchema = new Schema<ISectionSetting>(
   },
   { timestamps: true }
 );
+
+// Eğer aynı section birden fazla kez kaydedilemeyecekse, ek index:
+SectionSettingSchema.index({ tenant: 1, sectionKey: 1 }, { unique: true });
 
 const SectionSetting: Model<ISectionSetting> =
   models.SectionSetting || mongoose.model<ISectionSetting>("SectionSetting", SectionSettingSchema);

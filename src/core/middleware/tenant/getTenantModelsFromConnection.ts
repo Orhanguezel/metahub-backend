@@ -55,7 +55,7 @@ import { Sport } from "@/modules/sport/sport.models";
 import { SportCategory } from "@/modules/sportcategory/sportcategory.models";
 import { Bike } from "@/modules/bikes/model";
 import { BikeCategory } from "@/modules/bikescategory/models";
-import { SectionSetting } from "@/modules/section/section.models";
+import { SectionSetting,SectionMeta } from "@/modules/section/section.models";
 import { Apartment } from "@/modules/apartment/apartment.model";
 import { ApartmentCategory } from "@/modules/apartmentcategory/apartmentcategory.models";
 import { Apikey, Apikeylog } from "@/modules/apikey/apikey.models";
@@ -124,6 +124,7 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   Bike: conn.model("Bike", Bike.schema),
   BikeCategory: conn.model("BikeCategory", BikeCategory.schema),
   SectionSetting: conn.model("SectionSetting", SectionSetting.schema),
+  SectionMeta: conn.model("SectionMeta", SectionMeta.schema),
   Apartment: conn.model("Apartment", Apartment.schema),
   ApartmentCategory: conn.model("ApartmentCategory", ApartmentCategory.schema),
   Apikey: conn.model("Apikey", Apikey.schema),

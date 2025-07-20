@@ -1,9 +1,9 @@
-// src/scripts/section/utils/seedSectionUtils.ts
-
-import { SectionMeta, SectionSetting } from "@/modules/section/section.models";
+import { SectionMeta } from "@/modules/section/section.models";
 import { Tenants } from "@/modules/tenants/tenants.model";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import { SUPPORTED_LOCALES } from "@/types/common";
+import { getTenantDbConnection } from "@/core/config/tenantDb";
+import { getTenantModelsFromConnection } from "@/core/middleware/tenant/getTenantModelsFromConnection";
 
 /**
  * Tüm aktif tenantları çeker (slug array’i)
@@ -18,19 +18,19 @@ export async function getAllActiveTenantSlugs(): Promise<string[]> {
  * SectionMeta seed datasındaki eksik dilleri tamamlar
  * (label ve description alanlarını doldurur)
  */
-export function fillSectionMetaLocales(sectionMetaSeed: any[]) { 
-
+export function fillSectionMetaLocales(sectionMetaSeed: any[]) {
   sectionMetaSeed.forEach((s) => {
     s.label = fillAllLocales(s.label);
     if (s.description) s.description = fillAllLocales(s.description);
     if (!("required" in s)) s.required = false;
     if (!("params" in s)) s.params = {};
-    // Burada yeni field’lar eklemek gerekirse eklenebilir!
+    // Yeni field’lar gerekiyorsa burada ekle!
   });
 }
 
 /**
  * Bir tenant için, SectionMeta’dan SectionSetting oluşturur.
+ * HER ZAMAN tenant'ın kendi veritabanında!
  * @param tenantSlug string (ör: "demo", "main-tenant")
  * @param meta SectionMeta objesi
  * @param extraSettings İstenirse override ayarları (örn: { visibleInSidebar: false })
@@ -40,6 +40,10 @@ export async function createSectionSettingForTenant(
   meta: any,
   extraSettings: Partial<any> = {}
 ) {
+  // Tenant'a özel connection ve model!
+  const conn = await getTenantDbConnection(tenantSlug);
+  const { SectionSetting } = getTenantModelsFromConnection(conn);
+
   // label ve description override edilmediyse null yap, boş obje göndermeyin!
   let safeSettings = { ...extraSettings };
   if (!("label" in safeSettings)) safeSettings.label = null;

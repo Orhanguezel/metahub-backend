@@ -4,6 +4,7 @@ import type { SupportedLocale } from "@/types/common";
 export type TranslatedLabel = { [key in SupportedLocale]: string };
 
 export interface ISectionMeta {
+  tenant: string;
   key: string;                    // unique (örn: "about", "hero", "blog")
   label: TranslatedLabel;         // Çoklu dil zorunlu
   description?: TranslatedLabel;  // Çoklu dil

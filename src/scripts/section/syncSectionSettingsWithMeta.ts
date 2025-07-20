@@ -1,15 +1,15 @@
-// src/scripts/section/syncSectionSettingsWithMeta.ts
-import { SectionMeta, SectionSetting } from "@/modules/section/section.models";
+import { SectionMeta } from "@/modules/section/section.models";
 import { Tenants } from "@/modules/tenants/tenants.model";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
+import { getTenantDbConnection } from "@/core/config/tenantDb";
+import { getTenantModelsFromConnection } from "@/core/middleware/tenant/getTenantModelsFromConnection";
 
-// --- Senaryoda kullanılacak locale (ör: "tr", "en", "de"...) ---
 const DEFAULT_LOCALE = "tr";
 
 async function syncSectionSettingsWithMeta() {
-  // 1️⃣ Aktif veya tüm tenantları bul
+  // 1️⃣ Aktif tenantlar
   const tenants = await Tenants.find({ isActive: true }, { slug: 1 }).lean();
   if (!tenants.length) {
     const msg = t("sync.noTenant", DEFAULT_LOCALE, translations);
@@ -17,7 +17,7 @@ async function syncSectionSettingsWithMeta() {
     process.exit(1);
   }
 
-  // 2️⃣ Tüm section meta’ları bul
+  // 2️⃣ SectionMeta'ları (global DB'den) çek
   const sectionMetas = await SectionMeta.find().lean();
   if (!sectionMetas.length) {
     const msg = t("sync.noSectionMeta", DEFAULT_LOCALE, translations);
@@ -28,8 +28,12 @@ async function syncSectionSettingsWithMeta() {
   let createdCount = 0, updatedCount = 0, skippedCount = 0;
 
   for (const tenant of tenants) {
+    // Tenant'a özel DB ve model injection
+    const conn = await getTenantDbConnection(tenant.slug);
+    const { SectionSetting } = getTenantModelsFromConnection(conn);
+
     for (const meta of sectionMetas) {
-      // SectionSetting mevcut mu?
+      // SectionSetting sadece tenant'ın DB'sinde var mı?
       const setting = await SectionSetting.findOne({ tenant: tenant.slug, sectionKey: meta.key });
 
       if (!setting) {
@@ -82,7 +86,6 @@ async function syncSectionSettingsWithMeta() {
           setting.params = meta.params;
           needUpdate = true;
         }
-      
         if (needUpdate) {
           setting.updatedAt = new Date();
           await setting.save();

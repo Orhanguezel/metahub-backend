@@ -1,11 +1,11 @@
-// src/scripts/section/seedSectionSettingsForNewTenant.ts
-import { SectionMeta, SectionSetting } from "@/modules/section/section.models";
+import { SectionMeta } from "@/modules/section/section.models";
 import { Tenants } from "@/modules/tenants/tenants.model";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
+import { getTenantDbConnection } from "@/core/config/tenantDb";
+import { getTenantModelsFromConnection } from "@/core/middleware/tenant/getTenantModelsFromConnection";
 
-// Not: Mongoose bağlantısı burada yok! (App entry’de varsa yeterli)
 async function seedSectionSettingsForNewTenant() {
   // 1️⃣ Aktif tenantları bul
   const allTenants = await Tenants.find({ isActive: true }).lean();
@@ -14,16 +14,19 @@ async function seedSectionSettingsForNewTenant() {
     process.exit(1);
   }
 
-  // 2️⃣ Tüm section meta’ları çek
+  // 2️⃣ Tüm section meta’ları çek (global SectionMeta’dan)
   const sectionMetas = await SectionMeta.find();
   if (!sectionMetas.length) {
     console.warn("⚠️ Hiç SectionMeta yok. Önce SectionMeta seed etmelisiniz!");
     process.exit(1);
   }
 
-  // 3️⃣ Her tenant için, tüm section meta’lar için ayar ata
+  // 3️⃣ Her tenant için, tenant'a özel DB bağlantısı ve model ile ayar ata
   let created = 0, skipped = 0;
   for (const tenant of allTenants) {
+    const conn = await getTenantDbConnection(tenant.slug);
+    const { SectionSetting } = getTenantModelsFromConnection(conn);
+
     for (const meta of sectionMetas) {
       const exists = await SectionSetting.findOne({
         tenant: tenant.slug,
@@ -62,6 +65,5 @@ async function seedSectionSettingsForNewTenant() {
     `SectionSetting seed tamamlandı. Tüm tenantlar için | Eklenen: ${created} | Atlanan (zaten vardı): ${skipped}`
   );
 }
-
 
 export { seedSectionSettingsForNewTenant };
