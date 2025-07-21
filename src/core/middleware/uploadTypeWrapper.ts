@@ -5,6 +5,7 @@ export const uploadSizeLimits: Record<UploadFolderKeys, number> = {
   profile: 5 * 1024 * 1024,
   product: 20 * 1024 * 1024,
   ensotekprod: 20 * 1024 * 1024,
+  ensotekCategory: 20 * 1024 * 1024,
   bikes: 20 * 1024 * 1024,
   bikesCategory: 20 * 1024 * 1024,
   category: 10 * 1024 * 1024,

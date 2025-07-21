@@ -40,6 +40,8 @@ declare global {
         | "ensotekprod"
         | "bikes"
         | "bikesCategory"
+        | "ensotekCategory"
+        | "ensotekprod"
         | "category"
         | "blog"
         | "gallery"
