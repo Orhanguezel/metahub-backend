@@ -26,6 +26,7 @@ export const UPLOAD_FOLDERS = {
   profile: "profile-images",
   product: "product-images",
   ensotekprod: "ensotekprod-images",
+  ensotekCategory: "ensotekCategory-images",
   bikes: "bikes-images",
   bikesCategory: "bikesCategory-images",
   category: "category-images",
