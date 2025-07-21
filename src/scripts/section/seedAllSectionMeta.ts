@@ -35,28 +35,28 @@ async function seedAllSectionMeta() {
     const { SectionMeta } = getTenantModelsFromConnection(conn);
 
     for (const section of sectionMetaSeed) {
-      const sectionKey = String(section.key ?? "");
+      const sectionKey = String(section.sectionKey ?? "");
       if (!sectionKey) continue;
 
-      // tenant+key unique olacak şekilde kontrol
-      const existing = await SectionMeta.findOne({ tenant: tenant.slug, key: sectionKey });
+      // tenant+sectionKey unique olacak şekilde kontrol
+      const existing = await SectionMeta.findOne({ tenant: tenant.slug, sectionKey: sectionKey });
       const locale: SupportedLocale = "tr";
 
       if (existing) {
         await SectionMeta.updateOne(
-          { tenant: tenant.slug, key: sectionKey },
-          { $set: { ...section, tenant: tenant.slug, key: sectionKey } }
+          { tenant: tenant.slug, sectionKey: sectionKey },
+          { $set: { ...section, tenant: tenant.slug, sectionKey: sectionKey } }
         );
         logger.info(
-          t("sync.sectionMetaUpdated", locale, translations, { key: sectionKey, tenant: tenant.slug }),
-          { module: "seedAllSectionMeta", event: "sectionMeta.updated", status: "success", key: sectionKey, tenant: tenant.slug }
+          t("sync.sectionMetaUpdated", locale, translations, { sectionKey: sectionKey, tenant: tenant.slug }),
+          { module: "seedAllSectionMeta", event: "sectionMeta.updated", status: "success", sectionKey: sectionKey, tenant: tenant.slug }
         );
         updated++;
       } else {
-        await SectionMeta.create({ ...section, tenant: tenant.slug, key: sectionKey });
+        await SectionMeta.create({ ...section, tenant: tenant.slug, sectionKey: sectionKey });
         logger.info(
-          t("sync.sectionMetaCreated", locale, translations, { key: sectionKey, tenant: tenant.slug }),
-          { module: "seedAllSectionMeta", event: "sectionMeta.created", status: "success", key: sectionKey, tenant: tenant.slug }
+          t("sync.sectionMetaCreated", locale, translations, { sectionKey: sectionKey, tenant: tenant.slug }),
+          { module: "seedAllSectionMeta", event: "sectionMeta.created", status: "success", sectionKey: sectionKey, tenant: tenant.slug }
         );
         created++;
       }

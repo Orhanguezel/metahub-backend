@@ -11,7 +11,7 @@ const labelSchemaFields = SUPPORTED_LOCALES.reduce((fields, lang) => {
 const SectionMetaSchema = new Schema<ISectionMeta>(
   {
     tenant: { type: String, required: true, index: true },
-    key: { type: String, required: true },
+    sectionKey: { type: String, required: true },
     label: labelSchemaFields,
     description: labelSchemaFields,
     icon: { type: String, default: "MdViewModule" },
@@ -24,8 +24,8 @@ const SectionMetaSchema = new Schema<ISectionMeta>(
   { timestamps: true }
 );
 
-// 🔥 Compound index ile tenant+key unique!
-SectionMetaSchema.index({ tenant: 1, key: 1 }, { unique: true });
+// 🔥 Compound index ile tenant+sectionKey unique!
+SectionMetaSchema.index({ tenant: 1, sectionKey: 1 }, { unique: true });
 
 
 const SectionMeta: Model<ISectionMeta> =

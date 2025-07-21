@@ -1,0 +1,14 @@
+{
+  "librarycategory.validation.invalidNameType": "İsim, dillerle birlikte bir nesne olmalıdır.",
+  "librarycategory.validation.localeMissing": "Name.{{lang}} zorunludur ve boş olamaz.",
+  "librarycategory.validation.localeInvalid": "Name.{{lang}} bir metin (string) olmalıdır.",
+  "librarycategory.create.success": "'{{name}}' kategorisi başarıyla oluşturuldu.",
+  "librarycategory.create.error": "Kategori oluşturulamadı.",
+  "librarycategory.update.success": "'{{name}}' kategorisi başarıyla güncellendi.",
+  "librarycategory.delete.success": "'{{name}}' kategorisi başarıyla silindi.",
+  "librarycategory.list.success": "Kategoriler başarıyla listelendi.",
+  "librarycategory.list.error": "Kategoriler alınırken hata oluştu.",
+  "librarycategory.fetch.success": "Kategori başarıyla getirildi.",
+  "librarycategory.notFound": "Kategori bulunamadı.",
+  "librarycategory.invalidId": "Geçersiz kategori ID’si."
+}

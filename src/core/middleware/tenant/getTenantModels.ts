@@ -46,10 +46,11 @@ import { References } from "@/modules/references/models";
 import { ReferencesCategory } from "@/modules/referencescategory/category.models";
 import { Articles } from "@/modules/articles/models";
 import { ArticlesCategory } from "@/modules/articlescategory/category.models";
-import { Library } from "@/modules/library/library.models";
+import { Library } from "@/modules/library/models";
+import { LibraryCategory } from "@/modules/librarycategory/category.models";
 import { ChatMessage, ChatSession } from "@/modules/chat/models";
-import { EnsotekProd } from "@/modules/ensotekprod/ensotekprod.models";
-import { EnsotekCategory } from "@/modules/ensotekcategory/ensotekcategory.models";
+import { Ensotekprod } from "@/modules/ensotekprod/models";
+import { EnsotekCategory } from "@/modules/ensotekcategory/models";
 import { Sport } from "@/modules/sport/sport.models";
 import { SportCategory } from "@/modules/sportcategory/sportcategory.models";
 import { Bike } from "@/modules/bikes/model";
@@ -129,9 +130,10 @@ export const getTenantModels = async (req: Request) => ({
     ArticlesCategory.schema
   ),
   Library: await req.getModel("Library", Library.schema),
+  LibraryCategory: await req.getModel("LibraryCategory", LibraryCategory.schema),
   ChatMessage: await req.getModel("ChatMessage", ChatMessage.schema),
   ChatSession: await req.getModel("ChatSession", ChatSession.schema),
-  EnsotekProd: await req.getModel("EnsotekProd", EnsotekProd.schema),
+  Ensotekprod: await req.getModel("Ensotekprod", Ensotekprod.schema),
   EnsotekCategory: await req.getModel(
     "EnsotekCategory",
     EnsotekCategory.schema

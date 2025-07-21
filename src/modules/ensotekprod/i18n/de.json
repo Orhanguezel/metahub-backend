@@ -1,0 +1,16 @@
+{
+  "log": {
+    "created": "Fahrrad erfolgreich erstellt.",
+    "updated": "Fahrrad erfolgreich aktualisiert.",
+    "deleted": "Fahrrad erfolgreich gelöscht.",
+    "fetched": "Fahrrad erfolgreich abgerufen.",
+    "listed": "Fahrräder erfolgreich aufgelistet."
+  },
+  "error": {
+    "not_found": "Fahrrad nicht gefunden.",
+    "invalid_id": "Ungültige Fahrrad-ID.",
+    "create_fail": "Fahrrad konnte nicht erstellt werden.",
+    "update_fail": "Fahrrad konnte nicht aktualisiert werden.",
+    "delete_fail": "Fahrrad konnte nicht gelöscht werden."
+  }
+}

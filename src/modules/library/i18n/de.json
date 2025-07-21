@@ -1,14 +1,13 @@
 {
-  "blogcategory.validation.invalidNameType": "Name muss ein Objekt mit Übersetzungen sein.",
-  "blogcategory.validation.localeMissing": "Name.{{lang}} ist erforderlich und darf nicht leer sein.",
-  "blogcategory.validation.localeInvalid": "Name.{{lang}} muss ein String sein.",
-  "blogcategory.create.success": "Kategorie '{{name}}' wurde erfolgreich erstellt.",
-  "blogcategory.create.error": "Kategorie konnte nicht erstellt werden.",
-  "blogcategory.update.success": "Kategorie '{{name}}' wurde erfolgreich aktualisiert.",
-  "blogcategory.delete.success": "Kategorie '{{name}}' wurde erfolgreich gelöscht.",
-  "blogcategory.list.success": "Kategorien wurden erfolgreich aufgelistet.",
-  "blogcategory.list.error": "Fehler beim Abrufen der Kategorien.",
-  "blogcategory.fetch.success": "Kategorie erfolgreich abgerufen.",
-  "blogcategory.notFound": "Kategorie nicht gefunden.",
-  "blogcategory.invalidId": "Ungültige Kategorie-ID."
+  "created": "Artikel erfolgreich erstellt.",
+  "updated": "Artikel erfolgreich aktualisiert.",
+  "invalidId": "Ungültige ID.",
+  "notFound": "Artikel nicht gefunden.",
+  "fetched": "Artikel erfolgreich abgerufen.",
+  "deleted": "Artikel erfolgreich gelöscht.",
+  "invalidRemovedImages": "Ungültige entfernte Bilder.",
+  "listFetched": "Artikel Liste erfolgreich abgerufen.",
+  "tagsArray": "Tags-Array ist ungültig.",
+  "invalidCategory": "Ungültige Kategorie.",
+  "booleanField": "Bitte geben Sie einen gültigen booleschen Wert ein."
 }

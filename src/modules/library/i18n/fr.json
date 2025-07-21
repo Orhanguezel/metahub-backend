@@ -1,14 +1,14 @@
 {
-  "blogcategory.validation.invalidNameType": "Le nom doit être un objet avec des traductions.",
-  "blogcategory.validation.localeMissing": "Name.{{lang}} est requis et ne peut pas être vide.",
-  "blogcategory.validation.localeInvalid": "Name.{{lang}} doit être une chaîne de caractères.",
-  "blogcategory.create.success": "Catégorie '{{name}}' créée avec succès.",
-  "blogcategory.create.error": "Échec de la création de la catégorie.",
-  "blogcategory.update.success": "Catégorie '{{name}}' mise à jour avec succès.",
-  "blogcategory.delete.success": "Catégorie '{{name}}' supprimée avec succès.",
-  "blogcategory.list.success": "Catégories listées avec succès.",
-  "blogcategory.list.error": "Échec de la récupération des catégories.",
-  "blogcategory.fetch.success": "Catégorie récupérée avec succès.",
-  "blogcategory.notFound": "Catégorie introuvable.",
-  "blogcategory.invalidId": "ID de catégorie invalide."
+  "created": "Article créé avec succès.",
+  "updated": "Article mis à jour avec succès.",
+  "invalidId": "ID invalide.",
+  "notFound": "Article non trouvé.",
+  "fetched": "Article récupéré avec succès.",
+  "deleted": "Article supprimé avec succès.",
+  "invalidRemovedImages": "Images supprimées invalides.",
+  "listFetched": "Liste des articles récupérée avec succès.",
+  "tagsArray": "Le tableau des tags est invalide.",
+  "invalidCategory": "Catégorie invalide.",
+  "booleanField": "Veuillez fournir une valeur booléenne valide."
 }
+

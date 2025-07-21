@@ -37,7 +37,7 @@ router.get(
 
 // Admin: Güncelle
 router.put(
-  "/:key",
+  "/:sectionKey",
   authenticate,
   authorizeRoles("admin"),
   validateSectionSettingKeyParam,      // 💡 Key param validasyonu
@@ -47,7 +47,7 @@ router.put(
 
 // Admin: Sil
 router.delete(
-  "/:key",
+  "/:sectionKey",
   authenticate,
   authorizeRoles("admin"),
   validateSectionSettingKeyParam,      // 💡 Key param validasyonu

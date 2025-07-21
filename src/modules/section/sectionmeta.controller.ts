@@ -17,7 +17,7 @@ export const getSectionMetas = asyncHandler(
     const metas = await SectionMeta.find().sort({ defaultOrder: 1 });
     res.json({
       success: true,
-      message: t("public.section.fetchedAll", locale, translations), // İstersen farklı bir mesaj key'i kullanabilirsin.
+      message: t("public.section.fetchedAll", locale, translations), // İstersen farklı bir mesaj sectionKey'i kullanabilirsin.
       data: metas,
     });
   }
@@ -29,7 +29,7 @@ export const createSectionMeta = asyncHandler(
     const { SectionMeta } = await getTenantModels(req);
     const locale: SupportedLocale = req.locale || "en";
     const {
-      key,
+      sectionKey,
       label,
       description,
       icon = "MdViewModule",
@@ -41,11 +41,11 @@ export const createSectionMeta = asyncHandler(
     } = req.body;
 
     // 1.1 Key kontrolü
-    const existing = await SectionMeta.findOne({ key });
+    const existing = await SectionMeta.findOne({ sectionKey });
     if (existing) {
       res.status(409).json({
         success: false,
-        message: t("admin.section.keyExists", locale, translations, { key }),
+        message: t("admin.section.sectionKeyExists", locale, translations, { sectionKey }),
       });
       return;
     }
@@ -58,7 +58,7 @@ export const createSectionMeta = asyncHandler(
 
     // 1.3 Kaydı oluştur
     const section = await SectionMeta.create({
-      key,
+      sectionKey,
       label: finalLabel,
       description: finalDescription,
       icon,
@@ -72,13 +72,13 @@ export const createSectionMeta = asyncHandler(
     });
 
     // 1.4 Log ve yanıt
-    logger.withReq.info(req, `[SectionMeta] Created: ${key}`, {
+    logger.withReq.info(req, `[SectionMeta] Created: ${sectionKey}`, {
       module: "sectionMeta",
       user: req.user?.name || req.user?.email || "system",
     });
     res.status(201).json({
       success: true,
-      message: t("admin.section.created", locale, translations, { key }),
+      message: t("admin.section.created", locale, translations, { sectionKey }),
       data: section,
     });
     return;
@@ -88,7 +88,7 @@ export const createSectionMeta = asyncHandler(
 // --- 2️⃣ Update SectionMeta ---
 export const updateSectionMeta = asyncHandler(
   async (req: Request, res: Response) => {
-    const { key } = req.params;
+    const { sectionKey } = req.params;
     const locale: SupportedLocale = req.locale || "en";
     const updates = req.body;
     const { SectionMeta } = await getTenantModels(req);
@@ -121,24 +121,24 @@ export const updateSectionMeta = asyncHandler(
 
     updates.updatedAt = new Date();
 
-    const meta = await SectionMeta.findOneAndUpdate({ key }, updates, {
+    const meta = await SectionMeta.findOneAndUpdate({ sectionKey }, updates, {
       new: true,
     });
     if (!meta) {
       res.status(404).json({
         success: false,
-        message: t("admin.section.notFound", locale, translations, { key }),
+        message: t("admin.section.notFound", locale, translations, { sectionKey }),
       });
       return;
     }
 
-    logger.withReq.info(req, `[SectionMeta] Updated: ${key}`, {
+    logger.withReq.info(req, `[SectionMeta] Updated: ${sectionKey}`, {
       module: "sectionMeta",
       user: req.user?.name || req.user?.email || "system",
     });
     res.json({
       success: true,
-      message: t("admin.section.updated", locale, translations, { key }),
+      message: t("admin.section.updated", locale, translations, { sectionKey }),
       data: meta,
     });
     return;
@@ -165,22 +165,22 @@ export const deleteSectionMeta = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || "en";
     const { SectionMeta } = await getTenantModels(req);
-    const { key } = req.params;
-    const deleted = await SectionMeta.findOneAndDelete({ key });
+    const { sectionKey } = req.params;
+    const deleted = await SectionMeta.findOneAndDelete({ sectionKey });
     if (!deleted) {
       res.status(404).json({
         success: false,
-        message: t("admin.section.notFound", locale, translations, { key }),
+        message: t("admin.section.notFound", locale, translations, { sectionKey }),
       });
       return;
     }
-    logger.withReq.info(req, `[SectionMeta] Deleted: ${key}`, {
+    logger.withReq.info(req, `[SectionMeta] Deleted: ${sectionKey}`, {
       module: "sectionMeta",
       user: req.user?.name || req.user?.email || "system",
     });
     res.json({
       success: true,
-      message: t("admin.section.deleted", locale, translations, { key }),
+      message: t("admin.section.deleted", locale, translations, { sectionKey }),
     });
   }
 );

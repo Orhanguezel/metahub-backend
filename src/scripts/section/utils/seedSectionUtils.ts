@@ -51,7 +51,7 @@ export async function createSectionSettingForTenant(
 
   return SectionSetting.create({
     tenant: tenantSlug,
-    sectionKey: meta.key,
+    sectionKey: meta.sectionKey,
     enabled: meta.defaultEnabled,
     order: meta.defaultOrder,
     variant: meta.variant,
@@ -69,9 +69,9 @@ export async function createSectionSettingForTenant(
  * @returns { created: boolean, updated: boolean }
  */
 export async function upsertSectionMeta(sectionMetaData: any) {
-  const existing = await SectionMeta.findOne({ key: sectionMetaData.key });
+  const existing = await SectionMeta.findOne({ sectionKey: sectionMetaData.sectionKey });
   if (existing) {
-    await SectionMeta.updateOne({ key: sectionMetaData.key }, { $set: sectionMetaData });
+    await SectionMeta.updateOne({ sectionKey: sectionMetaData.sectionKey }, { $set: sectionMetaData });
     return { created: false, updated: true };
   } else {
     await SectionMeta.create(sectionMetaData);

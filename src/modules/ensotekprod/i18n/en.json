@@ -1,0 +1,16 @@
+{
+  "log": {
+    "created": "Ensotekprod created successfully.",
+    "updated": "Ensotekprod updated successfully.",
+    "deleted": "Ensotekprod deleted successfully.",
+    "fetched": "Ensotekprod fetched successfully.",
+    "listed": "Ensotekprod listed successfully."
+  },
+  "error": {
+    "not_found": "Ensotekprod not found.",
+    "invalid_id": "Invalid ensotekprod ID.",
+    "create_fail": "Failed to create ensotekprod.",
+    "update_fail": "Failed to update ensotekprod.",
+    "delete_fail": "Failed to delete ensotekprod."
+  }
+}

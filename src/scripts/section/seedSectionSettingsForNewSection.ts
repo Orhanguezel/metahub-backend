@@ -9,7 +9,7 @@ import translations from "./i18n";
 import { getTenantDbConnection } from "@/core/config/tenantDb";
 import { getTenantModelsFromConnection } from "@/core/middleware/tenant/getTenantModelsFromConnection";
 
-// --- Ayarlayacağın yeni section key burada! (örn: "about", "news", vs.)
+// --- Ayarlayacağın yeni section sectionKey burada! (örn: "about", "news", vs.)
 const NEW_SECTION_KEY = "about";
 
 // --- Varsayılan ayarlar. Gerekirse burada özelleştir.
@@ -19,7 +19,7 @@ const DEFAULT_SETTING = {
 
 async function seedSectionSettingsForNewSection() {
   // 1️⃣ Section meta’yı bul (global ana DB'de)
-  const meta = await SectionMeta.findOne({ key: NEW_SECTION_KEY });
+  const meta = await SectionMeta.findOne({ sectionKey: NEW_SECTION_KEY });
   if (!meta) {
     console.error(`SectionMeta bulunamadı: ${NEW_SECTION_KEY}`);
     process.exit(1);
@@ -41,12 +41,12 @@ async function seedSectionSettingsForNewSection() {
     const { SectionSetting } = getTenantModelsFromConnection(conn);
 
     // 3.2 Sadece o tenant'ın kendi DB'sinde SectionSetting kontrol/ekle
-    const exists = await SectionSetting.findOne({ tenant: tenant.slug, sectionKey: meta.key });
+    const exists = await SectionSetting.findOne({ tenant: tenant.slug, sectionKey: meta.sectionKey });
     if (exists) continue;
 
     await SectionSetting.create({
       tenant: tenant.slug,
-      sectionKey: meta.key,
+      sectionKey: meta.sectionKey,
       enabled: meta.defaultEnabled,
       order: meta.defaultOrder,
       variant: meta.variant,
@@ -56,24 +56,24 @@ async function seedSectionSettingsForNewSection() {
     createdCount++;
 
     logger.info(
-      t("sync.sectionSettingCreated", "tr", translations, { sectionKey: meta.key, tenant: tenant.slug }),
+      t("sync.sectionSettingCreated", "tr", translations, { sectionKey: meta.sectionKey, tenant: tenant.slug }),
       {
         module: "seedSectionSettingsForNewSection",
         event: "sectionSetting.created",
         status: "success",
         tenant: tenant.slug,
-        sectionKey: meta.key,
+        sectionKey: meta.sectionKey,
       }
     );
   }
 
   logger.info(
-    t("sync.sectionSettingSummary", "tr", translations, { sectionKey: meta.key, createdCount }),
+    t("sync.sectionSettingSummary", "tr", translations, { sectionKey: meta.sectionKey, createdCount }),
     {
       module: "seedSectionSettingsForNewSection",
       event: "sectionSetting.summary",
       status: "info",
-      sectionKey: meta.key,
+      sectionKey: meta.sectionKey,
       createdCount,
     }
   );

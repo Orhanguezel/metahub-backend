@@ -47,7 +47,7 @@ const descriptionValidator = body("description")
 
 // --- SectionMeta CREATE ---
 export const validateCreateSectionMeta = [
-  body("key").isString().notEmpty().withMessage("admin.section.keyRequired"),
+  body("sectionKey").isString().notEmpty().withMessage("admin.section.keyRequired"),
   body("icon").optional().isString(),
   body("variant").optional().isString(),
   body("required").optional().isBoolean(),
@@ -80,7 +80,7 @@ export const validateUpdateSectionMeta = [
 
 // --- SectionMeta key param ---
 export const validateMetaKeyParam = [
-  param("key").isString().notEmpty().withMessage("admin.section.keyParamRequired"),
+  param("sectionKey").isString().notEmpty().withMessage("admin.section.sectionKeyParamRequired"),
   validateRequest,
 ];
 

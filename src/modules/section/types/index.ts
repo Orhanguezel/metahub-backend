@@ -5,7 +5,7 @@ export type TranslatedLabel = { [key in SupportedLocale]: string };
 
 export interface ISectionMeta {
   tenant: string;
-  key: string;                    // unique (örn: "about", "hero", "blog")
+  sectionKey: string;                    // unique (örn: "about", "hero", "blog")
   label: TranslatedLabel;         // Çoklu dil zorunlu
   description?: TranslatedLabel;  // Çoklu dil
   icon: string;                   // Örn: "MdViewModule" (global default)
@@ -21,7 +21,7 @@ export interface ISectionMeta {
 
 export interface ISectionSetting {
   tenant: string;
-  sectionKey: string;             // FK: SectionMeta.key
+  sectionKey: string;             // FK: SectionMeta.sectionKey
   enabled?: boolean;              // Tenant için aktif/pasif
   order?: number;                 // Tenant için sıra
   label?: TranslatedLabel;        // (override etmek isterse)

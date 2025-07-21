@@ -30,7 +30,7 @@ async function seedSectionSettingsForNewTenant() {
     for (const meta of sectionMetas) {
       const exists = await SectionSetting.findOne({
         tenant: tenant.slug,
-        sectionKey: meta.key,
+        sectionKey: meta.sectionKey,
       });
       if (exists) {
         skipped++;
@@ -38,7 +38,7 @@ async function seedSectionSettingsForNewTenant() {
       }
       await SectionSetting.create({
         tenant: tenant.slug,
-        sectionKey: meta.key,
+        sectionKey: meta.sectionKey,
         enabled: meta.defaultEnabled,
         order: meta.defaultOrder,
         variant: meta.variant,
