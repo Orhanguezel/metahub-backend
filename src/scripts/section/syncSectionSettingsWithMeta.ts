@@ -34,13 +34,13 @@ async function syncSectionSettingsWithMeta() {
 
     for (const meta of sectionMetas) {
       // SectionSetting sadece tenant'ın DB'sinde var mı?
-      const setting = await SectionSetting.findOne({ tenant: tenant.slug, sectionKey: meta.key });
+      const setting = await SectionSetting.findOne({ tenant: tenant.slug, sectionKey: meta.sectionKey });
 
       if (!setting) {
         // YOKSA: tenant'a section meta'nın varsayılanlarıyla ekle
         await SectionSetting.create({
           tenant: tenant.slug,
-          sectionKey: meta.key,
+          sectionKey: meta.sectionKey,
           enabled: meta.defaultEnabled,
           order: meta.defaultOrder,
           variant: meta.variant,
@@ -53,14 +53,14 @@ async function syncSectionSettingsWithMeta() {
         logger.info(
           t("sync.sectionSettingCreated", DEFAULT_LOCALE, translations, {
             tenant: tenant.slug,
-            sectionKey: meta.key,
+            sectionKey: meta.sectionKey,
           }),
           {
             module: "syncSectionSettingsWithMeta",
             event: "sectionSetting.created",
             status: "success",
             tenant: tenant.slug,
-            sectionKey: meta.key,
+            sectionKey: meta.sectionKey,
           }
         );
       } else {
@@ -93,14 +93,14 @@ async function syncSectionSettingsWithMeta() {
           logger.info(
             t("sync.sectionSettingUpdated", DEFAULT_LOCALE, translations, {
               tenant: tenant.slug,
-              sectionKey: meta.key,
+              sectionKey: meta.sectionKey,
             }),
             {
               module: "syncSectionSettingsWithMeta",
               event: "sectionSetting.updated",
               status: "success",
               tenant: tenant.slug,
-              sectionKey: meta.key,
+              sectionKey: meta.sectionKey,
             }
           );
         } else {

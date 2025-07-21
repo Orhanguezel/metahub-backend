@@ -7,7 +7,7 @@ import { syncSectionSettingsWithMeta } from "./syncSectionSettingsWithMeta";
 import { removeSectionSettingFields } from "./removeSectionSettingFields";
 // import { extraUtils } from "./utils/seedSectionUtils"; // Ekstra fonksiyonları ister aç
 
-// ✅ Her yerde aynı env key'i kullan
+// ✅ Her yerde aynı env sectionKey'i kullan
 const MONGODB_URI =
   process.env.MONGODB_URI ||
   process.env.MONGO_URI || // fallback

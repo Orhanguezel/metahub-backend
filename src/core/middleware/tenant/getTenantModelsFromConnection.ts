@@ -47,10 +47,11 @@ import { References } from "@/modules/references/models";
 import { ReferencesCategory } from "@/modules/referencescategory/category.models";
 import { Articles } from "@/modules/articles/models";
 import { ArticlesCategory } from "@/modules/articlescategory/category.models";
-import { Library } from "@/modules/library/library.models";
+import { Library } from "@/modules/library/models";
+import { LibraryCategory } from "@/modules/librarycategory/category.models";
 import { ChatMessage, ChatSession } from "@/modules/chat/models";
-import { EnsotekProd } from "@/modules/ensotekprod/ensotekprod.models";
-import { EnsotekCategory } from "@/modules/ensotekcategory/ensotekcategory.models";
+import { Ensotekprod } from "@/modules/ensotekprod/models";
+import { EnsotekCategory } from "@/modules/ensotekcategory/models";
 import { Sport } from "@/modules/sport/sport.models";
 import { SportCategory } from "@/modules/sportcategory/sportcategory.models";
 import { Bike } from "@/modules/bikes/model";
@@ -115,9 +116,10 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   Articles: conn.model("Articles", Articles.schema),
   ArticlesCategory: conn.model("ArticlesCategory", ArticlesCategory.schema),
   Library: conn.model("Library", Library.schema),
+  LibraryCategory: conn.model("LibraryCategory", LibraryCategory.schema),
   ChatMessage: conn.model("ChatMessage", ChatMessage.schema),
   ChatSession: conn.model("ChatSession", ChatSession.schema),
-  EnsotekProd: conn.model("EnsotekProd", EnsotekProd.schema),
+  Ensotekprod: conn.model("Ensotekprod", Ensotekprod.schema),
   EnsotekCategory: conn.model("EnsotekCategory", EnsotekCategory.schema),
   Sport: conn.model("Sport", Sport.schema),
   SportCategory: conn.model("SportCategory", SportCategory.schema),

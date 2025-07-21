@@ -1,0 +1,12 @@
+{
+  "create.success": "Categoría de bicicleta creada con éxito.",
+  "update.success": "Categoría de bicicleta actualizada con éxito.",
+  "delete.success": "Categoría de bicicleta eliminada con éxito.",
+  "fetch.success": "Categoría de bicicleta obtenida con éxito.",
+  "fetchAll.success": "Categorías de bicicletas obtenidas con éxito.",
+  "error.notFound": "Categoría de bicicleta no encontrada.",
+  "error.invalidId": "ID de categoría no válida.",
+  "validation.missingLocales": "Se debe proporcionar un nombre en todos los idiomas compatibles."
+}
+
+

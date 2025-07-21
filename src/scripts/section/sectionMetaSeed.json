@@ -1,6 +1,6 @@
 [
   {
-    "key": "heroSlider",
+    "sectionKey": "heroSlider",
     "label": {
       "tr": "Manşet Slaytı",
       "en": "Hero Slider",
@@ -24,7 +24,7 @@
     "defaultEnabled": false
   },
   {
-    "key": "heroSection",
+    "sectionKey": "heroSection",
     "label": {
       "tr": "Manşet Bölümü",
       "en": "Hero Section",
@@ -48,7 +48,7 @@
     "defaultEnabled": true
   },
   {
-    "key": "heroSectionSlayt",
+    "sectionKey": "heroSectionSlayt",
     "label": {
       "tr": "Manşet Slayt Bölümü",
       "en": "Hero Section Slideshow",
@@ -72,7 +72,7 @@
     "defaultEnabled": false
   },
   {
-    "key": "couponBanner",
+    "sectionKey": "couponBanner",
     "label": {
       "tr": "Kupon Bannerı",
       "en": "Coupon Banner",
@@ -96,7 +96,7 @@
     "defaultEnabled": true
   },
   {
-    "key": "services",
+    "sectionKey": "services",
     "label": {
       "tr": "Hizmetler",
       "en": "Services",
@@ -120,7 +120,7 @@
     "defaultEnabled": true
   },
   {
-    "key": "about",
+    "sectionKey": "about",
     "label": {
       "tr": "Hakkında",
       "en": "About",
@@ -144,7 +144,7 @@
     "defaultEnabled": true
   },
   {
-    "key": "news",
+    "sectionKey": "news",
     "label": {
       "tr": "Haberler",
       "en": "News",
@@ -168,7 +168,7 @@
     "defaultEnabled": true
   },
   {
-    "key": "bikes",
+    "sectionKey": "bikes",
     "label": {
       "tr": "Bisikletler",
       "en": "Bikes",
@@ -192,7 +192,7 @@
     "defaultEnabled": true
   },
   {
-    "key": "blog",
+    "sectionKey": "blog",
     "label": {
       "tr": "Blog",
       "en": "Blog",
@@ -216,7 +216,7 @@
     "defaultEnabled": true
   },
   {
-    "key": "contact",
+    "sectionKey": "contact",
     "label": {
       "tr": "İletişim",
       "en": "Contact",
@@ -240,7 +240,7 @@
     "defaultEnabled": false
   },
   {
-    "key": "activity",
+    "sectionKey": "activity",
     "label": {
       "tr": "Aktiviteler",
       "en": "Activities",
@@ -264,7 +264,7 @@
     "defaultEnabled": true
   },
   {
-    "key": "articles",
+    "sectionKey": "articles",
     "label": {
       "tr": "Makaleler",
       "en": "Articles",
@@ -288,7 +288,7 @@
     "defaultEnabled": true
   },
   {
-    "key": "references",
+    "sectionKey": "references",
     "label": {
       "tr": "Referanslar",
       "en": "References",

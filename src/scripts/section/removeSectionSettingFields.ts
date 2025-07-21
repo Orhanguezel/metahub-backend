@@ -35,12 +35,12 @@ export async function removeSectionSettingFields() {
   }
 
   // Temizlik objesi
-  const settingUpdate = SETTING_FIELDS_TO_REMOVE.reduce((obj, key) => {
-    obj[key] = "";
+  const settingUpdate = SETTING_FIELDS_TO_REMOVE.reduce((obj, sectionKey) => {
+    obj[sectionKey] = "";
     return obj;
   }, {} as Record<string, string>);
-  const metaUpdate = META_FIELDS_TO_REMOVE.reduce((obj, key) => {
-    obj[key] = "";
+  const metaUpdate = META_FIELDS_TO_REMOVE.reduce((obj, sectionKey) => {
+    obj[sectionKey] = "";
     return obj;
   }, {} as Record<string, string>);
 

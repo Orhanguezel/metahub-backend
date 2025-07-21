@@ -1,0 +1,10 @@
+{
+  "create.success": "Ensotek category created successfully.",
+  "update.success": "Ensotek category updated successfully.",
+  "delete.success": "Ensotek category deleted successfully.",
+  "fetch.success": "Ensotek category fetched successfully.",
+  "fetchAll.success": "Ensotek categories fetched successfully.",
+  "error.notFound": "Ensotek category not found.",
+  "error.invalidId": "Invalid category ID.",
+  "validation.missingLocales": "All supported locales must be provided in name."
+}

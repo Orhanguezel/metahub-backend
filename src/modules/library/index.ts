@@ -1,13 +1,22 @@
+// src/modules/library/index.ts
+
 import express from "express";
-import routes from "./library.routes";
-import { Library } from "./library.models";
-import * as libraryController from "./library.controller";
+import adminRoutes from "./admin.routes";
+import publicRoutes from "./public.routes";
+import { Library } from "./models";
+import * as adminController from "./admin.controller";
+import * as publicController from "./public.controller";
+import * as validation from "./validation";
 
 const router = express.Router();
-router.use("/", routes);
 
-// ✅ Guard + Export (standart)
-export { Library, libraryController };
-export * from "./library.validation";
+// 🔐 Admin Routes
+router.use("/admin", adminRoutes);
+
+// 🌍 Public Routes
+router.use("/", publicRoutes);
+
+// ✅ Exports (standardized)
+export { Library, adminController, publicController, validation };
 
 export default router;
