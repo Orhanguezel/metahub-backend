@@ -1,3 +1,4 @@
+import { Tenants } from "@/modules/tenants/tenants.model";
 import Imap from "imap";
 import { simpleParser, ParsedMail } from "mailparser";
 import { Readable } from "stream";
@@ -8,86 +9,75 @@ import translations from "@/core/config/i18n";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import type { SupportedLocale } from "@/types/common";
 
-// 🌐 Log dili belirleme (her zaman standart fonksiyon ile)
 const lang: SupportedLocale = getLogLocale();
 
-// 🌐 Environment variables
-const { IMAP_USER, IMAP_PASS, IMAP_HOST, IMAP_PORT } = process.env;
+export async function readInboxEmails(tenantSlug: string): Promise<void> {
+  // 1️⃣ IMAP configini tenant tablosundan çek
+  const tenant = await Tenants.findOne({ slug: tenantSlug, isActive: true }).lean();
+  const imapUser = tenant?.emailSettings?.imapUser;
+  const imapPass = tenant?.emailSettings?.imapPass;
+  const imapHost = tenant?.emailSettings?.imapHost;
+  const imapPort = tenant?.emailSettings?.imapPort;
+  const imapSecure = tenant?.emailSettings?.imapSecure ?? true; // default true
 
-if (!IMAP_USER || !IMAP_PASS || !IMAP_HOST || !IMAP_PORT) {
-  throw new Error(t("imap.error.env", lang, translations));
-}
+  if (!imapUser || !imapPass || !imapHost || !imapPort) {
+    throw new Error(`[IMAP] IMAP ayarları bulunamadı! Tenant: ${tenantSlug}`);
+  }
 
-// 📬 IMAP config
-const imap = new Imap({
-  user: IMAP_USER,
-  password: IMAP_PASS,
-  host: IMAP_HOST,
-  port: Number(IMAP_PORT),
-  tls: true,
-  tlsOptions: { rejectUnauthorized: false },
-});
+  // 2️⃣ IMAP bağlantısı oluştur
+  const imap = new Imap({
+    user: imapUser,
+    password: imapPass,
+    host: imapHost,
+    port: imapPort,
+    tls: imapSecure,
+    tlsOptions: { rejectUnauthorized: false },
+  });
 
-export const readInboxEmails = (): void => {
   imap.once("ready", () => {
     imap.openBox("INBOX", true, (err, _box) => {
       if (err) {
-        logger.error(t("imap.error.openInbox", lang, translations) + ` ${err}`);
+        logger.error(`[${tenantSlug}] ` + t("imap.error.openInbox", lang, translations) + ` ${err}`);
         return;
       }
-
       imap.search(["UNSEEN"], (err, results = []) => {
         if (err) {
-          logger.error(t("imap.error.search", lang, translations) + ` ${err}`);
+          logger.error(`[${tenantSlug}] ` + t("imap.error.search", lang, translations) + ` ${err}`);
           imap.end();
           return;
         }
-
         if (!results.length) {
-          logger.info(t("imap.nonew", lang, translations));
+          logger.info(`[${tenantSlug}] ` + t("imap.nonew", lang, translations));
           imap.end();
           return;
         }
-
         const fetch = imap.fetch(results, { bodies: "" });
-
         fetch.on("message", (msg) => {
           msg.on("body", (stream: Readable) => {
             simpleParser(stream, async (err, parsed: ParsedMail) => {
               if (err) {
-                logger.error(
-                  t("imap.parse.error", lang, translations) + ` ${err}`
-                );
+                logger.error(`[${tenantSlug}] ` + t("imap.parse.error", lang, translations) + ` ${err}`);
                 return;
               }
               try {
                 await EmailMessage.create({
                   from: parsed.from?.text || "Unknown Sender",
-                  subject: {
-                    de: parsed.subject || "(No Subject)",
-                    en: parsed.subject || "(No Subject)",
-                    tr: parsed.subject || "(No Subject)",
-                  },
-                  body: {
-                    de: parsed.text || parsed.html || "(No Content)",
-                    en: parsed.text || parsed.html || "(No Content)",
-                    tr: parsed.text || parsed.html || "(No Content)",
-                  },
+                  tenant: tenantSlug,
+                  subject: parsed.subject || "(No Subject)",
+                  body: parsed.text || parsed.html || "(No Content)",
                   date: parsed.date || new Date(),
                   isRead: false,
+                  isArchived: false,
                 });
-                logger.info(t("imap.saved", lang, translations));
+                logger.info(`[${tenantSlug}] ` + t("imap.saved", lang, translations));
               } catch (dbErr) {
-                logger.error(
-                  t("imap.dbError", lang, translations) + ` ${dbErr}`
-                );
+                logger.error(`[${tenantSlug}] ` + t("imap.dbError", lang, translations) + ` ${dbErr}`);
               }
             });
           });
         });
-
         fetch.once("end", () => {
-          logger.info(t("imap.allProcessed", lang, translations));
+          logger.info(`[${tenantSlug}] ` + t("imap.allProcessed", lang, translations));
           imap.end();
         });
       });
@@ -95,12 +85,11 @@ export const readInboxEmails = (): void => {
   });
 
   imap.once("error", (err: Error) => {
-    logger.error(t("imap.connection.error", lang, translations) + ` ${err}`);
+    logger.error(`[${tenantSlug}] ` + t("imap.connection.error", lang, translations) + ` ${err}`);
   });
-
   imap.once("end", () => {
-    logger.info(t("imap.connection.closed", lang, translations));
+    logger.info(`[${tenantSlug}] ` + t("imap.connection.closed", lang, translations));
   });
 
   imap.connect();
-};
+}

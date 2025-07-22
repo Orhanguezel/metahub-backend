@@ -144,7 +144,8 @@ export const fetchEmailsManually = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const t = getT(req);
 
-    await readInboxEmails();
+    // ✅ Multi-tenant! Her zaman req.tenant kullan!
+    await readInboxEmails(req.tenant);
 
     logger.withReq.info(req, t("email.inbox.sync.success"));
 
@@ -153,6 +154,7 @@ export const fetchEmailsManually = asyncHandler(
     });
   }
 );
+
 
 // =================== MARK EMAIL AS READ/UNREAD ===================
 export const markAsReadOrUnread = asyncHandler(
