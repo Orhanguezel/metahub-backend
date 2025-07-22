@@ -1,0 +1,30 @@
+{
+  "validation": {
+    "invalidObjectId": "ID de objeto no válido.",
+    "requiredField": "{field} es requerido.",
+    "invalidField": "{field} es un campo no válido.",
+    "tagsArray": "Las etiquetas deben ser un array.",
+    "invalidCategory": "Categoría no válida.",
+    "booleanField": "{field} debe ser verdadero o falso.",
+    "invalidDiscount": "Descuento no válido.",
+    "discountRange": "El descuento debe ser entre 1% y 100%.",
+    "invalidDate": "Formato de fecha no válido.",
+    "invalidLanguage": "Idioma no válido.",
+    "invalidRemovedImages": "Imágenes eliminadas no válidas.",
+    "created": "Cupón creado con éxito.",
+    "updated": "Cupón actualizado con éxito.",
+    "deleted": "Cupón eliminado con éxito.",
+    "listFetched": "Cupones recuperados con éxito.",
+    "fetched": "Cupón recuperado con éxito.",
+    "notFound": "Cupón no encontrado.",
+    "invalidId": "ID de cupón no válido."
+  },
+  "coupon": {
+    "created": "Cupón creado con éxito.",
+    "updated": "Cupón actualizado con éxito.",
+    "deleted": "Cupón eliminado con éxito.",
+    "listFetched": "Cupones recuperados con éxito.",
+    "fetched": "Cupón recuperado con éxito.",
+    "notFound": "Cupón no encontrado."
+  }
+}

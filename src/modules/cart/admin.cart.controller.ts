@@ -1,7 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response, NextFunction } from "express";
 import { isValidObjectId } from "@/core/utils/validation";
-//import { Cart } from "@/modules/cart";
 import { ICartItem } from "@/modules/cart/types";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
@@ -36,7 +35,11 @@ export const getAllCarts = asyncHandler(
 
       const carts = await Cart.find(filter)
         .populate("user", "name email")
-        .populate("items.product", "name price stock")
+        .populate({
+          path: "items.product",
+          select: "name price stock",
+          // refPath: "items.productType" // Gerekirse eklenebilir; çoğu zaman mongoose çözüyor
+        })
         .sort({ createdAt: -1 });
 
       logger.withReq.info(req, cartT("cart.admin.fetchedAll", locale));
@@ -71,9 +74,11 @@ export const getSingleCart = asyncHandler(
         });
         return;
       }
-      const cart = await Cart.findOne({ _id: id, tenant: req.tenant }).populate(
-        "items.product"
-      );
+      const cart = await Cart.findOne({ _id: id, tenant: req.tenant }).populate({
+        path: "items.product",
+        select: "name price stock",
+        // refPath: "items.productType"
+      });
       if (!cart) {
         logger.withReq.warn(req, cartT("cart.notFound", locale, { id }));
         res
@@ -128,9 +133,14 @@ export const updateCart = asyncHandler(
         return;
       }
 
+      // --- items güncellemesi (her item'ın productType'ı olması şart!) ---
       if (items && Array.isArray(items)) {
-        cart.items = items;
-        cart.totalPrice = items.reduce(
+        cart.items = items.map((item: ICartItem) => ({
+          ...item,
+          product: isValidObjectId(item.product) ? item.product : undefined,
+          productType: item.productType, // burada dikkat!
+        }));
+        cart.totalPrice = cart.items.reduce(
           (total: number, item: ICartItem) =>
             total + item.quantity * item.priceAtAddition,
           0

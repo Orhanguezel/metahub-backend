@@ -11,6 +11,7 @@ import userTranslations from "@/modules/users/i18n";
 import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { sendEmailVerification } from "@/modules/users/auth.advanced.controller";
+import { getTenantMailContext } from "@/core/middleware/tenant/getTenantMailContext";
 
 import {
   loginAndSetToken,
@@ -336,6 +337,8 @@ export const logoutUser = asyncHandler(
 );
 
 // ✅ Forgot Password
+// Helper fonksiyon yukarıda tanımlı olmalı:
+
 export const forgotPassword = asyncHandler(
   async (req: Request, res: Response) => {
     const { email } = req.body;
@@ -365,16 +368,24 @@ export const forgotPassword = asyncHandler(
     user.passwordResetExpires = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
     await user.save();
 
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    // ✅ Tenant domain/URL ve brand
+    const { brandName, senderEmail, frontendUrl } = getTenantMailContext(req);
+    const resetLink = `${frontendUrl.replace(/\/$/, "")}/reset-password/${resetToken}`;
+    
+    // Şablonun parametrelerini de tenant-aware ver
     const html = passwordResetTemplate({
       name: user.name,
       resetLink,
+      brandName,
+      senderEmail,
     });
 
     await sendEmail({
+      tenantSlug: req.tenant,
       to: user.email,
-      subject: userT("auth.forgot.subject", locale),
+      subject: userT("auth.forgot.subject", locale, { brand: brandName }),
       html,
+      from: senderEmail,
     });
 
     logger.withReq.info(
@@ -387,6 +398,7 @@ export const forgotPassword = asyncHandler(
       .json({ success: true, message: userT("auth.forgot.success", locale) });
   }
 );
+
 
 // ✅ Reset Password
 export const resetPassword = asyncHandler(

@@ -2,9 +2,19 @@ import { Schema, model, models, Types, Model } from "mongoose";
 import type { IOrder, IOrderItem, IShippingAddress } from "./types";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
+// --- ORDER ITEM: Dinamik refPath ile! ---
 const orderItemSchema = new Schema<IOrderItem>(
   {
-    product: { type: Schema.Types.ObjectId, ref: "Bike", required: true },
+    product: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      refPath: "items.productType", // <<<--- DİNAMİK REFERANS!
+    },
+     productType: {
+      type: String,
+      required: true,
+      enum: ["Bike", "Ensotekprod"], // İstediğin kadar model ekle
+    },
     tenant: { type: String, required: true, index: true },
     quantity: { type: Number, required: true, min: 1 },
     unitPrice: { type: Number, required: true, min: 0 },
@@ -12,6 +22,7 @@ const orderItemSchema = new Schema<IOrderItem>(
   { _id: false }
 );
 
+// --- SHIPPING ADDRESS ---
 const shippingAddressSchema = new Schema<IShippingAddress>(
   {
     name: { type: String, required: true, trim: true },
@@ -25,6 +36,7 @@ const shippingAddressSchema = new Schema<IShippingAddress>(
   { _id: false }
 );
 
+// --- ORDER SCHEMA ---
 const orderSchema = new Schema<IOrder>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
@@ -33,10 +45,7 @@ const orderSchema = new Schema<IOrder>(
     items: {
       type: [orderItemSchema],
       required: true,
-      validate: [
-        (v: any[]) => v.length > 0,
-        "Order must have at least one item.",
-      ],
+      validate: [(v: any[]) => v.length > 0, "Order must have at least one item."],
     },
     shippingAddress: { type: shippingAddressSchema, required: true },
     totalPrice: { type: Number, required: true, min: 0 },

@@ -3,14 +3,13 @@ import asyncHandler from "express-async-handler";
 import { isValidObjectId } from "@/core/utils/validation";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
+// ✅ Kullanıcının tüm adreslerini getir
 export const getUserAddresses = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const { Address } = await getTenantModels(req);
 
-    const addresses = await Address.find({ userId, tenant: req.tenant }).sort({
-      createdAt: -1,
-    });
+    const addresses = await Address.find({ userId, tenant: req.tenant }).sort({ createdAt: -1 }).lean();
 
     res.status(200).json({
       success: true,
@@ -20,32 +19,34 @@ export const getUserAddresses = asyncHandler(
   }
 );
 
+// ✅ Yeni adres oluştur
 export const createAddress = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user!.id;
-    const { street, houseNumber, city, zipCode, country, phone, isDefault } =
-      req.body;
+    const { street, houseNumber, city, zipCode, country, phone, email, isDefault } = req.body;
     const { Address, User } = await getTenantModels(req);
+
+    // ✅ Email zorunlu, backend ile frontend birebir!
+    if (!email) {
+      res.status(400).json({ success: false, message: "Email is required for address." });
+      return;
+    }
 
     const newAddress = await Address.create({
       userId,
+      tenant: req.tenant,
       street,
       houseNumber,
       city,
       zipCode,
-      tenant: req.tenant, // 🟢 Eklendi
       country,
       phone,
+      email,
       isDefault,
     });
 
-    await User.findByIdAndUpdate(
-      userId,
-      { tenant: req.tenant },
-      {
-        $push: { addresses: newAddress._id },
-      }
-    );
+    // User adres listesine ekle
+    await User.findByIdAndUpdate(userId, { $push: { addresses: newAddress._id } });
 
     res.status(201).json({
       success: true,
@@ -55,6 +56,7 @@ export const createAddress = asyncHandler(
   }
 );
 
+// ✅ Tek adres getir
 export const getAddressById = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -79,11 +81,11 @@ export const getAddressById = asyncHandler(
   }
 );
 
+// ✅ Adres güncelle
 export const updateAddress = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { street, houseNumber, city, zipCode, country, phone, isDefault } =
-      req.body;
+    const { street, houseNumber, city, zipCode, country, phone, email, isDefault } = req.body;
     const { Address, User } = await getTenantModels(req);
 
     if (!isValidObjectId(id)) {
@@ -91,18 +93,23 @@ export const updateAddress = asyncHandler(
       return;
     }
 
+    if (!email) {
+      res.status(400).json({ success: false, message: "Email is required for address." });
+      return;
+    }
+
     const updated = await Address.findByIdAndUpdate(
       id,
       {
-        tenant: req.tenant,
         street,
         houseNumber,
         city,
         zipCode,
         country,
         phone,
+        email,
         isDefault,
-      }, // 🟢 Eklendi
+      },
       { new: true, runValidators: true }
     );
 
@@ -111,10 +118,10 @@ export const updateAddress = asyncHandler(
       return;
     }
 
+    // User içindeki adresi de güncelle (Mongoose array update)
     await User.findOneAndUpdate(
       { addresses: id },
-      { $set: { "addresses.$": updated._id } },
-      { new: true }
+      { $set: { "addresses.$": updated._id } }
     );
 
     res.status(200).json({
@@ -125,6 +132,7 @@ export const updateAddress = asyncHandler(
   }
 );
 
+// ✅ Adres sil
 export const deleteAddress = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -153,6 +161,7 @@ export const deleteAddress = asyncHandler(
   }
 );
 
+// ✅ Tüm adresleri toplu güncelle
 export const updateAllUserAddresses = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user!.id;
@@ -160,19 +169,19 @@ export const updateAllUserAddresses = asyncHandler(
     const { Address, User } = await getTenantModels(req);
 
     if (!Array.isArray(newAddresses) || newAddresses.length === 0) {
-      res
-        .status(400)
-        .json({ success: false, message: "No addresses provided." });
+      res.status(400).json({ success: false, message: "No addresses provided." });
       return;
     }
 
+    // Hepsini sil, yenileri ekle
     await Address.deleteMany({ userId, tenant: req.tenant });
 
     const createdAddresses = await Address.insertMany(
       newAddresses.map((address: any, idx: number) => ({
         ...address,
-        isDefault: idx === 0,
         userId,
+        tenant: req.tenant,
+        isDefault: idx === 0,
       }))
     );
 

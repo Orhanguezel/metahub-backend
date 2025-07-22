@@ -121,13 +121,14 @@ export const updateBookingStatus = asyncHandler(
         tenantData?.name) ??
       "Brand";
     const senderEmail =
-      tenantData?.emailSettings?.senderEmail || "noreply@example.com";
+      tenantData?.emailSettings?.senderEmail;
     // ------------------------------------------------------------- //
 
-    // E-mail logic
+    // -- Email gönderimi tenant-aware! --
     if (status === "confirmed") {
       try {
         await sendEmail({
+          tenantSlug: req.tenant, // EN KRİTİK!
           to: booking.email,
           subject: t("booking.confirmed.subject"),
           html: BookingConfirmedTemplate({
@@ -144,7 +145,6 @@ export const updateBookingStatus = asyncHandler(
         logger.withReq.info(req, t("booking.confirmed.emailSent", { id }));
       } catch (err) {
         logger.withReq.error(req,
-          t("booking.confirmed.emailError", { id }),
           t("booking.confirmed.emailError", { id }) + " " + String(err)
         );
       }
@@ -152,6 +152,7 @@ export const updateBookingStatus = asyncHandler(
     if (status === "cancelled") {
       try {
         await sendEmail({
+          tenantSlug: req.tenant,
           to: booking.email,
           subject: t("booking.rejected.subject"),
           html: BookingRejectionTemplate({

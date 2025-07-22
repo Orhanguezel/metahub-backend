@@ -19,6 +19,7 @@ import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import userTranslations from "@/modules/users/i18n";
 import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+import type { Address as AddressType } from "@/modules/address/types";
 
 // Locale helper
 function getLocale(req: Request): SupportedLocale {
@@ -48,31 +49,43 @@ async function processUploadedProfileImage(file: Express.Multer.File) {
   return { url: imageUrl, thumbnail, webp, publicId };
 }
 
-// ✅ Kendi profilini getir
+// ✅ Kendi profilini getir (adresler doğrudan Address koleksiyonundan ekleniyor)
 export const getMyProfile = asyncHandler(
   async (req: Request, res: Response) => {
     const locale = getLocale(req);
-    const { User } = await getTenantModels(req);
+    const { User, Address } = await getTenantModels(req);
 
+    // Sadece user'ı çek (addresses: ObjectId[] şeklinde)
     const user = await User.findOne({ _id: req.user!.id, tenant: req.tenant })
       .select("-password")
-      .populate("addresses profile payment cart orders favorites");
+      .populate("profile payment cart orders favorites");
 
     if (!user) {
       logger.withReq.warn(req, `[PROFILE] User not found: ${req.user!.id}`);
-      res
-        .status(404)
-        .json({ success: false, message: userT("error.userNotFound", locale) });
+      res.status(404).json({
+        success: false,
+        message: userT("error.userNotFound", locale),
+      });
       return;
     }
+
+    // Tüm adresler ayrı collection'dan alınır (frontend'de Address[] ile uyumlu olacak!)
+    const addresses = await Address.find({ userId: user._id, tenant: req.tenant }).lean();
+
+
+    const userObj = user.toObject();
+    userObj.addresses = userObj.addresses ?? []; // ObjectId[] (referans array'i)
+    userObj.addressesPopulated = addresses;      // Address[]
+
     logger.withReq.info(req, `[PROFILE] Profile fetched for: ${user.email}`);
     res.status(200).json({
       success: true,
       message: userT("profile.fetch.success", locale),
-      user,
+      user: userObj,
     });
   }
 );
+
 
 // ✅ Profil güncelle
 export const updateMyProfile = asyncHandler(

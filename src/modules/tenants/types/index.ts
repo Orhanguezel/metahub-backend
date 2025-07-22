@@ -14,40 +14,40 @@ export interface TenantEmailSettings {
   smtpSecure?: boolean;
   smtpUser: string;
   smtpPass: string;
-  senderName: string;
-  senderEmail: string;
+  senderName: string;    // Dinamik: "Brand" adı vs.
+  senderEmail: string;   // Gönderici e-maili
 
-  // IMAP (opsiyonel)
+  // IMAP (Opsiyonel)
   imapHost?: string;
   imapPort?: number;
   imapUser?: string;
   imapPass?: string;
   imapSecure?: boolean;
-  replyToEmail?: string;
+  replyToEmail?: string;   // Yanıtlama adresi (opsiyonel)
+  adminEmail?: string;     // Tenant'a özel admin mail (opsiyonel, eklenebilir)
 }
 
 export interface TenantDomain {
-  main: string;
-  subdomains?: string[];
-  customDomains?: string[];
+  main: string;                 // Ana domain, zorunlu!
+  subdomains?: string[];        // Subdomainler (isteğe bağlı)
+  customDomains?: string[];     // Custom domainler (isteğe bağlı)
 }
 
 export interface ITenant {
-  name: TranslatedLabel;
-  slug: string;
-  mongoUri: string;
-  domain?: TenantDomain;
-  emailSettings?: TenantEmailSettings;
-  logo?: string;
-  images?: ITenantImage[];
-  theme?: string;
-  enabledModules?: string[];
-  isActive?: boolean;
-  description?: TranslatedLabel;
-  metaTitle?: TranslatedLabel;
-  metaDescription?: TranslatedLabel;
-  address?: TranslatedLabel;
-  phone?: string;
+  name: TranslatedLabel;        // Çoklu dil: { en, tr, de, ... }
+  slug: string;                 // Kısa ad (URL için)
+  mongoUri: string;             // Her tenant’a özel DB
+  domain: TenantDomain;         // Domain bilgisi (main zorunlu)
+  emailSettings: TenantEmailSettings;   // SMTP/IMAP/email context (zorunlu)
+  logo?: string;                // Ana logo (opsiyonel)
+  images?: ITenantImage[];      // Çoklu görsel desteği
+  theme?: string;               // Tema adı
+  isActive?: boolean;           // Aktiflik durumu
+  description?: TranslatedLabel;      // Açıklama (çoklu dil)
+  metaTitle?: TranslatedLabel;        // SEO başlık
+  metaDescription?: TranslatedLabel;  // SEO açıklama
+  address?: TranslatedLabel;          // Adres (çoklu dil)
+  phone?: string;               // Telefon
   social?: {
     facebook?: string;
     instagram?: string;

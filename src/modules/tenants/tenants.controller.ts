@@ -70,7 +70,6 @@ export const createTenant = asyncHandler(
       mongoUri: req.body.mongoUri,
       domain: parseIfJson(req.body.domain),
       emailSettings: parseIfJson(req.body.emailSettings),
-      enabledModules: parseIfJson(req.body.enabledModules),
       description: fillAllLocales(parseIfJson(req.body.description)),
       metaTitle: fillAllLocales(parseIfJson(req.body.metaTitle)),
       metaDescription: fillAllLocales(parseIfJson(req.body.metaDescription)),
