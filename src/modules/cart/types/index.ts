@@ -1,10 +1,11 @@
 import { Types } from "mongoose";
 import { IBike } from "@/modules/bikes/types";
 import { IEnsotekprod } from "@/modules/ensotekprod/types";
+import { ISparepart } from "@/modules/sparepart/types";
 
 export interface ICartItem {
   product: Types.ObjectId; // Sadece ObjectId!
-  productType: "Bike" | "Ensotekprod"; // Ürün tipi zorunlu
+  productType: "Bike" | "Ensotekprod" | "Sparepart"; // Ürün tipi zorunlu
   tenant: string;
   quantity: number;
   priceAtAddition: number;

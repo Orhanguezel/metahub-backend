@@ -1,14 +1,17 @@
 {
-  "blogcategory.validation.invalidNameType": "İsim, dillerle birlikte bir nesne olmalıdır.",
-  "blogcategory.validation.localeMissing": "Name.{{lang}} zorunludur ve boş olamaz.",
-  "blogcategory.validation.localeInvalid": "Name.{{lang}} bir metin (string) olmalıdır.",
-  "blogcategory.create.success": "'{{name}}' kategorisi başarıyla oluşturuldu.",
-  "blogcategory.create.error": "Kategori oluşturulamadı.",
-  "blogcategory.update.success": "'{{name}}' kategorisi başarıyla güncellendi.",
-  "blogcategory.delete.success": "'{{name}}' kategorisi başarıyla silindi.",
-  "blogcategory.list.success": "Kategoriler başarıyla listelendi.",
-  "blogcategory.list.error": "Kategoriler alınırken hata oluştu.",
-  "blogcategory.fetch.success": "Kategori başarıyla getirildi.",
-  "blogcategory.notFound": "Kategori bulunamadı.",
-  "blogcategory.invalidId": "Geçersiz kategori ID’si."
+  "log": {
+    "created": "Bisiklet başarıyla oluşturuldu.",
+    "updated": "Bisiklet başarıyla güncellendi.",
+    "deleted": "Bisiklet başarıyla silindi.",
+    "fetched": "Bisiklet başarıyla getirildi.",
+    "listed": "Bisikletler başarıyla listelendi."
+  },
+  "error": {
+    "not_found": "Bisiklet bulunamadı.",
+    "invalid_id": "Geçersiz bisiklet ID'si.",
+    "create_fail": "Bisiklet oluşturulamadı.",
+    "update_fail": "Bisiklet güncellenemedi.",
+    "delete_fail": "Bisiklet silinemedi."
+  }
 }
+

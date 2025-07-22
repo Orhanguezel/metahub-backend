@@ -1,14 +1,16 @@
 {
-  "blogcategory.validation.invalidNameType": "Name muss ein Objekt mit Übersetzungen sein.",
-  "blogcategory.validation.localeMissing": "Name.{{lang}} ist erforderlich und darf nicht leer sein.",
-  "blogcategory.validation.localeInvalid": "Name.{{lang}} muss ein String sein.",
-  "blogcategory.create.success": "Kategorie '{{name}}' wurde erfolgreich erstellt.",
-  "blogcategory.create.error": "Kategorie konnte nicht erstellt werden.",
-  "blogcategory.update.success": "Kategorie '{{name}}' wurde erfolgreich aktualisiert.",
-  "blogcategory.delete.success": "Kategorie '{{name}}' wurde erfolgreich gelöscht.",
-  "blogcategory.list.success": "Kategorien wurden erfolgreich aufgelistet.",
-  "blogcategory.list.error": "Fehler beim Abrufen der Kategorien.",
-  "blogcategory.fetch.success": "Kategorie erfolgreich abgerufen.",
-  "blogcategory.notFound": "Kategorie nicht gefunden.",
-  "blogcategory.invalidId": "Ungültige Kategorie-ID."
+  "log": {
+    "created": "Fahrrad erfolgreich erstellt.",
+    "updated": "Fahrrad erfolgreich aktualisiert.",
+    "deleted": "Fahrrad erfolgreich gelöscht.",
+    "fetched": "Fahrrad erfolgreich abgerufen.",
+    "listed": "Fahrräder erfolgreich aufgelistet."
+  },
+  "error": {
+    "not_found": "Fahrrad nicht gefunden.",
+    "invalid_id": "Ungültige Fahrrad-ID.",
+    "create_fail": "Fahrrad konnte nicht erstellt werden.",
+    "update_fail": "Fahrrad konnte nicht aktualisiert werden.",
+    "delete_fail": "Fahrrad konnte nicht gelöscht werden."
+  }
 }

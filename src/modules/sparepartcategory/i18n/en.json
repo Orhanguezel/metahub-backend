@@ -1,0 +1,10 @@
+{
+  "create.success": "Sparepart category created successfully.",
+  "update.success": "Sparepart category updated successfully.",
+  "delete.success": "Sparepart category deleted successfully.",
+  "fetch.success": "Sparepart category fetched successfully.",
+  "fetchAll.success": "Sparepart categories fetched successfully.",
+  "error.notFound": "Sparepart category not found.",
+  "error.invalidId": "Invalid category ID.",
+  "validation.missingLocales": "All supported locales must be provided in name."
+}

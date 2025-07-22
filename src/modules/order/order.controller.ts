@@ -16,7 +16,7 @@ function orderT(key: string, locale: SupportedLocale, vars?: Record<string, stri
 
 // --- SİPARİŞ OLUŞTUR ---
 export const createOrder = asyncHandler(async (req: Request, res: Response) => {
-  const { Order, Address, Coupon, Payment, User, Notification, Bike, Ensotekprod } = await getTenantModels(req);
+  const { Order, Address, Coupon, Payment, User, Notification, Bike, Ensotekprod, Sparepart } = await getTenantModels(req);
   const { items, addressId, shippingAddress, paymentMethod, couponCode } = req.body;
   const userId = req.user?._id;
   const userName = req.user?.name || "";
@@ -90,12 +90,12 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   for (const item of items) {
     // **productModel zorunlu**
     const modelName = item.productModel;
-    if (!modelName || !["Bike", "Ensotekprod"].includes(modelName)) {
+    if (!modelName || !["Bike", "Ensotekprod", "Sparepart"].includes(modelName)) {
       res.status(400).json({ success: false, message: "Invalid or missing product model!" });
       return;
     }
     // Dinamik olarak model seç
-    const ProductModel = { Bike, Ensotekprod }[modelName];
+    const ProductModel = { Bike, Ensotekprod, Sparepart }[modelName];
     if (!ProductModel) {
       res.status(400).json({ success: false, message: `Model not supported: ${modelName}` });
       return;

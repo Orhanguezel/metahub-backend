@@ -64,7 +64,8 @@ import { News } from "@/modules/news/models";
 import { NewsCategory } from "@/modules/newscategory/category.models";
 import { Analytics } from "@/modules/analytics/analytics.models";
 import { ModuleMeta, ModuleSetting } from "@/modules/modules/admin.models";
-import { Sparepart } from "@/modules/sparepart/sparepart.models";
+import { Sparepart } from "@/modules/sparepart/models";
+import { SparepartCategory } from "@/modules/sparepartcategory/models";
 import { Tenants } from "@/modules/tenants/tenants.model";
 
 // ✅ Ana export
@@ -140,5 +141,6 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   FAQ: conn.model("FAQ", FAQ.schema),
   Stockmovement: conn.model("Stockmovement", Stockmovement.schema),
   Sparepart: conn.model("Sparepart", Sparepart.schema),
+  SparepartCategory: conn.model("SparepartCategory", SparepartCategory.schema),
   Tenants: conn.model("Tenants", Tenants.schema),
 });

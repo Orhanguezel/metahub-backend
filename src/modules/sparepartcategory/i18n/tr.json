@@ -1,0 +1,12 @@
+{
+  "create.success": "Bisiklet kategorisi başarıyla oluşturuldu.",
+  "update.success": "Bisiklet kategorisi başarıyla güncellendi.",
+  "delete.success": "Bisiklet kategorisi başarıyla silindi.",
+  "fetch.success": "Bisiklet kategorisi başarıyla getirildi.",
+  "fetchAll.success": "Bisiklet kategorileri başarıyla getirildi.",
+  "error.notFound": "Bisiklet kategorisi bulunamadı.",
+  "error.invalidId": "Geçersiz kategori ID'si.",
+  "validation.missingLocales": "Tüm desteklenen dillerde isim zorunludur: {{locales}}.",
+  "validation.invalidLocales": "İsim sadece şu dillerden oluşmalı ve string olmalı: {{locales}}.",
+  "validation.default": "Geçersiz veri. Lütfen kontrol edin."
+}

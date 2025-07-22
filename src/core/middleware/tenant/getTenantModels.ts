@@ -63,7 +63,8 @@ import { News } from "@/modules/news/models";
 import { NewsCategory } from "@/modules/newscategory/category.models";
 import { Analytics } from "@/modules/analytics/analytics.models";
 import { ModuleMeta, ModuleSetting } from "@/modules/modules/admin.models";
-import { Sparepart } from "@/modules/sparepart/sparepart.models";
+import { Sparepart } from "@/modules/sparepart/models";
+import { SparepartCategory } from "@/modules/sparepartcategory/models";
 import { Tenants } from "@/modules/tenants/tenants.model";
 
 export const getTenantModels = async (req: Request) => ({
@@ -159,5 +160,6 @@ export const getTenantModels = async (req: Request) => ({
   FAQ: await req.getModel("FAQ", FAQ.schema),
   Stockmovement: await req.getModel("Stockmovement", Stockmovement.schema),
   Sparepart: await req.getModel("Sparepart", Sparepart.schema),
+  SparepartCategory: await req.getModel("SparepartCategory", SparepartCategory.schema),
   Tenants: await req.getModel("Tenants", Tenants.schema),
 });
