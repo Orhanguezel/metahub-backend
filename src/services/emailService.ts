@@ -90,30 +90,38 @@ export const sendEmail = async ({
 /**
  * Kullanıcıya (multi-tenant, dynamic connection ile) e-posta doğrulama linki gönderir
  */
+
 export const sendEmailVerificationLink = async ({
   tenantSlug,
   userId,
   email,
+  req,   // <-- Ekstra: tenant context almak için Request nesnesi lazım!
 }: {
   tenantSlug: string;
   userId: string;
   email: string;
+  req: any; // Request
 }) => {
   const lang = getLogLocale();
 
   // 1. Token oluştur
   const token = crypto.randomBytes(32).toString("hex");
 
-  // 2. Tenant connection ile User modelini al!
+  // 2. Tenant connection ile User modelini al
   const conn = await getTenantDbConnection(tenantSlug);
   const { User } = getTenantModelsFromConnection(conn);
 
-  // 3. Tenant'ın domain bilgisini ÇEK — FALLBACK YOK!
-  const tenant = await Tenants.findOne({ slug: tenantSlug, isActive: true }).lean();
-  const frontendUrl = tenant?.domain?.main;
+  // 3. Tüm marka/domain/email bilgilerini context’ten çek (sadece .env değil!)
+  const {
+    brandName,
+    senderEmail,
+    frontendUrl, // en kritik nokta!
+  } = getTenantMailContext(req);
 
   if (!frontendUrl) {
-    throw new Error(`[EMAIL-VERIFICATION] Tenant domain (main) bulunamadı! Tenant: ${tenantSlug}`);
+    throw new Error(
+      `[EMAIL-VERIFICATION] Tenant domain (main) bulunamadı! Tenant: ${tenantSlug}`
+    );
   }
 
   // 4. Token'ı user'a yaz
@@ -139,7 +147,6 @@ export const sendEmailVerificationLink = async ({
     to: email,
     subject: t("email.verification.subject", lang, emailI18n),
     html,
+    from: senderEmail, // context’ten gelen email
   });
 };
-
-
