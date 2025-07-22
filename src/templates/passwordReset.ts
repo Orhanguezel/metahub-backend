@@ -5,18 +5,20 @@ import translations from "@/templates/i18n";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import type { SupportedLocale } from "@/types/common";
 
-interface PasswordResetTemplateParams {
+export interface PasswordResetTemplateParams {
   name: string;
   resetLink: string;
+  brandName: string;    // artık zorunlu!
+  senderEmail?: string; // opsiyonel
 }
-
-const BRAND_TEAM_NAME = process.env.BRAND_TEAM_NAME || "metahub Team";
 
 export const passwordResetTemplate = ({
   name,
   resetLink,
+  brandName,
+  senderEmail,
 }: PasswordResetTemplateParams): string => {
-  const locale = getLogLocale(); // env'den veya default
+  const locale = getLogLocale();
   const tr = translations[locale] || translations["en"];
 
   logger.debug(
@@ -33,7 +35,8 @@ export const passwordResetTemplate = ({
       </a>
     </p>
     <p>${t("reset.footer", locale, tr)}</p>
-    <p>${t("reset.sign", locale, tr, { team: BRAND_TEAM_NAME })}</p>
+    <p>${t("reset.sign", locale, tr, { team: brandName })}</p>
+    <p style="font-size:12px;color:#999;">${brandName}${senderEmail ? ` | ${senderEmail}` : ""}</p>
   `;
 
   return baseTemplate(content, t("reset.title", locale, tr));

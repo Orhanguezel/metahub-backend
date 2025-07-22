@@ -73,7 +73,6 @@ const TenantSchema = new Schema<ITenant>(
     logo: { type: String, default: "" },
     images: { type: [TenantImageSchema], default: [] },
     theme: { type: String, default: "default" },
-    enabledModules: [{ type: String, default: [] }],
     isActive: { type: Boolean, default: true },
     description: { type: translatedFieldSchema, default: () => ({}) },
     metaTitle: { type: translatedFieldSchema, default: () => ({}) },

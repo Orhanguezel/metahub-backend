@@ -149,13 +149,16 @@ export const createBooking = asyncHandler(
       <li><strong>${t("public.adminMail.note")}:</strong> ${note || "-"}</li>
     </ul>`;
 
+    // 🟢 Her mailde tenantSlug zorunlu!
     await Promise.all([
       sendEmail({
+        tenantSlug: req.tenant,
         to: email,
         subject: t("public.email.subject.customer"),
         html: htmlToCustomer,
       }),
       sendEmail({
+        tenantSlug: req.tenant,
         to: senderEmail,
         subject: t("public.email.subject.admin"),
         html: htmlToAdmin,

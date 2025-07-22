@@ -1,0 +1,30 @@
+{
+  "validation": {
+    "invalidObjectId": "Nieprawidłowy ObjectId.",
+    "requiredField": "{field} jest wymagany.",
+    "invalidField": "{field} jest nieprawidłowym polem.",
+    "tagsArray": "Tagi muszą być tablicą.",
+    "invalidCategory": "Nieprawidłowa kategoria.",
+    "booleanField": "{field} musi być prawdą lub fałszem.",
+    "invalidDiscount": "Nieprawidłowa zniżka.",
+    "discountRange": "Zniżka musi wynosić od 1% do 100%.",
+    "invalidDate": "Nieprawidłowy format daty.",
+    "invalidLanguage": "Nieprawidłowy język.",
+    "invalidRemovedImages": "Nieprawidłowe usunięte obrazy.",
+    "created": "Kupon został utworzony.",
+    "updated": "Kupon został zaktualizowany.",
+    "deleted": "Kupon został usunięty.",
+    "listFetched": "Kupony zostały pobrane.",
+    "fetched": "Kupon został pobrany.",
+    "notFound": "Kupon nie znaleziony.",
+    "invalidId": "Nieprawidłowy identyfikator kuponu."
+  },
+  "coupon": {
+    "created": "Kupon został utworzony.",
+    "updated": "Kupon został zaktualizowany.",
+    "deleted": "Kupon został usunięty.",
+    "listFetched": "Kupony zostały pobrane.",
+    "fetched": "Kupon został pobrany.",
+    "notFound": "Kupon nie znaleziony."
+  }
+}

@@ -45,6 +45,7 @@ export const sendMessage = asyncHandler(
 
       // Kullanıcıya otomatik yanıt
       await sendEmail({
+        tenantSlug: req.tenant, // 💡 Zorunlu alan!
         to: email,
         subject: t("email.replySubject", { brand: brandName }),
         html: ContactReplyTemplate({
@@ -58,9 +59,10 @@ export const sendMessage = asyncHandler(
       });
 
       // Admin'e bilgilendirme
-      if (process.env.ADMIN_EMAIL) {
+      if (tenantData?.emailSettings?.adminEmail) {
         await sendEmail({
-          to: process.env.ADMIN_EMAIL,
+          tenantSlug: req.tenant,
+          to: tenantData.emailSettings.adminEmail,
           subject: `[Contact] Yeni İletişim Mesajı - ${brandName}`,
           html: `
             <h3>Yeni iletişim mesajı!</h3>

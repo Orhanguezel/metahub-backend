@@ -7,6 +7,7 @@ import {
 import type { IUser, IUserProfileImage } from "./types";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
+// --- Profile Image Embedded Subschema ---
 const UserProfileImageSchema = new Schema<IUserProfileImage>(
   {
     url: { type: String, required: true },
@@ -19,6 +20,7 @@ const UserProfileImageSchema = new Schema<IUserProfileImage>(
 
 interface IUserModel extends Model<IUser> {}
 
+// --- Main User Schema ---
 const userSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
@@ -36,7 +38,7 @@ const userSchema = new Schema<IUser>(
       default: "user",
     },
     profile: { type: Schema.Types.ObjectId, ref: "Profile" },
-    addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }],
+    addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }], // Referans array (her zaman böyle)
     payment: { type: Schema.Types.ObjectId, ref: "Payment" },
     cart: { type: Schema.Types.ObjectId, ref: "Cart" },
     orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
@@ -45,7 +47,7 @@ const userSchema = new Schema<IUser>(
     birthDate: { type: Date },
     language: {
       type: String,
-      enum: SUPPORTED_LOCALES,
+      enum: SUPPORTED_LOCALES, // DİKKAT: Backend ile aynı source’dan gelmeli!
       default: "en",
     },
     profileImage: {
@@ -59,7 +61,6 @@ const userSchema = new Schema<IUser>(
     },
     isActive: { type: Boolean, default: true },
     favorites: [{ type: Schema.Types.ObjectId, ref: "Product" }],
-
     deleted: {
       isDeleted: { type: Boolean, default: false },
       deletedAt: { type: Date, default: null },
@@ -74,20 +75,16 @@ const userSchema = new Schema<IUser>(
       emailNotifications: { type: Boolean, default: true },
       smsNotifications: { type: Boolean, default: false },
     },
-
     passwordResetToken: { type: String },
     passwordResetExpires: { type: Date },
-
     // --- Email Verification
     emailVerified: { type: Boolean, default: false },
     emailVerificationToken: { type: String, select: false },
     emailVerificationExpires: { type: Date, select: false },
     verifiedAt: { type: Date },
-
     // --- OTP
     otpCode: { type: String, select: false },
     otpExpires: { type: Date, select: false },
-
     // --- MFA (2FA, TOTP)
     mfaEnabled: { type: Boolean, default: false },
     mfaSecret: { type: String, select: false },
@@ -96,6 +93,7 @@ const userSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
+// --- Password Hash Middleware ---
 userSchema.pre("save", async function (next) {
   const user = this as mongoose.Document & IUser;
   if (user.isModified("password") && !isPasswordHashed(user.password)) {
@@ -104,6 +102,7 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+// --- Instance Methods ---
 userSchema.methods.comparePassword = async function (
   this: IUser,
   candidatePassword: string

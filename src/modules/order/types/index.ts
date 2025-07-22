@@ -2,24 +2,20 @@ import { Types } from "mongoose";
 import type { SupportedLocale } from "@/types/common";
 
 export type PaymentMethod = "cash_on_delivery" | "credit_card" | "paypal";
-export type OrderStatus =
-  | "pending"
-  | "preparing"
-  | "shipped"
-  | "completed"
-  | "cancelled";
+export type OrderStatus = "pending" | "preparing" | "shipped" | "completed" | "cancelled";
 
 export interface IOrderItem {
   product: Types.ObjectId;
+  productType: "Bike" | "Ensotekprod"; // burada hangi koleksiyon olduğunu belirtiyoruz
   quantity: number;
-  tenant: string; // Optional tenant field for multi-tenancy
+  tenant: string;
   unitPrice: number;
 }
 
 export interface IShippingAddress {
   name: string;
   phone: string;
-  tenant: string; // Optional tenant field for multi-tenancy
+  tenant: string;
   street: string;
   city: string;
   postalCode: string;
@@ -30,7 +26,7 @@ export interface IOrder {
   user: Types.ObjectId;
   addressId?: Types.ObjectId;
   items: IOrderItem[];
-  tenant: string; // Optional tenant field for multi-tenancy
+  tenant: string;
   shippingAddress: IShippingAddress;
   totalPrice: number;
   discount?: number;

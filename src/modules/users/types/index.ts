@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
-import type { SupportedLocale } from "@/types/common";
+import type { SupportedLocale } from "@/types/common";  // ← Senin merkezi locale tipin!
+import type { Address } from "@/modules/address/types";
 
 export interface IUserProfileImage {
   url: string;
@@ -12,16 +13,17 @@ export interface Notifications {
   emailNotifications?: boolean;
   smsNotifications?: boolean;
 }
+
 export interface SocialMedia {
   facebook?: string;
   twitter?: string;
   instagram?: string;
 }
 
-// Main User Interface
+// --- FINAL USER TIPI ---
 export interface IUser {
   name: string;
-  tenant: string; // Optional tenant field for multi-tenancy
+  tenant: string; // Multi-tenancy (her zaman zorunlu!)
   email: string;
   password: string;
   role: "superadmin" | "admin" | "user" | "customer" | "moderator" | "staff";
@@ -35,13 +37,14 @@ export interface IUser {
     deletedAt: Date | null;
     reason: string | null;
   };
-  addresses?: Types.ObjectId[];
+  addresses?: (Types.ObjectId | string)[];  // ← Sadece referans ID'ler
+  addressesPopulated?: Address[];           // ← API response'da gerçek adresler
   profileImage?: IUserProfileImage;
   isActive: boolean;
   favorites?: Types.ObjectId[];
   bio?: string;
   birthDate?: Date;
-  language?: SupportedLocale;
+  language?: SupportedLocale; // ← HER ZAMAN central type'dan
   socialMedia?: SocialMedia;
   notifications?: Notifications;
   passwordResetToken?: string;
@@ -63,6 +66,7 @@ export interface IUser {
   createdAt: Date;
   updatedAt: Date;
 
+  // --- Methods (instance)
   comparePassword(candidatePassword: string): Promise<boolean>;
   isPasswordHashed(): boolean;
 }

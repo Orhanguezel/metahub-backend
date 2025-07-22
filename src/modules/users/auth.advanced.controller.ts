@@ -13,7 +13,7 @@ import userTranslations from "@/modules/users/i18n";
 import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
-// Dil ve log için kısa yol
+// --- Helper: locale ve tenant marka/email ---
 function getLocale(req: Request): SupportedLocale {
   return (req.locale as SupportedLocale) || getLogLocale();
 }
@@ -24,13 +24,26 @@ function userT(
 ) {
   return t(key, locale, userTranslations, vars);
 }
+function getTenantMailContext(req: Request) {
+  const tenantData = req.tenantData;
+  const locale = getLocale(req);
+  const brandName =
+    (tenantData?.name?.[locale] ||
+      tenantData?.name?.en ||
+      tenantData?.name) ?? "Brand";
+  const senderEmail =
+    tenantData?.emailSettings?.senderEmail;
+  const frontendUrl =
+    tenantData?.domain?.main ||
+    process.env.FRONTEND_URL
+  return { brandName, senderEmail, frontendUrl };
+}
 
 // ✅ E-posta Doğrulama Gönder (next parametresiz)
 export const sendEmailVerification = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  // next parametresi kaldırıldı
   const { email } = req.body;
   const locale = getLocale(req);
   const { User } = await getTenantModels(req);
@@ -74,14 +87,19 @@ export const sendEmailVerification = async (
   user.emailVerificationExpires = new Date(Date.now() + 1000 * 60 * 60 * 6); // 6 saat
   await user.save();
 
-  const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${token}`;
+  const { brandName, senderEmail, frontendUrl } = getTenantMailContext(req);
+  const verifyUrl = `${frontendUrl.replace(/\/$/, "")}/verify-email/${token}`;
   await sendEmail({
+    tenantSlug: req.tenant,
     to: user.email,
-    subject: userT("email.verification.subject", locale),
+    subject: userT("email.verification.subject", locale, { brand: brandName }),
     html: `
-    <p>${userT("email.verification.body", locale)}</p>
-    <a href="${verifyUrl}">${verifyUrl}</a>
-  `,
+      <h2>${userT("email.verification.subject", locale, { brand: brandName })}</h2>
+      <p>${userT("email.verification.body", locale, { brand: brandName })}</p>
+      <a href="${verifyUrl}" target="_blank">${verifyUrl}</a>
+      <p style="font-size:12px;color:#888;">${brandName} | ${senderEmail}</p>
+    `,
+    from: senderEmail,
   });
 
   logger.withReq.info(req, `[EMAIL-VERIFICATION] E-posta gönderildi: ${email}`);
@@ -106,7 +124,7 @@ export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const user = await User.findOne({
-    tenant: req.tenant, // tenant burada kontrol ediliyor
+    tenant: req.tenant,
     emailVerificationToken: token,
     emailVerificationExpires: { $gt: new Date() },
   });
@@ -168,17 +186,22 @@ export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
   user.otpExpires = new Date(Date.now() + 1000 * 60 * 10);
   await user.save();
 
+  const { brandName, senderEmail } = getTenantMailContext(req);
+
   if (via === "sms" && user.phone) {
-    await sendSms(user.phone, `${otpCode} - ${userT("otp.smsBody", locale)}`);
+    await sendSms(user.phone, `${otpCode} - ${userT("otp.smsBody", locale, { brand: brandName })}`);
     logger.withReq.info(req, `[OTP] SMS ile kod gönderildi: ${user.phone}`);
   } else {
     await sendEmail({
+      tenantSlug: req.tenant,
       to: user.email,
-      subject: userT("otp.emailSubject", locale),
+      subject: userT("otp.emailSubject", locale, { brand: brandName }),
       html: `
         <h2>${otpCode}</h2>
-        <p>${userT("otp.emailBody", locale)}</p>
+        <p>${userT("otp.emailBody", locale, { brand: brandName })}</p>
+        <p style="font-size:12px;color:#888;">${brandName} | ${senderEmail}</p>
       `,
+      from: senderEmail,
     });
     logger.withReq.info(req, `[OTP] E-posta ile kod gönderildi: ${user.email}`);
   }
@@ -254,8 +277,10 @@ export const enableMfa = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
+  const { brandName } = getTenantMailContext(req);
+
   const secret = speakeasy.generateSecret({
-    name: `Ensotek (${user.email})`,
+    name: `${brandName} (${user.email})`,
     length: 32,
   });
 

@@ -5,7 +5,16 @@ import { SUPPORTED_LOCALES } from "@/types/common";
 // 🛒 Sepet Ürün Alt Şeması
 const cartItemSchema = new Schema<ICartItem>(
   {
-    product: { type: Types.ObjectId, ref: "Bike", required: true },
+    product: {
+      type: Schema.Types.ObjectId,
+      refPath: "items.productType",
+      required: true,
+    },
+    productType: {
+      type: String,
+      enum: ["Bike", "Ensotekprod"],
+      required: true,
+    },
     tenant: { type: String, required: true, index: true },
     quantity: { type: Number, required: true, min: 1, default: 1 },
     priceAtAddition: { type: Number, required: true },
