@@ -1,14 +1,17 @@
 {
-  "blogcategory.validation.invalidNameType": "Le nom doit être un objet avec des traductions.",
-  "blogcategory.validation.localeMissing": "Name.{{lang}} est requis et ne peut pas être vide.",
-  "blogcategory.validation.localeInvalid": "Name.{{lang}} doit être une chaîne de caractères.",
-  "blogcategory.create.success": "Catégorie '{{name}}' créée avec succès.",
-  "blogcategory.create.error": "Échec de la création de la catégorie.",
-  "blogcategory.update.success": "Catégorie '{{name}}' mise à jour avec succès.",
-  "blogcategory.delete.success": "Catégorie '{{name}}' supprimée avec succès.",
-  "blogcategory.list.success": "Catégories listées avec succès.",
-  "blogcategory.list.error": "Échec de la récupération des catégories.",
-  "blogcategory.fetch.success": "Catégorie récupérée avec succès.",
-  "blogcategory.notFound": "Catégorie introuvable.",
-  "blogcategory.invalidId": "ID de catégorie invalide."
+  "log": {
+    "created": "Vélo créé avec succès.",
+    "updated": "Vélo mis à jour avec succès.",
+    "deleted": "Vélo supprimé avec succès.",
+    "fetched": "Vélo récupéré avec succès.",
+    "listed": "Vélos listés avec succès."
+  },
+  "error": {
+    "not_found": "Vélo non trouvé.",
+    "invalid_id": "ID de vélo invalide.",
+    "create_fail": "Échec de la création du vélo.",
+    "update_fail": "Échec de la mise à jour du vélo.",
+    "delete_fail": "Échec de la suppression du vélo."
+  }
 }
+

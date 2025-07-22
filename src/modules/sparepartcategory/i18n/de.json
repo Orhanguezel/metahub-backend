@@ -1,0 +1,10 @@
+{
+  "create.success": "Fahrradkategorie erfolgreich erstellt.",
+  "update.success": "Fahrradkategorie erfolgreich aktualisiert.",
+  "delete.success": "Fahrradkategorie erfolgreich gelöscht.",
+  "fetch.success": "Fahrradkategorie erfolgreich abgerufen.",
+  "fetchAll.success": "Fahrradkategorien erfolgreich abgerufen.",
+  "error.notFound": "Fahrradkategorie nicht gefunden.",
+  "error.invalidId": "Ungültige Kategorie-ID.",
+  "validation.missingLocales": "In allen unterstützten Sprachen muss ein Name angegeben werden."
+}

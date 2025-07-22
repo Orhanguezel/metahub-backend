@@ -1,14 +1,17 @@
 {
-  "blogcategory.validation.invalidNameType": "El nombre debe ser un objeto con traducciones.",
-  "blogcategory.validation.localeMissing": "Name.{{lang}} es obligatorio y no puede estar vacío.",
-  "blogcategory.validation.localeInvalid": "Name.{{lang}} debe ser una cadena de texto.",
-  "blogcategory.create.success": "Categoría '{{name}}' creada con éxito.",
-  "blogcategory.create.error": "No se pudo crear la categoría.",
-  "blogcategory.update.success": "Categoría '{{name}}' actualizada con éxito.",
-  "blogcategory.delete.success": "Categoría '{{name}}' eliminada con éxito.",
-  "blogcategory.list.success": "Categorías listadas con éxito.",
-  "blogcategory.list.error": "Error al obtener las categorías.",
-  "blogcategory.fetch.success": "Categoría obtenida con éxito.",
-  "blogcategory.notFound": "Categoría no encontrada.",
-  "blogcategory.invalidId": "ID de categoría no válida."
+  "log": {
+    "created": "Bicicleta creada con éxito.",
+    "updated": "Bicicleta actualizada con éxito.",
+    "deleted": "Bicicleta eliminada con éxito.",
+    "fetched": "Bicicleta obtenida con éxito.",
+    "listed": "Bicicletas listadas con éxito."
+  },
+  "error": {
+    "not_found": "Bicicleta no encontrada.",
+    "invalid_id": "ID de bicicleta inválido.",
+    "create_fail": "No se pudo crear la bicicleta.",
+    "update_fail": "No se pudo actualizar la bicicleta.",
+    "delete_fail": "No se pudo eliminar la bicicleta."
+  }
 }
+

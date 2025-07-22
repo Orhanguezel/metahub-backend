@@ -13,7 +13,7 @@ const orderItemSchema = new Schema<IOrderItem>(
      productType: {
       type: String,
       required: true,
-      enum: ["Bike", "Ensotekprod"], // İstediğin kadar model ekle
+      enum: ["Bike", "Ensotekprod", "Sparepart"], // İstediğin kadar model ekle
     },
     tenant: { type: String, required: true, index: true },
     quantity: { type: Number, required: true, min: 1 },

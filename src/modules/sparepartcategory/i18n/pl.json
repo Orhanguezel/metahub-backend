@@ -1,0 +1,13 @@
+{
+  "create.success": "Kategoria roweru została pomyślnie utworzona.",
+  "update.success": "Kategoria roweru została pomyślnie zaktualizowana.",
+  "delete.success": "Kategoria roweru została pomyślnie usunięta.",
+  "fetch.success": "Kategoria roweru została pomyślnie pobrana.",
+  "fetchAll.success": "Kategorie rowerów zostały pomyślnie pobrane.",
+  "error.notFound": "Kategoria roweru nie została znaleziona.",
+  "error.invalidId": "Nieprawidłowe ID kategorii.",
+  "validation.missingLocales": "Wszystkie obsługiwane języki muszą mieć podaną nazwę."
+}
+
+
+

@@ -1,14 +1,18 @@
 {
-  "blogcategory.validation.invalidNameType": "Nazwa musi być obiektem z tłumaczeniami.",
-  "blogcategory.validation.localeMissing": "Name.{{lang}} jest wymagane i nie może być puste.",
-  "blogcategory.validation.localeInvalid": "Name.{{lang}} musi być ciągiem znaków.",
-  "blogcategory.create.success": "Kategoria '{{name}}' została pomyślnie utworzona.",
-  "blogcategory.create.error": "Nie udało się utworzyć kategorii.",
-  "blogcategory.update.success": "Kategoria '{{name}}' została pomyślnie zaktualizowana.",
-  "blogcategory.delete.success": "Kategoria '{{name}}' została pomyślnie usunięta.",
-  "blogcategory.list.success": "Kategorie zostały pomyślnie wyświetlone.",
-  "blogcategory.list.error": "Nie udało się pobrać kategorii.",
-  "blogcategory.fetch.success": "Kategoria została pomyślnie pobrana.",
-  "blogcategory.notFound": "Nie znaleziono kategorii.",
-  "blogcategory.invalidId": "Nieprawidłowy identyfikator kategorii."
+  "log": {
+    "created": "Rower został pomyślnie utworzony.",
+    "updated": "Rower został pomyślnie zaktualizowany.",
+    "deleted": "Rower został pomyślnie usunięty.",
+    "fetched": "Rower został pomyślnie pobrany.",
+    "listed": "Rowery zostały pomyślnie wyświetlone."
+  },
+  "error": {
+    "not_found": "Nie znaleziono roweru.",
+    "invalid_id": "Nieprawidłowy identyfikator roweru.",
+    "create_fail": "Nie udało się utworzyć roweru.",
+    "update_fail": "Nie udało się zaktualizować roweru.",
+    "delete_fail": "Nie udało się usunąć roweru."
+  }
 }
+
+

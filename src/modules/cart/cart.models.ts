@@ -12,7 +12,7 @@ const cartItemSchema = new Schema<ICartItem>(
     },
     productType: {
       type: String,
-      enum: ["Bike", "Ensotekprod"],
+      enum: ["Bike", "Ensotekprod", "Sparepart"],
       required: true,
     },
     tenant: { type: String, required: true, index: true },

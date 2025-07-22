@@ -39,7 +39,7 @@ export const UPLOAD_FOLDERS = {
   library: "library",
   references: "references",
   sport: "sport-images",
-  spareparts: "spareparts-images",
+  sparepart: "spareparts-images",
   settings: "settings-images",
   company: "company-images",
   about: "about-images",
@@ -47,6 +47,8 @@ export const UPLOAD_FOLDERS = {
   tenant: "tenant-images",
   coupons: "coupons-images",
   galleryCategory: "galleryCategory-images",
+  sparepartCategory: "sparepartCategory-images",
+
   default: "misc",
 } as const;
 

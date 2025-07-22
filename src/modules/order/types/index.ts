@@ -6,7 +6,7 @@ export type OrderStatus = "pending" | "preparing" | "shipped" | "completed" | "c
 
 export interface IOrderItem {
   product: Types.ObjectId;
-  productType: "Bike" | "Ensotekprod"; // burada hangi koleksiyon olduğunu belirtiyoruz
+  productType: "Bike" | "Ensotekprod" | "Sparepart"; // burada hangi koleksiyon olduğunu belirtiyoruz
   quantity: number;
   tenant: string;
   unitPrice: number;
