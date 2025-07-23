@@ -3,15 +3,32 @@ import type { SupportedLocale } from "@/types/common";
 // Çoklu dil admin cevabı için
 export type TranslatedLabel = { [key in SupportedLocale]: string };
 
-// Mongoose ile tam uyumlu tip
+export type CommentContentType =
+  | "news"
+  | "blog"
+  | "product"
+  | "articles"
+  | "services"
+  | "bikes"
+  | "about"
+  | "references"
+  | "library"
+  | "company"
+  | "ensotekprod"
+  | "sparepart";
+
+export type CommentType = "comment" | "testimonial" | "review" | "question" | "answer" | "rating";
+
+// Ana model
 export interface IComment {
   _id?: any; // string veya ObjectId olabilir
-  userId?: any; // string veya Types.ObjectId
+  userId?: any; // string veya Types.ObjectId veya { _id, name, email }
   name?: string;
   email?: string;
   tenant: string;
-  contentType: string;
-  contentId: any; // string veya Types.ObjectId
+  contentType: CommentContentType;
+  contentId: any; // string veya Types.ObjectId veya { _id, title, slug }
+  type?: CommentType; // default: "comment"
   label?: string;
   text: string;
   reply?: {
@@ -20,7 +37,7 @@ export interface IComment {
   };
   isPublished: boolean;
   isActive: boolean;
+  rating?: number; // opsiyonel puan (örn: review için)
   createdAt?: string;
   updatedAt?: string;
 }
-
