@@ -1,32 +1,19 @@
 {
-  "delete": {
-    "success": "Message deleted.",
-    "notFound": "Message not found.",
-    "invalidIds": "Invalid message IDs."
-  },
-  "sendMessage": {
-    "success": "Message sent.",
-    "missingParams": "Missing parameters."
-  },
-  "markAsRead": {
-    "success": "Messages marked as read."
-  },
-  "manualMessage": {
-    "roomIdRequired": "Room ID is required.",
-    "roomIdString": "Room ID must be a string.",
-    "messageRequired": "Message is required.",
-    "messageString": "Message must be a string.",
-    "closeBoolean": "Close must be a boolean."
-  },
-  "bulkDelete": {
-    "idsArray": "IDs must be an array with at least one ID.",
-    "idMongo": "Each ID must be a valid MongoDB ObjectId."
-  },
-  "singleId": {
-    "invalid": "Invalid message ID."
-  },
-  "roomIdParam": {
-    "required": "Room ID is required.",
-    "string": "Room ID must be a string."
-  }
+  "comment.nameEmailRequired": "Name and email are required for guests.",
+  "comment.invalidContentType": "Invalid content type: {{contentType}}.",
+  "comment.invalidContentId": "Invalid content ID: {{contentId}}.",
+  "comment.submitted": "Your comment has been submitted for review.",
+  "comment.listFetched": "Comments fetched successfully.",
+  "comment.listFetchError": "An error occurred while fetching comments: {{error}}.",
+  "comment.paginatedFetched": "Comments fetched with pagination.",
+  "comment.paginatedFetchError": "An error occurred while fetching comments with pagination: {{error}}.",
+  "comment.togglePublished": "Comment has been {{published}}.",
+  "comment.toggleError": "An error occurred while updating publish status: {{error}}.",
+  "comment.invalidId": "Invalid comment ID.",
+  "comment.notFound": "Comment not found.",
+  "comment.deleted": "Comment has been deleted (archived) successfully.",
+  "comment.deleteError": "An error occurred while deleting the comment: {{error}}.",
+  "comment.replyAdded": "Admin reply has been added or updated successfully.",
+  "comment.replyError": "An error occurred while adding the admin reply: {{error}}.",
+  "comment.createError": "An error occurred while creating the comment: {{error}}."
 }

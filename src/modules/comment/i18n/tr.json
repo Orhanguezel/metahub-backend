@@ -1,32 +1,19 @@
 {
-  "delete": {
-    "success": "Mesaj silindi.",
-    "notFound": "Mesaj bulunamadı.",
-    "invalidIds": "Geçersiz mesaj ID'leri."
-  },
-  "sendMessage": {
-    "success": "Mesaj gönderildi.",
-    "missingParams": "Eksik parametre(ler)."
-  },
-  "markAsRead": {
-    "success": "Mesajlar okundu olarak işaretlendi."
-  },
-  "manualMessage": {
-    "roomIdRequired": "Oda ID'si zorunludur.",
-    "roomIdString": "Oda ID'si bir string olmalı.",
-    "messageRequired": "Mesaj zorunludur.",
-    "messageString": "Mesaj bir string olmalı.",
-    "closeBoolean": "Kapat parametresi boolean olmalı."
-  },
-  "bulkDelete": {
-    "idsArray": "ID'ler en az bir eleman içeren bir dizi olmalı.",
-    "idMongo": "Her ID geçerli bir MongoDB ObjectId olmalı."
-  },
-  "singleId": {
-    "invalid": "Geçersiz mesaj ID'si."
-  },
-  "roomIdParam": {
-    "required": "Oda ID'si zorunludur.",
-    "string": "Oda ID'si bir string olmalı."
-  }
+  "comment.nameEmailRequired": "Misafirler için ad ve e-posta gereklidir.",
+  "comment.invalidContentType": "Geçersiz içerik türü: {{contentType}}.",
+  "comment.invalidContentId": "Geçersiz içerik ID'si: {{contentId}}.",
+  "comment.submitted": "Yorumunuz incelenmek üzere gönderildi.",
+  "comment.listFetched": "Yorumlar başarıyla getirildi.",
+  "comment.listFetchError": "Yorumlar getirilirken hata oluştu: {{error}}.",
+  "comment.paginatedFetched": "Yorumlar sayfalı olarak getirildi.",
+  "comment.paginatedFetchError": "Sayfalı yorumlar getirilirken hata oluştu: {{error}}.",
+  "comment.togglePublished": "Yorumun yayında olma durumu güncellendi: {{published}}.",
+  "comment.toggleError": "Yorum yayında durumu güncellenirken hata oluştu: {{error}}.",
+  "comment.invalidId": "Geçersiz yorum ID'si.",
+  "comment.notFound": "Yorum bulunamadı.",
+  "comment.deleted": "Yorum başarıyla silindi (arşivlendi).",
+  "comment.deleteError": "Yorum silinirken hata oluştu: {{error}}.",
+  "comment.replyAdded": "Admin yanıtı eklendi veya güncellendi.",
+  "comment.replyError": "Admin yanıtı eklenirken hata oluştu: {{error}}.",
+  "comment.createError": "Yorum oluşturulurken hata oluştu: {{error}}."
 }

@@ -1,32 +1,19 @@
 {
-  "delete": {
-    "success": "Nachricht gelöscht.",
-    "notFound": "Nachricht nicht gefunden.",
-    "invalidIds": "Ungültige Nachrichten-IDs."
-  },
-  "sendMessage": {
-    "success": "Nachricht gesendet.",
-    "missingParams": "Fehlende Parameter."
-  },
-  "markAsRead": {
-    "success": "Nachrichten als gelesen markiert."
-  },
-  "manualMessage": {
-    "roomIdRequired": "Raum-ID ist erforderlich.",
-    "roomIdString": "Raum-ID muss ein String sein.",
-    "messageRequired": "Nachricht ist erforderlich.",
-    "messageString": "Nachricht muss ein String sein.",
-    "closeBoolean": "Schließen muss ein Boolean sein."
-  },
-  "bulkDelete": {
-    "idsArray": "IDs müssen ein Array mit mindestens einem Element sein.",
-    "idMongo": "Jede ID muss eine gültige MongoDB ObjectId sein."
-  },
-  "singleId": {
-    "invalid": "Ungültige Nachrichten-ID."
-  },
-  "roomIdParam": {
-    "required": "Raum-ID ist erforderlich.",
-    "string": "Raum-ID muss ein String sein."
-  }
+  "comment.nameEmailRequired": "Name und E-Mail sind für Gäste erforderlich.",
+  "comment.invalidContentType": "Ungültiger Inhaltstyp: {{contentType}}.",
+  "comment.invalidContentId": "Ungültige Inhalts-ID: {{contentId}}.",
+  "comment.submitted": "Ihr Kommentar wurde zur Überprüfung eingereicht.",
+  "comment.listFetched": "Kommentare erfolgreich abgerufen.",
+  "comment.listFetchError": "Fehler beim Abrufen der Kommentare: {{error}}.",
+  "comment.paginatedFetched": "Kommentare mit Seitennummerierung abgerufen.",
+  "comment.paginatedFetchError": "Fehler beim paginierten Abrufen der Kommentare: {{error}}.",
+  "comment.togglePublished": "Kommentar wurde {{published}}.",
+  "comment.toggleError": "Fehler beim Aktualisieren des Veröffentlichungsstatus: {{error}}.",
+  "comment.invalidId": "Ungültige Kommentar-ID.",
+  "comment.notFound": "Kommentar nicht gefunden.",
+  "comment.deleted": "Kommentar wurde erfolgreich gelöscht (archiviert).",
+  "comment.deleteError": "Fehler beim Löschen des Kommentars: {{error}}.",
+  "comment.replyAdded": "Admin-Antwort wurde erfolgreich hinzugefügt oder aktualisiert.",
+  "comment.replyError": "Fehler beim Hinzufügen der Admin-Antwort: {{error}}.",
+  "comment.createError": "Fehler beim Erstellen des Kommentars: {{error}}."
 }

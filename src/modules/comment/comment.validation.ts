@@ -1,16 +1,15 @@
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 import { ALLOWED_COMMENT_CONTENT_TYPES } from "@/core/utils/constants";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
 // 🎯 Mesajlarda kullanmak için string
 const allowedTypesText = ALLOWED_COMMENT_CONTENT_TYPES.join(", ");
-
-// 🎯 Set ile lowercase kıyaslama
 const allowedSet = new Set(
   ALLOWED_COMMENT_CONTENT_TYPES.map((t) => t.toLowerCase())
 );
 
-// ✅ Yorum Oluşturma Validasyonu
+// --- Sadece guest kullanıcı için name/email zorunlu
 export const validateCreateComment = [
   body("name")
     .if((_, { req }) => !req.user)
@@ -27,13 +26,28 @@ export const validateCreateComment = [
     .withMessage("A valid email address is required.")
     .normalizeEmail(),
 
+  // label zorunlu değil, çünkü formdan gelebilir/gelen adla aynı olabilir
+  body("label")
+    .optional()
+    .isString()
+    .withMessage("Label must be a string.")
+    .isLength({ min: 2, max: 150 })
+    .withMessage("Label must be between 2 and 150 characters."),
+
+  // text (veya comment) zorunlu
+  body("text")
+    .optional()
+    .isString()
+    .isLength({ min: 5, max: 500 })
+    .withMessage("Comment text must be between 5 and 500 characters."),
+
   body("comment")
-    .trim()
-    .notEmpty()
-    .withMessage("Comment is required.")
+    .optional()
+    .isString()
     .isLength({ min: 5, max: 500 })
     .withMessage("Comment must be between 5 and 500 characters."),
 
+  // contentType
   body("contentType")
     .notEmpty()
     .withMessage("Content type is required.")
@@ -45,6 +59,7 @@ export const validateCreateComment = [
       return true;
     }),
 
+  // contentId
   body("contentId")
     .notEmpty()
     .withMessage("Content ID is required.")
@@ -54,36 +69,25 @@ export const validateCreateComment = [
   validateRequest,
 ];
 
-// ✅ Yorum ID Parametresi Kontrolü
+// --- ID param validasyonları
 export const validateCommentIdParam = [
-  param("id")
-    .isMongoId()
-    .withMessage("Comment ID must be a valid MongoDB ObjectId."),
+  param("id").isMongoId().withMessage("Comment ID must be a valid MongoDB ObjectId."),
   validateRequest,
 ];
 
-// ✅ İçerik ID Parametresi Kontrolü
 export const validateContentIdParam = [
-  param("id")
-    .isMongoId()
-    .withMessage("Content ID must be a valid MongoDB ObjectId."),
+  param("id").isMongoId().withMessage("Content ID must be a valid MongoDB ObjectId."),
   validateRequest,
 ];
 
-// ✅ Admin Reply Validasyonu
+// --- Admin Reply validasyonu (dinamik, tüm diller)
 export const validateReplyToComment = [
   param("id").isMongoId().withMessage("Invalid comment ID."),
-  body("text.tr")
-    .optional()
-    .isString()
-    .withMessage("TR reply must be a string."),
-  body("text.en")
-    .optional()
-    .isString()
-    .withMessage("EN reply must be a string."),
-  body("text.de")
-    .optional()
-    .isString()
-    .withMessage("DE reply must be a string."),
+  ...SUPPORTED_LOCALES.map((lng) =>
+    body(`text.${lng}`)
+      .optional()
+      .isString()
+      .withMessage(`${lng.toUpperCase()} reply must be a string.`)
+  ),
   validateRequest,
 ];

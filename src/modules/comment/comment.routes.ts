@@ -8,7 +8,6 @@ import {
   replyToComment,
 } from "./comment.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { validateApiKey } from "@/core/middleware/validateApiKey";
 import {
   validateCreateComment,
   validateCommentIdParam,
@@ -22,7 +21,7 @@ const router = express.Router();
 router.post("/", validateCreateComment, createComment);
 router.get("/:type/:id", validateContentIdParam, getCommentsForContent);
 
-// 🔐 Admin Routes
+// 🔐 Admin Routes (korumalı, admin/moderator)
 router.use(authenticate, authorizeRoles("admin", "moderator"));
 
 router.get("/", getAllComments);
