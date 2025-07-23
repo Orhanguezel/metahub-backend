@@ -310,5 +310,272 @@
     "required": false,
     "defaultOrder": 11,
     "defaultEnabled": true
-  }
+  },
+  {
+    "sectionKey": "library",
+    "label": {
+      "tr": "Dokümantasyon",
+      "en": "Library",
+      "de": "Bibliothek",
+      "pl": "Biblioteka",
+      "fr": "Bibliothèque",
+      "es": "Biblioteca"
+    },
+    "description": {
+      "tr": "Teknik dokümanlar ve kaynaklar",
+      "en": "Technical documents and resources",
+      "de": "Technische Dokumente und Ressourcen",
+      "pl": "Dokumenty techniczne i zasoby",
+      "fr": "Documents techniques et ressources",
+      "es": "Documentos técnicos y recursos"
+    },
+    "icon": "MdMenuBook",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 12,
+    "defaultEnabled": true
+  },
+  {
+    "sectionKey": "ensotekprod",
+    "label": {
+      "tr": "Ürünler",
+      "en": "Products",
+      "de": "Produkte",
+      "pl": "Produkty",
+      "fr": "Produits",
+      "es": "Productos"
+    },
+    "description": {
+      "tr": "Ana ürünler ve teknik detaylar",
+      "en": "Main products and technical details",
+      "de": "Hauptprodukte und technische Details",
+      "pl": "Główne produkty i szczegóły techniczne",
+      "fr": "Produits principaux et détails techniques",
+      "es": "Productos principales y detalles técnicos"
+    },
+    "icon": "MdDevicesOther",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 13,
+    "defaultEnabled": true
+  },
+  {
+    "sectionKey": "sparepart",
+    "label": {
+      "tr": "Yedek Parça",
+      "en": "Spare Parts",
+      "de": "Ersatzteile",
+      "pl": "Części zamienne",
+      "fr": "Pièces détachées",
+      "es": "Piezas de repuesto"
+    },
+    "description": {
+      "tr": "Yedek parça ve aksesuarlar",
+      "en": "Spare parts and accessories",
+      "de": "Ersatzteile und Zubehör",
+      "pl": "Części zamienne i akcesoria",
+      "fr": "Pièces détachées et accessoires",
+      "es": "Piezas de repuesto y accesorios"
+    },
+    "icon": "MdBuildCircle",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 14,
+    "defaultEnabled": true
+  },
+  {
+    "sectionKey": "whatsapp",
+    "label": {
+      "tr": "WhatsApp Destek",
+      "en": "WhatsApp Support",
+      "de": "WhatsApp-Support",
+      "pl": "Wsparcie WhatsApp",
+      "fr": "Support WhatsApp",
+      "es": "Soporte WhatsApp"
+    },
+    "description": {
+      "tr": "WhatsApp üzerinden anlık iletişim ve destek bölümü",
+      "en": "Real-time communication and support via WhatsApp",
+      "de": "Echtzeitkommunikation und Support über WhatsApp",
+      "pl": "Komunikacja i wsparcie przez WhatsApp",
+      "fr": "Communication et assistance en temps réel via WhatsApp",
+      "es": "Comunicación y soporte en tiempo real por WhatsApp"
+    },
+    "icon": "MdWhatsapp",
+    "variant": "banner",
+    "required": false,
+    "defaultOrder": 15,
+    "defaultEnabled": false
+  },
+  {
+    "sectionKey": "testimonial",
+    "label": {
+      "tr": "Müşteri Yorumları",
+      "en": "Testimonials",
+      "de": "Kundenmeinungen",
+      "pl": "Opinie klientów",
+      "fr": "Témoignages clients",
+      "es": "Testimonios de clientes"
+    },
+    "description": {
+      "tr": "Müşteri yorumları ve değerlendirmeleri",
+      "en": "Customer testimonials and reviews",
+      "de": "Kundenmeinungen und Bewertungen",
+      "pl": "Opinie i recenzje klientów",
+      "fr": "Avis et témoignages clients",
+      "es": "Opiniones y testimonios de clientes"
+    },
+    "icon": "MdFeedback",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 16,
+    "defaultEnabled": true
+  },
+  {
+    "sectionKey": "newsletter",
+    "label": {
+      "tr": "Bülten Aboneliği",
+      "en": "Newsletter",
+      "de": "Newsletter",
+      "pl": "Newsletter",
+      "fr": "Bulletin d'information",
+      "es": "Boletín informativo"
+    },
+    "description": {
+      "tr": "E-posta ile duyuru ve kampanya aboneliği",
+      "en": "Email newsletter and campaign subscription",
+      "de": "E-Mail-Newsletter und Kampagnenabonnement",
+      "pl": "Subskrypcja newslettera e-mailowego i kampanii",
+      "fr": "Abonnement à la newsletter et aux campagnes",
+      "es": "Suscripción al boletín y campañas"
+    },
+    "icon": "MdEmail",
+    "variant": "banner",
+    "required": false,
+    "defaultOrder": 17,
+    "defaultEnabled": false
+  },
+  {
+  "sectionKey": "chatbox",
+  "label": {
+    "tr": "Canlı Sohbet",
+    "en": "Live Chat",
+    "de": "Live-Chat",
+    "pl": "Czat na żywo",
+    "fr": "Chat en direct",
+    "es": "Chat en vivo"
+  },
+  "description": {
+    "tr": "Ziyaretçilerle canlı mesajlaşma ve destek",
+    "en": "Live messaging and support with visitors",
+    "de": "Live-Messaging und Support für Besucher",
+    "pl": "Wiadomości na żywo i wsparcie dla odwiedzających",
+    "fr": "Messagerie instantanée et assistance aux visiteurs",
+    "es": "Mensajería en vivo y soporte para visitantes"
+  },
+  "icon": "MdChatBubble",
+  "variant": "banner",
+  "required": false,
+  "defaultOrder": 18,
+  "defaultEnabled": false
+},
+{
+  "sectionKey": "certificates",
+  "label": {
+    "tr": "Sertifikalar",
+    "en": "Certificates",
+    "de": "Zertifikate",
+    "pl": "Certyfikaty",
+    "fr": "Certificats",
+    "es": "Certificados"
+  },
+  "description": {
+    "tr": "Firma ve çalışanların sahip olduğu sertifika, belge ve akreditasyonlar",
+    "en": "Company and staff certificates, documents, and accreditations",
+    "de": "Zertifikate, Dokumente und Akkreditierungen des Unternehmens und der Mitarbeiter",
+    "pl": "Certyfikaty, dokumenty i akredytacje firmy oraz pracowników",
+    "fr": "Certificats, documents et accréditations de l'entreprise et du personnel",
+    "es": "Certificados, documentos y acreditaciones de la empresa y del personal"
+  },
+  "icon": "MdVerified",
+  "variant": "classic",
+  "required": false,
+  "defaultOrder": 19,
+  "defaultEnabled": false
+},
+{
+  "sectionKey": "scrollToTop",
+  "label": {
+    "tr": "Yukarı Çık",
+    "en": "Scroll To Top",
+    "de": "Nach Oben",
+    "pl": "Przewiń do góry",
+    "fr": "Remonter en haut",
+    "es": "Volver arriba"
+  },
+  "description": {
+    "tr": "Sayfanın alt köşesinde, tıklanınca en üste çıkaran ikon.",
+    "en": "A button fixed at the bottom corner that scrolls to top.",
+    "de": "Ein Button unten in der Ecke, der nach oben scrollt.",
+    "pl": "Przycisk w rogu przewijający na górę strony.",
+    "fr": "Un bouton en bas de page qui remonte en haut.",
+    "es": "Un botón fijo que sube al inicio de la página."
+  },
+  "icon": "FaChevronUp",
+  "variant": "floating",
+  "required": false,
+  "defaultOrder": 100,
+  "defaultEnabled": true
+},
+{
+  "sectionKey": "catalogRequest",
+  "label": {
+    "tr": "Katalog Talebi",
+    "en": "Catalog Request",
+    "de": "Katalog Anforderung",
+    "pl": "Zamów katalog",
+    "fr": "Demande de catalogue",
+    "es": "Solicitud de catálogo"
+  },
+  "description": {
+    "tr": "Sağ kenarda sabit, katalog talep formuna yönlendiren buton.",
+    "en": "A fixed button on the right side that links to the catalog request form.",
+    "de": "Fester Button am rechten Rand für Kataloganfragen.",
+    "pl": "Stały przycisk po prawej stronie do formularza katalogowego.",
+    "fr": "Bouton fixe à droite pour demander un catalogue.",
+    "es": "Botón fijo a la derecha para solicitar un catálogo."
+  },
+  "icon": "HiOutlineDocumentText",
+  "variant": "verticalFloating",
+  "required": false,
+  "defaultOrder": 30,
+  "defaultEnabled": true
+},
+{
+  "sectionKey": "requestOffer",
+  "label": {
+    "tr": "Teklif İste",
+    "en": "Request Offer",
+    "de": "Angebot Anfordern",
+    "pl": "Poproś o ofertę",
+    "fr": "Demander un devis",
+    "es": "Solicitar oferta"
+  },
+  "description": {
+    "tr": "Sağ kenarda sabit, teklif/form sayfasına yönlendiren buton.",
+    "en": "A fixed button on the right side that links to the offer request page.",
+    "de": "Fester Button am rechten Rand für Angebotsanfragen.",
+    "pl": "Stały przycisk po prawej stronie do formularza ofertowego.",
+    "fr": "Bouton fixe à droite pour demander une offre.",
+    "es": "Botón fijo a la derecha para solicitar una oferta."
+  },
+  "icon": "HiOutlineTag",
+  "variant": "verticalFloating",
+  "required": false,
+  "defaultOrder": 31,
+  "defaultEnabled": true
+}
+
+
+
 ]
