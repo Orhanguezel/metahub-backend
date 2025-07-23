@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { ALLOWED_COMMENT_CONTENT_TYPES, CommentContentType } from "@/core/utils/constants";
+import { ALLOWED_COMMENT_CONTENT_TYPES, ALLOWED_COMMENT_TYPES, CommentContentType } from "@/core/utils/constants";
 import { isValidObjectId } from "@/core/utils/validation";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
@@ -9,17 +9,25 @@ import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
+import { IComment, CommentType } from "./types";
 
 // --- Yardımcılar
-const normalizeContentType = (type: string): CommentContentType => {
-  const normalized = type.toLowerCase();
-  return (normalized.charAt(0).toUpperCase() + normalized.slice(1)) as CommentContentType;
-};
+const normalizeContentType = (type: string): CommentContentType =>
+  type.toLowerCase() as CommentContentType;
 
-// --- Yorum oluştur
-// --- Yorum oluştur (Notification eklenmiş ve response optimize)
+// --- Yorum oluştur ---
 export const createComment = asyncHandler(async (req: Request, res: Response) => {
-  const { comment, contentType, contentId, label, text } = req.body;
+  const {
+    comment,
+    contentType,
+    contentId,
+    label,
+    text,
+    type = "comment",
+    name,
+    email,
+    rating,
+  } = req.body;
   const user = req.user;
   const locale: SupportedLocale = req.locale || getLogLocale();
   const t = (key: string, params?: any) => translate(key, locale, translations, params);
@@ -27,14 +35,15 @@ export const createComment = asyncHandler(async (req: Request, res: Response) =>
   try {
     const normalizedType = contentType?.toLowerCase();
     const finalContentType = normalizeContentType(normalizedType);
+    const finalType: CommentType = (type || "comment").toLowerCase();
+
     const { Comment, Notification } = await getTenantModels(req);
 
-    if (!user && (!req.body.name || !req.body.email)) {
+    if (!user && (!name || !email)) {
       res.status(400).json({
         success: false,
         message: t("comment.nameEmailRequired"),
-      });
-      return;
+      });return;
     }
 
     if (!ALLOWED_COMMENT_CONTENT_TYPES.includes(finalContentType)) {
@@ -42,8 +51,14 @@ export const createComment = asyncHandler(async (req: Request, res: Response) =>
       res.status(400).json({
         success: false,
         message: t("comment.invalidContentType", { contentType: finalContentType }),
-      });
-      return;
+      });return;
+    }
+
+    if (!ALLOWED_COMMENT_TYPES.includes(finalType)) {
+      res.status(400).json({
+        success: false,
+        message: t("comment.invalidType", { type: finalType }),
+      });return;
     }
 
     if (!isValidObjectId(contentId)) {
@@ -51,36 +66,37 @@ export const createComment = asyncHandler(async (req: Request, res: Response) =>
       res.status(400).json({
         success: false,
         message: t("comment.invalidContentId", { contentId }),
-      });
-      return;
+      });return;
     }
 
     const newComment = await Comment.create({
-      name: user?.name || req.body.name,
+      name: user?.name || name,
       tenant: req.tenant,
-      email: user?.email || req.body.email,
+      email: user?.email || email,
       userId: user?._id,
-      label: label || comment,   // formdan gelen başlık veya yorum
-      text: text || comment,     // formdan gelen içerik veya yorum
+      label: label || comment,
+      text: text || comment,
       contentType: finalContentType,
       contentId,
+      type: finalType,
+      rating: typeof rating === "number" ? rating : undefined,
       isPublished: false,
       isActive: true,
     });
 
-    // --- Yorum bildirimi (admin/moderator için)
+    // Bildirim
     await Notification.create({
       tenant: req.tenant,
       type: "info",
-      user: user?._id || null, // guest ise null, admin panelde gösterim için
+      user: user?._id || null,
       message: t("comment.notification.created", { contentType: finalContentType }),
       data: {
         commentId: newComment._id,
         contentId,
         contentType: finalContentType,
         preview: (label || comment || "").slice(0, 80),
-        name: user?.name || req.body.name,
-        email: user?.email || req.body.email,
+        name: user?.name || name,
+        email: user?.email || email,
       },
       isActive: true,
       isRead: false,
@@ -93,22 +109,20 @@ export const createComment = asyncHandler(async (req: Request, res: Response) =>
       success: true,
       message: t("comment.submitted"),
       data: newComment,
-    });
-    return;
+    });return;
   } catch (err: any) {
     logger.withReq.error(req, "Comment create error", { error: err.message, stack: err.stack });
     res.status(500).json({
       success: false,
       message: t("comment.createError", { error: err.message }),
-    });
-    return;
+    });return;
   }
 });
 
-
-// --- İçeriğe ait yorumları çek (sadece yayınlanmış)
+// --- İçeriğe ait yorumları çek (filtreli: sadece yayınlanmış) ---
 export const getCommentsForContent = asyncHandler(async (req: Request, res: Response) => {
   const { type: rawType, id } = req.params;
+  const commentType = req.query.type as CommentType | undefined; // opsiyonel filter param
   const locale: SupportedLocale = req.locale || getLogLocale();
   const t = (key: string, params?: any) => translate(key, locale, translations, params);
 
@@ -121,24 +135,27 @@ export const getCommentsForContent = asyncHandler(async (req: Request, res: Resp
       res.status(400).json({
         success: false,
         message: t("comment.invalidContentType", { contentType: finalContentType }),
-      });
-      return;
+      });return;
     }
     if (!isValidObjectId(id)) {
       res.status(400).json({
         success: false,
         message: t("comment.invalidContentId", { contentId: id }),
-      });
-      return;
+      });return;
     }
 
-    const comments = await Comment.find({
+    const filter: any = {
       tenant: req.tenant,
       contentType: finalContentType,
       contentId: id,
       isPublished: true,
       isActive: true,
-    })
+    };
+    if (commentType && ALLOWED_COMMENT_TYPES.includes(commentType)) {
+      filter.type = commentType;
+    }
+
+    const comments = await Comment.find(filter)
       .sort({ createdAt: -1 })
       .lean();
 
@@ -147,18 +164,16 @@ export const getCommentsForContent = asyncHandler(async (req: Request, res: Resp
       message: t("comment.listFetched"),
       data: comments,
     });
-    return;
   } catch (err: any) {
     logger.withReq.error(req, "Get comments error", { error: err.message, stack: err.stack });
     res.status(500).json({
       success: false,
       message: t("comment.listFetchError", { error: err.message }),
     });
-    return;
   }
 });
 
-// --- Admin: Tüm yorumlar (sayfalı)
+// --- Admin: Tüm yorumlar (sayfalı + type filter) ---
 export const getAllComments = asyncHandler(async (req: Request, res: Response) => {
   const locale: SupportedLocale = req.locale || getLogLocale();
   const t = (key: string, params?: any) => translate(key, locale, translations, params);
@@ -167,7 +182,11 @@ export const getAllComments = asyncHandler(async (req: Request, res: Response) =
     const { Comment } = await getTenantModels(req);
     const page = parseInt(req.query.page as string, 10) || 1;
     const limit = 10;
-    const query = { isActive: true, tenant: req.tenant };
+    const commentType = req.query.type as CommentType | undefined;
+    const query: any = { isActive: true, tenant: req.tenant };
+    if (commentType && ALLOWED_COMMENT_TYPES.includes(commentType)) {
+      query.type = commentType;
+    }
 
     const total = await Comment.countDocuments(query);
     const comments = await Comment.find(query)
@@ -184,18 +203,16 @@ export const getAllComments = asyncHandler(async (req: Request, res: Response) =
       data: comments,
       pagination: { page, pages: Math.ceil(total / limit), total },
     });
-    return;
   } catch (err: any) {
     logger.withReq.error(req, "Admin getAllComments error", { error: err.message, stack: err.stack });
-    res.status(500).json({
+  res.status(500).json({
       success: false,
       message: t("comment.paginatedFetchError", { error: err.message }),
     });
-    return;
   }
 });
 
-// --- Admin: Yayınlama togglesı
+// --- Admin: Yayınlama togglesı ---
 export const togglePublishComment = asyncHandler(async (req: Request, res: Response) => {
   const locale: SupportedLocale = req.locale || getLogLocale();
   const t = (key: string, params?: any) => translate(key, locale, translations, params);
@@ -223,18 +240,16 @@ export const togglePublishComment = asyncHandler(async (req: Request, res: Respo
       message: t("comment.togglePublished", { published: comment.isPublished }),
       data: comment,
     });
-    return;
   } catch (err: any) {
     logger.withReq.error(req, "Admin togglePublishComment error", { error: err.message, stack: err.stack });
     res.status(500).json({
       success: false,
       message: t("comment.toggleError", { error: err.message }),
     });
-    return;
   }
 });
 
-// --- Admin: Yorum sil (soft delete)
+// --- Admin: Yorum sil (soft delete) ---
 export const deleteComment = asyncHandler(async (req: Request, res: Response) => {
   const locale: SupportedLocale = req.locale || getLogLocale();
   const t = (key: string, params?: any) => translate(key, locale, translations, params);
@@ -261,18 +276,16 @@ export const deleteComment = asyncHandler(async (req: Request, res: Response) =>
       success: true,
       message: t("comment.deleted"),
     });
-    return;
   } catch (err: any) {
     logger.withReq.error(req, "Admin deleteComment error", { error: err.message, stack: err.stack });
     res.status(500).json({
       success: false,
       message: t("comment.deleteError", { error: err.message }),
     });
-    return;
   }
 });
 
-// --- Admin: Çok dilli admin reply ekle/güncelle
+// --- Admin: Çok dilli admin reply ekle/güncelle ---
 export const replyToComment = asyncHandler(async (req: Request, res: Response) => {
   const locale: SupportedLocale = req.locale || getLogLocale();
   const t = (key: string, params?: any) => translate(key, locale, translations, params);
@@ -288,9 +301,7 @@ export const replyToComment = asyncHandler(async (req: Request, res: Response) =
       return;
     }
 
-   comment.reply = comment.reply || { text: fillAllLocales(""), createdAt: new Date().toISOString() };
-
-
+    comment.reply = comment.reply || { text: fillAllLocales(""), createdAt: new Date().toISOString() };
     for (const lng of SUPPORTED_LOCALES) {
       if (typeof text?.[lng] === "string") {
         comment.reply.text[lng] = text[lng];
@@ -304,13 +315,11 @@ export const replyToComment = asyncHandler(async (req: Request, res: Response) =
       message: t("comment.replyAdded"),
       data: comment,
     });
-    return;
   } catch (err: any) {
     logger.withReq.error(req, "Admin replyToComment error", { error: err.message, stack: err.stack });
     res.status(500).json({
       success: false,
       message: t("comment.replyError", { error: err.message }),
     });
-    return;
   }
 });
