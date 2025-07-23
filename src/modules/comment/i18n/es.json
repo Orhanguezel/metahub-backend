@@ -1,32 +1,19 @@
 {
-  "delete": {
-    "success": "Mensaje eliminado.",
-    "notFound": "Mensaje no encontrado.",
-    "invalidIds": "IDs de mensajes no válidos."
-  },
-  "sendMessage": {
-    "success": "Mensaje enviado.",
-    "missingParams": "Faltan parámetros."
-  },
-  "markAsRead": {
-    "success": "Mensajes marcados como leídos."
-  },
-  "manualMessage": {
-    "roomIdRequired": "El ID de la sala es obligatorio.",
-    "roomIdString": "El ID de la sala debe ser una cadena.",
-    "messageRequired": "El mensaje es obligatorio.",
-    "messageString": "El mensaje debe ser una cadena.",
-    "closeBoolean": "Cerrar debe ser un booleano."
-  },
-  "bulkDelete": {
-    "idsArray": "Los IDs deben ser una matriz con al menos un elemento.",
-    "idMongo": "Cada ID debe ser un MongoDB ObjectId válido."
-  },
-  "singleId": {
-    "invalid": "ID de mensaje no válido."
-  },
-  "roomIdParam": {
-    "required": "El ID de la sala es obligatorio.",
-    "string": "El ID de la sala debe ser una cadena."
-  }
+  "comment.nameEmailRequired": "Se requieren nombre y correo electrónico para los invitados.",
+  "comment.invalidContentType": "Tipo de contenido no válido: {{contentType}}.",
+  "comment.invalidContentId": "ID de contenido no válido: {{contentId}}.",
+  "comment.submitted": "Tu comentario ha sido enviado para revisión.",
+  "comment.listFetched": "Comentarios obtenidos correctamente.",
+  "comment.listFetchError": "Se produjo un error al obtener los comentarios: {{error}}.",
+  "comment.paginatedFetched": "Comentarios obtenidos con paginación.",
+  "comment.paginatedFetchError": "Error al obtener los comentarios paginados: {{error}}.",
+  "comment.togglePublished": "El estado de publicación del comentario ha sido cambiado: {{published}}.",
+  "comment.toggleError": "Error al actualizar el estado de publicación: {{error}}.",
+  "comment.invalidId": "ID de comentario no válido.",
+  "comment.notFound": "Comentario no encontrado.",
+  "comment.deleted": "Comentario eliminado (archivado) correctamente.",
+  "comment.deleteError": "Error al eliminar el comentario: {{error}}.",
+  "comment.replyAdded": "La respuesta del administrador se ha añadido o actualizado correctamente.",
+  "comment.replyError": "Error al añadir la respuesta del administrador: {{error}}.",
+  "comment.createError": "Se produjo un error al crear el comentario: {{error}}."
 }

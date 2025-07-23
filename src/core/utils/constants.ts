@@ -1,12 +1,18 @@
 // 🔠 Veritabanında kullanılacak büyük harfli sabit değerler
 export const ALLOWED_COMMENT_CONTENT_TYPES = [
-  "EnsotekProd",
+  "Ensotekprod",
+  "Sparepart",
   "Bike",
   "Blog",
   "News",
   "Services",
   "Articles",
   "Activity",
+  "Company",
+  "Library",
+  "Product",
+  "About",
+  "References",
 ] as const;
 
 export type CommentContentType = (typeof ALLOWED_COMMENT_CONTENT_TYPES)[number];

@@ -1,81 +1,46 @@
 import { Schema, model, Types, Model, models } from "mongoose";
-import {
-  ALLOWED_COMMENT_CONTENT_TYPES,
-  CommentContentType,
-} from "@/core/utils/constants";
+import { ALLOWED_COMMENT_CONTENT_TYPES } from "@/core/utils/constants";
+import { SUPPORTED_LOCALES } from "@/types/common";
+import type { IComment } from "./types";
 
-interface IComment  {
-  userId?: Types.ObjectId;
-  name?: string;
-  tenant?: string; // Optional tenant field for multi-tenancy
-  email?: string;
-  label: { tr: string; en: string; de: string };
-  contentType: CommentContentType;
-  contentId: Types.ObjectId;
-  reply?: {
-    text: {
-      tr: string;
-      en: string;
-      de: string;
-    };
-    createdAt: Date;
-  };
-
-  isPublished: boolean;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Çok dilli alanlar için field
+const localizedStringField = () => {
+  const fields: Record<string, any> = {};
+  for (const locale of SUPPORTED_LOCALES) {
+    fields[locale] = { type: String, trim: true };
+  }
+  return fields;
+};
 
 const commentSchema = new Schema<IComment>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User" },
-
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: false },
     name: {
       type: String,
       trim: true,
-      required: function () {
-        return !this.userId;
-      },
+      required: function () { return !this.userId; },
     },
-    tenant: {
-      type: String,
-      required: true,
-      index: true,
-    },
-
+    tenant: { type: String, required: true, index: true },
     email: {
       type: String,
       trim: true,
-      required: function () {
-        return !this.userId;
-      },
+      required: function () { return !this.userId; },
     },
-
-    label: {
-      tr: { type: String, required: true },
-      en: { type: String, required: true },
-      de: { type: String, required: true },
-    },
-
+    label: { type: String, trim: true },
+    text:  { type: String, trim: true, required: true },
     contentType: {
       type: String,
       enum: ALLOWED_COMMENT_CONTENT_TYPES,
       required: true,
     },
-
     contentId: {
       type: Schema.Types.ObjectId,
       required: true,
       refPath: "contentType",
     },
     reply: {
-      text: {
-        tr: { type: String, default: "" },
-        en: { type: String, default: "" },
-        de: { type: String, default: "" },
-      },
-      createdAt: { type: Date },
+      text: localizedStringField(),
+      createdAt: { type: String },
     },
     isPublished: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
@@ -83,8 +48,7 @@ const commentSchema = new Schema<IComment>(
   { timestamps: true }
 );
 
-// ✅ Guard + Model Type
 const Comment: Model<IComment> =
   models.Comment || model<IComment>("Comment", commentSchema);
 
-export { Comment };
+export { Comment, commentSchema };

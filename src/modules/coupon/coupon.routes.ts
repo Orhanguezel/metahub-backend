@@ -2,6 +2,7 @@ import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
   createCoupon,
+  getCoupons,
   getAllCoupons,
   getCouponByCode,
   updateCoupon,
@@ -19,14 +20,20 @@ import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
 
+router.get("/", getCoupons);
+
 // ✅ Public - Check valid coupon by code
 router.get("/check/:code", getCouponByCode);
 
 // ✅ Admin routes (auth+role required)
 router.use(authenticate, authorizeRoles("admin"));
 
-// Get all coupons - only for admin
-router.get("/", validateAdminQuery, getAllCoupons);
+// Get all coupons (admin only)
+router.get(
+  "/admin",
+  validateAdminQuery,
+  getAllCoupons
+);
 
 // Create new coupon (admin only)
 router.post(

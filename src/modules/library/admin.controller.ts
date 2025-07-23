@@ -179,10 +179,7 @@ export const createLibrary = asyncHandler(async (req: Request, res: Response) =>
     });
     res.status(500).json({ success: false, message: t("error.create_fail") });
   }
-});
-
-
-// ✅ UPDATE
+});// ✅ FINAL & CLEAN - Supports fields(), array(), add+remove images/files at once
 export const updateLibrary = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const locale: SupportedLocale = req.locale || getLogLocale();
@@ -191,88 +188,76 @@ export const updateLibrary = asyncHandler(async (req: Request, res: Response) =>
     translate(key, locale, translations, params);
 
   if (!isValidObjectId(id)) {
-    logger.withReq.warn(req, t("invalidId"), {
-      ...getRequestContext(req),
-      id,
-    });
-    res.status(400).json({ success: false, message: t("invalidId") });
-    return;
+    logger.withReq.warn(req, t("invalidId"), { ...getRequestContext(req), id });
+    res.status(400).json({ success: false, message: t("invalidId") });return;
   }
 
   const library = await Library.findOne({ _id: id, tenant: req.tenant });
   if (!library) {
-    logger.withReq.warn(req, t("notFound"), {
-      ...getRequestContext(req),
-      id,
-    });
-    res.status(404).json({ success: false, message: t("notFound") });
-    return;
+    logger.withReq.warn(req, t("notFound"), { ...getRequestContext(req), id });
+    res.status(404).json({ success: false, message: t("notFound") });return;
   }
 
   const updates = req.body;
-  if (updates.title) {
-    library.title = mergeLocalesForUpdate(
-      library.title,
-      parseIfJson(updates.title)
-    );
-  }
-  if (updates.summary) {
-    library.summary = mergeLocalesForUpdate(
-      library.summary,
-      parseIfJson(updates.summary)
-    );
-  }
-  if (updates.content) {
-    library.content = mergeLocalesForUpdate(
-      library.content,
-      parseIfJson(updates.content)
-    );
-  }
+  if (updates.title)
+    library.title = mergeLocalesForUpdate(library.title, parseIfJson(updates.title));
+  if (updates.summary)
+    library.summary = mergeLocalesForUpdate(library.summary, parseIfJson(updates.summary));
+  if (updates.content)
+    library.content = mergeLocalesForUpdate(library.content, parseIfJson(updates.content));
 
   const updatableFields: (keyof ILibrary)[] = [
-    "tags",
-    "category",
-    "isPublished",
-    "publishedAt",
-    "isActive",
+    "tags", "category", "isPublished", "publishedAt"
   ];
   for (const field of updatableFields) {
     if (updates[field] !== undefined) (library as any)[field] = updates[field];
   }
 
-  // IMAGE UPDATE
   if (!Array.isArray(library.images)) library.images = [];
-  // FILES UPDATE
   if (!Array.isArray(library.files)) library.files = [];
 
-  if (Array.isArray(req.files)) {
-    for (const file of req.files as Express.Multer.File[]) {
-      // -- SADECE IMAGE FIELD + IMAGE MIMETYPE --
-      if (
-        file.fieldname === "images" &&
-        file.mimetype &&
-        file.mimetype.startsWith("image/")
-      ) {
-        const imageUrl = getImagePath(file);
-        let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
-        if (shouldProcessImage()) {
-          const processed = await processImageLocal(
-            file.path,
-            file.filename,
-            path.dirname(file.path)
-          );
-          thumbnail = processed.thumbnail;
-          webp = processed.webp;
+  // ---- Multer fields() (object: {images:[], files:[]}) destegi ----
+  if (req.files && typeof req.files === "object" && !Array.isArray(req.files)) {
+    // Images
+    if (Array.isArray((req.files as any)["images"])) {
+      for (const file of (req.files as any)["images"]) {
+        if (file.mimetype && file.mimetype.startsWith("image/")) {
+          const imageUrl = getImagePath(file);
+          let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
+          if (shouldProcessImage()) {
+            const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+            thumbnail = processed.thumbnail; webp = processed.webp;
+          }
+          library.images.push({ url: imageUrl, thumbnail, webp, publicId: (file as any).public_id });
         }
-        library.images.push({
-          url: imageUrl,
-          thumbnail,
-          webp,
+      }
+    }
+    // Files (PDF/doküman)
+    if (Array.isArray((req.files as any)["files"])) {
+      for (const file of (req.files as any)["files"]) {
+        library.files.push({
+          url: getImagePath(file),
+          name: file.originalname,
+          size: file.size,
+          type: file.mimetype,
           publicId: (file as any).public_id,
         });
       }
+    }
+  }
 
-      // -- SADECE FILE FIELD --
+  // ---- Multer array() destegi ----
+  if (Array.isArray(req.files)) {
+    for (const file of req.files as Express.Multer.File[]) {
+      if (file.fieldname === "images" && file.mimetype && file.mimetype.startsWith("image/")) {
+        const imageUrl = getImagePath(file);
+        let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
+        if (shouldProcessImage()) {
+          const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+          thumbnail = processed.thumbnail; webp = processed.webp;
+        }
+        library.images.push({ url: imageUrl, thumbnail, webp, publicId: (file as any).public_id });
+      }
       if (file.fieldname === "files") {
         library.files.push({
           url: getImagePath(file),
@@ -285,59 +270,56 @@ export const updateLibrary = asyncHandler(async (req: Request, res: Response) =>
     }
   }
 
-  // Image Remove
-  if (updates.removedImages) {
-    try {
-      const removed = JSON.parse(updates.removedImages);
-      library.images = library.images.filter(
-        (img: any) => !removed.includes(img.url)
-      );
-      for (const img of removed) {
-        const localPath = path.join(
-          "uploads",
-          "library-images",
-          path.basename(img.url)
-        );
+ // --- IMAGE REMOVE (tamamen güvenli) ---
+if (updates.removedImages) {
+  try {
+    const removed: string[] =
+      Array.isArray(updates.removedImages)
+        ? updates.removedImages
+        : typeof updates.removedImages === "string"
+        ? JSON.parse(updates.removedImages)
+        : [];
+    for (const imgUrl of removed) {
+      const imgIdx = library.images.findIndex((i: any) => i.url === imgUrl);
+      if (imgIdx > -1) {
+        const imgObj = library.images[imgIdx];
+        const localPath = path.join("uploads", "library-images", path.basename(imgUrl));
         if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-        if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
+        if (imgObj?.publicId) await cloudinary.uploader.destroy(imgObj.publicId);
+        library.images.splice(imgIdx, 1);
       }
-    } catch (e) {
-      logger.withReq.warn(req, t("invalidRemovedImages"), {
-        ...getRequestContext(req),
-        error: e,
-      });
     }
+  } catch (e) {
+    logger.withReq.warn(req, t("invalidRemovedImages"), { ...getRequestContext(req), error: e });
   }
-  // File Remove
+}
+
+
+  // --- FILE REMOVE ---
   if (updates.removedFiles) {
     try {
-      const removed = JSON.parse(updates.removedFiles);
-      library.files = library.files.filter(
-        (file: any) => !removed.includes(file.url)
-      );
-      for (const file of removed) {
-        const localPath = path.join(
-          "uploads",
-          "library-files",
-          path.basename(file.url)
-        );
-        if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-        if (file.publicId) await cloudinary.uploader.destroy(file.publicId);
+      const removed: string[] = JSON.parse(updates.removedFiles);
+      for (const fileUrl of removed) {
+        const fileIdx = library.files.findIndex((f: any) => f.url === fileUrl);
+        if (fileIdx > -1) {
+          const fileObj = library.files[fileIdx];
+          const localPath = path.join("uploads", "library-files", path.basename(fileUrl));
+          if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+          if (fileObj?.publicId) await cloudinary.uploader.destroy(fileObj.publicId);
+          library.files.splice(fileIdx, 1);
+        }
       }
     } catch (e) {
-      logger.withReq.warn(req, t("invalidRemovedFiles"), {
-        ...getRequestContext(req),
-        error: e,
-      });
+      logger.withReq.warn(req, t("invalidRemovedFiles"), { ...getRequestContext(req), error: e });
     }
   }
 
   await library.save();
   logger.withReq.info(req, t("updated"), { ...getRequestContext(req), id });
-  res
-    .status(200)
-    .json({ success: true, message: t("updated"), data: library });
+  res.status(200).json({ success: true, message: t("updated"), data: library });
 });
+
+
 
 // ✅ GET ALL
 export const adminGetAllLibrary = asyncHandler(
