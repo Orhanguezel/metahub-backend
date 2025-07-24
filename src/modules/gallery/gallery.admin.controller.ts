@@ -117,7 +117,7 @@ export const createGalleryItem = asyncHandler(
     }
   }
 );
-// ✅ Update Gallery Item (EXACT & MODERN)
+// ✅ Update Gallery Item (EXACT & MODERN & FUTURE-PROOF)
 export const updateGalleryItem = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -153,74 +153,101 @@ export const updateGalleryItem = asyncHandler(
         removedImages,  // frontend'den gelen (silinen) url dizisi
       } = updates;
 
-      // 1️⃣ Korunacak eski görseller (url dizisi) - frontend mutlaka göndermeli!
-      let keepUrls: string[] = [];
-      if (existingImages) {
-        keepUrls = Array.isArray(existingImages)
-          ? existingImages
-          : JSON.parse(existingImages);
-      }
+      // ---------- IMAGE UPDATE LOGIC BAŞLANGIÇ ----------
+      // Resim array güvenliği
+      if (!Array.isArray(gallery.images)) gallery.images = [];
 
-      // 2️⃣ Sadece mevcut kalmasını istediğin eski görselleri bırak!
-      if (keepUrls.length > 0) {
-        gallery.images = gallery.images.filter(img => keepUrls.includes(img.url));
-      }
-
-      // 3️⃣ Silinen görselleri dosyadan/cloudinary'den de sil
-      if (removedImages) {
-        try {
-          const removed = Array.isArray(removedImages)
-            ? removedImages
-            : JSON.parse(removedImages);
-
-          for (const imgUrl of removed) {
-            const imageDoc = gallery.images.find((img: any) => img.url === imgUrl);
-            // Silinen resmin dosya/Cloudinary'den kaldırılması
-            if (imageDoc?.publicId) {
-              await cloudinary.uploader.destroy(imageDoc.publicId);
+      // Multer fields() (object: {images:[], ...}) desteği
+      if (req.files && typeof req.files === "object" && !Array.isArray(req.files)) {
+        // Images
+        if (Array.isArray((req.files as any)["images"])) {
+          for (const file of (req.files as any)["images"]) {
+            if (file.mimetype && file.mimetype.startsWith("image/")) {
+              const imageUrl = getImagePath(file);
+              let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
+              if (shouldProcessImage()) {
+                const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+                thumbnail = processed.thumbnail;
+                webp = processed.webp;
+              }
+              gallery.images.push({
+                url: imageUrl,
+                thumbnail,
+                webp,
+                publicId: (file as any).public_id,
+                name: fillAllLocales({ [locale]: file.originalname }),
+                description: fillAllLocales({ [locale]: "" }),
+                order: order ? Number(order) : 0,
+              });
             }
-            // Lokalde ise:
-            const localPath = path.join(
-              "uploads",
-              "gallery-images",
-              path.basename(imgUrl)
-            );
-            if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
           }
-          // images array'i zaten keepUrls ile filtrelenmiş oldu
-        } catch (e) {
-          logger.withReq.warn(req, t("invalidRemovedImages"), {
-            ...getRequestContext(req),
-            error: e,
-          });
         }
       }
 
-      // 4️⃣ Yeni dosyalar (eklenen)
+      // Multer array() desteği
       if (Array.isArray(req.files)) {
         for (const file of req.files as Express.Multer.File[]) {
-          const imageUrl = getImagePath(file);
-          let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
-          if (shouldProcessImage()) {
-            const processed = await processImageLocal(
-              file.path,
-              file.filename,
-              path.dirname(file.path)
-            );
-            thumbnail = processed.thumbnail;
-            webp = processed.webp;
+          if (file.fieldname === "images" && file.mimetype && file.mimetype.startsWith("image/")) {
+            const imageUrl = getImagePath(file);
+            let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
+            if (shouldProcessImage()) {
+              const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+              thumbnail = processed.thumbnail;
+              webp = processed.webp;
+            }
+            gallery.images.push({
+              url: imageUrl,
+              thumbnail,
+              webp,
+              publicId: (file as any).public_id,
+              name: fillAllLocales({ [locale]: file.originalname }),
+              description: fillAllLocales({ [locale]: "" }),
+              order: order ? Number(order) : 0,
+            });
           }
-          gallery.images.push({
-            url: imageUrl,
-            thumbnail,
-            webp,
-            name: fillAllLocales({ [locale]: file.originalname }),
-            description: fillAllLocales({ [locale]: "" }),
-            order: order ? Number(order) : 0,
-            publicId: (file as any).public_id,
-          });
         }
       }
+
+      // --- IMAGE REMOVE (tamamen güvenli, hem diziden hem cloud hem lokal sil) ---
+      if (removedImages) {
+  try {
+    const removed: string[] =
+      Array.isArray(removedImages)
+        ? removedImages
+        : typeof removedImages === "string"
+        ? JSON.parse(removedImages)
+        : [];
+    for (const imgUrl of removed) {
+            const imgIdx = gallery.images.findIndex((i: any) => i.url === imgUrl);
+            if (imgIdx > -1) {
+              const imgObj = gallery.images[imgIdx];
+              // Lokalde ise sil
+              const localPath = path.join("uploads", "gallery-images", path.basename(imgUrl));
+              if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+              // Cloudinary'de ise sil
+              if (imgObj?.publicId) await cloudinary.uploader.destroy(imgObj.publicId);
+              // Diziden çıkar
+              gallery.images.splice(imgIdx, 1);
+            }
+          }
+        } catch (e) {
+          logger.withReq.warn(req, t("invalidRemovedImages"), { ...getRequestContext(req), error: e });
+        }
+      }
+
+      // --- Kalan resimler (korunacaklar) sadece existingImages ile güncellensin (Opsiyonel, eğer frontend yolluyorsa!) ---
+      if (existingImages) {
+        let keepUrls: string[] =
+          Array.isArray(existingImages)
+            ? existingImages
+            : typeof existingImages === "string"
+            ? JSON.parse(existingImages)
+            : [];
+        if (keepUrls.length > 0) {
+          gallery.images = gallery.images.filter(img => keepUrls.includes(img.url));
+        }
+      }
+      // ---------- IMAGE UPDATE LOGIC SONU ----------
 
       // 5️⃣ Name/Description/Order: Sadece tekli resim güncelliyorsa uygula, çoklu ise her bir resim frontend'den ayrı güncellenmeli.
       if (name && gallery.images.length === 1) {
@@ -241,8 +268,6 @@ export const updateGalleryItem = asyncHandler(
       if (isActive !== undefined)
         gallery.isActive = isActive === "true" || isActive === true;
       if (priority !== undefined) gallery.priority = parseInt(priority);
-
-      // updatableFields vs gerek yok artık (yukarıda güncelledik zaten)
 
       await gallery.save();
 
@@ -274,6 +299,7 @@ export const updateGalleryItem = asyncHandler(
   }
 );
 
+
 export const getAllGalleryItems = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
@@ -285,7 +311,7 @@ export const getAllGalleryItems = asyncHandler(
         isPublished,
         isActive,
         page = "1",
-        limit = "10",
+        limit = "100",
         category,
       } = req.query;
 
