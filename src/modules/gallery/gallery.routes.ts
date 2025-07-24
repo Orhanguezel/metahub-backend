@@ -40,7 +40,7 @@ router.get("/", adminController.getAllGalleryItems);
 router.post(
   "/upload",
   uploadTypeWrapper("gallery"),
-  upload("gallery").array("images", 10),
+  upload("gallery").array("images", 30),
   checkFileSizeMiddleware,
   validateUploadGallery,
   adminController.createGalleryItem
@@ -50,7 +50,7 @@ router.post(
 router.put(
   "/:id",
   uploadTypeWrapper("gallery"),
-  upload("gallery").array("images", 10),
+  upload("gallery").array("images", 30),
   checkFileSizeMiddleware,
   validateGalleryIdParam,
   adminController.updateGalleryItem

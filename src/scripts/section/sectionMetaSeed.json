@@ -574,8 +574,29 @@
   "required": false,
   "defaultOrder": 31,
   "defaultEnabled": true
+},
+{
+  "sectionKey": "herorobotic",
+  "label": {
+    "tr": "Robotik Kahraman",
+    "en": "Hero Robotic",
+    "de": "Hero Robotik",
+    "pl": "Robotyczny Bohater",
+    "fr": "Héros Robotique",
+    "es": "Héroe Robótico"
+  },
+  "description": {
+    "tr": "Anasayfa için AI ve robotik temalı ana kahraman bölümü.",
+    "en": "Main hero section for homepage with AI & Robotics theme.",
+    "de": "Haupt-Heldensektion der Startseite mit KI- und Robotikthema.",
+    "pl": "Główna sekcja bohatera strony głównej z motywem AI i robotyki.",
+    "fr": "Section principale de héros de la page d'accueil avec un thème IA et robotique.",
+    "es": "Sección principal de héroe de la página de inicio con temática de IA y robótica."
+  },
+  "icon": "MdSmartToy",
+  "variant": "modern",
+  "required": false,
+  "defaultOrder": 1,
+  "defaultEnabled": true
 }
-
-
-
 ]

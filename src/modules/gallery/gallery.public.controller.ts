@@ -18,7 +18,7 @@ export const getPublishedGalleryItems = asyncHandler(
     const t = (key: string) => translate(key, locale, translations);
 
     try {
-      const { page = "1", limit = "10", category } = req.query;
+      const { page = "1", limit = "100", category } = req.query;
       const pageNum = parseInt(page as string);
       const limitNum = parseInt(limit as string);
       const skip = (pageNum - 1) * limitNum;
@@ -144,7 +144,7 @@ export const searchGalleryItems = asyncHandler(
         isActive,
         category,
         page = "1",
-        limit = "10",
+        limit = "100",
       } = req.query;
       const pageNum = parseInt(page as string);
       const limitNum = parseInt(limit as string);
