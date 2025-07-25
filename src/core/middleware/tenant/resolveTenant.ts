@@ -1,3 +1,5 @@
+// src/core/middleware/tenant/resolveTenant.ts
+
 import { Request, Response, NextFunction } from "express";
 import { Tenants } from "@/modules/tenants/tenants.model";
 import logger from "../logger/logger";

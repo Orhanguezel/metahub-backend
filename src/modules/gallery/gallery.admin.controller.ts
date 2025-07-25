@@ -10,7 +10,7 @@ import {
   getFallbackThumbnail,
   processImageLocal,
   shouldProcessImage,
-} from "@/core/utils/uploadUtils";
+} from "@/core/middleware/file/uploadUtils";
 import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
@@ -150,7 +150,7 @@ export const updateGalleryItem = asyncHandler(
         priority,
         order,
         existingImages, // frontend'den gelen (korunacak) url dizisi
-        removedImages,  // frontend'den gelen (silinen) url dizisi
+        removedImages, // frontend'den gelen (silinen) url dizisi
       } = updates;
 
       // ---------- IMAGE UPDATE LOGIC BAŞLANGIÇ ----------
@@ -158,7 +158,11 @@ export const updateGalleryItem = asyncHandler(
       if (!Array.isArray(gallery.images)) gallery.images = [];
 
       // Multer fields() (object: {images:[], ...}) desteği
-      if (req.files && typeof req.files === "object" && !Array.isArray(req.files)) {
+      if (
+        req.files &&
+        typeof req.files === "object" &&
+        !Array.isArray(req.files)
+      ) {
         // Images
         if (Array.isArray((req.files as any)["images"])) {
           for (const file of (req.files as any)["images"]) {
@@ -166,7 +170,11 @@ export const updateGalleryItem = asyncHandler(
               const imageUrl = getImagePath(file);
               let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
               if (shouldProcessImage()) {
-                const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+                const processed = await processImageLocal(
+                  file.path,
+                  file.filename,
+                  path.dirname(file.path)
+                );
                 thumbnail = processed.thumbnail;
                 webp = processed.webp;
               }
@@ -187,11 +195,19 @@ export const updateGalleryItem = asyncHandler(
       // Multer array() desteği
       if (Array.isArray(req.files)) {
         for (const file of req.files as Express.Multer.File[]) {
-          if (file.fieldname === "images" && file.mimetype && file.mimetype.startsWith("image/")) {
+          if (
+            file.fieldname === "images" &&
+            file.mimetype &&
+            file.mimetype.startsWith("image/")
+          ) {
             const imageUrl = getImagePath(file);
             let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
             if (shouldProcessImage()) {
-              const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+              const processed = await processImageLocal(
+                file.path,
+                file.filename,
+                path.dirname(file.path)
+              );
               thumbnail = processed.thumbnail;
               webp = processed.webp;
             }
@@ -210,51 +226,68 @@ export const updateGalleryItem = asyncHandler(
 
       // --- IMAGE REMOVE (tamamen güvenli, hem diziden hem cloud hem lokal sil) ---
       if (removedImages) {
-  try {
-    const removed: string[] =
-      Array.isArray(removedImages)
-        ? removedImages
-        : typeof removedImages === "string"
-        ? JSON.parse(removedImages)
-        : [];
-    for (const imgUrl of removed) {
-            const imgIdx = gallery.images.findIndex((i: any) => i.url === imgUrl);
+        try {
+          const removed: string[] = Array.isArray(removedImages)
+            ? removedImages
+            : typeof removedImages === "string"
+            ? JSON.parse(removedImages)
+            : [];
+          for (const imgUrl of removed) {
+            const imgIdx = gallery.images.findIndex(
+              (i: any) => i.url === imgUrl
+            );
             if (imgIdx > -1) {
               const imgObj = gallery.images[imgIdx];
               // Lokalde ise sil
-              const localPath = path.join("uploads", "gallery-images", path.basename(imgUrl));
+              const localPath = path.join(
+                "uploads",
+                req.tenant,
+                "gallery-images",
+                path.basename(imgUrl)
+              );
               if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
               // Cloudinary'de ise sil
-              if (imgObj?.publicId) await cloudinary.uploader.destroy(imgObj.publicId);
+              if (imgObj?.publicId)
+                await cloudinary.uploader.destroy(imgObj.publicId);
               // Diziden çıkar
               gallery.images.splice(imgIdx, 1);
             }
           }
         } catch (e) {
-          logger.withReq.warn(req, t("invalidRemovedImages"), { ...getRequestContext(req), error: e });
+          logger.withReq.warn(req, t("invalidRemovedImages"), {
+            ...getRequestContext(req),
+            error: e,
+          });
         }
       }
 
       // --- Kalan resimler (korunacaklar) sadece existingImages ile güncellensin (Opsiyonel, eğer frontend yolluyorsa!) ---
       if (existingImages) {
-        let keepUrls: string[] =
-          Array.isArray(existingImages)
-            ? existingImages
-            : typeof existingImages === "string"
-            ? JSON.parse(existingImages)
-            : [];
+        let keepUrls: string[] = Array.isArray(existingImages)
+          ? existingImages
+          : typeof existingImages === "string"
+          ? JSON.parse(existingImages)
+          : [];
         if (keepUrls.length > 0) {
-          gallery.images = gallery.images.filter(img => keepUrls.includes(img.url));
+          gallery.images = gallery.images.filter((img) =>
+            keepUrls.includes(img.url)
+          );
         }
       }
       // ---------- IMAGE UPDATE LOGIC SONU ----------
 
       // 5️⃣ Name/Description/Order: Sadece tekli resim güncelliyorsa uygula, çoklu ise her bir resim frontend'den ayrı güncellenmeli.
       if (name && gallery.images.length === 1) {
-        gallery.images[0].name = mergeLocalesForUpdate(gallery.images[0].name, parseIfJson(name));
+        gallery.images[0].name = mergeLocalesForUpdate(
+          gallery.images[0].name,
+          parseIfJson(name)
+        );
       }
       if (description && gallery.images.length === 1) {
-        gallery.images[0].description = mergeLocalesForUpdate(gallery.images[0].description, parseIfJson(description));
+        gallery.images[0].description = mergeLocalesForUpdate(
+          gallery.images[0].description,
+          parseIfJson(description)
+        );
       }
       if (order !== undefined) {
         gallery.images.forEach((img) => (img.order = Number(order)));
@@ -298,7 +331,6 @@ export const updateGalleryItem = asyncHandler(
     }
   }
 );
-
 
 export const getAllGalleryItems = asyncHandler(
   async (req: Request, res: Response) => {

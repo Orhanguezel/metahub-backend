@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 //import { Product } from "@/modules/product";
-import { BASE_URL, UPLOAD_BASE_PATH } from "@/core/middleware/uploadMiddleware";
+import {
+  BASE_URL,
+} from "@/core/middleware/file/uploadMiddleware";
 //import { Stockmovement } from "@/modules/stockmovement";
 import sharp from "sharp";
 import fs from "fs";
@@ -19,7 +21,7 @@ const optimizeImage = async (filePath: string): Promise<string> => {
 
   fs.unlinkSync(filePath);
 
-  return outputPath.replace("uploads/", `${BASE_URL}/${UPLOAD_BASE_PATH}/`);
+  return outputPath.replace("uploads/", `${BASE_URL}/`);
 };
 
 // Create Product
@@ -153,7 +155,7 @@ export const updateProduct = asyncHandler(
 
           removed.forEach((imgUrl: string) => {
             const relativePath = imgUrl.replace(`${BASE_URL}/`, "");
-            const fullPath = path.join("uploads", relativePath);
+            const fullPath = path.join("uploads", req.tenant, relativePath);
             if (fs.existsSync(fullPath)) {
               fs.unlinkSync(fullPath);
             }
@@ -193,7 +195,7 @@ export const deleteProduct = asyncHandler(
       if (product.images && Array.isArray(product.images)) {
         product.images.forEach((imgUrl) => {
           const relativePath = imgUrl.replace(`${BASE_URL}/`, "");
-          const fullPath = path.join("uploads", relativePath);
+          const fullPath = path.join("uploads", req.tenant, relativePath);
           if (fs.existsSync(fullPath)) {
             fs.unlinkSync(fullPath);
           }

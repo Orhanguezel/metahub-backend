@@ -11,7 +11,7 @@ import {
   getFallbackThumbnail,
   processImageLocal,
   shouldProcessImage,
-} from "@/core/utils/uploadUtils";
+} from "@/core/middleware/file/uploadUtils";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 function parseIfJsonString(value: any) {
@@ -215,7 +215,7 @@ export const updateApartment = asyncHandler(
 
         for (const imgUrl of removed) {
           const filename = path.basename(imgUrl);
-          const localPath = path.join("uploads", "apartment-images", filename);
+          const localPath = path.join("uploads", req.tenant, "apartment-images", filename);
           if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
 
           const match = apartment.images.find(
@@ -262,6 +262,7 @@ export const deleteApartment = asyncHandler(
     for (const img of apartment.images) {
       const localPath = path.join(
         "uploads",
+        req.tenant,
         "apartment-images",
         path.basename(img.url)
       );

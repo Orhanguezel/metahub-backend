@@ -7,21 +7,7 @@ import slugify from "slugify";
 import { storageAdapter } from "./storageAdapter";
 import { uploadSizeLimits } from "./uploadTypeWrapper";
 
-// 🌍 Environment-based values (already loaded via env.ts)
-const envProfile = process.env.APP_ENV;
-const provider = process.env.STORAGE_PROVIDER as "local" | "cloudinary";
-const baseUrl = process.env.BASE_URL;
-const uploadRoot = process.env.UPLOAD_ROOT || "uploads";
-
-// ❗ Required variable check
-if (!envProfile) throw new Error("APP_ENV is not defined. Please set it via your environment configuration.");
-if (!provider) throw new Error("STORAGE_PROVIDER is not defined in your environment.");
-if (!baseUrl) throw new Error("BASE_URL is not defined in your environment.");
-
-export const BASE_UPLOAD_DIR = uploadRoot;
-export const BASE_URL_VALUE = baseUrl;
-export const CURRENT_PROJECT = envProfile;
-
+// --- Upload klasörleri ---
 export const UPLOAD_FOLDERS = {
   profile: "profile-images",
   product: "product-images",
@@ -48,24 +34,44 @@ export const UPLOAD_FOLDERS = {
   coupons: "coupons-images",
   galleryCategory: "galleryCategory-images",
   sparepartCategory: "sparepartCategory-images",
-
   default: "misc",
 } as const;
 
 export type UploadFolderKeys = keyof typeof UPLOAD_FOLDERS;
 
-export const resolveUploadPath = (type: string): string =>
-  path.join(BASE_UPLOAD_DIR, CURRENT_PROJECT, type);
+// 🌍 Base dirs
+export const BASE_UPLOAD_DIR = process.env.UPLOAD_ROOT || "uploads";
+export const BASE_URL_VALUE = process.env.BASE_URL || "http://localhost:5019";
 
-// 📁 Auto-create directories if not exist
-Object.values(UPLOAD_FOLDERS).forEach((folder) => {
-  const fullPath = resolveUploadPath(String(folder));
-  if (!fs.existsSync(fullPath)) {
-    fs.mkdirSync(fullPath, { recursive: true });
-  }
-});
+// 🔥 Tenant slug helper (req.tenant öncelik)
+export function getTenantSlug(req?: any): string {
+  return (
+    req?.tenant ||
+    process.env.NEXT_PUBLIC_APP_ENV ||
+    process.env.NEXT_PUBLIC_TENANT_NAME ||
+    process.env.TENANT_NAME ||
+    process.env.APP_ENV ||
+    "default"
+  );
+}
 
-// ✅ Dosya uzantısı ve mimetype kontrolü
+// Dinamik upload path tenant’a göre:
+export const resolveUploadPath = (type: string, req?: any): string => {
+  const tenant = getTenantSlug(req);
+  return path.join(BASE_UPLOAD_DIR, tenant, type);
+};
+
+// 📁 Sunucu ilk açılışta local geliştirmede tüm tenant için default dizinler (isteğe bağlı)
+if (process.env.NODE_ENV !== "production") {
+  Object.values(UPLOAD_FOLDERS).forEach((folder) => {
+    const fullPath = resolveUploadPath(String(folder));
+    if (!fs.existsSync(fullPath)) {
+      fs.mkdirSync(fullPath, { recursive: true });
+    }
+  });
+}
+
+// --- Dosya uzantı ve mime kontrolü ---
 const allowedExtensions = [
   ".jpg", ".jpeg", ".png", ".webp", ".gif", ".pdf", ".docx", ".pptx",
 ];
@@ -93,17 +99,20 @@ const fileFilter = (
 };
 
 /**
- * Dinamik upload middleware.
- * Her tip için uygun dosya boyutu limiti otomatik uygulanır.
+ * Dinamik upload middleware (tenant-slug guaranteed)
  */
 export const upload = (type: UploadFolderKeys) => {
   return multer({
-    storage: storageAdapter(provider),
+    storage: storageAdapter(process.env.STORAGE_PROVIDER as "local" | "cloudinary"),
     limits: { fileSize: uploadSizeLimits[type] || uploadSizeLimits.default },
     fileFilter,
   });
 };
 
 export const serveUploads = express.static(BASE_UPLOAD_DIR);
-export const UPLOAD_BASE_PATH = `${BASE_UPLOAD_DIR}/${envProfile}`;
-export { BASE_URL_VALUE as BASE_URL};
+// runtime’da tenant’a göre kullanılmalı, ör: /uploads/ensotek/about-images/...
+export { BASE_URL_VALUE as BASE_URL };
+
+// 🔥 Export getTenantSlug VE resolveUploadPath fonksiyonlarını,
+// storageAdapter ve diğer fonksiyonlar da **her zaman** tenant’a göre path kurar!
+// Yani backend’in her yerinde tenant isolation garanti!

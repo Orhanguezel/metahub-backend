@@ -8,9 +8,9 @@ import {
   publicGetAllSport,
 } from "./sport.controller";
 
-import { upload } from "@/core/middleware/uploadMiddleware";
+import { upload } from "@/core/middleware/file/uploadMiddleware";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
+import { uploadTypeWrapper } from "@/core/middleware/file/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 import {
   validateCreateSport,

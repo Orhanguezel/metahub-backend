@@ -17,8 +17,8 @@ import {
   validateAdminQuery,
 } from "./validation";
 
-import { upload } from "@/core/middleware/uploadMiddleware";
-import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
+import { upload } from "@/core/middleware/file/uploadMiddleware";
+import { uploadTypeWrapper } from "@/core/middleware/file/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
@@ -51,7 +51,14 @@ router.put(
     { name: "images", maxCount: 5 },
     { name: "files", maxCount: 10 },
   ]),
-  transformNestedFields(["title", "summary", "content", "tags", "removedImages", "removedFiles"]),
+  transformNestedFields([
+    "title",
+    "summary",
+    "content",
+    "tags",
+    "removedImages",
+    "removedFiles",
+  ]),
   validateObjectId("id"),
   validateUpdateLibrary,
   updateLibrary

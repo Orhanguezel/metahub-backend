@@ -8,7 +8,7 @@ import {
   getFallbackThumbnail,
   processImageLocal,
   shouldProcessImage,
-} from "@/core/utils/uploadUtils";
+} from "@/core/middleware/file/uploadUtils";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import logger from "@/core/middleware/logger/logger";
@@ -21,8 +21,14 @@ import type { ICompany } from "./types";
 // --- Yardımcılar ---
 // Primitive alanlar ve çoklu dilli alanları ayrı yönetelim
 const primitiveFields = [
-  "tenant", "language", "taxNumber", "handelsregisterNumber", "registerCourt",
-  "website", "email", "phone"
+  "tenant",
+  "language",
+  "taxNumber",
+  "handelsregisterNumber",
+  "registerCourt",
+  "website",
+  "email",
+  "phone",
 ];
 
 // --- CREATE ---
@@ -35,14 +41,18 @@ export const createCompany = asyncHandler(
     const { Company } = await getTenantModels(req);
 
     if (!req.tenant) {
-      res.status(400).json({ success: false, message: t("company.tenantRequired") });
+      res
+        .status(400)
+        .json({ success: false, message: t("company.tenantRequired") });
       return;
     }
 
     // Tek tenant = tek company!
     const exists = await Company.findOne({ tenant: req.tenant });
     if (exists) {
-      res.status(400).json({ success: false, message: t("company.alreadyExists") });
+      res
+        .status(400)
+        .json({ success: false, message: t("company.alreadyExists") });
       return;
     }
 
@@ -50,7 +60,7 @@ export const createCompany = asyncHandler(
     body.tenant = req.tenant;
     body.language = body.language || locale || "en";
 
-    // Çoklu dilli companyName, companyDesc 
+    // Çoklu dilli companyName, companyDesc
     if (typeof body.companyName === "string") {
       body.companyName = { [locale]: body.companyName };
     }
@@ -59,7 +69,11 @@ export const createCompany = asyncHandler(
     }
 
     // managers ve addresses (opsiyonel)
-    body.managers = Array.isArray(body.managers) ? body.managers : (body.managers ? [body.managers] : []);
+    body.managers = Array.isArray(body.managers)
+      ? body.managers
+      : body.managers
+      ? [body.managers]
+      : [];
     body.addresses = Array.isArray(body.addresses) ? body.addresses : [];
 
     // Social links default (hepsi string olmalı)
@@ -78,7 +92,11 @@ export const createCompany = asyncHandler(
         const imageUrl = getImagePath(file);
         let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
         if (shouldProcessImage()) {
-          const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+          const processed = await processImageLocal(
+            file.path,
+            file.filename,
+            path.dirname(file.path)
+          );
           thumbnail = processed.thumbnail;
           webp = processed.webp;
         }
@@ -126,10 +144,13 @@ export const updateCompanyInfo = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const locale: SupportedLocale = req.locale || getLogLocale();
-    const t = (key: string, params?: any) => translate(key, locale, translations, params);
+    const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
 
     if (!req.tenant) {
-      res.status(400).json({ success: false, message: t("company.tenantRequired") });
+      res
+        .status(400)
+        .json({ success: false, message: t("company.tenantRequired") });
       return;
     }
 
@@ -159,12 +180,16 @@ export const updateCompanyInfo = asyncHandler(
 
     // managers güncelle
     if (updates.managers) {
-      company.managers = Array.isArray(updates.managers) ? updates.managers : [updates.managers];
+      company.managers = Array.isArray(updates.managers)
+        ? updates.managers
+        : [updates.managers];
     }
 
     // addresses güncelle
     if (updates.addresses) {
-      company.addresses = Array.isArray(updates.addresses) ? updates.addresses : [updates.addresses];
+      company.addresses = Array.isArray(updates.addresses)
+        ? updates.addresses
+        : [updates.addresses];
     }
 
     // Social links güncelle
@@ -189,7 +214,11 @@ export const updateCompanyInfo = asyncHandler(
         const imageUrl = getImagePath(file);
         let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
         if (shouldProcessImage()) {
-          const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+          const processed = await processImageLocal(
+            file.path,
+            file.filename,
+            path.dirname(file.path)
+          );
           thumbnail = processed.thumbnail;
           webp = processed.webp;
         }
@@ -211,21 +240,32 @@ export const updateCompanyInfo = asyncHandler(
         const toRemove = new Set(removed);
         for (const imgUrl of removed) {
           // Local sil
-          const localPath = path.join("uploads", "company-images", path.basename(imgUrl));
+          const localPath = path.join(
+            "uploads",
+            req.tenant,
+            "company-images",
+            path.basename(imgUrl)
+          );
           if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
           // Cloudinary sil
-          const img = company.images.find((img: any) => img.url === imgUrl && img.publicId);
+          const img = company.images.find(
+            (img: any) => img.url === imgUrl && img.publicId
+          );
           if (img && img.publicId) {
             await cloudinary.uploader.destroy(img.publicId);
           }
         }
-        company.images = company.images.filter((img: any) => !toRemove.has(img.url));
+        company.images = company.images.filter(
+          (img: any) => !toRemove.has(img.url)
+        );
       } catch (err) {
         logger.withReq.error(req, t("company.removeImagesError"), {
           ...getRequestContext(req),
           error: err,
         });
-        res.status(400).json({ success: false, message: t("company.removeImagesError") });
+        res
+          .status(400)
+          .json({ success: false, message: t("company.removeImagesError") });
         return;
       }
     }
@@ -248,17 +288,24 @@ export const updateCompanyInfo = asyncHandler(
 export const getCompanyInfo = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
-    const t = (key: string, params?: any) => translate(key, locale, translations, params);
+    const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
 
     if (!req.tenant) {
-      res.status(400).json({ success: false, message: t("company.tenantRequired") });
+      res
+        .status(400)
+        .json({ success: false, message: t("company.tenantRequired") });
       return;
     }
 
     const { Company } = await getTenantModels(req);
-    const company = await Company.findOne({ tenant: req.tenant }).select("-__v");
+    const company = await Company.findOne({ tenant: req.tenant }).select(
+      "-__v"
+    );
     if (!company) {
-      logger.withReq.warn(req, t("company.notFound"), { ...getRequestContext(req) });
+      logger.withReq.warn(req, t("company.notFound"), {
+        ...getRequestContext(req),
+      });
       res.status(404).json({ success: false, message: t("company.notFound") });
       return;
     }
@@ -280,10 +327,13 @@ export const deleteCompany = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const locale: SupportedLocale = req.locale || getLogLocale();
-    const t = (key: string, params?: any) => translate(key, locale, translations, params);
+    const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
 
     if (!req.tenant) {
-      res.status(400).json({ success: false, message: t("company.tenantRequired") });
+      res
+        .status(400)
+        .json({ success: false, message: t("company.tenantRequired") });
       return;
     }
 
@@ -295,7 +345,12 @@ export const deleteCompany = asyncHandler(
     }
 
     for (const img of company.images || []) {
-      const localPath = path.join("uploads", "company-images", path.basename(img.url));
+      const localPath = path.join(
+        "uploads",
+        req.tenant,
+        "company-images",
+        path.basename(img.url)
+      );
       if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
       if (img.publicId) {
         try {

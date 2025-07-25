@@ -12,8 +12,8 @@ import {
   validateUpdateEnsotekCategory,
   validateObjectId,
 } from "./validation";
-import { upload } from "@/core/middleware/uploadMiddleware";
-import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
+import { upload } from "@/core/middleware/file/uploadMiddleware";
+import { uploadTypeWrapper } from "@/core/middleware/file/uploadTypeWrapper";
 import { parseFormDataJson } from "@/core/utils/i18n/parseFormDataJson"; // <-- ekle
 
 const router = express.Router();

@@ -11,7 +11,7 @@ import {
   getFallbackThumbnail,
   processImageLocal,
   shouldProcessImage,
-} from "@/core/utils/uploadUtils";
+} from "@/core/middleware/file/uploadUtils";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import { t as translate } from "@/core/utils/i18n/translate";
@@ -274,6 +274,7 @@ export const updateSparepart = asyncHandler(
         for (const img of removed) {
           const localPath = path.join(
             "uploads",
+            req.tenant,
             "sparepart-images",
             path.basename(img.url)
           );
@@ -322,6 +323,7 @@ export const deleteSparepart = asyncHandler(
     for (const img of product.images) {
       const localPath = path.join(
         "uploads",
+        req.tenant,
         "sparepart-images",
         path.basename(img.url)
       );

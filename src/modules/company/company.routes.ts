@@ -8,12 +8,12 @@ import {
   deleteCompany,
 } from "./company.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { upload } from "@/core/middleware/uploadMiddleware";
-import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
+import { upload } from "@/core/middleware/file/uploadMiddleware";
+import { uploadTypeWrapper } from "@/core/middleware/file/uploadTypeWrapper";
 import {
   validateCreateCompany,
   validateUpdateCompany,
-  validateObjectId,  // <-- fonksiyon olarak import
+  validateObjectId, // <-- fonksiyon olarak import
 } from "./company.validation";
 
 const router = express.Router();
@@ -38,7 +38,7 @@ router.put(
   "/:id",
   uploadTypeWrapper("company"),
   upload("company").array("images", 5),
-  validateObjectId("id"),    // <-- burada fonksiyon çağrısı ile
+  validateObjectId("id"), // <-- burada fonksiyon çağrısı ile
   validateUpdateCompany,
   updateCompanyInfo
 );
@@ -46,7 +46,7 @@ router.put(
 // DELETE: /company/:id — Yalnızca admin, tüm logo dosyalarını da siler
 router.delete(
   "/:id",
-  validateObjectId("id"),    // <-- burada da fonksiyon çağrısı ile
+  validateObjectId("id"), // <-- burada da fonksiyon çağrısı ile
   deleteCompany
 );
 

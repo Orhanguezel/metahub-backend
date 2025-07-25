@@ -11,7 +11,7 @@ import {
   getFallbackThumbnail,
   processImageLocal,
   shouldProcessImage,
-} from "@/core/utils/uploadUtils";
+} from "@/core/middleware/file/uploadUtils";
 import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
@@ -59,8 +59,8 @@ export const createAbout = asyncHandler(async (req: Request, res: Response) => {
 
     const images: IAbout["images"] = [];
     if (Array.isArray(req.files)) {
-      console.log("[UPLOAD][about] req.uploadType:", req.uploadType);   // <-- EN ÖNEMLİSİ!
-  console.log("[UPLOAD][about] req.files:", req.files);
+      console.log("[UPLOAD][about] req.uploadType:", req.uploadType); // <-- EN ÖNEMLİSİ!
+      console.log("[UPLOAD][about] req.files:", req.files);
       for (const file of req.files as Express.Multer.File[]) {
         const imageUrl = getImagePath(file);
         let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
@@ -201,6 +201,7 @@ export const updateAbout = asyncHandler(async (req: Request, res: Response) => {
       for (const img of removed) {
         const localPath = path.join(
           "uploads",
+          req.tenant,
           "about-images",
           path.basename(img.url)
         );
@@ -333,6 +334,7 @@ export const deleteAbout = asyncHandler(async (req: Request, res: Response) => {
   for (const img of about.images || []) {
     const localPath = path.join(
       "uploads",
+      req.tenant,
       "about-images",
       path.basename(img.url)
     );

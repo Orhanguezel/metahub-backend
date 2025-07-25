@@ -9,7 +9,7 @@ import {
   getFallbackThumbnail,
   processImageLocal,
   shouldProcessImage,
-} from "@/core/utils/uploadUtils";
+} from "@/core/middleware/file/uploadUtils";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import { t as translate } from "@/core/utils/i18n/translate";
@@ -216,6 +216,7 @@ export const updateEnsotekCategory = asyncHandler(
           if (imgObj) {
             const localPath = path.join(
               "uploads",
+              req.tenant,
               "ensotekCategory-images",
               path.basename(imgObj.url)
             );
@@ -349,6 +350,7 @@ export const deleteEnsotekCategory = asyncHandler(
     for (const img of category.images || []) {
       const localPath = path.join(
         "uploads",
+        req.tenant,
         "ensotekCategory",
         path.basename(img.url)
       );

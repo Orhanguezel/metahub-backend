@@ -13,8 +13,8 @@ import {
   deleteTenant,
 } from "./tenants.controller";
 
-import { upload } from "@/core/middleware/uploadMiddleware";
-import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
+import { upload } from "@/core/middleware/file/uploadMiddleware";
+import { uploadTypeWrapper } from "@/core/middleware/file/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
@@ -26,7 +26,7 @@ router.get("/", getAllTenantsPublic);
 // --- ADMIN: panel işlemleri (TAMAMI admin ve login ister) ---
 router.use("/admin", authenticate, authorizeRoles("admin"));
 
-// Admin: Tüm tenants (panelde) 
+// Admin: Tüm tenants (panelde)
 router.get("/admin", getAllTenantsAdmin);
 
 // Admin: Create Tenant
