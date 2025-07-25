@@ -37,10 +37,14 @@ export async function processImageLocal(inputPath: string, filename: string, fol
 
 export function getImagePath(file: Express.Multer.File, folder: string = "gallery") {
   const storageProvider = process.env.STORAGE_PROVIDER || "local";
-  return storageProvider === "cloudinary"
-    ? (file as any).path
-    : `${BASE_URL}/${UPLOAD_BASE_PATH}/${folder}/${file.filename}`;
+  if (storageProvider === "cloudinary") {
+    // 🔥 Log ekle, prod'da path ve url hangisi geliyor gör
+    console.log("[getImagePath][cloudinary] file.path:", (file as any).path, "file.url:", (file as any).url);
+    return (file as any).url || (file as any).path;
+  }
+  return `${BASE_URL}/${UPLOAD_BASE_PATH}/${folder}/${file.filename}`;
 }
+
 
 export function shouldProcessImage() {
   return (process.env.STORAGE_PROVIDER || "local") === "local";

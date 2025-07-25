@@ -21,11 +21,12 @@ const router = express.Router();
 // GET: /company  — Public info
 router.get("/", getCompanyInfo);
 
+// 🌟 Admin Middleware
+router.use(authenticate, authorizeRoles("admin", "moderator"));
+
 // POST: /company — Yalnızca admin, çoklu logo upload destekli
 router.post(
   "/",
-  authenticate,
-  authorizeRoles("admin"),
   uploadTypeWrapper("company"),
   upload("company").array("images", 5),
   validateCreateCompany,
@@ -35,8 +36,6 @@ router.post(
 // PUT: /company/:id — Yalnızca admin, çoklu logo, silme desteği
 router.put(
   "/:id",
-  authenticate,
-  authorizeRoles("admin"),
   uploadTypeWrapper("company"),
   upload("company").array("images", 5),
   validateObjectId("id"),    // <-- burada fonksiyon çağrısı ile
@@ -47,8 +46,6 @@ router.put(
 // DELETE: /company/:id — Yalnızca admin, tüm logo dosyalarını da siler
 router.delete(
   "/:id",
-  authenticate,
-  authorizeRoles("admin"),
   validateObjectId("id"),    // <-- burada da fonksiyon çağrısı ile
   deleteCompany
 );
