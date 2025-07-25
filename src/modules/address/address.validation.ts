@@ -1,81 +1,88 @@
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
+import translations from "./i18n";
+import type { SupportedLocale } from "@/types/common";
 
+// --- Locale-aware error helper
+function t(key: string, req: any) {
+  const locale: SupportedLocale = req?.locale || "en";
+  return translations?.[locale]?.[key] || translations.en[key] || key;
+}
 
-export const validateUpdateAddresses = [
-  body("addresses")
-    .isArray({ min: 1 })
-    .withMessage("Addresses must be an array with at least 1 item."),
-  body("addresses.*.street")
-    .trim()
-    .notEmpty()
-    .withMessage("Street is required.")
-    .isString()
-    .withMessage("Street must be a string."),
-  body("addresses.*.houseNumber")
-    .trim()
-    .notEmpty()
-    .withMessage("House number is required.")
-    .isString()
-    .withMessage("House number must be a string."),
-  body("addresses.*.city")
-    .trim()
-    .notEmpty()
-    .withMessage("City is required.")
-    .isString()
-    .withMessage("City must be a string."),
-  body("addresses.*.zipCode")
-    .trim()
-    .notEmpty()
-    .withMessage("Zip code is required.")
-    .isString()
-    .withMessage("Zip code must be a string."),
-  body("addresses.*.phone")
-    .trim()
-    .notEmpty()
-    .withMessage("Phone is required.")
-    .isString()
-    .withMessage("Phone must be a string."),
-  validateRequest,
-];
-
-
+// --- Tekil adres validasyonu
 export const validateAddress = [
   body("street")
     .trim()
-    .notEmpty()
-    .withMessage("Street is required.")
-    .isString()
-    .withMessage("Street must be a string."),
+    .notEmpty().withMessage((_, { req }) => t("addresses.streetRequired", req))
+    .isString().withMessage((_, { req }) => t("addresses.streetRequired", req)),
   body("houseNumber")
     .trim()
-    .notEmpty()
-    .withMessage("House number is required.")
-    .isString()
-    .withMessage("House number must be a string."),
+    .notEmpty().withMessage((_, { req }) => t("addresses.houseNumberRequired", req))
+    .isString().withMessage((_, { req }) => t("addresses.houseNumberRequired", req)),
   body("city")
     .trim()
-    .notEmpty()
-    .withMessage("City is required.")
-    .isString()
-    .withMessage("City must be a string."),
+    .notEmpty().withMessage((_, { req }) => t("addresses.cityRequired", req))
+    .isString().withMessage((_, { req }) => t("addresses.cityRequired", req)),
   body("zipCode")
     .trim()
-    .notEmpty()
-    .withMessage("Zip code is required.")
-    .isString()
-    .withMessage("Zip code must be a string."),
+    .notEmpty().withMessage((_, { req }) => t("addresses.zipCodeRequired", req))
+    .isString().withMessage((_, { req }) => t("addresses.zipCodeRequired", req)),
   body("phone")
     .trim()
-    .notEmpty()
-    .withMessage("Phone is required.")
-    .isString()
-    .withMessage("Phone must be a string."),
+    .notEmpty().withMessage((_, { req }) => t("addresses.phoneRequired", req))
+    .isString().withMessage((_, { req }) => t("addresses.phoneRequired", req)),
+  body("email")
+    .trim()
+    .notEmpty().withMessage((_, { req }) => t("addresses.emailRequired", req))
+    .isEmail().withMessage((_, { req }) => t("addresses.emailRequired", req)),
+  body("country")
+    .trim()
+    .notEmpty().withMessage((_, { req }) => t("addresses.countryRequired", req))
+    .isString().withMessage((_, { req }) => t("addresses.countryRequired", req)),
+  // Opsiyonel companyId (ID ise kontrol et)
+  body("companyId").optional().isMongoId().withMessage((_, { req }) => t("addresses.companyIdInvalid", req)),
   validateRequest,
 ];
 
+// --- Toplu adres validasyonu (her adres için aynı validasyonlar) ---
+export const validateUpdateAddresses = [
+  body("addresses")
+    .isArray({ min: 1 }).withMessage((_, { req }) => t("addresses.noAddressesProvided", req)),
+  body("addresses.*.street")
+    .trim()
+    .notEmpty().withMessage((_, { req }) => t("addresses.streetRequired", req))
+    .isString().withMessage((_, { req }) => t("addresses.streetRequired", req)),
+  body("addresses.*.houseNumber")
+    .trim()
+    .notEmpty().withMessage((_, { req }) => t("addresses.houseNumberRequired", req))
+    .isString().withMessage((_, { req }) => t("addresses.houseNumberRequired", req)),
+  body("addresses.*.city")
+    .trim()
+    .notEmpty().withMessage((_, { req }) => t("addresses.cityRequired", req))
+    .isString().withMessage((_, { req }) => t("addresses.cityRequired", req)),
+  body("addresses.*.zipCode")
+    .trim()
+    .notEmpty().withMessage((_, { req }) => t("addresses.zipCodeRequired", req))
+    .isString().withMessage((_, { req }) => t("addresses.zipCodeRequired", req)),
+  body("addresses.*.phone")
+    .trim()
+    .notEmpty().withMessage((_, { req }) => t("addresses.phoneRequired", req))
+    .isString().withMessage((_, { req }) => t("addresses.phoneRequired", req)),
+  body("addresses.*.email")
+    .trim()
+    .notEmpty().withMessage((_, { req }) => t("addresses.emailRequired", req))
+    .isEmail().withMessage((_, { req }) => t("addresses.emailRequired", req)),
+  body("addresses.*.country")
+    .trim()
+    .notEmpty().withMessage((_, { req }) => t("addresses.countryRequired", req))
+    .isString().withMessage((_, { req }) => t("addresses.countryRequired", req)),
+  // Opsiyonel companyId (ID ise kontrol et)
+  body("addresses.*.companyId").optional().isMongoId().withMessage((_, { req }) => t("addresses.companyIdInvalid", req)),
+  validateRequest,
+];
 
+// --- ID validasyonu (çoklu dil) ---
 export const validateAddressId = [
-  param("id").isMongoId().withMessage("Invalid address ID."),
+  param("id").isMongoId().withMessage((_, { req }) => t("addresses.invalidId", req)),
   validateRequest,
 ];

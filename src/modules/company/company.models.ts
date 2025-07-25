@@ -1,8 +1,17 @@
 // models/company.model.ts
 
-import mongoose, { Schema, Model, models } from "mongoose";
+import { Schema, Model, Types, models, model } from "mongoose";
 import type { ICompany, ICompanyImage } from "./types";
 import { SUPPORTED_LOCALES } from "@/types/common";
+
+// 🔤 Çok dilli alan tipi tanımı
+const localizedStringField = () => {
+  const fields: Record<string, any> = {};
+  for (const locale of SUPPORTED_LOCALES) {
+    fields[locale] = { type: String, trim: true };
+  }
+  return fields;
+};
 
 const CompanyImageSchema = new Schema<ICompanyImage>(
   {
@@ -16,7 +25,8 @@ const CompanyImageSchema = new Schema<ICompanyImage>(
 
 const CompanySchema = new Schema<ICompany>(
   {
-    companyName: { type: String, required: true, unique: true },
+    companyName: localizedStringField(),
+    companyDesc: localizedStringField(),
     tenant: { type: String, required: true, index: true },
     language: {
       type: String,
@@ -26,14 +36,12 @@ const CompanySchema = new Schema<ICompany>(
     },
     taxNumber: { type: String, required: true },
     handelsregisterNumber: { type: String },
+    registerCourt: { type: String }, // *** EKLE ***
+    website: { type: String },       // *** EKLE ***
+    managers: { type: [String], default: [] }, // *** EKLE ***
     email: { type: String, required: true, unique: true },
     phone: { type: String, required: true },
-    address: {
-      street: { type: String, required: true },
-      city: { type: String, required: true },
-      postalCode: { type: String, required: true },
-      country: { type: String, required: true },
-    },
+    addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }],
     bankDetails: {
       bankName: { type: String, required: true },
       iban: { type: String, required: true },
@@ -51,7 +59,8 @@ const CompanySchema = new Schema<ICompany>(
   { timestamps: true }
 );
 
-const Company: Model<ICompany> =
-  models.Company || mongoose.model<ICompany>("Company", CompanySchema);
 
-export { Company };
+const Company: Model<ICompany> =
+  models.Company || model<ICompany>("Company", CompanySchema);
+
+export { Company, CompanyImageSchema, CompanySchema };
