@@ -59,6 +59,8 @@ export const createAbout = asyncHandler(async (req: Request, res: Response) => {
 
     const images: IAbout["images"] = [];
     if (Array.isArray(req.files)) {
+      console.log("[UPLOAD][about] req.uploadType:", req.uploadType);   // <-- EN ÖNEMLİSİ!
+  console.log("[UPLOAD][about] req.files:", req.files);
       for (const file of req.files as Express.Multer.File[]) {
         const imageUrl = getImagePath(file);
         let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
