@@ -32,7 +32,16 @@
   "company.deleted": "Firma başarıyla silindi.",
   "company.notFound": "Firma bilgisi bulunamadı.",
   "company.alreadyExists": "Bu tenant için zaten bir firma mevcut.",
-  "company.fetchError": "Firma bilgisi getirilirken bir hata oluştu."
+  "company.fetchError": "Firma bilgisi getirilirken bir hata oluştu.",
+  "addresses.invalid": "Adresler geçersiz.",
+  "addresses.invalidId": "Adres ID'si geçersiz.",
+  "managers.invalid": "Yönetici listesi geçersiz.",
+  "managers.invalidString": "Yönetici adı metin olmalı.",
+  "website.invalid": "Web sitesi geçersiz.",
+  "language.invalid": "Dil geçersiz.",
+  "tenant.invalid": "Tenant adı geçersiz.",
+  "handelsregisterNumber.invalid": "Ticaret sicil numarası geçersiz.",
+  "registerCourt.invalid": "Kayıt mahkemesi geçersiz."
 }
 
 

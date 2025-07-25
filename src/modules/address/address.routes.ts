@@ -1,11 +1,15 @@
 import express from "express";
 import {
-  getUserAddresses,
+  getAddresses,            // dinamik (user veya company)
   createAddress,
   getAddressById,
   updateAddress,
   deleteAddress,
-  updateAllUserAddresses,
+  updateAllAddresses,      // dinamik
+  getUserAddresses,        // sadece kullanıcının kendi adresleri
+  updateAllUserAddresses,  // sadece kullanıcının kendi adreslerini topluca değiştir
+  getCompanyAddresses,     // şirket adresleri
+  updateAllCompanyAddresses// şirket adreslerini topluca değiştir
 } from "./address.controller";
 
 import { authenticate } from "@/core/middleware/authMiddleware";
@@ -13,27 +17,20 @@ import { validateAddress, validateUpdateAddresses } from "./address.validation";
 
 const router = express.Router();
 
-// 🗺️ Tüm adresleri getir
-router.get("/", authenticate, getUserAddresses);
-
-// ➕ Yeni adres ekle
+// --- DİNAMİK, OWNER YAKLAŞIMI (eski uyum için) ---
+router.get("/", authenticate, getAddresses);
 router.post("/", authenticate, validateAddress, createAddress);
-
-// 🔎 Tek adres getir
 router.get("/:id", authenticate, getAddressById);
-
-// 🛠️ Tek adresi güncelle
 router.put("/:id", authenticate, validateAddress, updateAddress);
-
-// 🗑️ Tek adresi sil
 router.delete("/:id", authenticate, deleteAddress);
+router.put("/all/replace", authenticate, validateUpdateAddresses, updateAllAddresses);
 
-// 🔄 Tüm adresleri topluca güncelle (replace)
-router.put(
-  "/all/replace",
-  authenticate,
-  validateUpdateAddresses,
-  updateAllUserAddresses
-);
+// --- KULLANICI ADRESLERİ ---
+router.get("/user", authenticate, getUserAddresses);
+router.put("/user/all/replace", authenticate, validateUpdateAddresses, updateAllUserAddresses);
+
+// --- ŞİRKET ADRESLERİ ---
+router.get("/company/:companyId", authenticate, getCompanyAddresses);
+router.put("/company/:companyId/all/replace", authenticate, validateUpdateAddresses, updateAllCompanyAddresses);
 
 export default router;

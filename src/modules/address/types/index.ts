@@ -2,7 +2,8 @@ import { Types } from "mongoose";
 
 export interface Address {
   _id?: Types.ObjectId | string;
-  userId: Types.ObjectId | string;
+  userId?: Types.ObjectId | string;
+  companyId?: Types.ObjectId | string; // Eklendi
   tenant: string;
   street: string;
   houseNumber: string;

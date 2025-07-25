@@ -56,6 +56,7 @@ BlogSchema.pre("validate", function (next) {
   next();
 });
 
-const Blog: Model<IBlog> = models.Blog || model<IBlog>("Blog", BlogSchema);
+const Blog: Model<IBlog> = 
+models.Blog || model<IBlog>("Blog", BlogSchema);
 
 export { Blog, BlogImageSchema, BlogSchema };

@@ -32,6 +32,14 @@
   "company.deleted": "Company deleted successfully.",
   "company.notFound": "Company information not found.",
   "company.alreadyExists": "A company already exists for this tenant.",
-  "company.fetchError": "An error occurred while fetching company information."
+  "company.fetchError": "An error occurred while fetching company information.",
+  "addresses.invalid": "Addresses are invalid.",
+  "addresses.invalidId": "Invalid address ID.",
+  "managers.invalid": "Invalid manager list.",
+  "managers.invalidString": "Manager name must be a string.",
+  "website.invalid": "Invalid website.",
+  "language.invalid": "Invalid language.",
+  "tenant.invalid": "Invalid tenant name.",
+  "handelsregisterNumber.invalid": "Invalid commercial register number.",
+  "registerCourt.invalid": "Invalid registration court."
 }
-

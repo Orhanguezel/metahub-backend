@@ -296,23 +296,29 @@ if (updates.removedImages) {
 
 
   // --- FILE REMOVE ---
-  if (updates.removedFiles) {
-    try {
-      const removed: string[] = JSON.parse(updates.removedFiles);
-      for (const fileUrl of removed) {
-        const fileIdx = library.files.findIndex((f: any) => f.url === fileUrl);
-        if (fileIdx > -1) {
-          const fileObj = library.files[fileIdx];
-          const localPath = path.join("uploads", "library-files", path.basename(fileUrl));
-          if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-          if (fileObj?.publicId) await cloudinary.uploader.destroy(fileObj.publicId);
-          library.files.splice(fileIdx, 1);
-        }
+ if (updates.removedFiles) {
+  try {
+    const removed: string[] = Array.isArray(updates.removedFiles)
+      ? updates.removedFiles
+      : typeof updates.removedFiles === "string"
+        ? JSON.parse(updates.removedFiles)
+        : [];
+    for (const fileUrl of removed) {
+      const fileIdx = library.files.findIndex((f: any) => f.url === fileUrl);
+      if (fileIdx > -1) {
+        const fileObj = library.files[fileIdx];
+        // Eğer local ise localPath, cloudinary ise cloudinary'den sil
+        const localPath = path.join("uploads", "library-files", path.basename(fileUrl));
+        if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+        if (fileObj?.publicId) await cloudinary.uploader.destroy(fileObj.publicId);
+        library.files.splice(fileIdx, 1);
       }
-    } catch (e) {
-      logger.withReq.warn(req, t("invalidRemovedFiles"), { ...getRequestContext(req), error: e });
     }
+  } catch (e) {
+    logger.withReq.warn(req, t("invalidRemovedFiles"), { ...getRequestContext(req), error: e });
   }
+}
+
 
   await library.save();
   logger.withReq.info(req, t("updated"), { ...getRequestContext(req), id });

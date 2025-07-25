@@ -24,10 +24,15 @@ export const storageAdapter = (provider: "local" | "cloudinary") => {
         const nameWithoutExt = file.originalname.replace(/\.[^/.]+$/, "");
         const safeName = slugify(nameWithoutExt, { lower: true, strict: true });
         const uniqueName = `${safeName}-${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+
+        // Önemli: Dosya tipi kontrolü
+        const isImage = file.mimetype.startsWith("image/") && !file.originalname.toLowerCase().endsWith(".pdf");
+        // "pdf", "docx", "pptx", "xlsx" gibi diğer dokümanlar için resource_type: "raw"
         return {
           folder: `${process.env.CLOUDINARY_FOLDER}/${CURRENT_PROJECT}/${uploadFolder}`,
-          format: getCloudinaryFormat(),
+          format: isImage ? getCloudinaryFormat() : undefined,
           public_id: uniqueName,
+          resource_type: isImage ? "image" : "raw", // 🔴 PDF ve dokümanlar için "raw"
         };
       },
     });

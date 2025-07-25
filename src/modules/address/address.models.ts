@@ -1,24 +1,26 @@
-import mongoose, { Schema, Types,Model } from "mongoose";
+import { Schema, Model, Types, models, model } from "mongoose";
 import type { Address } from "./types";
 
-const AddressSchema = new Schema<Address>({
-  userId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
-  tenant: { type: String, required: true },
-  street: { type: String, required: true },
-  houseNumber: { type: String, required: true },
-  city: { type: String, required: true },
-  zipCode: { type: String, required: true },
-  phone: { type: String, required: true },
-  email: { type: String, required: true },     // <-- EKLE!
-  country: { type: String, required: true },   // <-- required
-  isDefault: { type: Boolean, default: false },
-}, { timestamps: true });
+// --- AddressSchema (hem userId hem companyId opsiyonel) ---
+const AddressSchema = new Schema<Address>(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: false },      // Opsiyonel
+    companyId: { type: Schema.Types.ObjectId, ref: "Company", required: false },// Opsiyonel
+    tenant: { type: String, required: true },
+    street: { type: String, required: true },
+    houseNumber: { type: String, required: true },
+    city: { type: String, required: true },
+    zipCode: { type: String, required: true },
+    phone: { type: String, required: true },
+    email: { type: String, required: true },
+    country: { type: String, required: true },
+    isDefault: { type: Boolean, default: false },
+  },
+  { timestamps: true }
+);
 
-export default mongoose.models.Address || mongoose.model<Address>("Address", AddressSchema);
-
-
-// 📌 Model Guard
+// --- Model Guard (Tek Noktadan Export) ---
 const Address: Model<Address> =
-  mongoose.models.Address || mongoose.model<Address>("Address", AddressSchema);
+  models.Address || model<Address>("Address", AddressSchema);
 
-export { Address };
+export { Address, AddressSchema };

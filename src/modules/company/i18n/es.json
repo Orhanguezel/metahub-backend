@@ -1,8 +1,8 @@
 {
   "companyName.required": "El nombre de la empresa es obligatorio.",
   "companyName.invalid": "Nombre de empresa no válido.",
-  "taxNumber.required": "El número fiscal es obligatorio.",
-  "taxNumber.invalid": "Número fiscal no válido.",
+  "taxNumber.required": "El número de identificación fiscal es obligatorio.",
+  "taxNumber.invalid": "Número de identificación fiscal no válido.",
   "email.invalid": "Correo electrónico no válido.",
   "phone.required": "El número de teléfono es obligatorio.",
   "phone.invalid": "Número de teléfono no válido.",
@@ -27,11 +27,20 @@
   "socialLinks.youtube.invalid": "Enlace de YouTube no válido.",
   "company.id.invalid": "ID de empresa no válido.",
   "validation.invalidObjectId": "ObjectId no válido.",
-  "company.created": "Empresa creada con éxito.",
-  "company.updated": "Empresa actualizada con éxito.",
-  "company.deleted": "Empresa eliminada con éxito.",
-  "company.notFound": "Información de la empresa no encontrada.",
+  "company.created": "Empresa creada correctamente.",
+  "company.updated": "Empresa actualizada correctamente.",
+  "company.deleted": "Empresa eliminada correctamente.",
+  "company.notFound": "No se encontró la información de la empresa.",
   "company.alreadyExists": "Ya existe una empresa para este tenant.",
-  "company.fetchError": "Se produjo un error al obtener la información de la empresa."
+  "company.fetchError": "Se produjo un error al obtener la información de la empresa.",
+  "addresses.invalid": "Las direcciones no son válidas.",
+  "addresses.invalidId": "ID de dirección no válido.",
+  "managers.invalid": "Lista de responsables no válida.",
+  "managers.invalidString": "El nombre del responsable debe ser una cadena.",
+  "website.invalid": "Sitio web no válido.",
+  "language.invalid": "Idioma no válido.",
+  "tenant.invalid": "Nombre de tenant no válido.",
+  "handelsregisterNumber.invalid": "Número de registro mercantil no válido.",
+  "registerCourt.invalid": "Tribunal de registro no válido."
 }
 
