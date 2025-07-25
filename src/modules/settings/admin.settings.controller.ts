@@ -6,7 +6,7 @@ import {
   getFallbackThumbnail,
   processImageLocal,
   shouldProcessImage,
-} from "@/core/utils/uploadUtils";
+} from "@/core/middleware/file/uploadUtils";
 import fs from "fs";
 import path from "path";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
@@ -69,6 +69,7 @@ export const upsertSettingImage = asyncHandler(
       for (const img of settings.images || []) {
         const localPath = path.join(
           "uploads",
+          req.tenant,
           "settings-images",
           path.basename(img.url)
         );
@@ -116,7 +117,7 @@ export const updateSettingImage = asyncHandler(
       return;
     }
     if (!key) {
-      logger.withReq.warn(req, ("Key param missing"), {
+      logger.withReq.warn(req, "Key param missing", {
         ...getRequestContext(req),
         event: "setting.updateImage",
         status: "fail",
@@ -150,6 +151,7 @@ export const updateSettingImage = asyncHandler(
         for (const imgUrl of removed) {
           const localPath = path.join(
             "uploads",
+            req.tenant,
             "settings-images",
             path.basename(imgUrl)
           );
@@ -242,6 +244,7 @@ export const deleteSetting = asyncHandler(async (req, res) => {
   for (const img of settings.images || []) {
     const localPath = path.join(
       "uploads",
+      req.tenant,
       "settings-images",
       path.basename(img.url)
     );

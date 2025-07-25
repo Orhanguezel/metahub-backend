@@ -2,18 +2,25 @@
 
 import fs from "fs";
 import path from "path";
-import { UPLOAD_FOLDERS, UPLOAD_BASE_PATH } from "../middleware/uploadMiddleware";
+import { UPLOAD_FOLDERS } from "./uploadMiddleware";
 
 /**
- * Deletes uploaded files (main, thumbnail, webp) for a given folderKey.
- * Also logs each operation and handles errors gracefully.
+ * Deletes uploaded files (main, thumbnail, webp) for a given folderKey and tenantSlug.
+ * All paths are tenant-isolated!
+ * Logs each operation and handles errors gracefully.
  */
 export const deleteUploadedFiles = (
   imageUrls: string[],
-  folderKey: keyof typeof UPLOAD_FOLDERS
+  folderKey: keyof typeof UPLOAD_FOLDERS,
+  tenantSlug: string // 🔥 ZORUNLU parametre
 ): void => {
+  if (!tenantSlug) {
+    throw new Error("deleteUploadedFiles: tenantSlug is required!");
+  }
+
   const uploadFolder = UPLOAD_FOLDERS[folderKey];
-  const baseDir = path.join(UPLOAD_BASE_PATH, uploadFolder);
+  // uploads/<tenant>/<folder>
+  const baseDir = path.join("uploads", tenantSlug, uploadFolder);
 
   imageUrls.forEach((imgUrl) => {
     const filename = path.basename(imgUrl);
@@ -25,7 +32,7 @@ export const deleteUploadedFiles = (
       path.join(baseDir, "webp", filename.replace(path.extname(filename), ".webp")), // WebP
     ];
 
-    possiblePaths.forEach((fullPath) => {
+    possiblePaths.forEach((fullPath, idx) => {
       if (fs.existsSync(fullPath)) {
         try {
           fs.unlinkSync(fullPath);
@@ -35,8 +42,7 @@ export const deleteUploadedFiles = (
         }
       } else {
         // Sadece ana dosya için uyarı, thumbnail/webp eksikse uyarı vermeye gerek yok
-        if (fullPath === possiblePaths[0])
-          console.warn("⚠️ File not found to delete:", fullPath);
+        if (idx === 0) console.warn("⚠️ File not found to delete:", fullPath);
       }
     });
   });

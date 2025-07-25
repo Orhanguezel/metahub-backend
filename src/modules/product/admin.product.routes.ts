@@ -11,7 +11,7 @@ import {
 } from "./product.validation";
 import { validateRequest } from "@/core/middleware/validateRequest";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { upload } from "@/core/middleware/uploadMiddleware";
+import { upload } from "@/core/middleware/file/uploadMiddleware";
 import { validateApiKey } from "@/core/middleware/validateApiKey";
 
 const router = express.Router();

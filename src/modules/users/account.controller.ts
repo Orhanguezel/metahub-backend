@@ -1,9 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { getUserOrFail, validateJsonField } from "@/core/utils/validation";
+import { validateJsonField } from "@/core/utils/validation";
 import { checkPassword, hashNewPassword } from "@/services/authService";
-import { safelyDeleteFile } from "@/core/utils/fileUtils";
-import { BASE_URL, UPLOAD_BASE_PATH } from "@/core/middleware/uploadMiddleware";
 import fs from "fs/promises";
 import path from "path";
 import { v2 as cloudinary } from "cloudinary";
@@ -12,14 +10,13 @@ import {
   processImageLocal,
   shouldProcessImage,
   getImagePath,
-} from "@/core/utils/uploadUtils";
+} from "@/core/middleware/file/uploadUtils";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import userTranslations from "@/modules/users/i18n";
 import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
-import type { Address as AddressType } from "@/modules/address/types";
 
 // Locale helper
 function getLocale(req: Request): SupportedLocale {
@@ -70,12 +67,14 @@ export const getMyProfile = asyncHandler(
     }
 
     // Tüm adresler ayrı collection'dan alınır (frontend'de Address[] ile uyumlu olacak!)
-    const addresses = await Address.find({ userId: user._id, tenant: req.tenant }).lean();
-
+    const addresses = await Address.find({
+      userId: user._id,
+      tenant: req.tenant,
+    }).lean();
 
     const userObj = user.toObject();
     userObj.addresses = userObj.addresses ?? []; // ObjectId[] (referans array'i)
-    userObj.addressesPopulated = addresses;      // Address[]
+    userObj.addressesPopulated = addresses; // Address[]
 
     logger.withReq.info(req, `[PROFILE] Profile fetched for: ${user.email}`);
     res.status(200).json({
@@ -85,7 +84,6 @@ export const getMyProfile = asyncHandler(
     });
   }
 );
-
 
 // ✅ Profil güncelle
 export const updateMyProfile = asyncHandler(
@@ -258,6 +256,7 @@ export const updateProfileImage = asyncHandler(
           const localPath = path.join(
             process.cwd(),
             "uploads",
+            req.tenant,
             "profile-images",
             path.basename(img.url)
           );
@@ -269,6 +268,7 @@ export const updateProfileImage = asyncHandler(
           const localPath = path.join(
             process.cwd(),
             "uploads",
+            req.tenant,
             "profile-images",
             img
           );

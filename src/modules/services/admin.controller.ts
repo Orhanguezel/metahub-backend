@@ -11,7 +11,7 @@ import {
   getFallbackThumbnail,
   processImageLocal,
   shouldProcessImage,
-} from "@/core/utils/uploadUtils";
+} from "@/core/middleware/file/uploadUtils";
 import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
@@ -218,6 +218,7 @@ export const updateServices = asyncHandler(
         for (const img of removed) {
           const localPath = path.join(
             "uploads",
+            req.tenant,
             "services-images",
             path.basename(img.url)
           );
@@ -360,6 +361,7 @@ export const deleteServices = asyncHandler(
     for (const img of services.images || []) {
       const localPath = path.join(
         "uploads",
+        req.tenant,
         "services-images",
         path.basename(img.url)
       );

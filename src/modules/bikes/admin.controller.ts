@@ -11,7 +11,7 @@ import {
   getFallbackThumbnail,
   processImageLocal,
   shouldProcessImage,
-} from "@/core/utils/uploadUtils";
+} from "@/core/middleware/file/uploadUtils";
 
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
@@ -282,6 +282,7 @@ export const updateBike = asyncHandler(async (req: Request, res: Response) => {
       for (const img of removed) {
         const localPath = path.join(
           "uploads",
+          req.tenant,
           "bike-images",
           path.basename(img.url)
         );
@@ -331,6 +332,7 @@ export const deleteBike = asyncHandler(async (req: Request, res: Response) => {
   for (const img of product.images) {
     const localPath = path.join(
       "uploads",
+      req.tenant,
       "bike-images",
       path.basename(img.url)
     );

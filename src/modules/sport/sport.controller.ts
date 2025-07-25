@@ -12,7 +12,7 @@ import {
   getFallbackThumbnail,
   processImageLocal,
   shouldProcessImage,
-} from "@/core/utils/uploadUtils";
+} from "@/core/middleware/file/uploadUtils";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 const parseIfJson = (value: any) => {
@@ -232,6 +232,7 @@ export const updateSport = asyncHandler(async (req: Request, res: Response) => {
       for (const img of removed) {
         const localPath = path.join(
           "uploads",
+          req.tenant,
           "Sport-images",
           path.basename(img.url)
         );
@@ -271,6 +272,7 @@ export const deleteSport = asyncHandler(async (req: Request, res: Response) => {
   for (const img of sport.images) {
     const localPath = path.join(
       "uploads",
+      req.tenant,
       "Sport-images",
       path.basename(img.url)
     );

@@ -10,7 +10,7 @@ import {
   getFallbackThumbnail,
   processImageLocal,
   shouldProcessImage,
-} from "@/core/utils/uploadUtils";
+} from "@/core/middleware/file/uploadUtils";
 import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import logger from "@/core/middleware/logger/logger";
@@ -177,6 +177,7 @@ export const updateCoupon = asyncHandler(
         for (const img of removed) {
           const localPath = path.join(
             "uploads",
+            req.tenant,
             "coupons-images",
             path.basename(img.url)
           );
@@ -258,7 +259,8 @@ export const getAllCoupons = asyncHandler(
     // Burada query ile admin filtreleri uygulayabilirsin
     // (örn. isPublished, isActive, expiresAt, code vs.)
     const query: any = { tenant: req.tenant };
-    if (req.query.isPublished !== undefined) query.isPublished = req.query.isPublished;
+    if (req.query.isPublished !== undefined)
+      query.isPublished = req.query.isPublished;
     if (req.query.isActive !== undefined) query.isActive = req.query.isActive;
     // Diğer filtreler (isteğe bağlı)
 
@@ -273,7 +275,6 @@ export const getAllCoupons = asyncHandler(
     res.status(200).json({ success: true, message: t("listFetched"), data });
   }
 );
-
 
 // ✅ GET BY CODE - Public
 export const getCouponByCode = asyncHandler(
@@ -306,27 +307,24 @@ export const getCouponByCode = asyncHandler(
 );
 
 // ✅ GET ALL - PUBLIC (published, active)
-export const getCoupons = asyncHandler(
-  async (req: Request, res: Response) => {
-    const locale: SupportedLocale = req.locale || "en";
-    const { Coupon } = await getTenantModels(req);
-    const t = (key: string, params?: any) =>
-      translate(key, locale, translations, params);
+export const getCoupons = asyncHandler(async (req: Request, res: Response) => {
+  const locale: SupportedLocale = req.locale || "en";
+  const { Coupon } = await getTenantModels(req);
+  const t = (key: string, params?: any) =>
+    translate(key, locale, translations, params);
 
-    // Sadece yayınlanmış ve aktif olanlar:
-    const coupons = await Coupon.find({
-      tenant: req.tenant,
-      isPublished: true,
-      isActive: true,
-    }).lean();
+  // Sadece yayınlanmış ve aktif olanlar:
+  const coupons = await Coupon.find({
+    tenant: req.tenant,
+    isPublished: true,
+    isActive: true,
+  }).lean();
 
-    const data = coupons.map((coupon) => ({
-      ...coupon,
-      title: fillAllLocales(coupon.title),
-      description: fillAllLocales(coupon.description),
-    }));
+  const data = coupons.map((coupon) => ({
+    ...coupon,
+    title: fillAllLocales(coupon.title),
+    description: fillAllLocales(coupon.description),
+  }));
 
-    res.status(200).json({ success: true, message: t("listFetched"), data });
-  }
-);
-
+  res.status(200).json({ success: true, message: t("listFetched"), data });
+});

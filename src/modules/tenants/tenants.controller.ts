@@ -16,7 +16,7 @@ import {
   getFallbackThumbnail,
   processImageLocal,
   shouldProcessImage,
-} from "@/core/utils/uploadUtils";
+} from "@/core/middleware/file/uploadUtils";
 import path from "path";
 import fs from "fs";
 import { v2 as cloudinary } from "cloudinary";
@@ -176,6 +176,7 @@ export const updateTenant = asyncHandler(
         if (!isCloudinaryImage) {
           const localPath = path.join(
             "uploads",
+            req.tenant,
             "tenant-images",
             path.basename(imgUrl)
           );

@@ -12,8 +12,8 @@ import {
   validateUpsertSetting,
   validateSettingKeyParam,
 } from "./settings.validation";
-import { upload } from "@/core/middleware/uploadMiddleware";
-import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
+import { upload } from "@/core/middleware/file/uploadMiddleware";
+import { uploadTypeWrapper } from "@/core/middleware/file/uploadTypeWrapper";
 
 const router = express.Router();
 

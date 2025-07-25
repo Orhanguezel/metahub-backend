@@ -14,8 +14,8 @@ import {
   validateObjectId,
   validateAdminQuery,
 } from "./coupon.validation";
-import { upload } from "@/core/middleware/uploadMiddleware";
-import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
+import { upload } from "@/core/middleware/file/uploadMiddleware";
+import { uploadTypeWrapper } from "@/core/middleware/file/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
@@ -29,11 +29,7 @@ router.get("/check/:code", getCouponByCode);
 router.use(authenticate, authorizeRoles("admin"));
 
 // Get all coupons (admin only)
-router.get(
-  "/admin",
-  validateAdminQuery,
-  getAllCoupons
-);
+router.get("/admin", validateAdminQuery, getAllCoupons);
 
 // Create new coupon (admin only)
 router.post(

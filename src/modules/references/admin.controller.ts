@@ -11,7 +11,7 @@ import {
   getFallbackThumbnail,
   processImageLocal,
   shouldProcessImage,
-} from "@/core/utils/uploadUtils";
+} from "@/core/middleware/file/uploadUtils";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
@@ -39,12 +39,15 @@ export const createReferences = asyncHandler(
 
     try {
       // Çoklu upload için files veya tekli için file
-      const files: Express.Multer.File[] = (req.files as any) || (req.file ? [req.file] : []);
+      const files: Express.Multer.File[] =
+        (req.files as any) || (req.file ? [req.file] : []);
 
       // Kategori zorunlu!
       const { category, isPublished, publishedAt, title, content } = req.body;
       if (!category || !isValidObjectId(category)) {
-        res.status(400).json({ success: false, message: t("categoryRequired") });
+        res
+          .status(400)
+          .json({ success: false, message: t("categoryRequired") });
         return;
       }
       if (!files.length) {
@@ -72,9 +75,17 @@ export const createReferences = asyncHandler(
         }
 
         // Slug'ı her logo için uniq üret (varsa dosya ismi eklensin)
-        const nameForSlug = baseTitle?.[locale] || baseTitle?.en || path.parse(file.originalname).name || "logo";
+        const nameForSlug =
+          baseTitle?.[locale] ||
+          baseTitle?.en ||
+          path.parse(file.originalname).name ||
+          "logo";
         const slug = slugify(
-          nameForSlug + "-" + Date.now() + "-" + Math.random().toString(36).substr(2, 5),
+          nameForSlug +
+            "-" +
+            Date.now() +
+            "-" +
+            Math.random().toString(36).substr(2, 5),
           { lower: true, strict: true }
         );
 
@@ -93,7 +104,10 @@ export const createReferences = asyncHandler(
             },
           ],
           category,
-          isPublished: isPublished === undefined ? true : (isPublished === "true" || isPublished === true),
+          isPublished:
+            isPublished === undefined
+              ? true
+              : isPublished === "true" || isPublished === true,
           publishedAt: isPublished ? publishedAt || new Date() : undefined,
           isActive: true,
         });
@@ -110,7 +124,8 @@ export const createReferences = asyncHandler(
         success: true,
         message: t("created"),
         data: results.length === 1 ? results[0] : results, // Tekli ise obje, çoklu ise array döner
-      });return;
+      });
+      return;
     } catch (err: any) {
       logger.withReq.error(req, t("error.create_fail"), {
         ...getRequestContext(req),
@@ -149,12 +164,19 @@ export const updateReferences = asyncHandler(
     }
 
     // Alanlar opsiyonel, gelen varsa güncelle
-    if (req.body.title) references.title = fillAllLocales(parseIfJson(req.body.title));
-    if (req.body.content) references.content = fillAllLocales(parseIfJson(req.body.content));
-    if (req.body.category && isValidObjectId(req.body.category)) references.category = req.body.category;
-    if (req.body.isPublished !== undefined) references.isPublished = req.body.isPublished === "true" || req.body.isPublished === true;
+    if (req.body.title)
+      references.title = fillAllLocales(parseIfJson(req.body.title));
+    if (req.body.content)
+      references.content = fillAllLocales(parseIfJson(req.body.content));
+    if (req.body.category && isValidObjectId(req.body.category))
+      references.category = req.body.category;
+    if (req.body.isPublished !== undefined)
+      references.isPublished =
+        req.body.isPublished === "true" || req.body.isPublished === true;
     if (req.body.publishedAt) references.publishedAt = req.body.publishedAt;
-    if (req.body.isActive !== undefined) references.isActive = req.body.isActive === "true" || req.body.isActive === true;
+    if (req.body.isActive !== undefined)
+      references.isActive =
+        req.body.isActive === "true" || req.body.isActive === true;
 
     // Resim ekle
     if (Array.isArray(req.files) && req.files.length > 0) {
@@ -187,12 +209,21 @@ export const updateReferences = asyncHandler(
           (img: any) => !removed.includes(img.url)
         );
         for (const imgUrl of removed) {
-          const localPath = path.join("uploads", "references-images", path.basename(imgUrl));
+          const localPath = path.join(
+            "uploads",
+            req.tenant,
+            "references-images",
+            path.basename(imgUrl)
+          );
           if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
           // cloudinary
-          const imgObj = references.images.find((img: any) => img.url === imgUrl);
+          const imgObj = references.images.find(
+            (img: any) => img.url === imgUrl
+          );
           if (imgObj && imgObj.publicId) {
-            try { await cloudinary.uploader.destroy(imgObj.publicId); } catch {}
+            try {
+              await cloudinary.uploader.destroy(imgObj.publicId);
+            } catch {}
           }
         }
       } catch {}
@@ -200,12 +231,11 @@ export const updateReferences = asyncHandler(
 
     await references.save();
     logger.withReq.info(req, t("updated"), { ...getRequestContext(req), id });
-    res.status(200).json({ success: true, message: t("updated"), data: references });
+    res
+      .status(200)
+      .json({ success: true, message: t("updated"), data: references });
   }
 );
-
-
-
 
 // ✅ GET ALL
 export const adminGetAllReferences = asyncHandler(
@@ -330,6 +360,7 @@ export const deleteReferences = asyncHandler(
     for (const img of references.images || []) {
       const localPath = path.join(
         "uploads",
+        req.tenant,
         "references-images",
         path.basename(img.url)
       );
