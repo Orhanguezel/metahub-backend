@@ -33,12 +33,12 @@ const AboutSchema = new Schema<IAbout>(
     author: { type: String },
     category: {
       type: Schema.Types.ObjectId,
-      ref: "AboutCategory",
+      ref: "aboutcategory",
       required: true,
     },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
-    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+    comments: [{ type: Schema.Types.ObjectId, ref: "comment" }],
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
@@ -57,6 +57,6 @@ AboutSchema.pre("validate", function (next) {
 });
 
 const About: Model<IAbout> =
-  models.About || model<IAbout>("About", AboutSchema);
+  models.about || model<IAbout>("about", AboutSchema);
 
 export { About, AboutImageSchema, AboutSchema };

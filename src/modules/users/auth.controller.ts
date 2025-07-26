@@ -45,6 +45,8 @@ export const registerUser = asyncHandler(
 
     const {
       name,
+      company,
+      position,
       email,
       password,
       role = "user",
@@ -123,6 +125,8 @@ export const registerUser = asyncHandler(
     try {
       user = await User.create({
         name,
+        company,
+        position,
         tenant: req.tenant,
         email,
         password: await hashNewPassword(req, password),

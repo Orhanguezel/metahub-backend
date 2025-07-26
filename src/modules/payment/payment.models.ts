@@ -4,7 +4,7 @@ import { SUPPORTED_LOCALES } from "@/types/common";
 
 const paymentSchema = new Schema<IPayment>(
   {
-    order: { type: Schema.Types.ObjectId, ref: "Order", required: true },
+    order: { type: Schema.Types.ObjectId, ref: "order", required: true },
     amount: { type: Number, required: true, min: 0 },
     tenant: { type: String, required: true, index: true },
     method: {
@@ -33,4 +33,4 @@ const paymentSchema = new Schema<IPayment>(
 );
 
 export const Payment: Model<IPayment> =
-  models.Payment || model<IPayment>("Payment", paymentSchema);
+  models.payment || model<IPayment>("payment", paymentSchema);

@@ -1,6 +1,6 @@
 import { Schema, model, Types, Model, models } from "mongoose";
 
-export interface IReview  {
+export interface IReview {
   user: Types.ObjectId;
   tenant: string; // Optional tenant field for multi-tenancy
   product: Types.ObjectId;
@@ -12,14 +12,16 @@ export interface IReview  {
 }
 
 export interface ReviewModel extends Model<IReview> {
-  calculateAverageRating(productId: Types.ObjectId): Promise<{ averageRating: number; totalReviews: number }>;
+  calculateAverageRating(
+    productId: Types.ObjectId
+  ): Promise<{ averageRating: number; totalReviews: number }>;
 }
 
 const reviewSchema = new Schema<IReview>(
   {
-    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    user: { type: Schema.Types.ObjectId, ref: "user", required: true },
     tenant: { type: String, required: true, index: true },
-    product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
+    product: { type: Schema.Types.ObjectId, ref: "product", required: true },
     rating: { type: Number, required: true, min: 1, max: 5 },
     comment: { type: String, required: true },
     editedAt: { type: Date, default: Date.now },
@@ -28,7 +30,9 @@ const reviewSchema = new Schema<IReview>(
 );
 
 // Ortalama puan hesaplama
-reviewSchema.statics.calculateAverageRating = async function (productId: Types.ObjectId) {
+reviewSchema.statics.calculateAverageRating = async function (
+  productId: Types.ObjectId
+) {
   const result = await this.aggregate([
     { $match: { product: productId } },
     {
@@ -41,10 +45,15 @@ reviewSchema.statics.calculateAverageRating = async function (productId: Types.O
   ]);
 
   return result.length
-    ? { averageRating: result[0].averageRating, totalReviews: result[0].totalReviews }
+    ? {
+        averageRating: result[0].averageRating,
+        totalReviews: result[0].totalReviews,
+      }
     : { averageRating: 0, totalReviews: 0 };
 };
 
-const Review = (models.Review as ReviewModel) || model<IReview, ReviewModel>("Review", reviewSchema);
+const Review =
+  (models.review as ReviewModel) ||
+  model<IReview, ReviewModel>("review", reviewSchema);
 
 export { Review };

@@ -10,14 +10,29 @@ import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 
 // Kısa yol çeviri fonksiyonu
-function orderT(key: string, locale: SupportedLocale, vars?: Record<string, string | number>) {
+function orderT(
+  key: string,
+  locale: SupportedLocale,
+  vars?: Record<string, string | number>
+) {
   return t(key, locale, orderTranslations, vars);
 }
 
 // --- SİPARİŞ OLUŞTUR ---
 export const createOrder = asyncHandler(async (req: Request, res: Response) => {
-  const { Order, Address, Coupon, Payment, User, Notification, Bike, Ensotekprod, Sparepart } = await getTenantModels(req);
-  const { items, addressId, shippingAddress, paymentMethod, couponCode } = req.body;
+  const {
+    Order,
+    Address,
+    Coupon,
+    Payment,
+    User,
+    Notification,
+    Bike,
+    Ensotekprod,
+    Sparepart,
+  } = await getTenantModels(req);
+  const { items, addressId, shippingAddress, paymentMethod, couponCode } =
+    req.body;
   const userId = req.user?._id;
   const userName = req.user?.name || "";
 
@@ -26,14 +41,14 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   // --- Tenant marka ve email ayarları
   const tenantData = req.tenantData;
   const brandName =
-    (tenantData?.name?.[locale] ||
-      tenantData?.name?.en ||
-      tenantData?.name) ??
+    (tenantData?.name?.[locale] || tenantData?.name?.en || tenantData?.name) ??
     "Brand";
   const senderEmail =
     tenantData?.emailSettings?.senderEmail || "noreply@example.com";
   const adminEmail =
-    tenantData?.emailSettings?.adminEmail || tenantData?.emailSettings?.senderEmail || "noreply@example.com";
+    tenantData?.emailSettings?.adminEmail ||
+    tenantData?.emailSettings?.senderEmail ||
+    "noreply@example.com";
 
   // --- Adres işlemleri
   let shippingAddressWithTenant: any;
@@ -44,7 +59,12 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     }).lean();
     if (!addressDoc) {
       logger.withReq.warn(req, orderT("error.addressNotFound", locale));
-      res.status(400).json({ success: false, message: orderT("error.addressNotFound", locale) });
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: orderT("error.addressNotFound", locale),
+        });
       return;
     }
     shippingAddressWithTenant = {
@@ -90,25 +110,45 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   for (const item of items) {
     // **productModel zorunlu**
     const modelName = item.productModel;
-    if (!modelName || !["Bike", "Ensotekprod", "Sparepart"].includes(modelName)) {
-      res.status(400).json({ success: false, message: "Invalid or missing product model!" });
+    if (
+      !modelName ||
+      !["bike", "ensotekprod", "sparepart"].includes(modelName)
+    ) {
+      res
+        .status(400)
+        .json({ success: false, message: "Invalid or missing product model!" });
       return;
     }
     // Dinamik olarak model seç
     const ProductModel = { Bike, Ensotekprod, Sparepart }[modelName];
     if (!ProductModel) {
-      res.status(400).json({ success: false, message: `Model not supported: ${modelName}` });
+      res
+        .status(400)
+        .json({ success: false, message: `Model not supported: ${modelName}` });
       return;
     }
-    const product = await ProductModel.findOne({ _id: item.product, tenant: req.tenant });
+    const product = await ProductModel.findOne({
+      _id: item.product,
+      tenant: req.tenant,
+    });
     if (!product) {
       logger.withReq.warn(req, orderT("error.productNotFound", locale));
-      res.status(404).json({ success: false, message: orderT("error.productNotFound", locale) });
+      res
+        .status(404)
+        .json({
+          success: false,
+          message: orderT("error.productNotFound", locale),
+        });
       return;
     }
     if (product.stock < item.quantity) {
       logger.withReq.warn(req, orderT("error.insufficientStock", locale));
-      res.status(400).json({ success: false, message: orderT("error.insufficientStock", locale) });
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: orderT("error.insufficientStock", locale),
+        });
       return;
     }
     product.stock -= item.quantity;
@@ -117,7 +157,8 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     if (product.stock <= (product.stockThreshold ?? 5)) {
       criticalStockWarnings.push(
         orderT("warning.lowStock", locale, {
-          name: product.name?.[locale] || product.name?.en || String(product._id),
+          name:
+            product.name?.[locale] || product.name?.en || String(product._id),
           stock: String(product.stock),
         })
       );
@@ -130,7 +171,9 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       tenant: req.tenant,
     });
     itemsForMail.push(
-      `• ${product.name?.[locale] || product.name?.en || String(product._id)} – Qty: ${item.quantity}`
+      `• ${
+        product.name?.[locale] || product.name?.en || String(product._id)
+      } – Qty: ${item.quantity}`
     );
     total += product.price * item.quantity;
   }
@@ -149,7 +192,12 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       discount = Math.round(total * (coupon.discount / 100));
     } else {
       logger.withReq.warn(req, orderT("error.invalidCoupon", locale));
-      res.status(400).json({ success: false, message: orderT("error.invalidCoupon", locale) });
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: orderT("error.invalidCoupon", locale),
+        });
       return;
     }
   }
@@ -158,7 +206,12 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   const method = (paymentMethod as string) || "cash_on_delivery";
   if (!["cash_on_delivery", "credit_card", "paypal"].includes(method)) {
     logger.withReq.warn(req, orderT("error.invalidPaymentMethod", locale));
-    res.status(400).json({ success: false, message: orderT("error.invalidPaymentMethod", locale) });
+    res
+      .status(400)
+      .json({
+        success: false,
+        message: orderT("error.invalidPaymentMethod", locale),
+      });
     return;
   }
 
@@ -195,7 +248,9 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
 
   // --- Email & Notification
   const user = userId
-    ? await User.findOne({ _id: userId, tenant: req.tenant }).select("email name language")
+    ? await User.findOne({ _id: userId, tenant: req.tenant }).select(
+        "email name language"
+      )
     : null;
   const customerEmail = shippingAddressWithTenant?.email || user?.email || "";
 
@@ -207,7 +262,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       name: shippingAddressWithTenant.name || user?.name || "",
       itemsList: itemsForMail.join("<br/>"),
       totalPrice: total - discount,
-      locale: typeof locale === "string" ? locale : (locale[0] || "en"),
+      locale: typeof locale === "string" ? locale : locale[0] || "en",
       brandName,
       senderEmail,
       orderId: String(order._id),
@@ -225,7 +280,9 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     tenantSlug: req.tenant,
     to: adminEmail,
     subject: orderT("email.adminSubject", locale, { brand: brandName }),
-    html: `<p>${orderT("email.adminBody", locale, { orderId: String(order._id) })}</p>`,
+    html: `<p>${orderT("email.adminBody", locale, {
+      orderId: String(order._id),
+    })}</p>`,
     from: senderEmail,
   });
 
@@ -233,12 +290,18 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     user: userId,
     tenant: req.tenant,
     type: "success",
-    message: orderT("notification.orderReceived", locale, { total: total - discount }),
+    message: orderT("notification.orderReceived", locale, {
+      total: total - discount,
+    }),
     data: { orderId: String(order._id) },
     language: locale,
   });
 
-  logger.withReq.info(req, orderT("order.created.success", locale) + ` | User: ${userId} | Order: ${order._id}`);
+  logger.withReq.info(
+    req,
+    orderT("order.created.success", locale) +
+      ` | User: ${userId} | Order: ${order._id}`
+  );
 
   res.status(201).json({
     success: true,
@@ -255,63 +318,108 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
 });
 
 // --- Sipariş Detay (owner veya admin) ---
-export const getOrderById = asyncHandler(async (req: Request, res: Response) => {
-  const { Order } = await getTenantModels(req);
-  const locale: SupportedLocale = req.locale || getLogLocale();
+export const getOrderById = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { Order } = await getTenantModels(req);
+    const locale: SupportedLocale = req.locale || getLogLocale();
 
-  const order = await Order.findOne({ _id: req.params.id, tenant: req.tenant })
-    .populate("items.product")
-    .populate("addressId");
+    const order = await Order.findOne({
+      _id: req.params.id,
+      tenant: req.tenant,
+    })
+      .populate("items.product")
+      .populate("addressId");
 
-  if (!order) {
-    logger.withReq.warn(req, orderT("error.orderNotFound", locale));
-    res.status(404).json({ success: false, message: orderT("error.orderNotFound", locale) });
-    return;
+    if (!order) {
+      logger.withReq.warn(req, orderT("error.orderNotFound", locale));
+      res
+        .status(404)
+        .json({
+          success: false,
+          message: orderT("error.orderNotFound", locale),
+        });
+      return;
+    }
+    if (
+      order.user?.toString() !== req.user?._id.toString() &&
+      req.user?.role !== "admin"
+    ) {
+      logger.withReq.warn(req, orderT("error.notAuthorizedViewOrder", locale));
+      res
+        .status(403)
+        .json({
+          success: false,
+          message: orderT("error.notAuthorizedViewOrder", locale),
+        });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: orderT("order.fetched.success", locale),
+      data: order,
+    });
   }
-  if (order.user?.toString() !== req.user?._id.toString() && req.user?.role !== "admin") {
-    logger.withReq.warn(req, orderT("error.notAuthorizedViewOrder", locale));
-    res.status(403).json({ success: false, message: orderT("error.notAuthorizedViewOrder", locale) });
-    return;
-  }
-
-  res.status(200).json({
-    success: true,
-    message: orderT("order.fetched.success", locale),
-    data: order,
-  });
-});
+);
 
 // --- Siparişin adresini güncelle (owner) ---
-export const updateShippingAddress = asyncHandler(async (req: Request, res: Response) => {
-  const { Order } = await getTenantModels(req);
-  const locale: SupportedLocale = req.locale || getLogLocale();
+export const updateShippingAddress = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { Order } = await getTenantModels(req);
+    const locale: SupportedLocale = req.locale || getLogLocale();
 
-  const order = await Order.findOne({ _id: req.params.id, tenant: req.tenant });
-  if (!order) {
-    logger.withReq.warn(req, orderT("error.orderNotFound", locale));
-    res.status(404).json({ success: false, message: orderT("error.orderNotFound", locale) });
-    return;
+    const order = await Order.findOne({
+      _id: req.params.id,
+      tenant: req.tenant,
+    });
+    if (!order) {
+      logger.withReq.warn(req, orderT("error.orderNotFound", locale));
+      res
+        .status(404)
+        .json({
+          success: false,
+          message: orderT("error.orderNotFound", locale),
+        });
+      return;
+    }
+    if (order.user?.toString() !== req.user?._id.toString()) {
+      logger.withReq.warn(
+        req,
+        orderT("error.notAuthorizedUpdateOrder", locale)
+      );
+      res
+        .status(403)
+        .json({
+          success: false,
+          message: orderT("error.notAuthorizedUpdateOrder", locale),
+        });
+      return;
+    }
+    const { shippingAddress } = req.body;
+    if (!shippingAddress) {
+      logger.withReq.warn(req, orderT("error.shippingAddressRequired", locale));
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: orderT("error.shippingAddressRequired", locale),
+        });
+      return;
+    }
+    order.shippingAddress = { ...order.shippingAddress, ...shippingAddress };
+    await order.save();
+    logger.withReq.info(
+      req,
+      orderT("order.addressUpdated.success", locale) +
+        ` | User: ${order.user} | Order: ${order._id}`
+    );
+    res.status(200).json({
+      success: true,
+      message: orderT("order.addressUpdated.success", locale),
+      data: order,
+    });
   }
-  if (order.user?.toString() !== req.user?._id.toString()) {
-    logger.withReq.warn(req, orderT("error.notAuthorizedUpdateOrder", locale));
-    res.status(403).json({ success: false, message: orderT("error.notAuthorizedUpdateOrder", locale) });
-    return;
-  }
-  const { shippingAddress } = req.body;
-  if (!shippingAddress) {
-    logger.withReq.warn(req, orderT("error.shippingAddressRequired", locale));
-    res.status(400).json({ success: false, message: orderT("error.shippingAddressRequired", locale) });
-    return;
-  }
-  order.shippingAddress = { ...order.shippingAddress, ...shippingAddress };
-  await order.save();
-  logger.withReq.info(req, orderT("order.addressUpdated.success", locale) + ` | User: ${order.user} | Order: ${order._id}`);
-  res.status(200).json({
-    success: true,
-    message: orderT("order.addressUpdated.success", locale),
-    data: order,
-  });
-});
+);
 
 // --- Kullanıcının kendi siparişleri ---
 export const getMyOrders = asyncHandler(async (req: Request, res: Response) => {
@@ -325,7 +433,9 @@ export const getMyOrders = asyncHandler(async (req: Request, res: Response) => {
 
   if (!orders || orders.length === 0) {
     logger.withReq.info(req, orderT("order.noOrdersFound", locale));
-    res.status(404).json({ success: false, message: orderT("order.noOrdersFound", locale) });
+    res
+      .status(404)
+      .json({ success: false, message: orderT("order.noOrdersFound", locale) });
     return;
   }
 

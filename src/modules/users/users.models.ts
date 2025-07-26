@@ -24,6 +24,8 @@ interface IUserModel extends Model<IUser> {}
 const userSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
+    company: { type: String, required: false },
+    position: { type: String, required: false },
     tenant: { type: String, required: true, index: true },
     email: {
       type: String,
@@ -38,10 +40,10 @@ const userSchema = new Schema<IUser>(
       default: "user",
     },
     profile: { type: Schema.Types.ObjectId, ref: "Profile" },
-    addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }], // Referans array (her zaman böyle)
-    payment: { type: Schema.Types.ObjectId, ref: "Payment" },
-    cart: { type: Schema.Types.ObjectId, ref: "Cart" },
-    orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
+    addresses: [{ type: Schema.Types.ObjectId, ref: "address" }], // Referans array (her zaman böyle)
+    payment: { type: Schema.Types.ObjectId, ref: "payment" },
+    cart: { type: Schema.Types.ObjectId, ref: "cart" },
+    orders: [{ type: Schema.Types.ObjectId, ref: "order" }],
     phone: { type: String },
     bio: { type: String, default: "" },
     birthDate: { type: Date },
@@ -60,7 +62,7 @@ const userSchema = new Schema<IUser>(
       },
     },
     isActive: { type: Boolean, default: true },
-    favorites: [{ type: Schema.Types.ObjectId, ref: "Product" }],
+    favorites: [{ type: Schema.Types.ObjectId, ref: "product" }],
     deleted: {
       isDeleted: { type: Boolean, default: false },
       deletedAt: { type: Date, default: null },
@@ -114,6 +116,6 @@ userSchema.methods.isPasswordHashed = function (this: IUser): boolean {
 };
 
 const User: IUserModel =
-  models.User || mongoose.model<IUser, IUserModel>("User", userSchema);
+  models.user || mongoose.model<IUser, IUserModel>("user", userSchema);
 
 export { User };

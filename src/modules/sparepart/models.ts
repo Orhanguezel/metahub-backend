@@ -35,7 +35,7 @@ const SparepartSchema = new Schema<ISparepart>(
     brand: { type: String, required: true },
     category: {
       type: Schema.Types.ObjectId,
-      ref: "SparepartCategory",
+      ref: "sparepartcategory",
       required: true,
     },
     tags: [{ type: String, trim: true }],
@@ -63,7 +63,7 @@ const SparepartSchema = new Schema<ISparepart>(
     isActive: { type: Boolean, required: true, default: true },
     isPublished: { type: Boolean, required: true, default: false },
     likes: { type: Number, required: true, default: 0 },
-    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+    comments: [{ type: Schema.Types.ObjectId, ref: "comment" }],
   },
   { timestamps: true }
 );
@@ -81,5 +81,5 @@ SparepartSchema.pre("validate", function (next) {
 });
 
 const Sparepart: Model<ISparepart> =
-  models.Sparepart || model<ISparepart>("Sparepart", SparepartSchema);
+  models.sparepart || model<ISparepart>("sparepart", SparepartSchema);
 export { Sparepart };

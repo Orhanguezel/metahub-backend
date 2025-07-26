@@ -1,5 +1,3 @@
-
-
 // 📁 modules/apartment/models/apartment.model.ts
 
 import mongoose, { Schema, Model, models } from "mongoose";
@@ -39,7 +37,7 @@ const ApartmentSchema: Schema = new Schema<IApartment>(
     images: { type: [ApartmentImageSchema], default: [] },
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "ApartmentCategory",
+      ref: "apartmentcategory",
     },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
@@ -73,7 +71,6 @@ ApartmentSchema.pre("validate", async function (next) {
 });
 
 const Apartment: Model<IApartment> =
-  models.Apartment || mongoose.model<IApartment>("Apartment", ApartmentSchema);
+  models.apartment || mongoose.model<IApartment>("apartment", ApartmentSchema);
 
 export { Apartment };
-

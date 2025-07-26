@@ -23,6 +23,8 @@ export interface SocialMedia {
 // --- FINAL USER TIPI ---
 export interface IUser {
   name: string;
+  company?: string;
+  position?: string;
   tenant: string; // Multi-tenancy (her zaman zorunlu!)
   email: string;
   password: string;

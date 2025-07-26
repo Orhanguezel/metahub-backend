@@ -45,7 +45,7 @@
     "variant": "classic",
     "required": false,
     "defaultOrder": 1,
-    "defaultEnabled": true
+    "defaultEnabled": false
   },
   {
     "sectionKey": "heroSectionSlayt",
@@ -93,16 +93,16 @@
     "variant": "banner",
     "required": false,
     "defaultOrder": 2,
-    "defaultEnabled": true
+    "defaultEnabled": false
   },
   {
     "sectionKey": "services",
     "label": {
       "tr": "Hizmetler",
-      "en": "Services",
+      "en": "services",
       "de": "Dienstleistungen",
       "pl": "Usługi",
-      "fr": "Services",
+      "fr": "services",
       "es": "Servicios"
     },
     "description": {
@@ -117,13 +117,13 @@
     "variant": "classic",
     "required": false,
     "defaultOrder": 3,
-    "defaultEnabled": true
+    "defaultEnabled": false
   },
   {
     "sectionKey": "about",
     "label": {
       "tr": "Hakkında",
-      "en": "About",
+      "en": "about",
       "de": "Über uns",
       "pl": "O nas",
       "fr": "À propos",
@@ -141,13 +141,13 @@
     "variant": "classic",
     "required": false,
     "defaultOrder": 4,
-    "defaultEnabled": true
+    "defaultEnabled": false
   },
   {
     "sectionKey": "news",
     "label": {
       "tr": "Haberler",
-      "en": "News",
+      "en": "news",
       "de": "Nachrichten",
       "pl": "Aktualności",
       "fr": "Nouvelles",
@@ -165,7 +165,7 @@
     "variant": "classic",
     "required": false,
     "defaultOrder": 5,
-    "defaultEnabled": true
+    "defaultEnabled": false
   },
   {
     "sectionKey": "bikes",
@@ -189,17 +189,17 @@
     "variant": "classic",
     "required": false,
     "defaultOrder": 6,
-    "defaultEnabled": true
+    "defaultEnabled": false
   },
   {
     "sectionKey": "blog",
     "label": {
-      "tr": "Blog",
-      "en": "Blog",
-      "de": "Blog",
-      "pl": "Blog",
-      "fr": "Blog",
-      "es": "Blog"
+      "tr": "blog",
+      "en": "blog",
+      "de": "blog",
+      "pl": "blog",
+      "fr": "blog",
+      "es": "blog"
     },
     "description": {
       "tr": "Son blog yazıları ve makaleler",
@@ -213,7 +213,7 @@
     "variant": "classic",
     "required": false,
     "defaultOrder": 7,
-    "defaultEnabled": true
+    "defaultEnabled":false
   },
   {
     "sectionKey": "contact",
@@ -261,16 +261,16 @@
     "variant": "classic",
     "required": false,
     "defaultOrder": 9,
-    "defaultEnabled": true
+    "defaultEnabled": false
   },
   {
     "sectionKey": "articles",
     "label": {
       "tr": "Makaleler",
-      "en": "Articles",
+      "en": "articles",
       "de": "Artikel",
       "pl": "Artykuły",
-      "fr": "Articles",
+      "fr": "articles",
       "es": "Artículos"
     },
     "description": {
@@ -285,13 +285,13 @@
     "variant": "classic",
     "required": false,
     "defaultOrder": 10,
-    "defaultEnabled": true
+    "defaultEnabled": false
   },
   {
     "sectionKey": "references",
     "label": {
       "tr": "Referanslar",
-      "en": "References",
+      "en": "references",
       "de": "Referenzen",
       "pl": "Referencje",
       "fr": "Références",
@@ -309,13 +309,13 @@
     "variant": "classic",
     "required": false,
     "defaultOrder": 11,
-    "defaultEnabled": true
+    "defaultEnabled": false
   },
   {
     "sectionKey": "library",
     "label": {
       "tr": "Dokümantasyon",
-      "en": "Library",
+      "en": "library",
       "de": "Bibliothek",
       "pl": "Biblioteka",
       "fr": "Bibliothèque",
@@ -333,7 +333,7 @@
     "variant": "classic",
     "required": false,
     "defaultOrder": 12,
-    "defaultEnabled": true
+    "defaultEnabled": false
   },
   {
     "sectionKey": "ensotekprod",
@@ -357,7 +357,7 @@
     "variant": "classic",
     "required": false,
     "defaultOrder": 13,
-    "defaultEnabled": true
+    "defaultEnabled": false
   },
   {
     "sectionKey": "sparepart",
@@ -381,7 +381,7 @@
     "variant": "classic",
     "required": false,
     "defaultOrder": 14,
-    "defaultEnabled": true
+    "defaultEnabled": false
   },
   {
     "sectionKey": "whatsapp",
@@ -429,7 +429,7 @@
     "variant": "classic",
     "required": false,
     "defaultOrder": 16,
-    "defaultEnabled": true
+    "defaultEnabled": false
   },
   {
     "sectionKey": "newsletter",
@@ -456,147 +456,171 @@
     "defaultEnabled": false
   },
   {
-  "sectionKey": "chatbox",
-  "label": {
-    "tr": "Canlı Sohbet",
-    "en": "Live Chat",
-    "de": "Live-Chat",
-    "pl": "Czat na żywo",
-    "fr": "Chat en direct",
-    "es": "Chat en vivo"
+    "sectionKey": "chatbox",
+    "label": {
+      "tr": "Canlı Sohbet",
+      "en": "Live Chat",
+      "de": "Live-Chat",
+      "pl": "Czat na żywo",
+      "fr": "Chat en direct",
+      "es": "Chat en vivo"
+    },
+    "description": {
+      "tr": "Ziyaretçilerle canlı mesajlaşma ve destek",
+      "en": "Live messaging and support with visitors",
+      "de": "Live-Messaging und Support für Besucher",
+      "pl": "Wiadomości na żywo i wsparcie dla odwiedzających",
+      "fr": "Messagerie instantanée et assistance aux visiteurs",
+      "es": "Mensajería en vivo y soporte para visitantes"
+    },
+    "icon": "MdChatBubble",
+    "variant": "banner",
+    "required": false,
+    "defaultOrder": 18,
+    "defaultEnabled": false
   },
-  "description": {
-    "tr": "Ziyaretçilerle canlı mesajlaşma ve destek",
-    "en": "Live messaging and support with visitors",
-    "de": "Live-Messaging und Support für Besucher",
-    "pl": "Wiadomości na żywo i wsparcie dla odwiedzających",
-    "fr": "Messagerie instantanée et assistance aux visiteurs",
-    "es": "Mensajería en vivo y soporte para visitantes"
+  {
+    "sectionKey": "certificates",
+    "label": {
+      "tr": "Sertifikalar",
+      "en": "Certificates",
+      "de": "Zertifikate",
+      "pl": "Certyfikaty",
+      "fr": "Certificats",
+      "es": "Certificados"
+    },
+    "description": {
+      "tr": "Firma ve çalışanların sahip olduğu sertifika, belge ve akreditasyonlar",
+      "en": "Company and staff certificates, documents, and accreditations",
+      "de": "Zertifikate, Dokumente und Akkreditierungen des Unternehmens und der Mitarbeiter",
+      "pl": "Certyfikaty, dokumenty i akredytacje firmy oraz pracowników",
+      "fr": "Certificats, documents et accréditations de l'entreprise et du personnel",
+      "es": "Certificados, documentos y acreditaciones de la empresa y del personal"
+    },
+    "icon": "MdVerified",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 19,
+    "defaultEnabled": false
   },
-  "icon": "MdChatBubble",
-  "variant": "banner",
-  "required": false,
-  "defaultOrder": 18,
-  "defaultEnabled": false
-},
-{
-  "sectionKey": "certificates",
-  "label": {
-    "tr": "Sertifikalar",
-    "en": "Certificates",
-    "de": "Zertifikate",
-    "pl": "Certyfikaty",
-    "fr": "Certificats",
-    "es": "Certificados"
+  {
+    "sectionKey": "scrollToTop",
+    "label": {
+      "tr": "Yukarı Çık",
+      "en": "Scroll To Top",
+      "de": "Nach Oben",
+      "pl": "Przewiń do góry",
+      "fr": "Remonter en haut",
+      "es": "Volver arriba"
+    },
+    "description": {
+      "tr": "Sayfanın alt köşesinde, tıklanınca en üste çıkaran ikon.",
+      "en": "A button fixed at the bottom corner that scrolls to top.",
+      "de": "Ein Button unten in der Ecke, der nach oben scrollt.",
+      "pl": "Przycisk w rogu przewijający na górę strony.",
+      "fr": "Un bouton en bas de page qui remonte en haut.",
+      "es": "Un botón fijo que sube al inicio de la página."
+    },
+    "icon": "FaChevronUp",
+    "variant": "floating",
+    "required": false,
+    "defaultOrder": 100,
+    "defaultEnabled": false
   },
-  "description": {
-    "tr": "Firma ve çalışanların sahip olduğu sertifika, belge ve akreditasyonlar",
-    "en": "Company and staff certificates, documents, and accreditations",
-    "de": "Zertifikate, Dokumente und Akkreditierungen des Unternehmens und der Mitarbeiter",
-    "pl": "Certyfikaty, dokumenty i akredytacje firmy oraz pracowników",
-    "fr": "Certificats, documents et accréditations de l'entreprise et du personnel",
-    "es": "Certificados, documentos y acreditaciones de la empresa y del personal"
+  {
+    "sectionKey": "catalogRequest",
+    "label": {
+      "tr": "Katalog Talebi",
+      "en": "Catalog Request",
+      "de": "Katalog Anforderung",
+      "pl": "Zamów katalog",
+      "fr": "Demande de catalogue",
+      "es": "Solicitud de catálogo"
+    },
+    "description": {
+      "tr": "Sağ kenarda sabit, katalog talep formuna yönlendiren buton.",
+      "en": "A fixed button on the right side that links to the catalog request form.",
+      "de": "Fester Button am rechten Rand für Kataloganfragen.",
+      "pl": "Stały przycisk po prawej stronie do formularza katalogowego.",
+      "fr": "Bouton fixe à droite pour demander un catalogue.",
+      "es": "Botón fijo a la derecha para solicitar un catálogo."
+    },
+    "icon": "HiOutlineDocumentText",
+    "variant": "verticalFloating",
+    "required": false,
+    "defaultOrder": 30,
+    "defaultEnabled": false
   },
-  "icon": "MdVerified",
-  "variant": "classic",
-  "required": false,
-  "defaultOrder": 19,
-  "defaultEnabled": false
-},
-{
-  "sectionKey": "scrollToTop",
-  "label": {
-    "tr": "Yukarı Çık",
-    "en": "Scroll To Top",
-    "de": "Nach Oben",
-    "pl": "Przewiń do góry",
-    "fr": "Remonter en haut",
-    "es": "Volver arriba"
+  {
+    "sectionKey": "requestOffer",
+    "label": {
+      "tr": "Teklif İste",
+      "en": "Request Offer",
+      "de": "Angebot Anfordern",
+      "pl": "Poproś o ofertę",
+      "fr": "Demander un devis",
+      "es": "Solicitar oferta"
+    },
+    "description": {
+      "tr": "Sağ kenarda sabit, teklif/form sayfasına yönlendiren buton.",
+      "en": "A fixed button on the right side that links to the offer request page.",
+      "de": "Fester Button am rechten Rand für Angebotsanfragen.",
+      "pl": "Stały przycisk po prawej stronie do formularza ofertowego.",
+      "fr": "Bouton fixe à droite pour demander une offre.",
+      "es": "Botón fijo a la derecha para solicitar una oferta."
+    },
+    "icon": "HiOutlineTag",
+    "variant": "verticalFloating",
+    "required": false,
+    "defaultOrder": 31,
+    "defaultEnabled": false
   },
-  "description": {
-    "tr": "Sayfanın alt köşesinde, tıklanınca en üste çıkaran ikon.",
-    "en": "A button fixed at the bottom corner that scrolls to top.",
-    "de": "Ein Button unten in der Ecke, der nach oben scrollt.",
-    "pl": "Przycisk w rogu przewijający na górę strony.",
-    "fr": "Un bouton en bas de page qui remonte en haut.",
-    "es": "Un botón fijo que sube al inicio de la página."
+  {
+    "sectionKey": "herorobotic",
+    "label": {
+      "tr": "Robotik Kahraman",
+      "en": "Hero Robotic",
+      "de": "Hero Robotik",
+      "pl": "Robotyczny Bohater",
+      "fr": "Héros Robotique",
+      "es": "Héroe Robótico"
+    },
+    "description": {
+      "tr": "Anasayfa için AI ve robotik temalı ana kahraman bölümü.",
+      "en": "Main hero section for homepage with AI & Robotics theme.",
+      "de": "Haupt-Heldensektion der Startseite mit KI- und Robotikthema.",
+      "pl": "Główna sekcja bohatera strony głównej z motywem AI i robotyki.",
+      "fr": "Section principale de héros de la page d'accueil avec un thème IA et robotique.",
+      "es": "Sección principal de héroe de la página de inicio con temática de IA y robótica."
+    },
+    "icon": "MdSmartToy",
+    "variant": "modern",
+    "required": false,
+    "defaultOrder": 1,
+    "defaultEnabled": false
   },
-  "icon": "FaChevronUp",
-  "variant": "floating",
-  "required": false,
-  "defaultOrder": 100,
-  "defaultEnabled": true
-},
-{
-  "sectionKey": "catalogRequest",
-  "label": {
-    "tr": "Katalog Talebi",
-    "en": "Catalog Request",
-    "de": "Katalog Anforderung",
-    "pl": "Zamów katalog",
-    "fr": "Demande de catalogue",
-    "es": "Solicitud de catálogo"
-  },
-  "description": {
-    "tr": "Sağ kenarda sabit, katalog talep formuna yönlendiren buton.",
-    "en": "A fixed button on the right side that links to the catalog request form.",
-    "de": "Fester Button am rechten Rand für Kataloganfragen.",
-    "pl": "Stały przycisk po prawej stronie do formularza katalogowego.",
-    "fr": "Bouton fixe à droite pour demander un catalogue.",
-    "es": "Botón fijo a la derecha para solicitar un catálogo."
-  },
-  "icon": "HiOutlineDocumentText",
-  "variant": "verticalFloating",
-  "required": false,
-  "defaultOrder": 30,
-  "defaultEnabled": true
-},
-{
-  "sectionKey": "requestOffer",
-  "label": {
-    "tr": "Teklif İste",
-    "en": "Request Offer",
-    "de": "Angebot Anfordern",
-    "pl": "Poproś o ofertę",
-    "fr": "Demander un devis",
-    "es": "Solicitar oferta"
-  },
-  "description": {
-    "tr": "Sağ kenarda sabit, teklif/form sayfasına yönlendiren buton.",
-    "en": "A fixed button on the right side that links to the offer request page.",
-    "de": "Fester Button am rechten Rand für Angebotsanfragen.",
-    "pl": "Stały przycisk po prawej stronie do formularza ofertowego.",
-    "fr": "Bouton fixe à droite pour demander une offre.",
-    "es": "Botón fijo a la derecha para solicitar una oferta."
-  },
-  "icon": "HiOutlineTag",
-  "variant": "verticalFloating",
-  "required": false,
-  "defaultOrder": 31,
-  "defaultEnabled": true
-},
-{
-  "sectionKey": "herorobotic",
-  "label": {
-    "tr": "Robotik Kahraman",
-    "en": "Hero Robotic",
-    "de": "Hero Robotik",
-    "pl": "Robotyczny Bohater",
-    "fr": "Héros Robotique",
-    "es": "Héroe Robótico"
-  },
-  "description": {
-    "tr": "Anasayfa için AI ve robotik temalı ana kahraman bölümü.",
-    "en": "Main hero section for homepage with AI & Robotics theme.",
-    "de": "Haupt-Heldensektion der Startseite mit KI- und Robotikthema.",
-    "pl": "Główna sekcja bohatera strony głównej z motywem AI i robotyki.",
-    "fr": "Section principale de héros de la page d'accueil avec un thème IA et robotique.",
-    "es": "Sección principal de héroe de la página de inicio con temática de IA y robótica."
-  },
-  "icon": "MdSmartToy",
-  "variant": "modern",
-  "required": false,
-  "defaultOrder": 1,
-  "defaultEnabled": true
-}
+   {
+    "sectionKey": "team",
+    "label": {
+      "tr": "Ekip",
+      "en": "Team",
+      "de": "Team",
+      "pl": "Zespół",
+      "fr": "Équipe",
+      "es": "Equipo"
+    },
+    "description": {
+      "tr": "Şirket ve personel belgeleri, sertifikaları ve akreditasyonları",
+      "en": "Company and staff documents, certificates, and accreditations",
+      "de": "Unternehmens- und Mitarbeiterdokumente, Zertifikate und Akkreditierungen",
+      "pl": "Dokumenty, certyfikaty i akredytacje firmy oraz pracowników",
+      "fr": "Documents, certificats et accréditations de l'entreprise et du personnel",
+      "es": "Documentos, certificados y acreditaciones de la empresa y del personal"
+    },
+    "icon": "MdGroup",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 19,
+    "defaultEnabled": false
+  }
 ]

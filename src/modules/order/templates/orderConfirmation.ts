@@ -34,7 +34,9 @@ function orderConfirmationHtml({
   couponCode,
   discount,
   finalTotal,
-}: Omit<OrderConfirmationParams, "locale"> & { locale: SupportedLocale }): string {
+}: Omit<OrderConfirmationParams, "locale"> & {
+  locale: SupportedLocale;
+}): string {
   // Kısa, anlaşılır ve nötr isimlendirme:
   const labels = translations[locale] || translations["en"];
   const interpolate = (str: string) => str.replace("{name}", name);
@@ -46,55 +48,105 @@ function orderConfirmationHtml({
     <p>${labels.status}</p>
     <table style="margin-top: 20px; border-collapse: collapse;">
       <tr>
-        <td style="padding: 8px 12px;"><strong>${labels.labelOrderId ?? "Order ID"}:</strong></td>
+        <td style="padding: 8px 12px;"><strong>${
+          labels.labelOrderId ?? "Order ID"
+        }:</strong></td>
         <td style="padding: 8px 12px;">${orderId ?? "-"}</td>
       </tr>
-      ${brandName ? `
+      ${
+        brandName
+          ? `
       <tr>
-        <td style="padding: 8px 12px;"><strong>${labels.labelBrand ?? "Brand"}:</strong></td>
+        <td style="padding: 8px 12px;"><strong>${
+          labels.labelBrand ?? "Brand"
+        }:</strong></td>
         <td style="padding: 8px 12px;">${brandName}</td>
-      </tr>` : ""}
+      </tr>`
+          : ""
+      }
       <tr>
-        <td style="padding: 8px 12px;"><strong>${labels.labelItems}:</strong></td>
+        <td style="padding: 8px 12px;"><strong>${
+          labels.labelItems
+        }:</strong></td>
         <td style="padding: 8px 12px;">${itemsList}</td>
       </tr>
       <tr>
-        <td style="padding: 8px 12px;"><strong>${labels.labelTotal}:</strong></td>
+        <td style="padding: 8px 12px;"><strong>${
+          labels.labelTotal
+        }:</strong></td>
         <td style="padding: 8px 12px;">€${totalPrice.toFixed(2)}</td>
       </tr>
-      ${discount ? `
+      ${
+        discount
+          ? `
       <tr>
-        <td style="padding: 8px 12px;"><strong>${labels.labelDiscount ?? "Discount"}:</strong></td>
+        <td style="padding: 8px 12px;"><strong>${
+          labels.labelDiscount ?? "Discount"
+        }:</strong></td>
         <td style="padding: 8px 12px;">-€${discount.toFixed(2)}</td>
       </tr>
-      ` : ""}
-      ${couponCode ? `
+      `
+          : ""
+      }
+      ${
+        couponCode
+          ? `
       <tr>
-        <td style="padding: 8px 12px;"><strong>${labels.labelCoupon ?? "Coupon"}:</strong></td>
+        <td style="padding: 8px 12px;"><strong>${
+          labels.labelCoupon ?? "coupon"
+        }:</strong></td>
         <td style="padding: 8px 12px;">${couponCode}</td>
       </tr>
-      ` : ""}
+      `
+          : ""
+      }
       <tr>
-        <td style="padding: 8px 12px;"><strong>${labels.labelFinalTotal ?? "Final Total"}:</strong></td>
-        <td style="padding: 8px 12px;">€${(finalTotal ?? totalPrice).toFixed(2)}</td>
+        <td style="padding: 8px 12px;"><strong>${
+          labels.labelFinalTotal ?? "Final Total"
+        }:</strong></td>
+        <td style="padding: 8px 12px;">€${(finalTotal ?? totalPrice).toFixed(
+          2
+        )}</td>
       </tr>
-      ${paymentMethod ? `
+      ${
+        paymentMethod
+          ? `
       <tr>
-        <td style="padding: 8px 12px;"><strong>${labels.labelPaymentMethod ?? "Payment Method"}:</strong></td>
+        <td style="padding: 8px 12px;"><strong>${
+          labels.labelPaymentMethod ?? "Payment Method"
+        }:</strong></td>
         <td style="padding: 8px 12px;">${paymentMethod}</td>
       </tr>
-      ` : ""}
-      ${paymentStatus ? `
+      `
+          : ""
+      }
+      ${
+        paymentStatus
+          ? `
       <tr>
-        <td style="padding: 8px 12px;"><strong>${labels.labelPaymentStatus ?? "Payment Status"}:</strong></td>
+        <td style="padding: 8px 12px;"><strong>${
+          labels.labelPaymentStatus ?? "Payment Status"
+        }:</strong></td>
         <td style="padding: 8px 12px;">${paymentStatus}</td>
       </tr>
-      ` : ""}
+      `
+          : ""
+      }
     </table>
-    ${criticalStockWarnings ? `<div style="margin-top:15px; color: #c00; font-weight:bold;">${criticalStockWarnings}</div>` : ""}
+    ${
+      criticalStockWarnings
+        ? `<div style="margin-top:15px; color: #c00; font-weight:bold;">${criticalStockWarnings}</div>`
+        : ""
+    }
     <p style="margin-top: 20px;">${labels.shipping}</p>
     <p>${labels.sign}</p>
-    ${brandName ? `<p style="font-size:12px;color:#999;">${brandName} ${senderEmail ? `| ${senderEmail}` : ""}</p>` : ""}
+    ${
+      brandName
+        ? `<p style="font-size:12px;color:#999;">${brandName} ${
+            senderEmail ? `| ${senderEmail}` : ""
+          }</p>`
+        : ""
+    }
     `,
     labels.title
   );

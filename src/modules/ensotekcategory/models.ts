@@ -46,7 +46,7 @@ EnsotekCategorySchema.pre("validate", function (next) {
 });
 
 const EnsotekCategory: Model<IEnsotekCategory> =
-  models.EnsotekCategory ||
-  mongoose.model<IEnsotekCategory>("EnsotekCategory", EnsotekCategorySchema);
+  models.ensotekcategory ||
+  mongoose.model<IEnsotekCategory>("ensotekcategory", EnsotekCategorySchema);
 
 export { EnsotekCategory };

@@ -8,7 +8,7 @@ export const addToCartValidator = [
     .withMessage("Product ID must be a valid MongoDB ObjectId."),
   body("productType")
     .notEmpty()
-    .isIn(["Bike", "Ensotekprod"]) // Desteklediğin ürün tipleri burada güncel tutulmalı!
+    .isIn(["bike", "ensotekprod"]) // Desteklediğin ürün tipleri burada güncel tutulmalı!
     .withMessage("Product type is invalid."),
   body("quantity")
     .isInt({ min: 1 })
@@ -40,7 +40,7 @@ export const updateCartValidator = [
     .withMessage("Each item must have a valid product ID."),
   body("items.*.productType")
     .optional()
-    .isIn(["Bike", "Ensotekprod"])
+    .isIn(["bike", "ensotekprod"])
     .withMessage("Each item must have a valid product type."),
   body("items.*.quantity")
     .optional()

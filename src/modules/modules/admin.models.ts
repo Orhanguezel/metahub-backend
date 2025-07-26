@@ -36,8 +36,8 @@ const ModuleMetaSchema = new Schema<IModuleMeta>(
 );
 
 export const ModuleMeta: Model<IModuleMeta> =
-  models.ModuleMeta ||
-  mongoose.model<IModuleMeta>("ModuleMeta", ModuleMetaSchema);
+  models.modulemeta ||
+  mongoose.model<IModuleMeta>("modulemeta", ModuleMetaSchema);
 
 // ModuleSetting Schema (KISA & TEMİZ!)
 const ModuleSettingSchema = new Schema<IModuleSetting>(
@@ -55,5 +55,5 @@ const ModuleSettingSchema = new Schema<IModuleSetting>(
 );
 
 export const ModuleSetting: Model<IModuleSetting> =
-  models.ModuleSetting ||
-  mongoose.model<IModuleSetting>("ModuleSetting", ModuleSettingSchema);
+  models.modulesetting ||
+  mongoose.model<IModuleSetting>("modulesetting", ModuleSettingSchema);

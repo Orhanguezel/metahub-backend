@@ -9,8 +9,8 @@ const ContactMessageSchema = new Schema<IContactMessage>(
     name: { type: String, required: true },
     tenant: { type: String, required: true, index: true },
     email: { type: String, required: true },
-    subject: { type: String, required: true },   // Düz string
-    message: { type: String, required: true },   // Düz string
+    subject: { type: String, required: true }, // Düz string
+    message: { type: String, required: true }, // Düz string
     isRead: { type: Boolean, default: false },
     isArchived: { type: Boolean, default: false },
   },
@@ -19,7 +19,7 @@ const ContactMessageSchema = new Schema<IContactMessage>(
 
 // ✅ Model
 const ContactMessage: Model<IContactMessage> =
-  models.ContactMessage ||
-  model<IContactMessage>("ContactMessage", ContactMessageSchema);
+  models.contactmessage ||
+  model<IContactMessage>("contactmessage", ContactMessageSchema);
 
 export { ContactMessage };

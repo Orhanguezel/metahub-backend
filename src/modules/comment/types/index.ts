@@ -15,7 +15,8 @@ export type CommentContentType =
   | "library"
   | "company"
   | "ensotekprod"
-  | "sparepart";
+  | "sparepart"
+  | "global";
 
 export type CommentType = "comment" | "testimonial" | "review" | "question" | "answer" | "rating";
 
@@ -24,6 +25,7 @@ export interface IComment {
   _id?: any; // string veya ObjectId olabilir
   userId?: any; // string veya Types.ObjectId veya { _id, name, email }
   name?: string;
+  profileImage?: string | { thumbnail?: string; url?: string }; // Resim objesi veya URL
   email?: string;
   tenant: string;
   contentType: CommentContentType;

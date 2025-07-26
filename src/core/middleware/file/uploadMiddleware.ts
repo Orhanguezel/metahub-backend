@@ -34,6 +34,7 @@ export const UPLOAD_FOLDERS = {
   coupons: "coupons-images",
   galleryCategory: "galleryCategory-images",
   sparepartCategory: "sparepartCategory-images",
+  team: "team-images",
   default: "misc",
 } as const;
 

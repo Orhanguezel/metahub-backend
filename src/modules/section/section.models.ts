@@ -1,6 +1,6 @@
 // models/section.model.ts
 import mongoose, { Schema, Model, models } from "mongoose";
-import type { ISectionMeta,ISectionSetting } from "@/modules/section/types";
+import type { ISectionMeta, ISectionSetting } from "@/modules/section/types";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
 const labelSchemaFields = SUPPORTED_LOCALES.reduce((fields, lang) => {
@@ -27,12 +27,11 @@ const SectionMetaSchema = new Schema<ISectionMeta>(
 // 🔥 Compound index ile tenant+sectionKey unique!
 SectionMetaSchema.index({ tenant: 1, sectionKey: 1 }, { unique: true });
 
-
 const SectionMeta: Model<ISectionMeta> =
-  models.SectionMeta || mongoose.model<ISectionMeta>("SectionMeta", SectionMetaSchema);
+  models.sectionmeta ||
+  mongoose.model<ISectionMeta>("sectionmeta", SectionMetaSchema);
 
 export { SectionMeta };
-
 
 const SectionSettingSchema = new Schema<ISectionSetting>(
   {
@@ -52,7 +51,7 @@ const SectionSettingSchema = new Schema<ISectionSetting>(
 SectionSettingSchema.index({ tenant: 1, sectionKey: 1 }, { unique: true });
 
 const SectionSetting: Model<ISectionSetting> =
-  models.SectionSetting || mongoose.model<ISectionSetting>("SectionSetting", SectionSettingSchema);
+  models.sectionsetting ||
+  mongoose.model<ISectionSetting>("sectionsetting", SectionSettingSchema);
 
 export { SectionSetting };
-

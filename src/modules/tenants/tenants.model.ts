@@ -92,7 +92,7 @@ const TenantSchema = new Schema<ITenant>(
 );
 
 const Tenants: Model<ITenant> =
-  models.Tenants || mongoose.model<ITenant>("Tenants", TenantSchema);
+  models.tenants || mongoose.model<ITenant>("tenants", TenantSchema);
 
 export default Tenants;
 export { Tenants };

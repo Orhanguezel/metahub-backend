@@ -86,6 +86,8 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const {
     name,
+    company,
+    position,
     email,
     role,
     isActive,
@@ -192,6 +194,8 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   // JSON alanları güvenle güncelle
   let updates: any = {
     name: name ?? user.name,
+    company: company ?? user.company,
+    position: position ?? user.position,
     email: email ?? user.email,
     role: role ?? user.role,
     isActive: typeof isActive === "boolean" ? isActive : user.isActive,

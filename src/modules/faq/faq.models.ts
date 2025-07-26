@@ -1,7 +1,7 @@
 import { Schema, model, Model, models } from "mongoose";
 
 // ✅ Interface
-export interface IFAQ  {
+export interface IFAQ {
   question: {
     tr: string;
     en: string;
@@ -54,7 +54,7 @@ const faqSchema = new Schema<IFAQ>(
 );
 
 // ✅ Model tanımı (guard'lı)
-const FAQ: Model<IFAQ> = models.FAQ || model<IFAQ>("FAQ", faqSchema);
+const FAQ: Model<IFAQ> = models.faq || model<IFAQ>("faq", faqSchema);
 
 // ✅ Export
 export { FAQ };

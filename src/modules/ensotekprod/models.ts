@@ -1,6 +1,9 @@
 import { Schema, Model, models, model, Types } from "mongoose";
 import { SUPPORTED_LOCALES } from "@/types/common";
-import type { IEnsotekprod, IEnsotekprodImage } from "@/modules/ensotekprod/types";
+import type {
+  IEnsotekprod,
+  IEnsotekprodImage,
+} from "@/modules/ensotekprod/types";
 
 const localizedStringField = () => {
   const fields: Record<string, any> = {};
@@ -24,10 +27,20 @@ const EnsotekprodSchema = new Schema<IEnsotekprod>(
   {
     name: localizedStringField(),
     tenant: { type: String, required: true, index: true },
-    slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
     description: localizedStringField(),
     brand: { type: String, required: true },
-    category: { type: Schema.Types.ObjectId, ref: "EnsotekCategory", required: true },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: "ensotekcategory",
+      required: true,
+    },
     tags: [{ type: String, trim: true }],
     price: { type: Number, required: true, min: 0 },
     stock: { type: Number, required: true, default: 0 },
@@ -53,7 +66,7 @@ const EnsotekprodSchema = new Schema<IEnsotekprod>(
     isActive: { type: Boolean, required: true, default: true },
     isPublished: { type: Boolean, required: true, default: false },
     likes: { type: Number, required: true, default: 0 },
-    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+    comments: [{ type: Schema.Types.ObjectId, ref: "comment" }],
   },
   { timestamps: true }
 );
@@ -71,5 +84,5 @@ EnsotekprodSchema.pre("validate", function (next) {
 });
 
 const Ensotekprod: Model<IEnsotekprod> =
-  models.Ensotekprod || model<IEnsotekprod>("Ensotekprod", EnsotekprodSchema);
+  models.ensotekprod || model<IEnsotekprod>("ensotekprod", EnsotekprodSchema);
 export { Ensotekprod };

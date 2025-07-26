@@ -5,7 +5,7 @@ import { ISparepart } from "@/modules/sparepart/types";
 
 export interface ICartItem {
   product: Types.ObjectId; // Sadece ObjectId!
-  productType: "Bike" | "Ensotekprod" | "Sparepart"; // Ürün tipi zorunlu
+  productType: "bike" | "ensotekprod" | "sparepart"; // Ürün tipi zorunlu
   tenant: string;
   quantity: number;
   priceAtAddition: number;

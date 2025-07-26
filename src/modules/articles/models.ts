@@ -33,12 +33,12 @@ const ArticlesSchema = new Schema<IArticles>(
     author: { type: String },
     category: {
       type: Schema.Types.ObjectId,
-      ref: "ArticlesCategory",
+      ref: "articlescategory",
       required: true,
     },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
-    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+    comments: [{ type: Schema.Types.ObjectId, ref: "comment" }],
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
@@ -57,6 +57,6 @@ ArticlesSchema.pre("validate", function (next) {
 });
 
 const Articles: Model<IArticles> =
-  models.Articles || model<IArticles>("Articles", ArticlesSchema);
+  models.articles || model<IArticles>("articles", ArticlesSchema);
 
 export { Articles, ArticlesImageSchema, ArticlesSchema };

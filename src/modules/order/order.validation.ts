@@ -13,8 +13,10 @@ export const createOrderValidator = [
     .withMessage("Each item must have a valid product ID."),
 
   body("items.*.productModel")
-    .isIn(["Bike", "Ensotekprod"])
-    .withMessage("Each item must have a valid product model (Bike or Ensotekprod)."),
+    .isIn(["bike", "ensotekprod"])
+    .withMessage(
+      "Each item must have a valid product model (Bike or Ensotekprod)."
+    ),
 
   body("items.*.quantity")
     .isInt({ min: 1 })
@@ -108,7 +110,3 @@ export const updateShippingAddressValidator = [
     .notEmpty()
     .withMessage("Shipping address must have a tenant identifier."),
 ];
-
-
-
-

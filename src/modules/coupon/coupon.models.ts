@@ -65,14 +65,15 @@ const couponSchema = new Schema<ICoupon>(
 );
 
 // Pre-save hook: Kodun benzersizliği
-couponSchema.pre("save", function(next) {
+couponSchema.pre("save", function (next) {
   if (!this.code) {
-    this.code = "COUPON_" + Date.now();  // Örnek kod oluşturma
+    this.code = "COUPON_" + Date.now(); // Örnek kod oluşturma
   }
   next();
 });
 
-const Coupon: Model<ICoupon> = models.Coupon || model<ICoupon>("Coupon", couponSchema);
+const Coupon: Model<ICoupon> =
+  models.coupon || model<ICoupon>("coupon", couponSchema);
 
 export { Coupon };
 export default Coupon;

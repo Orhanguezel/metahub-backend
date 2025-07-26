@@ -50,7 +50,7 @@ LibraryCategorySchema.pre("validate", function (next) {
 });
 
 const LibraryCategory: Model<ILibraryCategory> =
-  (models.LibraryCategory as Model<ILibraryCategory>) ||
-  mongoose.model<ILibraryCategory>("LibraryCategory", LibraryCategorySchema);
+  (models.librarycategory as Model<ILibraryCategory>) ||
+  mongoose.model<ILibraryCategory>("librarycategory", LibraryCategorySchema);
 
 export { LibraryCategory };

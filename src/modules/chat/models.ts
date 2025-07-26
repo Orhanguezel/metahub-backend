@@ -11,7 +11,7 @@ for (const locale of SUPPORTED_LOCALES) {
 /** ChatMessage Model */
 const ChatMessageSchema = new Schema<IChatMessage>(
   {
-    sender: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    sender: { type: Schema.Types.ObjectId, ref: "user", default: null },
     tenant: { type: String, required: true, index: true },
     roomId: { type: String, required: true },
     message: { type: String, required: true, trim: true },
@@ -24,14 +24,14 @@ const ChatMessageSchema = new Schema<IChatMessage>(
 );
 
 export const ChatMessage: Model<IChatMessage> =
-  models.ChatMessage || model<IChatMessage>("ChatMessage", ChatMessageSchema);
+  models.chatmessage || model<IChatMessage>("chatmessage", ChatMessageSchema);
 
 /** ChatSession Model */
 const ChatSessionSchema = new Schema<IChatSession>(
   {
     roomId: { type: String, required: true, unique: true },
     tenant: { type: String, required: true, index: true },
-    user: { type: Schema.Types.ObjectId, ref: "User" },
+    user: { type: Schema.Types.ObjectId, ref: "user" },
     createdAt: { type: Date, default: Date.now },
     closedAt: { type: Date },
   },
@@ -39,4 +39,4 @@ const ChatSessionSchema = new Schema<IChatSession>(
 );
 
 export const ChatSession: Model<IChatSession> =
-  models.ChatSession || model<IChatSession>("ChatSession", ChatSessionSchema);
+  models.chatsession || model<IChatSession>("chatsession", ChatSessionSchema);

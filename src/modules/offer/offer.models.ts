@@ -10,7 +10,7 @@ interface IOfferItem {
 }
 
 // ✅ Ana Interface
-export interface IOffer  {
+export interface IOffer {
   offerNumber: string;
   user: Types.ObjectId;
   tenant: string; // Optional tenant field for multi-tenancy
@@ -34,7 +34,7 @@ export interface IOffer  {
 // ✅ Alt Şema
 const offerItemSchema = new Schema<IOfferItem>(
   {
-    product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
+    product: { type: Schema.Types.ObjectId, ref: "product", required: true },
     quantity: { type: Number, required: true },
     tenant: { type: String, required: true, index: true },
     unitPrice: { type: Number, required: true },
@@ -48,9 +48,9 @@ const offerSchema = new Schema<IOffer>(
   {
     offerNumber: { type: String, required: true, unique: true },
     tenant: { type: String, required: true, index: true },
-    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    company: { type: Schema.Types.ObjectId, ref: "Company", required: true },
-    customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
+    user: { type: Schema.Types.ObjectId, ref: "user", required: true },
+    company: { type: Schema.Types.ObjectId, ref: "company", required: true },
+    customer: { type: Schema.Types.ObjectId, ref: "customer", required: true },
     items: {
       type: [offerItemSchema],
       validate: (items: IOfferItem[]) => items.length > 0,
@@ -75,7 +75,7 @@ const offerSchema = new Schema<IOffer>(
 
 // ✅ Guard + Model Type (standart)
 const Offer: Model<IOffer> =
-  models.Offer || model<IOffer>("Offer", offerSchema);
+  models.offer || model<IOffer>("offer", offerSchema);
 
 // ✅ Export
 export { Offer };

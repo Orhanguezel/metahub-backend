@@ -1,6 +1,6 @@
 import mongoose, { Schema, model, models, Model } from "mongoose";
 
-export interface IApartmentCategory  {
+export interface IApartmentCategory {
   name: {
     tr: string;
     en: string;
@@ -13,7 +13,6 @@ export interface IApartmentCategory  {
   createdAt: Date;
   updatedAt: Date;
 }
-
 
 const ApartmentCategorySchema = new Schema<IApartmentCategory>(
   {
@@ -53,8 +52,8 @@ ApartmentCategorySchema.pre("validate", function (next) {
   next();
 });
 
-
 const ApartmentCategory: Model<IApartmentCategory> =
-  models.ApartmentCategory || model<IApartmentCategory>("ApartmentCategory", ApartmentCategorySchema);
+  models.apartmentcategory ||
+  model<IApartmentCategory>("apartmentcategory", ApartmentCategorySchema);
 
 export { ApartmentCategory };

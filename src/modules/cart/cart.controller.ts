@@ -23,13 +23,13 @@ const recalculateTotal = (items: ICartItem[]): number =>
 const getProduct = async (
   req: Request,
   productId: string,
-  productType: "Bike" | "Ensotekprod" | "Sparepart"
+  productType: "bike" | "ensotekprod" | "sparepart"
 ) => {
   const { Bike, Ensotekprod, Sparepart } = await getTenantModels(req);
-  if (productType === "Ensotekprod") {
+  if (productType === "ensotekprod") {
     return Ensotekprod.findOne({ _id: productId, tenant: req.tenant });
   }
-  if (productType === "Sparepart") {
+  if (productType === "sparepart") {
     return Sparepart.findOne({ _id: productId, tenant: req.tenant });
   }
   return Bike.findOne({ _id: productId, tenant: req.tenant });

@@ -30,9 +30,14 @@ const bookingSlotOverrideSchema = new Schema<IBookingSlotOverride>(
 );
 
 const BookingSlotRule: Model<IBookingSlotRule> =
-  models.BookingSlotRule || mongoose.model<IBookingSlotRule>("BookingSlotRule", bookingSlotRuleSchema);
+  models.bookingslotrule ||
+  mongoose.model<IBookingSlotRule>("bookingslotrule", bookingSlotRuleSchema);
 
 const BookingSlotOverride: Model<IBookingSlotOverride> =
-  models.BookingSlotOverride || mongoose.model<IBookingSlotOverride>("BookingSlotOverride", bookingSlotOverrideSchema);
+  models.bookingslotoverride ||
+  mongoose.model<IBookingSlotOverride>(
+    "bookingslotoverride",
+    bookingSlotOverrideSchema
+  );
 
 export { BookingSlotRule, BookingSlotOverride };

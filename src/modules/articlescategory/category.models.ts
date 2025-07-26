@@ -50,7 +50,7 @@ ArticlesCategorySchema.pre("validate", function (next) {
 });
 
 const ArticlesCategory: Model<IArticlesCategory> =
-  (models.ArticlesCategory as Model<IArticlesCategory>) ||
-  mongoose.model<IArticlesCategory>("ArticlesCategory", ArticlesCategorySchema);
+  (models.articlescategory as Model<IArticlesCategory>) ||
+  mongoose.model<IArticlesCategory>("articlescategory", ArticlesCategorySchema);
 
 export { ArticlesCategory };

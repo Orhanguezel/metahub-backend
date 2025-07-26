@@ -33,12 +33,12 @@ const ActivitySchema = new Schema<IActivity>(
     author: { type: String },
     category: {
       type: Schema.Types.ObjectId,
-      ref: "ActivityCategory",
+      ref: "activitycategory",
       required: true,
     },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
-    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+    comments: [{ type: Schema.Types.ObjectId, ref: "comment" }],
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
@@ -57,6 +57,6 @@ ActivitySchema.pre("validate", function (next) {
 });
 
 const Activity: Model<IActivity> =
-  models.Activity || model<IActivity>("Activity", ActivitySchema);
+  models.activity || model<IActivity>("activity", ActivitySchema);
 
 export { Activity, ActivityImageSchema, ActivitySchema };

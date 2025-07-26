@@ -50,9 +50,9 @@ ReferencesCategorySchema.pre("validate", function (next) {
 });
 
 const ReferencesCategory: Model<IReferencesCategory> =
-  (models.ReferencesCategory as Model<IReferencesCategory>) ||
+  (models.referencescategory as Model<IReferencesCategory>) ||
   mongoose.model<IReferencesCategory>(
-    "ReferencesCategory",
+    "referencescategory",
     ReferencesCategorySchema
   );
 

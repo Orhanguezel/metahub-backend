@@ -50,7 +50,7 @@ ServicesCategorySchema.pre("validate", function (next) {
 });
 
 const ServicesCategory: Model<IServicesCategory> =
-  (models.ServicesCategory as Model<IServicesCategory>) ||
-  mongoose.model<IServicesCategory>("ServicesCategory", ServicesCategorySchema);
+  (models.servicescategory as Model<IServicesCategory>) ||
+  mongoose.model<IServicesCategory>("servicescategory", ServicesCategorySchema);
 
 export { ServicesCategory };

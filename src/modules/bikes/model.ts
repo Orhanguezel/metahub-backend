@@ -35,7 +35,7 @@ const BikeSchema = new Schema<IBike>(
     stockThreshold: { type: Number, default: 5 },
     category: {
       type: Schema.Types.ObjectId,
-      ref: "BikeCategory",
+      ref: "bikecategory",
       required: true,
     },
     tags: [{ type: String }],
@@ -50,7 +50,7 @@ const BikeSchema = new Schema<IBike>(
     isElectric: { type: Boolean, default: false },
     batteryRangeKm: { type: Number },
     motorPowerW: { type: Number },
-    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+    comments: [{ type: Schema.Types.ObjectId, ref: "comment" }],
     likes: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
     isPublished: { type: Boolean, default: false },
@@ -71,5 +71,5 @@ BikeSchema.pre("validate", function (next) {
   next();
 });
 
-const Bike: Model<IBike> = models.Bike || model<IBike>("Bike", BikeSchema);
+const Bike: Model<IBike> = models.bike || model<IBike>("bike", BikeSchema);
 export { Bike };

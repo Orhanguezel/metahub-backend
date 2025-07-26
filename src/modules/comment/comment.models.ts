@@ -1,5 +1,8 @@
 import { Schema, model, Types, Model, models } from "mongoose";
-import { ALLOWED_COMMENT_CONTENT_TYPES, ALLOWED_COMMENT_TYPES } from "@/core/utils/constants";
+import {
+  ALLOWED_COMMENT_CONTENT_TYPES,
+  ALLOWED_COMMENT_TYPES,
+} from "@/core/utils/constants";
 import { SUPPORTED_LOCALES } from "@/types/common";
 import type { IComment } from "./types";
 
@@ -14,20 +17,28 @@ const localizedStringField = () => {
 
 const commentSchema = new Schema<IComment>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: false },
+    userId: { type: Schema.Types.ObjectId, ref: "user", required: false },
     name: {
       type: String,
       trim: true,
-      required: function () { return !this.userId; },
+      required: function () {
+        return !this.userId;
+      },
+    },
+    profileImage: {
+      type: Schema.Types.Mixed,
+      required: false,
     },
     email: {
       type: String,
       trim: true,
-      required: function () { return !this.userId; },
+      required: function () {
+        return !this.userId;
+      },
     },
     tenant: { type: String, required: true, index: true },
     label: { type: String, trim: true },
-    text:  { type: String, trim: true, required: true },
+    text: { type: String, trim: true, required: true },
     contentType: {
       type: String,
       enum: ALLOWED_COMMENT_CONTENT_TYPES,
@@ -35,9 +46,15 @@ const commentSchema = new Schema<IComment>(
     },
     contentId: {
       type: Schema.Types.ObjectId,
-      required: true,
-      // refPath dinamik olarak hangi modele bağlanacağını belirler:
-      refPath: "contentType",
+      required: function () {
+        // Testimonial ise gerekmesin
+        return this.type !== "testimonial";
+      },
+      // contentType testimonial ise refPath olmayacak!
+      refPath: function () {
+        if (this.type === "testimonial") return undefined;
+        return "contentType";
+      },
     },
     type: {
       type: String,
@@ -56,6 +73,6 @@ const commentSchema = new Schema<IComment>(
 );
 
 const Comment: Model<IComment> =
-  models.Comment || model<IComment>("Comment", commentSchema);
+  models.comment || model<IComment>("comment", commentSchema);
 
 export { Comment, commentSchema };

@@ -2,11 +2,16 @@ import { Types } from "mongoose";
 import type { SupportedLocale } from "@/types/common";
 
 export type PaymentMethod = "cash_on_delivery" | "credit_card" | "paypal";
-export type OrderStatus = "pending" | "preparing" | "shipped" | "completed" | "cancelled";
+export type OrderStatus =
+  | "pending"
+  | "preparing"
+  | "shipped"
+  | "completed"
+  | "cancelled";
 
 export interface IOrderItem {
   product: Types.ObjectId;
-  productType: "Bike" | "Ensotekprod" | "Sparepart"; // burada hangi koleksiyon olduğunu belirtiyoruz
+  productType: "bike" | "ensotekprod" | "sparepart"; // burada hangi koleksiyon olduğunu belirtiyoruz
   quantity: number;
   tenant: string;
   unitPrice: number;

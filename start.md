@@ -27,6 +27,11 @@ npx ts-node -r tsconfig-paths/register src/generateMeta.ts
 npx ts-node -r tsconfig-paths/register src/scripts/section/masterSyncSections.ts
 
 
+git fetch origin
+git reset --hard origin/main
+
+
+
 Alternatif olarak:
 ```sh
 pm2 start server.js --name "my-app"

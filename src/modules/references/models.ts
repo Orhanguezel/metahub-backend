@@ -23,14 +23,20 @@ const ReferencesImageSchema = new Schema<IReferencesImage>(
 
 const ReferencesSchema = new Schema<IReferences>(
   {
-    title: localizedStringField(),         // Opsiyonel tutulacaksa default "" verildi
+    title: localizedStringField(), // Opsiyonel tutulacaksa default "" verildi
     tenant: { type: String, required: true, index: true },
     content: localizedStringField(),
-    slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
     images: { type: [ReferencesImageSchema], default: [], required: true },
     category: {
       type: Schema.Types.ObjectId,
-      ref: "ReferencesCategory",
+      ref: "referencescategory",
       required: true,
     },
     isPublished: { type: Boolean, default: false },
@@ -54,6 +60,6 @@ ReferencesSchema.pre("validate", function (next) {
 });
 
 const References: Model<IReferences> =
-  models.References || model<IReferences>("References", ReferencesSchema);
+  models.references || model<IReferences>("references", ReferencesSchema);
 
 export { References, ReferencesImageSchema, ReferencesSchema };
