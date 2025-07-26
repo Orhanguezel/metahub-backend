@@ -5,7 +5,7 @@ import { SUPPORTED_LOCALES } from "@/types/common";
 // --- ŞEMA ---
 const analyticsSchema = new Schema<IAnalyticsLog>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: false },
+    userId: { type: Schema.Types.ObjectId, ref: "user", required: false },
     tenant: { type: String, required: true, index: true },
     module: { type: String, required: true },
     eventType: { type: String, required: true },
@@ -14,17 +14,15 @@ const analyticsSchema = new Schema<IAnalyticsLog>(
     ip: { type: String },
     country: { type: String },
     city: { type: String },
-   location: {
-  type: {
-    type: String,
-    enum: ["Point"],
-  },
-  coordinates: {
-    type: [Number],
-  },
-},
-
-
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+      },
+      coordinates: {
+        type: [Number],
+      },
+    },
 
     userAgent: { type: String },
     query: { type: Object },
@@ -47,7 +45,7 @@ const analyticsSchema = new Schema<IAnalyticsLog>(
 analyticsSchema.index({ location: "2dsphere" }); // Bunu ekle!
 
 const Analytics =
-  (mongoose.models.Analytics as mongoose.Model<IAnalyticsLog>) ||
-  model<IAnalyticsLog>("Analytics", analyticsSchema);
+  (mongoose.models.analytics as mongoose.Model<IAnalyticsLog>) ||
+  model<IAnalyticsLog>("analytics", analyticsSchema);
 
 export { Analytics };

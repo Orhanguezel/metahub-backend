@@ -1,0 +1,14 @@
+{
+  "created": "Makale başarıyla oluşturuldu.",
+  "updated": "Makale başarıyla güncellendi.",
+  "invalidId": "Geçersiz ID.",
+  "notFound": "Makale bulunamadı.",
+  "fetched": "Makale başarıyla alındı.",
+  "deleted": "Makale başarıyla silindi.",
+  "invalidRemovedImages": "Geçersiz silinen görseller.",
+  "listFetched": "Makale listesi başarıyla alındı.",
+  "tagsArray": "Etiketler dizisi geçerli değil.",
+  "invalidCategory": "Geçersiz kategori.",
+  "booleanField": "Geçerli bir boolean değeri girin."
+}
+

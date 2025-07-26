@@ -24,7 +24,7 @@ export interface IStockmovement {
 
 const StockmovementSchema = new Schema<IStockmovement>(
   {
-    product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
+    product: { type: Schema.Types.ObjectId, ref: "product", required: true },
     type: {
       type: String,
       enum: ["increase", "decrease", "adjust", "order", "return", "manual"],
@@ -37,14 +37,14 @@ const StockmovementSchema = new Schema<IStockmovement>(
       en: { type: String },
       de: { type: String },
     },
-    createdBy: { type: Schema.Types.ObjectId, ref: "User" },
+    createdBy: { type: Schema.Types.ObjectId, ref: "user" },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );
 
 // ✅ Guard + Tip belirleme
 const Stockmovement: Model<IStockmovement> =
-  models.Stockmovement ||
-  model<IStockmovement>("Stockmovement", StockmovementSchema);
+  models.stockmovement ||
+  model<IStockmovement>("stockmovement", StockmovementSchema);
 
 export { Stockmovement };

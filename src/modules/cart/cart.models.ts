@@ -12,7 +12,7 @@ const cartItemSchema = new Schema<ICartItem>(
     },
     productType: {
       type: String,
-      enum: ["Bike", "Ensotekprod", "Sparepart"],
+      enum: ["bike", "ensotekprod", "sparepart"],
       required: true,
     },
     tenant: { type: String, required: true, index: true },
@@ -26,7 +26,7 @@ const cartItemSchema = new Schema<ICartItem>(
 // 🛒 Ana Sepet Şeması
 const cartSchema = new Schema<ICart>(
   {
-    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    user: { type: Schema.Types.ObjectId, ref: "user", required: true },
     tenant: { type: String, required: true, index: true },
     items: { type: [cartItemSchema], default: [] },
     totalPrice: { type: Number, required: true, default: 0 },
@@ -48,6 +48,6 @@ const cartSchema = new Schema<ICart>(
 );
 
 // 🛒 Model Guard (Tekrarlı create engellenir)
-const Cart: Model<ICart> = models.Cart || model<ICart>("Cart", cartSchema);
+const Cart: Model<ICart> = models.cart || model<ICart>("cart", cartSchema);
 
 export { Cart };

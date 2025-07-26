@@ -1,7 +1,7 @@
 import { Schema, model, Types, Model, models } from "mongoose";
 
 // ✅ Interface
-export interface INotification  {
+export interface INotification {
   user?: Types.ObjectId;
   title: {
     tr?: string;
@@ -24,7 +24,7 @@ export interface INotification  {
 // ✅ Schema
 const notificationSchema = new Schema<INotification>(
   {
-    user: { type: Schema.Types.ObjectId, ref: "User", required: false },
+    user: { type: Schema.Types.ObjectId, ref: "user", required: false },
     title: {
       tr: { type: String, trim: true },
       en: { type: String, trim: true },
@@ -49,7 +49,8 @@ const notificationSchema = new Schema<INotification>(
 
 // ✅ Guard + Model Type (standart yapı)
 const Notification: Model<INotification> =
-  models.Notification || model<INotification>("Notification", notificationSchema);
+  models.notification ||
+  model<INotification>("notification", notificationSchema);
 
 // ✅ Export
-export { Notification};
+export { Notification };

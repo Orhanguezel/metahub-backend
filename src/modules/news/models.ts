@@ -33,12 +33,12 @@ const NewsSchema = new Schema<INews>(
     author: { type: String },
     category: {
       type: Schema.Types.ObjectId,
-      ref: "NewsCategory",
+      ref: "newscategory",
       required: true,
     },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
-    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+    comments: [{ type: Schema.Types.ObjectId, ref: "comment" }],
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
@@ -56,6 +56,6 @@ NewsSchema.pre("validate", function (next) {
   next();
 });
 
-const News: Model<INews> = models.News || model<INews>("News", NewsSchema);
+const News: Model<INews> = models.news || model<INews>("news", NewsSchema);
 
 export { News, NewsImageSchema, NewsSchema };

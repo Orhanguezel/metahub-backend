@@ -2118,11 +2118,11 @@
     "visibleInSidebar": true,
     "label": {
       "tr": "SSS",
-      "en": "FAQ",
-      "de": "FAQ",
-      "pl": "FAQ",
-      "fr": "FAQ",
-      "es": "FAQ"
+      "en": "faq",
+      "de": "faq",
+      "pl": "faq",
+      "fr": "faq",
+      "es": "faq"
     },
     "tenants": ["metahub", "metahub_local"]
   },
@@ -4874,7 +4874,7 @@
     "visibleInSidebar": true,
     "label": {
       "tr": "Şirket",
-      "en": "Company",
+      "en": "company",
       "de": "Firma",
       "pl": "Firma",
       "fr": "Entreprise",
@@ -6953,7 +6953,7 @@
     "visibleInSidebar": true,
     "label": {
       "tr": "Hakkında",
-      "en": "About",
+      "en": "about",
       "de": "Über",
       "pl": "O nas",
       "fr": "À propos",
@@ -9125,7 +9125,7 @@
     "visibleInSidebar": true,
     "label": {
       "tr": "Galeri",
-      "en": "Gallery",
+      "en": "gallery",
       "de": "Galerie",
       "pl": "Galeria",
       "fr": "Galería",
@@ -12603,7 +12603,7 @@
     "visibleInSidebar": true,
     "label": {
       "tr": "Ayarlar",
-      "en": "Settings",
+      "en": "settings",
       "de": "Einstellungen",
       "pl": "Ustawienia",
       "fr": "Paramètres",
@@ -13289,7 +13289,7 @@
     "visibleInSidebar": true,
     "label": {
       "tr": "Favoriler",
-      "en": "Wishlist",
+      "en": "wishlist",
       "de": "Favoriten",
       "pl": "Lista życzeń",
       "fr": "wishlist",
@@ -14044,7 +14044,7 @@
     "visibleInSidebar": true,
     "label": {
       "tr": "Sepet",
-      "en": "Cart",
+      "en": "cart",
       "de": "Warenkorb",
       "pl": "Koszyk",
       "fr": "Panier",
@@ -40875,12 +40875,12 @@
     "name": "tenants",
     "tenants": ["metahub", "metahub_local"],
     "label": {
-      "tr": "Tenants",
-      "en": "Tenants",
-      "de": "Tenants",
-      "pl": "Tenants",
-      "fr": "Tenants",
-      "es": "Tenants"
+      "tr": "tenants",
+      "en": "tenants",
+      "de": "tenants",
+      "pl": "tenants",
+      "fr": "tenants",
+      "es": "tenants"
     },
     "icon": "box",
     "roles": ["admin"],

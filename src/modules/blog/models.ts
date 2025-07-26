@@ -33,12 +33,12 @@ const BlogSchema = new Schema<IBlog>(
     author: { type: String },
     category: {
       type: Schema.Types.ObjectId,
-      ref: "BlogCategory",
+      ref: "blogcategory",
       required: true,
     },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
-    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+    comments: [{ type: Schema.Types.ObjectId, ref: "comment" }],
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
@@ -56,7 +56,6 @@ BlogSchema.pre("validate", function (next) {
   next();
 });
 
-const Blog: Model<IBlog> = 
-models.Blog || model<IBlog>("Blog", BlogSchema);
+const Blog: Model<IBlog> = models.blog || model<IBlog>("blog", BlogSchema);
 
 export { Blog, BlogImageSchema, BlogSchema };

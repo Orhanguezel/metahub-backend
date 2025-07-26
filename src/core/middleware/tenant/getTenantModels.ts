@@ -55,7 +55,7 @@ import { Sport } from "@/modules/sport/sport.models";
 import { SportCategory } from "@/modules/sportcategory/sportcategory.models";
 import { Bike } from "@/modules/bikes/model";
 import { BikeCategory } from "@/modules/bikescategory/models";
-import { SectionSetting,SectionMeta } from "@/modules/section/section.models";
+import { SectionSetting, SectionMeta } from "@/modules/section/section.models";
 import { Apartment } from "@/modules/apartment/apartment.model";
 import { ApartmentCategory } from "@/modules/apartmentcategory/apartmentcategory.models";
 import { Apikey, Apikeylog } from "@/modules/apikey/apikey.models";
@@ -66,100 +66,110 @@ import { ModuleMeta, ModuleSetting } from "@/modules/modules/admin.models";
 import { Sparepart } from "@/modules/sparepart/models";
 import { SparepartCategory } from "@/modules/sparepartcategory/models";
 import { Tenants } from "@/modules/tenants/tenants.model";
+import { Team } from "@/modules/team/models";
+import { TeamCategory } from "@/modules/teamcategory/category.models";
 
 export const getTenantModels = async (req: Request) => ({
-  Settings: await req.getModel("Settings", Settings.schema),
-  User: await req.getModel("User", User.schema),
-  Product: await req.getModel("Product", Product.schema),
-  Order: await req.getModel("Order", Order.schema),
-  Cart: await req.getModel("Cart", Cart.schema),
-  Blog: await req.getModel("Blog", Blog.schema),
-  BlogCategory: await req.getModel("BlogCategory", BlogCategory.schema),
-  Booking: await req.getModel("Booking", Booking.schema),
+  Settings: await req.getModel("settings", Settings.schema),
+  User: await req.getModel("user", User.schema),
+  Product: await req.getModel("product", Product.schema),
+  Order: await req.getModel("order", Order.schema),
+  Cart: await req.getModel("cart", Cart.schema),
+  Blog: await req.getModel("blog", Blog.schema),
+  BlogCategory: await req.getModel("blogcategory", BlogCategory.schema),
+  Booking: await req.getModel("booking", Booking.schema),
   BookingSlotRule: await req.getModel(
-    "BookingSlotRule",
+    "bookingslotrule",
     BookingSlotRule.schema
   ),
   BookingSlotOverride: await req.getModel(
-    "BookingSlotOverride",
+    "bookingslotoverride",
     BookingSlotOverride.schema
   ),
-  Coupon: await req.getModel("Coupon", Coupon.schema),
-  Gallery: await req.getModel("Gallery", Gallery.schema),
+  Coupon: await req.getModel("coupon", Coupon.schema),
+  Gallery: await req.getModel("gallery", Gallery.schema),
   GalleryCategory: await req.getModel(
-    "GalleryCategory",
+    "gallerycategory",
     GalleryCategory.schema
   ),
-  Services: await req.getModel("Services", Services.schema),
+  Services: await req.getModel("services", Services.schema),
   ServicesCategory: await req.getModel(
-    "ServicesCategory",
+    "servicescategory",
     ServicesCategory.schema
   ),
-  StockMovement: await req.getModel("StockMovement", Stockmovement.schema),
-  Notification: await req.getModel("Notification", Notification.schema),
-  Comment: await req.getModel("Comment", Comment.schema),
-  Review: await req.getModel("Review", Review.schema),
-  ContactMessage: await req.getModel("ContactMessage", ContactMessage.schema),
-  EmailMessage: await req.getModel("EmailMessage", EmailMessage.schema),
-  Wishlist: await req.getModel("Wishlist", Wishlist.schema),
-  Favorite: await req.getModel("Favorite", Favorite.schema),
-  Feedback: await req.getModel("Feedback", Feedback.schema),
-  Address: await req.getModel("Address", Address.schema),
-  Company: await req.getModel("Company", Company.schema),
-  Customer: await req.getModel("Customer", Customer.schema),
-  Invoice: await req.getModel("Invoice", Invoice.schema),
-  Offer: await req.getModel("Offer", Offer.schema),
-  Payment: await req.getModel("Payment", Payment.schema),
-  Shipment: await req.getModel("Shipment", Shipment.schema),
-  Task: await req.getModel("Task", Task.schema),
-  Activity: await req.getModel("Activity", Activity.schema),
+  StockMovement: await req.getModel("stockmovement", Stockmovement.schema),
+  Notification: await req.getModel("notification", Notification.schema),
+  Comment: await req.getModel("comment", Comment.schema),
+  Review: await req.getModel("review", Review.schema),
+  ContactMessage: await req.getModel("contactmessage", ContactMessage.schema),
+  EmailMessage: await req.getModel("emailmessage", EmailMessage.schema),
+  Wishlist: await req.getModel("wishlist", Wishlist.schema),
+  Favorite: await req.getModel("favorite", Favorite.schema),
+  Feedback: await req.getModel("feedback", Feedback.schema),
+  Address: await req.getModel("address", Address.schema),
+  Company: await req.getModel("company", Company.schema),
+  Customer: await req.getModel("customer", Customer.schema),
+  Invoice: await req.getModel("invoice", Invoice.schema),
+  Offer: await req.getModel("offer", Offer.schema),
+  Payment: await req.getModel("payment", Payment.schema),
+  Shipment: await req.getModel("shipment", Shipment.schema),
+  Task: await req.getModel("task", Task.schema),
+  Activity: await req.getModel("activity", Activity.schema),
   ActivityCategory: await req.getModel(
-    "ActivityCategory",
+    "activitycategory",
     ActivityCategory.schema
   ),
-  About: await req.getModel("About", About.schema),
-  AboutCategory: await req.getModel("AboutCategory", AboutCategory.schema),
-  Experience: await req.getModel("Experience", Experience.schema),
-  References: await req.getModel("References", References.schema),
+  About: await req.getModel("about", About.schema),
+  AboutCategory: await req.getModel("aboutcategory", AboutCategory.schema),
+  Experience: await req.getModel("experience", Experience.schema),
+  References: await req.getModel("references", References.schema),
   ReferencesCategory: await req.getModel(
-    "ReferencesCategory",
+    "referencescategory",
     ReferencesCategory.schema
   ),
-  Articles: await req.getModel("Articles", Articles.schema),
+  Articles: await req.getModel("articles", Articles.schema),
   ArticlesCategory: await req.getModel(
-    "ArticlesCategory",
+    "articlescategory",
     ArticlesCategory.schema
   ),
-  Library: await req.getModel("Library", Library.schema),
-  LibraryCategory: await req.getModel("LibraryCategory", LibraryCategory.schema),
-  ChatMessage: await req.getModel("ChatMessage", ChatMessage.schema),
-  ChatSession: await req.getModel("ChatSession", ChatSession.schema),
-  Ensotekprod: await req.getModel("Ensotekprod", Ensotekprod.schema),
+  Library: await req.getModel("library", Library.schema),
+  LibraryCategory: await req.getModel(
+    "librarycategory",
+    LibraryCategory.schema
+  ),
+  ChatMessage: await req.getModel("chatmessage", ChatMessage.schema),
+  ChatSession: await req.getModel("chatsession", ChatSession.schema),
+  Ensotekprod: await req.getModel("ensotekprod", Ensotekprod.schema),
   EnsotekCategory: await req.getModel(
-    "EnsotekCategory",
+    "ensotekcategory",
     EnsotekCategory.schema
   ),
-  Sport: await req.getModel("Sport", Sport.schema),
-  SportCategory: await req.getModel("SportCategory", SportCategory.schema),
-  Bike: await req.getModel("Bike", Bike.schema),
-  BikeCategory: await req.getModel("BikeCategory", BikeCategory.schema),
-  SectionSetting: await req.getModel("SectionSetting", SectionSetting.schema),
-  SectionMeta: await req.getModel("SectionMeta", SectionMeta.schema),
-  Apartment: await req.getModel("Apartment", Apartment.schema),
+  Sport: await req.getModel("sport", Sport.schema),
+  SportCategory: await req.getModel("sportcategory", SportCategory.schema),
+  Bike: await req.getModel("bike", Bike.schema),
+  BikeCategory: await req.getModel("bikecategory", BikeCategory.schema),
+  SectionSetting: await req.getModel("sectionsetting", SectionSetting.schema),
+  SectionMeta: await req.getModel("sectionmeta", SectionMeta.schema),
+  Apartment: await req.getModel("apartment", Apartment.schema),
   ApartmentCategory: await req.getModel(
-    "ApartmentCategory",
+    "apartmentcategory",
     ApartmentCategory.schema
   ),
-  Apikey: await req.getModel("Apikey", Apikey.schema),
-  Apikeylog: await req.getModel("Apikeylog", Apikeylog.schema),
-  News: await req.getModel("News", News.schema),
-  NewsCategory: await req.getModel("NewsCategory", NewsCategory.schema),
-  Analytics: await req.getModel("Analytics", Analytics.schema),
-  ModuleMeta: await req.getModel("ModuleMeta", ModuleMeta.schema),
-  ModuleSetting: await req.getModel("ModuleSetting", ModuleSetting.schema),
-  FAQ: await req.getModel("FAQ", FAQ.schema),
-  Stockmovement: await req.getModel("Stockmovement", Stockmovement.schema),
-  Sparepart: await req.getModel("Sparepart", Sparepart.schema),
-  SparepartCategory: await req.getModel("SparepartCategory", SparepartCategory.schema),
-  Tenants: await req.getModel("Tenants", Tenants.schema),
+  Apikey: await req.getModel("apikey", Apikey.schema),
+  Apikeylog: await req.getModel("apikeylog", Apikeylog.schema),
+  News: await req.getModel("news", News.schema),
+  NewsCategory: await req.getModel("newscategory", NewsCategory.schema),
+  Analytics: await req.getModel("analytics", Analytics.schema),
+  ModuleMeta: await req.getModel("modulemeta", ModuleMeta.schema),
+  ModuleSetting: await req.getModel("modulesetting", ModuleSetting.schema),
+  FAQ: await req.getModel("faq", FAQ.schema),
+  Stockmovement: await req.getModel("stockmovement", Stockmovement.schema),
+  Sparepart: await req.getModel("sparepart", Sparepart.schema),
+  SparepartCategory: await req.getModel(
+    "sparepartcategory",
+    SparepartCategory.schema
+  ),
+  Tenants: await req.getModel("tenants", Tenants.schema),
+  Team: await req.getModel("team", Team.schema),
+  TeamCategory: await req.getModel("teamcategory", TeamCategory.schema),
 });

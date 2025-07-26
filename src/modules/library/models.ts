@@ -43,10 +43,14 @@ const LibrarySchema = new Schema<ILibrary>(
     files: { type: [LibraryFileSchema], default: undefined }, // opsiyonel
     tags: { type: [String], default: undefined }, // opsiyonel
     author: { type: String },
-    category: { type: Schema.Types.ObjectId, ref: "LibraryCategory", required: true },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: "librarycategory",
+      required: true,
+    },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
-    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+    comments: [{ type: Schema.Types.ObjectId, ref: "comment" }],
     isActive: { type: Boolean, default: true },
     views: { type: Number, default: 0 },
     downloadCount: { type: Number, default: 0 },
@@ -68,6 +72,6 @@ LibrarySchema.pre("validate", function (next) {
 });
 
 const Library: Model<ILibrary> =
-  models.Library || model<ILibrary>("Library", LibrarySchema);
+  models.library || model<ILibrary>("library", LibrarySchema);
 
 export { Library, LibraryImageSchema, LibraryFileSchema, LibrarySchema };

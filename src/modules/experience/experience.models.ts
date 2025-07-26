@@ -50,7 +50,8 @@ const experienceSchema = new Schema<IExperience>(
 );
 
 // ✅ Guard + Model Type
-const Experience: Model<IExperience> = models.Experience || model<IExperience>("Experience", experienceSchema);
+const Experience: Model<IExperience> =
+  models.experience || model<IExperience>("experience", experienceSchema);
 
 export { Experience, IExperience };
 export default Experience;

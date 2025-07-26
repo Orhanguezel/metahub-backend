@@ -13,7 +13,7 @@ export interface ICarrierDetails {
   tenant?: string; // Optional tenant field for multi-tenancy
 }
 
-export interface IShipment  {
+export interface IShipment {
   order: Types.ObjectId;
   tenant: string; // Optional tenant field for multi-tenancy
   trackingNumber: string;
@@ -29,7 +29,7 @@ export interface IShipment  {
 
 const shipmentSchema = new Schema<IShipment>(
   {
-    order: { type: Schema.Types.ObjectId, ref: "Order", required: true },
+    order: { type: Schema.Types.ObjectId, ref: "order", required: true },
     tenant: { type: String, required: true, index: true },
     trackingNumber: { type: String, required: true, unique: true },
     status: {
@@ -55,6 +55,6 @@ const shipmentSchema = new Schema<IShipment>(
 
 // ✅ Guard + Model Tipi (standart yapı)
 const Shipment: Model<IShipment> =
-  models.Shipment || model<IShipment>("Shipment", shipmentSchema);
+  models.shipment || model<IShipment>("shipment", shipmentSchema);
 
 export { Shipment };

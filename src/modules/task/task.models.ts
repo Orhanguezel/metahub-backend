@@ -16,16 +16,16 @@ const TaskSchema = new Schema<ITask>(
     },
     assignedTo: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: "user",
       required: true,
     },
     assignedBy: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: "user",
     },
     apartment: {
       type: Schema.Types.ObjectId,
-      ref: "Apartment",
+      ref: "apartment",
       required: true,
     },
     status: {
@@ -53,6 +53,5 @@ const TaskSchema = new Schema<ITask>(
   { timestamps: true }
 );
 
-const Task: Model<ITask> = models.Task || model<ITask>("Task", TaskSchema);
+const Task: Model<ITask> = models.task || model<ITask>("task", TaskSchema);
 export { Task };
-

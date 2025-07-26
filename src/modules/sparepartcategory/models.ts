@@ -46,9 +46,9 @@ SparepartCategorySchema.pre("validate", function (next) {
 });
 
 const SparepartCategory: Model<ISparepartCategory> =
-  models.SparepartCategory ||
+  models.sparepartcategory ||
   mongoose.model<ISparepartCategory>(
-    "SparepartCategory",
+    "sparepartcategory",
     SparepartCategorySchema
   );
 

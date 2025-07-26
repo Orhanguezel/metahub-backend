@@ -14,6 +14,7 @@ const SettingSchema = new Schema<ISettings>(
 
 SettingSchema.index({ tenant: 1, key: 1 }, { unique: true });
 
-const Settings: Model<ISettings> = models.Settings || model<ISettings>("Settings", SettingSchema);
+const Settings: Model<ISettings> =
+  models.settings || model<ISettings>("settings", SettingSchema);
 
 export { Settings };

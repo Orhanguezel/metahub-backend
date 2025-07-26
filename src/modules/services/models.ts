@@ -33,12 +33,12 @@ const ServicesSchema = new Schema<IServices>(
     author: { type: String },
     category: {
       type: Schema.Types.ObjectId,
-      ref: "ServicesCategory",
+      ref: "servicescategory",
       required: true,
     },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
-    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+    comments: [{ type: Schema.Types.ObjectId, ref: "comment" }],
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
@@ -57,6 +57,6 @@ ServicesSchema.pre("validate", function (next) {
 });
 
 const Services: Model<IServices> =
-  models.Services || model<IServices>("Services", ServicesSchema);
+  models.services || model<IServices>("services", ServicesSchema);
 
 export { Services, ServicesImageSchema, ServicesSchema };

@@ -50,7 +50,7 @@ BlogCategorySchema.pre("validate", function (next) {
 });
 
 const BlogCategory: Model<IBlogCategory> =
-  (models.BlogCategory as Model<IBlogCategory>) ||
-  mongoose.model<IBlogCategory>("BlogCategory", BlogCategorySchema);
+  (models.blogcategory as Model<IBlogCategory>) ||
+  mongoose.model<IBlogCategory>("blogcategory", BlogCategorySchema);
 
 export { BlogCategory };

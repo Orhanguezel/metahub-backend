@@ -50,7 +50,7 @@ AboutCategorySchema.pre("validate", function (next) {
 });
 
 const AboutCategory: Model<IAboutCategory> =
-  (models.AboutCategory as Model<IAboutCategory>) ||
-  mongoose.model<IAboutCategory>("AboutCategory", AboutCategorySchema);
+  (models.aboutcategory as Model<IAboutCategory>) ||
+  mongoose.model<IAboutCategory>("aboutcategory", AboutCategorySchema);
 
 export { AboutCategory };

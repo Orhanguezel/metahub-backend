@@ -37,11 +37,11 @@ const CompanySchema = new Schema<ICompany>(
     taxNumber: { type: String, required: true },
     handelsregisterNumber: { type: String },
     registerCourt: { type: String }, // *** EKLE ***
-    website: { type: String },       // *** EKLE ***
+    website: { type: String }, // *** EKLE ***
     managers: { type: [String], default: [] }, // *** EKLE ***
     email: { type: String, required: true, unique: true },
     phone: { type: String, required: true },
-    addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }],
+    addresses: [{ type: Schema.Types.ObjectId, ref: "address" }],
     bankDetails: {
       bankName: { type: String, required: true },
       iban: { type: String, required: true },
@@ -59,8 +59,7 @@ const CompanySchema = new Schema<ICompany>(
   { timestamps: true }
 );
 
-
 const Company: Model<ICompany> =
-  models.Company || model<ICompany>("Company", CompanySchema);
+  models.company || model<ICompany>("company", CompanySchema);
 
 export { Company, CompanyImageSchema, CompanySchema };

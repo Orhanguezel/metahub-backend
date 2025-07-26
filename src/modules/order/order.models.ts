@@ -10,10 +10,10 @@ const orderItemSchema = new Schema<IOrderItem>(
       required: true,
       refPath: "items.productType", // <<<--- DİNAMİK REFERANS!
     },
-     productType: {
+    productType: {
       type: String,
       required: true,
-      enum: ["Bike", "Ensotekprod", "Sparepart"], // İstediğin kadar model ekle
+      enum: ["bike", "ensotekprod", "sparepart"], // İstediğin kadar model ekle
     },
     tenant: { type: String, required: true, index: true },
     quantity: { type: Number, required: true, min: 1 },
@@ -39,25 +39,28 @@ const shippingAddressSchema = new Schema<IShippingAddress>(
 // --- ORDER SCHEMA ---
 const orderSchema = new Schema<IOrder>(
   {
-    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    user: { type: Schema.Types.ObjectId, ref: "user", required: true },
     tenant: { type: String, required: true, index: true },
-    addressId: { type: Schema.Types.ObjectId, ref: "Address" },
+    addressId: { type: Schema.Types.ObjectId, ref: "address" },
     items: {
       type: [orderItemSchema],
       required: true,
-      validate: [(v: any[]) => v.length > 0, "Order must have at least one item."],
+      validate: [
+        (v: any[]) => v.length > 0,
+        "Order must have at least one item.",
+      ],
     },
     shippingAddress: { type: shippingAddressSchema, required: true },
     totalPrice: { type: Number, required: true, min: 0 },
     discount: { type: Number, default: 0 },
-    coupon: { type: Schema.Types.ObjectId, ref: "Coupon" },
+    coupon: { type: Schema.Types.ObjectId, ref: "coupon" },
     paymentMethod: {
       type: String,
       enum: ["cash_on_delivery", "credit_card", "paypal"],
       default: "cash_on_delivery",
       required: true,
     },
-    payments: [{ type: Schema.Types.ObjectId, ref: "Payment" }],
+    payments: [{ type: Schema.Types.ObjectId, ref: "payment" }],
     status: {
       type: String,
       enum: ["pending", "preparing", "shipped", "completed", "cancelled"],
@@ -77,4 +80,4 @@ const orderSchema = new Schema<IOrder>(
 );
 
 export const Order: Model<IOrder> =
-  models.Order || model<IOrder>("Order", orderSchema);
+  models.order || model<IOrder>("order", orderSchema);

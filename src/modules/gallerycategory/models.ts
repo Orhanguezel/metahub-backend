@@ -46,7 +46,7 @@ GalleryCategorySchema.pre("validate", function (next) {
 });
 
 const GalleryCategory: Model<IGalleryCategory> =
-  models.GalleryCategory ||
-  mongoose.model<IGalleryCategory>("GalleryCategory", GalleryCategorySchema);
+  models.gallerycategory ||
+  mongoose.model<IGalleryCategory>("gallerycategory", GalleryCategorySchema);
 
 export { GalleryCategory };

@@ -25,6 +25,7 @@ export const createComment = asyncHandler(async (req: Request, res: Response) =>
     text,
     type = "comment",
     name,
+    profileImage,
     email,
     rating,
   } = req.body;
@@ -71,6 +72,7 @@ export const createComment = asyncHandler(async (req: Request, res: Response) =>
 
     const newComment = await Comment.create({
       name: user?.name || name,
+      profileImage,
       tenant: req.tenant,
       email: user?.email || email,
       userId: user?._id,
@@ -189,13 +191,47 @@ export const getAllComments = asyncHandler(async (req: Request, res: Response) =
     }
 
     const total = await Comment.countDocuments(query);
-    const comments = await Comment.find(query)
+
+    // 1. Tüm veriyi al
+    let comments = await Comment.find(query)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate("userId", "name email")
-      .populate("contentId", "title slug")
+      .populate("userId", "name email profileImage")
       .lean();
+
+    // 2. Yalnızca type !== 'testimonial' olanlara contentId populate et
+    const mongoose = require("mongoose");
+    for (const comment of comments) {
+      // Eğer contentId gerçek bir ObjectId ise ve type testimonial değilse
+      if (
+        comment.contentId &&
+        mongoose.Types.ObjectId.isValid(comment.contentId) &&
+        comment.type !== "testimonial"
+      ) {
+        // Model adını dinamik al (contentType)
+        const contentModelName =
+          comment.contentType.charAt(0).toUpperCase() +
+          comment.contentType.slice(1);
+        try {
+          // Model varsa populate et
+          const ContentModel =
+            req.app.get("models")?.[contentModelName] ||
+            (await getTenantModels(req))[contentModelName];
+          if (ContentModel) {
+            // İçeriği bul ve ata
+            const content = await ContentModel.findById(comment.contentId)
+              .select("title slug")
+              .lean();
+            if (content) {
+              comment.contentId = content;
+            }
+          }
+        } catch (err) {
+          // Model yoksa veya hata olursa hiçbir şey yapma
+        }
+      }
+    }
 
     res.status(200).json({
       success: true,
@@ -205,12 +241,13 @@ export const getAllComments = asyncHandler(async (req: Request, res: Response) =
     });
   } catch (err: any) {
     logger.withReq.error(req, "Admin getAllComments error", { error: err.message, stack: err.stack });
-  res.status(500).json({
+    res.status(500).json({
       success: false,
       message: t("comment.paginatedFetchError", { error: err.message }),
     });
   }
 });
+
 
 // --- Admin: Yayınlama togglesı ---
 export const togglePublishComment = asyncHandler(async (req: Request, res: Response) => {

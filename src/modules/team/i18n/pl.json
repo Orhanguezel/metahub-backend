@@ -1,0 +1,14 @@
+{
+  "created": "Artykuł został pomyślnie utworzony.",
+  "updated": "Artykuł został pomyślnie zaktualizowany.",
+  "invalidId": "Nieprawidłowe ID.",
+  "notFound": "Artykuł nie został znaleziony.",
+  "fetched": "Artykuł pomyślnie pobrany.",
+  "deleted": "Artykuł został pomyślnie usunięty.",
+  "invalidRemovedImages": "Nieprawidłowe usunięte obrazy.",
+  "listFetched": "Lista artykułów pomyślnie pobrana.",
+  "tagsArray": "Tablica tagów jest nieprawidłowa.",
+  "invalidCategory": "Nieprawidłowa kategoria.",
+  "booleanField": "Proszę podać prawidłową wartość logiczną."
+}
+

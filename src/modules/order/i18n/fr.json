@@ -30,7 +30,7 @@
   "greeting": "Cher/Chère {name},",
   "thankYou": "Merci pour votre commande.",
   "status": "Votre commande a bien été reçue et est en cours de traitement.",
-  "labelItems": "Articles",
+  "labelItems": "articles",
   "labelTotal": "Total",
   "shipping": "Votre commande sera expédiée à votre adresse dans les plus brefs délais.",
   "sign": "Cordialement, l'équipe {name}"

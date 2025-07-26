@@ -93,11 +93,13 @@ export const updateMyProfile = asyncHandler(
     const user = await User.findOne({ _id: req.user!.id, tenant: req.tenant });
     if (!user) return;
 
-    const { name, email, phone, language } = req.body;
+    const { name, email, phone, language, company, position } = req.body;
     user.name = name ?? user.name;
     user.email = email ?? user.email;
     user.phone = phone ?? user.phone;
     user.language = language ?? user.language ?? locale;
+    user.company = company ?? user.company;
+    user.position = position ?? user.position;
 
     const updated = await user.save();
 
@@ -108,6 +110,8 @@ export const updateMyProfile = asyncHandler(
       user: {
         _id: updated._id,
         name: updated.name,
+        company: updated.company,
+        position: updated.position,
         email: updated.email,
         phone: updated.phone,
         language: updated.language,

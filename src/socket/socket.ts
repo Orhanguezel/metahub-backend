@@ -68,20 +68,20 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
   const onlineUsers = new Map<string, string>();
 
   io.on("connection", async (socket: Socket) => {
-  // 1️⃣ Tenant Algılama
-  let tenant: string =
-    socket.data.tenant ||
-    (typeof socket.handshake.headers["x-tenant"] === "string"
-      ? socket.handshake.headers["x-tenant"]
-      : "") ||
-    // Yeni ekle:
-    (socket.handshake.query?.tenant as string) || // <-- Query’den oku!
-    "";
+    // 1️⃣ Tenant Algılama
+    let tenant: string =
+      socket.data.tenant ||
+      (typeof socket.handshake.headers["x-tenant"] === "string"
+        ? socket.handshake.headers["x-tenant"]
+        : "") ||
+      // Yeni ekle:
+      (socket.handshake.query?.tenant as string) || // <-- Query’den oku!
+      "";
 
-  if (!tenant) {
-    logger.error("[Socket] Tenant slug alınamadı. Bağlantı reddedildi.");
-    return socket.disconnect(true);
-  }
+    if (!tenant) {
+      logger.error("[Socket] Tenant slug alınamadı. Bağlantı reddedildi.");
+      return socket.disconnect(true);
+    }
 
     // 3️⃣ DB bağlantısı ve model cache’i tenant’a göre alınır
     let conn;
@@ -107,7 +107,7 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
 
     // 5️⃣ ChatSession kaydı
     try {
-      await models.ChatSession.findOneAndUpdate(
+      await models.chatsession.findOneAndUpdate(
         { roomId },
         {
           roomId,
@@ -118,7 +118,9 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
         { upsert: true, new: true }
       );
     } catch (err) {
-      logger.error(t("socket.session.saveError", lang, translations) + ` ${err}`);
+      logger.error(
+        t("socket.session.saveError", lang, translations) + ` ${err}`
+      );
     }
 
     if (userId) {
@@ -148,14 +150,17 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
           "tr";
         let languageObj: TranslatedLabel;
         if (language && typeof language === "object") {
-          languageObj = { ...fillAllLocales(message, preferredLang), ...language };
+          languageObj = {
+            ...fillAllLocales(message, preferredLang),
+            ...language,
+          };
         } else if (typeof language === "string") {
           languageObj = fillAllLocales(language, preferredLang);
         } else {
           languageObj = fillAllLocales(message, preferredLang);
         }
 
-        const newMsg = await models.ChatMessage.create({
+        const newMsg = await models.chatmessage.create({
           sender: userId ? userId : null,
           tenant,
           roomId: room,
@@ -193,67 +198,73 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
     });
 
     // 7️⃣ Admin mesajı (admin-message)
-    socket.on("admin-message", async ({ room, message, language }: ChatMessagePayload) => {
-      if (!message?.trim() || !room) return;
-      try {
-        const preferredLang =
-          (user?.lang as SupportedLocale) ||
-          (typeof language === "string" ? undefined : undefined) ||
-          "tr";
-        let languageObj: TranslatedLabel;
-        if (language && typeof language === "object") {
-          languageObj = { ...fillAllLocales(message, preferredLang), ...language };
-        } else if (typeof language === "string") {
-          languageObj = fillAllLocales(message, preferredLang);
-        } else {
-          languageObj = fillAllLocales(message, preferredLang);
-        }
+    socket.on(
+      "admin-message",
+      async ({ room, message, language }: ChatMessagePayload) => {
+        if (!message?.trim() || !room) return;
+        try {
+          const preferredLang =
+            (user?.lang as SupportedLocale) ||
+            (typeof language === "string" ? undefined : undefined) ||
+            "tr";
+          let languageObj: TranslatedLabel;
+          if (language && typeof language === "object") {
+            languageObj = {
+              ...fillAllLocales(message, preferredLang),
+              ...language,
+            };
+          } else if (typeof language === "string") {
+            languageObj = fillAllLocales(message, preferredLang);
+          } else {
+            languageObj = fillAllLocales(message, preferredLang);
+          }
 
-        const adminChat = await models.ChatMessage.create({
-          sender: userId ? userId : null,
-          tenant,
-          roomId: room,
-          message,
-          isFromAdmin: true,
-          isRead: true,
-          language: languageObj,
-        });
-
-        const populated = await adminChat.populate("sender", "name email");
-        const sender = populated.sender as any;
-
-        io.to(room).emit("chat-message", {
-          _id: populated.id.toString(),
-          message: populated.get("message"),
-          sender: sender
-            ? {
-                _id: sender._id,
-                name: sender.name,
-                email: sender.email,
-              }
-            : null,
-          roomId: room,
-          tenant,
-          createdAt: populated.get("createdAt"),
-          isFromAdmin: true,
-          isFromBot: false,
-          isRead: true,
-          language: populated.get("language"),
-        });
-
-        logger.info(
-          t("socket.adminMessage.success", lang, translations, {
-            email: sender?.email,
-            room,
+          const adminChat = await models.chatmessage.create({
+            sender: userId ? userId : null,
             tenant,
-          })
-        );
-      } catch (err) {
-        logger.error(
-          t("socket.adminMessage.error", lang, translations) + ` ${err}`
-        );
+            roomId: room,
+            message,
+            isFromAdmin: true,
+            isRead: true,
+            language: languageObj,
+          });
+
+          const populated = await adminChat.populate("sender", "name email");
+          const sender = populated.sender as any;
+
+          io.to(room).emit("chat-message", {
+            _id: populated.id.toString(),
+            message: populated.get("message"),
+            sender: sender
+              ? {
+                  _id: sender._id,
+                  name: sender.name,
+                  email: sender.email,
+                }
+              : null,
+            roomId: room,
+            tenant,
+            createdAt: populated.get("createdAt"),
+            isFromAdmin: true,
+            isFromBot: false,
+            isRead: true,
+            language: populated.get("language"),
+          });
+
+          logger.info(
+            t("socket.adminMessage.success", lang, translations, {
+              email: sender?.email,
+              room,
+              tenant,
+            })
+          );
+        } catch (err) {
+          logger.error(
+            t("socket.adminMessage.error", lang, translations) + ` ${err}`
+          );
+        }
       }
-    });
+    );
 
     // 8️⃣ Disconnect eventi
     socket.on("disconnect", () => {

@@ -35,11 +35,11 @@ const SportSchema = new Schema<ISport>(
     author: { type: String },
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "SportCategory",
+      ref: "sportcategory",
     },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
-    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
+    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "comment" }],
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
@@ -61,6 +61,7 @@ SportSchema.pre("validate", function (this: ISport, next) {
 
 // ✅ Guarded Model
 const Sport: Model<ISport> =
-  (models.Sport as Model<ISport>) || mongoose.model<ISport>("Sport", SportSchema);
+  (models.sport as Model<ISport>) ||
+  mongoose.model<ISport>("sport", SportSchema);
 
 export { Sport };

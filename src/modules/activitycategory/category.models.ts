@@ -50,7 +50,7 @@ ActivityCategorySchema.pre("validate", function (next) {
 });
 
 const ActivityCategory: Model<IActivityCategory> =
-  (models.ActivityCategory as Model<IActivityCategory>) ||
-  mongoose.model<IActivityCategory>("ActivityCategory", ActivityCategorySchema);
+  (models.activitycategory as Model<IActivityCategory>) ||
+  mongoose.model<IActivityCategory>("activitycategory", ActivityCategorySchema);
 
 export { ActivityCategory };

@@ -46,7 +46,7 @@ BikeCategorySchema.pre("validate", function (next) {
 });
 
 const BikeCategory: Model<IBikeCategory> =
-  models.BikeCategory ||
-  mongoose.model<IBikeCategory>("BikeCategory", BikeCategorySchema);
+  models.bikecategory ||
+  mongoose.model<IBikeCategory>("bikecategory", BikeCategorySchema);
 
 export { BikeCategory };

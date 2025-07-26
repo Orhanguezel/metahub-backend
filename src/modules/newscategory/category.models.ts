@@ -50,7 +50,7 @@ NewsCategorySchema.pre("validate", function (next) {
 });
 
 const NewsCategory: Model<INewsCategory> =
-  (models.NewsCategory as Model<INewsCategory>) ||
-  mongoose.model<INewsCategory>("NewsCategory", NewsCategorySchema);
+  (models.newscategory as Model<INewsCategory>) ||
+  mongoose.model<INewsCategory>("newscategory", NewsCategorySchema);
 
 export { NewsCategory };

@@ -71,8 +71,9 @@ export const validateCreateComment = [
 
   // --- contentId: zorunlu ObjectId
   body("contentId")
-    .notEmpty().withMessage("Content ID is required.")
-    .isMongoId().withMessage("Content ID must be a valid MongoDB ObjectId."),
+  .if(body("type").not().equals("testimonial"))
+  .notEmpty().withMessage("Content ID is required.")
+  .isMongoId().withMessage("Content ID must be a valid MongoDB ObjectId."),
 
   validateRequest,
 ];

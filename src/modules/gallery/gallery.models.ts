@@ -27,7 +27,7 @@ const gallerySchema = new Schema<IGallery>(
     images: [galleryItemSchema],
     category: {
       type: Schema.Types.ObjectId,
-      ref: "GalleryCategory",
+      ref: "gallerycategory",
       required: true,
     },
     tenant: { type: String, required: true, index: true },
@@ -47,7 +47,7 @@ gallerySchema.index({ category: 1, isPublished: 1, isActive: 1 });
 
 // ✅ Model
 const Gallery: Model<IGallery> =
-  models.Gallery || model<IGallery>("Gallery", gallerySchema);
+  models.gallery || model<IGallery>("gallery", gallerySchema);
 
 // ✅ Export
 export { Gallery };

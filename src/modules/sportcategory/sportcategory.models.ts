@@ -1,6 +1,6 @@
 import mongoose, { Schema, Types, Model, models } from "mongoose";
 
-export interface ISportCategory  {
+export interface ISportCategory {
   name: {
     tr: string;
     en: string;
@@ -48,10 +48,9 @@ SportCategorySchema.pre("validate", function (next) {
   next();
 });
 
-
 // ✅ Guard + Model Type
-const SportCategory: Model<ISportCategory>=
-(models.SportCategory as Model<ISportCategory>) || mongoose.model<ISportCategory>("SportCategory", SportCategorySchema);
+const SportCategory: Model<ISportCategory> =
+  (models.sportcategory as Model<ISportCategory>) ||
+  mongoose.model<ISportCategory>("sportcategory", SportCategorySchema);
 
 export { SportCategory };
-

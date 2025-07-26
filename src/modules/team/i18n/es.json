@@ -1,0 +1,13 @@
+{
+  "created": "Artículo creado con éxito.",
+  "updated": "Artículo actualizado con éxito.",
+  "invalidId": "ID no válido.",
+  "notFound": "Artículo no encontrado.",
+  "fetched": "Artículo obtenido con éxito.",
+  "deleted": "Artículo eliminado con éxito.",
+  "invalidRemovedImages": "Imágenes eliminadas no válidas.",
+  "listFetched": "Lista de artículos obtenida con éxito.",
+  "tagsArray": "El array de etiquetas no es válido.",
+  "invalidCategory": "Categoría no válida.",
+  "booleanField": "Por favor, ingrese un valor booleano válido."
+}

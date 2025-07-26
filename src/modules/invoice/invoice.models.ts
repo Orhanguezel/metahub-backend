@@ -8,7 +8,7 @@ interface InvoiceItem {
   unitPrice: number;
 }
 
-export interface IInvoice  {
+export interface IInvoice {
   order: Types.ObjectId;
   tenant: string; // Optional tenant field for multi-tenancy
   user: Types.ObjectId;
@@ -25,7 +25,7 @@ export interface IInvoice  {
 }
 
 const invoiceItemSchema = new Schema<InvoiceItem>({
-  product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
+  product: { type: Schema.Types.ObjectId, ref: "product", required: true },
   tenant: { type: String, required: true, index: true },
   name: { type: String, required: true },
   quantity: { type: Number, required: true },
@@ -34,10 +34,10 @@ const invoiceItemSchema = new Schema<InvoiceItem>({
 
 const invoiceSchema = new Schema<IInvoice>(
   {
-    order: { type: Schema.Types.ObjectId, ref: "Order", required: true },
+    order: { type: Schema.Types.ObjectId, ref: "order", required: true },
     tenant: { type: String, required: true, index: true },
-    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    company: { type: Schema.Types.ObjectId, ref: "Company", required: true },
+    user: { type: Schema.Types.ObjectId, ref: "user", required: true },
+    company: { type: Schema.Types.ObjectId, ref: "company", required: true },
     items: [invoiceItemSchema],
     totalAmount: { type: Number, required: true },
     taxRate: { type: Number, default: 19 },
@@ -55,6 +55,6 @@ const invoiceSchema = new Schema<IInvoice>(
 
 // ✅ Guard + Model Type
 const Invoice: Model<IInvoice> =
-  models.Invoice || model<IInvoice>("Invoice", invoiceSchema);
+  models.invoice || model<IInvoice>("invoice", invoiceSchema);
 
 export { Invoice, InvoiceItem };

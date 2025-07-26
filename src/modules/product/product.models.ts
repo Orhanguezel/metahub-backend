@@ -1,6 +1,6 @@
 import { Schema, Model, Types, models, model } from "mongoose";
 
-export interface IProduct  {
+export interface IProduct {
   name: {
     tr: string;
     en: string;
@@ -65,7 +65,7 @@ productSchema.pre<IProduct>("validate", function (next) {
 
 // ✅ Guard + Model yapısı
 const Product: Model<IProduct> =
-  models.Product || model<IProduct>("Product", productSchema);
+  models.product || model<IProduct>("product", productSchema);
 
 // ✅ Export
-export { Product }; 
+export { Product };

@@ -1,7 +1,7 @@
 import { Schema, model, Model, models } from "mongoose";
 
 // ✅ Interface
-export interface IFeedback  {
+export interface IFeedback {
   name: string;
   tenant: string; // Optional tenant field for multi-tenancy
   email: string;
@@ -36,6 +36,7 @@ const feedbackSchema = new Schema<IFeedback>(
 );
 
 // ✅ Guard + Model Type
-const Feedback: Model<IFeedback> = models.Feedback || model<IFeedback>("Feedback", feedbackSchema);
+const Feedback: Model<IFeedback> =
+  models.feedback || model<IFeedback>("feedback", feedbackSchema);
 
 export { Feedback };
