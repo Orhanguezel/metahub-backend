@@ -1,0 +1,38 @@
+[
+  {
+    "id": "faq1",
+    "language": "en",
+    "question": {
+      "en": "What is your return policy?",
+      "tr": "İade politikanız nedir?",
+      "de": "Wie ist Ihre Rückgabebedingung?",
+      "fr": "Quelle est votre politique de retour?",
+      "pl": "Jaka jest twoja polityka zwrotów?"
+    },
+    "answer": {
+      "en": "You can return within 30 days.",
+      "tr": "30 gün içinde iade edebilirsiniz.",
+      "de": "Sie können innerhalb von 30 Tagen zurückgeben.",
+      "fr": "Vous pouvez retourner dans les 30 jours.",
+      "pl": "Możesz zwrócić w ciągu 30 dni."
+    }
+  },
+  {
+    "id": "faq2",
+    "language": "tr",
+    "question": {
+      "en": "How do I reset my password?",
+      "tr": "Şifremi nasıl sıfırlayabilirim?",
+      "de": "Wie kann ich mein Passwort zurücksetzen?",
+      "fr": "Comment réinitialiser mon mot de passe?",
+      "pl": "Jak zresetować hasło?"
+    },
+    "answer": {
+      "en": "Use the 'Forgot Password' link on the login page.",
+      "tr": "Giriş sayfasındaki 'Şifremi Unuttum' bağlantısını kullanın.",
+      "de": "Verwenden Sie den Link 'Passwort vergessen' auf der Anmeldeseite.",
+      "fr": "Utilisez le lien 'Mot de passe oublié' sur la page de connexion.",
+      "pl": "Użyj linku 'Zapomniałeś hasła' na stronie logowania."
+    }
+  }
+]

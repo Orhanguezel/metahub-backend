@@ -46,7 +46,7 @@ export const getAllReferences = asyncHandler(
 
     res.status(200).json({
       success: true,
-      message: "References list fetched successfully.",
+      message: t("log.listed"),
       data: referencesList,
     });
   }

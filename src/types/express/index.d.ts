@@ -62,6 +62,7 @@ declare global {
         | "tenant"
         | "coupons"
         | "team"
+        | "portfolio"
         | "default";
 
       uploadSizeLimit?: number;

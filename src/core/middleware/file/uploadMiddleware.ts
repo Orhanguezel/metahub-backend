@@ -35,6 +35,7 @@ export const UPLOAD_FOLDERS = {
   galleryCategory: "galleryCategory-images",
   sparepartCategory: "sparepartCategory-images",
   team: "team-images",
+  portfolio: "portfolio-images",
   default: "misc",
 } as const;
 

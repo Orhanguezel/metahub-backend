@@ -1,39 +1,22 @@
 import axios from "axios";
+import { SupportedLocale } from "@/types/common";
+import { t as translate } from "@/core/utils/i18n/translate";
+import faqTranslations from "@/modules/faq/i18n";
 
-const languagePrompts: Record<"tr" | "en" | "de", string> = {
-  tr: `Kullanıcının sorusu: {{question}}
-
-Aşağıda bazı örnek SSS içerikleri verilmiştir.
-Lütfen bu bilgileri kullanarak kullanıcıya kısa, sade ve anlaşılır bir yanıt ver:
-
-{{context}}`,
-
-  en: `User question: {{question}}
-
-Below are some related FAQ entries.
-Please use this information to give a short, clear and helpful response:
-
-{{context}}`,
-
-  de: `Benutzerfrage: {{question}}
-
-Unten findest du einige verwandte FAQ-Einträge.
-Bitte verwende diese Informationen, um eine kurze, klare und hilfreiche Antwort zu geben:
-
-{{context}}`,
-};
-
+/**
+ * Interface
+ */
 interface AskWithOllamaOptions {
   question: string;
   context: string;
-  lang: "tr" | "en" | "de";
+  lang: SupportedLocale;
   model?: string;
 }
 
 const OLLAMA_HOST = process.env.OLLAMA_HOST;
 
 /**
- * Sends multilingual prompt to Ollama and gets response.
+ * Sends i18n prompt to Ollama and returns AI-generated answer
  */
 export const askWithOllama = async ({
   question,
@@ -42,24 +25,21 @@ export const askWithOllama = async ({
   model = "llama3",
 }: AskWithOllamaOptions): Promise<string> => {
   try {
-    const template = languagePrompts[lang] || languagePrompts.en;
-
-    const prompt = template
+    const promptTemplate = translate("faqs.llm_prompt", lang, faqTranslations);
+    const prompt = promptTemplate
       .replace("{{question}}", sanitize(question))
-      .replace("{{context}}", context || "No related data found.");
+      .replace("{{context}}", context || "No related FAQ content available.");
 
     const response = await axios.post(
       `${OLLAMA_HOST}/api/generate`,
       { model, prompt, stream: false },
-      {
-        headers: { "Content-Type": "application/json" },
-      }
+      { headers: { "Content-Type": "application/json" } }
     );
 
     return response.data?.response?.trim() || "No response from AI.";
   } catch (error: any) {
     console.error("❌ Ollama API Error:", error.response?.data || error.message);
-    throw new Error("Ollama'dan yanıt alınamadı.");
+    throw new Error("Ollama API failed to respond.");
   }
 };
 

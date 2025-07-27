@@ -1,0 +1,21 @@
+{
+  "faqs": {
+    "question_required": "Soru alanı zorunludur.",
+    "answer_generated": "Yanıt başarıyla üretildi.",
+    "answer_failed": "Yanıt üretilemedi.",
+    "no_similar_found": "Benzer SSS bulunamadı.",
+    "retrieved_successfully": "SSS başarıyla getirildi.",
+    "created_successfully": "SSS başarıyla oluşturuldu.",
+    "updated_successfully": "SSS başarıyla güncellendi.",
+    "deleted_successfully": "SSS başarıyla silindi.",
+    "not_found": "SSS bulunamadı.",
+    "invalid_id": "Geçersiz SSS ID.",
+    "validation_failed": "Doğrulama başarısız."
+  },
+  "validation": {
+    "invalidObjectId": "Geçersiz ID.",
+    "embedding_array": "Embedding bir dizi olmalıdır.",
+    "embedding_numbers": "Tüm embedding değerleri sayı olmalıdır.",
+    "invalid_language": "Geçersiz dil."
+  }
+}

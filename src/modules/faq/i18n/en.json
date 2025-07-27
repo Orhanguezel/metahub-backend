@@ -1,0 +1,21 @@
+{
+  "faqs": {
+    "question_required": "Question is required.",
+    "answer_generated": "Answer has been generated successfully.",
+    "answer_failed": "Failed to generate answer.",
+    "no_similar_found": "No similar FAQ found.",
+    "retrieved_successfully": "FAQs retrieved successfully.",
+    "created_successfully": "FAQ created successfully.",
+    "updated_successfully": "FAQ updated successfully.",
+    "deleted_successfully": "FAQ deleted successfully.",
+    "not_found": "FAQ not found.",
+    "invalid_id": "Invalid FAQ ID.",
+    "validation_failed": "Validation failed."
+  },
+  "validation": {
+    "invalidObjectId": "Invalid ID.",
+    "embedding_array": "Embedding must be an array.",
+    "embedding_numbers": "All embedding values must be numbers.",
+    "invalid_language": "Invalid language."
+  }
+}

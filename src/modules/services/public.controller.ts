@@ -29,7 +29,7 @@ export const getAllServices = asyncHandler(
     }
 
     if (onlyLocalized === "true") {
-      filter[`name.${locale}`] = { $exists: true };
+      filter[`title.${locale}`] = { $exists: true };
     }
 
     const servicesList = await Services.find(filter)
@@ -47,7 +47,7 @@ export const getAllServices = asyncHandler(
 
     res.status(200).json({
       success: true,
-      message: "Services list fetched successfully.",
+      message: t("log.listed"),
       data: servicesList,
     });
   }
@@ -81,7 +81,7 @@ export const getServicesById = asyncHandler(
       tenant: req.tenant,
     })
       .populate("comments")
-      .populate("category", "title")
+      .populate("category", "name slug")
       .lean();
 
     if (!services) {
@@ -125,7 +125,7 @@ export const getServicesBySlug = asyncHandler(
       isPublished: true,
     })
       .populate("comments")
-      .populate("category", "title")
+      .populate("category", "name slug")
       .lean();
 
     if (!services) {

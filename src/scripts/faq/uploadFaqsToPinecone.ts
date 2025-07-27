@@ -1,20 +1,23 @@
-import { config } from "dotenv";
-import mongoose from "mongoose";
+// src/scripts/faq/upsertToPinecone.ts
+
+import "@/core/config/envLoader"; // Ortam değişkenlerini yükler
 import { Pinecone } from "@pinecone-database/pinecone";
-import { FAQ } from "@/modules/faq";
+import { getTenantDbConnection } from "@/core/config/tenantDb";
+import { getTenantModelsFromConnection } from "@/core/middleware/tenant/getTenantModelsFromConnection";
+import { Tenants } from "@/modules/tenants/tenants.model";
+import { PINECONE_INDEX_NAME, DEFAULT_NAMESPACE, pinecone } from "@/scripts/faq/pinecone";
 
-config();
-
-const pinecone = new Pinecone({
-  apiKey: process.env.PINECONE_API_KEY!,
-});
-
-const index = pinecone.Index(process.env.PINECONE_INDEX_NAME!);
+const index = pinecone.Index(PINECONE_INDEX_NAME);
 
 async function main() {
-  try {
-    await mongoose.connect(process.env.MONGO_URI!);
-    console.log("✅ MongoDB bağlantısı başarılı.");
+  const tenants = await Tenants.find({ isActive: true }, { slug: 1 }).lean();
+
+  if (!tenants.length) throw new Error("❌ Hiç aktif tenant bulunamadı!");
+
+  for (const tenant of tenants) {
+    const conn = await getTenantDbConnection(tenant.slug);
+    const models = getTenantModelsFromConnection(conn);
+    const FAQ = models.FAQ;
 
     const faqs = await FAQ.find({
       isActive: true,
@@ -22,34 +25,39 @@ async function main() {
     });
 
     if (faqs.length === 0) {
-      console.log("⛔ Yüklenecek uygun embedding bulunamadı.");
-      return;
+      console.log(`⏭️ [${tenant.slug}] Uygun embedding verisi bulunamadı.`);
+      continue;
     }
 
-    const vectors = faqs.map((faq) => ({
-      id: faq._id.toString(),
-      values: faq.embedding!,
-      metadata: {
-        question_tr: faq.question.tr,
-        question_en: faq.question.en,
-        question_de: faq.question.de,
-        answer_tr: faq.answer.tr,
-        answer_en: faq.answer.en,
-        answer_de: faq.answer.de,
-      },
-    }));
+    const vectors = faqs.map((faq) => {
+      const metadata: Record<string, any> = {
+        tenant: tenant.slug,
+        category: "faq",
+      };
 
-    console.log(`🚀 Pinecone’a yüklenecek veri adedi: ${vectors.length}`);
+      // 🔄 Çok dilli soru/cevapları düzleştir (örnek: question_en, answer_de ...)
+      for (const [lang, text] of Object.entries(faq.question || {})) {
+        metadata[`question_${lang}`] = text;
+      }
+      for (const [lang, text] of Object.entries(faq.answer || {})) {
+        metadata[`answer_${lang}`] = text;
+      }
 
-    await index.namespace("default").upsert(vectors);
-    console.log("✅ Embedding verileri Pinecone’a başarıyla yüklendi.");
-  } catch (error) {
-    console.error("❌ Yükleme hatası:", error);
-  } finally {
-    await mongoose.disconnect();
-    console.log("🔌 MongoDB bağlantısı kapatıldı.");
+      return {
+        id: faq._id.toString(),
+        values: faq.embedding,
+        metadata,
+      };
+    });
+
+    console.log(`🚀 [${tenant.slug}] Pinecone’a yüklenecek: ${vectors.length} kayıt`);
+
+    await index.namespace(tenant.slug || DEFAULT_NAMESPACE).upsert(vectors);
+
+    console.log(`✅ [${tenant.slug}] Pinecone upsert işlemi tamamlandı.`);
   }
 }
 
-main();
-
+main()
+  .then(() => console.log("🎉 Tüm tenant’lar için işlem tamamlandı."))
+  .catch((err) => console.error("❌ Genel hata:", err));

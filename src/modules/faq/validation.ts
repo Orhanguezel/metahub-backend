@@ -1,38 +1,59 @@
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
+import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import { t as translate } from "@/core/utils/i18n/translate";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import translations from "./i18n";
+import { validateMultilangField } from "@/core/utils/i18n/validationUtils";
+
+// ✅ ObjectId param validator
+export const validateFAQId = [
+  param("id")
+    .isMongoId()
+    .withMessage((_, { req }) => {
+      const t = (key: string) =>
+        translate(key, req.locale || getLogLocale(), translations);
+      return t("validation.invalidObjectId");
+    }),
+  validateRequest,
+];
 
 // ✅ CREATE: POST /admin/faqs
 export const validateCreateFAQ = [
-  body("question.tr").notEmpty().withMessage("Soru (TR) zorunludur."),
-  body("question.en").notEmpty().withMessage("Question (EN) is required."),
-  body("question.de").notEmpty().withMessage("Frage (DE) ist erforderlich."),
-  body("answer.tr").notEmpty().withMessage("Cevap (TR) zorunludur."),
-  body("answer.en").notEmpty().withMessage("Answer (EN) is required."),
-  body("answer.de").notEmpty().withMessage("Antwort (DE) ist erforderlich."),
+  validateMultilangField("question"), // çok dilli alan kontrolü
+  validateMultilangField("answer"),
+  body("category").optional().isString(),
+  body("isActive").optional().isBoolean(),
+  body("isPublished").optional().isBoolean(),
+  body("publishedAt").optional().isISO8601().toDate(),
   validateRequest,
 ];
 
 // ✅ UPDATE: PUT /admin/faqs/:id
 export const validateUpdateFAQ = [
-  param("id").isMongoId().withMessage("Geçersiz FAQ ID."),
-  body("question.tr").optional().isString().notEmpty().withMessage("Soru (TR) boş olamaz."),
-  body("question.en").optional().isString().notEmpty().withMessage("Question (EN) cannot be empty."),
-  body("question.de").optional().isString().notEmpty().withMessage("Frage (DE) darf nicht leer sein."),
-  body("answer.tr").optional().isString().notEmpty().withMessage("Cevap (TR) boş olamaz."),
-  body("answer.en").optional().isString().notEmpty().withMessage("Answer (EN) cannot be empty."),
-  body("answer.de").optional().isString().notEmpty().withMessage("Antwort (DE) darf nicht leer sein."),
+  ...validateFAQId, // spread kullan
+  body("question").optional().customSanitizer((v) => (typeof v === "string" ? JSON.parse(v) : v)),
+  body("answer").optional().customSanitizer((v) => (typeof v === "string" ? JSON.parse(v) : v)),
+  body("category").optional().isString(),
+  body("isActive").optional().isBoolean(),
+  body("isPublished").optional().isBoolean(),
+  body("publishedAt").optional().isISO8601().toDate(),
+  body("embedding")
+    .optional()
+    .isArray()
+    .withMessage("Embedding must be an array.")
+    .custom((arr: any[]) => arr.every((v) => typeof v === "number"))
+    .withMessage("All embedding values must be numbers."),
   validateRequest,
 ];
 
-// ✅ DELETE /admin/faqs/:id veya GET /admin/faqs/:id
-export const validateFAQId = [
-  param("id").isMongoId().withMessage("Geçersiz FAQ ID."),
-  validateRequest,
-];
 
-// ✅ ASK: POST /faqs/ask (public)
+// ✅ PUBLIC ASK: POST /faqs/ask
 export const validateAskFAQ = [
   body("question").notEmpty().withMessage("Question is required."),
-  body("language").optional().isIn(["tr", "en", "de"]).withMessage("Invalid language."),
+  body("language")
+    .optional()
+    .isIn(SUPPORTED_LOCALES)
+    .withMessage("Invalid language."),
   validateRequest,
 ];

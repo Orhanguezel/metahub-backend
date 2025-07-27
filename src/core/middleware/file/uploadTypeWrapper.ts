@@ -29,6 +29,7 @@ export const uploadSizeLimits: Record<UploadFolderKeys, number> = {
   galleryCategory: 30 * 1024 * 1024, // New limit for gallery categories
   sparepartCategory: 30 * 1024 * 1024, // New limit for spareparts categories
   team: 30 * 1024 * 1024, // New limit for team categories
+  portfolio: 30 * 1024 * 1024, // New limit for portfolio categories
 };
 
 export const uploadTypeWrapper = (type: UploadFolderKeys) => {

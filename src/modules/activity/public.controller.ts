@@ -29,7 +29,7 @@ export const getAllActivity = asyncHandler(
     }
 
     if (onlyLocalized === "true") {
-      filter[`name.${locale}`] = { $exists: true };
+      filter[`title.${locale}`] = { $exists: true };
     }
 
     const activityList = await Activity.find(filter)
@@ -47,7 +47,7 @@ export const getAllActivity = asyncHandler(
 
     res.status(200).json({
       success: true,
-      message: "Activity list fetched successfully.",
+      message: t("log.listed"),
       data: activityList,
     });
   }
@@ -81,7 +81,7 @@ export const getActivityById = asyncHandler(
       tenant: req.tenant,
     })
       .populate("comments")
-      .populate("category", "title")
+      .populate("category", "name slug")
       .lean();
 
     if (!activity) {
@@ -125,7 +125,7 @@ export const getActivityBySlug = asyncHandler(
       isPublished: true,
     })
       .populate("comments")
-      .populate("category", "title")
+      .populate("category", "name slug")
       .lean();
 
     if (!activity) {

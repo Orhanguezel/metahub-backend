@@ -1,13 +1,25 @@
 {
-  "created": "Article created successfully.",
-  "updated": "Article updated successfully.",
-  "invalidId": "Invalid ID.",
-  "notFound": "Article not found.",
-  "fetched": "Article fetched successfully.",
-  "deleted": "Article deleted successfully.",
-  "invalidRemovedImages": "Invalid removed images.",
-  "listFetched": "Article list fetched successfully.",
-  "tagsArray": "Tags array is invalid.",
-  "invalidCategory": "Invalid category.",
-  "booleanField": "Please provide a valid boolean value."
+  "log": {
+    "listed": "Services listed.",
+    "fetched": "Service fetched successfully.",
+    "created": "Service created successfully.",
+    "updated": "Service updated.",
+    "deleted": "Service deleted.",
+    "listFetched": "Service list fetched successfully."
+  },
+  "error": {
+    "invalid_id": "Invalid ID.",
+    "not_found": "Service not found.",
+    "create_fail": "Failed to create service."
+  },
+  "validation": {
+    "invalidObjectId": "Invalid object ID.",
+    "tagsArray": "Tags must be an array.",
+    "durationMinutesPositive": "Duration must be a positive number.",
+    "pricePositive": "Price must be a positive number.",
+    "invalidCategory": "Invalid category ID.",
+    "invalidRemovedImages": "Removed images format is invalid.",
+    "booleanField": "This field must be true or false.",
+    "invalidLanguage": "Invalid language code."
+  }
 }

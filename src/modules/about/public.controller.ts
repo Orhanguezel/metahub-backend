@@ -28,7 +28,7 @@ export const getAllAbout = asyncHandler(async (req: Request, res: Response) => {
   }
 
   if (onlyLocalized === "true") {
-    filter[`name.${locale}`] = { $exists: true };
+    filter[`title.${locale}`] = { $exists: true };
   }
 
   const aboutList = await About.find(filter)
@@ -46,7 +46,7 @@ export const getAllAbout = asyncHandler(async (req: Request, res: Response) => {
 
   res.status(200).json({
     success: true,
-    message: "About list fetched successfully.",
+    message: t("log.listed"),
     data: aboutList,
   });
 });
@@ -79,7 +79,7 @@ export const getAboutById = asyncHandler(
       tenant: req.tenant,
     })
       .populate("comments")
-      .populate("category", "title")
+      .populate("category", "name slug")
       .lean();
 
     if (!about) {
@@ -123,7 +123,7 @@ export const getAboutBySlug = asyncHandler(
       isPublished: true,
     })
       .populate("comments")
-      .populate("category", "title")
+      .populate("category", "name slug")
       .lean();
 
     if (!about) {
