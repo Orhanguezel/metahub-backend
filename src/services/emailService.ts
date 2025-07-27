@@ -10,7 +10,7 @@ import { getTenantModelsFromConnection } from "@/core/middleware/tenant/getTenan
 import { getTenantMailContext } from "@/core/middleware/tenant/getTenantMailContext";
 
 interface EmailOptions {
-  tenantSlug: string; // zorunlu!
+  tenantSlug: string;
   to: string;
   subject: string;
   html: string;
@@ -19,16 +19,29 @@ interface EmailOptions {
 
 const smtpTransporters: Record<string, { transporter: any; senderName: string; senderEmail: string }> = {};
 
+// --- SMTP transporter caching ---
 async function getTenantSmtpTransporter(tenantSlug: string) {
   if (smtpTransporters[tenantSlug]) return smtpTransporters[tenantSlug];
 
   const tenant = await Tenants.findOne({ slug: tenantSlug, isActive: true }).lean();
-  if (!tenant?.emailSettings) throw new Error(`SMTP ayarları bulunamadı! Tenant: ${tenantSlug}`);
+
+  if (!tenant?.emailSettings) {
+    throw new Error(`[SMTP] Ayarlar eksik! Tenant: ${tenantSlug}`);
+  }
 
   const {
-    smtpHost, smtpPort, smtpSecure, smtpUser, smtpPass,
-    senderName, senderEmail
+    smtpHost,
+    smtpPort,
+    smtpSecure = true,
+    smtpUser,
+    smtpPass,
+    senderName,
+    senderEmail,
   } = tenant.emailSettings;
+
+  if (!smtpHost || !smtpUser || !smtpPass || !senderEmail) {
+    throw new Error(`[SMTP] Eksik alan: ${JSON.stringify(tenant.emailSettings)}`);
+  }
 
   const transporter = nodemailer.createTransport({
     host: smtpHost,
@@ -36,17 +49,20 @@ async function getTenantSmtpTransporter(tenantSlug: string) {
     secure: smtpSecure,
     auth: {
       user: smtpUser,
-      pass: smtpPass
-    }
+      pass: smtpPass,
+    },
   });
 
-  smtpTransporters[tenantSlug] = { transporter, senderName, senderEmail };
+  smtpTransporters[tenantSlug] = {
+    transporter,
+    senderName,
+    senderEmail,
+  };
+
   return smtpTransporters[tenantSlug];
 }
 
-/**
- * Multi-tenant e-posta gönderir
- */
+// --- Email gönderici (multi-tenant aware) ---
 export const sendEmail = async ({
   tenantSlug,
   to,
@@ -55,14 +71,10 @@ export const sendEmail = async ({
   from,
 }: EmailOptions): Promise<void> => {
   const lang = getLogLocale();
-
   const { transporter, senderName, senderEmail } = await getTenantSmtpTransporter(tenantSlug);
 
   const sender =
-    from ||
-    (senderName && senderEmail
-      ? `"${senderName}" <${senderEmail}>`
-      : senderEmail);
+    from || (senderName && senderEmail ? `"${senderName}" <${senderEmail}>` : senderEmail);
 
   const mailOptions = {
     from: sender,
@@ -73,67 +85,50 @@ export const sendEmail = async ({
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    logger.info(
-      `[${tenantSlug}] ${t("email.sent.success", lang, emailI18n, {
-        id: info.messageId,
-      })}`
-    );
+    logger.info(`[${tenantSlug}] ${t("email.sent.success", lang, emailI18n, { id: info.messageId })}`);
     logger.info(t("email.sent.to", lang, emailI18n, { to }));
   } catch (error: any) {
-    logger.error(
-      t("email.sent.error", lang, emailI18n, { error: error.message || error })
-    );
+    logger.error(t("email.sent.error", lang, emailI18n, { error: error.message || error }));
     throw error;
   }
 };
 
-/**
- * Kullanıcıya (multi-tenant, dynamic connection ile) e-posta doğrulama linki gönderir
- */
-
+// --- Email Verification Link Gönderici ---
 export const sendEmailVerificationLink = async ({
   tenantSlug,
   userId,
   email,
-  req,   // <-- Ekstra: tenant context almak için Request nesnesi lazım!
+  req,
 }: {
   tenantSlug: string;
   userId: string;
   email: string;
-  req: any; // Request
+  req: any;
 }) => {
   const lang = getLogLocale();
 
-  // 1. Token oluştur
   const token = crypto.randomBytes(32).toString("hex");
 
-  // 2. Tenant connection ile User modelini al
   const conn = await getTenantDbConnection(tenantSlug);
   const { User } = getTenantModelsFromConnection(conn);
 
-  // 3. Tüm marka/domain/email bilgilerini context’ten çek (sadece .env değil!)
   const {
     brandName,
     senderEmail,
-    frontendUrl, // en kritik nokta!
+    frontendUrl,
   } = getTenantMailContext(req);
 
   if (!frontendUrl) {
-    throw new Error(
-      `[EMAIL-VERIFICATION] Tenant domain (main) bulunamadı! Tenant: ${tenantSlug}`
-    );
+    throw new Error(`[EMAIL-VERIFICATION] Tenant domain bulunamadı: ${tenantSlug}`);
   }
 
-  // 4. Token'ı user'a yaz
   await User.findByIdAndUpdate(userId, {
     emailVerifyToken: token,
-    emailVerifyTokenExpires: new Date(Date.now() + 1000 * 60 * 60 * 24), // 24 saat
+    emailVerifyTokenExpires: new Date(Date.now() + 1000 * 60 * 60 * 24),
   });
 
-  // 5. Link oluştur
   const verifyUrl = `${frontendUrl.replace(/\/$/, "")}/verify-email/${token}`;
 
-  // 6. HTML içeriği (i18n)
   const html = `
     <h3>${t("email.verification.heading", lang, emailI18n)}</h3>
     <p>${t("email.verification.body", lang, emailI18n)}</p>
@@ -141,12 +136,11 @@ export const sendEmailVerificationLink = async ({
     <p>${t("email.verification.ignore", lang, emailI18n)}</p>
   `;
 
-  // 7. E-posta gönder
   await sendEmail({
     tenantSlug,
     to: email,
     subject: t("email.verification.subject", lang, emailI18n),
     html,
-    from: senderEmail, // context’ten gelen email
+    from: senderEmail,
   });
 };

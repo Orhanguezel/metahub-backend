@@ -8,7 +8,6 @@ import { getSettingValue } from "@/core/utils/settingUtils";
 import logger from "@/core/middleware/logger/logger";
 import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "@/templates/i18n";
-import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
@@ -27,7 +26,6 @@ export const createBooking = asyncHandler(
       language,
     } = req.body;
 
-    // Locale ve aktif tenant bilgileri
     const locale: SupportedLocale =
       req.locale ||
       language ||
@@ -36,17 +34,16 @@ export const createBooking = asyncHandler(
     const t = (key: string, params?: any) =>
       translate(key, locale, translations, params);
 
-    // 🟢 TENANT MARKA ADINI DİL İLE AL
     const tenantData = req.tenantData;
     const brandName =
-      (tenantData?.name?.[locale] ||
-        tenantData?.name?.en ||
-        tenantData?.name) ??
+      tenantData?.name?.[locale] ||
+      tenantData?.name?.en ||
+      tenantData?.name ||
       "Brand";
     const senderEmail =
       tenantData?.emailSettings?.senderEmail || "noreply@example.com";
 
-    // Zorunlu alanlar (empty check)
+    // 🚨 Güvenli zorunlu alan kontrolü
     if (!name || !email || !serviceType || !date || !time || !service) {
       logger.withReq.warn(req, t("public.create.missingFields"));
       res.status(400).json({
@@ -59,7 +56,6 @@ export const createBooking = asyncHandler(
     const start = dayjs(`${date}T${time}`);
     const end = start.add(durationMinutes, "minute");
 
-    // Maksimum aynı anda kaç randevu olabilir?
     const maxConcurrentBookingsSetting = await getSettingValue(
       "max_concurrent_bookings"
     );
@@ -70,7 +66,6 @@ export const createBooking = asyncHandler(
 
     const { Booking } = await getTenantModels(req);
 
-    // Çakışma kontrolü (overlap)
     const overlappingBookings = await Booking.find({
       date,
       $expr: {
@@ -86,7 +81,9 @@ export const createBooking = asyncHandler(
               {
                 $toDate: {
                   $dateAdd: {
-                    startDate: { $concat: ["$date", "T", "$time"] },
+                    startDate: {
+                      $toDate: { $concat: ["$date", "T", "$time"] },
+                    },
                     unit: "minute",
                     amount: "$durationMinutes",
                   },
@@ -108,7 +105,7 @@ export const createBooking = asyncHandler(
       return;
     }
 
-    // Kayıt oluştur
+    // 🔐 Booking oluşturuluyor
     const booking = await Booking.create({
       user: req.user?.id || undefined,
       name,
@@ -126,7 +123,7 @@ export const createBooking = asyncHandler(
 
     logger.withReq.info(req, t("public.create.created", { name, date, time }));
 
-    // Mail şablonları (DİL VE MARKA PARAMETRESİYLE!)
+    // ✉️ Email: Customer
     const htmlToCustomer = BookingReceivedTemplate({
       name,
       service: serviceType,
@@ -135,8 +132,13 @@ export const createBooking = asyncHandler(
       locale,
       brandName,
       senderEmail,
+      tenant: req.tenant,
+      userId: req.user?.id,
+      ip: req.ip,
+      loggerLocale: locale,
     });
 
+    // ✉️ Email: Admin
     const htmlToAdmin = `
     <h2>📬 ${t("public.adminMail.newBooking")}</h2>
     <ul>
@@ -147,9 +149,10 @@ export const createBooking = asyncHandler(
       <li><strong>${t("public.adminMail.date")}:</strong> ${date}</li>
       <li><strong>${t("public.adminMail.time")}:</strong> ${time}</li>
       <li><strong>${t("public.adminMail.note")}:</strong> ${note || "-"}</li>
-    </ul>`;
+    </ul>
+  `;
 
-    // 🟢 Her mailde tenantSlug zorunlu!
+    // 📬 Emailler gönderiliyor
     await Promise.all([
       sendEmail({
         tenantSlug: req.tenant,
@@ -165,6 +168,7 @@ export const createBooking = asyncHandler(
       }),
     ]);
 
+    // 🔔 Bildirim
     await Notification.create({
       title: t("public.notification.title"),
       tenant: req.tenant,
@@ -183,5 +187,6 @@ export const createBooking = asyncHandler(
       message: t("public.create.success"),
       booking,
     });
+    return;
   }
 );

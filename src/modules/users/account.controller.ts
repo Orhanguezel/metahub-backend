@@ -170,7 +170,6 @@ export const updateNotificationSettings = asyncHandler(
     const { User } = await getTenantModels(req);
     const user = await User.findOne(
       { _id: req.user!.id, tenant: req.tenant },
-      User
     );
     if (!user) return;
 
@@ -200,8 +199,7 @@ export const updateSocialMediaLinks = asyncHandler(
     const locale = getLocale(req);
     const { User } = await getTenantModels(req);
     const user = await User.findOne(
-      { _id: req.user!.id, tenant: req.tenant },
-      User
+      { _id: req.user!.id, tenant: req.tenant }
     );
     if (!user) return;
     const { facebook, instagram, twitter } = req.body;

@@ -4,7 +4,7 @@ import type { SupportedLocale } from "@/types/common"; // Merkezi dil tipi
 export interface IBooking extends Document {
   user?: Types.ObjectId;
   name: string;
-  tenant: string; // Optional tenant field for multi-tenancy
+  tenant: string;
   email: string;
   phone?: string;
   serviceType: string;

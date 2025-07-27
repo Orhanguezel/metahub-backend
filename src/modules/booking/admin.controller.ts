@@ -138,7 +138,6 @@ export const updateBookingStatus = asyncHandler(
             time: booking.time,
             locale: bookingLang,
             brandName,
-            senderEmail,
           }),
         });
 
@@ -162,7 +161,6 @@ export const updateBookingStatus = asyncHandler(
             time: booking.time,
             locale: bookingLang,
             brandName,
-            senderEmail,
           }),
         });
 
