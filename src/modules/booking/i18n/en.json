@@ -1,97 +1,48 @@
 {
-  "validation": {
-    "nameRequired": "Name is required.",
-    "nameString": "Name must be a string.",
-    "email": "A valid email is required.",
-    "phone": "Phone must be a string.",
-    "serviceTypeRequired": "Service type is required.",
-    "serviceTypeString": "Service type must be a string.",
-    "note": "Note must be a string.",
-    "dateRequired": "Date is required.",
-    "dateFormat": "Please enter a valid date (YYYY-MM-DD).",
-    "timeRequired": "Time is required.",
-    "timeFormat": "Time must be in HH:mm format.",
-    "serviceRequired": "Service ID is required.",
-    "serviceId": "Service ID must be a valid MongoDB ObjectId.",
-    "duration": "Duration must be a positive integer.",
-    "languageRequired": "Language is required.",
-    "language": "Language must be one of: {{supported}}",
-    "status": "Status must be pending, confirmed or cancelled.",
-    "mongoId": "{{field}} must be a valid MongoDB ObjectId."
-  },
-  "admin": {
-    "bookings": {
-      "fetched": "All bookings fetched successfully.",
-      "invalidId": "Invalid booking ID.",
-      "notFound": "Booking not found.",
-      "fetchedOne": "Booking fetched successfully.",
-      "statusUpdated": "Booking status updated. (Status: {{status}})",
-      "notFoundOrDeleted": "Booking not found or already deleted.",
-      "deleted": "Booking deleted successfully."
-    }
-  },
-  "public": {
-    "create": {
-      "missingFields": "Please fill all required fields.",
-      "slotsFull": "This time slot is fully booked.",
-      "created": "Your booking has been created.",
-      "success": "Booking created successfully."
-    },
-    "email": {
-      "subject": {
-        "customer": "Your booking was received",
-        "admin": "New booking request"
-      }
-    },
-    "adminMail": {
-      "newBooking": "New Booking Request",
-      "name": "Name",
-      "phone": "Phone",
-      "service": "Service",
-      "date": "Date",
-      "time": "Time",
-      "note": "Note"
-    },
-    "notification": {
-      "title": "New booking created",
-      "message": "{{name}} booked {{service}} on {{date}} at {{time}}."
-    }
-  },
-  "booking": {
-    "confirmed": {
-      "subject": "Your booking has been confirmed",
-      "emailSent": "Confirmation email sent.",
-      "emailError": "Failed to send confirmation email."
-    },
-    "rejected": {
-      "subject": "Your booking has been cancelled",
-      "emailSent": "Cancellation email sent.",
-      "emailError": "Failed to send cancellation email."
-    },
-     "title": "Booking Confirmation",
-    "greeting": "Hello {{name}},",
-    "info": "Your appointment with {{brand}} has been confirmed.",
-    "instructions": "Please be ready 5 minutes before your scheduled time.",
-    "serviceLabel": "Service",
-    "dateLabel": "Date",
-    "timeLabel": "Time",
-    "note": "If you have any questions, feel free to contact us.",
-    "sign": "Best regards, The {{brand}} Team",
-    "received": {
-      "title": "Your Booking Request Received",
-      "greeting": "Hello {{name}},",
-      "info": "Your booking request with {{brand}} has been received.",
-      "wait": "Our team will contact you shortly to confirm your appointment.",
-      "note": "If you have any questions, you can reach us by email.",
-      "sign": "Best regards, The {{brand}} Team"
-    },
-    "rejection": {
-      "title": "Booking Cancellation",
-      "greeting": "Hello {{name}},",
-      "info": "Your \"{{service}}\" appointment scheduled for {{date}} at {{time}} has been cancelled.",
-      "closing": "You may book a new appointment if you wish.",
-      "sign": "Best regards, The {{brand}} Team"
-    }
-  }
+  "admin.bookings.fetched": "All bookings retrieved successfully.",
+  "admin.bookings.fetchedOne": "Booking with ID #{id} retrieved successfully.",
+  "admin.bookings.invalidId": "Invalid booking ID: {id}",
+  "admin.bookings.notFound": "No booking found with ID #{id}.",
+  "admin.bookings.statusUpdated": "Booking status updated: {id} - {status}",
+  "admin.bookings.deleted": "Booking with ID #{id} successfully deleted.",
+  "admin.bookings.notFoundOrDeleted": "Booking with ID #{id} not found or already deleted.",
+  "booking.confirmed.subject": "Your Appointment is Confirmed",
+  "booking.confirmed.emailSent": "Confirmation email sent: {id}",
+  "booking.confirmed.emailError": "Confirmation email failed: {id}",
+  "booking.rejected.subject": "Your Appointment was Rejected",
+  "booking.rejected.emailSent": "Rejection email sent: {id}",
+  "booking.rejected.emailError": "Rejection email failed: {id}",
+  "public.create.missingFields": "Required fields are missing.",
+  "public.create.slotsFull": "No availability for the selected time.",
+  "public.create.created": "Appointment created for {name} on {date} at {time}.",
+  "public.create.success": "Your appointment has been successfully received.",
+  "public.email.subject.customer": "Your Appointment Request Received",
+  "public.email.subject.admin": "New Appointment Request",
+  "public.notification.title": "New Appointment",
+  "public.notification.message": "{name} made an appointment for {service} on {date} at {time}.",
+  "public.adminMail.newBooking": "New Appointment Request",
+  "public.adminMail.name": "Name",
+  "public.adminMail.phone": "Phone",
+  "public.adminMail.service": "Service",
+  "public.adminMail.date": "Date",
+  "public.adminMail.time": "Time",
+  "public.adminMail.note": "Note",
+  "validation.nameRequired": "Name is required.",
+  "validation.nameString": "Name must be a valid string.",
+  "validation.email": "Please enter a valid email address.",
+  "validation.phone": "Phone must be a string.",
+  "validation.serviceTypeRequired": "Service type is required.",
+  "validation.serviceTypeString": "Service type must be a string.",
+  "validation.note": "Note must be a string.",
+  "validation.dateRequired": "Date is required.",
+  "validation.dateFormat": "Please enter a valid date (YYYY-MM-DD).",
+  "validation.timeRequired": "Time is required.",
+  "validation.timeFormat": "Time must be in HH:mm format.",
+  "validation.serviceRequired": "Service selection is required.",
+  "validation.serviceId": "Please enter a valid service ID.",
+  "validation.duration": "Duration must be a positive number.",
+  "validation.languageRequired": "Language is required.",
+  "validation.language": "Invalid language. Supported: {supported}",
+  "validation.status": "Invalid status. Only: pending, confirmed, cancelled are allowed.",
+  "validation.mongoId": "{field} must be a valid Mongo ID."
 }
-

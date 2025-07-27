@@ -1,97 +1,48 @@
 {
-  "validation": {
-    "nameRequired": "El nombre es obligatorio.",
-    "nameString": "El nombre debe ser una cadena.",
-    "email": "Se requiere un correo electrónico válido.",
-    "phone": "El teléfono debe ser una cadena.",
-    "serviceTypeRequired": "El tipo de servicio es obligatorio.",
-    "serviceTypeString": "El tipo de servicio debe ser una cadena.",
-    "note": "La nota debe ser una cadena.",
-    "dateRequired": "La fecha es obligatoria.",
-    "dateFormat": "Por favor, introduzca una fecha válida (AAAA-MM-DD).",
-    "timeRequired": "La hora es obligatoria.",
-    "timeFormat": "La hora debe tener formato HH:mm.",
-    "serviceRequired": "El ID del servicio es obligatorio.",
-    "serviceId": "El ID del servicio debe ser un ObjectId válido de MongoDB.",
-    "duration": "La duración debe ser un número entero positivo.",
-    "languageRequired": "El idioma es obligatorio.",
-    "language": "El idioma debe ser uno de: {{supported}}",
-    "status": "El estado debe ser pending, confirmed o cancelled.",
-    "mongoId": "{{field}} debe ser un ObjectId válido de MongoDB."
-  },
-  "admin": {
-    "bookings": {
-      "fetched": "Todas las reservas se han obtenido correctamente.",
-      "invalidId": "ID de reserva inválido.",
-      "notFound": "Reserva no encontrada.",
-      "fetchedOne": "Reserva obtenida correctamente.",
-      "statusUpdated": "El estado de la reserva se actualizó. (Estado: {{status}})",
-      "notFoundOrDeleted": "Reserva no encontrada o ya eliminada.",
-      "deleted": "Reserva eliminada correctamente."
-    }
-  },
-  "public": {
-    "create": {
-      "missingFields": "Por favor, complete todos los campos obligatorios.",
-      "slotsFull": "Este intervalo horario está completo.",
-      "created": "Su reserva ha sido creada.",
-      "success": "Reserva creada correctamente."
-    },
-    "email": {
-      "subject": {
-        "customer": "Hemos recibido su reserva",
-        "admin": "Nueva solicitud de reserva"
-      }
-    },
-    "adminMail": {
-      "newBooking": "Nueva solicitud de reserva",
-      "name": "Nombre",
-      "phone": "Teléfono",
-      "service": "Servicio",
-      "date": "Fecha",
-      "time": "Hora",
-      "note": "Nota"
-    },
-    "notification": {
-      "title": "Nueva reserva creada",
-      "message": "{{name}} reservó {{service}} el {{date}} a las {{time}}."
-    }
-  },
-  "booking": {
-    "confirmed": {
-      "subject": "Su reserva ha sido confirmada",
-      "emailSent": "Correo de confirmación enviado.",
-      "emailError": "No se pudo enviar el correo de confirmación."
-    },
-    "rejected": {
-      "subject": "Su reserva ha sido cancelada",
-      "emailSent": "Correo de cancelación enviado.",
-      "emailError": "No se pudo enviar el correo de cancelación."
-    },
-    "title": "Confirmación de cita",
-    "greeting": "Hola {{name}},",
-    "info": "Su cita con {{brand}} ha sido confirmada.",
-    "instructions": "Por favor, llegue 5 minutos antes de la hora programada.",
-    "serviceLabel": "Servicio",
-    "dateLabel": "Fecha",
-    "timeLabel": "Hora",
-    "note": "Si tiene alguna pregunta, no dude en contactarnos.",
-    "sign": "Saludos cordiales, El equipo de {{brand}}",
-    "received": {
-      "title": "Solicitud de cita recibida",
-      "greeting": "Hola {{name}},",
-      "info": "Hemos recibido su solicitud de cita con {{brand}}.",
-      "wait": "Nuestro equipo se pondrá en contacto con usted pronto para confirmar la cita.",
-      "note": "Si tiene preguntas, puede contactarnos por correo electrónico.",
-      "sign": "Saludos cordiales, El equipo de {{brand}}"
-    },
-     "rejection": {
-      "title": "Cancelación de cita",
-      "greeting": "Hola {{name}},",
-      "info": "Su cita \"{{service}}\" programada para el {{date}} a las {{time}} ha sido cancelada.",
-      "closing": "Puede reservar una nueva cita si lo desea.",
-      "sign": "Saludos cordiales, El equipo de {{brand}}"
-    }
-  }
+  "admin.bookings.fetched": "Todas las reservas se han obtenido correctamente.",
+  "admin.bookings.fetchedOne": "Reserva con ID #{id} obtenida correctamente.",
+  "admin.bookings.invalidId": "ID de reserva no válido: {id}",
+  "admin.bookings.notFound": "No se encontró ninguna reserva con el ID #{id}.",
+  "admin.bookings.statusUpdated": "Estado de la reserva actualizado: {id} - {status}",
+  "admin.bookings.deleted": "Reserva con ID #{id} eliminada correctamente.",
+  "admin.bookings.notFoundOrDeleted": "Reserva con ID #{id} no encontrada o ya eliminada.",
+  "booking.confirmed.subject": "Tu cita ha sido confirmada",
+  "booking.confirmed.emailSent": "Correo de confirmación enviado: {id}",
+  "booking.confirmed.emailError": "Error al enviar correo de confirmación: {id}",
+  "booking.rejected.subject": "Tu cita ha sido rechazada",
+  "booking.rejected.emailSent": "Correo de rechazo enviado: {id}",
+  "booking.rejected.emailError": "Error al enviar correo de rechazo: {id}",
+  "public.create.missingFields": "Faltan campos obligatorios.",
+  "public.create.slotsFull": "No hay disponibilidad para la hora seleccionada.",
+  "public.create.created": "Cita creada para {name} el {date} a las {time}.",
+  "public.create.success": "Tu cita ha sido registrada correctamente.",
+  "public.email.subject.customer": "Hemos recibido tu solicitud de cita",
+  "public.email.subject.admin": "Nueva solicitud de cita",
+  "public.notification.title": "Nueva cita",
+  "public.notification.message": "{name} ha reservado {service} para el {date} a las {time}.",
+  "public.adminMail.newBooking": "Nueva solicitud de cita",
+  "public.adminMail.name": "Nombre",
+  "public.adminMail.phone": "Teléfono",
+  "public.adminMail.service": "Servicio",
+  "public.adminMail.date": "Fecha",
+  "public.adminMail.time": "Hora",
+  "public.adminMail.note": "Nota",
+  "validation.nameRequired": "El nombre es obligatorio.",
+  "validation.nameString": "El nombre debe ser una cadena de texto.",
+  "validation.email": "Por favor, introduce un correo electrónico válido.",
+  "validation.phone": "El teléfono debe ser una cadena de texto.",
+  "validation.serviceTypeRequired": "El tipo de servicio es obligatorio.",
+  "validation.serviceTypeString": "El tipo de servicio debe ser una cadena de texto.",
+  "validation.note": "La nota debe ser una cadena de texto.",
+  "validation.dateRequired": "La fecha es obligatoria.",
+  "validation.dateFormat": "Introduce una fecha válida (AAAA-MM-DD).",
+  "validation.timeRequired": "La hora es obligatoria.",
+  "validation.timeFormat": "La hora debe tener formato HH:mm.",
+  "validation.serviceRequired": "Es obligatorio seleccionar un servicio.",
+  "validation.serviceId": "Introduce un ID de servicio válido.",
+  "validation.duration": "La duración debe ser un número positivo.",
+  "validation.languageRequired": "El idioma es obligatorio.",
+  "validation.language": "Idioma no válido. Idiomas permitidos: {supported}",
+  "validation.status": "Estado no válido. Solo se permite: pending, confirmed, cancelled.",
+  "validation.mongoId": "El campo {field} debe contener un ID de Mongo válido."
 }
-
