@@ -20,30 +20,30 @@ export const passwordResetTemplate = ({
   brandWebsite,
   senderEmail,
 }: PasswordResetTemplateParams): string => {
-  const locale = getLogLocale();
-  const tr = translations[locale] || translations["en"];
+  const locale: SupportedLocale = (getLogLocale() as SupportedLocale) || "en";
+  const tt = (key: string, params?: any) => t(key, locale, translations, params);
 
   logger.debug(
     `[EmailTemplate] Password reset generated for ${name} | locale: ${locale}`
   );
 
   const content = `
-    <h2>${t("reset.greeting", locale, tr, { name })}</h2>
-    <p>${t("reset.info", locale, tr)}</p>
-    <p>${t("reset.action", locale, tr)}</p>
+    <h2>${tt("reset.greeting", { name })}</h2>
+    <p>${tt("reset.info")}</p>
+    <p>${tt("reset.action")}</p>
     <p style="text-align: center; margin: 20px 0;">
       <a href="${resetLink}" style="padding: 12px 24px; background-color: #7c3aed; color: white; text-decoration: none; border-radius: 8px;">
-        ${t("reset.button", locale, tr)}
+        ${tt("reset.button")}
       </a>
     </p>
-    <p>${t("reset.footer", locale, tr)}</p>
-    <p>${t("reset.sign", locale, tr, { team: brandName })}</p>
+    <p>${tt("reset.footer")}</p>
+    <p>${tt("reset.sign", { team: brandName })}</p>
     <p style="font-size:12px;color:#999;">${brandName}${senderEmail ? ` | ${senderEmail}` : ""}</p>
   `;
 
   return baseTemplate({
     content,
-    title: t("reset.title", locale, tr, { brand: brandName }),
+    title: tt("reset.title", { brand: brandName }),
     locale,
     brandName,
     brandWebsite,

@@ -1,4 +1,3 @@
-// src/templates/bookingRejection.ts
 import { baseTemplate } from "@/templates/baseTemplate";
 import logger from "@/core/middleware/logger/logger";
 import { t as translate } from "@/core/utils/i18n/translate";
@@ -12,8 +11,9 @@ interface BookingRejectionParams {
   time: string;
   locale: SupportedLocale;
   brandName: string;
+  brandWebsite?: string;
 
-  // 🔐 Logger context
+  // Logger context
   tenant?: string;
   userId?: string;
   ip?: string;
@@ -27,6 +27,7 @@ export function BookingRejectionTemplate({
   time,
   locale,
   brandName,
+  brandWebsite,
   tenant,
   userId,
   ip,
@@ -60,5 +61,11 @@ export function BookingRejectionTemplate({
     },
   });
 
-  return baseTemplate(content, t("booking.rejection.title"));
+  return baseTemplate({
+    content,
+    title: t("booking.rejection.title"),
+    locale,
+    brandName,
+    brandWebsite,
+  });
 }

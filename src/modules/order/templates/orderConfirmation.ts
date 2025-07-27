@@ -1,5 +1,7 @@
+// src/templates/orderConfirmationTemplate.ts
 import { baseTemplate } from "@/templates/baseTemplate";
 import type { SupportedLocale } from "@/types/common";
+import { SUPPORTED_LOCALES } from "@/types/common"; // 👈 unutma: ayrı export edilmişse böyle import et
 import translations from "@/modules/order/i18n";
 import { t } from "@/core/utils/i18n/translate";
 
@@ -11,6 +13,7 @@ export interface OrderConfirmationParams {
   senderEmail?: string;
   orderId?: string;
   brandName?: string;
+  brandWebsite?: string;
   paymentMethod?: string;
   paymentStatus?: string;
   criticalStockWarnings?: string;
@@ -19,156 +22,85 @@ export interface OrderConfirmationParams {
   finalTotal?: number;
 }
 
-// Helper: tek dil için HTML döndürür
-function orderConfirmationHtml({
-  name,
-  itemsList,
-  totalPrice,
-  locale = "en",
-  senderEmail,
-  orderId,
-  brandName,
-  paymentMethod,
-  paymentStatus,
-  criticalStockWarnings,
-  couponCode,
-  discount,
-  finalTotal,
-}: Omit<OrderConfirmationParams, "locale"> & {
-  locale: SupportedLocale;
-}): string {
-  // Kısa, anlaşılır ve nötr isimlendirme:
-  const labels = translations[locale] || translations["en"];
-  const interpolate = (str: string) => str.replace("{name}", name);
+// Tek dil için HTML template üretir
+function generateHtml(params: OrderConfirmationParams & { locale: SupportedLocale }): string {
+  const {
+    name,
+    itemsList,
+    totalPrice,
+    locale,
+    senderEmail,
+    orderId,
+    brandName,
+    brandWebsite,
+    paymentMethod,
+    paymentStatus,
+    criticalStockWarnings,
+    couponCode,
+    discount,
+    finalTotal,
+  } = params;
 
-  return baseTemplate(
-    `
-    <h2>${interpolate(labels.greeting)}</h2>
-    <p>${labels.thankYou}</p>
-    <p>${labels.status}</p>
+  const tr = translations[locale] || translations["en"];
+  const tL = (key: string, p?: any) => t(key, locale, tr, p);
+  const brand = brandName ?? "MetaHub";
+
+  const content = `
+    <h2>${tL("greeting", { name })}</h2>
+    <p>${tL("thankYou")}</p>
+    <p>${tL("status")}</p>
+
     <table style="margin-top: 20px; border-collapse: collapse;">
-      <tr>
-        <td style="padding: 8px 12px;"><strong>${
-          labels.labelOrderId ?? "Order ID"
-        }:</strong></td>
-        <td style="padding: 8px 12px;">${orderId ?? "-"}</td>
-      </tr>
-      ${
-        brandName
-          ? `
-      <tr>
-        <td style="padding: 8px 12px;"><strong>${
-          labels.labelBrand ?? "Brand"
-        }:</strong></td>
-        <td style="padding: 8px 12px;">${brandName}</td>
-      </tr>`
-          : ""
-      }
-      <tr>
-        <td style="padding: 8px 12px;"><strong>${
-          labels.labelItems
-        }:</strong></td>
-        <td style="padding: 8px 12px;">${itemsList}</td>
-      </tr>
-      <tr>
-        <td style="padding: 8px 12px;"><strong>${
-          labels.labelTotal
-        }:</strong></td>
-        <td style="padding: 8px 12px;">€${totalPrice.toFixed(2)}</td>
-      </tr>
-      ${
-        discount
-          ? `
-      <tr>
-        <td style="padding: 8px 12px;"><strong>${
-          labels.labelDiscount ?? "Discount"
-        }:</strong></td>
-        <td style="padding: 8px 12px;">-€${discount.toFixed(2)}</td>
-      </tr>
-      `
-          : ""
-      }
-      ${
-        couponCode
-          ? `
-      <tr>
-        <td style="padding: 8px 12px;"><strong>${
-          labels.labelCoupon ?? "coupon"
-        }:</strong></td>
-        <td style="padding: 8px 12px;">${couponCode}</td>
-      </tr>
-      `
-          : ""
-      }
-      <tr>
-        <td style="padding: 8px 12px;"><strong>${
-          labels.labelFinalTotal ?? "Final Total"
-        }:</strong></td>
-        <td style="padding: 8px 12px;">€${(finalTotal ?? totalPrice).toFixed(
-          2
-        )}</td>
-      </tr>
-      ${
-        paymentMethod
-          ? `
-      <tr>
-        <td style="padding: 8px 12px;"><strong>${
-          labels.labelPaymentMethod ?? "Payment Method"
-        }:</strong></td>
-        <td style="padding: 8px 12px;">${paymentMethod}</td>
-      </tr>
-      `
-          : ""
-      }
-      ${
-        paymentStatus
-          ? `
-      <tr>
-        <td style="padding: 8px 12px;"><strong>${
-          labels.labelPaymentStatus ?? "Payment Status"
-        }:</strong></td>
-        <td style="padding: 8px 12px;">${paymentStatus}</td>
-      </tr>
-      `
-          : ""
-      }
+      ${orderId ? `<tr><td><strong>${tL("labelOrderId")}:</strong></td><td>${orderId}</td></tr>` : ""}
+      ${brandName ? `<tr><td><strong>${tL("labelBrand")}:</strong></td><td>${brandName}</td></tr>` : ""}
+      <tr><td><strong>${tL("labelItems")}:</strong></td><td>${itemsList}</td></tr>
+      <tr><td><strong>${tL("labelTotal")}:</strong></td><td>€${totalPrice.toFixed(2)}</td></tr>
+      ${discount ? `<tr><td><strong>${tL("labelDiscount")}:</strong></td><td>-€${discount.toFixed(2)}</td></tr>` : ""}
+      ${couponCode ? `<tr><td><strong>${tL("labelCoupon")}:</strong></td><td>${couponCode}</td></tr>` : ""}
+      <tr><td><strong>${tL("labelFinalTotal")}:</strong></td><td>€${(finalTotal ?? totalPrice).toFixed(2)}</td></tr>
+      ${paymentMethod ? `<tr><td><strong>${tL("labelPaymentMethod")}:</strong></td><td>${paymentMethod}</td></tr>` : ""}
+      ${paymentStatus ? `<tr><td><strong>${tL("labelPaymentStatus")}:</strong></td><td>${paymentStatus}</td></tr>` : ""}
     </table>
-    ${
-      criticalStockWarnings
-        ? `<div style="margin-top:15px; color: #c00; font-weight:bold;">${criticalStockWarnings}</div>`
-        : ""
-    }
-    <p style="margin-top: 20px;">${labels.shipping}</p>
-    <p>${labels.sign}</p>
-    ${
-      brandName
-        ? `<p style="font-size:12px;color:#999;">${brandName} ${
-            senderEmail ? `| ${senderEmail}` : ""
-          }</p>`
-        : ""
-    }
-    `,
-    labels.title
-  );
+
+    ${criticalStockWarnings ? `<div style="margin-top:15px; color: #c00; font-weight:bold;">${criticalStockWarnings}</div>` : ""}
+
+    <p style="margin-top: 20px;">${tL("shipping")}</p>
+    <p>${tL("sign")}</p>
+    <p style="font-size:12px;color:#999;">${brand}${senderEmail ? ` | ${senderEmail}` : ""}</p>
+  `;
+
+  return baseTemplate({
+    content,
+    title: tL("title"),
+    locale,
+    brandName: brand,
+    brandWebsite,
+  });
 }
 
-// Çoklu dil için ana fonksiyon
+// Çoklu dil destekli şablon export
 export const orderConfirmationTemplate = (
   params: OrderConfirmationParams
 ): string | Record<SupportedLocale, string> => {
-  if (!params.locale || typeof params.locale === "string") {
-    return orderConfirmationHtml({
+  const { locale = "en" } = params;
+
+  // Tek dil
+  if (typeof locale === "string") {
+    return generateHtml({
       ...params,
-      locale: (params.locale as SupportedLocale) || "en",
+      locale,
     });
   }
 
-  const result: Record<SupportedLocale, string> = {} as any;
-  for (const lang of params.locale) {
-    result[lang] = orderConfirmationHtml({
+  // Çoklu dil
+  const result: Partial<Record<SupportedLocale, string>> = {};
+
+  for (const lang of locale) {
+    result[lang] = generateHtml({
       ...params,
       locale: lang,
     });
   }
-  return result;
+
+  return result as Record<SupportedLocale, string>;
 };
