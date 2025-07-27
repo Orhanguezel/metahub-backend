@@ -6,8 +6,9 @@ import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
 import type { SupportedLocale } from "@/types/common";
+import { ADDRESS_TYPE_OPTIONS } from "@/modules/address/types";
 
-// --- Owner helper ---
+// Owner tespiti
 function getOwner(req: Request): { field: "userId" | "companyId"; value: string } {
   const companyId = req.body.companyId || req.query.companyId || req.params.companyId;
   const userId = req.user?.id;
@@ -18,84 +19,69 @@ function getOwner(req: Request): { field: "userId" | "companyId"; value: string 
 
 
 // ✅ Adresleri getir (user veya company için)
-export const getAddresses = asyncHandler(async (req: Request, res: Response) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const t = (key: string, params?: any) => translate(key, locale, translations, params);
+export const getAddresses = asyncHandler(async (req, res) => {
   const { Address } = await getTenantModels(req);
+  const locale = req.locale || getLogLocale();
+  const t = (key: string) => translate(key, locale, translations);
+  let owner;
 
-  let owner: { field: "userId" | "companyId"; value: string };
   try {
     owner = getOwner(req);
-  } catch (err: any) {
-    res.status(400).json({ success: false, message: t("addresses.ownerRequired") });
-    return;
+  } catch {
+   res.status(400).json({ success: false, message: t("addresses.ownerRequired") });
+   return;
   }
-  const filter: any = { [owner.field]: owner.value, tenant: req.tenant };
-  const addresses = await Address.find(filter).sort({ createdAt: -1 }).lean();
 
-  res.status(200).json({
-    success: true,
-    message: t("addresses.fetched"),
-    data: addresses,
-  });
-  return;
+  const addresses = await Address.find({ [owner.field]: owner.value, tenant: req.tenant }).sort({ createdAt: -1 });
+  res.status(200).json({ success: true, message: t("addresses.fetched"), data: addresses });
 });
 
-// ✅ Yeni adres oluştur (userId/companyId)
+// ✅ Tekli adres oluştur
 export const createAddress = asyncHandler(async (req: Request, res: Response) => {
   const locale: SupportedLocale = req.locale || getLogLocale();
   const t = (key: string, params?: any) => translate(key, locale, translations, params);
   const { Address, User, Company } = await getTenantModels(req);
 
-  let owner: { field: "userId" | "companyId"; value: string };
+  let owner;
   try {
     owner = getOwner(req);
-  } catch (err: any) {
+  } catch {
     res.status(400).json({ success: false, message: t("addresses.ownerRequired") });
     return;
   }
 
-  const { street, houseNumber, city, zipCode, country, phone, email, isDefault } = req.body;
+  const { street, houseNumber, city, zipCode, country, phone, email, addressType, isDefault } = req.body;
 
   if (!email) {
     res.status(400).json({ success: false, message: t("addresses.emailRequired") });
     return;
   }
+  if (!ADDRESS_TYPE_OPTIONS.includes(addressType)) {
+    res.status(400).json({ success: false, message: t("addresses.invalidType") });
+    return;
+  }
 
   const newAddress = await Address.create({
-    [owner.field]: owner.value,
+    ...req.body,
     tenant: req.tenant,
-    street,
-    houseNumber,
-    city,
-    zipCode,
-    country,
-    phone,
-    email,
-    isDefault,
+    [owner.field]: owner.value,
   });
 
-  // Adres id'sini User veya Company objesine ekle
   if (owner.field === "userId") {
     await User.findByIdAndUpdate(owner.value, { $push: { addresses: newAddress._id } });
-  } else if (owner.field === "companyId") {
+  } else {
     await Company.findByIdAndUpdate(owner.value, { $push: { addresses: newAddress._id } });
   }
 
-  res.status(201).json({
-    success: true,
-    message: t("addresses.created"),
-    data: newAddress,
-  });
-  return;
+  res.status(201).json({ success: true, message: t("addresses.created"), data: newAddress });
 });
 
 // ✅ Tek adres getir
-export const getAddressById = asyncHandler(async (req: Request, res: Response) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const t = (key: string, params?: any) => translate(key, locale, translations, params);
-  const { id } = req.params;
+export const getAddressById = asyncHandler(async (req, res) => {
   const { Address } = await getTenantModels(req);
+  const locale = req.locale || getLogLocale();
+  const t = (key: string) => translate(key, locale, translations);
+  const { id } = req.params;
 
   if (!isValidObjectId(id)) {
     res.status(400).json({ success: false, message: t("addresses.invalidId") });
@@ -108,132 +94,102 @@ export const getAddressById = asyncHandler(async (req: Request, res: Response) =
     return;
   }
 
-  res.status(200).json({
-    success: true,
-    message: t("addresses.fetched"),
-    data: address,
-  });
-  return;
+  res.status(200).json({ success: true, message: t("addresses.fetched"), data: address });
 });
 
 // ✅ Adres güncelle
-export const updateAddress = asyncHandler(async (req: Request, res: Response) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const t = (key: string, params?: any) => translate(key, locale, translations, params);
-  const { id } = req.params;
+export const updateAddress = asyncHandler(async (req, res) => {
   const { Address } = await getTenantModels(req);
-  const { street, houseNumber, city, zipCode, country, phone, email, isDefault } = req.body;
+  const locale = req.locale || getLogLocale();
+  const t = (key: string) => translate(key, locale, translations);
+  const { id } = req.params;
 
   if (!isValidObjectId(id)) {
     res.status(400).json({ success: false, message: t("addresses.invalidId") });
     return;
   }
 
-  if (!email) {
-    res.status(400).json({ success: false, message: t("addresses.emailRequired") });
-    return;
-  }
-
-  const updated = await Address.findByIdAndUpdate(
-    id,
-    { street, houseNumber, city, zipCode, country, phone, email, isDefault },
-    { new: true, runValidators: true }
-  );
+  const updated = await Address.findByIdAndUpdate(id, req.body, {
+    new: true,
+    runValidators: true,
+  });
 
   if (!updated) {
     res.status(404).json({ success: false, message: t("addresses.notFound") });
     return;
   }
 
-  res.status(200).json({
-    success: true,
-    message: t("addresses.updated"),
-    data: updated,
-  });
-  return;
+  res.status(200).json({ success: true, message: t("addresses.updated"), data: updated });
 });
 
 // ✅ Adres sil
-export const deleteAddress = asyncHandler(async (req: Request, res: Response) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const t = (key: string, params?: any) => translate(key, locale, translations, params);
-  const { id } = req.params;
+export const deleteAddress = asyncHandler(async (req, res) => {
   const { Address, User, Company } = await getTenantModels(req);
+  const locale = req.locale || getLogLocale();
+  const t = (key: string) => translate(key, locale, translations);
+  const { id } = req.params;
 
   if (!isValidObjectId(id)) {
     res.status(400).json({ success: false, message: t("addresses.invalidId") });
     return;
   }
 
-  // Adresi bul, owner'ı tespit et
   const address = await Address.findById(id);
   if (!address) {
     res.status(404).json({ success: false, message: t("addresses.notFound") });
     return;
   }
 
-  // Owner tablosundan da sil
+  await Address.deleteOne({ _id: id, tenant: req.tenant });
+
   if (address.userId) {
     await User.findByIdAndUpdate(address.userId, { $pull: { addresses: id } });
-  }
-  if (address.companyId) {
+  } else if (address.companyId) {
     await Company.findByIdAndUpdate(address.companyId, { $pull: { addresses: id } });
   }
 
-  await Address.deleteOne({ _id: id, tenant: req.tenant });
-
-  res.status(200).json({
-    success: true,
-    message: t("addresses.deleted"),
-  });
-  return;
+  res.status(200).json({ success: true, message: t("addresses.deleted") });
 });
 
 // ✅ Tüm adresleri toplu güncelle (user/company dinamik)
-export const updateAllAddresses = asyncHandler(async (req: Request, res: Response) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const t = (key: string, params?: any) => translate(key, locale, translations, params);
+export const updateAllAddresses = asyncHandler(async (req, res) => {
   const { Address, User, Company } = await getTenantModels(req);
+  const locale = req.locale || getLogLocale();
+  const t = (key: string) => translate(key, locale, translations);
+  let owner;
 
-  let owner: { field: "userId" | "companyId"; value: string };
   try {
     owner = getOwner(req);
-  } catch (err: any) {
+  } catch {
     res.status(400).json({ success: false, message: t("addresses.ownerRequired") });
     return;
   }
 
-  const newAddresses = req.body.addresses;
-  if (!Array.isArray(newAddresses) || newAddresses.length === 0) {
+  const addresses = req.body.addresses;
+  if (!Array.isArray(addresses) || addresses.length === 0) {
     res.status(400).json({ success: false, message: t("addresses.noAddressesProvided") });
     return;
   }
 
-  // Hepsini sil, yenileri ekle
   await Address.deleteMany({ [owner.field]: owner.value, tenant: req.tenant });
 
-  const createdAddresses = await Address.insertMany(
-    newAddresses.map((address: any, idx: number) => ({
-      ...address,
+  const created = await Address.insertMany(
+    addresses.map((a: any, i) => ({
+      ...a,
       [owner.field]: owner.value,
       tenant: req.tenant,
-      isDefault: idx === 0,
+      isDefault: i === 0,
     }))
   );
-  const addressIds = createdAddresses.map((address) => address._id);
 
+  const ids = created.map((a) => a._id);
   if (owner.field === "userId") {
-    await User.findByIdAndUpdate(owner.value, { addresses: addressIds });
-  } else if (owner.field === "companyId") {
-    await Company.findByIdAndUpdate(owner.value, { addresses: addressIds });
+    await User.findByIdAndUpdate(owner.value, { addresses: ids });
+  } else {
+    await Company.findByIdAndUpdate(owner.value, { addresses: ids });
   }
 
-  res.status(200).json({
-    success: true,
-    message: t("addresses.updatedAll"),
-    data: createdAddresses,
-  });
-  return;
+  res.status(200).json({ success: true, message: t("addresses.updatedAll"), data: created });
 });
 
 

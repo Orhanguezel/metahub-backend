@@ -1,11 +1,25 @@
-import { Schema, Model, Types, models, model } from "mongoose";
-import type { Address } from "./types";
+import { Schema, Model, models, model } from "mongoose";
+import type { Address, AddressType } from "@/modules/address/types";
+import { ADDRESS_TYPE_OPTIONS } from "@/modules/address/types";
 
-// --- AddressSchema (hem userId hem companyId opsiyonel) ---
+// ✅ Mongoose Schema
 const AddressSchema = new Schema<Address>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "user", required: false }, // Opsiyonel
-    companyId: { type: Schema.Types.ObjectId, ref: "company", required: false }, // Opsiyonel
+    addressType: {
+      type: String,
+      enum: ADDRESS_TYPE_OPTIONS,
+      required: true,
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "user",
+      required: false,
+    },
+    companyId: {
+      type: Schema.Types.ObjectId,
+      ref: "company",
+      required: false,
+    },
     tenant: { type: String, required: true },
     street: { type: String, required: true },
     houseNumber: { type: String, required: true },
@@ -19,8 +33,7 @@ const AddressSchema = new Schema<Address>(
   { timestamps: true }
 );
 
-// --- Model Guard (Tek Noktadan Export) ---
-const Address: Model<Address> =
-  models.address || model<Address>("address", AddressSchema);
+// ✅ Model guard
+const Address: Model<Address> = models.address || model<Address>("address", AddressSchema);
 
 export { Address, AddressSchema };

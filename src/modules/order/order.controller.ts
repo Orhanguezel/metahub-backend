@@ -8,6 +8,12 @@ import orderTranslations from "@/modules/order/i18n";
 import logger from "@/core/middleware/logger/logger";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import type {
+  IOrderItem,
+  IShippingAddress,
+} from "@/modules/order/types/index";
+import type { PaymentMethod } from "@/modules/order/types/index";
+
 
 // Kısa yol çeviri fonksiyonu
 function orderT(
@@ -18,59 +24,32 @@ function orderT(
   return t(key, locale, orderTranslations, vars);
 }
 
+
 // --- SİPARİŞ OLUŞTUR ---
 export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   const {
-    Order,
-    Address,
-    Coupon,
-    Payment,
-    User,
-    Notification,
-    Bike,
-    Ensotekprod,
-    Sparepart,
+    Order, Address, Coupon, Payment, User, Notification,
+    Bike, Ensotekprod, Sparepart,
   } = await getTenantModels(req);
-  const { items, addressId, shippingAddress, paymentMethod, couponCode } =
-    req.body;
+
+  const { items, addressId, shippingAddress, paymentMethod, couponCode } = req.body;
   const userId = req.user?._id;
   const userName = req.user?.name || "";
-
   const locale: SupportedLocale = req.locale || getLogLocale();
 
-  // --- Tenant marka ve email ayarları
+  // Tenant bilgileri
   const tenantData = req.tenantData;
-  const brandName =
-    (tenantData?.name?.[locale] || tenantData?.name?.en || tenantData?.name) ??
-    "Brand";
+  const brandName = tenantData?.name?.[locale] || tenantData?.name?.en || tenantData?.name || "Brand";
+  const brandWebsite = (tenantData?.domain?.main && `https://${tenantData.domain.main}`) || process.env.BRAND_WEBSITE || "https://guezelwebdesign.com";
+  const senderEmail = tenantData?.emailSettings?.senderEmail || "noreply@example.com";
+  const adminEmail = tenantData?.emailSettings?.adminEmail || senderEmail;
 
-    const brandWebsite =
-  (tenantData?.domain?.main && `https://${tenantData.domain.main}`) ??
-  process.env.BRAND_WEBSITE ??
-  "https://guezelwebdesign.com";
-
-  const senderEmail =
-    tenantData?.emailSettings?.senderEmail || "noreply@example.com";
-  const adminEmail =
-    tenantData?.emailSettings?.adminEmail ||
-    tenantData?.emailSettings?.senderEmail ||
-    "noreply@example.com";
-
-  // --- Adres işlemleri
-  let shippingAddressWithTenant: any;
+  // --- Adres kontrolü (ve tenant merge)
+  let shippingAddressWithTenant: IShippingAddress;
   if (addressId) {
-    const addressDoc = await Address.findOne({
-      _id: addressId,
-      tenant: req.tenant,
-    }).lean();
+    const addressDoc = await Address.findOne({ _id: addressId, tenant: req.tenant }).lean();
     if (!addressDoc) {
-      logger.withReq.warn(req, orderT("error.addressNotFound", locale));
-      res
-        .status(400)
-        .json({
-          success: false,
-          message: orderT("error.addressNotFound", locale),
-        });
+      res.status(400).json({ success: false, message: orderT("error.addressNotFound", locale) });
       return;
     }
     shippingAddressWithTenant = {
@@ -81,80 +60,50 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       city: addressDoc.city,
       postalCode: addressDoc.zipCode,
       country: addressDoc.country || "Germany",
+      email: addressDoc.email,
       ...(shippingAddress || {}),
     };
   } else {
     shippingAddressWithTenant = { ...shippingAddress, tenant: req.tenant };
   }
 
-  // --- Adres zorunlu alanlar
-  if (
-    !shippingAddressWithTenant ||
-    !shippingAddressWithTenant.name ||
-    !shippingAddressWithTenant.phone ||
-    !shippingAddressWithTenant.email ||
-    !shippingAddressWithTenant.street ||
-    !shippingAddressWithTenant.city ||
-    !shippingAddressWithTenant.postalCode ||
-    !shippingAddressWithTenant.country
-  ) {
-    logger.withReq.warn(req, orderT("error.shippingAddressRequired", locale));
-    res.status(400).json({
-      success: false,
-      message: orderT("error.shippingAddressRequired", locale),
-      redirect: "/account",
-    });
-    return;
+  // --- Zorunlu alan kontrolü
+  const requiredFields = ["name", "phone", "email", "street", "city", "postalCode", "country"];
+  for (const field of requiredFields) {
+    if (!shippingAddressWithTenant[field]) {
+      logger.withReq.warn(req, orderT("error.shippingAddressRequired", locale));
+      res.status(400).json({
+        success: false,
+        message: orderT("error.shippingAddressRequired", locale),
+        redirect: "/account",
+      });
+      return;
+    }
   }
 
-  // --- Ürün kontrol, stok ve toplam (Bike, Ensotekprod veya yeni model)
+  // --- Ürünlerin enrichment & stok kontrol
+  const modelMap = { bike: Bike, ensotekprod: Ensotekprod, sparepart: Sparepart } as const;
   let total = 0;
-  const enrichedItems: any[] = [];
+  const enrichedItems: IOrderItem[] = [];
   const criticalStockWarnings: string[] = [];
   const itemsForMail: string[] = [];
 
   for (const item of items) {
-    // **productModel zorunlu**
-    const modelName = item.productModel;
-    if (
-      !modelName ||
-      !["bike", "ensotekprod", "sparepart"].includes(modelName)
-    ) {
-      res
-        .status(400)
-        .json({ success: false, message: "Invalid or missing product model!" });
-      return;
-    }
-    // Dinamik olarak model seç
-    const ProductModel = { Bike, Ensotekprod, Sparepart }[modelName];
+    const modelName = item.productType?.toLowerCase?.();
+    const ProductModel = modelMap[modelName];
+
     if (!ProductModel) {
-      res
-        .status(400)
-        .json({ success: false, message: `Model not supported: ${modelName}` });
+      res.status(400).json({ success: false, message: `Model not supported: ${item.productType}` });
       return;
     }
-    const product = await ProductModel.findOne({
-      _id: item.product,
-      tenant: req.tenant,
-    });
+
+    const product = await ProductModel.findOne({ _id: item.product, tenant: req.tenant });
     if (!product) {
-      logger.withReq.warn(req, orderT("error.productNotFound", locale));
-      res
-        .status(404)
-        .json({
-          success: false,
-          message: orderT("error.productNotFound", locale),
-        });
+      res.status(404).json({ success: false, message: orderT("error.productNotFound", locale) });
       return;
     }
     if (product.stock < item.quantity) {
-      logger.withReq.warn(req, orderT("error.insufficientStock", locale));
-      res
-        .status(400)
-        .json({
-          success: false,
-          message: orderT("error.insufficientStock", locale),
-        });
+      res.status(400).json({ success: false, message: orderT("error.insufficientStock", locale) });
       return;
     }
     product.stock -= item.quantity;
@@ -163,28 +112,24 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     if (product.stock <= (product.stockThreshold ?? 5)) {
       criticalStockWarnings.push(
         orderT("warning.lowStock", locale, {
-          name:
-            product.name?.[locale] || product.name?.en || String(product._id),
+          name: product.name?.[locale] || product.name?.en || String(product._id),
           stock: String(product.stock),
         })
       );
     }
+
     enrichedItems.push({
       product: product._id,
-      productModel: modelName, // refPath için şart
+      productType: modelName,
       quantity: item.quantity,
       unitPrice: product.price,
       tenant: req.tenant,
     });
-    itemsForMail.push(
-      `• ${
-        product.name?.[locale] || product.name?.en || String(product._id)
-      } – Qty: ${item.quantity}`
-    );
+    itemsForMail.push(`• ${product.name?.[locale] || product.name?.en} – Qty: ${item.quantity}`);
     total += product.price * item.quantity;
   }
 
-  // --- Kupon
+  // --- Kupon kontrolü
   let discount = 0;
   let coupon = null;
   if (couponCode) {
@@ -194,34 +139,21 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       tenant: req.tenant,
       expiresAt: { $gte: new Date() },
     });
-    if (coupon) {
-      discount = Math.round(total * (coupon.discount / 100));
-    } else {
-      logger.withReq.warn(req, orderT("error.invalidCoupon", locale));
-      res
-        .status(400)
-        .json({
-          success: false,
-          message: orderT("error.invalidCoupon", locale),
-        });
+    if (!coupon) {
+      res.status(400).json({ success: false, message: orderT("error.invalidCoupon", locale) });
       return;
     }
+    discount = Math.round(total * (coupon.discount / 100));
   }
 
-  // --- Payment method kontrol
-  const method = (paymentMethod as string) || "cash_on_delivery";
+  // --- Ödeme yöntemi kontrolü
+  const method: PaymentMethod = paymentMethod || "cash_on_delivery";
   if (!["cash_on_delivery", "credit_card", "paypal"].includes(method)) {
-    logger.withReq.warn(req, orderT("error.invalidPaymentMethod", locale));
-    res
-      .status(400)
-      .json({
-        success: false,
-        message: orderT("error.invalidPaymentMethod", locale),
-      });
+    res.status(400).json({ success: false, message: orderT("error.invalidPaymentMethod", locale) });
     return;
   }
 
-  // --- Siparişi oluştur
+  // --- Order kaydı
   const order = await Order.create({
     user: userId,
     tenant: req.tenant,
@@ -233,10 +165,11 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     coupon: coupon?._id,
     paymentMethod: method,
     status: "pending",
+    isDelivered: false,
+    isPaid: false,
     language: locale,
   });
 
-  // --- Payment (kredi kartı/paypal ise)
   let paymentDoc = null;
   if (["credit_card", "paypal"].includes(method)) {
     paymentDoc = await Payment.create({
@@ -252,14 +185,13 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     await order.save();
   }
 
-  // --- Email & Notification
+  // --- Kullanıcı bilgisi (email vs)
   const user = userId
-    ? await User.findOne({ _id: userId, tenant: req.tenant }).select(
-        "email name language"
-      )
+    ? await User.findOne({ _id: userId, tenant: req.tenant }).select("email name language")
     : null;
-  const customerEmail = shippingAddressWithTenant?.email || user?.email || "";
+  const customerEmail = user?.email || "";
 
+  // ✉️ Email: Customer (Booking modülü ile birebir aynı pattern)
   await sendEmail({
     tenantSlug: req.tenant,
     to: customerEmail,
@@ -268,7 +200,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       name: shippingAddressWithTenant.name || user?.name || "",
       itemsList: itemsForMail.join("<br/>"),
       totalPrice: total - discount,
-      locale: typeof locale === "string" ? locale : locale[0] || "en",
+      locale,
       brandName,
       brandWebsite,
       senderEmail,
@@ -283,31 +215,38 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     from: senderEmail,
   });
 
+  // ✉️ Email: Admin
   await sendEmail({
     tenantSlug: req.tenant,
     to: adminEmail,
     subject: orderT("email.adminSubject", locale, { brand: brandName }),
-    html: `<p>${orderT("email.adminBody", locale, {
-      orderId: String(order._id),
-    })}</p>`,
+    html: `
+      <h2>🛒 ${orderT("email.adminOrderTitle", locale, { brand: brandName })}</h2>
+      <ul>
+        <li><strong>${orderT("labelOrderId", locale)}:</strong> ${order._id}</li>
+        <li><strong>${orderT("labelCustomerName", locale)}:</strong> ${shippingAddressWithTenant.name || user?.name || ""}</li>
+        <li><strong>Email:</strong> ${customerEmail}</li>
+        <li><strong>${orderT("labelItems", locale)}:</strong> ${itemsForMail.join("<br/>")}</li>
+        <li><strong>${orderT("labelTotal", locale)}:</strong> €${(total - discount).toFixed(2)}</li>
+        <li><strong>${orderT("labelPaymentMethod", locale)}:</strong> ${orderT(`payment.method.${method}`, locale)}</li>
+      </ul>
+    `,
     from: senderEmail,
   });
 
+  // 🔔 Bildirim
   await Notification.create({
     user: userId,
     tenant: req.tenant,
     type: "success",
-    message: orderT("notification.orderReceived", locale, {
-      total: total - discount,
-    }),
+    message: orderT("notification.orderReceived", locale, { total: total - discount }),
     data: { orderId: String(order._id) },
     language: locale,
   });
 
   logger.withReq.info(
     req,
-    orderT("order.created.success", locale) +
-      ` | User: ${userId} | Order: ${order._id}`
+    orderT("order.created.success", locale) + ` | User: ${userId} | Order: ${order._id}`
   );
 
   res.status(201).json({

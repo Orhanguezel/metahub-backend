@@ -293,14 +293,17 @@ export const updateProfileImage = asyncHandler(
     });
   }
 );
-
-// ✅ Full profil güncelle
+// ✅ Full profil güncelle (SADE, TUTARLI, REFERANS ALANLAR KORUNUR)
 export const updateFullProfile = asyncHandler(
   async (req: Request, res: Response) => {
     const locale = getLocale(req);
     const { User } = await getTenantModels(req);
+
     const updateFields: Record<string, any> = { ...req.body };
-    const jsonFields = ["addresses", "notifications", "socialMedia", "payment"];
+
+    // ❗ Sadece şu alanlar JSON olarak kontrol edilebilir
+    const jsonFields = ["notifications", "socialMedia"];
+
     for (const field of jsonFields) {
       try {
         if (updateFields[field] !== undefined) {
@@ -315,9 +318,30 @@ export const updateFullProfile = asyncHandler(
         return;
       }
     }
+
+    // ❌ Güvenlik için şu alanlar asla güncellenemez
+    const blockedFields = [
+      "_id",
+      "tenant",
+      "role",
+      "password",
+      "orders",
+      "cart",
+      "profile",
+      "favorites",
+      "addresses", // ← adres güncellemesi adres endpointinden yapılır!
+      "createdAt",
+      "updatedAt",
+    ];
+    for (const key of blockedFields) {
+      if (key in updateFields) {
+        delete updateFields[key];
+      }
+    }
+
     const updatedUser = await User.findOneAndUpdate(
       { _id: req.user!.id, tenant: req.tenant },
-      { ...updateFields },
+      updateFields,
       { new: true, runValidators: true }
     ).select("-password");
 
@@ -326,9 +350,10 @@ export const updateFullProfile = asyncHandler(
         req,
         `[PROFILE] User not found for full update: ${req.user!.id}`
       );
-      res
-        .status(404)
-        .json({ success: false, message: userT("error.userNotFound", locale) });
+      res.status(404).json({
+        success: false,
+        message: userT("error.userNotFound", locale),
+      });
       return;
     }
 
