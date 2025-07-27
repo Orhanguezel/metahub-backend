@@ -40,6 +40,11 @@ export const createBooking = asyncHandler(
       tenantData?.name?.en ||
       tenantData?.name ||
       "Brand";
+    const brandWebsite =
+      (tenantData?.domain?.main && `https://${tenantData.domain.main}`) ??
+      process.env.BRAND_WEBSITE ??
+      "https://guezelwebdesign.com";
+
     const senderEmail =
       tenantData?.emailSettings?.senderEmail || "noreply@example.com";
 
@@ -131,6 +136,7 @@ export const createBooking = asyncHandler(
       time,
       locale,
       brandName,
+      brandWebsite,
       senderEmail,
       tenant: req.tenant,
       userId: req.user?.id,

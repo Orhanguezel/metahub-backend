@@ -43,6 +43,12 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   const brandName =
     (tenantData?.name?.[locale] || tenantData?.name?.en || tenantData?.name) ??
     "Brand";
+
+    const brandWebsite =
+  (tenantData?.domain?.main && `https://${tenantData.domain.main}`) ??
+  process.env.BRAND_WEBSITE ??
+  "https://guezelwebdesign.com";
+
   const senderEmail =
     tenantData?.emailSettings?.senderEmail || "noreply@example.com";
   const adminEmail =
@@ -264,6 +270,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       totalPrice: total - discount,
       locale: typeof locale === "string" ? locale : locale[0] || "en",
       brandName,
+      brandWebsite,
       senderEmail,
       orderId: String(order._id),
       paymentMethod: orderT(`payment.method.${method}`, locale),
