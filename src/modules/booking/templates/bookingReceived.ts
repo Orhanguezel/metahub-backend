@@ -13,7 +13,12 @@ interface BookingReceivedParams {
   locale?: SupportedLocale;
   brandName: string;
   senderEmail?: string;
-  req?: any;
+
+  // Logger context (future-proof)
+  tenant?: string;
+  userId?: string;
+  ip?: string;
+  loggerLocale?: SupportedLocale;
 }
 
 export const BookingReceivedTemplate = ({
@@ -23,7 +28,11 @@ export const BookingReceivedTemplate = ({
   time,
   locale,
   brandName,
-  req
+  senderEmail,
+  tenant,
+  userId,
+  ip,
+  loggerLocale,
 }: BookingReceivedParams): string => {
   const lang: SupportedLocale = locale || "en";
   const t = (key: string, params?: any) =>
@@ -35,34 +44,37 @@ export const BookingReceivedTemplate = ({
     <p>${t("booking.received.wait")}</p>
     <table style="margin-top: 20px; border-collapse: collapse;">
       <tr>
-        <td style="padding: 8px 12px;"><strong>${t(
-          "booking.serviceLabel"
-        )}:</strong></td>
+        <td style="padding: 8px 12px;"><strong>${t("booking.serviceLabel")}:</strong></td>
         <td style="padding: 8px 12px;">${service}</td>
       </tr>
       <tr>
-        <td style="padding: 8px 12px;"><strong>${t(
-          "booking.dateLabel"
-        )}:</strong></td>
+        <td style="padding: 8px 12px;"><strong>${t("booking.dateLabel")}:</strong></td>
         <td style="padding: 8px 12px;">${date}</td>
       </tr>
       <tr>
-        <td style="padding: 8px 12px;"><strong>${t(
-          "booking.timeLabel"
-        )}:</strong></td>
+        <td style="padding: 8px 12px;"><strong>${t("booking.timeLabel")}:</strong></td>
         <td style="padding: 8px 12px;">${time}</td>
       </tr>
     </table>
     <p style="margin-top: 20px;">${t("booking.received.note")}</p>
-    <p style="margin-top: 30px;">${t("booking.received.sign", {
-      brand: brandName,
-    })}</p>
+    <p style="margin-top: 30px;">${t("booking.received.sign", { brand: brandName })}</p>
   `;
 
-  logger.withReq.debug(
-    req,
-    `[EmailTemplate] Booking RECEIVED generated for ${name} | lang: ${lang}`
-  );
+  logger.debug(`[EmailTemplate] Booking RECEIVED generated`, {
+    module: "booking",
+    event: "booking.email.received",
+    status: "success",
+    tenant,
+    userId,
+    ip,
+    locale: loggerLocale || lang,
+    meta: {
+      name,
+      service,
+      date,
+      time,
+    },
+  });
 
   return baseTemplate(content, t("booking.received.title"));
 };

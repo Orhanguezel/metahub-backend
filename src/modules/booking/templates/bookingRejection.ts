@@ -11,9 +11,13 @@ interface BookingRejectionParams {
   date: string;
   time: string;
   locale: SupportedLocale;
-  brandName: string; // EKLENDİ
-  senderEmail?: string; // Gerekirse
-  req?: any; // Gerekirse, örneğin logger için
+  brandName: string;
+
+  // 🔐 Logger context
+  tenant?: string;
+  userId?: string;
+  ip?: string;
+  loggerLocale?: SupportedLocale;
 }
 
 export function BookingRejectionTemplate({
@@ -23,7 +27,10 @@ export function BookingRejectionTemplate({
   time,
   locale,
   brandName,
-  req
+  tenant,
+  userId,
+  ip,
+  loggerLocale,
 }: BookingRejectionParams): string {
   const t = (key: string, params?: any) =>
     translate(key, locale, translations, params);
@@ -37,10 +44,21 @@ export function BookingRejectionTemplate({
     })}</p>
   `;
 
-  logger.withReq.debug(
-    req,
-    `[EmailTemplate] Booking REJECTION generated for ${name} | lang: ${locale}`
-  );
+  logger.debug(`[EmailTemplate] Booking REJECTION generated`, {
+    module: "booking",
+    event: "booking.email.rejection",
+    status: "info",
+    tenant,
+    userId,
+    ip,
+    locale: loggerLocale || locale,
+    meta: {
+      name,
+      service,
+      date,
+      time,
+    },
+  });
 
   return baseTemplate(content, t("booking.rejection.title"));
 }

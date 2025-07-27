@@ -201,7 +201,7 @@ export const getAnalyticsEvents = asyncHandler(async (req: Request, res: Respons
 
   const { Analytics } = await getTenantModels(req);
 
-  const events = await Analytics.find(queryObj, { tenant: req.tenant })
+  const events = await Analytics.find(queryObj)
     .sort(String(sort))
     .skip(Number(skip))
     .limit(Math.min(Number(limit), 1000));
