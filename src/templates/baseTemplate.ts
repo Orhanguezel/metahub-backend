@@ -3,7 +3,6 @@ import translations from "@/templates/i18n";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 
-// 🔧 Default fallback (çalışmazsa .env'den)
 const DEFAULT_BRAND_NAME = process.env.BRAND_NAME ?? "MetaHub";
 const DEFAULT_BRAND_WEBSITE = process.env.BRAND_WEBSITE ?? "https://guezelwebdesign.com";
 
@@ -11,8 +10,8 @@ interface BaseTemplateOptions {
   content: string;
   title?: string;
   locale?: SupportedLocale;
-  brandName?: string;       // ✨ Tenant'tan gelen marka adı
-  brandWebsite?: string;    // ✨ Tenant'tan gelen web sitesi
+  brandName?: string;
+  brandWebsite?: string;
 }
 
 export const baseTemplate = ({
@@ -22,19 +21,20 @@ export const baseTemplate = ({
   brandName,
   brandWebsite,
 }: BaseTemplateOptions): string => {
-  const _locale = locale ?? getLogLocale();
-  const tTrans = translations[_locale] || translations["en"];
-  const year = new Date().getFullYear();
+  const _locale: SupportedLocale = locale ?? getLogLocale() ?? "en";
+  const t = (key: string) => translations[_locale]?.[key] || translations["en"]?.[key] || "";
 
+  const year = new Date().getFullYear();
   const _brand = brandName ?? DEFAULT_BRAND_NAME;
   const _website = brandWebsite ?? DEFAULT_BRAND_WEBSITE;
   const _websiteClean = _website.replace(/^https?:\/\//, "");
 
-  const footerRights = tTrans["footer.rights"]
+  const footerRights = t("footer.rights")
     .replace("{year}", String(year))
     .replace("{brand}", _brand);
 
-  const footerWebsite = tTrans["footer.website"].replace("{domain}", _websiteClean);
+  const footerWebsite = t("footer.website")
+    .replace("{domain}", _websiteClean);
 
   logger.debug(
     `[EmailTemplate] Rendered for locale: ${_locale} | title: ${title ?? _brand}`
@@ -80,7 +80,7 @@ export const baseTemplate = ({
           ${content}
           <div class="footer">
             ${footerRights}<br/>
-            <a href="${_website}">${footerWebsite}</a>
+            <a href="${_website}" target="_blank" rel="noopener noreferrer">${footerWebsite}</a>
           </div>
         </div>
       </body>
