@@ -12,10 +12,10 @@ export const createOrderValidator = [
     .notEmpty()
     .withMessage("Each item must have a valid product ID."),
 
-  body("items.*.productModel")
-    .isIn(["bike", "ensotekprod"])
+  body("items.*.productType")
+    .isIn(["bike", "ensotekprod", "sparepart"])
     .withMessage(
-      "Each item must have a valid product model (Bike or Ensotekprod)."
+      "Each item must have a valid product type (Bike or Ensotekprod or Sparepart)."
     ),
 
   body("items.*.quantity")
