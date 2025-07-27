@@ -19,6 +19,8 @@ export interface IServices {
   images: IServicesImage[];
   tags: string[];
   author?: string;
+  durationMinutes?: number; // Örnek: 30 dakika
+  price?: number; // Örnek: 100.00
   category: Types.ObjectId;
   isPublished: boolean;
   publishedAt?: Date;

@@ -47,7 +47,7 @@ export const getAllArticles = asyncHandler(
 
     res.status(200).json({
       success: true,
-      message: "Articles list fetched successfully.",
+      message: t("log.listed"),
       data: articlesList,
     });
   }
@@ -81,7 +81,7 @@ export const getArticlesById = asyncHandler(
       tenant: req.tenant,
     })
       .populate("comments")
-      .populate("category", "title")
+      .populate("category", "name slug")
       .lean();
 
     if (!articles) {
@@ -125,7 +125,7 @@ export const getArticlesBySlug = asyncHandler(
       isPublished: true,
     })
       .populate("comments")
-      .populate("category", "title")
+      .populate("category", "name slug")
       .lean();
 
     if (!articles) {

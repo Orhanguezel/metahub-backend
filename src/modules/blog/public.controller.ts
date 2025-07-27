@@ -78,7 +78,7 @@ export const getBlogById = asyncHandler(async (req: Request, res: Response) => {
     tenant: req.tenant,
   })
     .populate("comments")
-    .populate("category", "title")
+    .populate("category", "name slug")
     .lean();
 
   if (!blog) {
@@ -121,7 +121,7 @@ export const getBlogBySlug = asyncHandler(
       isPublished: true,
     })
       .populate("comments")
-      .populate("category", "title")
+      .populate("category", "name slug")
       .lean();
 
     if (!blog) {

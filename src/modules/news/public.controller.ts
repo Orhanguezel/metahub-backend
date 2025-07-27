@@ -28,7 +28,7 @@ export const getAllNews = asyncHandler(async (req: Request, res: Response) => {
   }
 
   if (onlyLocalized === "true") {
-    filter[`name.${locale}`] = { $exists: true };
+    filter[`title.${locale}`] = { $exists: true };
   }
 
   const newsList = await News.find(filter)
@@ -46,7 +46,7 @@ export const getAllNews = asyncHandler(async (req: Request, res: Response) => {
 
   res.status(200).json({
     success: true,
-    message: "News list fetched successfully.",
+    message: t("log.listed"),
     data: newsList,
   });
 });
@@ -78,7 +78,7 @@ export const getNewsById = asyncHandler(async (req: Request, res: Response) => {
     tenant: req.tenant,
   })
     .populate("comments")
-    .populate("category", "title")
+    .populate("category", "name slug")
     .lean();
 
   if (!news) {
@@ -121,7 +121,7 @@ export const getNewsBySlug = asyncHandler(
       isPublished: true,
     })
       .populate("comments")
-      .populate("category", "title")
+      .populate("category", "name slug")
       .lean();
 
     if (!news) {

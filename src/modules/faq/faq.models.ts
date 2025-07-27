@@ -1,43 +1,26 @@
 import { Schema, model, Model, models } from "mongoose";
+import type { IFAQ } from "./types";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
-// ✅ Interface
-export interface IFAQ {
-  question: {
-    tr: string;
-    en: string;
-    de: string;
-  };
-  answer: {
-    tr: string;
-    en: string;
-    de: string;
-  };
-  tenant?: string; // Optional tenant field for multi-tenancy
-  category?: string;
-  isActive: boolean;
-  isPublished: boolean;
-  embedding?: number[];
-  createdAt: Date;
-  updatedAt: Date;
-}
+// 🔤 Çok dilli alan tipi
+const localizedStringField = () => {
+  const fields: Record<string, any> = {};
+  for (const locale of SUPPORTED_LOCALES) {
+    fields[locale] = { type: String, trim: true };
+  }
+  return fields;
+};
 
 // ✅ Schema
 const faqSchema = new Schema<IFAQ>(
   {
-    question: {
-      tr: { type: String, required: true, trim: true },
-      en: { type: String, required: true, trim: true },
-      de: { type: String, required: true, trim: true },
-    },
+    question: localizedStringField(),
+    answer: localizedStringField(),
     tenant: { type: String, required: true, index: true },
-    answer: {
-      tr: { type: String, required: true, trim: true },
-      en: { type: String, required: true, trim: true },
-      de: { type: String, required: true, trim: true },
-    },
     category: { type: String, trim: true },
     isActive: { type: Boolean, default: true },
     isPublished: { type: Boolean, default: false },
+    publishedAt: { type: Date },
     embedding: {
       type: [Number],
       default: [],
@@ -53,8 +36,6 @@ const faqSchema = new Schema<IFAQ>(
   }
 );
 
-// ✅ Model tanımı (guard'lı)
+// ✅ Model tanımı
 const FAQ: Model<IFAQ> = models.faq || model<IFAQ>("faq", faqSchema);
-
-// ✅ Export
 export { FAQ };

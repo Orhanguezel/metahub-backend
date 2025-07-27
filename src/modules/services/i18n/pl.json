@@ -1,14 +1,25 @@
 {
-  "created": "Artykuł został pomyślnie utworzony.",
-  "updated": "Artykuł został pomyślnie zaktualizowany.",
-  "invalidId": "Nieprawidłowe ID.",
-  "notFound": "Artykuł nie został znaleziony.",
-  "fetched": "Artykuł pomyślnie pobrany.",
-  "deleted": "Artykuł został pomyślnie usunięty.",
-  "invalidRemovedImages": "Nieprawidłowe usunięte obrazy.",
-  "listFetched": "Lista artykułów pomyślnie pobrana.",
-  "tagsArray": "Tablica tagów jest nieprawidłowa.",
-  "invalidCategory": "Nieprawidłowa kategoria.",
-  "booleanField": "Proszę podać prawidłową wartość logiczną."
+  "log": {
+    "listed": "Usługi zostały wyświetlone.",
+    "fetched": "Usługa została pobrana.",
+    "created": "Usługa została utworzona.",
+    "updated": "Usługa została zaktualizowana.",
+    "deleted": "Usługa została usunięta.",
+    "listFetched": "Lista usług została pobrana."
+  },
+  "error": {
+    "invalid_id": "Nieprawidłowe ID.",
+    "not_found": "Usługa nie znaleziona.",
+    "create_fail": "Wystąpił błąd podczas tworzenia usługi."
+  },
+  "validation": {
+    "invalidObjectId": "Nieprawidłowy identyfikator obiektu.",
+    "tagsArray": "Tagi muszą być tablicą.",
+    "durationMinutesPositive": "Czas trwania musi być dodatnią liczbą.",
+    "pricePositive": "Cena musi być dodatnią liczbą.",
+    "invalidCategory": "Nieprawidłowy identyfikator kategorii.",
+    "invalidRemovedImages": "Nieprawidłowy format usuniętych obrazów.",
+    "booleanField": "To pole musi być true lub false.",
+    "invalidLanguage": "Nieprawidłowy kod języka."
+  }
 }
-

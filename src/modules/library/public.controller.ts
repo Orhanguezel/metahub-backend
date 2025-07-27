@@ -34,7 +34,7 @@ export const getAllLibrary = asyncHandler(
 
     const libraryList = await Library.find(filter)
       .populate({ path: "comments", strictPopulate: false })
-      .populate({ path: "category", select: "title slug" })
+      .populate({ path: "category", select: "name slug" })
       .sort({ createdAt: -1 })
       .lean();
 
@@ -81,7 +81,7 @@ export const getLibraryById = asyncHandler(
       tenant: req.tenant,
     })
       .populate({ path: "comments", strictPopulate: false })
-      .populate({ path: "category", select: "title slug" })
+      .populate({ path: "category", select: "name slug" })
       .lean();
 
     if (!library) {
@@ -125,7 +125,7 @@ export const getLibraryBySlug = asyncHandler(
       isPublished: true,
     })
       .populate({ path: "comments", strictPopulate: false })
-      .populate({ path: "category", select: "title slug" })
+      .populate({ path: "category", select: "name slug" })
       .lean();
 
     if (!library) {

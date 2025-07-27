@@ -44,6 +44,8 @@ export const createServices = asyncHandler(
         summary,
         content,
         tags,
+        durationMinutes,
+        price,
         category,
         isPublished,
         publishedAt,
@@ -98,6 +100,10 @@ export const createServices = asyncHandler(
         tenant: req.tenant,
         content,
         tags,
+        durationMinutes: durationMinutes
+          ? parseFloat(durationMinutes)
+          : undefined,
+        price: price ? parseFloat(price) : undefined,
         category: isValidObjectId(category) ? category : undefined,
         isPublished: isPublished === "true" || isPublished === true,
         publishedAt: isPublished ? publishedAt || new Date() : undefined,
@@ -180,6 +186,8 @@ export const updateServices = asyncHandler(
       "category",
       "isPublished",
       "publishedAt",
+      "durationMinutes",
+      "price",
     ];
     for (const field of updatableFields) {
       if (updates[field] !== undefined)

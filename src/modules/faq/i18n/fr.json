@@ -1,0 +1,21 @@
+{
+  "faqs": {
+    "question_required": "La question est requise.",
+    "answer_generated": "Réponse générée avec succès.",
+    "answer_failed": "Échec de la génération de la réponse.",
+    "no_similar_found": "Aucune FAQ similaire trouvée.",
+    "retrieved_successfully": "FAQs récupérées avec succès.",
+    "created_successfully": "FAQ créée avec succès.",
+    "updated_successfully": "FAQ mise à jour avec succès.",
+    "deleted_successfully": "FAQ supprimée avec succès.",
+    "not_found": "FAQ non trouvée.",
+    "invalid_id": "ID de FAQ invalide.",
+    "validation_failed": "Échec de la validation."
+  },
+  "validation": {
+    "invalidObjectId": "ID invalide.",
+    "embedding_array": "L'embedding doit être un tableau.",
+    "embedding_numbers": "Tous les éléments de l'embedding doivent être des nombres.",
+    "invalid_language": "Langue invalide."
+  }
+}

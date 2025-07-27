@@ -144,6 +144,30 @@
     "defaultEnabled": false
   },
   {
+    "sectionKey": "aboutMe",
+    "label": {
+      "tr": "Hakkımda",
+      "en": "about me",
+      "de": "Über mich",
+      "pl": "O mnie",
+      "fr": "À propos",
+      "es": "Sobre mí"
+    },
+    "description": {
+      "tr": "Hakkımda alanı",
+      "en": "About me section",
+      "de": "Über mich Bereich",
+      "pl": "Sekcja o mnie",
+      "fr": "Section à propos",
+      "es": "Sección sobre mí"
+    },
+    "icon": "MdInfo",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 4,
+    "defaultEnabled": false
+  },
+  {
     "sectionKey": "news",
     "label": {
       "tr": "Haberler",

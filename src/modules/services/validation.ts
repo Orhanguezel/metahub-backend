@@ -38,6 +38,28 @@ export const validateCreateServices = [
         translations
       )
     ),
+  body("durationMinutes")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.durationMinutesPositive",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
+
+  body("price")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.pricePositive",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
+
   body("category")
     .optional()
     .isMongoId()
@@ -67,16 +89,39 @@ export const validateUpdateServices = [
         translations
       )
     ),
-  body("category")
+  body("durationMinutes")
     .optional()
-    .isMongoId()
+    .isFloat({ min: 0 })
     .withMessage((_, { req }) =>
       translate(
-        "validation.invalidCategory",
+        "validation.durationMinutesPositive",
         req.locale || getLogLocale(),
         translations
       )
     ),
+
+  body("durationMinutes")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.durationMinutesPositive",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
+
+  body("price")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.pricePositive",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
+
   body("removedImages")
     .optional()
     .custom((val, { req }) => {

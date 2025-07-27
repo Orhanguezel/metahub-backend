@@ -68,6 +68,7 @@ import { SparepartCategory } from "@/modules/sparepartcategory/models";
 import { Tenants } from "@/modules/tenants/tenants.model";
 import { Team } from "@/modules/team/models";
 import { TeamCategory } from "@/modules/teamcategory/category.models";
+import { Portfolio } from "@/modules/portfolio/models";
 
 export const getTenantModels = async (req: Request) => ({
   Settings: await req.getModel("settings", Settings.schema),
@@ -172,4 +173,5 @@ export const getTenantModels = async (req: Request) => ({
   Tenants: await req.getModel("tenants", Tenants.schema),
   Team: await req.getModel("team", Team.schema),
   TeamCategory: await req.getModel("teamcategory", TeamCategory.schema),
+  Portfolio: await req.getModel("portfolio", Portfolio.schema),
 });

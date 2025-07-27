@@ -1,13 +1,25 @@
 {
-  "created": "Artikel erfolgreich erstellt.",
-  "updated": "Artikel erfolgreich aktualisiert.",
-  "invalidId": "Ungültige ID.",
-  "notFound": "Artikel nicht gefunden.",
-  "fetched": "Artikel erfolgreich abgerufen.",
-  "deleted": "Artikel erfolgreich gelöscht.",
-  "invalidRemovedImages": "Ungültige entfernte Bilder.",
-  "listFetched": "Artikel Liste erfolgreich abgerufen.",
-  "tagsArray": "Tags-Array ist ungültig.",
-  "invalidCategory": "Ungültige Kategorie.",
-  "booleanField": "Bitte geben Sie einen gültigen booleschen Wert ein."
+  "log": {
+    "listed": "Dienste aufgelistet.",
+    "fetched": "Dienst erfolgreich abgerufen.",
+    "created": "Dienst erfolgreich erstellt.",
+    "updated": "Dienst aktualisiert.",
+    "deleted": "Dienst gelöscht.",
+    "listFetched": "Dienstliste erfolgreich abgerufen."
+  },
+  "error": {
+    "invalid_id": "Ungültige ID.",
+    "not_found": "Dienst nicht gefunden.",
+    "create_fail": "Fehler beim Erstellen des Dienstes."
+  },
+  "validation": {
+    "invalidObjectId": "Ungültige Objekt-ID.",
+    "tagsArray": "Tags müssen ein Array sein.",
+    "durationMinutesPositive": "Dauer muss eine positive Zahl sein.",
+    "pricePositive": "Preis muss eine positive Zahl sein.",
+    "invalidCategory": "Ungültige Kategorie-ID.",
+    "invalidRemovedImages": "Format der entfernten Bilder ist ungültig.",
+    "booleanField": "Dieses Feld muss true oder false sein.",
+    "invalidLanguage": "Ungültiger Sprachcode."
+  }
 }
