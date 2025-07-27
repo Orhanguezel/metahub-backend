@@ -1,41 +1,43 @@
 import logger from "@/core/middleware/logger/logger";
-import { t } from "@/core/utils/i18n/translate";
-import translations from "@/templates/i18n"; // <-- Email template çeviri dosyan
+import translations from "@/templates/i18n";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 
-const BRAND_NAME = process.env.BRAND_NAME ?? "MeteHuB";
-const BRAND_WEBSITE =
-  process.env.BRAND_WEBSITE ?? "https://guezelwebdesign.com";
+// 🔧 Default fallback (çalışmazsa .env'den)
+const DEFAULT_BRAND_NAME = process.env.BRAND_NAME ?? "MetaHub";
+const DEFAULT_BRAND_WEBSITE = process.env.BRAND_WEBSITE ?? "https://guezelwebdesign.com";
 
-/**
- * Returns a fully formatted HTML email template.
- *
- * @param content - The HTML content inside the email container.
- * @param title - The <title> of the email document. Defaults to BRAND_NAME.
- * @param locale - (optional) override for language (default: process.env.LOG_LOCALE ya da "en")
- * @returns Full HTML document string.
- */
-export const baseTemplate = (
-  content: string,
-  title: string = BRAND_NAME,
-  locale?: SupportedLocale
-): string => {
-  // --- DİL SEÇİMİ (her yerde aynı) ---
-  const _locale = getLogLocale();
+interface BaseTemplateOptions {
+  content: string;
+  title?: string;
+  locale?: SupportedLocale;
+  brandName?: string;       // ✨ Tenant'tan gelen marka adı
+  brandWebsite?: string;    // ✨ Tenant'tan gelen web sitesi
+}
+
+export const baseTemplate = ({
+  content,
+  title,
+  locale,
+  brandName,
+  brandWebsite,
+}: BaseTemplateOptions): string => {
+  const _locale = locale ?? getLogLocale();
   const tTrans = translations[_locale] || translations["en"];
   const year = new Date().getFullYear();
-  const domain = BRAND_WEBSITE.replace(/^https?:\/\//, "");
 
-  // --- Footer çok dilli metinler (tanslation dosyasından) ---
+  const _brand = brandName ?? DEFAULT_BRAND_NAME;
+  const _website = brandWebsite ?? DEFAULT_BRAND_WEBSITE;
+  const _websiteClean = _website.replace(/^https?:\/\//, "");
+
   const footerRights = tTrans["footer.rights"]
     .replace("{year}", String(year))
-    .replace("{brand}", BRAND_NAME);
-  const footerWebsite = tTrans["footer.website"].replace("{domain}", domain);
+    .replace("{brand}", _brand);
 
-  // --- LOG: Template hangi dilde render edildiğini isteğe bağlı loglayabilirsin ---
+  const footerWebsite = tTrans["footer.website"].replace("{domain}", _websiteClean);
+
   logger.debug(
-    `[EmailTemplate] Rendered for locale: ${_locale} | title: ${title}`
+    `[EmailTemplate] Rendered for locale: ${_locale} | title: ${title ?? _brand}`
   );
 
   return `
@@ -44,7 +46,7 @@ export const baseTemplate = (
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>${title}</title>
+        <title>${title ?? _brand}</title>
         <style>
           body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -78,7 +80,7 @@ export const baseTemplate = (
           ${content}
           <div class="footer">
             ${footerRights}<br/>
-            <a href="${BRAND_WEBSITE}">${footerWebsite}</a>
+            <a href="${_website}">${footerWebsite}</a>
           </div>
         </div>
       </body>

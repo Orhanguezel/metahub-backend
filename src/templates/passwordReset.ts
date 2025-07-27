@@ -8,21 +8,23 @@ import type { SupportedLocale } from "@/types/common";
 export interface PasswordResetTemplateParams {
   name: string;
   resetLink: string;
-  brandName: string;    // artık zorunlu!
-  senderEmail?: string; // opsiyonel
+  brandName: string;       // zorunlu: "Königs Massage" vs.
+  brandWebsite?: string;   // opsiyonel: tenant domain'den alınır
+  senderEmail?: string;    // opsiyonel: footer’a yazmak için
 }
 
 export const passwordResetTemplate = ({
   name,
   resetLink,
   brandName,
+  brandWebsite,
   senderEmail,
 }: PasswordResetTemplateParams): string => {
   const locale = getLogLocale();
   const tr = translations[locale] || translations["en"];
 
   logger.debug(
-    `[EmailTemplate] Password reset for: ${name} | locale: ${locale}`
+    `[EmailTemplate] Password reset generated for ${name} | locale: ${locale}`
   );
 
   const content = `
@@ -39,5 +41,11 @@ export const passwordResetTemplate = ({
     <p style="font-size:12px;color:#999;">${brandName}${senderEmail ? ` | ${senderEmail}` : ""}</p>
   `;
 
-  return baseTemplate(content, t("reset.title", locale, tr));
+  return baseTemplate({
+    content,
+    title: t("reset.title", locale, tr, { brand: brandName }),
+    locale,
+    brandName,
+    brandWebsite,
+  });
 };

@@ -1,97 +1,48 @@
 {
-  "validation": {
-    "nameRequired": "İsim zorunludur.",
-    "nameString": "İsim metin olmalıdır.",
-    "email": "Geçerli bir e-posta gereklidir.",
-    "phone": "Telefon metin olmalıdır.",
-    "serviceTypeRequired": "Hizmet türü zorunludur.",
-    "serviceTypeString": "Hizmet türü metin olmalıdır.",
-    "note": "Not metin olmalıdır.",
-    "dateRequired": "Tarih zorunludur.",
-    "dateFormat": "Geçerli bir tarih giriniz (YYYY-MM-DD).",
-    "timeRequired": "Saat zorunludur.",
-    "timeFormat": "Saat HH:mm formatında olmalıdır.",
-    "serviceRequired": "Hizmet ID zorunludur.",
-    "serviceId": "Hizmet ID geçerli bir ObjectId olmalıdır.",
-    "duration": "Süre pozitif bir tam sayı olmalıdır.",
-    "languageRequired": "Dil zorunludur.",
-    "language": "Dil şu seçeneklerden biri olmalıdır: {{supported}}",
-    "status": "Durum: pending, confirmed veya cancelled olmalıdır.",
-    "mongoId": "{{field}} geçerli bir MongoDB ObjectId olmalıdır."
-  },
-  "admin": {
-    "bookings": {
-      "fetched": "Tüm randevular başarıyla getirildi.",
-      "invalidId": "Geçersiz randevu ID.",
-      "notFound": "Randevu bulunamadı.",
-      "fetchedOne": "Randevu başarıyla getirildi.",
-      "statusUpdated": "Randevu durumu güncellendi. (Durum: {{status}})",
-      "notFoundOrDeleted": "Randevu bulunamadı veya silindi.",
-      "deleted": "Randevu başarıyla silindi."
-    }
-  },
-  "public": {
-    "create": {
-      "missingFields": "Zorunlu alanları doldurun.",
-      "slotsFull": "Bu saat aralığı tamamen dolu.",
-      "created": "Randevunuz başarıyla oluşturuldu.",
-      "success": "Randevu oluşturma işlemi başarılı."
-    },
-    "email": {
-      "subject": {
-        "customer": "Randevunuz alındı",
-        "admin": "Yeni randevu talebi"
-      }
-    },
-    "adminMail": {
-      "newBooking": "Yeni Randevu Talebi",
-      "name": "Ad Soyad",
-      "phone": "Telefon",
-      "service": "Hizmet",
-      "date": "Tarih",
-      "time": "Saat",
-      "note": "Not"
-    },
-    "notification": {
-      "title": "Yeni randevu oluşturuldu",
-      "message": "{{name}}, {{service}} için {{date}} tarihinde saat {{time}}'de randevu aldı."
-    }
-  },
-  "booking": {
-    "confirmed": {
-      "subject": "Randevunuz onaylandı",
-      "emailSent": "Onay e-postası gönderildi.",
-      "emailError": "Onay e-postası gönderilemedi."
-    },
-    "rejected": {
-      "subject": "Randevunuz iptal edildi",
-      "emailSent": "İptal e-postası gönderildi.",
-      "emailError": "İptal e-postası gönderilemedi."
-    },
-     "title": "Randevu Onayı",
-    "greeting": "Merhaba {{name}},",
-    "info": "{{brand}} ile randevunuz başarıyla onaylanmıştır.",
-    "instructions": "Lütfen randevu saatinizden 5 dakika önce hazır olunuz.",
-    "serviceLabel": "Hizmet",
-    "dateLabel": "Tarih",
-    "timeLabel": "Saat",
-    "note": "Herhangi bir sorunuz olursa bizimle iletişime geçebilirsiniz.",
-    "sign": "Sevgilerle, {{brand}} Ekibi",
-    "received": {
-      "title": "Randevu Talebiniz Alındı",
-      "greeting": "Merhaba {{name}},",
-      "info": "{{brand}} ile randevu talebiniz başarıyla alınmıştır.",
-      "wait": "Randevunuzun onaylanması için ekibimiz en kısa sürede sizinle iletişime geçecektir.",
-      "note": "Herhangi bir sorunuz olursa bize e-posta ile ulaşabilirsiniz.",
-      "sign": "Sevgilerle, {{brand}} Ekibi"
-    },
-    "rejection": {
-      "title": "Randevu İptali",
-      "greeting": "Merhaba {{name}},",
-      "info": "{{date}} tarihinde saat {{time}} için planlanan \"{{service}}\" randevunuz iptal edilmiştir.",
-      "closing": "Dilerseniz yeni bir randevu alabilirsiniz.",
-      "sign": "Sevgilerle, {{brand}} Ekibi"
-    }
-  }
-  
+  "admin.bookings.fetched": "Tüm randevular başarıyla getirildi.",
+  "admin.bookings.fetchedOne": "#{id} ID’li randevu başarıyla getirildi.",
+  "admin.bookings.invalidId": "Geçersiz randevu ID: {id}",
+  "admin.bookings.notFound": "#{id} ID’li randevu bulunamadı.",
+  "admin.bookings.statusUpdated": "Randevu durumu güncellendi: {id} - {status}",
+  "admin.bookings.deleted": "#{id} ID’li randevu başarıyla silindi.",
+  "admin.bookings.notFoundOrDeleted": "#{id} ID’li randevu bulunamadı veya silinmiş.",
+  "booking.confirmed.subject": "Randevunuz Onaylandı",
+  "booking.confirmed.emailSent": "Onay maili gönderildi: {id}",
+  "booking.confirmed.emailError": "Onay maili gönderilemedi: {id}",
+  "booking.rejected.subject": "Randevunuz Reddedildi",
+  "booking.rejected.emailSent": "Red maili gönderildi: {id}",
+  "booking.rejected.emailError": "Red maili gönderilemedi: {id}",
+  "public.create.missingFields": "Zorunlu alanlar eksik.",
+  "public.create.slotsFull": "Bu saat aralığında müsaitlik kalmadı.",
+  "public.create.created": "{name} için {date} {time} tarihinde randevu oluşturuldu.",
+  "public.create.success": "Randevunuz başarıyla alındı.",
+  "public.email.subject.customer": "Randevu Talebiniz Alındı",
+  "public.email.subject.admin": "Yeni Randevu Talebi",
+  "public.notification.title": "Yeni Randevu",
+  "public.notification.message": "{name}, {service} için {date} {time} tarihinde randevu oluşturdu.",
+  "public.adminMail.newBooking": "Yeni Randevu Talebi",
+  "public.adminMail.name": "İsim",
+  "public.adminMail.phone": "Telefon",
+  "public.adminMail.service": "Hizmet",
+  "public.adminMail.date": "Tarih",
+  "public.adminMail.time": "Saat",
+  "public.adminMail.note": "Not",
+  "validation.nameRequired": "İsim alanı zorunludur.",
+  "validation.nameString": "İsim geçerli bir metin olmalıdır.",
+  "validation.email": "Geçerli bir e-posta adresi giriniz.",
+  "validation.phone": "Telefon alanı metin olmalıdır.",
+  "validation.serviceTypeRequired": "Hizmet türü zorunludur.",
+  "validation.serviceTypeString": "Hizmet türü metin olmalıdır.",
+  "validation.note": "Not alanı metin olmalıdır.",
+  "validation.dateRequired": "Tarih zorunludur.",
+  "validation.dateFormat": "Geçerli bir tarih formatı giriniz (YYYY-MM-DD).",
+  "validation.timeRequired": "Saat zorunludur.",
+  "validation.timeFormat": "Saat formatı HH:mm olmalıdır.",
+  "validation.serviceRequired": "Hizmet seçimi zorunludur.",
+  "validation.serviceId": "Geçerli bir hizmet ID’si giriniz.",
+  "validation.duration": "Süre dakikası pozitif bir sayı olmalıdır.",
+  "validation.languageRequired": "Dil seçimi zorunludur.",
+  "validation.language": "Geçersiz dil. Desteklenen diller: {supported}",
+  "validation.status": "Geçersiz durum. Sadece: pending, confirmed, cancelled olabilir.",
+  "validation.mongoId": "{field} alanı geçerli bir Mongo ID olmalıdır."
 }

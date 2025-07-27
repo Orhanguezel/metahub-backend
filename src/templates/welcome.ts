@@ -6,28 +6,42 @@ import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 
 interface WelcomeTemplateParams {
   name: string;
+  brandName?: string;       // tenant'tan gelir
+  brandFullName?: string;   // opsiyonel özel tanım
+  brandTeamName?: string;   // opsiyonel özel tanım
+  brandWebsite?: string;    // tenant domain
 }
 
-const BRAND_NAME = process.env.BRAND_NAME || "metahub";
-const BRAND_FULL_NAME = process.env.BRAND_FULL_NAME || `${BRAND_NAME}`;
-const BRAND_TEAM_NAME = process.env.BRAND_TEAM_NAME || `${BRAND_NAME} Team`;
-
-export const welcomeTemplate = ({ name }: WelcomeTemplateParams): string => {
+export const welcomeTemplate = ({
+  name,
+  brandName,
+  brandFullName,
+  brandTeamName,
+  brandWebsite,
+}: WelcomeTemplateParams): string => {
   const lang = getLogLocale();
   const tr = translations[lang] || translations["en"];
 
+  // Fallback değerler (env yerine geçici default)
+  const fallbackBrand = brandName ?? "MetaHub";
+  const fallbackFull = brandFullName ?? fallbackBrand;
+  const fallbackTeam = brandTeamName ?? `${fallbackBrand} Team`;
+
   const content = `
     <h2>${t("welcome.greeting", lang, tr, { name })}</h2>
-    <p>${t("welcome.message1", lang, tr, { brandFull: BRAND_FULL_NAME })}</p>
+    <p>${t("welcome.message1", lang, tr, { brandFull: fallbackFull })}</p>
     <p>${t("welcome.message2", lang, tr)}</p>
     <p>${t("welcome.message3", lang, tr)}</p>
-    <p>${t("welcome.sign", lang, tr, { brandTeam: BRAND_TEAM_NAME })}</p>
+    <p>${t("welcome.sign", lang, tr, { brandTeam: fallbackTeam })}</p>
   `;
 
   logger.debug(`[EmailTemplate] Welcome generated for ${name} | lang: ${lang}`);
 
-  return baseTemplate(
+  return baseTemplate({
     content,
-    t("welcome.title", lang, tr, { brand: BRAND_NAME })
-  );
+    title: t("welcome.title", lang, tr, { brand: fallbackBrand }),
+    locale: lang,
+    brandName: fallbackBrand,
+    brandWebsite: brandWebsite, // undefined olabilir, baseTemplate fallback’le halleder
+  });
 };
