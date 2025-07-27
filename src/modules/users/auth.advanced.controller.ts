@@ -31,12 +31,16 @@ function getTenantMailContext(req: Request) {
     (tenantData?.name?.[locale] ||
       tenantData?.name?.en ||
       tenantData?.name) ?? "Brand";
+      const brandWebsite =
+  (tenantData?.domain?.main && `https://${tenantData.domain.main}`) ??
+  process.env.BRAND_WEBSITE ??
+  "https://guezelwebdesign.com";
   const senderEmail =
     tenantData?.emailSettings?.senderEmail;
   const frontendUrl =
     tenantData?.domain?.main ||
     process.env.FRONTEND_URL
-  return { brandName, senderEmail, frontendUrl };
+  return { brandName, brandWebsite, senderEmail, frontendUrl };
 }
 
 // ✅ E-posta Doğrulama Gönder (next parametresiz)
@@ -87,7 +91,7 @@ export const sendEmailVerification = async (
   user.emailVerificationExpires = new Date(Date.now() + 1000 * 60 * 60 * 6); // 6 saat
   await user.save();
 
-  const { brandName, senderEmail, frontendUrl } = getTenantMailContext(req);
+  const { brandName, brandWebsite, senderEmail, frontendUrl } = getTenantMailContext(req);
   const verifyUrl = `${frontendUrl.replace(/\/$/, "")}/verify-email/${token}`;
   await sendEmail({
     tenantSlug: req.tenant,
@@ -98,6 +102,7 @@ export const sendEmailVerification = async (
       <p>${userT("email.verification.body", locale, { brand: brandName })}</p>
       <a href="${verifyUrl}" target="_blank">${verifyUrl}</a>
       <p style="font-size:12px;color:#888;">${brandName} | ${senderEmail}</p>
+      <p style="font-size:12px;color:#888;">${brandWebsite}</p>
     `,
     from: senderEmail,
   });
@@ -186,7 +191,7 @@ export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
   user.otpExpires = new Date(Date.now() + 1000 * 60 * 10);
   await user.save();
 
-  const { brandName, senderEmail } = getTenantMailContext(req);
+  const { brandName, brandWebsite, senderEmail } = getTenantMailContext(req);
 
   if (via === "sms" && user.phone) {
     await sendSms(user.phone, `${otpCode} - ${userT("otp.smsBody", locale, { brand: brandName })}`);
@@ -200,6 +205,7 @@ export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
         <h2>${otpCode}</h2>
         <p>${userT("otp.emailBody", locale, { brand: brandName })}</p>
         <p style="font-size:12px;color:#888;">${brandName} | ${senderEmail}</p>
+        <p style="font-size:12px;color:#888;">${brandWebsite}</p>
       `,
       from: senderEmail,
     });

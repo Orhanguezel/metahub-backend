@@ -43,6 +43,11 @@ export const sendMessage = asyncHandler(
         (tenantData?.name?.[locale] || tenantData?.name?.en || tenantData?.name || "Brand");
       const senderEmail = tenantData?.emailSettings?.senderEmail;
 
+      const brandWebsite =
+  (tenantData?.domain?.main && `https://${tenantData.domain.main}`) ??
+  process.env.BRAND_WEBSITE ??
+  "https://guezelwebdesign.com";
+
       // Kullanıcıya otomatik yanıt
       await sendEmail({
         tenantSlug: req.tenant, // 💡 Zorunlu alan!
@@ -54,6 +59,7 @@ export const sendMessage = asyncHandler(
           message,
           locale,
           brandName,
+          brandWebsite,
         }),
         from: senderEmail,
       });
