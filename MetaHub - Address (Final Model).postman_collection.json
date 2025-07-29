@@ -1,0 +1,278 @@
+{
+	"info": {
+		"_postman_id": "3c6b005c-af12-4df4-afd3-c01abda99ef8",
+		"name": "MetaHub - Address (Final Model)",
+		"description": "Final, future-proof address API collection (addressLine, addressType, company/user uyumlu).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20528167",
+		"_collection_link": "https://www.postman.com/red-eclipse-24199/workspace/orhan/collection/20528167-3c6b005c-af12-4df4-afd3-c01abda99ef8?action=share&source=collection_link&creator=20528167"
+	},
+	"item": [
+		{
+			"name": "Create Address (User)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-tenant",
+						"value": "ensotek",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"addressLine\": \"Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İSTANBUL - TÜRKİYE\",\n  \"addressType\": \"home\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/address",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"address"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Address (Company)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-tenant",
+						"value": "ensotek",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"addressLine\": \"Saray Mah. Gimat Cad. No:6A 06980 Kahramankazan / ANKARA TÜRKİYE\",\n  \"addressType\": \"factory\",\n  \"companyId\": \"6887730f1f3c7bbc44ece197\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/address",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"address"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All User Addresses",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "ensotek",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/address",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"address"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Company Addresses",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "ensotek",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/address?companyId=6887730f1f3c7bbc44ece197",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"address"
+					],
+					"query": [
+						{
+							"key": "companyId",
+							"value": "6887730f1f3c7bbc44ece197"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Address By ID",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "ensotek",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/address/68879ca7530ac2d5dbcb218d",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"address",
+						"68879ca7530ac2d5dbcb218d"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Address By ID",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-tenant",
+						"value": "ensotek",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"addressLine\": \"2nd Floor, 123 Oxford Street, Soho, London, W1D 2LT, United Kingdom\",\n  \"addressType\": \"work\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/address/68879ca7530ac2d5dbcb218d",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"address",
+						"68879ca7530ac2d5dbcb218d"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Address By ID",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "ensotek",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/address/68879c5d530ac2d5dbcb2141",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"address",
+						"68879c5d530ac2d5dbcb2141"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Bulk Update Addresses (User)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-tenant",
+						"value": "ensotek",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"addresses\": [\n    {\n      \"addressLine\": \"Fabrika: Saray Mah. Gimat Cad. No:6A 06980 Kahramankazan / ANKARA TÜRKİYE\",\n      \"addressType\": \"factory\"\n    },\n    {\n      \"addressLine\": \"Showroom: 2nd Floor, 123 Oxford Street, Soho, London, W1D 2LT, United Kingdom\",\n      \"addressType\": \"showroom\"\n    }\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/address/all/replace",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"address",
+						"all",
+						"replace"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Bulk Update Addresses (Company)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-tenant",
+						"value": "ensotek",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"addresses\": [\n    {\n      \"addressLine\": \"Fabrika: Saray Mah. Gimat Cad. No:6A 06980 Kahramankazan / ANKARA TÜRKİYE\",\n      \"addressType\": \"factory\",\n      \"companyId\": \"6887730f1f3c7bbc44ece197\"\n    },\n    {\n      \"addressLine\": \"Showroom: 2nd Floor, 123 Oxford Street, Soho, London, W1D 2LT, United Kingdom\",\n      \"addressType\": \"showroom\",\n      \"companyId\": \"6887730f1f3c7bbc44ece197\"\n    }\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/address/all/replace",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"address",
+						"all",
+						"replace"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000"
+		}
+	]
+}

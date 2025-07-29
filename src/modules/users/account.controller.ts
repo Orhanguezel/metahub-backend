@@ -55,7 +55,7 @@ export const getMyProfile = asyncHandler(
     // Sadece user'ı çek (addresses: ObjectId[] şeklinde)
     const user = await User.findOne({ _id: req.user!.id, tenant: req.tenant })
       .select("-password")
-      .populate("profile payment cart orders favorites");
+      .populate("profile payment cart orders favorites addresses");
 
     if (!user) {
       logger.withReq.warn(req, `[PROFILE] User not found: ${req.user!.id}`);

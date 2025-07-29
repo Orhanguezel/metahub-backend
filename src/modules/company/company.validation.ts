@@ -26,13 +26,10 @@ export const validateObjectId = (field: string) => [
 ];
 
 // --- CREATE COMPANY VALIDATION ---
-// companyName ve companyDesc çoklu dil, diğerleri klasik string/format
 export const validateCreateCompany = [
-  // Çoklu dil alanı
   validateMultilangField("companyName").withMessage((_, { req }) => getValidationMessage("companyName.required", req)),
   validateMultilangField("companyDesc").optional(),
 
-  // Tekil string/format alanları
   body("email").isEmail().withMessage((_, { req }) => getValidationMessage("email.invalid", req)),
   body("phone").notEmpty().withMessage((_, { req }) => getValidationMessage("phone.required", req)),
   body("taxNumber").notEmpty().withMessage((_, { req }) => getValidationMessage("taxNumber.required", req)),
@@ -40,20 +37,20 @@ export const validateCreateCompany = [
   body("registerCourt").optional().isString().withMessage((_, { req }) => getValidationMessage("registerCourt.invalid", req)),
   body("website").optional().isString().withMessage((_, { req }) => getValidationMessage("website.invalid", req)),
 
-  // Adres
-  body("address.street").notEmpty().withMessage((_, { req }) => getValidationMessage("address.street.required", req)),
-  body("address.city").notEmpty().withMessage((_, { req }) => getValidationMessage("address.city.required", req)),
-  body("address.postalCode").notEmpty().withMessage((_, { req }) => getValidationMessage("address.postalCode.required", req)),
-  body("address.country").notEmpty().withMessage((_, { req }) => getValidationMessage("address.country.required", req)),
-
-  // Banka
+  // Banka (dot notation ile parseNestedFields sonrası kontrol edilir)
   body("bankDetails.bankName").notEmpty().withMessage((_, { req }) => getValidationMessage("bankDetails.bankName.required", req)),
   body("bankDetails.iban").notEmpty().withMessage((_, { req }) => getValidationMessage("bankDetails.iban.required", req)),
   body("bankDetails.swiftCode").notEmpty().withMessage((_, { req }) => getValidationMessage("bankDetails.swiftCode.required", req)),
 
-  // Yöneticiler opsiyonel array (string array)
-  body("managers").optional().isArray().withMessage((_, { req }) => getValidationMessage("managers.invalid", req)),
-  body("managers.*").optional().isString().withMessage((_, { req }) => getValidationMessage("managers.invalidString", req)),
+  // Yöneticiler: array veya string olarak kabul et (her iki form-data/JSON için)
+  body("managers")
+    .optional()
+    .custom((value) => Array.isArray(value) || typeof value === "string")
+    .withMessage((_, { req }) => getValidationMessage("managers.invalid", req)),
+  body("managers.*")
+    .optional()
+    .isString()
+    .withMessage((_, { req }) => getValidationMessage("managers.invalidString", req)),
 
   // Sosyal linkler opsiyonel
   body("socialLinks.facebook").optional().isString().withMessage((_, { req }) => getValidationMessage("socialLinks.facebook.invalid", req)),
@@ -66,7 +63,6 @@ export const validateCreateCompany = [
 ];
 
 // --- UPDATE COMPANY VALIDATION ---
-// Her alan opsiyonel, multilang alanlar .optional()
 export const validateUpdateCompany = [
   validateMultilangField("companyName").optional().withMessage((_, { req }) => getValidationMessage("companyName.invalid", req)),
   validateMultilangField("companyDesc").optional(),
@@ -78,20 +74,26 @@ export const validateUpdateCompany = [
   body("registerCourt").optional().isString().withMessage((_, { req }) => getValidationMessage("registerCourt.invalid", req)),
   body("website").optional().isString().withMessage((_, { req }) => getValidationMessage("website.invalid", req)),
 
-  // Adres alanı
+  // Adres alanı opsiyonel
   body("address.street").optional().isString().withMessage((_, { req }) => getValidationMessage("address.street.invalid", req)),
   body("address.city").optional().isString().withMessage((_, { req }) => getValidationMessage("address.city.invalid", req)),
   body("address.postalCode").optional().isString().withMessage((_, { req }) => getValidationMessage("address.postalCode.invalid", req)),
   body("address.country").optional().isString().withMessage((_, { req }) => getValidationMessage("address.country.invalid", req)),
 
-  // Banka alanı
+  // Banka
   body("bankDetails.bankName").optional().isString().withMessage((_, { req }) => getValidationMessage("bankDetails.bankName.invalid", req)),
   body("bankDetails.iban").optional().isString().withMessage((_, { req }) => getValidationMessage("bankDetails.iban.invalid", req)),
   body("bankDetails.swiftCode").optional().isString().withMessage((_, { req }) => getValidationMessage("bankDetails.swiftCode.invalid", req)),
 
-  // Yöneticiler opsiyonel array
-  body("managers").optional().isArray().withMessage((_, { req }) => getValidationMessage("managers.invalid", req)),
-  body("managers.*").optional().isString().withMessage((_, { req }) => getValidationMessage("managers.invalidString", req)),
+  // Yöneticiler: array veya string olarak kabul et (her iki form-data/JSON için)
+  body("managers")
+    .optional()
+    .custom((value) => Array.isArray(value) || typeof value === "string")
+    .withMessage((_, { req }) => getValidationMessage("managers.invalid", req)),
+  body("managers.*")
+    .optional()
+    .isString()
+    .withMessage((_, { req }) => getValidationMessage("managers.invalidString", req)),
 
   // Sosyal linkler opsiyonel
   body("socialLinks.facebook").optional().isString().withMessage((_, { req }) => getValidationMessage("socialLinks.facebook.invalid", req)),
@@ -102,12 +104,3 @@ export const validateUpdateCompany = [
 
   validateRequest,
 ];
-
-// --- (Opsiyonel) JSON Parse Helper (şu an kullanılmıyor ama işine yarayabilir) ---
-function parseIfJson(value: any) {
-  try {
-    return typeof value === "string" ? JSON.parse(value) : value;
-  } catch {
-    return value;
-  }
-}

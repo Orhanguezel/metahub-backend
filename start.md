@@ -13,7 +13,7 @@ rm -rf dist
 rm -rf build
 rm -rf node_modules/.cache
 npx tsc --noEmit
-bun run build
+npm run build
 
 bun run dev
 

@@ -35,16 +35,17 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   const { items, addressId, shippingAddress, paymentMethod, couponCode } = req.body;
   const userId = req.user?._id;
   const userName = req.user?.name || "";
+  const userEmail = req.user?.email || ""; // Kullanıcıdan gelen email!
   const locale: SupportedLocale = req.locale || getLogLocale();
 
   // Tenant bilgileri
   const tenantData = req.tenantData;
   const brandName = tenantData?.name?.[locale] || tenantData?.name?.en || tenantData?.name || "Brand";
-  const brandWebsite = (tenantData?.domain?.main && `https://${tenantData.domain.main}`) || process.env.BRAND_WEBSITE || "https://guezelwebdesign.com";
+  const brandWebsite = (tenantData?.domain?.main && `https://${tenantData.domain.main}`) || process.env.BRAND_WEBSITE;
   const senderEmail = tenantData?.emailSettings?.senderEmail || "noreply@example.com";
   const adminEmail = tenantData?.emailSettings?.adminEmail || senderEmail;
 
-  // --- Adres kontrolü (ve tenant merge)
+  // --- Adres kontrolü (yeni model, email asla adres tablosundan alınmaz!)
   let shippingAddressWithTenant: IShippingAddress;
   if (addressId) {
     const addressDoc = await Address.findOne({ _id: addressId, tenant: req.tenant }).lean();
@@ -57,18 +58,24 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       tenant: req.tenant,
       phone: addressDoc.phone,
       street: addressDoc.street,
+      houseNumber: addressDoc.houseNumber,
       city: addressDoc.city,
-      postalCode: addressDoc.zipCode,
+      postalCode: addressDoc.postalCode || "",
       country: addressDoc.country || "Germany",
-      email: addressDoc.email,
+      addressType: addressDoc.addressType || "shipping",
+      email: userEmail, // **email sadece kullanıcıdan**
       ...(shippingAddress || {}),
     };
   } else {
-    shippingAddressWithTenant = { ...shippingAddress, tenant: req.tenant };
+    shippingAddressWithTenant = {
+      ...shippingAddress,
+      tenant: req.tenant,
+      email: userEmail, // **email sadece kullanıcıdan**
+    };
   }
 
-  // --- Zorunlu alan kontrolü
-  const requiredFields = ["name", "phone", "email", "street", "city", "postalCode", "country"];
+  // --- Zorunlu alan kontrolü (email sadece kullanıcıdan!)
+  const requiredFields = ["name", "phone", "street", "city", "postalCode", "country"];
   for (const field of requiredFields) {
     if (!shippingAddressWithTenant[field]) {
       logger.withReq.warn(req, orderT("error.shippingAddressRequired", locale));
@@ -80,8 +87,17 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       return;
     }
   }
+  // Ekstra: email (kullanıcıdan!) kontrolü
+  if (!userEmail) {
+    res.status(400).json({
+      success: false,
+      message: orderT("error.userEmailRequired", locale),
+      redirect: "/account",
+    });
+    return;
+  }
 
-  // --- Ürünlerin enrichment & stok kontrol
+  // --- Ürünlerin enrichment & stok kontrol (değişiklik yok)
   const modelMap = { bike: Bike, ensotekprod: Ensotekprod, sparepart: Sparepart } as const;
   let total = 0;
   const enrichedItems: IOrderItem[] = [];
@@ -129,7 +145,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     total += product.price * item.quantity;
   }
 
-  // --- Kupon kontrolü
+  // --- Kupon kontrolü (değişiklik yok)
   let discount = 0;
   let coupon = null;
   if (couponCode) {
@@ -146,7 +162,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     discount = Math.round(total * (coupon.discount / 100));
   }
 
-  // --- Ödeme yöntemi kontrolü
+  // --- Ödeme yöntemi kontrolü (değişiklik yok)
   const method: PaymentMethod = paymentMethod || "cash_on_delivery";
   if (!["cash_on_delivery", "credit_card", "paypal"].includes(method)) {
     res.status(400).json({ success: false, message: orderT("error.invalidPaymentMethod", locale) });
@@ -185,19 +201,17 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     await order.save();
   }
 
-  // --- Kullanıcı bilgisi (email vs)
-  const user = userId
-    ? await User.findOne({ _id: userId, tenant: req.tenant }).select("email name language")
-    : null;
-  const customerEmail = user?.email || "";
+  // --- Kullanıcı bilgisi
+  // NOT: user artık yukarıda var! userEmail zaten yukarıda set edildi.
+  const customerEmail = userEmail;
 
-  // ✉️ Email: Customer (Booking modülü ile birebir aynı pattern)
+  // ✉️ Email: Customer
   await sendEmail({
     tenantSlug: req.tenant,
     to: customerEmail,
     subject: orderT("email.subject", locale, { brand: brandName }),
     html: orderConfirmationTemplate({
-      name: shippingAddressWithTenant.name || user?.name || "",
+      name: shippingAddressWithTenant.name || req.user?.name || "",
       itemsList: itemsForMail.join("<br/>"),
       totalPrice: total - discount,
       locale,
@@ -215,7 +229,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     from: senderEmail,
   });
 
-  // ✉️ Email: Admin
+  // ✉️ Email: Admin (değişiklik yok)
   await sendEmail({
     tenantSlug: req.tenant,
     to: adminEmail,
@@ -224,7 +238,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       <h2>🛒 ${orderT("email.adminOrderTitle", locale, { brand: brandName })}</h2>
       <ul>
         <li><strong>${orderT("labelOrderId", locale)}:</strong> ${order._id}</li>
-        <li><strong>${orderT("labelCustomerName", locale)}:</strong> ${shippingAddressWithTenant.name || user?.name || ""}</li>
+        <li><strong>${orderT("labelCustomerName", locale)}:</strong> ${shippingAddressWithTenant.name || req.user?.name || ""}</li>
         <li><strong>Email:</strong> ${customerEmail}</li>
         <li><strong>${orderT("labelItems", locale)}:</strong> ${itemsForMail.join("<br/>")}</li>
         <li><strong>${orderT("labelTotal", locale)}:</strong> €${(total - discount).toFixed(2)}</li>
@@ -262,6 +276,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     },
   });
 });
+
 
 // --- Sipariş Detay (owner veya admin) ---
 export const getOrderById = asyncHandler(

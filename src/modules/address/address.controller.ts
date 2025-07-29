@@ -17,7 +17,6 @@ function getOwner(req: Request): { field: "userId" | "companyId"; value: string 
   throw new Error("Owner (userId or companyId) is required.");
 }
 
-
 // ✅ Adresleri getir (user veya company için)
 export const getAddresses = asyncHandler(async (req, res) => {
   const { Address } = await getTenantModels(req);
@@ -28,8 +27,8 @@ export const getAddresses = asyncHandler(async (req, res) => {
   try {
     owner = getOwner(req);
   } catch {
-   res.status(400).json({ success: false, message: t("addresses.ownerRequired") });
-   return;
+    res.status(400).json({ success: false, message: t("addresses.ownerRequired") });
+    return;
   }
 
   const addresses = await Address.find({ [owner.field]: owner.value, tenant: req.tenant }).sort({ createdAt: -1 });
@@ -50,10 +49,9 @@ export const createAddress = asyncHandler(async (req: Request, res: Response) =>
     return;
   }
 
-  const { street, houseNumber, city, zipCode, country, phone, email, addressType, isDefault } = req.body;
-
-  if (!email) {
-    res.status(400).json({ success: false, message: t("addresses.emailRequired") });
+  const { addressLine, addressType } = req.body;
+  if (!addressLine || typeof addressLine !== "string" || !addressLine.trim()) {
+    res.status(400).json({ success: false, message: t("addresses.addressLineRequired") });
     return;
   }
   if (!ADDRESS_TYPE_OPTIONS.includes(addressType)) {
@@ -106,6 +104,16 @@ export const updateAddress = asyncHandler(async (req, res) => {
 
   if (!isValidObjectId(id)) {
     res.status(400).json({ success: false, message: t("addresses.invalidId") });
+    return;
+  }
+
+  const { addressLine, addressType } = req.body;
+  if (!addressLine || typeof addressLine !== "string" || !addressLine.trim()) {
+    res.status(400).json({ success: false, message: t("addresses.addressLineRequired") });
+    return;
+  }
+  if (!ADDRESS_TYPE_OPTIONS.includes(addressType)) {
+    res.status(400).json({ success: false, message: t("addresses.invalidType") });
     return;
   }
 
@@ -170,6 +178,17 @@ export const updateAllAddresses = asyncHandler(async (req, res) => {
     res.status(400).json({ success: false, message: t("addresses.noAddressesProvided") });
     return;
   }
+  // Her bir adres için addressLine zorunlu!
+  for (const a of addresses) {
+    if (!a.addressLine || typeof a.addressLine !== "string" || !a.addressLine.trim()) {
+      res.status(400).json({ success: false, message: t("addresses.addressLineRequired") });
+      return;
+    }
+    if (!ADDRESS_TYPE_OPTIONS.includes(a.addressType)) {
+      res.status(400).json({ success: false, message: t("addresses.invalidType") });
+      return;
+    }
+  }
 
   await Address.deleteMany({ [owner.field]: owner.value, tenant: req.tenant });
 
@@ -191,6 +210,7 @@ export const updateAllAddresses = asyncHandler(async (req, res) => {
 
   res.status(200).json({ success: true, message: t("addresses.updatedAll"), data: created });
 });
+
 
 
 // ✅ Sadece kullanıcının adresleri
