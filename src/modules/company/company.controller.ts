@@ -17,9 +17,11 @@ import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import translations from "./i18n";
 import type { SupportedLocale } from "@/types/common";
 import type { ICompany } from "./types";
+import { parseNestedFields } from "@/core/utils/parseNestedFields";
+import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
+
 
 // --- Yardımcılar ---
-// Primitive alanlar ve çoklu dilli alanları ayrı yönetelim
 const primitiveFields = [
   "tenant",
   "language",
@@ -34,6 +36,13 @@ const primitiveFields = [
 // --- CREATE ---
 export const createCompany = asyncHandler(
   async (req: Request, res: Response) => {
+    req.body = parseNestedFields(req.body);
+
+    // managers alanı normalize (tek veya çoklu olabilir)
+    if (typeof req.body.managers === "string") {
+      req.body.managers = [req.body.managers];
+    }
+
     const locale: SupportedLocale = req.locale || getLogLocale();
     const t = (key: string, params?: any) =>
       translate(key, locale, translations, params);
@@ -41,18 +50,14 @@ export const createCompany = asyncHandler(
     const { Company } = await getTenantModels(req);
 
     if (!req.tenant) {
-      res
-        .status(400)
-        .json({ success: false, message: t("company.tenantRequired") });
+      res.status(400).json({ success: false, message: t("company.tenantRequired") });
       return;
     }
 
     // Tek tenant = tek company!
     const exists = await Company.findOne({ tenant: req.tenant });
     if (exists) {
-      res
-        .status(400)
-        .json({ success: false, message: t("company.alreadyExists") });
+      res.status(400).json({ success: false, message: t("company.alreadyExists") });
       return;
     }
 
@@ -60,12 +65,20 @@ export const createCompany = asyncHandler(
     body.tenant = req.tenant;
     body.language = body.language || locale || "en";
 
-    // Çoklu dilli companyName, companyDesc
-    if (typeof body.companyName === "string") {
-      body.companyName = { [locale]: body.companyName };
+    // Çoklu dilli companyName, companyDesc → fillAllLocales ile eksikleri tamamla
+    if (body.companyName) {
+      if (typeof body.companyName === "string") {
+        try { body.companyName = JSON.parse(body.companyName); }
+        catch { body.companyName = { [locale]: body.companyName }; }
+      }
+      body.companyName = fillAllLocales(body.companyName);
     }
-    if (body.companyDesc && typeof body.companyDesc === "string") {
-      body.companyDesc = { [locale]: body.companyDesc };
+    if (body.companyDesc) {
+      if (typeof body.companyDesc === "string") {
+        try { body.companyDesc = JSON.parse(body.companyDesc); }
+        catch { body.companyDesc = { [locale]: body.companyDesc }; }
+      }
+      body.companyDesc = fillAllLocales(body.companyDesc);
     }
 
     // managers ve addresses (opsiyonel)
@@ -126,6 +139,7 @@ export const createCompany = asyncHandler(
     companyData.bankDetails = body.bankDetails;
 
     const newCompany = await Company.create(companyData);
+    const populatedCompany = await Company.findById(newCompany._id).populate("addresses");
 
     logger.withReq.info(req, t("company.created"), {
       ...getRequestContext(req),
@@ -134,23 +148,28 @@ export const createCompany = asyncHandler(
     res.status(201).json({
       success: true,
       message: t("company.created"),
-      data: newCompany,
+      data: populatedCompany,
     });
+    return;
   }
 );
+
 
 // --- UPDATE ---
 export const updateCompanyInfo = asyncHandler(
   async (req: Request, res: Response) => {
+    req.body = parseNestedFields(req.body);
+    if (typeof req.body.managers === "string") {
+      req.body.managers = [req.body.managers];
+    }
+
     const { id } = req.params;
     const locale: SupportedLocale = req.locale || getLogLocale();
     const t = (key: string, params?: any) =>
       translate(key, locale, translations, params);
 
     if (!req.tenant) {
-      res
-        .status(400)
-        .json({ success: false, message: t("company.tenantRequired") });
+      res.status(400).json({ success: false, message: t("company.tenantRequired") });
       return;
     }
 
@@ -163,11 +182,21 @@ export const updateCompanyInfo = asyncHandler(
 
     const updates = req.body;
 
-    // Çoklu dilli companyName ve companyDesc güncelle
+    // Çoklu dilli companyName ve companyDesc güncelle → fillAllLocales ile eksikleri tamamla
     if (updates.companyName) {
+      if (typeof updates.companyName === "string") {
+        try { updates.companyName = JSON.parse(updates.companyName); }
+        catch { updates.companyName = { [locale]: updates.companyName }; }
+      }
+      updates.companyName = fillAllLocales(updates.companyName);
       company.companyName = { ...company.companyName, ...updates.companyName };
     }
     if (updates.companyDesc) {
+      if (typeof updates.companyDesc === "string") {
+        try { updates.companyDesc = JSON.parse(updates.companyDesc); }
+        catch { updates.companyDesc = { [locale]: updates.companyDesc }; }
+      }
+      updates.companyDesc = fillAllLocales(updates.companyDesc);
       company.companyDesc = { ...company.companyDesc, ...updates.companyDesc };
     }
 
@@ -263,14 +292,13 @@ export const updateCompanyInfo = asyncHandler(
           ...getRequestContext(req),
           error: err,
         });
-        res
-          .status(400)
-          .json({ success: false, message: t("company.removeImagesError") });
+        res.status(400).json({ success: false, message: t("company.removeImagesError") });
         return;
       }
     }
 
     await company.save();
+    const populatedCompany = await Company.findById(company._id).populate("addresses");
 
     logger.withReq.info(req, t("company.updated"), {
       ...getRequestContext(req),
@@ -279,11 +307,14 @@ export const updateCompanyInfo = asyncHandler(
     res.status(200).json({
       success: true,
       message: t("company.updated"),
-      data: company,
+      data: populatedCompany,
     });
+    return;
   }
 );
 
+
+// --- GET ---
 // --- GET ---
 export const getCompanyInfo = asyncHandler(
   async (req: Request, res: Response) => {
@@ -292,16 +323,17 @@ export const getCompanyInfo = asyncHandler(
       translate(key, locale, translations, params);
 
     if (!req.tenant) {
-      res
-        .status(400)
-        .json({ success: false, message: t("company.tenantRequired") });
+      res.status(400).json({ success: false, message: t("company.tenantRequired") });
       return;
     }
 
     const { Company } = await getTenantModels(req);
-    const company = await Company.findOne({ tenant: req.tenant }).select(
-      "-__v"
-    );
+
+    // Address detaylarını getir!
+    const company = await Company.findOne({ tenant: req.tenant })
+      .select("-__v")
+      .populate("addresses"); // 👈 populate ekle
+
     if (!company) {
       logger.withReq.warn(req, t("company.notFound"), {
         ...getRequestContext(req),
@@ -319,8 +351,10 @@ export const getCompanyInfo = asyncHandler(
       message: t("company.fetched"),
       data: company,
     });
+    return;
   }
 );
+
 
 // --- DELETE ---
 export const deleteCompany = asyncHandler(
@@ -331,9 +365,7 @@ export const deleteCompany = asyncHandler(
       translate(key, locale, translations, params);
 
     if (!req.tenant) {
-      res
-        .status(400)
-        .json({ success: false, message: t("company.tenantRequired") });
+      res.status(400).json({ success: false, message: t("company.tenantRequired") });
       return;
     }
 
@@ -375,5 +407,6 @@ export const deleteCompany = asyncHandler(
       id,
     });
     res.status(200).json({ success: true, message: t("company.deleted") });
+    return;
   }
 );

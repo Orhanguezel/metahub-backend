@@ -2,6 +2,7 @@ import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 import translations from "./i18n";
 import type { SupportedLocale } from "@/types/common";
+import { ADDRESS_TYPE_OPTIONS } from "@/modules/address/types";
 
 // --- Locale-aware error helper
 function t(key: string, req: any) {
@@ -11,36 +12,18 @@ function t(key: string, req: any) {
 
 // --- Tekil adres validasyonu
 export const validateAddress = [
-  body("street")
+  body("addressLine")
     .trim()
-    .notEmpty().withMessage((_, { req }) => t("addresses.streetRequired", req))
-    .isString().withMessage((_, { req }) => t("addresses.streetRequired", req)),
-  body("houseNumber")
+    .notEmpty().withMessage((_, { req }) => t("addresses.addressLineRequired", req))
+    .isString().withMessage((_, { req }) => t("addresses.addressLineRequired", req)),
+  body("addressType")
     .trim()
-    .notEmpty().withMessage((_, { req }) => t("addresses.houseNumberRequired", req))
-    .isString().withMessage((_, { req }) => t("addresses.houseNumberRequired", req)),
-  body("city")
-    .trim()
-    .notEmpty().withMessage((_, { req }) => t("addresses.cityRequired", req))
-    .isString().withMessage((_, { req }) => t("addresses.cityRequired", req)),
-  body("zipCode")
-    .trim()
-    .notEmpty().withMessage((_, { req }) => t("addresses.zipCodeRequired", req))
-    .isString().withMessage((_, { req }) => t("addresses.zipCodeRequired", req)),
-  body("phone")
-    .trim()
-    .notEmpty().withMessage((_, { req }) => t("addresses.phoneRequired", req))
-    .isString().withMessage((_, { req }) => t("addresses.phoneRequired", req)),
-  body("email")
-    .trim()
-    .notEmpty().withMessage((_, { req }) => t("addresses.emailRequired", req))
-    .isEmail().withMessage((_, { req }) => t("addresses.emailRequired", req)),
-  body("country")
-    .trim()
-    .notEmpty().withMessage((_, { req }) => t("addresses.countryRequired", req))
-    .isString().withMessage((_, { req }) => t("addresses.countryRequired", req)),
+    .notEmpty().withMessage((_, { req }) => t("addresses.addressTypeRequired", req))
+    .isString().withMessage((_, { req }) => t("addresses.addressTypeRequired", req))
+    .isIn(ADDRESS_TYPE_OPTIONS).withMessage((_, { req }) => t("addresses.invalidType", req)),
   // Opsiyonel companyId (ID ise kontrol et)
   body("companyId").optional().isMongoId().withMessage((_, { req }) => t("addresses.companyIdInvalid", req)),
+  body("userId").optional().isMongoId().withMessage((_, { req }) => t("addresses.userIdInvalid", req)),
   validateRequest,
 ];
 
@@ -48,36 +31,18 @@ export const validateAddress = [
 export const validateUpdateAddresses = [
   body("addresses")
     .isArray({ min: 1 }).withMessage((_, { req }) => t("addresses.noAddressesProvided", req)),
-  body("addresses.*.street")
+  body("addresses.*.addressLine")
     .trim()
-    .notEmpty().withMessage((_, { req }) => t("addresses.streetRequired", req))
-    .isString().withMessage((_, { req }) => t("addresses.streetRequired", req)),
-  body("addresses.*.houseNumber")
+    .notEmpty().withMessage((_, { req }) => t("addresses.addressLineRequired", req))
+    .isString().withMessage((_, { req }) => t("addresses.addressLineRequired", req)),
+  body("addresses.*.addressType")
     .trim()
-    .notEmpty().withMessage((_, { req }) => t("addresses.houseNumberRequired", req))
-    .isString().withMessage((_, { req }) => t("addresses.houseNumberRequired", req)),
-  body("addresses.*.city")
-    .trim()
-    .notEmpty().withMessage((_, { req }) => t("addresses.cityRequired", req))
-    .isString().withMessage((_, { req }) => t("addresses.cityRequired", req)),
-  body("addresses.*.zipCode")
-    .trim()
-    .notEmpty().withMessage((_, { req }) => t("addresses.zipCodeRequired", req))
-    .isString().withMessage((_, { req }) => t("addresses.zipCodeRequired", req)),
-  body("addresses.*.phone")
-    .trim()
-    .notEmpty().withMessage((_, { req }) => t("addresses.phoneRequired", req))
-    .isString().withMessage((_, { req }) => t("addresses.phoneRequired", req)),
-  body("addresses.*.email")
-    .trim()
-    .notEmpty().withMessage((_, { req }) => t("addresses.emailRequired", req))
-    .isEmail().withMessage((_, { req }) => t("addresses.emailRequired", req)),
-  body("addresses.*.country")
-    .trim()
-    .notEmpty().withMessage((_, { req }) => t("addresses.countryRequired", req))
-    .isString().withMessage((_, { req }) => t("addresses.countryRequired", req)),
-  // Opsiyonel companyId (ID ise kontrol et)
+    .notEmpty().withMessage((_, { req }) => t("addresses.addressTypeRequired", req))
+    .isString().withMessage((_, { req }) => t("addresses.addressTypeRequired", req))
+    .isIn(ADDRESS_TYPE_OPTIONS).withMessage((_, { req }) => t("addresses.invalidType", req)),
+  // Opsiyonel companyId/userId (ID ise kontrol et)
   body("addresses.*.companyId").optional().isMongoId().withMessage((_, { req }) => t("addresses.companyIdInvalid", req)),
+  body("addresses.*.userId").optional().isMongoId().withMessage((_, { req }) => t("addresses.userIdInvalid", req)),
   validateRequest,
 ];
 
