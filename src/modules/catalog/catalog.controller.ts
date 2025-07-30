@@ -217,6 +217,8 @@ export const sendCatalogRequest = asyncHandler(
         `[Katalog Talebi] Kullanıcıya ${catalogFile.fileName} gönderildi - ${email}`
       );
 
+      console.log(`[Katalog Talebi] Kullanıcıya ${catalogFile.fileName} gönderildi - ${email}`);
+
       res.status(201).json({
         success: true,
         message: t("messageSent"),

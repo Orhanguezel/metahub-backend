@@ -20,15 +20,7 @@ export const getTenantDbConnection = async (
   // 1. Bağlantı cache'de varsa direkt dön
   if (connections[tenantSlug]) {
     if (process.env.NODE_ENV === "production") {
-      logger.info(
-        t("tenantDb.connected", locale, translations, { tenant: tenantSlug }),
-        {
-          tenant: tenantSlug,
-          module: "tenantDb",
-          event: "tenantDb.cachedConnection",
-          status: "cached",
-        }
-      );
+     //
     } else {
       // Sadece debug log veya hiç loglama
       // logger.debug(...);
@@ -70,17 +62,6 @@ export const getTenantDbConnection = async (
     );
   }
 
-  logger.info(
-    t("tenantDb.connecting", locale, translations, { tenant: tenantSlug }),
-    {
-      tenant: tenantSlug,
-      module: "tenantDb",
-      event: "tenantDb.connecting",
-      mongoUri: uri,
-      status: "connecting",
-    }
-  );
-
   // 4. Bağlantı oluştur
   const conn = mongoose.createConnection(uri, {
     bufferCommands: false,
@@ -89,15 +70,6 @@ export const getTenantDbConnection = async (
 
   await new Promise<void>((resolve, reject) => {
     conn.once("open", () => {
-      logger.info(
-        t("tenantDb.connected", locale, translations, { tenant: tenantSlug }),
-        {
-          tenant: tenantSlug,
-          module: "tenantDb",
-          event: "tenantDb.connected",
-          status: "success",
-        }
-      );
       connections[tenantSlug] = conn;
       resolve();
     });
