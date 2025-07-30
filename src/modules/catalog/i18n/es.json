@@ -1,0 +1,37 @@
+{
+  "allFieldsRequired": "Por favor, complete todos los campos obligatorios.",
+  "messageSent": "Su solicitud ha sido enviada con éxito.",
+  "messagesFetched": "Solicitudes obtenidas correctamente.",
+  "messageDeleted": "Solicitud eliminada con éxito.",
+  "messageNotFound": "Solicitud no encontrada.",
+  "invalidMessageId": "ID de solicitud inválido.",
+  "messageMarkedRead": "Solicitud marcada como leída.",
+
+  "validation.nameRequired": "El nombre es obligatorio.",
+  "validation.nameLength": "El nombre debe tener entre {{min}} y {{max}} caracteres.",
+  "validation.emailRequired": "El correo electrónico es obligatorio.",
+  "validation.emailInvalid": "Dirección de correo electrónico no válida.",
+  "validation.phoneLength": "El número de teléfono debe tener entre {{min}} y {{max}} caracteres.",
+  "validation.companyLength": "El nombre de la empresa debe tener entre {{min}} y {{max}} caracteres.",
+  "validation.localeRequired": "La selección de idioma es obligatoria.",
+  "validation.localeInvalid": "El idioma seleccionado no es compatible.",
+  "validation.catalogTypeLength": "El tipo de catálogo debe tener entre {{min}} y {{max}} caracteres.",
+  "validation.subjectRequired": "El asunto es obligatorio.",
+  "validation.subjectLength": "El asunto debe tener entre {{min}} y {{max}} caracteres.",
+  "validation.messageLength": "Su mensaje debe tener entre {{min}} y {{max}} caracteres.",
+
+  "email.replySubject": "Su solicitud de catálogo a {{brand}}",
+
+  "catalog.replyGreeting": "Estimado/a {{name}},",
+  "catalog.replyInfo": "A continuación encontrará el catálogo de {{brand}}.",
+  "catalog.downloadButton": "Descargar catálogo",
+  "catalog.downloadInfo": "El PDF se abrirá en una nueva pestaña.",
+  "catalog.subject": "Asunto",
+  "catalog.message": "Su mensaje",
+  "catalog.sign": "Saludos cordiales, equipo de {{brand}}",
+  "catalog.replyTitle": "Su solicitud de catálogo de {{brand}}",
+
+  "notification.newCatalogRequestTitle": "Nueva solicitud de catálogo",
+  "notification.newCatalogRequest": "{{name}} ({{email}}) ha solicitado un catálogo ({{catalogType}})."
+}
+

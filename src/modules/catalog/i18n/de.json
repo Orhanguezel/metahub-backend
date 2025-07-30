@@ -1,0 +1,37 @@
+{
+  "allFieldsRequired": "Bitte füllen Sie alle Pflichtfelder aus.",
+  "messageSent": "Ihre Anfrage wurde erfolgreich übermittelt.",
+  "messagesFetched": "Anfragen erfolgreich abgerufen.",
+  "messageDeleted": "Anfrage erfolgreich gelöscht.",
+  "messageNotFound": "Anfrage nicht gefunden.",
+  "invalidMessageId": "Ungültige Anfrage-ID.",
+  "messageMarkedRead": "Anfrage als gelesen markiert.",
+
+  "validation.nameRequired": "Name ist erforderlich.",
+  "validation.nameLength": "Der Name muss zwischen {{min}} und {{max}} Zeichen lang sein.",
+  "validation.emailRequired": "E-Mail ist erforderlich.",
+  "validation.emailInvalid": "Ungültige E-Mail-Adresse.",
+  "validation.phoneLength": "Telefonnummer muss zwischen {{min}} und {{max}} Zeichen lang sein.",
+  "validation.companyLength": "Firmenname muss zwischen {{min}} und {{max}} Zeichen lang sein.",
+  "validation.localeRequired": "Sprachauswahl ist erforderlich.",
+  "validation.localeInvalid": "Die ausgewählte Sprache wird nicht unterstützt.",
+  "validation.catalogTypeLength": "Katalogtyp muss zwischen {{min}} und {{max}} Zeichen lang sein.",
+  "validation.subjectRequired": "Betreff ist erforderlich.",
+  "validation.subjectLength": "Betreff muss zwischen {{min}} und {{max}} Zeichen lang sein.",
+  "validation.messageLength": "Ihre Nachricht muss zwischen {{min}} und {{max}} Zeichen lang sein.",
+
+  "email.replySubject": "Ihr Kataloganfrage von {{brand}}",
+
+  "catalog.replyGreeting": "Sehr geehrte/r {{name}},",
+  "catalog.replyInfo": "Unten finden Sie den {{brand}}-Katalog.",
+  "catalog.downloadButton": "Katalog herunterladen",
+  "catalog.downloadInfo": "PDF wird in einem neuen Tab geöffnet.",
+  "catalog.subject": "Betreff",
+  "catalog.message": "Ihre Nachricht",
+  "catalog.sign": "Mit freundlichen Grüßen, Ihr {{brand}}-Team",
+  "catalog.replyTitle": "Ihre {{brand}} Kataloganfrage",
+
+  "notification.newCatalogRequestTitle": "Neue Kataloganfrage",
+  "notification.newCatalogRequest": "{{name}} ({{email}}) hat einen Katalog angefordert ({{catalogType}})."
+}
+

@@ -1,0 +1,37 @@
+{
+  "allFieldsRequired": "Lütfen tüm zorunlu alanları doldurun.",
+  "messageSent": "Talebiniz başarıyla iletildi.",
+  "messagesFetched": "Talepler başarıyla alındı.",
+  "messageDeleted": "Talep başarıyla silindi.",
+  "messageNotFound": "Talep bulunamadı.",
+  "invalidMessageId": "Geçersiz talep ID’si.",
+  "messageMarkedRead": "Talep okundu olarak işaretlendi.",
+
+  "validation.nameRequired": "Ad zorunludur.",
+  "validation.nameLength": "Ad {{min}} ile {{max}} karakter arasında olmalıdır.",
+  "validation.emailRequired": "E-posta zorunludur.",
+  "validation.emailInvalid": "E-posta adresi geçersiz.",
+  "validation.phoneLength": "Telefon numarası {{min}} ile {{max}} karakter arasında olmalıdır.",
+  "validation.companyLength": "Firma adı {{min}} ile {{max}} karakter arasında olmalıdır.",
+  "validation.localeRequired": "Dil seçimi zorunludur.",
+  "validation.localeInvalid": "Seçilen dil desteklenmiyor.",
+  "validation.catalogTypeLength": "Katalog tipi {{min}} ile {{max}} karakter arasında olmalıdır.",
+  "validation.subjectRequired": "Konu zorunludur.",
+  "validation.subjectLength": "Konu {{min}} ile {{max}} karakter arasında olmalıdır.",
+  "validation.messageLength": "Mesajınız {{min}} ile {{max}} karakter arasında olmalıdır.",
+
+  "email.replySubject": "{{brand}} tarafından katalog talebiniz",
+
+  "catalog.replyGreeting": "Sayın {{name}},",
+  "catalog.replyInfo": "Aşağıda {{brand}} kataloğunu bulabilirsiniz.",
+  "catalog.downloadButton": "Kataloğu İndir",
+  "catalog.downloadInfo": "PDF yeni sekmede açılacaktır.",
+  "catalog.subject": "Konu",
+  "catalog.message": "Mesajınız",
+  "catalog.sign": "Saygılarımızla, {{brand}} Ekibi",
+  "catalog.replyTitle": "{{brand}} Katalog Talebiniz",
+
+  "notification.newCatalogRequestTitle": "Yeni katalog talebi",
+  "notification.newCatalogRequest": "{{name}} ({{email}}) bir katalog talebinde bulundu ({{catalogType}})."
+}
+

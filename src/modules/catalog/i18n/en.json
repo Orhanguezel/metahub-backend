@@ -1,0 +1,37 @@
+{
+  "allFieldsRequired": "Please fill in all required fields.",
+  "messageSent": "Your request has been submitted successfully.",
+  "messagesFetched": "Requests fetched successfully.",
+  "messageDeleted": "Request deleted successfully.",
+  "messageNotFound": "Request not found.",
+  "invalidMessageId": "Invalid request ID.",
+  "messageMarkedRead": "Request marked as read.",
+
+  "validation.nameRequired": "Name is required.",
+  "validation.nameLength": "Name must be between {{min}} and {{max}} characters.",
+  "validation.emailRequired": "Email is required.",
+  "validation.emailInvalid": "Invalid email address.",
+  "validation.phoneLength": "Phone number must be between {{min}} and {{max}} characters.",
+  "validation.companyLength": "Company name must be between {{min}} and {{max}} characters.",
+  "validation.localeRequired": "Language selection is required.",
+  "validation.localeInvalid": "Selected language is not supported.",
+  "validation.catalogTypeLength": "Catalog type must be between {{min}} and {{max}} characters.",
+  "validation.subjectRequired": "Subject is required.",
+  "validation.subjectLength": "Subject must be between {{min}} and {{max}} characters.",
+  "validation.messageLength": "Your message must be between {{min}} and {{max}} characters.",
+
+  "email.replySubject": "Your catalog request from {{brand}}",
+
+  "catalog.replyGreeting": "Dear {{name}},",
+  "catalog.replyInfo": "Below you will find the {{brand}} catalog.",
+  "catalog.downloadButton": "Download Catalog",
+  "catalog.downloadInfo": "PDF will open in a new tab.",
+  "catalog.subject": "Subject",
+  "catalog.message": "Your message",
+  "catalog.sign": "Best regards, {{brand}} Team",
+  "catalog.replyTitle": "Your {{brand}} Catalog Request",
+
+  "notification.newCatalogRequestTitle": "New catalog request",
+  "notification.newCatalogRequest": "{{name}} ({{email}}) has requested a catalog ({{catalogType}})."
+}
+
