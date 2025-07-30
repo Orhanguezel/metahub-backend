@@ -8,14 +8,10 @@ import orderTranslations from "@/modules/order/i18n";
 import logger from "@/core/middleware/logger/logger";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
-import type {
-  IOrderItem,
-  IShippingAddress,
-} from "@/modules/order/types/index";
+import type { IOrderItem, IShippingAddress } from "@/modules/order/types/index";
 import type { PaymentMethod } from "@/modules/order/types/index";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
-
-// Kısa yol çeviri fonksiyonu
 function orderT(
   key: string,
   locale: SupportedLocale,
@@ -23,34 +19,61 @@ function orderT(
 ) {
   return t(key, locale, orderTranslations, vars);
 }
-
+function notificationT(
+  key: string,
+  locale: SupportedLocale,
+  vars?: Record<string, string | number>
+) {
+  return t(key, locale, vars);
+}
 
 // --- SİPARİŞ OLUŞTUR ---
 export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   const {
-    Order, Address, Coupon, Payment, User, Notification,
-    Bike, Ensotekprod, Sparepart,
+    Order,
+    Address,
+    Coupon,
+    Payment,
+    User,
+    Notification,
+    Bike,
+    Ensotekprod,
+    Sparepart,
   } = await getTenantModels(req);
 
-  const { items, addressId, shippingAddress, paymentMethod, couponCode } = req.body;
+  const { items, addressId, shippingAddress, paymentMethod, couponCode } =
+    req.body;
   const userId = req.user?._id;
   const userName = req.user?.name || "";
-  const userEmail = req.user?.email || ""; // Kullanıcıdan gelen email!
+  const userEmail = req.user?.email || "";
   const locale: SupportedLocale = req.locale || getLogLocale();
 
   // Tenant bilgileri
   const tenantData = req.tenantData;
-  const brandName = tenantData?.name?.[locale] || tenantData?.name?.en || tenantData?.name || "Brand";
-  const brandWebsite = (tenantData?.domain?.main && `https://${tenantData.domain.main}`) || process.env.BRAND_WEBSITE;
-  const senderEmail = tenantData?.emailSettings?.senderEmail || "noreply@example.com";
+  const brandName =
+    tenantData?.name?.[locale] ||
+    tenantData?.name?.en ||
+    tenantData?.name ||
+    "Brand";
+  const brandWebsite =
+    (tenantData?.domain?.main && `https://${tenantData.domain.main}`) ||
+    process.env.BRAND_WEBSITE;
+  const senderEmail =
+    tenantData?.emailSettings?.senderEmail || "noreply@example.com";
   const adminEmail = tenantData?.emailSettings?.adminEmail || senderEmail;
 
-  // --- Adres kontrolü (yeni model, email asla adres tablosundan alınmaz!)
+  // --- Adres kontrolü
   let shippingAddressWithTenant: IShippingAddress;
   if (addressId) {
-    const addressDoc = await Address.findOne({ _id: addressId, tenant: req.tenant }).lean();
+    const addressDoc = await Address.findOne({
+      _id: addressId,
+      tenant: req.tenant,
+    }).lean();
     if (!addressDoc) {
-      res.status(400).json({ success: false, message: orderT("error.addressNotFound", locale) });
+      res.status(400).json({
+        success: false,
+        message: orderT("error.addressNotFound", locale),
+      });
       return;
     }
     shippingAddressWithTenant = {
@@ -63,19 +86,26 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       postalCode: addressDoc.postalCode || "",
       country: addressDoc.country || "Germany",
       addressType: addressDoc.addressType || "shipping",
-      email: userEmail, // **email sadece kullanıcıdan**
+      email: userEmail,
       ...(shippingAddress || {}),
     };
   } else {
     shippingAddressWithTenant = {
       ...shippingAddress,
       tenant: req.tenant,
-      email: userEmail, // **email sadece kullanıcıdan**
+      email: userEmail,
     };
   }
 
-  // --- Zorunlu alan kontrolü (email sadece kullanıcıdan!)
-  const requiredFields = ["name", "phone", "street", "city", "postalCode", "country"];
+  // --- Zorunlu alan kontrolü
+  const requiredFields = [
+    "name",
+    "phone",
+    "street",
+    "city",
+    "postalCode",
+    "country",
+  ];
   for (const field of requiredFields) {
     if (!shippingAddressWithTenant[field]) {
       logger.withReq.warn(req, orderT("error.shippingAddressRequired", locale));
@@ -87,7 +117,6 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       return;
     }
   }
-  // Ekstra: email (kullanıcıdan!) kontrolü
   if (!userEmail) {
     res.status(400).json({
       success: false,
@@ -97,8 +126,12 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  // --- Ürünlerin enrichment & stok kontrol (değişiklik yok)
-  const modelMap = { bike: Bike, ensotekprod: Ensotekprod, sparepart: Sparepart } as const;
+  // --- Ürünlerin enrichment & stok kontrol ---
+  const modelMap = {
+    bike: Bike,
+    ensotekprod: Ensotekprod,
+    sparepart: Sparepart,
+  } as const;
   let total = 0;
   const enrichedItems: IOrderItem[] = [];
   const criticalStockWarnings: string[] = [];
@@ -107,33 +140,79 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   for (const item of items) {
     const modelName = item.productType?.toLowerCase?.();
     const ProductModel = modelMap[modelName];
-
     if (!ProductModel) {
-      res.status(400).json({ success: false, message: `Model not supported: ${item.productType}` });
+      res.status(400).json({
+        success: false,
+        message: `Model not supported: ${item.productType}`,
+      });
       return;
     }
 
-    const product = await ProductModel.findOne({ _id: item.product, tenant: req.tenant });
+    const product = await ProductModel.findOne({
+      _id: item.product,
+      tenant: req.tenant,
+    });
     if (!product) {
-      res.status(404).json({ success: false, message: orderT("error.productNotFound", locale) });
+      res.status(404).json({
+        success: false,
+        message: orderT("error.productNotFound", locale),
+      });
       return;
     }
     if (product.stock < item.quantity) {
-      res.status(400).json({ success: false, message: orderT("error.insufficientStock", locale) });
+      res.status(400).json({
+        success: false,
+        message: orderT("error.insufficientStock", locale),
+      });
       return;
     }
     product.stock -= item.quantity;
     await product.save();
 
-    if (product.stock <= (product.stockThreshold ?? 5)) {
-      criticalStockWarnings.push(
-        orderT("warning.lowStock", locale, {
-          name: product.name?.[locale] || product.name?.en || String(product._id),
-          stock: String(product.stock),
-        })
-      );
+    // --- Kritik Stok Bildirimi (NOTIFICATION) ---
+    const threshold = product.stockThreshold ?? 5;
+    if (typeof product.stock === "number" && product.stock <= threshold) {
+      const existing = await Notification.findOne({
+        tenant: req.tenant,
+        type: "warning",
+        "data.productId": product._id,
+        isRead: false,
+      });
+
+      if (!existing) {
+        // Çoklu dilde title/message hazırla
+        const nameObj = product.name || {};
+        const title: Record<SupportedLocale, string> = {} as any;
+        const message: Record<SupportedLocale, string> = {} as any;
+
+        for (const lng of SUPPORTED_LOCALES) {
+          title[lng] = orderT("criticalStock.title", lng);
+          message[lng] = orderT("criticalStock.message", lng, {
+            name: nameObj[lng] || nameObj["en"] || String(product._id),
+            stock: product.stock,
+            productType: modelName,
+          });
+        }
+
+        await Notification.create({
+          tenant: req.tenant,
+          type: "warning",
+          title,
+          message,
+          data: {
+            productId: product._id,
+            stock: product.stock,
+            productType: modelName,
+          },
+          isActive: true,
+          isRead: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      }
     }
 
+    // Klasik order enrichment
     enrichedItems.push({
       product: product._id,
       productType: modelName,
@@ -141,11 +220,23 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       unitPrice: product.price,
       tenant: req.tenant,
     });
-    itemsForMail.push(`• ${product.name?.[locale] || product.name?.en} – Qty: ${item.quantity}`);
+    itemsForMail.push(
+      `• ${product.name?.[locale] || product.name?.en} – Qty: ${item.quantity}`
+    );
     total += product.price * item.quantity;
+
+    if (product.stock <= (product.stockThreshold ?? 5)) {
+      criticalStockWarnings.push(
+        orderT("warning.lowStock", locale, {
+          name:
+            product.name?.[locale] || product.name?.en || String(product._id),
+          stock: String(product.stock),
+        })
+      );
+    }
   }
 
-  // --- Kupon kontrolü (değişiklik yok)
+  // --- Kupon kontrolü (değişiklik yok) ---
   let discount = 0;
   let coupon = null;
   if (couponCode) {
@@ -156,20 +247,26 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       expiresAt: { $gte: new Date() },
     });
     if (!coupon) {
-      res.status(400).json({ success: false, message: orderT("error.invalidCoupon", locale) });
+      res.status(400).json({
+        success: false,
+        message: orderT("error.invalidCoupon", locale),
+      });
       return;
     }
     discount = Math.round(total * (coupon.discount / 100));
   }
 
-  // --- Ödeme yöntemi kontrolü (değişiklik yok)
+  // --- Ödeme yöntemi kontrolü ---
   const method: PaymentMethod = paymentMethod || "cash_on_delivery";
   if (!["cash_on_delivery", "credit_card", "paypal"].includes(method)) {
-    res.status(400).json({ success: false, message: orderT("error.invalidPaymentMethod", locale) });
+    res.status(400).json({
+      success: false,
+      message: orderT("error.invalidPaymentMethod", locale),
+    });
     return;
   }
 
-  // --- Order kaydı
+  // --- Order kaydı ---
   const order = await Order.create({
     user: userId,
     tenant: req.tenant,
@@ -201,11 +298,8 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     await order.save();
   }
 
-  // --- Kullanıcı bilgisi
-  // NOT: user artık yukarıda var! userEmail zaten yukarıda set edildi.
+  // --- Email: Customer ---
   const customerEmail = userEmail;
-
-  // ✉️ Email: Customer
   await sendEmail({
     tenantSlug: req.tenant,
     to: customerEmail,
@@ -229,7 +323,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     from: senderEmail,
   });
 
-  // ✉️ Email: Admin (değişiklik yok)
+  // --- Email: Admin ---
   await sendEmail({
     tenantSlug: req.tenant,
     to: adminEmail,
@@ -248,19 +342,26 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     from: senderEmail,
   });
 
-  // 🔔 Bildirim
+  // --- Sipariş başarı bildirimi ---
+  const notifyTitle: Record<SupportedLocale, string> = {} as any;
+  const notifyMsg: Record<SupportedLocale, string> = {} as any;
+  for (const lng of SUPPORTED_LOCALES) {
+    notifyTitle[lng] = orderT("notification.orderReceivedTitle", lng);
+    notifyMsg[lng] = orderT("notification.orderReceived", lng, { total: total - discount });
+  }
   await Notification.create({
     user: userId,
     tenant: req.tenant,
     type: "success",
-    message: orderT("notification.orderReceived", locale, { total: total - discount }),
+    title: notifyTitle,
+    message: notifyMsg,
     data: { orderId: String(order._id) },
-    language: locale,
   });
 
   logger.withReq.info(
     req,
-    orderT("order.created.success", locale) + ` | User: ${userId} | Order: ${order._id}`
+    orderT("order.created.success", locale) +
+      ` | User: ${userId} | Order: ${order._id}`
   );
 
   res.status(201).json({
@@ -293,12 +394,10 @@ export const getOrderById = asyncHandler(
 
     if (!order) {
       logger.withReq.warn(req, orderT("error.orderNotFound", locale));
-      res
-        .status(404)
-        .json({
-          success: false,
-          message: orderT("error.orderNotFound", locale),
-        });
+      res.status(404).json({
+        success: false,
+        message: orderT("error.orderNotFound", locale),
+      });
       return;
     }
     if (
@@ -306,12 +405,10 @@ export const getOrderById = asyncHandler(
       req.user?.role !== "admin"
     ) {
       logger.withReq.warn(req, orderT("error.notAuthorizedViewOrder", locale));
-      res
-        .status(403)
-        .json({
-          success: false,
-          message: orderT("error.notAuthorizedViewOrder", locale),
-        });
+      res.status(403).json({
+        success: false,
+        message: orderT("error.notAuthorizedViewOrder", locale),
+      });
       return;
     }
 
@@ -335,12 +432,10 @@ export const updateShippingAddress = asyncHandler(
     });
     if (!order) {
       logger.withReq.warn(req, orderT("error.orderNotFound", locale));
-      res
-        .status(404)
-        .json({
-          success: false,
-          message: orderT("error.orderNotFound", locale),
-        });
+      res.status(404).json({
+        success: false,
+        message: orderT("error.orderNotFound", locale),
+      });
       return;
     }
     if (order.user?.toString() !== req.user?._id.toString()) {
@@ -348,23 +443,19 @@ export const updateShippingAddress = asyncHandler(
         req,
         orderT("error.notAuthorizedUpdateOrder", locale)
       );
-      res
-        .status(403)
-        .json({
-          success: false,
-          message: orderT("error.notAuthorizedUpdateOrder", locale),
-        });
+      res.status(403).json({
+        success: false,
+        message: orderT("error.notAuthorizedUpdateOrder", locale),
+      });
       return;
     }
     const { shippingAddress } = req.body;
     if (!shippingAddress) {
       logger.withReq.warn(req, orderT("error.shippingAddressRequired", locale));
-      res
-        .status(400)
-        .json({
-          success: false,
-          message: orderT("error.shippingAddressRequired", locale),
-        });
+      res.status(400).json({
+        success: false,
+        message: orderT("error.shippingAddressRequired", locale),
+      });
       return;
     }
     order.shippingAddress = { ...order.shippingAddress, ...shippingAddress };

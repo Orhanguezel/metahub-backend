@@ -1,17 +1,35 @@
 {
-  "log": {
-    "created": "Bicicleta creada con éxito.",
-    "updated": "Bicicleta actualizada con éxito.",
-    "deleted": "Bicicleta eliminada con éxito.",
-    "fetched": "Bicicleta obtenida con éxito.",
-    "listed": "Bicicletas listadas con éxito."
-  },
-  "error": {
-    "not_found": "Bicicleta no encontrada.",
-    "invalid_id": "ID de bicicleta inválido.",
-    "create_fail": "No se pudo crear la bicicleta.",
-    "update_fail": "No se pudo actualizar la bicicleta.",
-    "delete_fail": "No se pudo eliminar la bicicleta."
-  }
+  "log.created": "La pieza de repuesto se creó correctamente.",
+  "log.updated": "La pieza de repuesto se actualizó correctamente.",
+  "log.deleted": "La pieza de repuesto ha sido eliminada.",
+  "log.listed": "Las piezas de repuesto se listaron correctamente.",
+  "log.fetched": "La pieza de repuesto se recuperó correctamente.",
+  "error.create_fail": "No se pudo crear la pieza de repuesto.",
+  "error.invalid_id": "ID inválido.",
+  "error.not_found": "Pieza de repuesto no encontrada.",
+  "criticalStock.title": "Nivel de stock crítico",
+  "criticalStock.message": "La pieza de repuesto \"{{name}}\" tiene un nivel de stock crítico: {{stock}}",
+  "validation.invalidObjectId": "ObjectId no válida.",
+  "validation.nameLocale": "El nombre debe ser un objeto JSON con al menos una clave de locale válida. Idiomas soportados: {{locales}}.",
+  "validation.descriptionLocale": "La descripción debe ser un objeto JSON con al menos una clave de locale válida. Idiomas soportados: {{locales}}.",
+  "validation.categoryObjectId": "La categoría debe ser un ObjectId de MongoDB válido.",
+  "validation.brandRequired": "La marca es obligatoria.",
+  "validation.pricePositive": "El precio debe ser un número positivo.",
+  "validation.stockNonNegative": "El stock no puede ser negativo.",
+  "validation.stockThresholdNonNegative": "El umbral de stock no puede ser negativo.",
+  "validation.tagsArray": "Las etiquetas deben ser un array JSON válido.",
+  "validation.colorArray": "El color debe ser un array JSON válido.",
+  "validation.frameMaterialString": "El material del marco debe ser una cadena.",
+  "validation.brakeTypeString": "El tipo de freno debe ser una cadena.",
+  "validation.wheelSizePositive": "El tamaño de la rueda debe ser un número positivo.",
+  "validation.gearCountPositive": "El número de marchas debe ser un número positivo.",
+  "validation.suspensionTypeString": "El tipo de suspensión debe ser una cadena.",
+  "validation.weightNonNegative": "El peso no puede ser negativo.",
+  "validation.isElectricBoolean": "isElectric debe ser un booleano.",
+  "validation.batteryRangeNonNegative": "La autonomía de la batería no puede ser negativa.",
+  "validation.motorPowerNonNegative": "La potencia del motor no puede ser negativa.",
+  "validation.isPublishedBoolean": "isPublished debe ser un booleano.",
+  "validation.removedImagesArray": "removedImages debe ser un array JSON válido.",
+  "validation.languageAllowed": "El idioma debe ser uno de los siguientes: {{locales}}.",
+  "validation.isActiveBoolean": "isActive debe ser un booleano."
 }
-

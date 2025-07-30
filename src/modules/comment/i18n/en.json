@@ -15,5 +15,7 @@
   "comment.deleteError": "An error occurred while deleting the comment: {{error}}.",
   "comment.replyAdded": "Admin reply has been added or updated successfully.",
   "comment.replyError": "An error occurred while adding the admin reply: {{error}}.",
-  "comment.createError": "An error occurred while creating the comment: {{error}}."
+  "comment.createError": "An error occurred while creating the comment: {{error}}.",
+  "comment.notification.title": "New comment notification",
+  "comment.notification.created": "A new comment has been submitted."
 }

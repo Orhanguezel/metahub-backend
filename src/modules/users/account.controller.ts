@@ -440,3 +440,42 @@ export const deleteMyAccount = asyncHandler(
     });
   }
 );
+
+// ✅ Profil fotoğrafını sil
+export const removeProfileImage = asyncHandler(
+  async (req: Request, res: Response) => {
+    const locale = getLocale(req);
+    const { User } = await getTenantModels(req);
+    const user = await User.findOne({ _id: req.user!.id, tenant: req.tenant });
+    if (!user) {
+      logger.withReq.warn(req, `[PROFILE] User not found for remove image: ${req.user!.id}`);
+      res.status(404).json({ success: false, message: userT("error.userNotFound", locale) });
+      return;
+    }
+    // Eski görseli sil
+    const img = user.profileImage as any;
+    if (img) {
+      if (img.publicId) {
+        try { await cloudinary.uploader.destroy(img.publicId); } catch {}
+      }
+      if (img.url && img.url.startsWith("/uploads/profile-images/")) {
+        try {
+          const localPath = path.join(
+            process.cwd(), "uploads", req.tenant, "profile-images", path.basename(img.url)
+          );
+          await fs.unlink(localPath);
+        } catch {}
+      }
+    }
+    user.profileImage = undefined;
+    await user.save();
+
+    logger.withReq.info(req, `[PROFILE] Profile image removed for: ${user.email}`);
+    res.status(200).json({
+      success: true,
+      message: userT("profileImage.remove.success", locale),
+      profileImage: null,
+    });
+  }
+);
+

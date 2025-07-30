@@ -1,56 +1,35 @@
-import { Schema, model, Types, Model, models } from "mongoose";
+import { Schema, Model, Types, models, model } from "mongoose";
+import type { INotification } from "./types";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
-// ✅ Interface
-export interface INotification {
-  user?: Types.ObjectId;
-  title: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  tenant: string; // Optional tenant field for multi-tenancy
-  message: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
-  type: "info" | "success" | "warning" | "error";
-  isRead: boolean;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Çoklu dil alan otomasyonu
+const localizedStringField = () => {
+  const fields: Record<string, any> = {};
+  for (const locale of SUPPORTED_LOCALES) {
+    fields[locale] = { type: String, trim: true };
+  }
+  return fields;
+};
 
-// ✅ Schema
 const notificationSchema = new Schema<INotification>(
   {
     user: { type: Schema.Types.ObjectId, ref: "user", required: false },
-    title: {
-      tr: { type: String, trim: true },
-      en: { type: String, trim: true },
-      de: { type: String, trim: true },
-    },
     tenant: { type: String, required: true, index: true },
-    message: {
-      tr: { type: String, trim: true },
-      en: { type: String, trim: true },
-      de: { type: String, trim: true },
-    },
     type: {
       type: String,
       enum: ["info", "success", "warning", "error"],
       default: "info",
     },
+    title: localizedStringField(),
+    message: localizedStringField(),
+    data: { type: Schema.Types.Mixed, default: null }, // future-proof payload!
     isRead: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-// ✅ Guard + Model Type (standart yapı)
 const Notification: Model<INotification> =
-  models.notification ||
-  model<INotification>("notification", notificationSchema);
+  models.notification || model<INotification>("notification", notificationSchema);
 
-// ✅ Export
 export { Notification };

@@ -6,16 +6,10 @@ import {
   markNotificationAsRead,
   markAllNotificationsAsRead,
 } from "./notification.controller";
-
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import {
-  createNotificationValidator,
-  idParamValidator,
-} from "./notification.validation";
+import { createNotificationValidator, idParamValidator } from "./notification.validation";
 
 const router = Router();
-
-// 🔐 Admin Routes
 router.use(authenticate, authorizeRoles("admin"));
 
 router.get("/", getAllNotifications);

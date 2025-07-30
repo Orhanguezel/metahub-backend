@@ -1,0 +1,14 @@
+{
+  "notificationCreated": "Powiadomienie zostało pomyślnie utworzone.",
+  "notificationsFetched": "Powiadomienia pobrane pomyślnie.",
+  "notificationDeleted": "Powiadomienie zostało usunięte.",
+  "notificationNotFound": "Nie znaleziono powiadomienia.",
+  "notificationMarkedAsRead": "Powiadomienie oznaczone jako przeczytane.",
+  "allNotificationsMarkedAsRead": "Wszystkie powiadomienia oznaczone jako przeczytane.",
+  "validation": {
+    "multilangFieldRequired": "{{field}}: Przynajmniej jeden język musi być uzupełniony.",
+    "invalidNotificationType": "Nieprawidłowy typ powiadomienia.",
+    "invalidNotificationId": "Nieprawidłowy identyfikator powiadomienia.",
+    "invalidUserId": "Nieprawidłowy identyfikator użytkownika."
+  }
+}

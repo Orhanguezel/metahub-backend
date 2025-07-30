@@ -11,7 +11,7 @@ import {
   clearCart,
 } from "./cart.controller";
 
-import { addToCartValidator, cartItemParamValidator } from "./cart.validation";
+import { addToCartValidator, cartItemBodyValidator, } from "./cart.validation";
 
 const router = Router();
 
@@ -22,22 +22,22 @@ router.get("/", getUserCart);
 router.post("/add", addToCartValidator, validateRequest, addToCart);
 
 router.patch(
-  "/increase/:productId",
-  cartItemParamValidator,
+  "/increase",
+  cartItemBodyValidator,
   validateRequest,
   increaseQuantity
 );
 
 router.patch(
-  "/decrease/:productId",
-  cartItemParamValidator,
+  "/decrease",
+  cartItemBodyValidator,
   validateRequest,
   decreaseQuantity
 );
 
-router.delete(
-  "/remove/:productId",
-  cartItemParamValidator,
+router.patch(
+  "/remove",
+  cartItemBodyValidator,
   validateRequest,
   removeFromCart
 );

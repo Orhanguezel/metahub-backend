@@ -15,5 +15,7 @@
   "comment.deleteError": "Yorum silinirken hata oluştu: {{error}}.",
   "comment.replyAdded": "Admin yanıtı eklendi veya güncellendi.",
   "comment.replyError": "Admin yanıtı eklenirken hata oluştu: {{error}}.",
-  "comment.createError": "Yorum oluşturulurken hata oluştu: {{error}}."
+  "comment.createError": "Yorum oluşturulurken hata oluştu: {{error}}.",
+  "comment.notification.title": "Yeni yorum bildirimi",
+  "comment.notification.created": "Yeni bir {{contentType}} yorum gönderildi."
 }

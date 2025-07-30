@@ -20,6 +20,7 @@ import type { SupportedLocale } from "@/types/common";
 import translations from "./i18n";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
 const parseIfJson = (value: any) => {
   try {
@@ -162,15 +163,13 @@ export const createSparepart = asyncHandler(
       res.status(500).json({ success: false, message: t("error.create_fail") });
     }
   }
-);
-
-// ✅ UPDATE
+); // ✅ UPDATE + Kritik Stok Notification
 export const updateSparepart = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const updates = req.body;
     const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Sparepart } = await getTenantModels(req);
+    const { Sparepart, Notification } = await getTenantModels(req);
     const t = (key: string, vars?: Record<string, any>) =>
       translate(key, locale, translations, vars);
 
@@ -287,6 +286,45 @@ export const updateSparepart = asyncHandler(
     }
 
     await product.save();
+
+    // === KRİTİK STOK NOTIFICATION ===
+    const threshold = product.stockThreshold ?? 5;
+    if (typeof product.stock === "number" && product.stock <= threshold) {
+      const existing = await Notification.findOne({
+        tenant: req.tenant,
+        type: "warning",
+        "data.productId": product._id,
+        isRead: false,
+      });
+
+      if (!existing) {
+        // ÇEVİRİLERİ TÜM DİLLERDE OLUŞTUR
+        const nameObj = product.name || {};
+        const title: Record<SupportedLocale, string> = {} as any;
+        const message: Record<SupportedLocale, string> = {} as any;
+
+        for (const lng of SUPPORTED_LOCALES) {
+          // t(key, lang, translations, vars)
+          title[lng] = translate("criticalStock.title", lng, translations);
+          message[lng] = translate("criticalStock.message", lng, translations, {
+            name: nameObj[lng] || "-",
+            stock: product.stock,
+          });
+        }
+
+        await Notification.create({
+          tenant: req.tenant,
+          type: "warning",
+          title,
+          message,
+          data: { productId: product._id, stock: product.stock },
+          isActive: true,
+          isRead: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      }
+    }
 
     logger.withReq.info(req, t("log.updated"), {
       ...getRequestContext(req),
