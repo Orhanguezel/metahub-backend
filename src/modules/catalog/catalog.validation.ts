@@ -4,6 +4,7 @@ import { t as translate } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import catalogTranslations from "./i18n";
 import type { SupportedLocale } from "@/types/common";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
 // --- Katalog talebi göndermek için validation ---
 export const validateSendCatalogRequest = [
@@ -62,7 +63,7 @@ export const validateSendCatalogRequest = [
       const t = (key: string, params?: any) => translate(key, locale, catalogTranslations, params);
       return t("validation.localeRequired");
     })
-    .isIn(["en", "tr", "de", "pl", "fr", "es"]) // Desteklenen dillerin tamamı burada güncel tutulmalı!
+    .isIn(SUPPORTED_LOCALES)
     .withMessage((_, { req }) => {
       const locale: SupportedLocale = req?.locale || getLogLocale();
       const t = (key: string, params?: any) => translate(key, locale, catalogTranslations, params);
@@ -102,6 +103,21 @@ export const validateSendCatalogRequest = [
       const t = (key: string, params?: any) => translate(key, locale, catalogTranslations, params);
       return t("validation.messageLength", { min: 5, max: 1000 });
     }),
+
+    body("catalogFileUrl")
+  .notEmpty()
+  .withMessage((_, { req }) => {
+    const locale: SupportedLocale = req?.locale || getLogLocale();
+    const t = (key: string, params?: any) => translate(key, locale, catalogTranslations, params);
+    return t("validation.catalogFileUrlRequired"); // Bunu i18n’e ekle!
+  })
+  .isURL()
+  .withMessage((_, { req }) => {
+    const locale: SupportedLocale = req?.locale || getLogLocale();
+    const t = (key: string, params?: any) => translate(key, locale, catalogTranslations, params);
+    return t("validation.catalogFileUrlInvalid"); // Bunu i18n’e ekle!
+  }),
+
 
   validateRequest,
 ];
