@@ -10,6 +10,7 @@ import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "@/templates/i18n";
 import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
 export const createBooking = asyncHandler(
   async (req: Request, res: Response) => {
@@ -174,16 +175,27 @@ export const createBooking = asyncHandler(
       }),
     ]);
 
+    const title: Record<SupportedLocale, string> = {} as any;
+const message: Record<SupportedLocale, string> = {} as any;
+for (const lng of SUPPORTED_LOCALES) {
+  const tLang = (key: string, params?: any) =>
+    translate(key, lng, translations, params);
+
+  title[lng] = tLang("public.notification.title");
+  message[lng] = tLang("public.notification.message", {
+    name,
+    service: serviceType,
+    date,
+    time,
+  });
+}
+
+
     // 🔔 Bildirim
     await Notification.create({
-      title: t("public.notification.title"),
+      title,
+      message,
       tenant: req.tenant,
-      message: t("public.notification.message", {
-        name,
-        service: serviceType,
-        date,
-        time,
-      }),
       type: "info",
       user: req.user?.id || null,
     });

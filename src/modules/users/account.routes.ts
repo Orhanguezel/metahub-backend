@@ -8,6 +8,7 @@ import {
   updateProfileImage,
   updateFullProfile,
   deleteMyAccount,
+  removeProfileImage
 } from "./account.controller";
 
 import {
@@ -60,6 +61,8 @@ router.patch(
 
 // 🗑️ Hesabı Sil
 router.delete("/me/delete", authenticate, deleteMyAccount);
+
+router.delete("/me/profile-image", authenticate, removeProfileImage);
 
 router.put(
   "/me/profile-image",

@@ -1,17 +1,35 @@
 {
-  "log": {
-    "created": "Vélo créé avec succès.",
-    "updated": "Vélo mis à jour avec succès.",
-    "deleted": "Vélo supprimé avec succès.",
-    "fetched": "Vélo récupéré avec succès.",
-    "listed": "Vélos listés avec succès."
-  },
-  "error": {
-    "not_found": "Vélo non trouvé.",
-    "invalid_id": "ID de vélo invalide.",
-    "create_fail": "Échec de la création du vélo.",
-    "update_fail": "Échec de la mise à jour du vélo.",
-    "delete_fail": "Échec de la suppression du vélo."
-  }
+  "log.created": "La pièce de rechange a été créée avec succès.",
+  "log.updated": "La pièce de rechange a été mise à jour avec succès.",
+  "log.deleted": "La pièce de rechange a été supprimée.",
+  "log.listed": "Les pièces de rechange ont été listées avec succès.",
+  "log.fetched": "La pièce de rechange a été récupérée avec succès.",
+  "error.create_fail": "Échec de la création de la pièce de rechange.",
+  "error.invalid_id": "ID invalide.",
+  "error.not_found": "Pièce de rechange introuvable.",
+  "criticalStock.title": "Niveau de stock critique",
+  "criticalStock.message": "La pièce de rechange \"{{name}}\" a un niveau de stock critique : {{stock}}",
+  "validation.invalidObjectId": "ObjectId invalide.",
+  "validation.nameLocale": "Le nom doit être un objet JSON avec au moins une clé de locale valide. Langues prises en charge : {{locales}}.",
+  "validation.descriptionLocale": "La description doit être un objet JSON avec au moins une clé de locale valide. Langues prises en charge : {{locales}}.",
+  "validation.categoryObjectId": "La catégorie doit être un ObjectId MongoDB valide.",
+  "validation.brandRequired": "La marque est requise.",
+  "validation.pricePositive": "Le prix doit être un nombre positif.",
+  "validation.stockNonNegative": "Le stock ne peut pas être négatif.",
+  "validation.stockThresholdNonNegative": "Le seuil de stock ne peut pas être négatif.",
+  "validation.tagsArray": "Les tags doivent être un tableau JSON valide.",
+  "validation.colorArray": "La couleur doit être un tableau JSON valide.",
+  "validation.frameMaterialString": "Le matériau du cadre doit être une chaîne.",
+  "validation.brakeTypeString": "Le type de frein doit être une chaîne.",
+  "validation.wheelSizePositive": "La taille de la roue doit être un nombre positif.",
+  "validation.gearCountPositive": "Le nombre de vitesses doit être un nombre positif.",
+  "validation.suspensionTypeString": "Le type de suspension doit être une chaîne.",
+  "validation.weightNonNegative": "Le poids ne peut pas être négatif.",
+  "validation.isElectricBoolean": "isElectric doit être un booléen.",
+  "validation.batteryRangeNonNegative": "L'autonomie de la batterie ne peut pas être négative.",
+  "validation.motorPowerNonNegative": "La puissance du moteur ne peut pas être négative.",
+  "validation.isPublishedBoolean": "isPublished doit être un booléen.",
+  "validation.removedImagesArray": "removedImages doit être un tableau JSON valide.",
+  "validation.languageAllowed": "La langue doit être l'une des suivantes : {{locales}}.",
+  "validation.isActiveBoolean": "isActive doit être un booléen."
 }
-

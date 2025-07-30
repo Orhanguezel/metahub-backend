@@ -16,6 +16,19 @@ export const addToCartValidator = [
   validateRequest,
 ];
 
+export const cartItemBodyValidator = [
+  body("productId")
+    .notEmpty()
+    .isMongoId()
+    .withMessage("Product ID must be a valid MongoDB ObjectId."),
+  body("productType")
+    .notEmpty()
+    .isIn(["bike", "ensotekprod", "sparepart"])
+    .withMessage("Product type is invalid."),
+  validateRequest,
+];
+
+
 export const cartItemParamValidator = [
   param("productId")
     .notEmpty()

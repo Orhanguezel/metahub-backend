@@ -1,0 +1,14 @@
+{
+  "notificationCreated": "Bildirim başarıyla oluşturuldu.",
+  "notificationsFetched": "Bildirimler başarıyla getirildi.",
+  "notificationDeleted": "Bildirim silindi.",
+  "notificationNotFound": "Bildirim bulunamadı.",
+  "notificationMarkedAsRead": "Bildirim okundu olarak işaretlendi.",
+  "allNotificationsMarkedAsRead": "Tüm bildirimler okundu olarak işaretlendi.",
+  "validation": {
+    "multilangFieldRequired": "{{field}} alanında en az bir dil doldurulmalı.",
+    "invalidNotificationType": "Geçersiz bildirim tipi.",
+    "invalidNotificationId": "Geçersiz bildirim ID'si.",
+    "invalidUserId": "Geçersiz kullanıcı ID'si."
+  }
+}

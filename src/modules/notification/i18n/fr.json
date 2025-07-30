@@ -1,0 +1,14 @@
+{
+  "notificationCreated": "Notification créée avec succès.",
+  "notificationsFetched": "Notifications récupérées avec succès.",
+  "notificationDeleted": "Notification supprimée.",
+  "notificationNotFound": "Notification non trouvée.",
+  "notificationMarkedAsRead": "Notification marquée comme lue.",
+  "allNotificationsMarkedAsRead": "Toutes les notifications ont été marquées comme lues.",
+  "validation": {
+    "multilangFieldRequired": "{{field}} : Au moins une langue doit être renseignée.",
+    "invalidNotificationType": "Type de notification invalide.",
+    "invalidNotificationId": "ID de notification invalide.",
+    "invalidUserId": "ID utilisateur invalide."
+  }
+}

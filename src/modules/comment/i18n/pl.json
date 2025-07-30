@@ -15,5 +15,7 @@
   "comment.deleteError": "Wystąpił błąd podczas usuwania komentarza: {{error}}.",
   "comment.replyAdded": "Odpowiedź administratora została dodana lub zaktualizowana.",
   "comment.replyError": "Błąd podczas dodawania odpowiedzi administratora: {{error}}.",
-  "comment.createError": "Wystąpił błąd podczas tworzenia komentarza: {{error}}."
+  "comment.createError": "Wystąpił błąd podczas tworzenia komentarza: {{error}}.",
+  "comment.notification.title": "Nowe powiadomienie o komentarzu",
+  "comment.notification.created": "Nowy komentarz został wysłany."
 }

@@ -15,5 +15,7 @@
   "comment.deleteError": "Fehler beim Löschen des Kommentars: {{error}}.",
   "comment.replyAdded": "Admin-Antwort wurde erfolgreich hinzugefügt oder aktualisiert.",
   "comment.replyError": "Fehler beim Hinzufügen der Admin-Antwort: {{error}}.",
-  "comment.createError": "Fehler beim Erstellen des Kommentars: {{error}}."
+  "comment.createError": "Fehler beim Erstellen des Kommentars: {{error}}.",
+  "comment.notification.title": "Neue Kommentarbenachrichtigung",
+  "comment.notification.created": "Ein neuer Kommentar wurde gesendet."
 }

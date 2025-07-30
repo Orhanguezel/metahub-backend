@@ -15,5 +15,7 @@
   "comment.deleteError": "Error al eliminar el comentario: {{error}}.",
   "comment.replyAdded": "La respuesta del administrador se ha añadido o actualizado correctamente.",
   "comment.replyError": "Error al añadir la respuesta del administrador: {{error}}.",
-  "comment.createError": "Se produjo un error al crear el comentario: {{error}}."
+  "comment.createError": "Se produjo un error al crear el comentario: {{error}}.",
+  "comment.notification.title": "Nueva notificación de comentario",
+  "comment.notification.created": "Un nuevo comentario ha sido enviado."
 }

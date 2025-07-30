@@ -1,0 +1,14 @@
+{
+  "notificationCreated": "Benachrichtigung wurde erfolgreich erstellt.",
+  "notificationsFetched": "Benachrichtigungen wurden erfolgreich abgerufen.",
+  "notificationDeleted": "Benachrichtigung wurde gelöscht.",
+  "notificationNotFound": "Benachrichtigung nicht gefunden.",
+  "notificationMarkedAsRead": "Benachrichtigung als gelesen markiert.",
+  "allNotificationsMarkedAsRead": "Alle Benachrichtigungen als gelesen markiert.",
+  "validation": {
+    "multilangFieldRequired": "{{field}}: Mindestens eine Sprache muss ausgefüllt sein.",
+    "invalidNotificationType": "Ungültiger Benachrichtigungstyp.",
+    "invalidNotificationId": "Ungültige Benachrichtigungs-ID.",
+    "invalidUserId": "Ungültige Benutzer-ID."
+  }
+}
