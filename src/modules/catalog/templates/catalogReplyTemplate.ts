@@ -47,9 +47,8 @@ export const CatalogReplyTemplate = ({
   const content = `
     <h2>${t("catalog.replyGreeting", { name: escapeHTML(name) })}</h2>
     <p>${t("catalog.replyInfo", { brand: escapeHTML(brandName) })}</p>
-
     <div style="margin: 36px 0 32px 0; text-align: center;">
-      <a href="${catalogFileUrl}" target="_blank" 
+      <a href="${catalogFileUrl}" target="_blank"
          style="display: inline-block; background: #2184e7; color: #fff; padding: 15px 36px; font-size: 1.13em; font-weight: 600; border-radius: 8px; text-decoration: none; letter-spacing: 0.03em; box-shadow: 0 3px 16px #2184e766;">
         ${catalogFileName ? escapeHTML(catalogFileName) : t("catalog.downloadButton", { brand: brandName })}
       </a>
@@ -57,7 +56,6 @@ export const CatalogReplyTemplate = ({
         ${t("catalog.downloadInfo")}
       </div>
     </div>
-
     <table style="margin-top: 12px; border-collapse: collapse; border: 1px solid #ddd; width: 100%; max-width: 540px;">
       ${subject ? `
       <tr>
@@ -72,7 +70,6 @@ export const CatalogReplyTemplate = ({
       </tr>
       ` : ""}
     </table>
-
     <p style="margin-top: 30px;">
       ${t("catalog.sign", { brand: escapeHTML(brandName) })}<br/>
       ${brandWebsite ? `<a href="${brandWebsite}" target="_blank" style="color:#2184e7; text-decoration:underline;">${brandWebsite}</a>` : ""}
@@ -87,3 +84,4 @@ export const CatalogReplyTemplate = ({
     brandWebsite,
   });
 };
+
