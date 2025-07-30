@@ -1,0 +1,36 @@
+{
+  "allFieldsRequired": "Veuillez remplir tous les champs obligatoires.",
+  "messageSent": "Votre demande a été soumise avec succès.",
+  "messagesFetched": "Demandes récupérées avec succès.",
+  "messageDeleted": "Demande supprimée avec succès.",
+  "messageNotFound": "Demande non trouvée.",
+  "invalidMessageId": "ID de demande invalide.",
+  "messageMarkedRead": "Demande marquée comme lue.",
+
+  "validation.nameRequired": "Le nom est obligatoire.",
+  "validation.nameLength": "Le nom doit comporter entre {{min}} et {{max}} caractères.",
+  "validation.emailRequired": "L'e-mail est obligatoire.",
+  "validation.emailInvalid": "Adresse e-mail invalide.",
+  "validation.phoneLength": "Le numéro de téléphone doit comporter entre {{min}} et {{max}} caractères.",
+  "validation.companyLength": "Le nom de l'entreprise doit comporter entre {{min}} et {{max}} caractères.",
+  "validation.localeRequired": "La sélection de la langue est obligatoire.",
+  "validation.localeInvalid": "La langue sélectionnée n'est pas prise en charge.",
+  "validation.catalogTypeLength": "Le type de catalogue doit comporter entre {{min}} et {{max}} caractères.",
+  "validation.subjectRequired": "Le sujet est obligatoire.",
+  "validation.subjectLength": "Le sujet doit comporter entre {{min}} et {{max}} caractères.",
+  "validation.messageLength": "Votre message doit comporter entre {{min}} et {{max}} caractères.",
+
+  "email.replySubject": "Votre demande de catalogue auprès de {{brand}}",
+
+  "catalog.replyGreeting": "Cher/Chère {{name}},",
+  "catalog.replyInfo": "Vous trouverez ci-dessous le catalogue de {{brand}}.",
+  "catalog.downloadButton": "Télécharger le catalogue",
+  "catalog.downloadInfo": "Le PDF s'ouvrira dans un nouvel onglet.",
+  "catalog.subject": "Sujet",
+  "catalog.message": "Votre message",
+  "catalog.sign": "Cordialement, l'équipe {{brand}}",
+  "catalog.replyTitle": "Votre demande de catalogue {{brand}}",
+
+  "notification.newCatalogRequestTitle": "Nouvelle demande de catalogue",
+  "notification.newCatalogRequest": "{{name}} ({{email}}) a demandé un catalogue ({{catalogType}})."
+}

@@ -69,7 +69,8 @@ import { SparepartCategory } from "@/modules/sparepartcategory/models";
 import { Tenants } from "@/modules/tenants/tenants.model";
 import { Team } from "@/modules/team/models";
 import { TeamCategory } from "@/modules/teamcategory/category.models";
-import { Portfolio } from "@/modules/portfolio/models"; // Yeni eklenen model
+import { Portfolio } from "@/modules/portfolio/models";
+import { CatalogRequest } from "@/modules/catalog/catalog.models";
 
 // ✅ Ana export
 export const getTenantModelsFromConnection = (conn: Connection) => ({
@@ -149,4 +150,5 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   Team: conn.model("team", Team.schema),
   TeamCategory: conn.model("teamcategory", TeamCategory.schema),
   Portfolio: conn.model("portfolio", Portfolio.schema),
+  CatalogRequest: conn.model("catalogrequest", CatalogRequest.schema),
 });

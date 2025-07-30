@@ -1,0 +1,36 @@
+{
+  "allFieldsRequired": "Proszę wypełnić wszystkie wymagane pola.",
+  "messageSent": "Twoje zapytanie zostało pomyślnie przesłane.",
+  "messagesFetched": "Zapytania pobrane pomyślnie.",
+  "messageDeleted": "Zapytanie zostało pomyślnie usunięte.",
+  "messageNotFound": "Nie znaleziono zapytania.",
+  "invalidMessageId": "Nieprawidłowy identyfikator zapytania.",
+  "messageMarkedRead": "Zapytanie oznaczono jako przeczytane.",
+
+  "validation.nameRequired": "Imię i nazwisko jest wymagane.",
+  "validation.nameLength": "Imię i nazwisko musi mieć od {{min}} do {{max}} znaków.",
+  "validation.emailRequired": "Adres e-mail jest wymagany.",
+  "validation.emailInvalid": "Nieprawidłowy adres e-mail.",
+  "validation.phoneLength": "Numer telefonu musi mieć od {{min}} do {{max}} znaków.",
+  "validation.companyLength": "Nazwa firmy musi mieć od {{min}} do {{max}} znaków.",
+  "validation.localeRequired": "Wybór języka jest wymagany.",
+  "validation.localeInvalid": "Wybrany język nie jest obsługiwany.",
+  "validation.catalogTypeLength": "Typ katalogu musi mieć od {{min}} do {{max}} znaków.",
+  "validation.subjectRequired": "Temat jest wymagany.",
+  "validation.subjectLength": "Temat musi mieć od {{min}} do {{max}} znaków.",
+  "validation.messageLength": "Twoja wiadomość musi mieć od {{min}} do {{max}} znaków.",
+
+  "email.replySubject": "Twoja prośba o katalog od {{brand}}",
+
+  "catalog.replyGreeting": "Szanowny/a {{name}},",
+  "catalog.replyInfo": "Poniżej znajdziesz katalog {{brand}}.",
+  "catalog.downloadButton": "Pobierz katalog",
+  "catalog.downloadInfo": "PDF otworzy się w nowej karcie.",
+  "catalog.subject": "Temat",
+  "catalog.message": "Twoja wiadomość",
+  "catalog.sign": "Z wyrazami szacunku, zespół {{brand}}",
+  "catalog.replyTitle": "Twoje zapytanie o katalog {{brand}}",
+
+  "notification.newCatalogRequestTitle": "Nowa prośba o katalog",
+  "notification.newCatalogRequest": "{{name}} ({{email}}) złożył/a prośbę o katalog ({{catalogType}})."
+}
