@@ -32,9 +32,7 @@ function getCatalogFile(
 
   // Dosya adı: ensotek.catalog.pdf (veya bikes için: ensotek.bikes.catalog.pdf)
   const fileName =
-    tenant +
-    (type && type !== "main" ? `.${type}` : "") +
-    `.catalog.pdf`;
+    tenant + (type && type !== "main" ? `.${type}` : "") + `.catalog.pdf`;
 
   // Mapping varsa ve ilgili locale mevcutsa onu kullan
   if (
@@ -54,9 +52,6 @@ function getCatalogFile(
   const url = `${domain}/${tenant}/katalog/${locale}/${fileName}`;
   return { url, fileName };
 }
-
-
-
 
 // ✅ 1) Public: Yeni katalog isteği
 export const sendCatalogRequest = asyncHandler(
@@ -151,7 +146,9 @@ export const sendCatalogRequest = asyncHandler(
               <li><b>Firma:</b> ${company || "-"}</li>
               <li><b>Dil:</b> ${finalLocale}</li>
               <li><b>Katalog Tipi:</b> ${catalogType || "main"}</li>
-              <li><b>Katalog Dosyası:</b> <a href="${catalogFile.url}" target="_blank">${catalogFile.fileName}</a></li>
+              <li><b>Katalog Dosyası:</b> <a href="${
+                catalogFile.url
+              }" target="_blank">${catalogFile.fileName}</a></li>
               <li><b>Konu:</b> ${subject}</li>
               <li><b>Mesaj:</b> <br/>${message || "-"}</li>
             </ul>
@@ -161,32 +158,64 @@ export const sendCatalogRequest = asyncHandler(
         });
       }
 
-     // --- 5) Admin notification log
-const notifTitle: Record<SupportedLocale, string> = {} as any;
-const notifMsg: Record<SupportedLocale, string> = {} as any;
-for (const lng of SUPPORTED_LOCALES) {
-  notifTitle[lng] = translate("notification.newCatalogRequestTitle", lng, translations);
-  notifMsg[lng] = translate("notification.newCatalogRequest", lng, translations, {
-    name,
-    email,
-    catalogType: catalogType || "main",
-  });
-}
-await Notification.create({
-  tenant: req.tenant,
-  type: "info",
-  title: notifTitle,
-  message: notifMsg,
-  data: {
-    catalogType: catalogType || "main",
-    email,
-    requestId: newRequest._id,
-  },
-  isRead: false,
-});
+      // --- 5) Admin notification log
+      function fillTemplate(str, params) {
+        return str.replace(
+          /\{\{(.*?)\}\}/g,
+          (_, key) => params[key.trim()] ?? ""
+        );
+      }
 
+      const notifTitle: Record<SupportedLocale, string> = {} as any;
+      const notifMsg: Record<SupportedLocale, string> = {} as any;
 
-      logger.withReq.info(req, `[Katalog Talebi] Kullanıcıya ${catalogFile.fileName} gönderildi - ${email}`);
+      for (const lng of SUPPORTED_LOCALES) {
+        let titleTemplate = translate(
+          "notification.newCatalogRequestTitle",
+          lng,
+          translations
+        );
+        let msgTemplate = translate(
+          "notification.newCatalogRequest",
+          lng,
+          translations
+        );
+
+        notifTitle[lng] = fillTemplate(titleTemplate, {
+          name,
+          email,
+          catalogType: catalogType || "main",
+        });
+        notifMsg[lng] = fillTemplate(msgTemplate, {
+          name,
+          email,
+          catalogType: catalogType || "main",
+        });
+      }
+
+      await Notification.create({
+        tenant: req.tenant,
+        type: "info",
+        title: notifTitle,
+        message: notifMsg,
+        data: {
+          catalogType: catalogType || "main",
+          name,
+          email,
+          company: company || "",
+          phone: phone || "",
+          locale: finalLocale,
+          subject,
+          requestId: newRequest._id,
+          sentCatalog: catalogFile, // PDF link vs.
+        },
+        isRead: false,
+      });
+
+      logger.withReq.info(
+        req,
+        `[Katalog Talebi] Kullanıcıya ${catalogFile.fileName} gönderildi - ${email}`
+      );
 
       res.status(201).json({
         success: true,
@@ -208,7 +237,9 @@ export const getAllCatalogRequests = asyncHandler(
 
     try {
       const { CatalogRequest } = await getTenantModels(req);
-      const requests = await CatalogRequest.find({ tenant: req.tenant }).sort({ createdAt: -1 });
+      const requests = await CatalogRequest.find({ tenant: req.tenant }).sort({
+        createdAt: -1,
+      });
       res.status(200).json({
         success: true,
         message: t("messagesFetched"),
