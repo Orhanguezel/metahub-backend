@@ -11,49 +11,7 @@ import { CatalogReplyTemplate } from "@/modules/catalog/templates/catalogReplyTe
 import logger from "@/core/middleware/logger/logger";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
-// --- Katalog isteği gönderen kullanıcıya otomatik yanıt ve admin'e log ---
-// Katalog PDF linkini tenant configden veya dinamik DB'den çekebilirsin.
-// Burada dummy link var, productionda tenantData'dan veya dosya storage'dan al.
-function getCatalogFile(
-  tenantData: any,
-  locale: SupportedLocale,
-  catalogType?: string
-) {
-  // tenant: 'ensotek', domain: 'ensotek.com'
-  const tenant =
-    tenantData?.slug ||
-    tenantData?.key ||
-    (tenantData?.name?.en && tenantData?.name.en.toLowerCase());
-  const domain =
-    (tenantData?.domain?.main && `https://${tenantData.domain.main}`) ||
-    "https://guezelwebdesign.com";
-
-  const type = catalogType || "main";
-
-  // Dosya adı: ensotek.catalog.pdf (veya bikes için: ensotek.bikes.catalog.pdf)
-  const fileName =
-    tenant + (type && type !== "main" ? `.${type}` : "") + `.catalog.pdf`;
-
-  // Mapping varsa ve ilgili locale mevcutsa onu kullan
-  if (
-    tenant &&
-    tenantData?.catalogs &&
-    tenantData.catalogs[type] &&
-    tenantData.catalogs[type][locale]
-  ) {
-    // Dosya ismini tenantData'dan da alabilirsin ama yukarıdaki gibi sabit de olabilir
-    // tenantData.catalogs[type][locale] = "ensotek.catalog.pdf" olmalı
-    const mappedFile = tenantData.catalogs[type][locale];
-    const url = `${domain}/${tenant}/katalog/${locale}/${mappedFile}`;
-    return { url, fileName: mappedFile };
-  }
-
-  // Mapping yoksa default pattern kullan
-  const url = `${domain}/${tenant}/katalog/${locale}/${fileName}`;
-  return { url, fileName };
-}
-
-// ✅ 1) Public: Yeni katalog isteği
+// ✅ Sadece kullanıcının verdiği direkt katalog linki ile çalışır
 export const sendCatalogRequest = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const locale: SupportedLocale = req.locale || getLogLocale();
@@ -69,10 +27,11 @@ export const sendCatalogRequest = asyncHandler(
         locale: formLocale,
         subject,
         message,
-        catalogType,
+        catalogFileUrl, // <== ARTIK SADECE BUNU KULLANIYORUZ!
+        catalogFileName,
       } = req.body;
 
-      if (!name || !email || !subject) {
+      if (!name || !email || !subject || !catalogFileUrl) {
         res.status(400).json({
           success: false,
           message: t("allFieldsRequired"),
@@ -83,23 +42,17 @@ export const sendCatalogRequest = asyncHandler(
       const finalLocale = (formLocale || locale) as SupportedLocale;
       const { CatalogRequest, Notification } = await getTenantModels(req);
 
-      // --- 1) Gönderilen katalog dosyasını belirle (tenant'a, dile, tipe göre)
-      const tenantData = req.tenantData;
       const brandName =
-        tenantData?.name?.[finalLocale] ||
-        tenantData?.name?.en ||
-        tenantData?.name ||
+        req.tenantData?.name?.[finalLocale] ||
+        req.tenantData?.name?.en ||
+        req.tenantData?.name ||
         "Brand";
-      const senderEmail = tenantData?.emailSettings?.senderEmail;
-      const adminEmail = tenantData?.emailSettings?.adminEmail;
+      const senderEmail = req.tenantData?.emailSettings?.senderEmail;
+      const adminEmail = req.tenantData?.emailSettings?.adminEmail;
       const brandWebsite =
-        (tenantData?.domain?.main && `https://${tenantData.domain.main}`) ??
-        process.env.BRAND_WEBSITE ??
-        "https://guezelwebdesign.com";
+        (req.tenantData?.domain?.main && `https://${req.tenantData.domain.main}`);
 
-      const catalogFile = getCatalogFile(tenantData, finalLocale, catalogType);
-
-      // --- 2) DB'ye kaydet
+      // --- 1) DB'ye kaydet
       const newRequest = await CatalogRequest.create({
         name,
         email,
@@ -107,15 +60,14 @@ export const sendCatalogRequest = asyncHandler(
         company,
         tenant: req.tenant,
         locale: finalLocale,
-        catalogType: catalogType || "main",
-        sentCatalog: catalogFile, // Gönderilen dosya logu!
+        sentCatalog: { url: catalogFileUrl, fileName: catalogFileName }, // Sadece bu!
         subject,
         message,
         isRead: false,
         isArchived: false,
       });
 
-      // --- 3) Kullanıcıya katalog dosyasını gönder
+      // --- 2) Kullanıcıya PDF linkini gönder
       await sendEmail({
         tenantSlug: req.tenant,
         to: email,
@@ -125,13 +77,15 @@ export const sendCatalogRequest = asyncHandler(
           locale: finalLocale,
           brandName,
           brandWebsite,
-          catalogFileUrl: catalogFile.url,
-          catalogFileName: catalogFile.fileName,
+          catalogFileUrl,
+          catalogFileName,
+          subject,
+          message,
         }),
         from: senderEmail,
       });
 
-      // --- 4) Admin'e bilgilendirme (opsiyonel, daha detaylı log)
+      // --- 3) Admin’e bilgilendirme (opsiyonel)
       if (adminEmail) {
         await sendEmail({
           tenantSlug: req.tenant,
@@ -144,11 +98,7 @@ export const sendCatalogRequest = asyncHandler(
               <li><b>E-Posta:</b> ${email}</li>
               <li><b>Telefon:</b> ${phone || "-"}</li>
               <li><b>Firma:</b> ${company || "-"}</li>
-              <li><b>Dil:</b> ${finalLocale}</li>
-              <li><b>Katalog Tipi:</b> ${catalogType || "main"}</li>
-              <li><b>Katalog Dosyası:</b> <a href="${
-                catalogFile.url
-              }" target="_blank">${catalogFile.fileName}</a></li>
+              <li><b>Katalog Dosyası:</b> <a href="${catalogFileUrl}" target="_blank">${catalogFileName || "PDF dosyası"}</a></li>
               <li><b>Konu:</b> ${subject}</li>
               <li><b>Mesaj:</b> <br/>${message || "-"}</li>
             </ul>
@@ -158,39 +108,18 @@ export const sendCatalogRequest = asyncHandler(
         });
       }
 
-      // --- 5) Admin notification log
-      function fillTemplate(str, params) {
-        return str.replace(
-          /\{\{(.*?)\}\}/g,
-          (_, key) => params[key.trim()] ?? ""
-        );
-      }
+      // --- 4) Admin notification log
+      const notifTitle: Record<SupportedLocale, string> = Object.fromEntries(
+        SUPPORTED_LOCALES.map(lng => [lng, `${name} yeni katalog talebi gönderdi`])
+      ) as Record<SupportedLocale, string>;
 
-      const notifTitle: Record<SupportedLocale, string> = {} as any;
-      const notifMsg: Record<SupportedLocale, string> = {} as any;
+      const notifMsg: Record<SupportedLocale, string> = Object.fromEntries(
+        SUPPORTED_LOCALES.map(lng => [lng, `${name} (${email}) yeni bir katalog talebinde bulundu.`])
+      ) as Record<SupportedLocale, string>;
 
       for (const lng of SUPPORTED_LOCALES) {
-        let titleTemplate = translate(
-          "notification.newCatalogRequestTitle",
-          lng,
-          translations
-        );
-        let msgTemplate = translate(
-          "notification.newCatalogRequest",
-          lng,
-          translations
-        );
-
-        notifTitle[lng] = fillTemplate(titleTemplate, {
-          name,
-          email,
-          catalogType: catalogType || "main",
-        });
-        notifMsg[lng] = fillTemplate(msgTemplate, {
-          name,
-          email,
-          catalogType: catalogType || "main",
-        });
+        notifTitle[lng] = `${name} yeni katalog talebi gönderdi`;
+        notifMsg[lng] = `${name} (${email}) yeni bir katalog talebinde bulundu.`;
       }
 
       await Notification.create({
@@ -199,7 +128,6 @@ export const sendCatalogRequest = asyncHandler(
         title: notifTitle,
         message: notifMsg,
         data: {
-          catalogType: catalogType || "main",
           name,
           email,
           company: company || "",
@@ -207,17 +135,15 @@ export const sendCatalogRequest = asyncHandler(
           locale: finalLocale,
           subject,
           requestId: newRequest._id,
-          sentCatalog: catalogFile, // PDF link vs.
+          sentCatalog: { url: catalogFileUrl, fileName: catalogFileName },
         },
         isRead: false,
       });
 
       logger.withReq.info(
         req,
-        `[Katalog Talebi] Kullanıcıya ${catalogFile.fileName} gönderildi - ${email}`
+        `[Katalog Talebi] Kullanıcıya PDF linki gönderildi - ${email}`
       );
-
-      console.log(`[Katalog Talebi] Kullanıcıya ${catalogFile.fileName} gönderildi - ${email}`);
 
       res.status(201).json({
         success: true,
@@ -229,6 +155,7 @@ export const sendCatalogRequest = asyncHandler(
     }
   }
 );
+
 
 // ✅ 2) Admin: Tüm katalog taleplerini getir
 export const getAllCatalogRequests = asyncHandler(
