@@ -9,6 +9,16 @@ import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import translations from "./i18n";
 import { t as translate } from "@/core/utils/i18n/translate";
 
+// Güvenli normalization fonksiyonu
+function normalizeAboutItem(item: any) {
+  return {
+    ...item,
+    images: Array.isArray(item.images) ? item.images : [],
+    tags: Array.isArray(item.tags) ? item.tags : [],
+    comments: Array.isArray(item.comments) ? item.comments : [],
+  };
+}
+
 // 📥 GET /about (Public)
 export const getAllAbout = asyncHandler(async (req: Request, res: Response) => {
   const { category, onlyLocalized } = req.query;
@@ -37,17 +47,20 @@ export const getAllAbout = asyncHandler(async (req: Request, res: Response) => {
     .sort({ createdAt: -1 })
     .lean();
 
+  // --- Güvenli array normalization ---
+  const normalizedList = (aboutList || []).map(normalizeAboutItem);
+
   logger.withReq.info(req, t("log.listed"), {
     ...getRequestContext(req),
     event: "about.public_list",
     module: "about",
-    resultCount: aboutList.length,
+    resultCount: normalizedList.length,
   });
 
   res.status(200).json({
     success: true,
     message: t("log.listed"),
-    data: aboutList,
+    data: normalizedList,
   });
 });
 
@@ -93,17 +106,21 @@ export const getAboutById = asyncHandler(
       res.status(404).json({ success: false, message: t("error.not_found") });
       return;
     }
+
+    // --- Güvenli array normalization ---
+    const normalized = normalizeAboutItem(about);
+
     logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
       event: "about.public_getById",
       module: "about",
-      aboutId: about._id,
+      aboutId: normalized._id,
     });
 
     res.status(200).json({
       success: true,
       message: t("log.fetched"),
-      data: about,
+      data: normalized,
     });
   }
 );
@@ -138,18 +155,21 @@ export const getAboutBySlug = asyncHandler(
       return;
     }
 
+    // --- Güvenli array normalization ---
+    const normalized = normalizeAboutItem(about);
+
     logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
       event: "about.public_getBySlug",
       module: "about",
       slug,
-      aboutId: about._id,
+      aboutId: normalized._id,
     });
 
     res.status(200).json({
       success: true,
       message: t("log.fetched"),
-      data: about,
+      data: normalized,
     });
   }
 );

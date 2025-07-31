@@ -159,6 +159,8 @@ export const updateAbout = asyncHandler(async (req: Request, res: Response) => {
     );
   }
 
+
+
   const updatableFields: (keyof IAbout)[] = [
     "tags",
     "category",
@@ -261,7 +263,13 @@ export const adminGetAllAbout = asyncHandler(
       .sort({ createdAt: -1 })
       .lean();
 
-    const data = aboutList;
+    // --- Güvenli array normalization ---
+    const data = (aboutList || []).map((item: any) => ({
+      ...item,
+      images: Array.isArray(item.images) ? item.images : [],
+      tags: Array.isArray(item.tags) ? item.tags : [],
+      comments: Array.isArray(item.comments) ? item.comments : [],
+    }));
 
     logger.withReq.info(req, t("listFetched"), {
       ...getRequestContext(req),
@@ -270,6 +278,7 @@ export const adminGetAllAbout = asyncHandler(
     res.status(200).json({ success: true, message: t("listFetched"), data });
   }
 );
+
 
 // ✅ GET BY ID
 export const adminGetAboutById = asyncHandler(
@@ -301,7 +310,13 @@ export const adminGetAboutById = asyncHandler(
       return;
     }
 
-    const populated = about as any;
+    // --- Güvenli array normalization ---
+    const populated = {
+      ...about,
+      images: Array.isArray(about.images) ? about.images : [],
+      tags: Array.isArray(about.tags) ? about.tags : [],
+      comments: Array.isArray(about.comments) ? about.comments : [],
+    };
 
     res.status(200).json({
       success: true,
@@ -310,6 +325,7 @@ export const adminGetAboutById = asyncHandler(
     });
   }
 );
+
 
 // ✅ DELETE
 export const deleteAbout = asyncHandler(async (req: Request, res: Response) => {
