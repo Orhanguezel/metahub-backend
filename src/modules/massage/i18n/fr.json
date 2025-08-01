@@ -1,0 +1,25 @@
+{
+  "log": {
+    "listed": "Massage listés.",
+    "fetched": "Service récupéré avec succès.",
+    "created": "Service créé avec succès.",
+    "updated": "Service mis à jour.",
+    "deleted": "Service supprimé.",
+    "listFetched": "Liste des massage récupérée avec succès."
+  },
+  "error": {
+    "invalid_id": "ID invalide.",
+    "not_found": "Service non trouvé.",
+    "create_fail": "Échec de la création du service."
+  },
+  "validation": {
+    "invalidObjectId": "ID d'objet invalide.",
+    "tagsArray": "Les tags doivent être un tableau.",
+    "durationMinutesPositive": "La durée doit être un nombre positif.",
+    "pricePositive": "Le prix doit être un nombre positif.",
+    "invalidCategory": "ID de catégorie invalide.",
+    "invalidRemovedImages": "Format d'image supprimée invalide.",
+    "booleanField": "Ce champ doit être true ou false.",
+    "invalidLanguage": "Code de langue invalide."
+  }
+}

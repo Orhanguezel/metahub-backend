@@ -14,6 +14,7 @@ export const uploadSizeLimits: Record<UploadFolderKeys, number> = {
   blog: 15 * 1024 * 1024,
   gallery: 30 * 1024 * 1024,
   services: 10 * 1024 * 1024,
+  massage: 10 * 1024 * 1024,
   library: 50 * 1024 * 1024,
   references: 20 * 1024 * 1024,
   sport: 10 * 1024 * 1024,

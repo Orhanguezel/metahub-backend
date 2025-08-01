@@ -21,6 +21,7 @@ export const UPLOAD_FOLDERS = {
   blog: "blog-images",
   gallery: "gallery",
   services: "service-images",
+  massage: "massage-images",
   activity: "activity-images",
   library: "library",
   references: "references",

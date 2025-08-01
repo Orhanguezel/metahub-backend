@@ -47,6 +47,7 @@ declare global {
         | "gallery"
         | "galleryCategory"
         | "services"
+        | "massage"
         | "activity"
         | "library"
         | "references"

@@ -20,6 +20,8 @@ import { Gallery } from "@/modules/gallery/gallery.models";
 import { GalleryCategory } from "@/modules/gallerycategory/models";
 import { Services } from "@/modules/services/models";
 import { ServicesCategory } from "@/modules/servicescategory/category.models";
+import { Massage } from "@/modules/massage/models";
+import { MassageCategory } from "@/modules/massagecategory/category.models";
 import { Stockmovement } from "@/modules/stockmovement/stockmovement.models";
 import { Notification } from "@/modules/notification/notification.models";
 import { Comment } from "@/modules/comment/comment.models";
@@ -92,6 +94,8 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   GalleryCategory: conn.model("gallerycategory", GalleryCategory.schema),
   Services: conn.model("services", Services.schema),
   ServicesCategory: conn.model("servicescategory", ServicesCategory.schema),
+  Massage: conn.model("massage", Massage.schema),
+  MassageCategory: conn.model("massagecategory", MassageCategory.schema),
   Notification: conn.model("notification", Notification.schema),
   Comment: conn.model("comment", Comment.schema),
   Review: conn.model("review", Review.schema),
