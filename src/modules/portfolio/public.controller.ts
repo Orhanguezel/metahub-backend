@@ -9,6 +9,16 @@ import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import translations from "./i18n";
 import { t as translate } from "@/core/utils/i18n/translate";
 
+// --- Güvenli array normalization fonksiyonu ---
+function normalizePortfolioItem(item: any) {
+  return {
+    ...item,
+    images: Array.isArray(item.images) ? item.images : [],
+    tags: Array.isArray(item.tags) ? item.tags : [],
+    comments: Array.isArray(item.comments) ? item.comments : [],
+  };
+}
+
 // 📥 GET /portfolio (Public)
 export const getAllPortfolio = asyncHandler(
   async (req: Request, res: Response) => {
@@ -37,17 +47,20 @@ export const getAllPortfolio = asyncHandler(
       .sort({ createdAt: -1 })
       .lean();
 
+    // --- Array normalization ---
+    const normalizedList = (portfolioList || []).map(normalizePortfolioItem);
+
     logger.withReq.info(req, t("log.listed"), {
       ...getRequestContext(req),
       event: "portfolio.public_list",
       module: "portfolio",
-      resultCount: portfolioList.length,
+      resultCount: normalizedList.length,
     });
 
     res.status(200).json({
       success: true,
       message: t("log.listed"),
-      data: portfolioList,
+      data: normalizedList,
     });
   }
 );
@@ -93,17 +106,21 @@ export const getPortfolioById = asyncHandler(
       res.status(404).json({ success: false, message: t("error.not_found") });
       return;
     }
+
+    // --- Array normalization ---
+    const normalized = normalizePortfolioItem(portfolio);
+
     logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
       event: "portfolio.public_getById",
       module: "portfolio",
-      portfolioId: portfolio._id,
+      portfolioId: normalized._id,
     });
 
     res.status(200).json({
       success: true,
       message: t("log.fetched"),
-      data: portfolio,
+      data: normalized,
     });
   }
 );
@@ -137,18 +154,21 @@ export const getPortfolioBySlug = asyncHandler(
       return;
     }
 
+    // --- Array normalization ---
+    const normalized = normalizePortfolioItem(portfolio);
+
     logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
       event: "portfolio.public_getBySlug",
       module: "portfolio",
       slug,
-      portfolioId: portfolio._id,
+      portfolioId: normalized._id,
     });
 
     res.status(200).json({
       success: true,
       message: t("log.fetched"),
-      data: portfolio,
+      data: normalized,
     });
   }
 );

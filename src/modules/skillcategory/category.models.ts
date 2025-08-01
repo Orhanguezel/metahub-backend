@@ -1,6 +1,6 @@
 import mongoose, { Schema, Types, Model, models } from "mongoose";
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
-import { ITeamCategory } from "./types";
+import { ISkillCategory } from "./types";
 
 // name alanını dinamik olarak oluştur
 const nameFields = SUPPORTED_LOCALES.reduce((acc, lang) => {
@@ -8,7 +8,7 @@ const nameFields = SUPPORTED_LOCALES.reduce((acc, lang) => {
   return acc;
 }, {} as Record<SupportedLocale, any>);
 
-const TeamCategorySchema = new Schema<ITeamCategory>(
+const SkillCategorySchema = new Schema<ISkillCategory>(
   {
     name: nameFields,
     tenant: {
@@ -33,7 +33,7 @@ const TeamCategorySchema = new Schema<ITeamCategory>(
   { timestamps: true }
 );
 
-TeamCategorySchema.pre("validate", function (next) {
+SkillCategorySchema.pre("validate", function (next) {
   if (!this.slug && this.name) {
     const firstValidName =
       Object.values(this.name).find(
@@ -49,8 +49,8 @@ TeamCategorySchema.pre("validate", function (next) {
   next();
 });
 
-const TeamCategory: Model<ITeamCategory> =
-  (models.teamcategory as Model<ITeamCategory>) ||
-  mongoose.model<ITeamCategory>("teamcategory", TeamCategorySchema);
+const SkillCategory: Model<ISkillCategory> =
+  (models.skillcategory as Model<ISkillCategory>) ||
+  mongoose.model<ISkillCategory>("skillcategory", SkillCategorySchema);
 
-export { TeamCategory };
+export { SkillCategory };

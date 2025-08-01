@@ -1,0 +1,13 @@
+{
+  "created": "Artikel erfolgreich erstellt.",
+  "updated": "Artikel erfolgreich aktualisiert.",
+  "invalidId": "Ungültige ID.",
+  "notFound": "Artikel nicht gefunden.",
+  "fetched": "Artikel erfolgreich abgerufen.",
+  "deleted": "Artikel erfolgreich gelöscht.",
+  "invalidRemovedImages": "Ungültige entfernte Bilder.",
+  "listFetched": "Artikel Liste erfolgreich abgerufen.",
+  "tagsArray": "Tags-Array ist ungültig.",
+  "invalidCategory": "Ungültige Kategorie.",
+  "booleanField": "Bitte geben Sie einen gültigen booleschen Wert ein."
+}

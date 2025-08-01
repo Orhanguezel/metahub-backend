@@ -1,8 +1,8 @@
 import { Schema, Model, Types, models, model } from "mongoose";
-import type { ITeam, ITeamImage } from "./types";
+import type { ISkill, ISkillImage } from "./types";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
-// Çok dilli alan tipi tanımı
+// 🔤 Çok dilli alan tipi tanımı
 const localizedStringField = () => {
   const fields: Record<string, any> = {};
   for (const locale of SUPPORTED_LOCALES) {
@@ -11,7 +11,7 @@ const localizedStringField = () => {
   return fields;
 };
 
-const TeamImageSchema = new Schema<ITeamImage>(
+const SkillImageSchema = new Schema<ISkillImage>(
   {
     url: { type: String, required: true },
     thumbnail: { type: String, required: true },
@@ -21,27 +21,30 @@ const TeamImageSchema = new Schema<ITeamImage>(
   { _id: false }
 );
 
-const TeamSchema = new Schema<ITeam>(
+const SkillSchema = new Schema<ISkill>(
   {
     title: localizedStringField(),
     tenant: { type: String, required: true, index: true },
     summary: localizedStringField(),
     content: localizedStringField(),
     slug: { type: String, required: true, unique: true, lowercase: true },
-    images: { type: [TeamImageSchema], default: [] },            // ✅
-    tags: { type: [String], default: [] },                            // ✅
+    images: { type: [SkillImageSchema], default: [] },
+    tags: { type: [String], default: [] },
     author: { type: String },
-    category: { type: String, trim: true },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: "skillcategory",
+      required: true,
+    },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
-    comments: { type: [Schema.Types.ObjectId], ref: "comment", default: [] }, // ✅
+    comments: { type: [Schema.Types.ObjectId], ref: "comment", default: [] },
     isActive: { type: Boolean, default: true },
   },
-  { timestamps: true, minimize: false } // minimize:false ekstra güvenlik için (array field asla silinmez)
+  { timestamps: true, minimize: false }
 );
 
-// --- Pre-validate ile her array field garanti altına alınır!
-TeamSchema.pre("validate", function (next) {
+SkillSchema.pre("validate", function (next) {
   if (!Array.isArray(this.images)) this.images = [];
   if (!Array.isArray(this.tags)) this.tags = [];
   if (!Array.isArray(this.comments)) this.comments = [];
@@ -56,7 +59,8 @@ TeamSchema.pre("validate", function (next) {
   next();
 });
 
-const Team: Model<ITeam> =
-  models.team || model<ITeam>("team", TeamSchema);
 
-export { Team, TeamImageSchema, TeamSchema };
+const Skill: Model<ISkill> =
+  models.skill || model<ISkill>("skill", SkillSchema);
+
+export { Skill, SkillImageSchema, SkillSchema };

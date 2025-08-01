@@ -10,7 +10,7 @@ import translations from "./i18n";
 import { t as translate } from "@/core/utils/i18n/translate";
 
 // Güvenli normalization fonksiyonu
-function normalizeActivityItem(item: any) {
+function normalizeSkillItem(item: any) {
   return {
     ...item,
     images: Array.isArray(item.images) ? item.images : [],
@@ -19,13 +19,13 @@ function normalizeActivityItem(item: any) {
   };
 }
 
-// 📥 GET /activity (Public)
-export const getAllActivity = asyncHandler(async (req: Request, res: Response) => {
+// 📥 GET /skill (Public)
+export const getAllSkill = asyncHandler(async (req: Request, res: Response) => {
   const { category, onlyLocalized } = req.query;
   const locale: SupportedLocale =
     (req.locale as SupportedLocale) || getLogLocale() || "en";
   const t = (key: string) => translate(key, locale, translations);
-  const { Activity } = await getTenantModels(req);
+  const { Skill } = await getTenantModels(req);
 
   const filter: Record<string, any> = {
     tenant: req.tenant,
@@ -41,19 +41,19 @@ export const getAllActivity = asyncHandler(async (req: Request, res: Response) =
     filter[`title.${locale}`] = { $exists: true };
   }
 
-  const activityList = await Activity.find(filter)
+  const skillList = await Skill.find(filter)
     .populate("comments")
     .populate("category", "name slug")
     .sort({ createdAt: -1 })
     .lean();
 
   // --- Güvenli array normalization ---
-  const normalizedList = (activityList || []).map(normalizeActivityItem);
+  const normalizedList = (skillList || []).map(normalizeSkillItem);
 
   logger.withReq.info(req, t("log.listed"), {
     ...getRequestContext(req),
-    event: "activity.public_list",
-    module: "activity",
+    event: "skill.public_list",
+    module: "skill",
     resultCount: normalizedList.length,
   });
 
@@ -64,20 +64,20 @@ export const getAllActivity = asyncHandler(async (req: Request, res: Response) =
   });
 });
 
-// 📥 GET /activity/:id (Public)
-export const getActivityById = asyncHandler(
+// 📥 GET /skill/:id (Public)
+export const getSkillById = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const locale: SupportedLocale =
       (req.locale as SupportedLocale) || getLogLocale() || "en";
     const t = (key: string) => translate(key, locale, translations);
-    const { Activity } = await getTenantModels(req);
+    const { Skill } = await getTenantModels(req);
 
     if (!isValidObjectId(id)) {
       logger.withReq.warn(req, t("error.invalid_id"), {
         ...getRequestContext(req),
-        event: "activity.public_getById",
-        module: "activity",
+        event: "skill.public_getById",
+        module: "skill",
         status: "fail",
         id,
       });
@@ -85,7 +85,7 @@ export const getActivityById = asyncHandler(
       return;
     }
 
-    const activity = await Activity.findOne({
+    const skill = await Skill.findOne({
       _id: id,
       isActive: true,
       isPublished: true,
@@ -95,11 +95,11 @@ export const getActivityById = asyncHandler(
       .populate("category", "name slug")
       .lean();
 
-    if (!activity) {
+    if (!skill) {
       logger.withReq.warn(req, t("error.not_found"), {
         ...getRequestContext(req),
-        event: "activity.public_getById",
-        module: "activity",
+        event: "skill.public_getById",
+        module: "skill",
         status: "fail",
         id,
       });
@@ -108,13 +108,13 @@ export const getActivityById = asyncHandler(
     }
 
     // --- Güvenli array normalization ---
-    const normalized = normalizeActivityItem(activity);
+    const normalized = normalizeSkillItem(skill);
 
     logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
-      event: "activity.public_getById",
-      module: "activity",
-      activityId: normalized._id,
+      event: "skill.public_getById",
+      module: "skill",
+      skillId: normalized._id,
     });
 
     res.status(200).json({
@@ -125,15 +125,15 @@ export const getActivityById = asyncHandler(
   }
 );
 
-// 📥 GET /activity/slug/:slug (Public)
-export const getActivityBySlug = asyncHandler(
+// 📥 GET /skill/slug/:slug (Public)
+export const getSkillBySlug = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
     const t = (key: string) => translate(key, locale, translations);
-    const { Activity } = await getTenantModels(req);
+    const { Skill } = await getTenantModels(req);
     const { slug } = req.params;
 
-    const activity = await Activity.findOne({
+    const skill = await Skill.findOne({
       slug,
       tenant: req.tenant,
       isActive: true,
@@ -143,11 +143,11 @@ export const getActivityBySlug = asyncHandler(
       .populate("category", "name slug")
       .lean();
 
-    if (!activity) {
+    if (!skill) {
       logger.withReq.warn(req, t("error.not_found"), {
         ...getRequestContext(req),
-        event: "activity.public_getBySlug",
-        module: "activity",
+        event: "skill.public_getBySlug",
+        module: "skill",
         status: "fail",
         slug,
       });
@@ -156,14 +156,14 @@ export const getActivityBySlug = asyncHandler(
     }
 
     // --- Güvenli array normalization ---
-    const normalized = normalizeActivityItem(activity);
+    const normalized = normalizeSkillItem(skill);
 
     logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
-      event: "activity.public_getBySlug",
-      module: "activity",
+      event: "skill.public_getBySlug",
+      module: "skill",
       slug,
-      activityId: normalized._id,
+      skillId: normalized._id,
     });
 
     res.status(200).json({

@@ -29,7 +29,7 @@ const BlogSchema = new Schema<IBlog>(
     content: localizedStringField(),
     slug: { type: String, required: true, unique: true, lowercase: true },
     images: { type: [BlogImageSchema], default: [] },
-    tags: [{ type: String }],
+    tags: { type: [String], default: [] },
     author: { type: String },
     category: {
       type: Schema.Types.ObjectId,
@@ -38,13 +38,16 @@ const BlogSchema = new Schema<IBlog>(
     },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
-    comments: [{ type: Schema.Types.ObjectId, ref: "comment" }],
+    comments: { type: [Schema.Types.ObjectId], ref: "comment", default: [] },
     isActive: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  { timestamps: true, minimize: false }
 );
 
 BlogSchema.pre("validate", function (next) {
+  if (!Array.isArray(this.images)) this.images = [];
+  if (!Array.isArray(this.tags)) this.tags = [];
+  if (!Array.isArray(this.comments)) this.comments = [];
   if (!this.slug && this.title?.en) {
     this.slug = this.title.en
       .toLowerCase()
@@ -56,6 +59,8 @@ BlogSchema.pre("validate", function (next) {
   next();
 });
 
-const Blog: Model<IBlog> = models.blog || model<IBlog>("blog", BlogSchema);
+
+const Blog: Model<IBlog> =
+  models.blog || model<IBlog>("blog", BlogSchema);
 
 export { Blog, BlogImageSchema, BlogSchema };

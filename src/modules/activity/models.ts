@@ -29,7 +29,7 @@ const ActivitySchema = new Schema<IActivity>(
     content: localizedStringField(),
     slug: { type: String, required: true, unique: true, lowercase: true },
     images: { type: [ActivityImageSchema], default: [] },
-    tags: [{ type: String }],
+    tags: { type: [String], default: [] },
     author: { type: String },
     category: {
       type: Schema.Types.ObjectId,
@@ -38,13 +38,16 @@ const ActivitySchema = new Schema<IActivity>(
     },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
-    comments: [{ type: Schema.Types.ObjectId, ref: "comment" }],
+    comments: { type: [Schema.Types.ObjectId], ref: "comment", default: [] },
     isActive: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  { timestamps: true, minimize: false }
 );
 
 ActivitySchema.pre("validate", function (next) {
+  if (!Array.isArray(this.images)) this.images = [];
+  if (!Array.isArray(this.tags)) this.tags = [];
+  if (!Array.isArray(this.comments)) this.comments = [];
   if (!this.slug && this.title?.en) {
     this.slug = this.title.en
       .toLowerCase()
@@ -55,6 +58,7 @@ ActivitySchema.pre("validate", function (next) {
   }
   next();
 });
+
 
 const Activity: Model<IActivity> =
   models.activity || model<IActivity>("activity", ActivitySchema);

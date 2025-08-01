@@ -42,7 +42,6 @@ import { Activity } from "@/modules/activity/models";
 import { ActivityCategory } from "@/modules/activitycategory/category.models";
 import { About } from "@/modules/about/models";
 import { AboutCategory } from "@/modules/aboutcategory/category.models";
-import { Experience } from "@/modules/experience/experience.models";
 import { References } from "@/modules/references/models";
 import { ReferencesCategory } from "@/modules/referencescategory/category.models";
 import { Articles } from "@/modules/articles/models";
@@ -68,8 +67,9 @@ import { Sparepart } from "@/modules/sparepart/models";
 import { SparepartCategory } from "@/modules/sparepartcategory/models";
 import { Tenants } from "@/modules/tenants/tenants.model";
 import { Team } from "@/modules/team/models";
-import { TeamCategory } from "@/modules/teamcategory/category.models";
 import { Portfolio } from "@/modules/portfolio/models";
+import { Skill } from "@/modules/skill/models";
+import { SkillCategory } from "@/modules/skillcategory/category.models";
 import { CatalogRequest } from "@/modules/catalog/catalog.models";
 
 // ✅ Ana export
@@ -112,7 +112,6 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   ActivityCategory: conn.model("activitycategory", ActivityCategory.schema),
   About: conn.model("about", About.schema),
   AboutCategory: conn.model("aboutcategory", AboutCategory.schema),
-  Experience: conn.model("experience", Experience.schema),
   References: conn.model("references", References.schema),
   ReferencesCategory: conn.model(
     "referencescategory",
@@ -148,7 +147,8 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   SparepartCategory: conn.model("sparepartcategory", SparepartCategory.schema),
   Tenants: conn.model("tenants", Tenants.schema),
   Team: conn.model("team", Team.schema),
-  TeamCategory: conn.model("teamcategory", TeamCategory.schema),
   Portfolio: conn.model("portfolio", Portfolio.schema),
+  Skill: conn.model("skill", Skill.schema),
+  SkillCategory: conn.model("skillcategory", SkillCategory.schema),
   CatalogRequest: conn.model("catalogrequest", CatalogRequest.schema),
 });

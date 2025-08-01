@@ -11,13 +11,13 @@ export const validateObjectId = (field: string) => [
 ];
 
 // ✅ Create (→ En az bir dil zorunlu)
-export const validateCreateTeamCategory = [
+export const validateCreateSkillCategory = [
   validateMultilangField("name"), // merkezi helper kullanıldı
   validateRequest,
 ];
 
 // ✅ Update (→ Opsiyonel: ama field geldiyse yine geçerli olmalı)
-export const validateUpdateTeamCategory = [
+export const validateUpdateSkillCategory = [
   body("name")
     .optional()
     .custom((value) => {
