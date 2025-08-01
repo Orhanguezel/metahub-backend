@@ -6,13 +6,13 @@ import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
-import translations from "../team/i18n";
+import translations from "../skill/i18n";
 import { t as translate } from "@/core/utils/i18n/translate";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
 
 // ✅ CREATE (Tüm dilleri kaydeder)
-export const createTeamCategory = asyncHandler(
+export const createSkillCategory = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
     const t = (key: string, params?: any) =>
@@ -21,53 +21,54 @@ export const createTeamCategory = asyncHandler(
     const name = fillAllLocales(req.body.name);
 
     try {
-      const { TeamCategory } = await getTenantModels(req);
-      const category = await TeamCategory.create({
+      const { SkillCategory } = await getTenantModels(req);
+      const category = await SkillCategory.create({
         name,
         tenant: req.tenant,
       });
 
       logger.withReq.info(
         req,
-        t("teamcategory.create.success", { name: name[locale] }),
+        t("skillcategory.create.success", { name: name[locale] }),
         {
           ...getRequestContext(req),
-          event: "teamcategory.create",
-          module: "teamcategory",
+          event: "skillcategory.create",
+          module: "skillcategory",
           status: "success",
         }
       );
 
+
       res.status(201).json({
         success: true,
-        message: t("teamcategory.create.success", { name: name[locale] }),
+        message: t("skillcategory.create.success", { name: name[locale] }),
         data: category, // .name burada tüm diller ile döner!
       });
     } catch (err: any) {
-      logger.withReq.error(req, t("teamcategory.create.error"), {
+      logger.withReq.error(req, t("skillcategory.create.error"), {
         ...getRequestContext(req),
-        event: "teamcategory.create",
-        module: "teamcategory",
+        event: "skillcategory.create",
+        module: "skillcategory",
         status: "fail",
         error: err.message,
       });
 
       res.status(500).json({
         success: false,
-        message: t("teamcategory.create.error"),
+        message: t("skillcategory.create.error"),
       });
     }
   }
 );
 
 // ✅ GET ALL (Tüm dillerle gönderir)
-export const getAllTeamCategories = asyncHandler(
+export const getAllSkillCategories = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale() || "en";
     const t = (key: string) => translate(key, locale, translations);
 
     try {
-      const { TeamCategory } = await getTenantModels(req);
+      const { SkillCategory } = await getTenantModels(req);
 
       const filter: Record<string, any> = {
         tenant: req.tenant,
@@ -76,41 +77,41 @@ export const getAllTeamCategories = asyncHandler(
         filter.isActive = req.query.isActive === "true";
       }
 
-      const categories = await TeamCategory.find(filter)
+      const categories = await SkillCategory.find(filter)
         .sort({ createdAt: -1 })
         .lean();
 
-      logger.withReq.info(req, t("teamcategory.list.success"), {
+      logger.withReq.info(req, t("skillcategory.list.success"), {
         ...getRequestContext(req),
-        event: "teamcategory.list",
-        module: "teamcategory",
+        event: "skillcategory.list",
+        module: "skillcategory",
         resultCount: categories.length,
       });
 
       res.status(200).json({
         success: true,
-        message: t("teamcategory.list.success"),
+        message: t("skillcategory.list.success"),
         data: categories, // <--- .name: {tr, en, ...} tüm dillerle gelir!
       });
     } catch (err: any) {
-      logger.withReq.error(req, t("teamcategory.list.error"), {
+      logger.withReq.error(req, t("skillcategory.list.error"), {
         ...getRequestContext(req),
-        event: "teamcategory.list",
-        module: "teamcategory",
+        event: "skillcategory.list",
+        module: "skillcategory",
         status: "fail",
         error: err.message,
       });
 
       res.status(500).json({
         success: false,
-        message: t("teamcategory.list.error"),
+        message: t("skillcategory.list.error"),
       });
     }
   }
 );
 
 // ✅ GET BY ID (Tüm dillerle)
-export const getTeamCategoryById = asyncHandler(
+export const getSkillCategoryById = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
     const t = (key: string) => translate(key, locale, translations);
@@ -119,17 +120,17 @@ export const getTeamCategoryById = asyncHandler(
     if (!isValidObjectId(id)) {
       logger.withReq.warn(
         req,
-        t("teamcategory.invalidId"),
+        t("skillcategory.invalidId"),
         getRequestContext(req)
       );
       res
         .status(400)
-        .json({ success: false, message: t("teamcategory.invalidId") });
+        .json({ success: false, message: t("skillcategory.invalidId") });
       return;
     }
 
-    const { TeamCategory } = await getTenantModels(req);
-    const category = await TeamCategory.findOne({
+    const { SkillCategory } = await getTenantModels(req);
+    const category = await SkillCategory.findOne({
       _id: id,
       tenant: req.tenant,
     }).lean();
@@ -137,25 +138,25 @@ export const getTeamCategoryById = asyncHandler(
     if (!category) {
       logger.withReq.warn(
         req,
-        t("teamcategory.notFound"),
+        t("skillcategory.notFound"),
         getRequestContext(req)
       );
       res
         .status(404)
-        .json({ success: false, message: t("teamcategory.notFound") });
+        .json({ success: false, message: t("skillcategory.notFound") });
       return;
     }
 
     res.status(200).json({
       success: true,
-      message: t("teamcategory.fetch.success"),
+      message: t("skillcategory.fetch.success"),
       data: category, // .name tüm dillerle!
     });
   }
 );
 
 // ✅ UPDATE (Tüm dilleri merge ederek günceller)
-export const updateTeamCategory = asyncHandler(
+export const updateSkillCategory = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
     const t = (key: string, params?: any) =>
@@ -166,29 +167,29 @@ export const updateTeamCategory = asyncHandler(
     if (!isValidObjectId(id)) {
       logger.withReq.warn(
         req,
-        t("teamcategory.invalidId"),
+        t("skillcategory.invalidId"),
         getRequestContext(req)
       );
       res
         .status(400)
-        .json({ success: false, message: t("teamcategory.invalidId") });
+        .json({ success: false, message: t("skillcategory.invalidId") });
       return;
     }
 
-    const { TeamCategory } = await getTenantModels(req);
-    const category = await TeamCategory.findOne({
+    const { SkillCategory } = await getTenantModels(req);
+    const category = await SkillCategory.findOne({
       _id: id,
       tenant: req.tenant,
     });
     if (!category) {
       logger.withReq.warn(
         req,
-        t("teamcategory.notFound"),
+        t("skillcategory.notFound"),
         getRequestContext(req)
       );
       res
         .status(404)
-        .json({ success: false, message: t("teamcategory.notFound") });
+        .json({ success: false, message: t("skillcategory.notFound") });
       return;
     }
 
@@ -202,20 +203,19 @@ export const updateTeamCategory = asyncHandler(
 
     await category.save();
 
-    logger.withReq.info(
-      req,
-      t("teamcategory.update.success", { name: category.name[locale] }),
+    logger.withReq.info(req,
+      t("skillcategory.update.success", { name: category.name[locale] }),
       {
         ...getRequestContext(req),
-        event: "teamcategory.update",
-        module: "teamcategory",
+        event: "skillcategory.update",
+        module: "skillcategory",
         status: "success",
       }
     );
 
     res.status(200).json({
       success: true,
-      message: t("teamcategory.update.success", {
+      message: t("skillcategory.update.success", {
         name: category.name[locale],
       }),
       data: category, // .name tüm dillerle!
@@ -224,7 +224,7 @@ export const updateTeamCategory = asyncHandler(
 );
 
 // ✅ DELETE
-export const deleteTeamCategory = asyncHandler(
+export const deleteSkillCategory = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
     const t = (key: string, params?: Record<string, any>) =>
@@ -234,19 +234,19 @@ export const deleteTeamCategory = asyncHandler(
     if (!isValidObjectId(id)) {
       logger.withReq.warn(
         req,
-        t("teamcategory.invalidId"),
+        t("skillcategory.invalidId"),
         getRequestContext(req)
       );
       res
         .status(400)
-        .json({ success: false, message: t("teamcategory.invalidId") });
+        .json({ success: false, message: t("skillcategory.invalidId") });
       return;
     }
 
-    const { TeamCategory } = await getTenantModels(req);
+    const { SkillCategory } = await getTenantModels(req);
 
     // ✔️ findOneAndDelete ile hem kontrol hem veri döner
-    const deleted = await TeamCategory.findOneAndDelete({
+    const deleted = await SkillCategory.findOneAndDelete({
       _id: id,
       tenant: req.tenant,
     });
@@ -254,27 +254,27 @@ export const deleteTeamCategory = asyncHandler(
     if (!deleted) {
       logger.withReq.warn(
         req,
-        t("teamcategory.notFound"),
+        t("skillcategory.notFound"),
         getRequestContext(req)
       );
       res
         .status(404)
-        .json({ success: false, message: t("teamcategory.notFound") });
+        .json({ success: false, message: t("skillcategory.notFound") });
       return;
     }
 
     const name = deleted.name?.[locale] || "Category";
 
-    logger.withReq.info(req, t("teamcategory.delete.success", { name }), {
+    logger.withReq.info(req, t("skillcategory.delete.success", { name }), {
       ...getRequestContext(req),
-      event: "teamcategory.delete",
-      module: "teamcategory",
+      event: "skillcategory.delete",
+      module: "skillcategory",
       status: "success",
     });
 
     res.status(200).json({
       success: true,
-      message: t("teamcategory.delete.success", { name }),
+      message: t("skillcategory.delete.success", { name }),
     });
   }
 );

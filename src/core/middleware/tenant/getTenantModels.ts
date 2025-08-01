@@ -41,7 +41,6 @@ import { Activity } from "@/modules/activity/models";
 import { ActivityCategory } from "@/modules/activitycategory/category.models";
 import { About } from "@/modules/about/models";
 import { AboutCategory } from "@/modules/aboutcategory/category.models";
-import { Experience } from "@/modules/experience/experience.models";
 import { References } from "@/modules/references/models";
 import { ReferencesCategory } from "@/modules/referencescategory/category.models";
 import { Articles } from "@/modules/articles/models";
@@ -67,9 +66,10 @@ import { Sparepart } from "@/modules/sparepart/models";
 import { SparepartCategory } from "@/modules/sparepartcategory/models";
 import { Tenants } from "@/modules/tenants/tenants.model";
 import { Team } from "@/modules/team/models";
-import { TeamCategory } from "@/modules/teamcategory/category.models";
 import { Portfolio } from "@/modules/portfolio/models";
-import { CatalogRequest} from "@/modules/catalog/catalog.models";
+import { Skill } from "@/modules/skill/models";
+import { SkillCategory } from "@/modules/skillcategory/category.models";
+import { CatalogRequest } from "@/modules/catalog/catalog.models";
 
 export const getTenantModels = async (req: Request) => ({
   Settings: await req.getModel("settings", Settings.schema),
@@ -123,7 +123,6 @@ export const getTenantModels = async (req: Request) => ({
   ),
   About: await req.getModel("about", About.schema),
   AboutCategory: await req.getModel("aboutcategory", AboutCategory.schema),
-  Experience: await req.getModel("experience", Experience.schema),
   References: await req.getModel("references", References.schema),
   ReferencesCategory: await req.getModel(
     "referencescategory",
@@ -173,7 +172,8 @@ export const getTenantModels = async (req: Request) => ({
   ),
   Tenants: await req.getModel("tenants", Tenants.schema),
   Team: await req.getModel("team", Team.schema),
-  TeamCategory: await req.getModel("teamcategory", TeamCategory.schema),
   Portfolio: await req.getModel("portfolio", Portfolio.schema),
+  Skill: await req.getModel("skill", Skill.schema),
+  SkillCategory: await req.getModel("skillcategory", SkillCategory.schema),
   CatalogRequest: await req.getModel("catalogrequest", CatalogRequest.schema),
 });

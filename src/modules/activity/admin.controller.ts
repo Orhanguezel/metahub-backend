@@ -31,163 +31,36 @@ const parseIfJson = (value: any) => {
 };
 
 // ✅ CREATE
-export const createActivity = asyncHandler(
-  async (req: Request, res: Response) => {
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Activity } = await getTenantModels(req);
-    const t = (key: string, params?: any) =>
-      translate(key, locale, translations, params);
+export const createActivity = asyncHandler(async (req: Request, res: Response) => {
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const { Activity } = await getTenantModels(req);
+  const t = (key: string, params?: any) =>
+    translate(key, locale, translations, params);
 
-    try {
-      let {
-        title,
-        summary,
-        content,
-        tags,
-        category,
-        isPublished,
-        publishedAt,
-      } = req.body;
+  try {
+    let { title, summary, content, tags, category, isPublished, publishedAt } =
+      req.body;
 
-      title = fillAllLocales(parseIfJson(title));
-      summary = fillAllLocales(parseIfJson(summary));
-      content = fillAllLocales(parseIfJson(content));
-      tags = parseIfJson(tags);
+    title = fillAllLocales(parseIfJson(title));
+    summary = fillAllLocales(parseIfJson(summary));
+    content = fillAllLocales(parseIfJson(content));
+    tags = parseIfJson(tags);
 
-      // String diziler: virgüllü veya JSON array olarak gelebilir!
-      tags = parseIfJson(tags);
-      if (typeof tags === "string") {
-        try {
-          tags = JSON.parse(tags);
-        } catch {
-          tags = [tags];
-        }
+    // String diziler: virgüllü veya JSON array olarak gelebilir!
+    tags = parseIfJson(tags);
+    if (typeof tags === "string") {
+      try {
+        tags = JSON.parse(tags);
+      } catch {
+        tags = [tags];
       }
-      if (!Array.isArray(tags)) tags = [];
-
-      const images: IActivity["images"] = [];
-      if (Array.isArray(req.files)) {
-        for (const file of req.files as Express.Multer.File[]) {
-          const imageUrl = getImagePath(file);
-          let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
-          if (shouldProcessImage()) {
-            const processed = await processImageLocal(
-              file.path,
-              file.filename,
-              path.dirname(file.path)
-            );
-            thumbnail = processed.thumbnail;
-            webp = processed.webp;
-          }
-          images.push({
-            url: imageUrl,
-            thumbnail,
-            webp,
-            publicId: (file as any).public_id,
-          });
-        }
-      }
-
-      const nameForSlug = title?.[locale] || title?.en || "activity";
-      const slug = slugify(nameForSlug, { lower: true, strict: true });
-
-      const activity = await Activity.create({
-        title,
-        slug,
-        summary,
-        tenant: req.tenant,
-        content,
-        tags,
-        category: isValidObjectId(category) ? category : undefined,
-        isPublished: isPublished === "true" || isPublished === true,
-        publishedAt: isPublished ? publishedAt || new Date() : undefined,
-        images,
-        author: req.user?.name || "System",
-        isActive: true,
-      });
-
-      logger.withReq.info(req, t("created"), {
-        ...getRequestContext(req),
-        id: activity._id,
-      });
-      res
-        .status(201)
-        .json({ success: true, message: t("created"), data: activity });
-    } catch (err: any) {
-      logger.withReq.error(req, t("error.create_fail"), {
-        ...getRequestContext(req),
-        event: "activity.create",
-        module: "activity",
-        status: "fail",
-        error: err.message,
-      });
-
-      res.status(500).json({ success: false, message: t("error.create_fail") });
     }
-  }
-);
+    if (!Array.isArray(tags)) tags = [];
 
-// ✅ UPDATE
-export const updateActivity = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Activity } = await getTenantModels(req);
-    const t = (key: string, params?: any) =>
-      translate(key, locale, translations, params);
-
-    if (!isValidObjectId(id)) {
-      logger.withReq.warn(req, t("invalidId"), {
-        ...getRequestContext(req),
-        id,
-      });
-      res.status(400).json({ success: false, message: t("invalidId") });
-      return;
-    }
-
-    const activity = await Activity.findOne({ _id: id, tenant: req.tenant });
-    if (!activity) {
-      logger.withReq.warn(req, t("notFound"), {
-        ...getRequestContext(req),
-        id,
-      });
-      res.status(404).json({ success: false, message: t("notFound") });
-      return;
-    }
-
-    const updates = req.body;
-    if (updates.title) {
-      activity.title = mergeLocalesForUpdate(
-        activity.title,
-        parseIfJson(updates.title)
-      );
-    }
-    if (updates.summary) {
-      activity.summary = mergeLocalesForUpdate(
-        activity.summary,
-        parseIfJson(updates.summary)
-      );
-    }
-    if (updates.content) {
-      activity.content = mergeLocalesForUpdate(
-        activity.content,
-        parseIfJson(updates.content)
-      );
-    }
-
-    const updatableFields: (keyof IActivity)[] = [
-      "tags",
-      "category",
-      "isPublished",
-      "publishedAt",
-    ];
-    for (const field of updatableFields) {
-      if (updates[field] !== undefined)
-        (activity as any)[field] = updates[field];
-    }
-
-    if (!Array.isArray(activity.images)) activity.images = [];
+    const images: IActivity["images"] = [];
     if (Array.isArray(req.files)) {
+      console.log("[UPLOAD][activity] req.uploadType:", req.uploadType); // <-- EN ÖNEMLİSİ!
+      console.log("[UPLOAD][activity] req.files:", req.files);
       for (const file of req.files as Express.Multer.File[]) {
         const imageUrl = getImagePath(file);
         let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
@@ -200,7 +73,7 @@ export const updateActivity = asyncHandler(
           thumbnail = processed.thumbnail;
           webp = processed.webp;
         }
-        activity.images.push({
+        images.push({
           url: imageUrl,
           thumbnail,
           webp,
@@ -209,37 +82,146 @@ export const updateActivity = asyncHandler(
       }
     }
 
-    if (updates.removedImages) {
-      try {
-        const removed = JSON.parse(updates.removedImages);
-        activity.images = activity.images.filter(
-          (img: any) => !removed.includes(img.url)
-        );
-        for (const img of removed) {
-          const localPath = path.join(
-            "uploads",
-            req.tenant,
-            "activity-images",
-            path.basename(img.url)
-          );
-          if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-          if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
-        }
-      } catch (e) {
-        logger.withReq.warn(req, t("invalidRemovedImages"), {
-          ...getRequestContext(req),
-          error: e,
-        });
-      }
-    }
+    const nameForSlug = title?.[locale] || title?.en || "activity";
+    const slug = slugify(nameForSlug, { lower: true, strict: true });
 
-    await activity.save();
-    logger.withReq.info(req, t("updated"), { ...getRequestContext(req), id });
-    res
-      .status(200)
-      .json({ success: true, message: t("updated"), data: activity });
+    const activity = await Activity.create({
+      title,
+      slug,
+      summary,
+      tenant: req.tenant,
+      content,
+      tags,
+      category: isValidObjectId(category) ? category : undefined,
+      isPublished: isPublished === "true" || isPublished === true,
+      publishedAt: isPublished ? publishedAt || new Date() : undefined,
+      images,
+      author: req.user?.name || "System",
+      isActive: true,
+    });
+
+    logger.withReq.info(req, t("created"), {
+      ...getRequestContext(req),
+      id: activity._id,
+    });
+    res.status(201).json({ success: true, message: t("created"), data: activity });
+  } catch (err: any) {
+    logger.withReq.error(req, t("error.create_fail"), {
+      ...getRequestContext(req),
+      event: "activity.create",
+      module: "activity",
+      status: "fail",
+      error: err.message,
+    });
+
+    res.status(500).json({ success: false, message: t("error.create_fail") });
   }
-);
+});
+
+// ✅ UPDATE
+export const updateActivity = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const { Activity } = await getTenantModels(req);
+  const t = (key: string, params?: any) =>
+    translate(key, locale, translations, params);
+
+  if (!isValidObjectId(id)) {
+    logger.withReq.warn(req, t("invalidId"), { ...getRequestContext(req), id });
+    res.status(400).json({ success: false, message: t("invalidId") });
+    return;
+  }
+
+  const activity = await Activity.findOne({ _id: id, tenant: req.tenant });
+  if (!activity) {
+    logger.withReq.warn(req, t("notFound"), { ...getRequestContext(req), id });
+    res.status(404).json({ success: false, message: t("notFound") });
+    return;
+  }
+
+  const updates = req.body;
+  if (updates.title) {
+    activity.title = mergeLocalesForUpdate(
+      activity.title,
+      parseIfJson(updates.title)
+    );
+  }
+  if (updates.summary) {
+    activity.summary = mergeLocalesForUpdate(
+      activity.summary,
+      parseIfJson(updates.summary)
+    );
+  }
+  if (updates.content) {
+    activity.content = mergeLocalesForUpdate(
+      activity.content,
+      parseIfJson(updates.content)
+    );
+  }
+
+
+
+  const updatableFields: (keyof IActivity)[] = [
+    "tags",
+    "category",
+    "isPublished",
+    "publishedAt",
+  ];
+  for (const field of updatableFields) {
+    if (updates[field] !== undefined) (activity as any)[field] = updates[field];
+  }
+
+  if (!Array.isArray(activity.images)) activity.images = [];
+  if (Array.isArray(req.files)) {
+    for (const file of req.files as Express.Multer.File[]) {
+      const imageUrl = getImagePath(file);
+      let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
+      if (shouldProcessImage()) {
+        const processed = await processImageLocal(
+          file.path,
+          file.filename,
+          path.dirname(file.path)
+        );
+        thumbnail = processed.thumbnail;
+        webp = processed.webp;
+      }
+      activity.images.push({
+        url: imageUrl,
+        thumbnail,
+        webp,
+        publicId: (file as any).public_id,
+      });
+    }
+  }
+
+  if (updates.removedImages) {
+    try {
+      const removed = JSON.parse(updates.removedImages);
+      activity.images = activity.images.filter(
+        (img: any) => !removed.includes(img.url)
+      );
+      for (const img of removed) {
+        const localPath = path.join(
+          "uploads",
+          req.tenant,
+          "activity-images",
+          path.basename(img.url)
+        );
+        if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+        if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
+      }
+    } catch (e) {
+      logger.withReq.warn(req, t("invalidRemovedImages"), {
+        ...getRequestContext(req),
+        error: e,
+      });
+    }
+  }
+
+  await activity.save();
+  logger.withReq.info(req, t("updated"), { ...getRequestContext(req), id });
+  res.status(200).json({ success: true, message: t("updated"), data: activity });
+});
 
 // ✅ GET ALL
 export const adminGetAllActivity = asyncHandler(
@@ -281,7 +263,13 @@ export const adminGetAllActivity = asyncHandler(
       .sort({ createdAt: -1 })
       .lean();
 
-    const data = activityList;
+    // --- Güvenli array normalization ---
+    const data = (activityList || []).map((item: any) => ({
+      ...item,
+      images: Array.isArray(item.images) ? item.images : [],
+      tags: Array.isArray(item.tags) ? item.tags : [],
+      comments: Array.isArray(item.comments) ? item.comments : [],
+    }));
 
     logger.withReq.info(req, t("listFetched"), {
       ...getRequestContext(req),
@@ -290,6 +278,7 @@ export const adminGetAllActivity = asyncHandler(
     res.status(200).json({ success: true, message: t("listFetched"), data });
   }
 );
+
 
 // ✅ GET BY ID
 export const adminGetActivityById = asyncHandler(
@@ -321,7 +310,13 @@ export const adminGetActivityById = asyncHandler(
       return;
     }
 
-    const populated = activity as any;
+    // --- Güvenli array normalization ---
+    const populated = {
+      ...activity,
+      images: Array.isArray(activity.images) ? activity.images : [],
+      tags: Array.isArray(activity.tags) ? activity.tags : [],
+      comments: Array.isArray(activity.comments) ? activity.comments : [],
+    };
 
     res.status(200).json({
       success: true,
@@ -331,56 +326,49 @@ export const adminGetActivityById = asyncHandler(
   }
 );
 
+
 // ✅ DELETE
-export const deleteActivity = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { Activity } = await getTenantModels(req);
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const t = (key: string) => translate(key, locale, translations);
+export const deleteActivity = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { Activity } = await getTenantModels(req);
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const t = (key: string) => translate(key, locale, translations);
 
-    if (!isValidObjectId(id)) {
-      logger.withReq.warn(req, t("invalidId"), {
-        ...getRequestContext(req),
-        id,
-      });
-      res.status(400).json({ success: false, message: t("invalidId") });
-      return;
-    }
+  if (!isValidObjectId(id)) {
+    logger.withReq.warn(req, t("invalidId"), { ...getRequestContext(req), id });
+    res.status(400).json({ success: false, message: t("invalidId") });
+    return;
+  }
 
-    const activity = await Activity.findOne({ _id: id, tenant: req.tenant });
-    if (!activity) {
-      logger.withReq.warn(req, t("notFound"), {
-        ...getRequestContext(req),
-        id,
-      });
-      res.status(404).json({ success: false, message: t("notFound") });
-      return;
-    }
+  const activity = await Activity.findOne({ _id: id, tenant: req.tenant });
+  if (!activity) {
+    logger.withReq.warn(req, t("notFound"), { ...getRequestContext(req), id });
+    res.status(404).json({ success: false, message: t("notFound") });
+    return;
+  }
 
-    for (const img of activity.images || []) {
-      const localPath = path.join(
-        "uploads",
-        req.tenant,
-        "activity-images",
-        path.basename(img.url)
-      );
-      if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-      if (img.publicId) {
-        try {
-          await cloudinary.uploader.destroy(img.publicId);
-        } catch (err) {
-          logger.withReq.error(req, t("Cloudinary delete error"), {
-            ...getRequestContext(req),
-            publicId: img.publicId,
-          });
-        }
+  for (const img of activity.images || []) {
+    const localPath = path.join(
+      "uploads",
+      req.tenant,
+      "activity-images",
+      path.basename(img.url)
+    );
+    if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+    if (img.publicId) {
+      try {
+        await cloudinary.uploader.destroy(img.publicId);
+      } catch (err) {
+        logger.withReq.error(req, t("Cloudinary delete error"), {
+          ...getRequestContext(req),
+          publicId: img.publicId,
+        });
       }
     }
-
-    await activity.deleteOne();
-
-    logger.withReq.info(req, t("deleted"), { ...getRequestContext(req), id });
-    res.status(200).json({ success: true, message: t("deleted") });
   }
-);
+
+  await activity.deleteOne();
+
+  logger.withReq.info(req, t("deleted"), { ...getRequestContext(req), id });
+  res.status(200).json({ success: true, message: t("deleted") });
+});

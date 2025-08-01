@@ -9,6 +9,16 @@ import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import translations from "./i18n";
 import { t as translate } from "@/core/utils/i18n/translate";
 
+// Güvenli normalization fonksiyonu
+function normalizeBlogItem(item: any) {
+  return {
+    ...item,
+    images: Array.isArray(item.images) ? item.images : [],
+    tags: Array.isArray(item.tags) ? item.tags : [],
+    comments: Array.isArray(item.comments) ? item.comments : [],
+  };
+}
+
 // 📥 GET /blog (Public)
 export const getAllBlog = asyncHandler(async (req: Request, res: Response) => {
   const { category, onlyLocalized } = req.query;
@@ -28,7 +38,7 @@ export const getAllBlog = asyncHandler(async (req: Request, res: Response) => {
   }
 
   if (onlyLocalized === "true") {
-    filter[`name.${locale}`] = { $exists: true };
+    filter[`title.${locale}`] = { $exists: true };
   }
 
   const blogList = await Blog.find(filter)
@@ -37,74 +47,83 @@ export const getAllBlog = asyncHandler(async (req: Request, res: Response) => {
     .sort({ createdAt: -1 })
     .lean();
 
+  // --- Güvenli array normalization ---
+  const normalizedList = (blogList || []).map(normalizeBlogItem);
+
   logger.withReq.info(req, t("log.listed"), {
     ...getRequestContext(req),
     event: "blog.public_list",
     module: "blog",
-    resultCount: blogList.length,
+    resultCount: normalizedList.length,
   });
 
   res.status(200).json({
     success: true,
-    message: "Blog list fetched successfully.",
-    data: blogList,
+    message: t("log.listed"),
+    data: normalizedList,
   });
 });
 
 // 📥 GET /blog/:id (Public)
-export const getBlogById = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const locale: SupportedLocale =
-    (req.locale as SupportedLocale) || getLogLocale() || "en";
-  const t = (key: string) => translate(key, locale, translations);
-  const { Blog } = await getTenantModels(req);
+export const getBlogById = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const locale: SupportedLocale =
+      (req.locale as SupportedLocale) || getLogLocale() || "en";
+    const t = (key: string) => translate(key, locale, translations);
+    const { Blog } = await getTenantModels(req);
 
-  if (!isValidObjectId(id)) {
-    logger.withReq.warn(req, t("error.invalid_id"), {
+    if (!isValidObjectId(id)) {
+      logger.withReq.warn(req, t("error.invalid_id"), {
+        ...getRequestContext(req),
+        event: "blog.public_getById",
+        module: "blog",
+        status: "fail",
+        id,
+      });
+      res.status(400).json({ success: false, message: t("error.invalid_id") });
+      return;
+    }
+
+    const blog = await Blog.findOne({
+      _id: id,
+      isActive: true,
+      isPublished: true,
+      tenant: req.tenant,
+    })
+      .populate("comments")
+      .populate("category", "name slug")
+      .lean();
+
+    if (!blog) {
+      logger.withReq.warn(req, t("error.not_found"), {
+        ...getRequestContext(req),
+        event: "blog.public_getById",
+        module: "blog",
+        status: "fail",
+        id,
+      });
+      res.status(404).json({ success: false, message: t("error.not_found") });
+      return;
+    }
+
+    // --- Güvenli array normalization ---
+    const normalized = normalizeBlogItem(blog);
+
+    logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
       event: "blog.public_getById",
       module: "blog",
-      status: "fail",
-      id,
+      blogId: normalized._id,
     });
-    res.status(400).json({ success: false, message: t("error.invalid_id") });
-    return;
-  }
 
-  const blog = await Blog.findOne({
-    _id: id,
-    isActive: true,
-    isPublished: true,
-    tenant: req.tenant,
-  })
-    .populate("comments")
-    .populate("category", "name slug")
-    .lean();
-
-  if (!blog) {
-    logger.withReq.warn(req, t("error.not_found"), {
-      ...getRequestContext(req),
-      event: "blog.public_getById",
-      module: "blog",
-      status: "fail",
-      id,
+    res.status(200).json({
+      success: true,
+      message: t("log.fetched"),
+      data: normalized,
     });
-    res.status(404).json({ success: false, message: t("error.not_found") });
-    return;
   }
-  logger.withReq.info(req, t("log.fetched"), {
-    ...getRequestContext(req),
-    event: "blog.public_getById",
-    module: "blog",
-    blogId: blog._id,
-  });
-
-  res.status(200).json({
-    success: true,
-    message: t("log.fetched"),
-    data: blog,
-  });
-});
+);
 
 // 📥 GET /blog/slug/:slug (Public)
 export const getBlogBySlug = asyncHandler(
@@ -136,18 +155,21 @@ export const getBlogBySlug = asyncHandler(
       return;
     }
 
+    // --- Güvenli array normalization ---
+    const normalized = normalizeBlogItem(blog);
+
     logger.withReq.info(req, t("log.fetched"), {
       ...getRequestContext(req),
       event: "blog.public_getBySlug",
       module: "blog",
       slug,
-      blogId: blog._id,
+      blogId: normalized._id,
     });
 
     res.status(200).json({
       success: true,
       message: t("log.fetched"),
-      data: blog,
+      data: normalized,
     });
   }
 );

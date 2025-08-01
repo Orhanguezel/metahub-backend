@@ -72,6 +72,30 @@
     "defaultEnabled": false
   },
   {
+    "sectionKey": "heroMetahub",
+    "label": {
+      "tr": "Manşet Metahub Bölümü",
+      "en": "Hero Metahub Section",
+      "de": "Hauptbereich Metahub",
+      "pl": "Sekcja główna Metahub",
+      "fr": "Section principale Metahub",
+      "es": "Sección principal Metahub"
+    },
+    "description": {
+      "tr": "Background görseli ve metin içeren manşet bölümü",
+      "en": "Hero section with background image and text",
+      "de": "Hauptbereich mit Hintergrundbild und Text",
+      "pl": "Sekcja główna z tłem i tekstem",
+      "fr": "Section principale avec image de fond et texte",
+      "es": "Sección principal con imagen de fondo y texto"
+    },
+    "icon": "MdSlideshow",
+    "variant": "slider",
+    "required": false,
+    "defaultOrder": 1,
+    "defaultEnabled": false
+  },
+  {
     "sectionKey": "couponBanner",
     "label": {
       "tr": "Kupon Bannerı",
@@ -119,6 +143,55 @@
     "defaultOrder": 3,
     "defaultEnabled": false
   },
+  {
+    "sectionKey": "portfolio",
+    "label": {
+      "tr": "Portföy",
+      "en": "Portfolio",
+      "de": "Portfolio",
+      "pl": "Portfolio",
+      "fr": "Portfolio",
+      "es": "Portfolio"
+    },
+    "description": {
+      "tr": "Sunulan portföy listesi",
+      "en": "List of provided portfolios",
+      "de": "Liste der angebotenen Portfolios",
+      "pl": "Lista oferowanych portfeli",
+      "fr": "Liste des portefeuilles fournis",
+      "es": "Lista de portafolios ofrecidos"
+    },
+    "icon": "MdPortfolio",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 25,
+    "defaultEnabled": false
+  },
+  {
+    "sectionKey": "skills",
+    "label": {
+      "tr": "Yetenekler",
+      "en": "Skills",
+      "de": "Fähigkeiten",
+      "pl": "Umiejętności",
+      "fr": "Compétences",
+      "es": "Habilidades"
+    },
+    "description": {
+      "tr": "Sunulan yetenekler listesi",
+      "en": "List of provided skills",
+      "de": "Liste der angebotenen Fähigkeiten",
+      "pl": "Lista oferowanych umiejętności",
+      "fr": "Liste des compétences fournies",
+      "es": "Lista de habilidades ofrecidas"
+    },
+    "icon": "MdSkills",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 26,
+    "defaultEnabled": false
+  },
+
   {
     "sectionKey": "about",
     "label": {

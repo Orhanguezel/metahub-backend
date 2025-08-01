@@ -1,6 +1,10 @@
 // src/modules/team/public.team.routes.ts
 import express from "express";
-import { getAllTeam, getTeamById, getTeamBySlug } from "./public.controller";
+import {
+  getAllTeam,
+  getTeamById,
+  getTeamBySlug,
+} from "./public.controller";
 import { validateObjectId } from "./validation";
 
 const router = express.Router();

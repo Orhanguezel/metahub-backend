@@ -1,14 +1,14 @@
 import express from "express";
 import {
-  createTeamCategory,
-  getAllTeamCategories,
-  getTeamCategoryById,
-  updateTeamCategory,
-  deleteTeamCategory,
+  createSkillCategory,
+  getAllSkillCategories,
+  getSkillCategoryById,
+  updateSkillCategory,
+  deleteSkillCategory,
 } from "./category.controller";
 import {
-  validateCreateTeamCategory,
-  validateUpdateTeamCategory,
+  validateCreateSkillCategory,
+  validateUpdateSkillCategory,
   validateObjectId,
 } from "./category.validation";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
@@ -16,16 +16,16 @@ import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 const router = express.Router();
 
 // 🌿 Public Routes
-router.get("/", getAllTeamCategories);
-router.get("/:id", validateObjectId("id"), getTeamCategoryById);
+router.get("/", getAllSkillCategories);
+router.get("/:id", validateObjectId("id"), getSkillCategoryById);
 
 // 🔐 Admin Routes
 router.post(
   "/",
   authenticate,
   authorizeRoles("admin"),
-  validateCreateTeamCategory,
-  createTeamCategory
+  validateCreateSkillCategory,
+  createSkillCategory
 );
 
 router.put(
@@ -33,8 +33,8 @@ router.put(
   authenticate,
   authorizeRoles("admin"),
   validateObjectId("id"),
-  validateUpdateTeamCategory,
-  updateTeamCategory
+  validateUpdateSkillCategory,
+  updateSkillCategory
 );
 
 router.delete(
@@ -42,7 +42,7 @@ router.delete(
   authenticate,
   authorizeRoles("admin"),
   validateObjectId("id"),
-  deleteTeamCategory
+  deleteSkillCategory
 );
 
 export default router;

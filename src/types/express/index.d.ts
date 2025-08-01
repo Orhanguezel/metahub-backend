@@ -63,7 +63,9 @@ declare global {
         | "coupons"
         | "team"
         | "portfolio"
+        | "skill"
         | "default";
+
 
       uploadSizeLimit?: number;
 

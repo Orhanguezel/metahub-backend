@@ -3,23 +3,23 @@ import type { Types, Document } from "mongoose";
 
 export type TranslatedLabel = { [key in SupportedLocale]: string };
 
-export interface ITeamImage {
+export interface ISkillImage {
   url: string;
   thumbnail: string;
   webp?: string;
   publicId?: string;
 }
 
-export interface ITeam {
+export interface ISkill {
   title: TranslatedLabel;
   tenant: string;
   slug: string;
   summary: TranslatedLabel;
   content: TranslatedLabel;
-  images: ITeamImage[];
+  images: ISkillImage[];
   tags: string[];
   author?: string;
-  category?: string;
+  category: Types.ObjectId;
   isPublished: boolean;
   publishedAt?: Date;
   comments: Types.ObjectId[];

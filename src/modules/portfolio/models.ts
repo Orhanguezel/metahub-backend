@@ -2,7 +2,7 @@ import { Schema, Model, Types, models, model } from "mongoose";
 import type { IPortfolio, IPortfolioImage } from "./types";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
-// 🔤 Çok dilli alan tipi tanımı
+// Çok dilli alan tipi tanımı
 const localizedStringField = () => {
   const fields: Record<string, any> = {};
   for (const locale of SUPPORTED_LOCALES) {
@@ -28,19 +28,23 @@ const PortfolioSchema = new Schema<IPortfolio>(
     summary: localizedStringField(),
     content: localizedStringField(),
     slug: { type: String, required: true, unique: true, lowercase: true },
-    images: { type: [PortfolioImageSchema], default: [] },
-    tags: [{ type: String }],
+    images: { type: [PortfolioImageSchema], default: [] },            // ✅
+    tags: { type: [String], default: [] },                            // ✅
     author: { type: String },
     category: { type: String, trim: true },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
-    comments: [{ type: Schema.Types.ObjectId, ref: "comment" }],
+    comments: { type: [Schema.Types.ObjectId], ref: "comment", default: [] }, // ✅
     isActive: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  { timestamps: true, minimize: false } // minimize:false ekstra güvenlik için (array field asla silinmez)
 );
 
+// --- Pre-validate ile her array field garanti altına alınır!
 PortfolioSchema.pre("validate", function (next) {
+  if (!Array.isArray(this.images)) this.images = [];
+  if (!Array.isArray(this.tags)) this.tags = [];
+  if (!Array.isArray(this.comments)) this.comments = [];
   if (!this.slug && this.title?.en) {
     this.slug = this.title.en
       .toLowerCase()

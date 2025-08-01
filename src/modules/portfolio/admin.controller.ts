@@ -23,6 +23,8 @@ import translations from "./i18n";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import faq from "../faq";
 
+// ...importlar (değişmedi)
+
 const parseIfJson = (value: any) => {
   try {
     return typeof value === "string" ? JSON.parse(value) : value;
@@ -30,6 +32,16 @@ const parseIfJson = (value: any) => {
     return value;
   }
 };
+
+// 🔒 Güvenli array normalization fonksiyonu
+function normalizePortfolioItem(item: any) {
+  return {
+    ...item,
+    images: Array.isArray(item.images) ? item.images : [],
+    tags: Array.isArray(item.tags) ? item.tags : [],
+    comments: Array.isArray(item.comments) ? item.comments : [],
+  };
+}
 
 // ✅ CREATE
 export const createPortfolio = asyncHandler(
@@ -55,7 +67,6 @@ export const createPortfolio = asyncHandler(
       content = fillAllLocales(parseIfJson(content));
       tags = parseIfJson(tags);
 
-      // String diziler: virgüllü veya JSON array olarak gelebilir!
       tags = parseIfJson(tags);
       if (typeof tags === "string") {
         try {
@@ -68,8 +79,6 @@ export const createPortfolio = asyncHandler(
 
       const images: IPortfolio["images"] = [];
       if (Array.isArray(req.files)) {
-        console.log("[UPLOAD][portfolio] req.uploadType:", req.uploadType); // <-- EN ÖNEMLİSİ!
-        console.log("[UPLOAD][portfolio] req.files:", req.files);
         for (const file of req.files as Express.Multer.File[]) {
           const imageUrl = getImagePath(file);
           let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
@@ -113,9 +122,11 @@ export const createPortfolio = asyncHandler(
         ...getRequestContext(req),
         id: portfolio._id,
       });
-      res
-        .status(201)
-        .json({ success: true, message: t("created"), data: portfolio });
+
+      // --- Normalization burada da uygulanabilir ---
+      const safePortfolio = normalizePortfolioItem(portfolio.toObject());
+
+      res.status(201).json({ success: true, message: t("created"), data: safePortfolio });
     } catch (err: any) {
       logger.withReq.error(req, t("error.create_fail"), {
         ...getRequestContext(req),
@@ -124,7 +135,6 @@ export const createPortfolio = asyncHandler(
         status: "fail",
         error: err.message,
       });
-
       res.status(500).json({ success: false, message: t("error.create_fail") });
     }
   }
@@ -178,8 +188,21 @@ export const updatePortfolio = asyncHandler(
       );
     }
 
+    // Array güvenliği
+    if (updates.tags !== undefined) {
+      let tags = parseIfJson(updates.tags);
+      if (typeof tags === "string") {
+        try {
+          tags = JSON.parse(tags);
+        } catch {
+          tags = [tags];
+        }
+      }
+      if (!Array.isArray(tags)) tags = [];
+      portfolio.tags = tags;
+    }
+
     const updatableFields: (keyof IPortfolio)[] = [
-      "tags",
       "category",
       "isPublished",
       "publishedAt",
@@ -238,13 +261,14 @@ export const updatePortfolio = asyncHandler(
 
     await portfolio.save();
     logger.withReq.info(req, t("updated"), { ...getRequestContext(req), id });
-    res
-      .status(200)
-      .json({ success: true, message: t("updated"), data: portfolio });
+
+    // --- Normalization ---
+    const safePortfolio = normalizePortfolioItem(portfolio.toObject());
+    res.status(200).json({ success: true, message: t("updated"), data: safePortfolio });
   }
 );
 
-// ✅ GET ALL
+// ✅ GET ALL (array normalization)
 export const adminGetAllPortfolio = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
@@ -273,13 +297,12 @@ export const adminGetAllPortfolio = asyncHandler(
     }
 
     const portfolioList = await Portfolio.find(filter)
-      .populate([
-        { path: "comments", strictPopulate: false },
-      ])
+      .populate([{ path: "comments", strictPopulate: false }])
       .sort({ createdAt: -1 })
       .lean();
 
-    const data = portfolioList;
+    // --- Güvenli array normalization ---
+    const data = (portfolioList || []).map(normalizePortfolioItem);
 
     logger.withReq.info(req, t("listFetched"), {
       ...getRequestContext(req),
@@ -289,7 +312,7 @@ export const adminGetAllPortfolio = asyncHandler(
   }
 );
 
-// ✅ GET BY ID
+// ✅ GET BY ID (tekil normalization)
 export const adminGetPortfolioById = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
@@ -319,7 +342,8 @@ export const adminGetPortfolioById = asyncHandler(
       return;
     }
 
-    const populated = portfolio as any;
+    // --- Güvenli array normalization ---
+    const populated = normalizePortfolioItem(portfolio);
 
     res.status(200).json({
       success: true,
@@ -329,7 +353,7 @@ export const adminGetPortfolioById = asyncHandler(
   }
 );
 
-// ✅ DELETE
+// ✅ DELETE (array safety gerekmiyor, loop için öneri var)
 export const deletePortfolio = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -356,7 +380,7 @@ export const deletePortfolio = asyncHandler(
       return;
     }
 
-    for (const img of portfolio.images || []) {
+    for (const img of Array.isArray(portfolio.images) ? portfolio.images : []) {
       const localPath = path.join(
         "uploads",
         req.tenant,

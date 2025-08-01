@@ -21,7 +21,7 @@ export const validateObjectId = (field: string) => [
 ];
 
 // ✅ Create Validator
-export const validateCreateTeam = [
+export const validateCreateSkill = [
   // Çok dilli zorunlu alan: title
   validateMultilangField("title"),
 
@@ -38,12 +38,22 @@ export const validateCreateTeam = [
         translations
       )
     ),
+  body("category")
+    .optional()
+    .isMongoId()
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.invalidCategory",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
 
   validateRequest,
 ];
 
 // ✅ Update Validator
-export const validateUpdateTeam = [
+export const validateUpdateSkill = [
   body("title").optional().customSanitizer(parseIfJson),
   body("summary").optional().customSanitizer(parseIfJson),
   body("content").optional().customSanitizer(parseIfJson),
@@ -57,7 +67,16 @@ export const validateUpdateTeam = [
         translations
       )
     ),
-
+  body("category")
+    .optional()
+    .isMongoId()
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.invalidCategory",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
   body("removedImages")
     .optional()
     .custom((val, { req }) => {
@@ -92,7 +111,16 @@ export const validateAdminQuery = [
         translations
       )
     ),
-
+  query("category")
+    .optional()
+    .isMongoId()
+    .withMessage((_, { req }) =>
+      translate(
+        "validation.invalidCategory",
+        req.locale || getLogLocale(),
+        translations
+      )
+    ),
   query("isPublished")
     .optional()
     .toBoolean()

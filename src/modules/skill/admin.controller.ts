@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { IBlog } from "@/modules/blog/types";
+import { ISkill } from "@/modules/skill/types";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
 import path from "path";
@@ -31,9 +31,9 @@ const parseIfJson = (value: any) => {
 };
 
 // ✅ CREATE
-export const createBlog = asyncHandler(async (req: Request, res: Response) => {
+export const createSkill = asyncHandler(async (req: Request, res: Response) => {
   const locale: SupportedLocale = req.locale || getLogLocale();
-  const { Blog } = await getTenantModels(req);
+  const { Skill } = await getTenantModels(req);
   const t = (key: string, params?: any) =>
     translate(key, locale, translations, params);
 
@@ -57,10 +57,10 @@ export const createBlog = asyncHandler(async (req: Request, res: Response) => {
     }
     if (!Array.isArray(tags)) tags = [];
 
-    const images: IBlog["images"] = [];
+    const images: ISkill["images"] = [];
     if (Array.isArray(req.files)) {
-      console.log("[UPLOAD][blog] req.uploadType:", req.uploadType); // <-- EN ÖNEMLİSİ!
-      console.log("[UPLOAD][blog] req.files:", req.files);
+      console.log("[UPLOAD][skill] req.uploadType:", req.uploadType); // <-- EN ÖNEMLİSİ!
+      console.log("[UPLOAD][skill] req.files:", req.files);
       for (const file of req.files as Express.Multer.File[]) {
         const imageUrl = getImagePath(file);
         let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
@@ -82,10 +82,10 @@ export const createBlog = asyncHandler(async (req: Request, res: Response) => {
       }
     }
 
-    const nameForSlug = title?.[locale] || title?.en || "blog";
+    const nameForSlug = title?.[locale] || title?.en || "skill";
     const slug = slugify(nameForSlug, { lower: true, strict: true });
 
-    const blog = await Blog.create({
+    const skill = await Skill.create({
       title,
       slug,
       summary,
@@ -102,14 +102,14 @@ export const createBlog = asyncHandler(async (req: Request, res: Response) => {
 
     logger.withReq.info(req, t("created"), {
       ...getRequestContext(req),
-      id: blog._id,
+      id: skill._id,
     });
-    res.status(201).json({ success: true, message: t("created"), data: blog });
+    res.status(201).json({ success: true, message: t("created"), data: skill });
   } catch (err: any) {
     logger.withReq.error(req, t("error.create_fail"), {
       ...getRequestContext(req),
-      event: "blog.create",
-      module: "blog",
+      event: "skill.create",
+      module: "skill",
       status: "fail",
       error: err.message,
     });
@@ -119,10 +119,10 @@ export const createBlog = asyncHandler(async (req: Request, res: Response) => {
 });
 
 // ✅ UPDATE
-export const updateBlog = asyncHandler(async (req: Request, res: Response) => {
+export const updateSkill = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const locale: SupportedLocale = req.locale || getLogLocale();
-  const { Blog } = await getTenantModels(req);
+  const { Skill } = await getTenantModels(req);
   const t = (key: string, params?: any) =>
     translate(key, locale, translations, params);
 
@@ -132,8 +132,8 @@ export const updateBlog = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  const blog = await Blog.findOne({ _id: id, tenant: req.tenant });
-  if (!blog) {
+  const skill = await Skill.findOne({ _id: id, tenant: req.tenant });
+  if (!skill) {
     logger.withReq.warn(req, t("notFound"), { ...getRequestContext(req), id });
     res.status(404).json({ success: false, message: t("notFound") });
     return;
@@ -141,37 +141,37 @@ export const updateBlog = asyncHandler(async (req: Request, res: Response) => {
 
   const updates = req.body;
   if (updates.title) {
-    blog.title = mergeLocalesForUpdate(
-      blog.title,
+    skill.title = mergeLocalesForUpdate(
+      skill.title,
       parseIfJson(updates.title)
     );
   }
   if (updates.summary) {
-    blog.summary = mergeLocalesForUpdate(
-      blog.summary,
+    skill.summary = mergeLocalesForUpdate(
+      skill.summary,
       parseIfJson(updates.summary)
     );
   }
   if (updates.content) {
-    blog.content = mergeLocalesForUpdate(
-      blog.content,
+    skill.content = mergeLocalesForUpdate(
+      skill.content,
       parseIfJson(updates.content)
     );
   }
 
 
 
-  const updatableFields: (keyof IBlog)[] = [
+  const updatableFields: (keyof ISkill)[] = [
     "tags",
     "category",
     "isPublished",
     "publishedAt",
   ];
   for (const field of updatableFields) {
-    if (updates[field] !== undefined) (blog as any)[field] = updates[field];
+    if (updates[field] !== undefined) (skill as any)[field] = updates[field];
   }
 
-  if (!Array.isArray(blog.images)) blog.images = [];
+  if (!Array.isArray(skill.images)) skill.images = [];
   if (Array.isArray(req.files)) {
     for (const file of req.files as Express.Multer.File[]) {
       const imageUrl = getImagePath(file);
@@ -185,7 +185,7 @@ export const updateBlog = asyncHandler(async (req: Request, res: Response) => {
         thumbnail = processed.thumbnail;
         webp = processed.webp;
       }
-      blog.images.push({
+      skill.images.push({
         url: imageUrl,
         thumbnail,
         webp,
@@ -197,14 +197,14 @@ export const updateBlog = asyncHandler(async (req: Request, res: Response) => {
   if (updates.removedImages) {
     try {
       const removed = JSON.parse(updates.removedImages);
-      blog.images = blog.images.filter(
+      skill.images = skill.images.filter(
         (img: any) => !removed.includes(img.url)
       );
       for (const img of removed) {
         const localPath = path.join(
           "uploads",
           req.tenant,
-          "blog-images",
+          "skill-images",
           path.basename(img.url)
         );
         if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
@@ -218,16 +218,16 @@ export const updateBlog = asyncHandler(async (req: Request, res: Response) => {
     }
   }
 
-  await blog.save();
+  await skill.save();
   logger.withReq.info(req, t("updated"), { ...getRequestContext(req), id });
-  res.status(200).json({ success: true, message: t("updated"), data: blog });
+  res.status(200).json({ success: true, message: t("updated"), data: skill });
 });
 
 // ✅ GET ALL
-export const adminGetAllBlog = asyncHandler(
+export const adminGetAllSkill = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Blog } = await getTenantModels(req);
+    const { Skill } = await getTenantModels(req);
     const t = (key: string) => translate(key, locale, translations);
     const { language, category, isPublished, isActive } = req.query;
     const filter: Record<string, any> = {
@@ -255,7 +255,7 @@ export const adminGetAllBlog = asyncHandler(
       filter.isActive = true;
     }
 
-    const blogList = await Blog.find(filter)
+    const skillList = await Skill.find(filter)
       .populate([
         { path: "comments", strictPopulate: false },
         { path: "category", select: "title" },
@@ -264,7 +264,7 @@ export const adminGetAllBlog = asyncHandler(
       .lean();
 
     // --- Güvenli array normalization ---
-    const data = (blogList || []).map((item: any) => ({
+    const data = (skillList || []).map((item: any) => ({
       ...item,
       images: Array.isArray(item.images) ? item.images : [],
       tags: Array.isArray(item.tags) ? item.tags : [],
@@ -281,10 +281,10 @@ export const adminGetAllBlog = asyncHandler(
 
 
 // ✅ GET BY ID
-export const adminGetBlogById = asyncHandler(
+export const adminGetSkillById = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Blog } = await getTenantModels(req);
+    const { Skill } = await getTenantModels(req);
     const t = (key: string) => translate(key, locale, translations);
     const { id } = req.params;
 
@@ -297,11 +297,11 @@ export const adminGetBlogById = asyncHandler(
       return;
     }
 
-    const blog = await Blog.findOne({ _id: id, tenant: req.tenant })
+    const skill = await Skill.findOne({ _id: id, tenant: req.tenant })
       .populate([{ path: "comments" }, { path: "category", select: "title" }])
       .lean();
 
-    if (!blog || Array.isArray(blog) || !blog.isActive) {
+    if (!skill || Array.isArray(skill) || !skill.isActive) {
       logger.withReq.warn(req, t("notFound"), {
         ...getRequestContext(req),
         id,
@@ -312,10 +312,10 @@ export const adminGetBlogById = asyncHandler(
 
     // --- Güvenli array normalization ---
     const populated = {
-      ...blog,
-      images: Array.isArray(blog.images) ? blog.images : [],
-      tags: Array.isArray(blog.tags) ? blog.tags : [],
-      comments: Array.isArray(blog.comments) ? blog.comments : [],
+      ...skill,
+      images: Array.isArray(skill.images) ? skill.images : [],
+      tags: Array.isArray(skill.tags) ? skill.tags : [],
+      comments: Array.isArray(skill.comments) ? skill.comments : [],
     };
 
     res.status(200).json({
@@ -328,9 +328,9 @@ export const adminGetBlogById = asyncHandler(
 
 
 // ✅ DELETE
-export const deleteBlog = asyncHandler(async (req: Request, res: Response) => {
+export const deleteSkill = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { Blog } = await getTenantModels(req);
+  const { Skill } = await getTenantModels(req);
   const locale: SupportedLocale = req.locale || getLogLocale();
   const t = (key: string) => translate(key, locale, translations);
 
@@ -340,18 +340,18 @@ export const deleteBlog = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  const blog = await Blog.findOne({ _id: id, tenant: req.tenant });
-  if (!blog) {
+  const skill = await Skill.findOne({ _id: id, tenant: req.tenant });
+  if (!skill) {
     logger.withReq.warn(req, t("notFound"), { ...getRequestContext(req), id });
     res.status(404).json({ success: false, message: t("notFound") });
     return;
   }
 
-  for (const img of blog.images || []) {
+  for (const img of skill.images || []) {
     const localPath = path.join(
       "uploads",
       req.tenant,
-      "blog-images",
+      "skill-images",
       path.basename(img.url)
     );
     if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
@@ -367,7 +367,7 @@ export const deleteBlog = asyncHandler(async (req: Request, res: Response) => {
     }
   }
 
-  await blog.deleteOne();
+  await skill.deleteOne();
 
   logger.withReq.info(req, t("deleted"), { ...getRequestContext(req), id });
   res.status(200).json({ success: true, message: t("deleted") });

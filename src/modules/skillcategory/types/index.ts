@@ -1,6 +1,6 @@
 import type { SupportedLocale } from "@/types/common";
 
-export interface ITeamCategory {
+export interface ISkillCategory {
   name: { [key in SupportedLocale]: string };
   slug: string;
   tenant: string; // Optional tenant field for multi-tenancy
