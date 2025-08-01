@@ -1,0 +1,25 @@
+{
+  "log": {
+    "listed": "Hizmetler listelendi.",
+    "fetched": "Hizmet başarıyla getirildi.",
+    "created": "Hizmet başarıyla oluşturuldu.",
+    "updated": "Hizmet güncellendi.",
+    "deleted": "Hizmet silindi.",
+    "listFetched": "Hizmet listesi başarıyla getirildi."
+  },
+  "error": {
+    "invalid_id": "Geçersiz ID.",
+    "not_found": "Hizmet bulunamadı.",
+    "create_fail": "Hizmet oluşturulurken hata oluştu."
+  },
+  "validation": {
+    "invalidObjectId": "Geçersiz nesne ID'si.",
+    "tagsArray": "Etiketler bir dizi olmalıdır.",
+    "durationMinutesPositive": "Süre pozitif bir sayı olmalıdır.",
+    "pricePositive": "Fiyat pozitif bir sayı olmalıdır.",
+    "invalidCategory": "Kategori ID geçersiz.",
+    "invalidRemovedImages": "Silinecek görseller geçersiz formatta.",
+    "booleanField": "Bu alan true veya false olmalıdır.",
+    "invalidLanguage": "Geçersiz dil kodu."
+  }
+}

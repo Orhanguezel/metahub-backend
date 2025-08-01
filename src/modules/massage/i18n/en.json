@@ -1,0 +1,25 @@
+{
+  "log": {
+    "listed": "Massage listed.",
+    "fetched": "Service fetched successfully.",
+    "created": "Service created successfully.",
+    "updated": "Service updated.",
+    "deleted": "Service deleted.",
+    "listFetched": "Service list fetched successfully."
+  },
+  "error": {
+    "invalid_id": "Invalid ID.",
+    "not_found": "Service not found.",
+    "create_fail": "Failed to create service."
+  },
+  "validation": {
+    "invalidObjectId": "Invalid object ID.",
+    "tagsArray": "Tags must be an array.",
+    "durationMinutesPositive": "Duration must be a positive number.",
+    "pricePositive": "Price must be a positive number.",
+    "invalidCategory": "Invalid category ID.",
+    "invalidRemovedImages": "Removed images format is invalid.",
+    "booleanField": "This field must be true or false.",
+    "invalidLanguage": "Invalid language code."
+  }
+}

@@ -144,6 +144,30 @@
     "defaultEnabled": false
   },
   {
+    "sectionKey": "massage",
+    "label": {
+      "tr": "Masaj",
+      "en": "Massage",
+      "de": "Massage",
+      "pl": "Masaż",
+      "fr": "Massage",
+      "es": "Masaje"
+    },
+    "description": {
+      "tr": "Sunulan masaj listesi",
+      "en": "List of provided massages",
+      "de": "Liste der angebotenen Massagen",
+      "pl": "Lista oferowanych masaży",
+      "fr": "Liste des massages fournis",
+      "es": "Lista de masajes ofrecidos"
+    },
+    "icon": "MdBuild",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 3,
+    "defaultEnabled": false
+  },
+  {
     "sectionKey": "portfolio",
     "label": {
       "tr": "Portföy",

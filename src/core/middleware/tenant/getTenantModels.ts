@@ -19,6 +19,8 @@ import { Gallery } from "@/modules/gallery/gallery.models";
 import { GalleryCategory } from "@/modules/gallerycategory/models";
 import { Services } from "@/modules/services/models";
 import { ServicesCategory } from "@/modules/servicescategory/category.models";
+import { Massage } from "@/modules/massage/models";
+import { MassageCategory } from "@/modules/massagecategory/category.models";
 import { Stockmovement } from "@/modules/stockmovement/stockmovement.models";
 import { Notification } from "@/modules/notification/notification.models";
 import { Comment } from "@/modules/comment/comment.models";
@@ -98,6 +100,11 @@ export const getTenantModels = async (req: Request) => ({
   ServicesCategory: await req.getModel(
     "servicescategory",
     ServicesCategory.schema
+  ),
+  Massage: await req.getModel("massage", Massage.schema),
+  MassageCategory: await req.getModel(
+    "massagecategory",
+    MassageCategory.schema
   ),
   StockMovement: await req.getModel("stockmovement", Stockmovement.schema),
   Notification: await req.getModel("notification", Notification.schema),

@@ -1,0 +1,25 @@
+{
+  "log": {
+    "listed": "Servicios listados.",
+    "fetched": "Servicio obtenido correctamente.",
+    "created": "Servicio creado con éxito.",
+    "updated": "Servicio actualizado.",
+    "deleted": "Servicio eliminado.",
+    "listFetched": "Lista de servicios obtenida con éxito."
+  },
+  "error": {
+    "invalid_id": "ID inválido.",
+    "not_found": "Servicio no encontrado.",
+    "create_fail": "Error al crear el servicio."
+  },
+  "validation": {
+    "invalidObjectId": "ID de objeto inválido.",
+    "tagsArray": "Las etiquetas deben ser un array.",
+    "durationMinutesPositive": "La duración debe ser un número positivo.",
+    "pricePositive": "El precio debe ser un número positivo.",
+    "invalidCategory": "ID de categoría inválido.",
+    "invalidRemovedImages": "Formato inválido de imágenes eliminadas.",
+    "booleanField": "Este campo debe ser true o false.",
+    "invalidLanguage": "Código de idioma inválido."
+  }
+}
