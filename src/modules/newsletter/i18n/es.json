@@ -1,0 +1,13 @@
+{
+  "emailRequired": "Se requiere dirección de correo electrónico.",
+  "emailInvalid": "Por favor, introduce una dirección de correo electrónico válida.",
+  "langInvalid": "Código de idioma no válido.",
+  "alreadySubscribed": "Ya estás suscrito a nuestro boletín.",
+  "subscriptionSuccess": "Te has suscrito correctamente a nuestro boletín.",
+  "unsubscribed": "Te has dado de baja del boletín.",
+  "notFound": "Suscriptor no encontrado.",
+  "fetched": "Suscriptores obtenidos correctamente.",
+  "deleted": "Suscriptor eliminado correctamente.",
+  "invalidId": "ID de suscriptor no válida.",
+  "verified": "El suscriptor ha sido verificado."
+}

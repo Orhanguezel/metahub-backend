@@ -13,6 +13,7 @@ const AddressSchema = new Schema<Address>(
     },
     userId: { type: Schema.Types.ObjectId, ref: "user" },
     companyId: { type: Schema.Types.ObjectId, ref: "company" },
+    customerId: { type: Schema.Types.ObjectId, ref: "customer" },
     tenant: { type: String, required: true },
 
     addressLine: { type: String, required: true },  // her ülke için zorunlu

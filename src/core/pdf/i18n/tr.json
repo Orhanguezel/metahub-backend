@@ -1,0 +1,23 @@
+{
+  "offerTitle": "Teklif",
+  "introParagraph": "Sayın Yetkili,\nÜrünlerimize gösterdiğiniz ilgi için teşekkür ederiz. Aşağıda size teklifimizi sunuyoruz:",
+  "customer": "Müşteri",
+  "date": "Tarih",
+  "offerNumber": "Teklif No",
+  "table.pos": "Sıra",
+  "table.product": "Ürün",
+  "table.qty": "Adet",
+  "table.unitPrice": "Birim Fiyat",
+  "table.total": "Toplam",
+  "table.subtotal": "Ara Toplam",
+  "table.vat": "KDV",
+  "table.shipping": "Kargo",
+  "table.discount": "İndirim",
+  "table.totalGross": "Genel Toplam",
+  "paymentTerms": "Ödeme Koşulları",
+  "note": "Not",
+  "validUntil": "Geçerlilik Tarihi",
+  "taxNumber": "Vergi No",
+  "registerNumber": "Ticaret Sicil No",
+  "registerCourt": "Ticaret Mahkemesi"
+}

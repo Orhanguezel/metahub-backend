@@ -1,0 +1,13 @@
+{
+  "emailRequired": "E-posta adresi gereklidir.",
+  "emailInvalid": "Lütfen geçerli bir e-posta adresi giriniz.",
+  "langInvalid": "Geçersiz dil kodu.",
+  "alreadySubscribed": "Zaten bültenimize abonesiniz.",
+  "subscriptionSuccess": "Bültenimize başarıyla abone oldunuz.",
+  "unsubscribed": "Bültenden çıkışınız gerçekleşti.",
+  "notFound": "Abone bulunamadı.",
+  "fetched": "Aboneler başarıyla getirildi.",
+  "deleted": "Abone başarıyla silindi.",
+  "invalidId": "Geçersiz abone kimliği.",
+  "verified": "Abone onaylandı."
+}

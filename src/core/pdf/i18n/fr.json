@@ -1,0 +1,23 @@
+{
+  "offerTitle": "Offre",
+  "introParagraph": "Madame, Monsieur,\nMerci de votre intérêt pour nos produits. Nous sommes heureux de vous soumettre l'offre suivante :",
+  "customer": "Client",
+  "date": "Date",
+  "offerNumber": "N° Offre",
+  "table.pos": "N°",
+  "table.product": "Produit",
+  "table.qty": "Qté",
+  "table.unitPrice": "Prix Unitaire",
+  "table.total": "Total",
+  "table.subtotal": "Sous-total",
+  "table.vat": "TVA",
+  "table.shipping": "Livraison",
+  "table.discount": "Remise",
+  "table.totalGross": "Total Général",
+  "paymentTerms": "Conditions de paiement",
+  "note": "Remarque",
+  "validUntil": "Valable jusqu'au",
+  "taxNumber": "Numéro fiscal",
+  "registerNumber": "Numéro d'enregistrement",
+  "registerCourt": "Tribunal de commerce"
+}
