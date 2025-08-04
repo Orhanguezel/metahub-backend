@@ -10,8 +10,14 @@ import { generateOfferPdf } from "@/core/pdf/generateOfferPdf";
 import { Types } from "mongoose";
 import logger from "@/core/middleware/logger/logger";
 
-// ✅ Teklif item enrich
-const enrichOfferItems = async (items: any[], { Product, Ensotekprod }, tenant: string, locale: SupportedLocale, t: any) => {
+// --- Teklif kalemlerini enrich et ---
+const enrichOfferItems = async (
+  items: any[],
+  { Product, Ensotekprod },
+  tenant: string,
+  locale: SupportedLocale,
+  t: any
+) => {
   let totalNet = 0;
   const enrichedItems = await Promise.all(
     items.map(async (item) => {
@@ -35,8 +41,8 @@ const enrichOfferItems = async (items: any[], { Product, Ensotekprod }, tenant: 
       const unitPrice = typeof item.unitPrice === "number"
         ? item.unitPrice
         : productDoc
-          ? productDoc.price
-          : ensotekprodDoc.price;
+        ? productDoc.price
+        : ensotekprodDoc.price;
       const customPrice = typeof item.customPrice === "number" ? item.customPrice : unitPrice;
       const quantity = Number(item.quantity) || 1;
       const vat = typeof item.vat === "number" ? item.vat : 19;
@@ -59,7 +65,7 @@ const enrichOfferItems = async (items: any[], { Product, Ensotekprod }, tenant: 
   return { enrichedItems, totalNet };
 };
 
-// ✅ Offer CREATE + PDF
+// --- Offer CREATE + PDF ---
 export const createOffer = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   const locale: SupportedLocale = req.locale || getLogLocale();
   const t = (key: string, params?: any) => translate(key, locale, translations, params);
@@ -79,11 +85,13 @@ export const createOffer = asyncHandler(async (req: Request, res: Response, next
       currency = "EUR",
     } = req.body;
 
+    // --- Zorunlu alan kontrolü ---
     if (!company || !customer || !items?.length || !validUntil) {
       res.status(400).json({ success: false, message: t("errors.required_fields") });
       return;
     }
 
+    // --- Company & Customer doğrula ---
     const companyExists = await Company.findOne({ _id: company, tenant: req.tenant });
     if (!companyExists) {
       res.status(404).json({ success: false, message: t("errors.company_not_found") });
@@ -95,15 +103,16 @@ export const createOffer = asyncHandler(async (req: Request, res: Response, next
       return;
     }
 
+    // --- Kalemleri enrich et ---
     const { enrichedItems, totalNet } = await enrichOfferItems(items, { Product, Ensotekprod }, req.tenant, locale, t);
-
     const totalVat = enrichedItems.reduce((sum, i) => sum + ((i.total * i.vat) / 100), 0);
     const gross = totalNet + totalVat + Number(shippingCost) + Number(additionalFees) - Number(discount);
 
+    // --- Teklif oluştur ---
     let offer = await Offer.create({
       offerNumber: `OFR-${uuidv4().slice(0, 8)}`,
       user: req.user?._id,
-      company,
+      company,  // <-- Null değil, id olarak atanıyor
       tenant: req.tenant,
       customer,
       items: enrichedItems,
@@ -132,8 +141,11 @@ export const createOffer = asyncHandler(async (req: Request, res: Response, next
     // --- PDF Generation & RevisionHistory ---
     try {
       const populatedOffer = await Offer.findById(offer._id)
-        .populate("company")
-        .populate("customer");
+        .populate("company", "companyName email")
+        .populate("customer", "companyName contactName email")
+        .populate("items.product", "name price")
+        .populate("items.ensotekprod", "name price");
+
       const pdfUrl = await generateOfferPdf(
         populatedOffer,
         populatedOffer.company,
@@ -152,11 +164,6 @@ export const createOffer = asyncHandler(async (req: Request, res: Response, next
         },
       ];
       await offer.save();
-      offer = await Offer.findById(offer._id);
-      logger.withReq.info(req, t("logs.offer.pdfGenerated"), {
-        offerId: offer._id,
-        pdfUrl,
-      });
     } catch (pdfError) {
       logger.withReq.error(req, "Offer PDF oluşturulamadı", {
         offerId: offer._id,
@@ -164,10 +171,17 @@ export const createOffer = asyncHandler(async (req: Request, res: Response, next
       });
     }
 
+    // --- Final: Populated teklif dön (her iki ilişki dolu) ---
+    const finalOffer = await Offer.findById(offer._id)
+      .populate("company", "companyName email")
+      .populate("customer", "companyName contactName email")
+      .populate("items.product", "name price")
+      .populate("items.ensotekprod", "name price");
+
     res.status(201).json({
       success: true,
       message: t("success.created"),
-      offer,
+      offer: finalOffer,
     });
     return;
   } catch (error) {
@@ -175,6 +189,7 @@ export const createOffer = asyncHandler(async (req: Request, res: Response, next
     next(error);
   }
 });
+
 
 // ✅ Tüm teklifleri getir
 export const getOffers = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
