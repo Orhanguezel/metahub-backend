@@ -1,81 +1,84 @@
-import { Schema, model, Types, Model, models } from "mongoose";
+import { Schema, model, models, Model } from "mongoose";
+import type { IOffer } from "./types";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
-// ✅ Alt Tip: Teklif Ürünleri
-interface IOfferItem {
-  product: Types.ObjectId;
-  tenant: string; // Optional tenant field for multi-tenancy
-  quantity: number;
-  unitPrice: number;
-  customPrice: number;
-}
+// Çok dilli alan tipi
+const localizedStringField = () => {
+  const fields: Record<string, any> = {};
+  for (const locale of SUPPORTED_LOCALES) {
+    fields[locale] = { type: String, trim: true, default: "" };
+  }
+  return fields;
+};
 
-// ✅ Ana Interface
-export interface IOffer {
-  offerNumber: string;
-  user: Types.ObjectId;
-  tenant: string; // Optional tenant field for multi-tenancy
-  company: Types.ObjectId;
-  customer: Types.ObjectId;
-  items: IOfferItem[];
-  totalAmount: number;
-  taxAmount: number;
-  taxRate: 7 | 19;
-  shippingCost: number;
-  paymentTerms: string;
-  status: "draft" | "preparing" | "sent" | "pending" | "approved" | "rejected";
-  validUntil: Date;
-  notes: string;
-  sentByEmail: boolean;
-  pdfLink: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// ✅ Alt Şema
-const offerItemSchema = new Schema<IOfferItem>(
+const OfferItemSchema = new Schema(
   {
-    product: { type: Schema.Types.ObjectId, ref: "product", required: true },
+    product: { type: Schema.Types.ObjectId, ref: "product", required: false },
+    ensotekprod: { type: Schema.Types.ObjectId, ref: "ensotekprod", required: false },
+    productName: { type: Object, required: true, default: () => ({}) },
     quantity: { type: Number, required: true },
-    tenant: { type: String, required: true, index: true },
     unitPrice: { type: Number, required: true },
-    customPrice: { type: Number, required: true },
+    customPrice: { type: Number },
+    vat: { type: Number, required: true, default: 19 },
+    total: { type: Number, required: true },
   },
   { _id: false }
 );
 
-// ✅ Ana Şema
-const offerSchema = new Schema<IOffer>(
+const RevisionSchema = new Schema(
   {
-    offerNumber: { type: String, required: true, unique: true },
+    pdfUrl: { type: String, required: true },
+    updatedAt: { type: Date, default: Date.now },
+    by: { type: Schema.Types.ObjectId, ref: "user" },
+    note: { type: String },
+  },
+  { _id: false }
+);
+
+const OfferSchema = new Schema(
+  {
     tenant: { type: String, required: true, index: true },
-    user: { type: Schema.Types.ObjectId, ref: "user", required: true },
-    company: { type: Schema.Types.ObjectId, ref: "company", required: true },
-    customer: { type: Schema.Types.ObjectId, ref: "customer", required: true },
-    items: {
-      type: [offerItemSchema],
-      validate: (items: IOfferItem[]) => items.length > 0,
-    },
-    totalAmount: { type: Number, required: true },
-    taxAmount: { type: Number, default: 0 },
-    taxRate: { type: Number, enum: [7, 19], default: 19 },
+    offerNumber: { type: String, unique: true, required: true },
+    user: { type: Schema.Types.ObjectId, ref: "user", required: false, default: null },
+    company: { type: Schema.Types.ObjectId, ref: "company", required: false, default: null },
+    customer: { type: Schema.Types.ObjectId, ref: "customer", required: false, default: null },
+    contactPerson: { type: String },
+    items: { type: [OfferItemSchema], required: true },
     shippingCost: { type: Number, default: 0 },
-    paymentTerms: { type: String, default: "30 gün içinde ödeme" },
+    additionalFees: { type: Number, default: 0 },
+    discount: { type: Number, default: 0 },
+    currency: { type: String, required: true, default: "EUR" },
+    paymentTerms: { type: Object, required: true, default: () => ({ ...localizedStringField() }) },
+    notes: { type: Object, default: () => ({ ...localizedStringField() }) },
+    validUntil: { type: Date, required: true },
     status: {
       type: String,
-      enum: ["draft", "preparing", "sent", "pending", "approved", "rejected"],
+      enum: [
+        "draft",
+        "preparing",
+        "sent",
+        "pending",
+        "approved",
+        "rejected",
+      ],
       default: "draft",
+      index: true,
     },
-    validUntil: { type: Date, required: true },
-    notes: { type: String, default: "" },
+    totalNet: { type: Number, required: true },
+    totalVat: { type: Number, required: true },
+    totalGross: { type: Number, required: true },
+    pdfUrl: { type: String, default: "" },
     sentByEmail: { type: Boolean, default: false },
-    pdfLink: { type: String, default: "" },
+    sentAt: { type: Date },
+    acceptedAt: { type: Date },
+    declinedAt: { type: Date },
+    revisionHistory: { type: [RevisionSchema], default: [] },
+    createdBy: { type: Schema.Types.ObjectId, ref: "user", required: false, default: null },
   },
   { timestamps: true }
 );
 
-// ✅ Guard + Model Type (standart)
-const Offer: Model<IOffer> =
-  models.offer || model<IOffer>("offer", offerSchema);
 
-// ✅ Export
+// Model guard ile
+const Offer: Model<IOffer> = models.offer || model<IOffer>("offer", OfferSchema);
 export { Offer };

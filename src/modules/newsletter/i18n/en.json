@@ -1,0 +1,13 @@
+{
+  "emailRequired": "Email address is required.",
+  "emailInvalid": "Please enter a valid email address.",
+  "langInvalid": "Invalid language code.",
+  "alreadySubscribed": "You are already subscribed to our newsletter.",
+  "subscriptionSuccess": "You have successfully subscribed to our newsletter.",
+  "unsubscribed": "You have been unsubscribed from our newsletter.",
+  "notFound": "Subscriber not found.",
+  "fetched": "Subscribers fetched successfully.",
+  "deleted": "Subscriber deleted successfully.",
+  "invalidId": "Invalid subscriber ID.",
+  "verified": "Subscriber has been verified."
+}

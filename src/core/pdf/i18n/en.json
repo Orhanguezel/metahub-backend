@@ -1,0 +1,23 @@
+{
+  "offerTitle": "Offer",
+  "introParagraph": "Dear Sir or Madam,\nThank you for your interest in our products. We are pleased to submit the following offer:",
+  "customer": "Customer",
+  "date": "Date",
+  "offerNumber": "Offer No.",
+  "table.pos": "No.",
+  "table.product": "Product",
+  "table.qty": "Qty",
+  "table.unitPrice": "Unit Price",
+  "table.total": "Total",
+  "table.subtotal": "Subtotal",
+  "table.vat": "VAT",
+  "table.shipping": "Shipping",
+  "table.discount": "Discount",
+  "table.totalGross": "Total Amount",
+  "paymentTerms": "Payment Terms",
+  "note": "Note",
+  "validUntil": "Valid Until",
+  "taxNumber": "Tax Number",
+  "registerNumber": "Register Number",
+  "registerCourt": "Register Court"
+}

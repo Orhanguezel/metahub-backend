@@ -30,7 +30,7 @@
   "include": [
     "src",
     "src/types"
-  ],
+, "project-docs/newsletter"  ],
   "exclude": [
     "node_modules",
     "dist"

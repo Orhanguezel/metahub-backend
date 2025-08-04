@@ -1,0 +1,23 @@
+{
+  "offerTitle": "Oferta",
+  "introParagraph": "Estimado/a señor/a:\nGracias por su interés en nuestros productos. Nos complace presentarle la siguiente oferta:",
+  "customer": "Cliente",
+  "date": "Fecha",
+  "offerNumber": "Nº Oferta",
+  "table.pos": "Nº",
+  "table.product": "Producto",
+  "table.qty": "Cant.",
+  "table.unitPrice": "Precio Unitario",
+  "table.total": "Total",
+  "table.subtotal": "Subtotal",
+  "table.vat": "IVA",
+  "table.shipping": "Envío",
+  "table.discount": "Descuento",
+  "table.totalGross": "Importe Total",
+  "paymentTerms": "Condiciones de pago",
+  "note": "Nota",
+  "validUntil": "Válido hasta",
+  "taxNumber": "NIF",
+  "registerNumber": "Número de registro",
+  "registerCourt": "Registro Mercantil"
+}

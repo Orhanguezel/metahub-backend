@@ -1,0 +1,23 @@
+{
+  "offerTitle": "Angebot",
+  "introParagraph": "Sehr geehrte Damen und Herren,\nvielen Dank für Ihr Interesse an unseren Produkten. Hiermit unterbreiten wir Ihnen folgendes Angebot:",
+  "customer": "Kunde",
+  "date": "Datum",
+  "offerNumber": "Angebotsnr.",
+  "table.pos": "Pos.",
+  "table.product": "Produkt",
+  "table.qty": "Menge",
+  "table.unitPrice": "Einzelpreis",
+  "table.total": "Gesamt",
+  "table.subtotal": "Zwischensumme",
+  "table.vat": "MwSt",
+  "table.shipping": "Versand",
+  "table.discount": "Rabatt",
+  "table.totalGross": "Gesamtsumme",
+  "paymentTerms": "Zahlungsbedingungen",
+  "note": "Bemerkung",
+  "validUntil": "Gültig bis",
+  "taxNumber": "Steuernummer",
+  "registerNumber": "Handelsregisternummer",
+  "registerCourt": "Registergericht"
+}

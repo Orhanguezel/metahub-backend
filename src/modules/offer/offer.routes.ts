@@ -6,40 +6,61 @@ import {
   updateOffer,
   updateOfferStatus,
   deleteOffer,
+  generateOfferPdfAndLink,
+  requestOfferHandler,
 } from "./offer.controller";
-
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { validateRequest } from "@/core/middleware/validateRequest";
-import { idParamValidator } from "./offer.validation";
+import {
+  idParamValidator,
+  validateCreateOffer,
+  validateUpdateOffer,
+  validateUpdateOfferStatus,
+  validateListOffers,
+  validateRequestOffer,
+} from "./offer.validation";
 
 const router = express.Router();
 
-// 🔐 Admin: Tüm teklifleri getir
-router.get("/", authenticate, authorizeRoles("admin"), getOffers);
+// --- PUBLIC: Teklif İstek Formu ---
+router.post(
+  "/request-offer",
+  validateRequestOffer,
+  requestOfferHandler // → Doğrudan public, auth yok!
+);
 
-// 📝 Kullanıcı: Yeni teklif oluştur
-router.post("/", authenticate, createOffer);
+// 🔐 Admin: Teklifleri listele (filtre opsiyonlu)
+router.get(
+  "/",
+  authenticate,
+  authorizeRoles("admin"),
+  validateListOffers,
+  getOffers
+);
 
-// 📌 Teklif detayları (görüntüle, güncelle, sil)
+// 📝 Yeni teklif oluştur
+router.post("/", authenticate, validateCreateOffer, createOffer);
+
+// 📌 Teklif detay (get/update/delete)
 router
   .route("/:id")
-  .get(authenticate, idParamValidator, validateRequest, getOfferById)
-  .put(authenticate, idParamValidator, validateRequest, updateOffer)
-  .delete(
-    authenticate,
-    authorizeRoles("admin"),
-    idParamValidator,
-    validateRequest,
-    deleteOffer
-  );
+  .get(authenticate, idParamValidator, getOfferById)
+  .put(authenticate, idParamValidator, validateUpdateOffer, updateOffer)
+  .delete(authenticate, authorizeRoles("admin"), idParamValidator, deleteOffer);
 
-// 🔄 Teklif durumu güncelleme
+// 🔄 Statü güncelleme
 router.patch(
   "/:id/status",
   authenticate,
   idParamValidator,
-  validateRequest,
+  validateUpdateOfferStatus,
   updateOfferStatus
+);
+
+router.post(
+  "/:id/generate-pdf",
+  authenticate,
+  idParamValidator,
+  generateOfferPdfAndLink
 );
 
 export default router;

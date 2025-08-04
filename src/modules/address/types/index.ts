@@ -31,6 +31,7 @@ export interface Address {
   addressType: AddressType;
   userId?: Types.ObjectId | string;
   companyId?: Types.ObjectId | string;
+  customerId?: Types.ObjectId | string; 
   tenant: string;
   addressLine: string;   // her ülkede zorunlu!
   street?: string;       // DE, FR, ES, PL için

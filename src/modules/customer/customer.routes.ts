@@ -15,22 +15,22 @@ import {
 
 const router = express.Router();
 
-// ✅ Admin Routes (all protected)
+// Tüm rotalar admin ve authenticated kullanıcıya özel
 router.use(authenticate, authorizeRoles("admin"));
 
+// Tüm müşterileri getir
 router.get("/", getAllCustomers);
 
+// Tek müşteri getir (ID ile)
 router.get("/:id", validateCustomerIdParam, getCustomerById);
 
+// Müşteri oluştur
 router.post("/", createCustomerValidator, createCustomer);
 
-router.put(
-  "/:id",
-  validateCustomerIdParam,
-  updateCustomerValidator,
-  updateCustomer
-);
+// Müşteri güncelle
+router.put("/:id", validateCustomerIdParam, updateCustomerValidator, updateCustomer);
 
+// Müşteri sil
 router.delete("/:id", validateCustomerIdParam, deleteCustomer);
 
 export default router;

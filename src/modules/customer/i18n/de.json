@@ -1,0 +1,19 @@
+{
+  "customer.success.fetched": "Kunden wurden erfolgreich abgerufen.",
+  "customer.success.created": "Kunde wurde erfolgreich erstellt.",
+  "customer.success.updated": "Kunde wurde erfolgreich aktualisiert.",
+  "customer.success.deleted": "Kunde wurde erfolgreich gelöscht.",
+  "customer.errors.notFound": "Kunde nicht gefunden.",
+  "customer.errors.requiredFields": "Alle Pflichtfelder müssen ausgefüllt werden.",
+  "customer.errors.emailExists": "Diese E-Mail-Adresse ist für diesen Mandanten bereits registriert.",
+
+  "customer.validation.invalidObjectId": "Ungültige Kunden-ID.",
+  "customer.validation.companyNameRequired": "Firmenname ist erforderlich.",
+  "customer.validation.contactNameRequired": "Ansprechpartner ist erforderlich.",
+  "customer.validation.invalidEmail": "Ungültige E-Mail-Adresse.",
+  "customer.validation.phoneRequired": "Telefonnummer ist erforderlich.",
+  "customer.validation.addressesRequired": "Mindestens eine Adresse ist erforderlich.",
+  "customer.validation.addressLineRequired": "Adresszeile ist erforderlich.",
+  "customer.validation.addressTypeRequired": "Adresstyp ist erforderlich.",
+  "customer.validation.invalidString": "Ungültiger Wert."
+}

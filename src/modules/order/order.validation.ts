@@ -1,82 +1,111 @@
 import { body } from "express-validator";
+import { t as translate } from "@/core/utils/i18n/translate";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import translations from "./i18n"; // Order modülüne ait çeviri dosyan!
 
 // --- Sipariş oluşturma validasyonu ---
 export const createOrderValidator = [
-  // items dizisi
   body("items")
     .isArray({ min: 1 })
-    .withMessage("Order must have at least one item."),
+    .withMessage((_, { req }) =>
+      translate("validation.itemsArrayRequired", req.locale || getLogLocale(), translations)
+    ),
 
-  // items içindeki her bir ürünün ObjectId ve model zorunluluğu
   body("items.*.product")
     .notEmpty()
-    .withMessage("Each item must have a valid product ID."),
+    .withMessage((_, { req }) =>
+      translate("validation.productIdRequired", req.locale || getLogLocale(), translations)
+    ),
 
   body("items.*.productType")
     .isIn(["bike", "ensotekprod", "sparepart"])
-    .withMessage(
-      "Each item must have a valid product type (Bike or Ensotekprod or Sparepart)."
+    .withMessage((_, { req }) =>
+      translate("validation.invalidProductType", req.locale || getLogLocale(), translations)
     ),
 
   body("items.*.quantity")
     .isInt({ min: 1 })
-    .withMessage("Each item must have a quantity of at least 1."),
+    .withMessage((_, { req }) =>
+      translate("validation.quantityMin1", req.locale || getLogLocale(), translations)
+    ),
 
   body("items.*.unitPrice")
     .isFloat({ min: 0 })
-    .withMessage("Each item must have a positive unit price."),
+    .withMessage((_, { req }) =>
+      translate("validation.unitPricePositive", req.locale || getLogLocale(), translations)
+    ),
 
   body("items.*.tenant")
     .notEmpty()
-    .withMessage("Each item must have a tenant identifier."),
+    .withMessage((_, { req }) =>
+      translate("validation.tenantRequired", req.locale || getLogLocale(), translations)
+    ),
 
   // shippingAddress alanları
   body("shippingAddress.name")
     .notEmpty()
-    .withMessage("Shipping name is required."),
+    .withMessage((_, { req }) =>
+      translate("validation.shippingNameRequired", req.locale || getLogLocale(), translations)
+    ),
 
   body("shippingAddress.phone")
     .notEmpty()
-    .withMessage("Shipping phone is required."),
+    .withMessage((_, { req }) =>
+      translate("validation.shippingPhoneRequired", req.locale || getLogLocale(), translations)
+    ),
 
   body("shippingAddress.street")
     .notEmpty()
-    .withMessage("Shipping street is required."),
+    .withMessage((_, { req }) =>
+      translate("validation.shippingStreetRequired", req.locale || getLogLocale(), translations)
+    ),
 
   body("shippingAddress.city")
     .notEmpty()
-    .withMessage("Shipping city is required."),
+    .withMessage((_, { req }) =>
+      translate("validation.shippingCityRequired", req.locale || getLogLocale(), translations)
+    ),
 
   body("shippingAddress.postalCode")
     .notEmpty()
-    .withMessage("Shipping postal code is required."),
+    .withMessage((_, { req }) =>
+      translate("validation.shippingPostalRequired", req.locale || getLogLocale(), translations)
+    ),
 
   body("shippingAddress.country")
     .notEmpty()
-    .withMessage("Shipping country is required."),
+    .withMessage((_, { req }) =>
+      translate("validation.shippingCountryRequired", req.locale || getLogLocale(), translations)
+    ),
 
   body("shippingAddress.tenant")
     .notEmpty()
-    .withMessage("Shipping address must have a tenant identifier."),
+    .withMessage((_, { req }) =>
+      translate("validation.shippingTenantRequired", req.locale || getLogLocale(), translations)
+    ),
 
   // totalPrice zorunlu ve >=0
   body("totalPrice")
     .isFloat({ min: 0 })
-    .withMessage("Total price must be a positive number."),
+    .withMessage((_, { req }) =>
+      translate("validation.totalPricePositive", req.locale || getLogLocale(), translations)
+    ),
 
   // paymentMethod enum
   body("paymentMethod")
     .isIn(["cash_on_delivery", "credit_card", "paypal"])
-    .withMessage("Invalid payment method."),
-
-  // status zorunlu değil (backend default "pending" atanıyor)
+    .withMessage((_, { req }) =>
+      translate("validation.invalidPaymentMethod", req.locale || getLogLocale(), translations)
+    ),
 ];
 
 // Sipariş durumu güncelleme validasyonu
 export const updateOrderStatusValidator = [
   body("status")
     .isIn(["pending", "preparing", "shipped", "completed", "cancelled"])
-    .withMessage("Invalid order status."),
+    .withMessage((_, { req }) =>
+      translate("validation.invalidOrderStatus", req.locale || getLogLocale(), translations)
+    ),
 ];
 
 // Sipariş adresi güncelleme validasyonu
@@ -84,29 +113,43 @@ export const updateShippingAddressValidator = [
   body("shippingAddress.name")
     .optional()
     .notEmpty()
-    .withMessage("Shipping name cannot be empty."),
+    .withMessage((_, { req }) =>
+      translate("validation.shippingNameRequired", req.locale || getLogLocale(), translations)
+    ),
   body("shippingAddress.phone")
     .optional()
     .notEmpty()
-    .withMessage("Shipping phone cannot be empty."),
+    .withMessage((_, { req }) =>
+      translate("validation.shippingPhoneRequired", req.locale || getLogLocale(), translations)
+    ),
   body("shippingAddress.street")
     .optional()
     .notEmpty()
-    .withMessage("Shipping street cannot be empty."),
+    .withMessage((_, { req }) =>
+      translate("validation.shippingStreetRequired", req.locale || getLogLocale(), translations)
+    ),
   body("shippingAddress.city")
     .optional()
     .notEmpty()
-    .withMessage("Shipping city cannot be empty."),
+    .withMessage((_, { req }) =>
+      translate("validation.shippingCityRequired", req.locale || getLogLocale(), translations)
+    ),
   body("shippingAddress.postalCode")
     .optional()
     .notEmpty()
-    .withMessage("Shipping postal code cannot be empty."),
+    .withMessage((_, { req }) =>
+      translate("validation.shippingPostalRequired", req.locale || getLogLocale(), translations)
+    ),
   body("shippingAddress.country")
     .optional()
     .notEmpty()
-    .withMessage("Shipping country cannot be empty."),
+    .withMessage((_, { req }) =>
+      translate("validation.shippingCountryRequired", req.locale || getLogLocale(), translations)
+    ),
   body("shippingAddress.tenant")
     .optional()
     .notEmpty()
-    .withMessage("Shipping address must have a tenant identifier."),
+    .withMessage((_, { req }) =>
+      translate("validation.shippingTenantRequired", req.locale || getLogLocale(), translations)
+    ),
 ];

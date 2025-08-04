@@ -21,9 +21,10 @@ export const validateAddress = [
     .notEmpty().withMessage((_, { req }) => t("addresses.addressTypeRequired", req))
     .isString().withMessage((_, { req }) => t("addresses.addressTypeRequired", req))
     .isIn(ADDRESS_TYPE_OPTIONS).withMessage((_, { req }) => t("addresses.invalidType", req)),
-  // Opsiyonel companyId (ID ise kontrol et)
+  // Opsiyonel owner ID'ler (hepsi kontrol ediliyor)
   body("companyId").optional().isMongoId().withMessage((_, { req }) => t("addresses.companyIdInvalid", req)),
   body("userId").optional().isMongoId().withMessage((_, { req }) => t("addresses.userIdInvalid", req)),
+  body("customerId").optional().isMongoId().withMessage((_, { req }) => t("addresses.customerIdInvalid", req)),
   validateRequest,
 ];
 
@@ -40,9 +41,10 @@ export const validateUpdateAddresses = [
     .notEmpty().withMessage((_, { req }) => t("addresses.addressTypeRequired", req))
     .isString().withMessage((_, { req }) => t("addresses.addressTypeRequired", req))
     .isIn(ADDRESS_TYPE_OPTIONS).withMessage((_, { req }) => t("addresses.invalidType", req)),
-  // Opsiyonel companyId/userId (ID ise kontrol et)
+  // Opsiyonel owner ID'ler (hepsi kontrol ediliyor)
   body("addresses.*.companyId").optional().isMongoId().withMessage((_, { req }) => t("addresses.companyIdInvalid", req)),
   body("addresses.*.userId").optional().isMongoId().withMessage((_, { req }) => t("addresses.userIdInvalid", req)),
+  body("addresses.*.customerId").optional().isMongoId().withMessage((_, { req }) => t("addresses.customerIdInvalid", req)),
   validateRequest,
 ];
 

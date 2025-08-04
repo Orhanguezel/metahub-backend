@@ -1,0 +1,23 @@
+{
+  "offerTitle": "Oferta",
+  "introParagraph": "Szanowni Państwo,\nDziękujemy za zainteresowanie naszymi produktami. Przedstawiamy naszą ofertę:",
+  "customer": "Klient",
+  "date": "Data",
+  "offerNumber": "Nr oferty",
+  "table.pos": "Poz.",
+  "table.product": "Produkt",
+  "table.qty": "Ilość",
+  "table.unitPrice": "Cena jedn.",
+  "table.total": "Suma",
+  "table.subtotal": "Suma częściowa",
+  "table.vat": "VAT",
+  "table.shipping": "Dostawa",
+  "table.discount": "Rabat",
+  "table.totalGross": "Suma końcowa",
+  "paymentTerms": "Warunki płatności",
+  "note": "Notatka",
+  "validUntil": "Ważne do",
+  "taxNumber": "NIP",
+  "registerNumber": "Numer rejestracyjny",
+  "registerCourt": "Sąd rejestrowy"
+}

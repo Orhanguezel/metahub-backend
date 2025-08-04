@@ -1,0 +1,19 @@
+{
+  "customer.success.fetched": "Customers fetched successfully.",
+  "customer.success.created": "Customer created successfully.",
+  "customer.success.updated": "Customer updated successfully.",
+  "customer.success.deleted": "Customer deleted successfully.",
+  "customer.errors.notFound": "Customer not found.",
+  "customer.errors.requiredFields": "All required fields must be provided.",
+  "customer.errors.emailExists": "This email address already exists for this tenant.",
+
+  "customer.validation.invalidObjectId": "Invalid customer ID.",
+  "customer.validation.companyNameRequired": "Company name is required.",
+  "customer.validation.contactNameRequired": "Contact name is required.",
+  "customer.validation.invalidEmail": "Invalid email address.",
+  "customer.validation.phoneRequired": "Phone number is required.",
+  "customer.validation.addressesRequired": "At least one address is required.",
+  "customer.validation.addressLineRequired": "Address line is required.",
+  "customer.validation.addressTypeRequired": "Address type is required.",
+  "customer.validation.invalidString": "Invalid value."
+}

@@ -577,6 +577,30 @@
     "defaultEnabled": false
   },
   {
+    "sectionKey": "newsletterSection",
+    "label": {
+      "tr": "Bülten Aboneliği",
+      "en": "Newsletter",
+      "de": "Newsletter",
+      "pl": "Newsletter",
+      "fr": "Bulletin d'information",
+      "es": "Boletín informativo"
+    },
+    "description": {
+      "tr": "E-posta ile duyuru ve kampanya aboneliği",
+      "en": "Email newsletter and campaign subscription",
+      "de": "E-Mail-Newsletter und Kampagnenabonnement",
+      "pl": "Subskrypcja newslettera e-mailowego i kampanii",
+      "fr": "Abonnement à la newsletter et aux campagnes",
+      "es": "Suscripción al boletín y campañas"
+    },
+    "icon": "MdEmail",
+    "variant": "banner",
+    "required": false,
+    "defaultOrder": 18,
+    "defaultEnabled": false
+  },
+  {
     "sectionKey": "chatbox",
     "label": {
       "tr": "Canlı Sohbet",

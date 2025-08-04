@@ -26,6 +26,7 @@ import { Notification } from "@/modules/notification/notification.models";
 import { Comment } from "@/modules/comment/comment.models";
 import { Review } from "@/modules/review/review.models";
 import { ContactMessage } from "@/modules/contact/contact.models";
+import { Newsletter } from "@/modules/newsletter/newsletter.models";
 import { EmailMessage } from "@/modules/email/email.models";
 import { Wishlist } from "@/modules/wishlist/wishlist.models";
 import { Favorite } from "@/modules/favorite/favorite.model";
@@ -183,4 +184,5 @@ export const getTenantModels = async (req: Request) => ({
   Skill: await req.getModel("skill", Skill.schema),
   SkillCategory: await req.getModel("skillcategory", SkillCategory.schema),
   CatalogRequest: await req.getModel("catalogrequest", CatalogRequest.schema),
+  Newsletter: await req.getModel("newsletter", Newsletter.schema),
 });

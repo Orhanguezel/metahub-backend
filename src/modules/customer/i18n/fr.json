@@ -1,0 +1,19 @@
+{
+  "customer.success.fetched": "Clients récupérés avec succès.",
+  "customer.success.created": "Client créé avec succès.",
+  "customer.success.updated": "Client mis à jour avec succès.",
+  "customer.success.deleted": "Client supprimé avec succès.",
+  "customer.errors.notFound": "Client non trouvé.",
+  "customer.errors.requiredFields": "Tous les champs obligatoires doivent être renseignés.",
+  "customer.errors.emailExists": "Cette adresse e-mail existe déjà pour ce tenant.",
+
+  "customer.validation.invalidObjectId": "ID client invalide.",
+  "customer.validation.companyNameRequired": "Le nom de l'entreprise est requis.",
+  "customer.validation.contactNameRequired": "Le nom du contact est requis.",
+  "customer.validation.invalidEmail": "Adresse e-mail invalide.",
+  "customer.validation.phoneRequired": "Le numéro de téléphone est requis.",
+  "customer.validation.addressesRequired": "Au moins une adresse est requise.",
+  "customer.validation.addressLineRequired": "La ligne d'adresse est requise.",
+  "customer.validation.addressTypeRequired": "Le type d'adresse est requis.",
+  "customer.validation.invalidString": "Valeur invalide."
+}
