@@ -24,6 +24,8 @@ function userT(
 ) {
   return t(key, locale, userTranslations, vars);
 }
+
+// --- ANA: Daima HTTPS link döndürür, tenant config yanlışsa bile fixler!
 function getTenantMailContext(req: Request) {
   const tenantData = req.tenantData;
   const locale = getLocale(req);
@@ -31,19 +33,22 @@ function getTenantMailContext(req: Request) {
     (tenantData?.name?.[locale] ||
       tenantData?.name?.en ||
       tenantData?.name) ?? "Brand";
-      const brandWebsite =
-  (tenantData?.domain?.main && `https://${tenantData.domain.main}`) ??
-  process.env.BRAND_WEBSITE ??
-  "https://guezelwebdesign.com";
-  const senderEmail =
-    tenantData?.emailSettings?.senderEmail;
+  const brandWebsite =
+    tenantData?.domain?.main
+      ? `https://${tenantData.domain.main.replace(/^https?:\/\//, "")}`
+      : process.env.BRAND_WEBSITE ?? "https://guezelwebdesign.com";
+  const senderEmail = tenantData?.emailSettings?.senderEmail;
+  // ✳️ Daima https:// ile başlat
   const frontendUrl =
-    tenantData?.domain?.main ||
-    process.env.FRONTEND_URL
+    tenantData?.domain?.main
+      ? `https://${tenantData.domain.main.replace(/^https?:\/\//, "")}`
+      : process.env.FRONTEND_URL
+        ? process.env.FRONTEND_URL.replace(/^http:\/\//, "https://")
+        : "https://guezelwebdesign.com";
   return { brandName, brandWebsite, senderEmail, frontendUrl };
 }
 
-// ✅ E-posta Doğrulama Gönder (next parametresiz)
+// --- E-posta Doğrulama Gönder
 export const sendEmailVerification = async (
   req: Request,
   res: Response
@@ -63,10 +68,7 @@ export const sendEmailVerification = async (
 
   const user = await User.findOne({ email, tenant: req.tenant });
   if (!user) {
-    logger.withReq.warn(
-      req,
-      `[EMAIL-VERIFICATION] Kullanıcı bulunamadı: ${email}`
-    );
+    logger.withReq.warn(req, `[EMAIL-VERIFICATION] Kullanıcı bulunamadı: ${email}`);
     res.status(404).json({
       success: false,
       message: userT("error.userNotFound", locale),
@@ -75,10 +77,7 @@ export const sendEmailVerification = async (
   }
 
   if (user.emailVerified) {
-    logger.withReq.info(
-      req,
-      `[EMAIL-VERIFICATION] Zaten doğrulanmış: ${email}`
-    );
+    logger.withReq.info(req, `[EMAIL-VERIFICATION] Zaten doğrulanmış: ${email}`);
     res.status(200).json({
       success: true,
       message: userT("email.alreadyVerified", locale),
@@ -92,7 +91,12 @@ export const sendEmailVerification = async (
   await user.save();
 
   const { brandName, brandWebsite, senderEmail, frontendUrl } = getTenantMailContext(req);
+  // ⚡️ Sadece HTTPS, asla HTTP yok!
   const verifyUrl = `${frontendUrl.replace(/\/$/, "")}/verify-email/${token}`;
+
+  // Log kontrolü (isteğe bağlı, prod'da kaldır!)
+  logger.info(`[EMAIL-VERIFICATION] Gönderilecek link: ${verifyUrl}`);
+
   await sendEmail({
     tenantSlug: req.tenant,
     to: user.email,
