@@ -25,6 +25,7 @@ const userSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
     company: { type: String, required: false },
+    customerId: { type: Schema.Types.ObjectId, ref: "customer" },
     position: { type: String, required: false },
     tenant: { type: String, required: true, index: true },
     email: {
@@ -39,7 +40,6 @@ const userSchema = new Schema<IUser>(
       enum: ["superadmin", "admin", "user", "customer", "moderator", "staff"],
       default: "user",
     },
-    profile: { type: Schema.Types.ObjectId, ref: "Profile" },
     addresses: [{ type: Schema.Types.ObjectId, ref: "address" }], // Referans array (her zaman böyle)
     payment: { type: Schema.Types.ObjectId, ref: "payment" },
     cart: { type: Schema.Types.ObjectId, ref: "cart" },

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
-import type { IUserProfileImage } from "@/modules/users/types";
+import type { IUserProfileImage, IUser } from "@/modules/users/types";
 import crypto from "crypto";
 import { passwordResetTemplate } from "@/templates/passwordReset";
 import { sendEmail } from "@/services/emailService";
@@ -12,6 +12,8 @@ import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { sendEmailVerification } from "@/modules/users/auth.advanced.controller";
 import { getTenantMailContext } from "@/core/middleware/tenant/getTenantMailContext";
+import type { Address } from "@/modules/address/types";
+import type { SocialMedia, Notifications } from "@/modules/users/types";
 
 import {
   loginAndSetToken,
@@ -37,147 +39,156 @@ function userT(
   return t(key, locale, userTranslations, vars);
 }
 
-// ✅ Register
-export const registerUser = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const locale = getLocale(req);
-    const { User } = await getTenantModels(req);
+// --- FINAL REGISTER HANDLER ---
+export const registerUser = asyncHandler(async (req: Request, res: Response) => {
+  const locale = getLocale(req);
+  const { User, Customer } = await getTenantModels(req);
 
-    const {
-      name,
-      company,
-      position,
-      email,
-      password,
-      role = "user",
-      phone,
-      addresses = [],
-      bio = "",
-      birthDate,
-      socialMedia = {},
-      notifications = { emailNotifications: true, smsNotifications: false },
-    } = req.body;
+  const {
+    name,
+    company,
+    customerId: reqCustomerId,
+    position,
+    email,
+    password,
+    role = "user",
+    phone,
+    addresses = [],
+    bio = "",
+    birthDate,
+    socialMedia = {},
+    notifications = { emailNotifications: true, smsNotifications: false },
+  } = req.body;
 
-    // --- Validasyonlar ---
-    if (!validateEmailFormat(email)) {
-      logger.withReq.warn(req, `[REGISTER] Geçersiz e-posta: ${email}`);
-      res.status(400).json({
-        success: false,
-        message: userT("auth.register.invalidEmail", locale),
-      });
-      return;
-    }
+  // --- Validasyonlar ---
+  if (!validateEmailFormat(email)) {
+    logger.withReq.warn(req, `[REGISTER] Geçersiz e-posta: ${email}`);
+    res.status(400).json({
+      success: false,
+      message: userT("auth.register.invalidEmail", locale),
+    });
+    return;
+  }
+  const normalizedRole = role.toLowerCase();
+  if (!isValidRole(normalizedRole)) {
+    logger.withReq.warn(req, `[REGISTER] Geçersiz rol: ${role}`);
+    res.status(400).json({
+      success: false,
+      message: userT("auth.register.invalidRole", locale),
+    });
+    return;
+  }
+  let parsedAddresses: Address[] = [];
+let parsedSocialMedia: SocialMedia = {};
+let parsedNotifications: Notifications = {};
 
-    const normalizedRole = role.toLowerCase();
-    if (!isValidRole(normalizedRole)) {
-      logger.withReq.warn(req, `[REGISTER] Geçersiz rol: ${role}`);
-      res.status(400).json({
-        success: false,
-        message: userT("auth.register.invalidRole", locale),
-      });
-      return;
-    }
+// Eğer emin değilsen ve null/undefined ihtimaline karşı:
+try {
+  parsedAddresses = validateJsonField(addresses, "addresses") as Address[];
+  parsedSocialMedia = validateJsonField(socialMedia, "socialMedia") as SocialMedia;
+  parsedNotifications = validateJsonField(notifications, "notifications") as Notifications;
+} catch (error: any) {
+  logger.withReq.warn(req, `[REGISTER] JSON parse hatası: ${error.message}`);
+  res.status(400).json({ success: false, message: error.message });
+  return;
+}
 
-    let parsedAddresses, parsedSocialMedia, parsedNotifications;
-    try {
-      parsedAddresses = validateJsonField(addresses, "addresses");
-      parsedSocialMedia = validateJsonField(socialMedia, "socialMedia");
-      parsedNotifications = validateJsonField(notifications, "notifications");
-    } catch (error: any) {
-      logger.withReq.warn(
-        req,
-        `[REGISTER] JSON parse hatası: ${error.message}`
-      );
-      res.status(400).json({ success: false, message: error.message });
-      return;
-    }
-
-    // Profil resmi objesi
-    let profileImageObj: IUserProfileImage = {
-      url: "/defaults/profile.png",
-      thumbnail: "/defaults/profile-thumbnail.png",
-      webp: "/defaults/profile.webp",
-      publicId: "",
-    };
-    if (req.file) {
-      if (
-        (req.file as any).cloudinary === true ||
-        (req.file as any).public_id
-      ) {
-        profileImageObj = {
-          url: (req.file as any).path || (req.file as any).url,
-          thumbnail: (req.file as any).thumbnail || (req.file as any).url,
-          webp: (req.file as any).webp || "",
-          publicId: (req.file as any).public_id || "",
-        };
-      } else {
-        profileImageObj = {
-          url: `/uploads/profile-images/${req.file.filename}`,
-          thumbnail: `/uploads/profile-images/${req.file.filename}`,
-          webp: "",
-          publicId: "",
-        };
-      }
-    }
-
-    // Kayıt işlemi
-    let user;
-    try {
-      user = await User.create({
-        name,
-        company,
-        position,
-        tenant: req.tenant,
-        email,
-        password: await hashNewPassword(req, password),
-        role: normalizedRole,
-        phone,
-        addresses: parsedAddresses,
-        bio,
-        birthDate,
-        socialMedia: parsedSocialMedia,
-        notifications: parsedNotifications,
-        profileImage: profileImageObj,
-      });
-
-      logger.withReq.info(
-        req,
-        `[REGISTER] Yeni kayıt: ${email} | locale: ${locale}`
-      );
-    } catch (err) {
-      logger.withReq.error(
-        req,
-        `[REGISTER] Kayıt başarısız: ${email} | ${err.message}`
-      );
-      res.status(500).json({
-        success: false,
-        message: userT("auth.register.userCreateFail", locale),
-      });
-      return;
-    }
-
-    // Doğrulama e-posta gönder
-    try {
-      await sendEmailVerification(req, user); // Sadece user'ı ver, res'i verme!
-      res.status(201).json({
-        success: true,
-        emailVerificationRequired: true,
-        message: userT("auth.register.success", locale),
-      });
-      return;
-    } catch (err) {
-      logger.withReq.error(
-        req,
-        `[REGISTER] E-posta doğrulama gönderilemedi: ${user.email} | ${err.message}`
-      );
-      res.status(500).json({
-        success: false,
-        message: userT("auth.emailVerification.fail", locale),
-      });
-      return;
+  // Profil resmi objesi
+  let profileImageObj: IUserProfileImage = {
+    url: "/defaults/profile.png",
+    thumbnail: "/defaults/profile-thumbnail.png",
+    webp: "/defaults/profile.webp",
+    publicId: "",
+  };
+  if (req.file) {
+    if ((req.file as any).cloudinary === true || (req.file as any).public_id) {
+      profileImageObj = {
+        url: (req.file as any).path || (req.file as any).url,
+        thumbnail: (req.file as any).thumbnail || (req.file as any).url,
+        webp: (req.file as any).webp || "",
+        publicId: (req.file as any).public_id || "",
+      };
+    } else {
+      profileImageObj = {
+        url: `/uploads/profile-images/${req.file.filename}`,
+        thumbnail: `/uploads/profile-images/${req.file.filename}`,
+        webp: "",
+        publicId: "",
+      };
     }
   }
-);
+
+  // --- 1️⃣ customerId opsiyonel: Eğer gelirse, doğrula
+  let finalCustomerId: string | undefined = undefined;
+  if (reqCustomerId) {
+    const customer = await Customer.findOne({ _id: reqCustomerId, tenant: req.tenant });
+    if (customer) finalCustomerId = customer._id.toString();
+  }
+
+  // --- 2️⃣ Yoksa: Email ile eşleşen müşteri var mı? (Bağla)
+  if (!finalCustomerId) {
+    const existingCustomer = await Customer.findOne({ email, tenant: req.tenant });
+    if (existingCustomer) finalCustomerId = existingCustomer._id.toString();
+  }
+
+  // --- 3️⃣ Hala yoksa ve rolü "customer" ise yeni müşteri kaydı aç
+  if (!finalCustomerId && normalizedRole === "customer") {
+    const createdCustomer = await Customer.create({
+      companyName: company || name,
+      contactName: name,
+      email,
+      phone,
+      tenant: req.tenant,
+      addresses: parsedAddresses,
+    });
+    finalCustomerId = createdCustomer._id.toString();
+  }
+
+  // --- 4️⃣ User kaydı (customerId opsiyonel!)
+  let user: IUser;
+  try {
+    user = await User.create({
+      name,
+      company,
+      customerId: finalCustomerId, // opsiyonel!
+      position,
+      tenant: req.tenant,
+      email,
+      password: await hashNewPassword(req, password),
+      role: normalizedRole,
+      phone,
+      addresses: parsedAddresses,
+      bio,
+      birthDate,
+      socialMedia: parsedSocialMedia,
+      notifications: parsedNotifications,
+      profileImage: profileImageObj,
+    });
+  } catch (err: any) {
+    logger.withReq.error(req, `[REGISTER] Kullanıcı oluşturulamadı: ${email} | ${err.message}`);
+    res.status(500).json({
+      success: false,
+      message: userT("auth.register.userCreateFail", locale),
+    });
+    return;
+  }
+
+  logger.withReq.info(req, `[REGISTER] Yeni kayıt: ${email} | locale: ${locale}`);
+
+  // --- E-posta doğrulama gönder
+  try {
+    await sendEmailVerification(req, res);
+    return;
+  } catch (err: any) {
+    logger.withReq.error(req, `[REGISTER] E-posta doğrulama gönderilemedi: ${user.email} | ${err.message}`);
+    res.status(500).json({
+      success: false,
+      message: userT("auth.emailVerification.fail", locale),
+    });
+    return;
+  }
+});
+
 
 // ✅ Login
 export const loginUser = asyncHandler(
@@ -259,8 +270,13 @@ export const loginUser = asyncHandler(
         email: user.email,
         role: user.role,
         profileImage: user.profileImage,
+        customerId: user.customerId,   // 🟢 BURAYA EKLE!
+        company: user.company,
+        position: user.position,
+        phone: user.phone,
       },
     });
+
   }
 );
 
@@ -375,7 +391,7 @@ export const forgotPassword = asyncHandler(
     // ✅ Tenant domain/URL ve brand
     const { brandName, senderEmail, frontendUrl } = getTenantMailContext(req);
     const resetLink = `${frontendUrl.replace(/\/$/, "")}/reset-password/${resetToken}`;
-    
+
     // Şablonun parametrelerini de tenant-aware ver
     const html = passwordResetTemplate({
       name: user.name,

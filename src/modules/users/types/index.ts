@@ -25,7 +25,7 @@ export interface IUser {
   name: string;
   company?: string;
   position?: string;
-  tenant: string; // Multi-tenancy (her zaman zorunlu!)
+  tenant: string;
   email: string;
   password: string;
   role: "superadmin" | "admin" | "user" | "customer" | "moderator" | "staff";
@@ -33,42 +33,36 @@ export interface IUser {
   cart?: Types.ObjectId;
   orders?: Types.ObjectId[];
   payment?: Types.ObjectId;
-  profile?: Types.ObjectId;
   deleted?: {
     isDeleted: boolean;
     deletedAt: Date | null;
     reason: string | null;
   };
-  addresses?: (Types.ObjectId | string)[];  // ← Sadece referans ID'ler
-  addressesPopulated?: Address[];           // ← API response'da gerçek adresler
+  addresses?: (Types.ObjectId | string)[];
+  addressesPopulated?: Address[];
   profileImage?: IUserProfileImage;
   isActive: boolean;
   favorites?: Types.ObjectId[];
   bio?: string;
   birthDate?: Date;
-  language?: SupportedLocale; // ← HER ZAMAN central type'dan
+  language?: SupportedLocale;
   socialMedia?: SocialMedia;
   notifications?: Notifications;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
-
-  // --- OTP, MFA, Email Verification fields
   emailVerified?: boolean;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
   verifiedAt?: Date;
-
   otpCode?: string;
   otpExpires?: Date;
-
   mfaEnabled?: boolean;
   mfaSecret?: string;
   mfaBackupCodes?: string[];
-
+  customerId?: Types.ObjectId | string;   // ← ← ←  🟢 **BURASI**
   createdAt: Date;
   updatedAt: Date;
-
-  // --- Methods (instance)
   comparePassword(candidatePassword: string): Promise<boolean>;
   isPasswordHashed(): boolean;
 }
+

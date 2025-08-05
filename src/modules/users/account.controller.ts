@@ -46,79 +46,100 @@ async function processUploadedProfileImage(file: Express.Multer.File) {
   return { url: imageUrl, thumbnail, webp, publicId };
 }
 
-// ✅ Kendi profilini getir (adresler doğrudan Address koleksiyonundan ekleniyor)
-export const getMyProfile = asyncHandler(
-  async (req: Request, res: Response) => {
-    const locale = getLocale(req);
-    const { User, Address } = await getTenantModels(req);
+// ✅ Kendi profilini getir (customerId dahil!)
+export const getMyProfile = asyncHandler(async (req: Request, res: Response) => {
+  const locale = getLocale(req);
+  const { User, Address, Customer } = await getTenantModels(req);
 
-    // Sadece user'ı çek (addresses: ObjectId[] şeklinde)
-    const user = await User.findOne({ _id: req.user!.id, tenant: req.tenant })
-      .select("-password")
-      .populate("profile payment cart orders favorites addresses");
+  const user = await User.findOne({ _id: req.user!.id, tenant: req.tenant })
+    .select("-password")
+    .populate("payment cart orders favorites addresses");
 
-    if (!user) {
-      logger.withReq.warn(req, `[PROFILE] User not found: ${req.user!.id}`);
-      res.status(404).json({
-        success: false,
-        message: userT("error.userNotFound", locale),
-      });
-      return;
-    }
-
-    // Tüm adresler ayrı collection'dan alınır (frontend'de Address[] ile uyumlu olacak!)
-    const addresses = await Address.find({
-      userId: user._id,
-      tenant: req.tenant,
-    }).lean();
-
-    const userObj = user.toObject();
-    userObj.addresses = userObj.addresses ?? []; // ObjectId[] (referans array'i)
-    userObj.addressesPopulated = addresses; // Address[]
-
-    logger.withReq.info(req, `[PROFILE] Profile fetched for: ${user.email}`);
-    res.status(200).json({
-      success: true,
-      message: userT("profile.fetch.success", locale),
-      user: userObj,
+  if (!user) {
+    logger.withReq.warn(req, `[PROFILE] User not found: ${req.user!.id}`);
+    res.status(404).json({
+      success: false,
+      message: userT("error.userNotFound", locale),
     });
+    return;
   }
-);
+
+  // Adresler ayrı collection'dan alınır (frontend ile birebir uyumlu!)
+  const addresses = await Address.find({
+    userId: user._id,
+    tenant: req.tenant,
+  }).lean();
+
+  // 🟢 Opsiyonel: customerId ve istersen customer detayını çek
+  let customerObj = null;
+  if (user.customerId) {
+    customerObj = await Customer.findOne({ _id: user.customerId, tenant: req.tenant });
+  }
+
+  const userObj = user.toObject();
+  userObj.addresses = userObj.addresses ?? [];            // [ObjectId] referans array
+  userObj.addressesPopulated = addresses;                 // [Address]
+  userObj.customerId = userObj.customerId ?? null;        // 🟢 her zaman olsun!
+
+  logger.withReq.info(req, `[PROFILE] Profile fetched for: ${user.email}`);
+  res.status(200).json({
+    success: true,
+    message: userT("profile.fetch.success", locale),
+    user: userObj,
+  });
+});
 
 // ✅ Profil güncelle
-export const updateMyProfile = asyncHandler(
-  async (req: Request, res: Response) => {
-    const locale = getLocale(req);
-    const { User } = await getTenantModels(req);
-    const user = await User.findOne({ _id: req.user!.id, tenant: req.tenant });
-    if (!user) return;
+export const updateMyProfile = asyncHandler(async (req: Request, res: Response) => {
+  const locale = getLocale(req);
+  const { User, Address, Customer } = await getTenantModels(req);
 
-    const { name, email, phone, language, company, position } = req.body;
-    user.name = name ?? user.name;
-    user.email = email ?? user.email;
-    user.phone = phone ?? user.phone;
-    user.language = language ?? user.language ?? locale;
-    user.company = company ?? user.company;
-    user.position = position ?? user.position;
-
-    const updated = await user.save();
-
-    logger.withReq.info(req, `[PROFILE] Updated for: ${user.email}`);
-    res.status(200).json({
-      success: true,
-      message: userT("profile.update.success", locale),
-      user: {
-        _id: updated._id,
-        name: updated.name,
-        company: updated.company,
-        position: updated.position,
-        email: updated.email,
-        phone: updated.phone,
-        language: updated.language,
-      },
+  const user = await User.findOne({ _id: req.user!.id, tenant: req.tenant });
+  if (!user) {
+    logger.withReq.warn(req, `[PROFILE] User not found: ${req.user!.id}`);
+    res.status(404).json({
+      success: false,
+      message: userT("error.userNotFound", locale),
     });
+    return;
   }
-);
+
+  const { name, email, phone, language, company, position } = req.body;
+  user.name = name ?? user.name;
+  user.email = email ?? user.email;
+  user.phone = phone ?? user.phone;
+  user.language = language ?? user.language ?? locale;
+  user.company = company ?? user.company;
+  user.position = position ?? user.position;
+
+  const updated = await user.save();
+
+  // Adresleri yeniden çek/populate et (frontend için net)
+  const addresses = await Address.find({
+    userId: updated._id,
+    tenant: req.tenant,
+  }).lean();
+
+  // Opsiyonel: customerId populate (veya customer objesi de dönebilirsin)
+  let customerObj = null;
+  if (updated.customerId) {
+    customerObj = await Customer.findOne({ _id: updated.customerId, tenant: req.tenant });
+  }
+
+  const userObj = updated.toObject();
+  userObj.addresses = userObj.addresses ?? [];
+  userObj.addressesPopulated = addresses;
+  userObj.customerId = userObj.customerId ?? null;
+
+  logger.withReq.info(req, `[PROFILE] Updated for: ${user.email}`);
+  res.status(200).json({
+    success: true,
+    message: userT("profile.update.success", locale),
+    user: userObj, // 💡 FULL USER OBJESİ!
+  });
+});
+
+
 
 // ✅ Şifre güncelle
 export const updateMyPassword = asyncHandler(
@@ -327,7 +348,6 @@ export const updateFullProfile = asyncHandler(
       "password",
       "orders",
       "cart",
-      "profile",
       "favorites",
       "addresses", // ← adres güncellemesi adres endpointinden yapılır!
       "createdAt",

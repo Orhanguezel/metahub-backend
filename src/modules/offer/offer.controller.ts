@@ -532,6 +532,7 @@ export const requestOfferHandler = asyncHandler(async (req: Request, res: Respon
       success: true,
       message: t("success.requested"),
       offerId: offer._id,
+      customerId: customer._id
     });
     return;
   } catch (error) {

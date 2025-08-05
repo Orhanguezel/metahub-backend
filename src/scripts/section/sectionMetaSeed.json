@@ -552,6 +552,30 @@
     "defaultOrder": 16,
     "defaultEnabled": false
   },
+   {
+    "sectionKey": "testimonialAlt",
+    "label": {
+      "tr": "Müşteri Yorumları",
+      "en": "Testimonials",
+      "de": "Kundenmeinungen",
+      "pl": "Opinie klientów",
+      "fr": "Témoignages clients",
+      "es": "Testimonios de clientes"
+    },
+    "description": {
+      "tr": "Müşteri yorumları ve değerlendirmeleri",
+      "en": "Customer testimonials and reviews",
+      "de": "Kundenmeinungen und Bewertungen",
+      "pl": "Opinie i recenzje klientów",
+      "fr": "Avis et témoignages clients",
+      "es": "Opiniones y testimonios de clientes"
+    },
+    "icon": "MdFeedback",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 16,
+    "defaultEnabled": false
+  },
   {
     "sectionKey": "newsletter",
     "label": {

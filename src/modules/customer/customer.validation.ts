@@ -115,3 +115,32 @@ export const updateCustomerValidator = [
 
   validateRequest,
 ];
+
+// --- Public Update (Sadece belirli alanlar, adres hariç!) ---
+export const updateCustomerPublicValidator = [
+  body("companyName")
+    .optional()
+    .isString()
+    .withMessage((_, { req }) => tMsg("customer.validation.invalidString", req)),
+  body("contactName")
+    .optional()
+    .isString()
+    .withMessage((_, { req }) => tMsg("customer.validation.invalidString", req)),
+  body("email")
+    .optional()
+    .isEmail()
+    .withMessage((_, { req }) => tMsg("customer.validation.invalidEmail", req)),
+  body("phone")
+    .optional()
+    .isString()
+    .withMessage((_, { req }) => tMsg("customer.validation.invalidString", req)),
+  body("notes")
+    .optional()
+    .isString()
+    .withMessage((_, { req }) => tMsg("customer.validation.invalidString", req)),
+  // Adres kesinlikle yok!
+  body("addresses").not().exists().withMessage("Adres güncelleme bu endpointte desteklenmiyor!"),
+  validateRequest,
+];
+
+
