@@ -54,6 +54,8 @@
   "admin.users.invalidRole": "Nieprawidłowa rola.",
   "admin.users.activated": "Użytkownik został pomyślnie aktywowany.",
   "admin.users.blocked": "Użytkownik został pomyślnie zablokowany.",
-  "admin.users.roleUpdated": "Rola użytkownika została pomyślnie zaktualizowana."
+  "admin.users.roleUpdated": "Rola użytkownika została pomyślnie zaktualizowana.",
+  "email.verification.button": "Zweryfikuj e-mail",
+"email.verification.copyPaste": "Jeśli przycisk nie działa, skopiuj poniższy link i wklej go do przeglądarki:"
 }
 

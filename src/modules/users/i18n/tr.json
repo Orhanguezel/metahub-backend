@@ -54,5 +54,7 @@
   "admin.users.invalidRole": "Geçersiz rol.",
   "admin.users.activated": "Kullanıcı başarıyla aktifleştirildi.",
   "admin.users.blocked": "Kullanıcı başarıyla engellendi.",
-  "admin.users.roleUpdated": "Kullanıcı rolü başarıyla güncellendi."
+  "admin.users.roleUpdated": "Kullanıcı rolü başarıyla güncellendi.",
+  "email.verification.button": "E-posta Doğrula",
+"email.verification.copyPaste": "Eğer buton çalışmazsa, aşağıdaki linki kopyalayıp tarayıcınıza yapıştırabilirsiniz:"
 }
