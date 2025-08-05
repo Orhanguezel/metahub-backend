@@ -275,3 +275,104 @@ export const deleteCustomer = asyncHandler(async (req: Request, res: Response, n
     next(error);
   }
 });
+
+// ✅ PUBLIC: Müşteri kendi bilgilerini günceller (sadece izin verilen alanlar, adres yok!)
+export const updateCustomerPublic = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const t = (key: string, params?: any) => translate(key, locale, translations, params);
+
+  try {
+    const { Customer } = await getTenantModels(req);
+
+    // Kimlik kontrolü
+    const authUserId = req.user?._id?.toString?.() || req.user?.id?.toString?.();
+    if (!authUserId) {
+      res.status(401).json({ success: false, message: t("customer.errors.unauthorized") });
+      return;
+    }
+    if (authUserId !== req.params.id) {
+      res.status(403).json({ success: false, message: t("customer.errors.forbidden") });
+      return;
+    }
+
+    // Müşteri kaydını bul
+    const customer = await Customer.findOne({ _id: req.params.id, tenant: req.tenant });
+    if (!customer) {
+      res.status(404).json({ success: false, message: t("customer.errors.notFound") });
+      return;
+    }
+
+    // Sadece belirli alanlar güncellenebilir (adres hariç!)
+    const allowedFields = ["companyName", "contactName", "email", "phone", "notes"];
+    let updatedFields: any = {};
+    allowedFields.forEach((field) => {
+      if (typeof req.body[field] !== "undefined") {
+        updatedFields[field] = req.body[field];
+      }
+    });
+
+    // Email değişiyorsa başka müşteriyle çakışmasın
+    if (
+      updatedFields.email &&
+      updatedFields.email !== customer.email
+    ) {
+      const exists = await Customer.findOne({ email: updatedFields.email, tenant: req.tenant });
+      if (exists) {
+        res.status(409).json({ success: false, message: t("customer.errors.emailExists") });
+        return;
+      }
+    }
+
+    // Update ve dön
+    Object.assign(customer, updatedFields);
+    await customer.save();
+
+    res.status(200).json({
+      success: true,
+      message: t("customer.success.updated"),
+      data: customer,
+    });
+    return;
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+// ✅ PUBLIC: Müşteri kendi kaydını görebilir
+export const getCustomerPublicById = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const t = (key: string, params?: any) => translate(key, locale, translations, params);
+
+  try {
+    const { Customer } = await getTenantModels(req);
+
+    // Kimlik kontrolü
+    const authUserId = req.user?._id?.toString?.() || req.user?.id?.toString?.();
+    if (!authUserId) {
+      res.status(401).json({ success: false, message: t("customer.errors.unauthorized") });
+      return;
+    }
+    if (authUserId !== req.params.id) {
+      res.status(403).json({ success: false, message: t("customer.errors.forbidden") });
+      return;
+    }
+
+    // Sadece kendi kaydını çekebilir!
+    const customer = await Customer.findOne({ _id: req.params.id, tenant: req.tenant }).populate("addresses");
+    if (!customer) {
+      res.status(404).json({ success: false, message: t("customer.errors.notFound") });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: customer,
+    });
+    return;
+  } catch (error) {
+    next(error);
+  }
+});
+
+
