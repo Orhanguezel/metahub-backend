@@ -54,5 +54,7 @@
   "admin.users.invalidRole": "Invalid role.",
   "admin.users.activated": "User successfully activated.",
   "admin.users.blocked": "User successfully blocked.",
-  "admin.users.roleUpdated": "User role updated successfully."
+  "admin.users.roleUpdated": "User role updated successfully.",
+  "email.verification.button": "Verify Email",
+"email.verification.copyPaste": "If the button does not work, please copy and paste the link below into your browser:"
 }

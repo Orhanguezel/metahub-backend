@@ -98,18 +98,29 @@ export const sendEmailVerification = async (
   logger.info(`[EMAIL-VERIFICATION] Gönderilecek link: ${verifyUrl}`);
 
   await sendEmail({
-    tenantSlug: req.tenant,
-    to: user.email,
-    subject: userT("email.verification.subject", locale, { brand: brandName }),
-    html: `
-      <h2>${userT("email.verification.subject", locale, { brand: brandName })}</h2>
-      <p>${userT("email.verification.body", locale, { brand: brandName })}</p>
-      <a href="${verifyUrl}" target="_blank">${verifyUrl}</a>
-      <p style="font-size:12px;color:#888;">${brandName} | ${senderEmail}</p>
-      <p style="font-size:12px;color:#888;">${brandWebsite}</p>
-    `,
-    from: senderEmail,
-  });
+  tenantSlug: req.tenant,
+  to: user.email,
+  subject: userT("email.verification.subject", locale, { brand: brandName }),
+  html: `
+    <h2>${userT("email.verification.subject", locale, { brand: brandName })}</h2>
+    <p>${userT("email.verification.body", locale, { brand: brandName })}</p>
+    <a href="${verifyUrl}" target="_blank" style="font-size:18px;color:#155be8;">
+      ${userT("email.verification.button", locale, { brand: brandName }) || verifyUrl}
+    </a>
+    <br><br>
+    <p style="margin:16px 0 4px 0;font-size:13px;color:#666;">
+      ${userT("email.verification.copyPaste", locale, { link: verifyUrl })}
+    </p>
+    <div style="background:#f8f9fa;border:1px dashed #bbb;padding:8px 14px;margin-bottom:14px;word-break:break-all;">
+      ${verifyUrl}
+    </div>
+    <p style="font-size:12px;color:#888;">${brandName} | ${senderEmail}</p>
+    <p style="font-size:12px;color:#888;">${brandWebsite}</p>
+  `,
+  from: senderEmail,
+});
+
+
 
   logger.withReq.info(req, `[EMAIL-VERIFICATION] E-posta gönderildi: ${email}`);
   res.status(200).json({

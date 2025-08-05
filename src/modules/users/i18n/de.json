@@ -54,5 +54,7 @@
   "admin.users.invalidRole": "Ungültige Rolle.",
   "admin.users.activated": "Benutzer wurde erfolgreich aktiviert.",
   "admin.users.blocked": "Benutzer wurde erfolgreich gesperrt.",
-  "admin.users.roleUpdated": "Benutzerrolle erfolgreich aktualisiert."
+  "admin.users.roleUpdated": "Benutzerrolle erfolgreich aktualisiert.",
+  "email.verification.button": "E-Mail bestätigen",
+"email.verification.copyPaste": "Falls die Schaltfläche nicht funktioniert, kopieren Sie bitte den folgenden Link in Ihren Browser:"
 }
