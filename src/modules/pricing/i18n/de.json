@@ -1,0 +1,21 @@
+{
+  "validation.invalidObjectId": "Ungültiges ID-Format.",
+  "validation.missingTitle": "Titel ist in mindestens einer Sprache erforderlich.",
+  "validation.invalidMultilang": "Titel muss ein mehrsprachiges Objekt sein.",
+  "validation.missingPrice": "Preisfeld ist erforderlich.",
+  "validation.invalidPrice": "Preis muss eine Zahl sein.",
+  "validation.invalidCurrency": "Währung muss USD, EUR oder TRY sein.",
+  "validation.invalidPeriod": "Zeitraum muss 'monthly' oder 'yearly' sein.",
+  "validation.invalidLanguage": "Nicht unterstützter Sprachcode.",
+  "validation.booleanField": "Dieses Feld muss ein Boolean (true/false) sein.",
+  "error.invalid_id": "Ungültige Preis-ID.",
+  "error.not_found": "Preispaket nicht gefunden.",
+  "error.missing_fields": "Einige erforderliche Felder fehlen.",
+  "log.admin_listed": "Alle Preispakete wurden aufgelistet.",
+  "log.admin_fetched": "Preispaket abgerufen.",
+  "log.admin_created": "Preispaket erfolgreich erstellt.",
+  "log.admin_updated": "Preispaket aktualisiert.",
+  "log.admin_deleted": "Preispaket gelöscht.",
+  "log.listed": "Preispakete erfolgreich aufgelistet.",
+  "log.fetched": "Preispaket abgerufen."
+}

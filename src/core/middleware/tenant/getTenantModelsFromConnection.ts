@@ -74,6 +74,7 @@ import { Skill } from "@/modules/skill/models";
 import { SkillCategory } from "@/modules/skillcategory/category.models";
 import { CatalogRequest } from "@/modules/catalog/catalog.models";
 import { Newsletter } from "@/modules/newsletter/newsletter.models";
+import { Pricing } from "@/modules/pricing/models";
 
 // ✅ Ana export
 export const getTenantModelsFromConnection = (conn: Connection) => ({
@@ -157,4 +158,5 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   SkillCategory: conn.model("skillcategory", SkillCategory.schema),
   CatalogRequest: conn.model("catalogrequest", CatalogRequest.schema),
   Newsletter: conn.model("newsletter", Newsletter.schema),
+  Pricing: conn.model("pricing", Pricing.schema),
 });

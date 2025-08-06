@@ -791,5 +791,29 @@
     "required": false,
     "defaultOrder": 19,
     "defaultEnabled": false
+  },
+  {
+    "sectionKey": "pricing",
+    "label": {
+      "tr": "Fiyatlandırma",
+      "en": "Pricing",
+      "de": "Preisgestaltung",
+      "pl": "Cennik",
+      "fr": "Tarification",
+      "es": "Precios"
+    },
+    "description": {
+      "tr": "Ürün ve hizmetlerin fiyatlandırma bilgileri",
+      "en": "Pricing information for products and services",
+      "de": "Preisgestaltungsinformationen für Produkte und Dienstleistungen",
+      "pl": "Informacje o cenach produktów i usług",
+      "fr": "Informations tarifaires pour les produits et services",
+      "es": "Información de precios para productos y servicios"
+    },
+    "icon": "MdAttachMoney",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 20,
+    "defaultEnabled": false
   }
 ]
