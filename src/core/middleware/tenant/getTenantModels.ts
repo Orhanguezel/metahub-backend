@@ -73,6 +73,7 @@ import { Portfolio } from "@/modules/portfolio/models";
 import { Skill } from "@/modules/skill/models";
 import { SkillCategory } from "@/modules/skillcategory/category.models";
 import { CatalogRequest } from "@/modules/catalog/catalog.models";
+import { Pricing } from "@/modules/pricing/models";
 
 export const getTenantModels = async (req: Request) => ({
   Settings: await req.getModel("settings", Settings.schema),
@@ -185,4 +186,5 @@ export const getTenantModels = async (req: Request) => ({
   SkillCategory: await req.getModel("skillcategory", SkillCategory.schema),
   CatalogRequest: await req.getModel("catalogrequest", CatalogRequest.schema),
   Newsletter: await req.getModel("newsletter", Newsletter.schema),
+  Pricing: await req.getModel("pricing", Pricing.schema),
 });

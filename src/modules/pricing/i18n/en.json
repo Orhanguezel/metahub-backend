@@ -1,0 +1,21 @@
+{
+  "validation.invalidObjectId": "Invalid ID format.",
+  "validation.missingTitle": "Title is required in at least one language.",
+  "validation.invalidMultilang": "Title must be a multilingual object.",
+  "validation.missingPrice": "Price field is required.",
+  "validation.invalidPrice": "Price must be a number.",
+  "validation.invalidCurrency": "Currency must be one of USD, EUR, or TRY.",
+  "validation.invalidPeriod": "Period must be 'monthly' or 'yearly'.",
+  "validation.invalidLanguage": "Unsupported language code.",
+  "validation.booleanField": "This field must be boolean (true/false).",
+  "error.invalid_id": "Invalid pricing ID.",
+  "error.not_found": "Pricing package not found.",
+  "error.missing_fields": "Some required fields are missing.",
+  "log.admin_listed": "All pricing packages listed.",
+  "log.admin_fetched": "Pricing package fetched.",
+  "log.admin_created": "Pricing package created successfully.",
+  "log.admin_updated": "Pricing package updated.",
+  "log.admin_deleted": "Pricing package deleted.",
+  "log.listed": "Pricing packages listed successfully.",
+  "log.fetched": "Pricing package fetched."
+}

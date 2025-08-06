@@ -1,0 +1,21 @@
+{
+  "validation.invalidObjectId": "Nieprawidłowy format identyfikatora.",
+  "validation.missingTitle": "Tytuł jest wymagany w co najmniej jednym języku.",
+  "validation.invalidMultilang": "Tytuł musi być obiektem wielojęzycznym.",
+  "validation.missingPrice": "Pole cena jest wymagane.",
+  "validation.invalidPrice": "Cena musi być liczbą.",
+  "validation.invalidCurrency": "Waluta musi być jedną z: USD, EUR lub TRY.",
+  "validation.invalidPeriod": "Okres musi być 'monthly' lub 'yearly'.",
+  "validation.invalidLanguage": "Nieobsługiwany kod języka.",
+  "validation.booleanField": "To pole musi być typu boolean (true/false).",
+  "error.invalid_id": "Nieprawidłowy identyfikator ceny.",
+  "error.not_found": "Pakiet cenowy nie został znaleziony.",
+  "error.missing_fields": "Brakuje niektórych wymaganych pól.",
+  "log.admin_listed": "Wszystkie pakiety cenowe zostały wyświetlone.",
+  "log.admin_fetched": "Pakiet cenowy pobrany.",
+  "log.admin_created": "Pakiet cenowy został pomyślnie utworzony.",
+  "log.admin_updated": "Pakiet cenowy zaktualizowany.",
+  "log.admin_deleted": "Pakiet cenowy usunięty.",
+  "log.listed": "Pakiety cenowe wyświetlone pomyślnie.",
+  "log.fetched": "Pakiet cenowy pobrany."
+}
