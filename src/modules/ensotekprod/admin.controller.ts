@@ -163,7 +163,6 @@ export const createEnsotekprod = asyncHandler(
     }
   }
 );
-
 // ✅ UPDATE
 export const updateEnsotekprod = asyncHandler(
   async (req: Request, res: Response) => {
@@ -185,62 +184,76 @@ export const updateEnsotekprod = asyncHandler(
       return;
     }
 
-    // Çok dilli alanlar
+    // --- Çok dilli alanlar ---
     if (updates.name !== undefined)
       product.name = fillAllLocales(parseIfJson(updates.name));
     if (updates.description !== undefined)
       product.description = fillAllLocales(parseIfJson(updates.description));
 
-    // String arrayler
-    if (updates.tags !== undefined) {
-      let newTags = parseIfJson(updates.tags);
-      if (typeof newTags === "string") {
-        try {
-          newTags = JSON.parse(newTags);
-        } catch {
-          newTags = [newTags];
-        }
-      }
-      product.tags = Array.isArray(newTags) ? newTags : [];
-    }
-    if (updates.color !== undefined) {
-      let newColors = parseIfJson(updates.color);
-      if (typeof newColors === "string") {
-        try {
-          newColors = JSON.parse(newColors);
-        } catch {
-          newColors = [newColors];
-        }
-      }
-      product.color = Array.isArray(newColors) ? newColors : [];
-    }
-
-    // Diğer direkt alanlar
-    const directFields: (keyof IEnsotekprod)[] = [
-      "category",
-      "brand",
-      "price",
-      "stock",
-      "stockThreshold",
-      "material",
-      "weightKg",
-      "size",
-      "powerW",
-      "voltageV",
-      "flowRateM3H",
-      "coolingCapacityKw",
-      "isElectric",
-      "batteryRangeKm",
-      "motorPowerW",
-      "isPublished",
-    ];
-    for (const field of directFields) {
+    // --- Array alanlar ---
+    const arrayFields: (keyof IEnsotekprod)[] = ["tags", "color"];
+    for (const field of arrayFields) {
       if (updates[field] !== undefined) {
-        (product as any)[field] = parseIfJson(updates[field]);
+        let arrVal = parseIfJson(updates[field]);
+        if (typeof arrVal === "string") {
+          try { arrVal = JSON.parse(arrVal); } catch { arrVal = [arrVal]; }
+        }
+        if (!Array.isArray(arrVal) || arrVal.length === 0 || arrVal.every((x) => !x)) {
+          product.set(field, [], { strict: false });
+        } else {
+          product.set(field, arrVal, { strict: false });
+        }
       }
     }
 
-    // Görseller
+    // --- String/text alanlar ("" veya null gelirse silinir) ---
+    const stringFields: (keyof IEnsotekprod)[] = [
+      "material", "size", "brand", "category", "weightKg",
+      "powerW", "voltageV", "flowRateM3H", "coolingCapacityKw",
+      "batteryRangeKm", "motorPowerW"
+    ];
+    for (const field of stringFields) {
+      if (updates[field] !== undefined) {
+        const val = parseIfJson(updates[field]);
+        if (val === "" || val === null) {
+          product.set(field, undefined, { strict: false });
+        } else {
+          product.set(field, val, { strict: false });
+        }
+      }
+    }
+
+    // --- Numeric alanlar ("" veya null gelirse silinir) ---
+    const numericFields: (keyof IEnsotekprod)[] = [
+      "weightKg", "powerW", "voltageV", "flowRateM3H", "coolingCapacityKw",
+      "batteryRangeKm", "motorPowerW", "stockThreshold", "price", "stock"
+    ];
+    for (const field of numericFields) {
+      if (updates[field] !== undefined) {
+        const val = parseIfJson(updates[field]);
+        if (val === "" || val === null) {
+          product.set(field, undefined, { strict: false });
+        } else {
+          product.set(field, Number(val), { strict: false });
+        }
+      }
+    }
+
+    // --- Boolean alanlar (sıfırlama için boş/false gelir) ---
+    if (updates.isElectric !== undefined) {
+      const v = updates.isElectric;
+      product.isElectric = v === "true" || v === true;
+    }
+    if (updates.isActive !== undefined) {
+      const v = updates.isActive;
+      product.isActive = v === "true" || v === true;
+    }
+    if (updates.isPublished !== undefined) {
+      const v = updates.isPublished;
+      product.isPublished = v === "true" || v === true;
+    }
+
+    // --- Görseller (ekleme) ---
     if (!Array.isArray(product.images)) product.images = [];
     if (Array.isArray(req.files)) {
       for (const file of req.files as Express.Multer.File[]) {
@@ -264,22 +277,25 @@ export const updateEnsotekprod = asyncHandler(
       }
     }
 
-    // Silinen görseller
+    // --- Görsel silme ---
     if (updates.removedImages) {
       try {
-        const removed = JSON.parse(updates.removedImages);
+        const removed = Array.isArray(updates.removedImages)
+          ? updates.removedImages
+          : JSON.parse(updates.removedImages);
         product.images = product.images.filter(
           (img: any) => !removed.includes(img.url)
         );
-        for (const img of removed) {
+        for (const imgUrl of removed) {
           const localPath = path.join(
             "uploads",
             req.tenant,
             "ensotekprod-images",
-            path.basename(img.url)
+            path.basename(imgUrl)
           );
           if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-          if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
+          // Eğer cloudinary kullanıyorsan publicId de gönderebilirsin
+          // if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
         }
       } catch (e) {
         console.warn("Invalid removedImages JSON:", e);
@@ -295,11 +311,14 @@ export const updateEnsotekprod = asyncHandler(
       ensotekprodId: id,
     });
 
-    res
-      .status(200)
-      .json({ success: true, message: t("log.updated"), data: product });
+    res.status(200).json({
+      success: true,
+      message: t("log.updated"),
+      data: product,
+    });
   }
 );
+
 
 // ✅ DELETE
 export const deleteEnsotekprod = asyncHandler(

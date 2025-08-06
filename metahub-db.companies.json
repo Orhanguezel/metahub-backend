@@ -1,0 +1,62 @@
+[{
+  "_id": {
+    "$oid": "6882f4690b5080f77eb7ae53"
+  },
+  "companyName": {
+    "tr": "MetaHub Yazılım ve Bilişim Teknolojileri",
+    "en": "MetaHub Software & IT Solutions",
+    "de": "MetaHub Software & IT-Lösungen",
+    "pl": "MetaHub Oprogramowanie i Technologie IT",
+    "fr": "MetaHub Logiciels et Technologies IT",
+    "es": "MetaHub Software y Tecnologías de la Información"
+  },
+  "companyDesc": {
+    "tr": "Tüm iş süreçlerinizi tek bir platformda yönetin. MetaHub, modern işletmeler için gelişmiş SaaS ve multi-tenant çözümler sunar.",
+    "en": "Manage all your business operations on a single platform. MetaHub delivers advanced SaaS and multi-tenant solutions for modern enterprises.",
+    "de": "Verwalten Sie alle Geschäftsprozesse auf einer Plattform. MetaHub bietet moderne SaaS- und Multi-Tenant-Lösungen für Unternehmen.",
+    "pl": "Zarządzaj wszystkimi procesami biznesowymi na jednej platformie. MetaHub oferuje zaawansowane rozwiązania SaaS i multi-tenant dla nowoczesnych firm.",
+    "fr": "Gérez tous vos processus métiers sur une seule plateforme. MetaHub propose des solutions SaaS avancées et multi-tenant pour les entreprises modernes.",
+    "es": "Gestione todos sus procesos empresariales en una sola plataforma. MetaHub ofrece soluciones avanzadas SaaS y multi-tenant para empresas modernas."
+  },
+  "tenant": "metahub",
+  "language": "tr",
+  "taxNumber": "12345678999",
+  "handelsregisterNumber": "HRB 202500",
+  "registerCourt": "Berlin Amtsgericht",
+  "website": "https://www.metahub.guzelwebdesign.com",
+  "email": "orhanguzell@gmail.com",
+  "phone": "01723846068",
+  "addresses": [
+    "687ecbd46dadb61cc8792ee7",
+    {
+      "$oid": "6888472e2a9a277eb5a961fc"
+    }
+  ],
+  "bankDetails": {
+    "bankName": "N26 Bank",
+    "iban": "DE72100110012643026012",
+    "swiftCode": "NTSBDEB1XXX"
+  },
+  "managers": [
+    "Orhan Güzel"
+  ],
+  "images": [
+    {
+      "url": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1753412775/uploads/metahub/company-images/metahub-1753412775326-80856530.webp",
+      "thumbnail": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1753412775/uploads/metahub/company-images/metahub-1753412775326-80856530.webp",
+      "webp": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1753412775/uploads/metahub/company-images/metahub-1753412775326-80856530.webp"
+    }
+  ],
+  "socialLinks": {
+    "facebook": "https://facebook.com/metahubcloud",
+    "instagram": "https://instagram.com/metahub.cloud",
+    "twitter": "https://twitter.com/metahub_cloud",
+    "linkedin": "https://linkedin.com/company/metahubcloud",
+    "youtube": "https://youtube.com/@metahubcloud"
+  },
+  "createdAt": "2024-07-25T13:00:00.000Z",
+  "updatedAt": {
+    "$date": "2025-07-29T03:59:55.435Z"
+  },
+  "__v": 2
+}]

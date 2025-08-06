@@ -65,55 +65,55 @@ export const validateCreateEnsotekprod = [
     .notEmpty()
     .isInt({ min: 0 })
     .withMessage("Stock must be a non-negative integer."),
-  body("stockThreshold").optional().isInt({ min: 0 }),
-  body("tags").optional().custom(isJsonArray),
-  body("color").optional().custom(isJsonArray),
-  body("frameMaterial").optional().isString(),
-  body("brakeType").optional().isString(),
-  body("wheelSize").optional().isInt({ min: 1 }),
-  body("gearCount").optional().isInt({ min: 1 }),
-  body("suspensionType").optional().isString(),
-  body("weightKg").optional().isFloat({ min: 0 }),
-  body("isElectric").optional().isBoolean(),
-  body("batteryRangeKm").optional().isInt({ min: 0 }),
-  body("motorPowerW").optional().isInt({ min: 0 }),
-  body("isPublished").optional().isBoolean(),
+  body("stockThreshold").optional({ checkFalsy: true }).isInt({ min: 0 }),
+  body("tags").optional({ checkFalsy: true }).custom(isJsonArray),
+  body("color").optional({ checkFalsy: true }).custom(isJsonArray),
+  body("frameMaterial").optional({ checkFalsy: true }).isString(),
+  body("brakeType").optional({ checkFalsy: true }).isString(),
+  body("wheelSize").optional({ checkFalsy: true }).isInt({ min: 1 }),
+  body("gearCount").optional({ checkFalsy: true }).isInt({ min: 1 }),
+  body("suspensionType").optional({ checkFalsy: true }).isString(),
+  body("weightKg").optional({ checkFalsy: true }).isFloat({ min: 0 }),
+  body("isElectric").optional({ checkFalsy: true }).isBoolean(),
+  body("batteryRangeKm").optional({ checkFalsy: true }).isInt({ min: 0 }),
+  body("motorPowerW").optional({ checkFalsy: true }).isInt({ min: 0 }),
+  body("isPublished").optional({ checkFalsy: true }).isBoolean(),
   validateRequest,
 ];
 
 // 🟢 UPDATE
 export const validateUpdateEnsotekprod = [
   body("name")
-    .optional()
+    .optional({ checkFalsy: true })
     .custom(hasAtLeastOneLocale)
     .withMessage(
       `Name must be a JSON object with at least one supported locale: ${SUPPORTED_LOCALES.join(", ")}.`
     ),
   body("description")
-    .optional()
+    .optional({ checkFalsy: true })
     .custom(hasAtLeastOneLocale)
     .withMessage(
       `Description must be a JSON object with at least one supported locale: ${SUPPORTED_LOCALES.join(", ")}.`
     ),
-  body("category").optional().isMongoId().withMessage("Category must be a valid MongoDB ObjectId."),
-  body("brand").optional().isString(),
-  body("price").optional().isFloat({ min: 0 }),
-  body("stock").optional().isInt({ min: 0 }),
-  body("stockThreshold").optional().isInt({ min: 0 }),
-  body("tags").optional().custom(isJsonArray),
-  body("color").optional().custom(isJsonArray),
-  body("frameMaterial").optional().isString(),
-  body("brakeType").optional().isString(),
-  body("wheelSize").optional().isInt({ min: 1 }),
-  body("gearCount").optional().isInt({ min: 1 }),
-  body("suspensionType").optional().isString(),
-  body("weightKg").optional().isFloat({ min: 0 }),
-  body("isElectric").optional().isBoolean(),
-  body("batteryRangeKm").optional().isInt({ min: 0 }),
-  body("motorPowerW").optional().isInt({ min: 0 }),
-  body("isPublished").optional().isBoolean(),
+  body("category").optional({ checkFalsy: true }).isMongoId().withMessage("Category must be a valid MongoDB ObjectId."),
+  body("brand").optional({ checkFalsy: true }).isString(),
+  body("price").optional({ checkFalsy: true }).isFloat({ min: 0 }),
+  body("stock").optional({ checkFalsy: true }).isInt({ min: 0 }),
+  body("stockThreshold").optional({ checkFalsy: true }).isInt({ min: 0 }),
+  body("tags").optional({ checkFalsy: true }).custom(isJsonArray),
+  body("color").optional({ checkFalsy: true }).custom(isJsonArray),
+  body("frameMaterial").optional({ checkFalsy: true }).isString(),
+  body("brakeType").optional({ checkFalsy: true }).isString(),
+  body("wheelSize").optional({ checkFalsy: true }).isInt({ min: 1 }),
+  body("gearCount").optional({ checkFalsy: true }).isInt({ min: 1 }),
+  body("suspensionType").optional({ checkFalsy: true }).isString(),
+  body("weightKg").optional({ checkFalsy: true }).isFloat({ min: 0 }),
+  body("isElectric").optional({ checkFalsy: true }).isBoolean(),
+  body("batteryRangeKm").optional({ checkFalsy: true }).isInt({ min: 0 }),
+  body("motorPowerW").optional({ checkFalsy: true }).isInt({ min: 0 }),
+  body("isPublished").optional({ checkFalsy: true }).isBoolean(),
   body("removedImages")
-    .optional()
+    .optional({ checkFalsy: true })
     .custom(isJsonArray)
     .withMessage("removedImages must be a valid JSON array."),
   validateRequest,

@@ -1,11 +1,13 @@
 {
   "koenigsmassage.com": "anastasia",
   "guezelwebdesign.com": "metahub",
-  "metahub.guezelwebdesign.com": "metahub",
+  "metahub.guezelwebdesign.com": "gzl",
   "md-hygienelogistik.de": "hygiene", 
   "ensotek.de": "ensotek", 
   "metahub.localhost": "metahub",
-  "test.guezelwebdesign.com": "ensotek",
+  "antalya-doner-pizzeria.de": "antalya",
+  "test.guezelwebdesign.com": "antalya",
   "localhost": "ensotek",
   "localhost:3000": "ensotek"
+  
 }

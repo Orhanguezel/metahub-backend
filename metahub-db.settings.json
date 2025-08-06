@@ -1,0 +1,279 @@
+[{
+  "_id": {
+    "$oid": "6856c707526a827668525191"
+  },
+  "key": "available_themes",
+  "tenant": "gzl",
+  "value": [
+    "anastasia",
+    "futuristic",
+    "orange",
+    "classic",
+    "modern",
+    "minimal",
+    "guezelweb"
+  ],
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-06-21T14:51:51.033Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-23T18:08:48.801Z"
+  },
+  "__v": 4,
+  "images": []
+},
+{
+  "_id": {
+    "$oid": "6856ca70526a827668525d12"
+  },
+  "key": "site_template",
+  "tenant": "gzl",
+  "value": "classic",
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-06-21T15:06:24.958Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-06T19:41:03.235Z"
+  },
+  "__v": 1,
+  "images": []
+},
+{
+  "_id": {
+    "$oid": "6856d73a86fe515ba9439260"
+  },
+  "key": "footer_rights",
+  "tenant": "gzl",
+  "value": {
+    "tr": "Tüm hakları saklıdır.",
+    "en": "All rights reserved.",
+    "de": "Alle Rechte vorbehalten.",
+    "pl": "All rights reserved.",
+    "fr": "All rights reserved.",
+    "es": "All rights reserved."
+  },
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-06-21T16:00:58.008Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T16:00:58.008Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "686066c1c480b2dca4bcc46a"
+  },
+  "key": "api_key",
+  "tenant": "gzl",
+  "value": "d7bc4651e3e2951f77c621dba0261e172a90181314857e445f8b0f8a2bf1b570",
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-06-28T22:03:45.997Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-28T22:03:45.997Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "684098d6d4d1f2949174d834"
+  },
+  "key": "max_concurrent_bookings",
+  "value": "2",
+  "tenant": "gzl",
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-06-04T19:04:54.536Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-04T19:04:54.536Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6873049dff1b2216b1a3eae3"
+  },
+  "key": "footer_images",
+  "tenant": "gzl",
+  "value": "",
+  "isActive": true,
+  "images": [
+    {
+      "url": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752368284/uploads/metahub/settings-images/metahub-1752368284043-899889405.webp",
+      "thumbnail": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752368284/uploads/metahub/settings-images/metahub-1752368284043-899889405.webp",
+      "webp": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752368284/uploads/metahub/settings-images/metahub-1752368284043-899889405.webp"
+    },
+    {
+      "url": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752368376/uploads/metahub/settings-images/metahub-1752368375363-788485055.webp",
+      "thumbnail": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752368376/uploads/metahub/settings-images/metahub-1752368375363-788485055.webp",
+      "webp": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752368376/uploads/metahub/settings-images/metahub-1752368375363-788485055.webp",
+      "publicId": null
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-07-13T00:58:05.993Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-13T00:59:37.558Z"
+  },
+  "__v": 1
+},
+{
+  "_id": {
+    "$oid": "687304c4ff1b2216b1a3eaea"
+  },
+  "key": "navbar_images",
+  "tenant": "gzl",
+  "value": "",
+  "isActive": true,
+  "images": [
+    {
+      "url": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752368323/uploads/metahub/settings-images/metahub-1752368322235-610441977.webp",
+      "thumbnail": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752368323/uploads/metahub/settings-images/metahub-1752368322235-610441977.webp",
+      "webp": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752368323/uploads/metahub/settings-images/metahub-1752368322235-610441977.webp"
+    },
+    {
+      "url": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752368366/uploads/metahub/settings-images/metahub-1752368365533-373144048.webp",
+      "thumbnail": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752368366/uploads/metahub/settings-images/metahub-1752368365533-373144048.webp",
+      "webp": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752368366/uploads/metahub/settings-images/metahub-1752368365533-373144048.webp",
+      "publicId": null
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-07-13T00:58:44.412Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-13T00:59:27.921Z"
+  },
+  "__v": 1
+},
+{
+  "_id": {
+    "$oid": "6873057ad1b4e8e7a2d7ba4a"
+  },
+  "key": "navbar_main_links",
+  "tenant": "gzl",
+  "value": {
+    "home": {
+      "label": {
+        "en": "Home",
+        "de": "Startseite",
+        "tr": "Anasayfa",
+        "fr": "Accueil",
+        "es": "Inicio",
+        "pl": "Strona główna"
+      },
+      "url": "/"
+    },
+    "about": {
+      "label": {
+        "en": "About Me",
+        "de": "Über mich",
+        "tr": "Hakkımda",
+        "fr": "À propos de moi",
+        "es": "Sobre mí",
+        "pl": "O mnie"
+      },
+      "url": "/aboutme/688ab6a7b959fb1b6c8c865b"
+    },
+    "portfolio": {
+      "label": {
+        "en": "Portfolio",
+        "de": "Portfolio",
+        "tr": "Portfolyo",
+        "fr": "Portfolio",
+        "es": "Portafolio",
+        "pl": "Portfolio"
+      },
+      "url": "/portfolio"
+    },
+    "services": {
+      "label": {
+        "en": "Services",
+        "de": "Leistungen",
+        "tr": "Hizmetler",
+        "fr": "Services",
+        "es": "Servicios",
+        "pl": "Usługi"
+      },
+      "url": "/services"
+    },
+    "blog": {
+      "label": {
+        "en": "Blog",
+        "de": "",
+        "tr": "",
+        "fr": "",
+        "es": "",
+        "pl": ""
+      },
+      "url": "/blog"
+    },
+    "contact": {
+      "label": {
+        "en": "Contact",
+        "de": "Kontakt",
+        "tr": "İletişim",
+        "fr": "Contact",
+        "es": "Contacto",
+        "pl": "Kontakt"
+      },
+      "url": "/contactme"
+    }
+  },
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-06-21T15:46:43.878Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T18:30:13.930Z"
+  },
+  "__v": 1,
+  "images": []
+},
+{
+  "_id": {
+    "$oid": "687305a8d1b4e8e7a2d7ba4f"
+  },
+  "key": "navbar_logo_text",
+  "tenant": "gzl",
+  "value": {
+    "title": {
+      "label": {
+        "en": "MetaHub",
+        "de": "MetaHub",
+        "tr": "MetaHub",
+        "fr": "MetaHub",
+        "es": "MetaHub",
+        "pl": "MetaHub"
+      },
+      "url": "https://guezelwebdesign.com"
+    },
+    "slogan": {
+      "label": {
+        "en": "Digital Hub",
+        "de": "Digitale Zentrale",
+        "tr": "Dijital Platform",
+        "fr": "Hub Digital",
+        "es": "Plataforma Digital",
+        "pl": "Prosta Platforma"
+      },
+      "url": "https://guezelwebdesign.com"
+    }
+  },
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-06-21T16:42:32.328Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-06T01:25:14.643Z"
+  },
+  "__v": 1,
+  "images": []
+}]
