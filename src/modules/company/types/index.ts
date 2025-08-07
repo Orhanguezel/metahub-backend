@@ -15,7 +15,7 @@ export interface ICompany {
   companyName: TranslatedLabel;
   companyDesc?: TranslatedLabel;             // Kısa açıklama/alan
   tenant: string;
-  language: string; // "en" | "de" | "tr" gibi — sadece ana dil!
+  language: string;
   taxNumber: string;
   handelsregisterNumber?: string;
   registerCourt?: string;  

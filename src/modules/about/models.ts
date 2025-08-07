@@ -40,6 +40,7 @@ const AboutSchema = new Schema<IAbout>(
     publishedAt: { type: Date },
     comments: { type: [Schema.Types.ObjectId], ref: "comment", default: [] },
     isActive: { type: Boolean, default: true },
+    order: { type: Number, default: 0, index: true },
   },
   { timestamps: true, minimize: false }
 );
