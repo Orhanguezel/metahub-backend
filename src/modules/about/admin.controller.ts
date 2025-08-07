@@ -38,7 +38,7 @@ export const createAbout = asyncHandler(async (req: Request, res: Response) => {
     translate(key, locale, translations, params);
 
   try {
-    let { title, summary, content, tags, category, isPublished, publishedAt } =
+    let { title, summary, content, tags, category,  isPublished, publishedAt, order } =
       req.body;
 
     title = fillAllLocales(parseIfJson(title));
@@ -56,6 +56,9 @@ export const createAbout = asyncHandler(async (req: Request, res: Response) => {
       }
     }
     if (!Array.isArray(tags)) tags = [];
+
+    order = typeof order === "string" ? parseInt(order, 10) : order;
+    if (isNaN(order)) order = 0;  // Boş veya yanlışsa default 0
 
     const images: IAbout["images"] = [];
     if (Array.isArray(req.files)) {
@@ -98,6 +101,7 @@ export const createAbout = asyncHandler(async (req: Request, res: Response) => {
       images,
       author: req.user?.name || "System",
       isActive: true,
+      order,
     });
 
     logger.withReq.info(req, t("created"), {
@@ -166,6 +170,7 @@ export const updateAbout = asyncHandler(async (req: Request, res: Response) => {
     "category",
     "isPublished",
     "publishedAt",
+    "order",
   ];
   for (const field of updatableFields) {
     if (updates[field] !== undefined) (about as any)[field] = updates[field];
@@ -260,7 +265,7 @@ export const adminGetAllAbout = asyncHandler(
         { path: "comments", strictPopulate: false },
         { path: "category", select: "title" },
       ])
-      .sort({ createdAt: -1 })
+      .sort({ order: 1, createdAt: -1 })
       .lean();
 
     // --- Güvenli array normalization ---

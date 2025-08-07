@@ -433,6 +433,30 @@
     "defaultEnabled": false
   },
   {
+    "sectionKey": "referencesAlt",
+    "label": {
+      "tr": "Referanslar (Alternatif)",
+      "en": "References (Alternative)",
+      "de": "Referenzen (Alternativ)",
+      "pl": "Referencje (Alternatywne)",
+      "fr": "Références (Alternatives)",
+      "es": "Referencias (Alternativas)"
+    },
+    "description": {
+      "tr": "Müşteri referansları ve görüşleri",
+      "en": "Customer references and testimonials",
+      "de": "Kundenreferenzen und Erfahrungsberichte",
+      "pl": "Referencje i opinie klientów",
+      "fr": "Références et témoignages clients",
+      "es": "Referencias y testimonios de clientes"
+    },
+    "icon": "MdStar",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 11,
+    "defaultEnabled": false
+  },
+  {
     "sectionKey": "library",
     "label": {
       "tr": "Dokümantasyon",

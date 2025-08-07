@@ -44,7 +44,7 @@ export const getAllAbout = asyncHandler(async (req: Request, res: Response) => {
   const aboutList = await About.find(filter)
     .populate("comments")
     .populate("category", "name slug")
-    .sort({ createdAt: -1 })
+    .sort({ order: 1, createdAt: -1 })
     .lean();
 
   // --- Güvenli array normalization ---
