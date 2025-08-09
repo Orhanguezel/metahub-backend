@@ -1,15 +1,14 @@
+import "@/core/config/envLoader";
 import fs from "fs";
 import path from "path";
-import { ModuleMeta } from "@/modules/modules/admin.models";
+import { Tenants } from "@/modules/tenants/tenants.model";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "@/modules/modules/i18n";
+import { getTenantDbConnection } from "@/core/config/tenantDb";
+import { getTenantModelsFromConnection } from "@/core/middleware/tenant/getTenantModelsFromConnection";
 
-/**
- * SADECE meta alanlarını kullanarak, fiziksel olarak var olan
- * her modül için ModuleMeta kaydı oluşturur (varsa atlar).
- */
 const DEFAULT_META = {
   icon: "box",
   enabled: true,
@@ -22,14 +21,23 @@ const DEFAULT_META = {
   statsKey: "",
 };
 
-async function seedAllModuleMeta() {
+export async function seedAllModuleMeta() {
   try {
     const modulesDir = path.resolve(process.cwd(), "src/modules");
     if (!fs.existsSync(modulesDir)) {
       throw new Error(`src/modules dizini bulunamadı: ${modulesDir}`);
     }
-
-    // Klasörleri oku
+    // 1️⃣ Aktif tenantları çek
+    const tenants = await Tenants.find({ isActive: true }).lean();
+    if (!tenants.length) {
+      logger.warn("[META] Hiç aktif tenant yok!", {
+        script: "seedAllModuleMeta",
+        event: "meta.no_tenants",
+        status: "warning",
+      });
+      return;
+    }
+    // 2️⃣ Modül klasörlerini oku
     const allEntries = fs.readdirSync(modulesDir);
     const modules: string[] = [];
     for (const entry of allEntries) {
@@ -40,16 +48,15 @@ async function seedAllModuleMeta() {
         }
       } catch (err) {
         logger.warn(`[META] Klasör okunamadı: ${entry} (${err.message})`, {
-          module: "seedAllModuleMeta",
+          script: "seedAllModuleMeta",
           event: "fs.error",
           status: "warning",
         });
       }
     }
-
     if (modules.length === 0) {
       logger.warn(`[META] Hiç modül klasörü bulunamadı. Path: ${modulesDir}`, {
-        module: "seedAllModuleMeta",
+        script: "seedAllModuleMeta",
         event: "meta.no_modules",
         status: "warning",
       });
@@ -58,56 +65,80 @@ async function seedAllModuleMeta() {
     }
 
     let count = 0;
-    for (const moduleName of modules) {
-      try {
-        const exists = await ModuleMeta.findOne({ name: moduleName });
-        if (!exists) {
-          const label = fillAllLocales(moduleName); // Tüm diller için label doldur
-          await ModuleMeta.create({
-            name: moduleName,
-            label,
-            ...DEFAULT_META,
-          });
-          count++;
-          logger.info(t("sync.metaCreated", "tr", translations, { moduleName }), {
-            module: "seedAllModuleMeta",
-            event: "meta.created",
-            status: "success",
-          });
-          console.log(`[META] ${moduleName} meta kaydı eklendi`);
-        } else {
-          logger.info(t("sync.metaExists", "tr", translations, { moduleName }), {
-            module: "seedAllModuleMeta",
-            event: "meta.exists",
-            status: "info",
-          });
+    // 3️⃣ Her tenant-modül kombinasyonu için meta oluştur
+    for (const tenant of tenants) {
+      // Tenant'ın kendi DB connection'unu al
+      const conn = await getTenantDbConnection(tenant.slug);
+      const { ModuleMeta } = getTenantModelsFromConnection(conn);
+
+      for (const moduleName of modules) {
+        try {
+          // Aynı tenant+modül için zaten varsa atla
+          const exists = await ModuleMeta.findOne({ name: moduleName, tenant: tenant.slug });
+          if (!exists) {
+            const label = fillAllLocales(moduleName);
+            await ModuleMeta.create({
+              tenant: tenant.slug,
+              name: moduleName,
+              label,
+              ...DEFAULT_META,
+            });
+            count++;
+            logger.info(
+              t("sync.metaCreated", "tr", translations, { moduleName }),
+              {
+                script: "seedAllModuleMeta",
+                event: "meta.created",
+                status: "success",
+                tenant: tenant.slug,
+                module: moduleName,
+              }
+            );
+            console.log(`[META] ${moduleName} meta kaydı eklendi → ${tenant.slug}`);
+          } else {
+            logger.info(
+              t("sync.metaExists", "tr", translations, { moduleName }),
+              {
+                script: "seedAllModuleMeta",
+                event: "meta.exists",
+                status: "info",
+                tenant: tenant.slug,
+                module: moduleName,
+              }
+            );
+          }
+        } catch (err) {
+          logger.error(
+            `[META] Meta eklenemedi: ${moduleName} → ${tenant.slug} (${err.message})`,
+            {
+              script: "seedAllModuleMeta",
+              event: "meta.create_error",
+              status: "fail",
+              moduleName,
+              tenant: tenant.slug,
+            }
+          );
+          console.error(`[META] Meta eklenemedi: ${moduleName} → ${tenant.slug}:`, err);
         }
-      } catch (err) {
-        logger.error(`[META] Meta eklenemedi: ${moduleName} (${err.message})`, {
-          module: "seedAllModuleMeta",
-          event: "meta.create_error",
-          status: "fail",
-          moduleName,
-        });
-        console.error(`[META] Meta eklenemedi: ${moduleName}:`, err);
       }
     }
-    logger.info(t("sync.metaSummary", "tr", translations, { count }), {
-      module: "seedAllModuleMeta",
-      event: "meta.summary",
-      status: "info",
-      count,
-    });
+    logger.info(
+      t("sync.metaSummary", "tr", translations, { count }),
+      {
+        script: "seedAllModuleMeta",
+        event: "meta.summary",
+        status: "info",
+        count,
+      }
+    );
     console.log(`[META] Toplam ${count} yeni meta kaydı eklendi.`);
   } catch (e: any) {
     logger.error(`[META] seedAllModuleMeta hata: ${e.message}`, {
-      module: "seedAllModuleMeta",
+      script: "seedAllModuleMeta",
       event: "meta.error",
       status: "fail",
     });
     console.error(`[META] seedAllModuleMeta hata:`, e);
-    throw e; // Yukarıya fırlat ki script tamamen dursun
+    throw e;
   }
 }
-
-export { seedAllModuleMeta };

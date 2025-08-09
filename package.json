@@ -8,12 +8,14 @@
   "scripts": {
     "build": "tsc",
     "start": "node -r module-alias/register dist/server.js",
-    "dev": "npx ts-node -r tsconfig-paths/register src/scripts/sync/masterSync.ts && npx ts-node -r tsconfig-paths/register src/server.ts",
-    "sync:meta": "npx ts-node -r tsconfig-paths/register src/scripts/sync/masterSync.ts",
+    "dev": "npx ts-node -r tsconfig-paths/register src/server.ts",
+    "sync:all": "npx ts-node -r tsconfig-paths/register src/scripts/sync/fullSyncModulesAndSettings.ts",
+    "sync:meta": "npx ts-node -r tsconfig-paths/register src/scripts/sync/seedAllModuleMeta.ts",
+    "sync:settings": "npx ts-node -r tsconfig-paths/register src/scripts/sync/seedAllModulesForAllTenants.ts",
+    "sync:health": "npx ts-node -r tsconfig-paths/register src/scripts/sync/healthCheckMetaSettings.ts",
     "sync:tenant": "npx ts-node -r tsconfig-paths/register src/scripts/sync/seedSettingsForNewTenant.ts",
     "sync:module": "npx ts-node -r tsconfig-paths/register src/scripts/sync/seedSettingsForNewModule.ts",
-    "sync:remove-tenant": "npx ts-node -r tsconfig-paths/register src/scripts/sync/removeTenantSettings.ts",
-    "sync:health": "npx ts-node -r tsconfig-paths/register src/scripts/sync/healthCheckMetaSettings.ts",
+    "sync:remove-tenant": "npx ts-node -r tsconfig-paths/register src/scripts/sync/removeTenantSettingsAndUnusedMetas.ts",
     "sync:section": "npx ts-node -r tsconfig-paths/register src/scripts/section/masterSyncSections.ts"
   },
   "keywords": [],

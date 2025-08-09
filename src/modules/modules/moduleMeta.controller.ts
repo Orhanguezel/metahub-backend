@@ -1,20 +1,24 @@
 // src/modules/modules/moduleMeta.controller.ts
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import logger from "@/core/middleware/logger/logger";
-import { t } from "@/core/utils/i18n/translate";
-import translations from "@/modules/modules/i18n";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import { t as translate } from "@/core/utils/i18n/translate";
+import translations from "./i18n";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import type { SupportedLocale, TranslatedLabel } from "@/types/common";
 import { SUPPORTED_LOCALES } from "@/types/common";
-import { ModuleMeta } from "./admin.models";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
 /**
  * Modül Meta Kaydı Oluştur (Sadece GLOBAL alanlar)
  */
 export const createModuleMeta = asyncHandler(
   async (req: Request, res: Response) => {
-    const locale: SupportedLocale = req.locale || "en";
+    const locale: SupportedLocale = req.locale || getLogLocale();
+    const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
+    const { ModuleMeta } = await getTenantModels(req);
     const {
       name,
       icon = "box",
@@ -26,6 +30,7 @@ export const createModuleMeta = asyncHandler(
       order = 0,
       statsKey = "",
       routes = [],
+      tenant,
     } = req.body;
 
     if (!name) {
@@ -34,19 +39,19 @@ export const createModuleMeta = asyncHandler(
       });
       res.status(400).json({
         success: false,
-        message: t("admin.module.nameRequired", locale, translations),
+        message: t("admin.module.nameRequired", { locale }),
       });
       return;
     }
 
-    const existing = await ModuleMeta.findOne({ name });
+    const existing = await ModuleMeta.findOne({ name, tenant });
     if (existing) {
       logger.withReq.warn(req, `Module '${name}' already exists.`, {
         module: "moduleMeta",
       });
       res.status(400).json({
         success: false,
-        message: t("admin.module.exists", locale, translations, { name }),
+        message: t("admin.module.exists", { locale, name }),
       });
       return;
     }
@@ -70,6 +75,7 @@ export const createModuleMeta = asyncHandler(
 
     // Meta kaydını oluştur
     const metaContent = {
+      tenant,
       name,
       icon,
       roles,
@@ -94,7 +100,7 @@ export const createModuleMeta = asyncHandler(
 
     const createdMeta = await ModuleMeta.create(metaContent);
 
-    logger.withReq.info(req, `ModuleMeta '${name}' created.`, {
+    logger.withReq.info(req, t("admin.module.created", { name, locale }), {
       module: "moduleMeta",
       user: userDisplayName,
       locale,
@@ -102,7 +108,7 @@ export const createModuleMeta = asyncHandler(
 
     res.status(201).json({
       success: true,
-      message: t("admin.module.created", locale, translations, { name }),
+      message: t("admin.module.created", { locale, name }),
       data: createdMeta,
     });
   }
@@ -113,9 +119,13 @@ export const createModuleMeta = asyncHandler(
  */
 export const updateModuleMeta = asyncHandler(
   async (req: Request, res: Response) => {
-    const locale: SupportedLocale = req.locale || "en";
+    const locale: SupportedLocale = req.locale || getLogLocale();
+    const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
     const { name } = req.params;
     const updates = req.body;
+
+    const { ModuleMeta } = await getTenantModels(req);
 
     // Sadece şu alanlar güncellenebilir
     const allowedFields = [
@@ -145,13 +155,13 @@ export const updateModuleMeta = asyncHandler(
       version: updates.version,
       by: userDisplayName,
       date: now.toISOString(),
-      note: "Module meta updated",
+      note: t("admin.module.updated", { locale, name }),
     };
 
     // --- EN TEMİZ: findOneAndUpdate ile atomik güncelleme ---
     // History'yi push et, diğer alanları set et
     const meta = await ModuleMeta.findOneAndUpdate(
-      { name },
+      { name, tenant: req.tenant },
       {
         $set: {
           ...updates,
@@ -163,23 +173,23 @@ export const updateModuleMeta = asyncHandler(
     );
 
     if (!meta) {
-      logger.withReq.warn(req, `Module not found for update: ${name}`, {
+      logger.withReq.warn(req, t("admin.module.notFound", { locale, name }), {
         module: "moduleMeta",
       });
       res.status(404).json({
         success: false,
-        message: t("admin.module.notFound", locale, translations),
+        message: t("admin.module.notFound", { locale, name }),
       });
       return;
     }
 
-    logger.withReq.info(req, `Global moduleMeta updated: ${name}`, {
+    logger.withReq.info(req, t("admin.module.updated", { locale, name }), {
       module: "moduleMeta",
       locale,
     });
     res.status(200).json({
       success: true,
-      message: t("admin.module.updated", locale, translations),
+      message: t("admin.module.updated", { locale, name }),
       data: meta,
     });
   }
@@ -189,9 +199,14 @@ export const updateModuleMeta = asyncHandler(
  * Tüm Modül Meta Kayıtlarını Listele (Global)
  */
 export const getAllModuleMetas = asyncHandler(async (req, res) => {
-  const metas = await ModuleMeta.find({});
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const t = (key: string, params?: any) =>
+    translate(key, locale, translations, params);
+  const { ModuleMeta } = await getTenantModels(req);
+  const metas = await ModuleMeta.find({ tenant: req.tenant });
   res.status(200).json({
     success: true,
+    message: t("admin.module.allMetasRetrieved", { count: metas.length }),
     data: metas,
   });
 });
@@ -200,12 +215,16 @@ export const getAllModuleMetas = asyncHandler(async (req, res) => {
  * Tek Modül Meta Kaydını Getir (Global)
  */
 export const getModuleMetaByName = asyncHandler(async (req, res) => {
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const t = (key: string, params?: any) =>
+    translate(key, locale, translations, params);
   const { name } = req.params;
-  const meta = await ModuleMeta.findOne({ name });
+  const { ModuleMeta } = await getTenantModels(req);
+  const meta = await ModuleMeta.findOne({ name, tenant: req.tenant });
   if (!meta) {
     res.status(404).json({
       success: false,
-      message: "Module meta not found",
+      message: t("admin.module.notFound", { locale, name }),
     });
     return;
   }
@@ -220,54 +239,62 @@ export const getModuleMetaByName = asyncHandler(async (req, res) => {
  * DİKKAT: Tüm tenantlarda ayarı silinirse orphan setting cleanup ayrıca yapılmalı!
  */
 export const deleteModuleMeta = asyncHandler(async (req, res) => {
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const t = (key: string, params?: any) =>
+    translate(key, locale, translations, params);
   const { name } = req.params;
-  const meta = await ModuleMeta.findOne({ name });
+  const { ModuleMeta } = await getTenantModels(req);
+  const meta = await ModuleMeta.findOne({ name, tenant: req.tenant });
   if (!meta) {
     res.status(404).json({
       success: false,
-      message: "Module meta not found",
+      message: t("admin.module.notFound", { locale, name }),
     });
     return;
   }
-  await ModuleMeta.deleteOne({ name });
-  logger.withReq.info(req, `ModuleMeta deleted: ${name}`, {
+  await ModuleMeta.deleteOne({ name, tenant: req.tenant });
+  logger.withReq.info(req, t("admin.module.deleted", { locale, name }), {
     module: "moduleMeta",
   });
   res.status(200).json({
     success: true,
-    message: "Module meta deleted",
+    message: t("admin.module.deleted", { locale, name }),
   });
 });
 
 export const importModuleMetas = asyncHandler(
   async (req: Request, res: Response) => {
+    const locale: SupportedLocale = req.locale || getLogLocale();
+    const t = (key: string, params?: any) =>
+      translate(key, locale, translations, params);
     const { metas } = req.body;
+    const { ModuleMeta } = await getTenantModels(req);
 
     if (!Array.isArray(metas) || metas.length === 0) {
       res.status(400).json({
         success: false,
-        message: "No module metas provided for import",
+        message: t("admin.module.noMetasProvided", { locale }),
       });
       return;
     }
 
     const createdMetas = [];
     for (const metaData of metas) {
-      const existing = await ModuleMeta.findOne({ name: metaData.name });
+      const existing = await ModuleMeta.findOne({ name: metaData.name, tenant: req.tenant });
       if (existing) {
         logger.withReq.warn(
           req,
-          `Module '${metaData.name}' already exists. Skipping import.`
+          t("admin.module.alreadyExists", { locale, name: metaData.name })
         );
         continue;
       }
-      const newMeta = await ModuleMeta.create(metaData);
+      const newMeta = await ModuleMeta.create({ ...metaData, tenant: req.tenant });
       createdMetas.push(newMeta);
     }
 
     res.status(201).json({
       success: true,
-      message: "Module metas imported successfully",
+      message: t("admin.module.importSuccess", { locale }),
       data: createdMetas,
     });
   }

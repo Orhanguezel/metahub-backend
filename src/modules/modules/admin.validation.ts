@@ -1,56 +1,161 @@
-import { body, param, query } from "express-validator";
+// src/modules/modules/admin.validation.ts (FINAL, i18n + logger pattern)
+
+import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import logger from "@/core/middleware/logger/logger";
+import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
+import { t as translate } from "@/core/utils/i18n/translate";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import translations from "./i18n";
+import { validateMultilangField } from "@/core/utils/i18n/validationUtils";
 
-/** Çoklu dil label validasyonu (label: { en, tr, de, ... }) */
+/**
+ * HELPERS
+ */
+
+// Body/path içinde tenant taşınmasını açıkça yasakla (header tek gerçek)
+const forbidTenantInBody = body("tenant")
+  .custom((_, { req }) => {
+    const locale = req.locale || getLogLocale();
+    if (typeof req.body?.tenant !== "undefined") {
+      const ctx = getRequestContext(req);
+     
+      throw new Error(translate("admin.module.tenantNotAllowed", locale, translations));
+    }
+    return true;
+  });
+
+// Çoklu dil label validasyonu (label: { en, tr, de, ... } | string)
 const labelValidator = body("label")
   .optional()
-  .custom((label) => {
+  .custom((label, { req }) => {
+    const locale = req.locale || getLogLocale();
+
     if (typeof label === "string") return true;
     if (typeof label !== "object" || Array.isArray(label)) {
-      throw new Error("admin.module.labelRequired");
+      throw new Error(translate("admin.module.labelRequired", locale, translations));
     }
+
     // En az bir locale dolu olmalı
     const hasAtLeastOne = SUPPORTED_LOCALES.some(
-      (locale) =>
-        typeof label[locale] === "string" && label[locale].trim() !== ""
+      (lng) => typeof (label as any)[lng] === "string" && (label as any)[lng].trim() !== ""
     );
-    if (!hasAtLeastOne) throw new Error("admin.module.labelRequired");
+    if (!hasAtLeastOne) {
+      throw new Error(translate("admin.module.labelRequired", locale, translations));
+    }
+
     // Her locale string olmalı
-    for (const locale of Object.keys(label)) {
+    for (const lng of Object.keys(label)) {
       if (
-        SUPPORTED_LOCALES.includes(locale as SupportedLocale) &&
-        typeof label[locale] !== "string"
+        SUPPORTED_LOCALES.includes(lng as SupportedLocale) &&
+        typeof (label as any)[lng] !== "string"
       ) {
-        throw new Error("admin.module.labelLocaleType");
+        throw new Error(translate("admin.module.labelLocaleType", locale, translations));
       }
     }
     return true;
   });
-// validateCreateModuleMeta
+
+// Çoklu dil SEO alanı validasyonu (seoTitle, seoDescription, seoSummary)
+const seoMultiLangValidator = (field: string) =>
+  body(field)
+    .optional()
+    .custom((value, { req }) => {
+      const locale = req.locale || getLogLocale();
+
+      if (typeof value === "undefined") return true;
+      if (typeof value !== "object" || Array.isArray(value)) {
+        throw new Error(translate(`admin.module.${field}Type`, locale, translations));
+      }
+
+      for (const lng of Object.keys(value)) {
+        if (
+          SUPPORTED_LOCALES.includes(lng as SupportedLocale) &&
+          typeof (value as any)[lng] !== "string"
+        ) {
+          throw new Error(translate(`admin.module.${field}LocaleType`, locale, translations));
+        }
+      }
+      return true;
+    });
+
+/**
+ * META (CREATE / UPDATE)
+ * Not: SEO override alanları meta'ya ASLA gelmez. Tenant da ASLA body'de gelmez.
+ */
+
 export const validateCreateModuleMeta = [
-  body("name").isString().notEmpty().withMessage("admin.module.nameRequired"),
-  body("icon").optional().isString().withMessage("admin.module.iconType"),
-  body("roles").optional().isArray().withMessage("admin.module.rolesType"),
+  forbidTenantInBody,
+  body("name")
+    .isString()
+    .notEmpty()
+    .withMessage((_, { req }) =>
+      translate("admin.module.nameRequired", req.locale || getLogLocale(), translations)
+    ),
+  body("icon")
+    .optional()
+    .isString()
+    .withMessage((_, { req }) =>
+      translate("admin.module.iconType", req.locale || getLogLocale(), translations)
+    ),
+  body("roles")
+    .optional()
+    .isArray()
+    .withMessage((_, { req }) =>
+      translate("admin.module.rolesType", req.locale || getLogLocale(), translations)
+    ),
   body("language")
     .optional()
     .isIn(SUPPORTED_LOCALES)
-    .withMessage("admin.module.languageInvalid"),
+    .withMessage((_, { req }) =>
+      translate("admin.module.languageInvalid", req.locale || getLogLocale(), translations)
+    ),
   body("enabled")
     .optional()
     .isBoolean()
-    .withMessage("admin.module.enabledType"),
-  body("label").exists().withMessage("admin.module.labelRequired"), // mutlaka olmalı
+    .withMessage((_, { req }) =>
+      translate("admin.module.enabledType", req.locale || getLogLocale(), translations)
+    ),
+  body("label")
+    .exists()
+    .withMessage((_, { req }) =>
+      translate("admin.module.labelRequired", req.locale || getLogLocale(), translations)
+    ),
   labelValidator,
   body("version").optional().isString(),
   body("order").optional().isInt(),
   body("statsKey").optional().isString(),
-  // history, routes backend'de default eklenir, validasyon gerekmez!
+  // SEO alanları META için yasak
+  body("seoTitle")
+    .not()
+    .exists()
+    .withMessage((_, { req }) =>
+      translate("admin.module.seoNotAllowedInMeta", req.locale || getLogLocale(), translations)
+    ),
+  body("seoDescription")
+    .not()
+    .exists()
+    .withMessage((_, { req }) =>
+      translate("admin.module.seoNotAllowedInMeta", req.locale || getLogLocale(), translations)
+    ),
+  body("seoSummary")
+    .not()
+    .exists()
+    .withMessage((_, { req }) =>
+      translate("admin.module.seoNotAllowedInMeta", req.locale || getLogLocale(), translations)
+    ),
+  body("seoOgImage")
+    .not()
+    .exists()
+    .withMessage((_, { req }) =>
+      translate("admin.module.seoNotAllowedInMeta", req.locale || getLogLocale(), translations)
+    ),
   validateRequest,
 ];
 
-// validateUpdateModuleMeta
 export const validateUpdateModuleMeta = [
+  forbidTenantInBody,
   body("icon").optional().isString(),
   body("roles").optional().isArray(),
   body("language").optional().isIn(SUPPORTED_LOCALES),
@@ -60,58 +165,108 @@ export const validateUpdateModuleMeta = [
   body("version").optional().isString(),
   body("order").optional().isInt(),
   body("statsKey").optional().isString(),
-  // Diğer alanlara asla izin yok!
+  // SEO alanları META için yasak
+  body("seoTitle")
+    .not()
+    .exists()
+    .withMessage((_, { req }) =>
+      translate("admin.module.seoNotAllowedInMeta", req.locale || getLogLocale(), translations)
+    ),
+  body("seoDescription")
+    .not()
+    .exists()
+    .withMessage((_, { req }) =>
+      translate("admin.module.seoNotAllowedInMeta", req.locale || getLogLocale(), translations)
+    ),
+  body("seoSummary")
+    .not()
+    .exists()
+    .withMessage((_, { req }) =>
+      translate("admin.module.seoNotAllowedInMeta", req.locale || getLogLocale(), translations)
+    ),
+  body("seoOgImage")
+    .not()
+    .exists()
+    .withMessage((_, { req }) =>
+      translate("admin.module.seoNotAllowedInMeta", req.locale || getLogLocale(), translations)
+    ),
   validateRequest,
 ];
 
-// validateModuleNameParam
-export const validateModuleNameParam = [
-  param("name")
+/**
+ * MODULE SETTING (TENANT OVERRIDES)
+ * Not: Tenant body/path ile gelmez (header zorunlu).
+ */
+export const validateTenantModuleSetting = [
+  forbidTenantInBody,
+  body("module")
     .isString()
     .notEmpty()
-    .withMessage("admin.module.nameParamRequired"),
-  validateRequest,
-];
-
-// validateTenantModuleSetting (PATCH)
-export const validateTenantModuleSetting = [
-  body("module").isString().notEmpty().withMessage("admin.module.nameRequired"),
+    .withMessage((_, { req }) =>
+      translate("admin.module.nameRequired", req.locale || getLogLocale(), translations)
+    ),
   body("enabled").optional().isBoolean(),
   body("visibleInSidebar").optional().isBoolean(),
   body("useAnalytics").optional().isBoolean(),
   body("showInDashboard").optional().isBoolean(),
   body("roles").optional().isArray(),
   body("order").optional().isInt(),
+  // SEO override alanları:
+  seoMultiLangValidator("seoTitle"),
+  seoMultiLangValidator("seoDescription"),
+  seoMultiLangValidator("seoSummary"),
+  body("seoOgImage").optional().isString(),
   validateRequest,
 ];
 
-// validateTenantParam (GET/DELETE)
-export const validateTenantParam = [
-  param("tenant")
+/**
+ * PARAM VALIDATION
+ */
+export const validateModuleNameParam = [
+  param("name")
     .isString()
     .notEmpty()
-    .withMessage("admin.module.tenantParamRequired"),
+    .withMessage((_, { req }) =>
+      translate("admin.module.nameParamRequired", req.locale || getLogLocale(), translations)
+    ),
   validateRequest,
 ];
 
-// validateBatchUpdate (PATCH: batch update)
+/**
+ * Batch operations (maintenance)
+ * - Header’daki tenant kullanılacağı için body'de tenant beklenmez.
+ * - module zorunlu (global assign vb. için)
+ */
 export const validateBatchUpdate = [
-  body("module").isString().notEmpty(),
-  body("update").isObject().notEmpty(),
-  validateRequest,
-];
-
-// validateBatchAssign (POST: bir tenant'a tüm modüller)
-export const validateBatchAssign = [
-  body("tenant")
+  forbidTenantInBody,
+  body("module")
     .isString()
     .notEmpty()
-    .withMessage("admin.module.tenantStringRequired"),
+    .withMessage((_, { req }) =>
+      translate("admin.module.nameRequired", req.locale || getLogLocale(), translations)
+    ),
+  body("update").isObject().notEmpty(),
+  // Güvenlik: update objesinde tenant olamaz
+  body("update.tenant")
+    .not()
+    .exists()
+    .withMessage((_, { req }) =>
+      translate("admin.module.tenantNotAllowed", req.locale || getLogLocale(), translations)
+    ),
   validateRequest,
 ];
 
-// validateGlobalAssign (POST: tüm tenantlara bir modül)
+// Eski (tenant body’de zorunlu) → KALDIRILDI. Header’dan tenant alınır.
+export const validateBatchAssign = [forbidTenantInBody, validateRequest];
+
+// Global assign: body’de yalnızca module adı beklenir
 export const validateGlobalAssign = [
-  body("module").isString().notEmpty().withMessage("admin.module.nameRequired"),
+  forbidTenantInBody,
+  body("module")
+    .isString()
+    .notEmpty()
+    .withMessage((_, { req }) =>
+      translate("admin.module.nameRequired", req.locale || getLogLocale(), translations)
+    ),
   validateRequest,
 ];

@@ -1,52 +1,48 @@
+// src/modules/modules/moduleMaintenance.router.ts (FINAL — tenant-scoped only)
+
 import express from "express";
 import {
   getModuleTenantMatrix,
   assignAllModulesToTenant,
-  assignModuleToAllTenants,
   repairModuleSettings,
   removeAllModulesFromTenant,
-  removeModuleFromAllTenants,
   cleanupOrphanModuleSettings,
   getAllAnalyticsStatus,
   batchUpdateModuleSetting,
 } from "./moduleMaintenance.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import {
-  validateBatchAssign,
-  validateBatchUpdate,
-  validateTenantParam,
-} from "./admin.validation";
+import { validateBatchAssign, validateBatchUpdate } from "./admin.validation";
 
 const router = express.Router();
 
-// ADMIN / AUTH KORUMALI
-router.use(authenticate, authorizeRoles("admin"));
+// AUTH: admin veya superadmin (hepsi tenant-scoped; global uç yok)
+router.use(authenticate, authorizeRoles("admin", "superadmin"));
 
-// GET: Tenant-modül matrix
+/**
+ * NOT:
+ * - Tenant path/body ile asla taşınmaz; x-tenant header’dan çözülür.
+ * - Tüm uçlar yalnızca header’daki tenant üzerinde çalışır.
+ */
+
+// GET: Header’daki tenant için module→exists matrisi
 router.get("/matrix", getModuleTenantMatrix);
 
-// POST: Tek tenant’a tüm aktif modülleri assign et
+// POST: Header’daki tenant’a tüm aktif modülleri assign et (eksikleri tamamla)
 router.post("/batch-assign", validateBatchAssign, assignAllModulesToTenant);
 
-// POST: Tüm tenantlara bir modül ekle
-router.post("/global-assign", assignModuleToAllTenants);
-
-// POST: Eksik setting mappinglerini tamamla
+// POST: Header’daki tenant için eksik setting mappinglerini tamamla
 router.post("/repair-settings", repairModuleSettings);
 
-// DELETE: Bir tenant’taki tüm mappingleri sil
+// DELETE: Header’daki tenant’taki TÜM mappingleri sil (cleanup)
 router.delete("/tenant-cleanup", removeAllModulesFromTenant);
 
-// DELETE: Bir modülü tüm tenantlardan sil
-router.delete("/global-cleanup", removeModuleFromAllTenants);
-
-// DELETE: Orphan mapping temizliği (meta kaydı olmayanlar)
+// DELETE: Header’daki tenant’ta orphan mapping temizliği (meta’sı olmayanlar)
 router.delete("/cleanup-orphan", cleanupOrphanModuleSettings);
 
-// GET: Analitik info (useAnalytics field’ı)
+// GET: Header’daki tenant için analitik info (meta.useAnalytics)
 router.get("/analytics-status", getAllAnalyticsStatus);
 
-// PATCH: Batch update (bir modülün tüm mappingleri)
+// PATCH: Header’daki tenant için batch update (tek module’un mapping’i)
 router.patch("/batch-update", validateBatchUpdate, batchUpdateModuleSetting);
 
 export default router;
