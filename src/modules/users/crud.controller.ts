@@ -1,14 +1,10 @@
+// controllers/admin/users.controller.ts
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import {
-  isValidObjectId,
-  getUserOrFail,
-  validateJsonField,
-} from "@/core/utils/validation";
+import { isValidObjectId, validateJsonField } from "@/core/utils/validation";
 import path from "path";
 import fs from "fs";
 import { v2 as cloudinary } from "cloudinary";
-
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import userTranslations from "@/modules/users/i18n";
@@ -16,63 +12,88 @@ import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
-// Kısayol fonksiyonu
-function userT(
-  key: string,
-  locale: SupportedLocale,
-  vars?: Record<string, string | number>
-) {
+function userT(key: string, locale: SupportedLocale, vars?: Record<string, string | number>) {
   return t(key, locale, userTranslations, vars);
 }
 
-// 📂 Profil resim klasörü
 const PROFILE_IMAGE_DIR = path.join(process.cwd(), "uploads", "profile-images");
 
-// ✅ Admin: Tüm kullanıcıları getir
+const SAFE_PROJECTION = {
+  password: 0,
+  mfaSecret: 0,
+  mfaBackupCodes: 0,
+  otpCode: 0,
+  otpExpires: 0,
+  emailVerificationToken: 0,
+  emailVerificationExpires: 0,
+  passwordResetToken: 0,
+  passwordResetExpires: 0,
+} as const;
+
+/* ---------------------------------- LIST ---------------------------------- */
 export const getUsers = asyncHandler(async (req: Request, res: Response) => {
   const locale: SupportedLocale = req.locale || getLogLocale();
   const { User } = await getTenantModels(req);
 
-  logger.withReq.debug(req, `[Admin] getUsers called | locale=${locale}`);
+  const {
+    q,
+    role,
+    isActive,
+    emailVerified,
+    page = "1",
+    limit = "12",
+    sortBy = "createdAt",
+    sortDir = "desc",
+  } = req.query as Record<string, string>;
 
-  const users = await User.find({ tenant: req.tenant }).select("-password");
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 12));
+  const skip = (pageNum - 1) * limitNum;
 
-  logger.withReq.info(req, `[Admin] getUsers success | count=${users.length}`);
+  const filter: any = { tenant: req.tenant };
+  if (q) {
+    const rx = new RegExp(q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+    filter.$or = [{ name: rx }, { email: rx }, { company: rx }, { position: rx }];
+  }
+  if (role) filter.role = role;
+  if (isActive === "true" || isActive === "false") filter.isActive = isActive === "true";
+  if (emailVerified === "true" || emailVerified === "false") filter.emailVerified = emailVerified === "true";
+
+  const allowedSorts = new Set(["createdAt", "updatedAt", "name", "email", "role"]);
+  const sortField = allowedSorts.has(sortBy) ? sortBy : "createdAt";
+  const sort: any = { [sortField]: sortDir === "asc" ? 1 : -1 };
+
+  const [items, total] = await Promise.all([
+    User.find(filter).select(SAFE_PROJECTION).sort(sort).skip(skip).limit(limitNum).lean(),
+    User.countDocuments(filter),
+  ]);
 
   res.status(200).json({
     success: true,
     message: userT("admin.users.fetched", locale),
-    data: users,
+    data: items,
+    meta: { page: pageNum, limit: limitNum, total, totalPages: Math.ceil(total / limitNum) },
   });
 });
 
-// ✅ Admin: Kullanıcıyı ID ile getir
+/* ---------------------------------- READ ---------------------------------- */
 export const getUserById = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const locale: SupportedLocale = req.locale || getLogLocale();
   const { User } = await getTenantModels(req);
 
-  logger.withReq.debug(
-    req,
-    `[Admin] getUserById called | id=${id} | locale=${locale}`
-  );
-
   if (!isValidObjectId(id)) {
     logger.withReq.warn(req, `[Admin] Invalid user ID: ${id}`);
-    res.status(400).json({
-      success: false,
-      message: userT("admin.users.invalidId", locale),
-    });
+    res.status(400).json({ success: false, message: userT("admin.users.invalidId", locale) });
     return;
   }
 
-  const user = await User.findOne({ _id: id, tenant: req.tenant });
+  const user = await User.findOne({ _id: id, tenant: req.tenant }).select(SAFE_PROJECTION).lean();
   if (!user) {
     logger.withReq.warn(req, `[Admin] User not found: ${id}`);
+    res.status(404).json({ success: false, message: userT("admin.users.notFound", locale) });
     return;
   }
-
-  logger.withReq.info(req, `[Admin] User fetched: ${id}`);
 
   res.status(200).json({
     success: true,
@@ -81,9 +102,52 @@ export const getUserById = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-// ✅ Admin: Kullanıcıyı güncelle (profil resmi - about mantığı)
+/* --------------------------------- UPDATE --------------------------------- */
 export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const { User } = await getTenantModels(req);
+
+  if (!isValidObjectId(id)) {
+    logger.withReq.warn(req, `[Admin] Invalid user ID: ${id}`);
+    res.status(400).json({ success: false, message: userT("admin.users.invalidId", locale) });
+    return;
+  }
+
+  const existing = await User.findOne({ _id: id, tenant: req.tenant });
+  if (!existing) {
+    logger.withReq.warn(req, `[Admin] User not found for update: ${id}`);
+    res.status(404).json({ success: false, message: userT("admin.users.notFound", locale) });
+    return;
+  }
+
+  let nextProfileImage = existing.profileImage;
+  if (req.file) {
+    try {
+      const img = existing.profileImage as any;
+      if (img?.publicId) await cloudinary.uploader.destroy(img.publicId);
+      if (img?.url && String(img.url).startsWith("/uploads/profile-images/")) {
+        const localPath = path.join(PROFILE_IMAGE_DIR, path.basename(img.url));
+        await fs.promises.unlink(localPath).catch(() => void 0);
+      }
+    } catch (e) {
+      logger.withReq.error(req, `[Admin] Old image cleanup error: ${e}`);
+    }
+
+    const f: any = req.file;
+    if (f.cloudinary === true || f.public_id) {
+      nextProfileImage = {
+        url: f.path || f.url,
+        thumbnail: f.thumbnail || (f.path || f.url),
+        webp: f.webp || "",
+        publicId: f.public_id,
+      };
+    } else {
+      const url = `/uploads/profile-images/${f.filename}`;
+      nextProfileImage = { url, thumbnail: url, webp: "" };
+    }
+  }
+
   const {
     name,
     company,
@@ -94,231 +158,94 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
     phone,
     bio,
     birthDate,
+    language,
     socialMedia,
     notifications,
     addresses,
-    oldProfileImage,
+    emailVerified,
   } = req.body;
 
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const { User } = await getTenantModels(req);
-
-  logger.withReq.debug(
-    req,
-    `[Admin] updateUser called | id=${id} | locale=${locale}`
-  );
-
-  const user = await User.findOne({ _id: id, tenant: req.tenant });
-  if (!user) {
-    logger.withReq.warn(req, `[Admin] User not found for update: ${id}`);
+  if (role && req.user && req.user.role !== "superadmin" && role === "superadmin") {
+    res.status(403).json({ success: false, message: userT("admin.users.forbiddenRoleChange", locale) });
     return;
   }
 
-  let newProfileImage = user.profileImage;
-
-  // Eğer yeni dosya yüklenmişse
-  if (req.file) {
-    logger.withReq.info(req, `[Admin] Updating profile image for user: ${id}`);
-
-    // 1️⃣ Eski resmi sil (Cloudinary ve local)
-    if (user.profileImage) {
-      if (typeof user.profileImage === "object") {
-        if (user.profileImage.publicId) {
-          try {
-            await cloudinary.uploader.destroy(user.profileImage.publicId);
-            logger.withReq.info(
-              req,
-              `[Admin] Cloudinary image deleted: ${user.profileImage.publicId}`
-            );
-          } catch (err) {
-            logger.withReq.error(
-              req,
-              `[Admin] Cloudinary image delete error: ${err}`
-            );
-          }
-        }
-        if (
-          user.profileImage.url &&
-          user.profileImage.url.startsWith("/uploads/profile-images/")
-        ) {
-          try {
-            const localPath = path.join(
-              PROFILE_IMAGE_DIR,
-              path.basename(user.profileImage.url)
-            );
-            await fs.promises.unlink(localPath);
-            logger.withReq.info(
-              req,
-              `[Admin] Local profile image deleted: ${localPath}`
-            );
-          } catch (err) {
-            logger.withReq.error(
-              req,
-              `[Admin] Local image delete error: ${err}`
-            );
-          }
-        }
-      } else if (typeof user.profileImage === "string") {
-        try {
-          const localPath = path.join(PROFILE_IMAGE_DIR, user.profileImage);
-          await fs.promises.unlink(localPath);
-          logger.withReq.info(
-            req,
-            `[Admin] Local profile image deleted: ${localPath}`
-          );
-        } catch (err) {
-          logger.withReq.error(req, `[Admin] Local image delete error: ${err}`);
-        }
-      }
-    }
-
-    // 2️⃣ Yeni dosya objesini oluştur
-    let url = "";
-    let thumbnail = "";
-    let webp = "";
-    let publicId: string | undefined = undefined;
-
-    if ((req.file as any).cloudinary === true || (req.file as any).public_id) {
-      url = (req.file as any).path || (req.file as any).url;
-      publicId = (req.file as any).public_id;
-      thumbnail = (req.file as any).thumbnail || url;
-      webp = (req.file as any).webp || "";
-    } else {
-      url = `/uploads/profile-images/${req.file.filename}`;
-      thumbnail = url;
-      webp = "";
-    }
-    newProfileImage = { url, thumbnail, webp, publicId };
-  }
-
-  // JSON alanları güvenle güncelle
-  let updates: any = {
-    name: name ?? user.name,
-    company: company ?? user.company,
-    position: position ?? user.position,
-    email: email ?? user.email,
-    role: role ?? user.role,
-    isActive: typeof isActive === "boolean" ? isActive : user.isActive,
-    phone: phone ?? user.phone,
-    bio: bio ?? user.bio,
-    birthDate: birthDate ? new Date(birthDate) : user.birthDate,
-    profileImage: newProfileImage,
+  const updates: any = {
+    ...(name !== undefined && { name }),
+    ...(company !== undefined && { company }),
+    ...(position !== undefined && { position }),
+    ...(email !== undefined && { email }),
+    ...(role !== undefined && { role }),
+    ...(typeof isActive === "boolean" && { isActive }),
+    ...(phone !== undefined && { phone }),
+    ...(bio !== undefined && { bio }),
+    ...(birthDate && { birthDate: new Date(birthDate) }),
+    ...(language && { language }),
+    ...(typeof emailVerified === "boolean" && { emailVerified }),
+    profileImage: nextProfileImage,
   };
 
   try {
-    updates.socialMedia = socialMedia
-      ? validateJsonField(socialMedia, "socialMedia")
-      : user.socialMedia;
-    updates.notifications = notifications
-      ? validateJsonField(notifications, "notifications")
-      : user.notifications;
-    updates.addresses = addresses
-      ? validateJsonField(addresses, "addresses")
-      : user.addresses;
-  } catch (error: any) {
-    logger.withReq.warn(
-      req,
-      `[Admin] JSON field validation error: ${error.message}`
-    );
-    res.status(400).json({ success: false, message: error.message });
+    if (socialMedia !== undefined) updates.socialMedia = validateJsonField(socialMedia, "socialMedia");
+    if (notifications !== undefined) updates.notifications = validateJsonField(notifications, "notifications");
+    if (addresses !== undefined) updates.addresses = validateJsonField(addresses, "addresses");
+  } catch (e: any) {
+    logger.withReq.warn(req, `[Admin] JSON field validation error: ${e.message}`);
+    res.status(400).json({ success: false, message: e.message });
     return;
   }
 
-  const updatedUser = await User.findByIdAndUpdate(id, updates, {
-    new: true,
-    runValidators: true,
-    tenant: req.tenant,
-  });
+  const updated = await User.findOneAndUpdate(
+    { _id: id, tenant: req.tenant },
+    updates,
+    { new: true, runValidators: true, projection: SAFE_PROJECTION }
+  );
 
-  logger.withReq.info(req, `[Admin] User updated: ${id}`);
+  if (!updated) {
+    res.status(404).json({ success: false, message: userT("admin.users.notFound", locale) });
+    return;
+  }
 
   res.status(200).json({
     success: true,
     message: userT("admin.users.updated", locale),
-    data: updatedUser,
+    data: updated,
   });
 });
 
-// ✅ Admin: Kullanıcıyı sil (profil fotoğrafı Cloudinary & local dosya mantığı ile)
+/* --------------------------------- DELETE --------------------------------- */
 export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const locale: SupportedLocale = req.locale || getLogLocale();
   const { User } = await getTenantModels(req);
 
-  logger.withReq.debug(
-    req,
-    `[Admin] deleteUser called | id=${id} | locale=${locale}`
-  );
-
   if (!isValidObjectId(id)) {
     logger.withReq.warn(req, `[Admin] Invalid user ID: ${id}`);
-    res.status(400).json({
-      success: false,
-      message: userT("admin.users.invalidId", locale),
-    });
+    res.status(400).json({ success: false, message: userT("admin.users.invalidId", locale) });
     return;
   }
+
   const user = await User.findOne({ _id: id, tenant: req.tenant });
-  await User.deleteOne({ _id: id, tenant: req.tenant });
   if (!user) {
     logger.withReq.warn(req, `[Admin] User not found for delete: ${id}`);
-    res.status(404).json({
-      success: false,
-      message: userT("admin.users.notFound", locale),
-    });
+    res.status(404).json({ success: false, message: userT("admin.users.notFound", locale) });
     return;
   }
 
-  // Profil resmi sil
-  if (user.profileImage) {
-    if (typeof user.profileImage === "object") {
-      if (user.profileImage.publicId) {
-        try {
-          await cloudinary.uploader.destroy(user.profileImage.publicId);
-          logger.withReq.info(
-            req,
-            `[Admin] Cloudinary image deleted: ${user.profileImage.publicId}`
-          );
-        } catch (err) {
-          logger.withReq.error(
-            req,
-            `[Admin] Cloudinary image delete error: ${err}`
-          );
-        }
-      }
-      if (
-        user.profileImage.url &&
-        user.profileImage.url.startsWith("/uploads/profile-images/")
-      ) {
-        try {
-          const localPath = path.join(
-            PROFILE_IMAGE_DIR,
-            path.basename(user.profileImage.url)
-          );
-          await fs.promises.unlink(localPath);
-          logger.withReq.info(
-            req,
-            `[Admin] Local profile image deleted: ${localPath}`
-          );
-        } catch (err) {
-          logger.withReq.error(req, `[Admin] Local image delete error: ${err}`);
-        }
-      }
-    } else if (typeof user.profileImage === "string") {
-      try {
-        const localPath = path.join(PROFILE_IMAGE_DIR, user.profileImage);
-        await fs.promises.unlink(localPath);
-        logger.withReq.info(
-          req,
-          `[Admin] Local profile image deleted: ${localPath}`
-        );
-      } catch (err) {
-        logger.withReq.error(req, `[Admin] Local image delete error: ${err}`);
-      }
-    }
-  }
+  // (Kendini silme kontrolü başka bir middleware’de yapıldığı için burada tekrar etmiyoruz)
 
-  logger.withReq.info(req, `[Admin] User deleted: ${id}`);
+  await User.deleteOne({ _id: id, tenant: req.tenant });
+
+  try {
+    const img: any = user.profileImage;
+    if (img?.publicId) await cloudinary.uploader.destroy(img.publicId).catch(() => void 0);
+    if (img?.url && String(img.url).startsWith("/uploads/profile-images/")) {
+      const localPath = path.join(PROFILE_IMAGE_DIR, path.basename(img.url));
+      await fs.promises.unlink(localPath).catch(() => void 0);
+    }
+  } catch (e) {
+    logger.withReq.error(req, `[Admin] Image delete error: ${e}`);
+  }
 
   res.status(200).json({
     success: true,

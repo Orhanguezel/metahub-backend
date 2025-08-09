@@ -1,85 +1,109 @@
+// users.me.validation.ts (veya mevcut dosyan)
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
-import { SUPPORTED_LOCALES } from "@/types/common";
+import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import { t as translate } from "@/core/utils/i18n/translate";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import translations from "./i18n";
 
-// 🔐 Register validation
+// ortak i18n helper (express-validator withMessage için)
+const msg =
+  (key: string, vars?: Record<string, any>) =>
+  (_value: any, { req }: { req: any }) =>
+    translate(
+      key,
+      (req?.locale as SupportedLocale) || getLogLocale(),
+      translations,
+      vars
+    );
+
+/* ----------------------------- AUTH: REGISTER ----------------------------- */
 export const validateRegister = [
-  body("name").isString().notEmpty().withMessage("Name is required."),
-  body("email").isEmail().withMessage("Valid email is required."),
+  body("name")
+    .isString()
+    .trim()
+    .notEmpty()
+    .withMessage(msg("validation.name.required")),
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage(msg("validation.email.required")),
   body("password")
     .isString()
     .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters."),
+    .withMessage(msg("validation.password.min", { min: 6 })),
   validateRequest,
 ];
 
-// 🔐 Login validation
+/* ------------------------------- AUTH: LOGIN ------------------------------ */
 export const validateLogin = [
-  body("email").isEmail().withMessage("Valid email is required."),
-  body("password").notEmpty().withMessage("Password is required."),
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage(msg("validation.email.required")),
+  body("password").notEmpty().withMessage(msg("validation.password.required")),
   validateRequest,
 ];
 
-// ✅ User ID param check
+/* ------------------------------ PARAM: USER ID ---------------------------- */
 export const validateUserId = [
-  param("id").isMongoId().withMessage("Invalid user ID."),
+  param("id").isMongoId().withMessage(msg("validation.userId.invalid")),
   validateRequest,
 ];
 
-// ✏️ Update my profile (me/update)
+/* ----------------------------- ME: UPDATE PROFILE ------------------------- */
 export const validateUpdateMyProfile = [
-  body("name").optional().isString().withMessage("Name must be a string."),
-  body("email").optional().isEmail().withMessage("Email must be valid."),
-  body("phone").optional().isString().withMessage("Phone must be a string."),
+  body("name").optional().isString().withMessage(msg("validation.name.string")),
+  body("email").optional().isEmail().withMessage(msg("validation.email.valid")),
+  body("phone").optional().isString().withMessage(msg("validation.phone.string")),
   body("language")
     .optional()
     .isIn(SUPPORTED_LOCALES)
     .withMessage(
-      `Language must be one of: ${SUPPORTED_LOCALES.join(", ")}.`
+      msg("validation.language.enum", { list: SUPPORTED_LOCALES.join(", ") })
     ),
   validateRequest,
 ];
 
-// 🔑 Update my password (me/password)
+/* ---------------------------- ME: UPDATE PASSWORD ------------------------- */
 export const validateUpdateMyPassword = [
   body("currentPassword")
     .notEmpty()
-    .withMessage("Current password is required."),
+    .withMessage(msg("validation.currentPassword.required")),
   body("newPassword")
     .isString()
     .isLength({ min: 6 })
-    .withMessage("New password must be at least 6 characters."),
+    .withMessage(msg("validation.newPassword.min", { min: 6 })),
   validateRequest,
 ];
 
-// 🔔 Update notification settings (me/notifications)
+/* ------------------------ ME: NOTIFICATION SETTINGS ----------------------- */
 export const validateUpdateNotificationSettings = [
   body("emailNotifications")
     .optional()
     .isBoolean()
-    .withMessage("emailNotifications must be a boolean."),
+    .withMessage(msg("validation.emailNotifications.boolean")),
   body("smsNotifications")
     .optional()
     .isBoolean()
-    .withMessage("smsNotifications must be a boolean."),
+    .withMessage(msg("validation.smsNotifications.boolean")),
   validateRequest,
 ];
 
-// 🌐 Update social links (me/social)
+/* ----------------------------- ME: SOCIAL LINKS --------------------------- */
 export const validateUpdateSocialLinks = [
   body("facebook")
     .optional()
     .isString()
-    .withMessage("Facebook must be a string."),
+    .withMessage(msg("validation.facebook.string")),
   body("instagram")
     .optional()
     .isString()
-    .withMessage("Instagram must be a string."),
+    .withMessage(msg("validation.instagram.string")),
   body("twitter")
     .optional()
     .isString()
-    .withMessage("Twitter must be a string."),
-  // Yeni sosyal medya platformu eklemek için buraya ekle:
-  // body("linkedin").optional().isString().withMessage("LinkedIn must be a string."),
+    .withMessage(msg("validation.twitter.string")),
+  // body("linkedin").optional().isString().withMessage(msg("validation.linkedin.string")),
   validateRequest,
 ];
