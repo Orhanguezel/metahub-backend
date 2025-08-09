@@ -19,7 +19,6 @@ import {
 import { updateUserRole, toggleUserStatus } from "./status.controller";
 
 import { upload } from "@/core/middleware/file/uploadMiddleware";
-import { validateApiKey } from "@/core/middleware/validateApiKey";
 import { uploadTypeWrapper } from "@/core/middleware/file/uploadTypeWrapper";
 
 // ✅ Validations
@@ -57,7 +56,6 @@ router.get(
   "/users",
   authenticate,
   authorizeRoles("admin"),
-  validateApiKey,
   getUsers
 );
 
@@ -84,7 +82,6 @@ router.delete(
   "/users/:id",
   authenticate,
   authorizeRoles("admin"),
-  validateApiKey,
   validateUserIdParam,
   deleteUser
 );
@@ -94,7 +91,6 @@ router.put(
   authenticate,
   authorizeRoles("admin"),
   validateUpdateUserRole,
-  validateApiKey,
   updateUserRole
 );
 
@@ -103,7 +99,6 @@ router.put(
   authenticate,
   authorizeRoles("admin"),
   validateToggleUserStatus,
-  validateApiKey,
   toggleUserStatus
 );
 

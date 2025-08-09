@@ -1,88 +1,146 @@
-import { body, param } from "express-validator";
+// src/modules/users/users.admin.validation.ts
+import { body, param, query } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
+import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import { t as translate } from "@/core/utils/i18n/translate";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import translations from "./i18n";
 
-// 🔐 Register validation
+// i18n helper: express-validator withMessage için
+const msg =
+  (key: string, vars?: Record<string, any>) =>
+  (_value: any, { req }: { req: any }) =>
+    translate(
+      key,
+      (req?.locale as SupportedLocale) || getLogLocale(),
+      translations,
+      vars
+    );
+
+// Tek noktadan rol listesi (register/update için superadmin DAHİL DEĞİL)
+const ROLES = ["admin", "user", "customer", "moderator", "staff"] as const;
+
+/* ------------------------------ REGISTER ------------------------------ */
 export const validateRegister = [
-  body("name").isString().notEmpty().withMessage("Name is required."),
-  body("email").isEmail().withMessage("Valid email is required."),
+  body("name")
+    .isString()
+    .trim()
+    .notEmpty()
+    .withMessage(msg("validation.name.required")),
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage(msg("validation.email.required")),
   body("password")
     .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters."),
+    .withMessage(msg("validation.password.min", { min: 6 })),
   body("role")
     .optional()
-    .isIn(["admin", "user", "customer", "moderator", "staff"])
-    .withMessage("Invalid role."),
+    .isIn(ROLES as unknown as string[])
+    .withMessage(msg("validation.role.enum", { list: ROLES.join(", ") })),
   validateRequest,
 ];
 
-// 🔐 Login validation
+/* ------------------------------- LOGIN -------------------------------- */
 export const validateLogin = [
-  body("email").isEmail().withMessage("Valid email is required."),
-  body("password").notEmpty().withMessage("Password is required."),
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage(msg("validation.email.required")),
+  body("password")
+    .notEmpty()
+    .withMessage(msg("validation.password.required")),
   validateRequest,
 ];
 
-// 🔑 Change password validation
+/* --------------------------- CHANGE PASSWORD --------------------------- */
 export const validateChangePassword = [
   body("currentPassword")
     .isString()
     .notEmpty()
-    .withMessage("Current password is required."),
+    .withMessage(msg("validation.currentPassword.required")),
   body("newPassword")
     .isLength({ min: 6 })
-    .withMessage("New password must be at least 6 characters."),
+    .withMessage(msg("validation.newPassword.min", { min: 6 })),
   validateRequest,
 ];
 
-// 🔑 Forgot password validation
+/* --------------------------- FORGOT PASSWORD --------------------------- */
 export const validateForgotPassword = [
-  body("email").isEmail().withMessage("Valid email is required."),
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage(msg("validation.email.required")),
   validateRequest,
 ];
 
-// 🔑 Reset password validation
+/* ---------------------------- RESET PASSWORD --------------------------- */
 export const validateResetPassword = [
-  param("token").isString().notEmpty().withMessage("Reset token is required."),
+  param("token")
+    .isString()
+    .notEmpty()
+    .withMessage(msg("validation.token.required")),
   body("newPassword")
     .isLength({ min: 6 })
-    .withMessage("New password must be at least 6 characters."),
+    .withMessage(msg("validation.newPassword.min", { min: 6 })),
   validateRequest,
 ];
 
-// 🆔 User ID param validation
+/* ------------------------------ USER ID -------------------------------- */
 export const validateUserIdParam = [
-  param("id").isMongoId().withMessage("Invalid user ID."),
+  param("id").isMongoId().withMessage(msg("validation.userId.invalid")),
   validateRequest,
 ];
 
-// 🛠️ Update user validation (admin)
+/* ----------------------------- UPDATE USER ----------------------------- */
 export const validateUpdateUser = [
-  body("name").optional().isString(),
-  body("email").optional().isEmail().withMessage("Email must be valid."),
+  body("name").optional().isString().withMessage(msg("validation.name.string")),
+  body("email")
+    .optional()
+    .isEmail()
+    .withMessage(msg("validation.email.valid")),
   body("role")
     .optional()
-    .isIn(["admin", "user", "customer", "moderator", "staff"])
-    .withMessage("Invalid role."),
-  body("isActive").optional().isBoolean(),
-  body("phone").optional().isString(),
-  body("bio").optional().isString(),
-  body("birthDate").optional().isISO8601().toDate(),
+    .isIn(ROLES as unknown as string[])
+    .withMessage(msg("validation.role.enum", { list: ROLES.join(", ") })),
+  body("isActive")
+    .optional()
+    .isBoolean()
+    .withMessage(msg("validation.isActive.boolean")),
+  body("phone")
+    .optional()
+    .isString()
+    .withMessage(msg("validation.phone.string")),
+  body("bio")
+    .optional()
+    .isString()
+    .withMessage(msg("validation.bio.string")),
+  body("birthDate")
+    .optional()
+    .isISO8601()
+    .withMessage(msg("validation.birthDate.iso"))
+    .toDate(),
   validateRequest,
 ];
 
-// 🛠️ Update role validation
+/* -------------------------- UPDATE USER ROLE --------------------------- */
 export const validateUpdateUserRole = [
-  param("id").isMongoId().withMessage("Invalid user ID."),
+  param("id").isMongoId().withMessage(msg("validation.userId.invalid")),
   body("role")
     .notEmpty()
-    .isIn(["admin", "user", "customer", "moderator", "staff"])
-    .withMessage("Invalid role."),
+    .isIn(ROLES as unknown as string[])
+    .withMessage(msg("validation.role.required")),
   validateRequest,
 ];
 
-// 🛠️ Update status validation
+/* ------------------------- TOGGLE USER STATUS -------------------------- */
+// Not: Controller'da zaten toggle yapıyorsan body.isActive gerekmeyebilir.
+// Yine de mevcut davranışı korumak adına boolean doğrulamasını bıraktım.
 export const validateToggleUserStatus = [
-  param("id").isMongoId().withMessage("Invalid user ID."),
-  body("isActive").isBoolean().withMessage("isActive must be boolean."),
+  param("id").isMongoId().withMessage(msg("validation.userId.invalid")),
+  body("isActive")
+    .optional()
+    .isBoolean()
+    .withMessage(msg("validation.isActive.boolean")),
   validateRequest,
 ];
