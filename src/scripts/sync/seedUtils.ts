@@ -1,14 +1,16 @@
 import "@/core/config/envLoader";
 import fs from "fs/promises";
 import path from "path";
-import { seedSettingsForNewModule } from "./seedSettingsForNewModule";
 import { Tenants } from "@/modules/tenants/tenants.model";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "@/modules/modules/i18n";
 import type { SupportedLocale } from "@/types/common";
+import { getTenantDbConnection } from "@/core/config/tenantDb";
+import { getTenantModelsFromConnection } from "@/core/middleware/tenant/getTenantModelsFromConnection";
+import { seedSettingsForNewModule } from "./seedSettingsForNewModule";
 
-// --- Tenant arayüzü (yalnızca gerekli alanlar)
+// --- Tenant arayüzü (yalnızca gerekli alanlar) ---
 interface Tenant {
   slug: string;
   isActive: boolean;
@@ -25,33 +27,75 @@ export async function getAllModuleNames(): Promise<string[]> {
 
 /**
  * Tüm aktif tenantlar için, fiziksel olarak var olan her modülün setting kaydını açar (sadece eksikse!).
- * Sadece modelde tanımlı alanlar yazılır, asla fazlası değil!
+ * Her tenantın kendi veritabanı/modeli kullanılır!
  */
 export async function seedAllModulesForAllTenants(
   locale: SupportedLocale = "en"
 ) {
   const moduleNames = await getAllModuleNames();
-  const allTenants = (await Tenants.find({
-    isActive: true,
-  }).lean()) as Tenant[];
-  let successCount = 0,
-    failCount = 0;
+  const allTenants = (await Tenants.find({ isActive: true }).lean()) as Tenant[];
 
-  for (const moduleName of moduleNames) {
-    for (const tenant of allTenants) {
+  let successCount = 0, failCount = 0;
+
+  if (!moduleNames.length || !allTenants.length) {
+    logger.warn(t("sync.noModuleOrTenant", locale, translations), {
+      script: "seedAllModulesForAllTenants",
+      event: "no.data",
+      status: "warning",
+    });
+    return;
+  }
+
+  for (const tenant of allTenants) {
+    if (!tenant.slug) {
+      logger.error(
+        `[Seed] Tenant slug eksik! Tenant: ${JSON.stringify(tenant)}`,
+        {
+          script: "seedAllModulesForAllTenants",
+          event: "invalid.tenant",
+          status: "fail",
+          tenant: tenant.slug,
+        }
+      );
+      failCount += moduleNames.length;
+      continue;
+    }
+    let conn, models;
+    try {
+      conn = await getTenantDbConnection(tenant.slug);
+      models = getTenantModelsFromConnection(conn);
+    } catch (err) {
+      logger.error(
+        `[Seed] Tenant DB bağlantı hatası: ${tenant.slug} ${(err as any)?.message}`,
+        {
+          script: "seedAllModulesForAllTenants",
+          event: "db.connection.error",
+          status: "fail",
+          tenant: tenant.slug,
+          error: (err as any)?.message,
+        }
+      );
+      failCount += moduleNames.length;
+      continue;
+    }
+    for (const moduleName of moduleNames) {
       try {
+        // Her tenant+modül için seed işlemini o tenantın contextinde yap!
+        // seedSettingsForNewModule idempotent çalışıyorsa burada doğrudan çağrılabilir,
+        // ancak tenant contextini modele iletmek istiyorsan models.ModuleSetting ile çalış
         await seedSettingsForNewModule(moduleName, tenant.slug);
+
         logger.info(
           t("sync.settingCreated", locale, translations, {
             moduleName,
             tenant: tenant.slug,
           }),
           {
-            module: "seedAllModulesForAllTenants",
+            script: "seedAllModulesForAllTenants",
             event: "setting.created",
             status: "success",
             tenant: tenant.slug,
-            moduleName,
+            module: moduleName,
           }
         );
         successCount++;
@@ -64,11 +108,11 @@ export async function seedAllModulesForAllTenants(
             message: (e as any)?.message,
           }),
           {
-            module: "seedAllModulesForAllTenants",
+            script: "seedAllModulesForAllTenants",
             event: "setting.error",
             status: "fail",
             tenant: tenant.slug,
-            moduleName,
+            module: moduleName,
             error: (e as any)?.message,
           }
         );
@@ -84,7 +128,7 @@ export async function seedAllModulesForAllTenants(
   logger.info(
     t("sync.seedSummary", locale, translations, { successCount, failCount }),
     {
-      module: "seedAllModulesForAllTenants",
+      script: "seedAllModulesForAllTenants",
       event: "seed.summary",
       status: "info",
       successCount,

@@ -3,7 +3,7 @@
     "$oid": "6856c707526a827668525191"
   },
   "key": "available_themes",
-  "tenant": "gzl",
+  "tenant": "antalya",
   "value": [
     "anastasia",
     "futuristic",
@@ -28,7 +28,7 @@
     "$oid": "6856ca70526a827668525d12"
   },
   "key": "site_template",
-  "tenant": "gzl",
+  "tenant": "antalya",
   "value": "classic",
   "isActive": true,
   "createdAt": {
@@ -45,7 +45,7 @@
     "$oid": "6856d73a86fe515ba9439260"
   },
   "key": "footer_rights",
-  "tenant": "gzl",
+  "tenant": "antalya",
   "value": {
     "tr": "Tüm hakları saklıdır.",
     "en": "All rights reserved.",
@@ -68,7 +68,7 @@
     "$oid": "686066c1c480b2dca4bcc46a"
   },
   "key": "api_key",
-  "tenant": "gzl",
+  "tenant": "antalya",
   "value": "d7bc4651e3e2951f77c621dba0261e172a90181314857e445f8b0f8a2bf1b570",
   "isActive": true,
   "createdAt": {
@@ -85,7 +85,7 @@
   },
   "key": "max_concurrent_bookings",
   "value": "2",
-  "tenant": "gzl",
+  "tenant": "antalya",
   "isActive": true,
   "createdAt": {
     "$date": "2025-06-04T19:04:54.536Z"
@@ -100,7 +100,7 @@
     "$oid": "6873049dff1b2216b1a3eae3"
   },
   "key": "footer_images",
-  "tenant": "gzl",
+  "tenant": "antalya",
   "value": "",
   "isActive": true,
   "images": [
@@ -129,7 +129,7 @@
     "$oid": "687304c4ff1b2216b1a3eaea"
   },
   "key": "navbar_images",
-  "tenant": "gzl",
+  "tenant": "antalya",
   "value": "",
   "isActive": true,
   "images": [
@@ -158,7 +158,7 @@
     "$oid": "6873057ad1b4e8e7a2d7ba4a"
   },
   "key": "navbar_main_links",
-  "tenant": "gzl",
+  "tenant": "antalya",
   "value": {
     "home": {
       "label": {
@@ -242,7 +242,7 @@
     "$oid": "687305a8d1b4e8e7a2d7ba4f"
   },
   "key": "navbar_logo_text",
-  "tenant": "gzl",
+  "tenant": "antalya",
   "value": {
     "title": {
       "label": {
