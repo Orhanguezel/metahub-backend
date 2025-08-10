@@ -1,0 +1,21 @@
+{
+  "apartmentcategory": {
+    "create": {
+      "success": "Kategoria została pomyślnie utworzona: {name}.",
+      "error": "Nie udało się utworzyć kategorii."
+    },
+    "list": {
+      "success": "Listę kategorii pobrano pomyślnie.",
+      "error": "Nie udało się pobrać listy kategorii."
+    },
+    "invalidId": "Nieprawidłowy identyfikator.",
+    "notFound": "Nie znaleziono kategorii.",
+    "fetch": { "success": "Kategoria pobrana pomyślnie." },
+    "update": {
+      "success": "Kategoria zaktualizowana: {name}.",
+      "error": "Nie udało się zaktualizować kategorii."
+    },
+    "delete": { "success": "Kategoria usunięta: {name}." },
+    "duplicate": "Slug już istnieje dla tego najemcy."
+  }
+}

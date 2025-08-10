@@ -1,21 +1,15 @@
+// src/modules/apartment/index.ts
+
 import express from "express";
-import publicRoutes from "./public.apartment.routes";
-import adminRoutes from "./admin.apartment.routes";
-import { Apartment } from "./apartment.model";
-import * as publicApartmentController from "./public.apartment.controller";
-import * as adminApartmentController from "./admin.apartment.controller";
-import * as ApartmentValidation from "./apartment.validation";
+import adminRoutes from "./admin.routes";
+import publicRoutes from "./public.routes";
 
 const router = express.Router();
 
+// 🔐 Admin Routes
 router.use("/admin", adminRoutes);
-router.use("/", publicRoutes);
 
-export {
-  Apartment,
-  publicApartmentController,
-  adminApartmentController,
-  ApartmentValidation,
-};
+// 🌍 Public Routes
+router.use("/", publicRoutes);
 
 export default router;

@@ -1,12 +1,12 @@
 import express from "express";
-import routes from "./apartmentcategory.routes";
-import { ApartmentCategory } from "./apartmentcategory.models";
-import * as ApartmentCategoryController from "./apartmentcategory.controller";
+import routes from "./category.routes";
+import { ApartmentCategory } from "./category.models";
+import * as apartmentCategoryController from "./category.controller";
 
 const router = express.Router();
 router.use("/", routes);
 
 // ✅ Named Exports (standards)
-export { ApartmentCategory, ApartmentCategoryController };
-export * from "./apartmentcategory.validation";
+export { ApartmentCategory, apartmentCategoryController };
+export * from "./category.validation";
 export default router;
