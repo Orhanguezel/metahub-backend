@@ -1,0 +1,21 @@
+{
+  "apartmentcategory": {
+    "create": {
+      "success": "Categoría creada correctamente: {name}.",
+      "error": "No se pudo crear la categoría."
+    },
+    "list": {
+      "success": "Lista de categorías obtenida correctamente.",
+      "error": "No se pudo obtener la lista de categorías."
+    },
+    "invalidId": "ID no válido.",
+    "notFound": "Categoría no encontrada.",
+    "fetch": { "success": "Categoría obtenida correctamente." },
+    "update": {
+      "success": "Categoría actualizada: {name}.",
+      "error": "No se pudo actualizar la categoría."
+    },
+    "delete": { "success": "Categoría eliminada: {name}." },
+    "duplicate": "El slug ya existe para este tenant."
+  }
+}

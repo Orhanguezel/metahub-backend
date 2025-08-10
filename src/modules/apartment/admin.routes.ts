@@ -1,57 +1,54 @@
 import express from "express";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
-  adminGetAllApartments,
+  adminGetAllApartment,
   adminGetApartmentById,
   updateApartment,
   deleteApartment,
   createApartment,
-} from "./admin.apartment.controller";
+} from "./admin.controller";
 
 import {
   validateObjectId,
   validateCreateApartment,
   validateUpdateApartment,
-  validateAdminApartmentQuery,
-} from "./apartment.validation";
+  validateAdminQuery,
+} from "./validation";
 
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import { upload } from "@/core/middleware/file/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/file/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
 
-// 🔐 Admin erişim kontrolü
+// 🌟 Admin Middleware
 router.use(authenticate, authorizeRoles("admin", "moderator"));
 
-// 📥 Daire oluştur
+// 🌟 Admin Endpoints
+router.get("/", validateAdminQuery, adminGetAllApartment);
+
+router.get("/:id", validateObjectId("id"), adminGetApartmentById);
+
 router.post(
   "/",
   uploadTypeWrapper("apartment"),
-  upload("apartment").array("images", 5),
-  transformNestedFields(["title", "description", "tags"]),
+  upload("apartment").array("images", 10),
+  // Yeni alanları JSON → objeye çevir
+  transformNestedFields(["title", "content", "address", "contact", "services", "fees"]),
   validateCreateApartment,
   createApartment
 );
 
-// 📝 Güncelle
 router.put(
   "/:id",
   uploadTypeWrapper("apartment"),
-  upload("apartment").array("images", 5),
-  transformNestedFields(["title", "description", "tags"]),
+  upload("apartment").array("images", 10),
+  transformNestedFields(["title", "content", "address", "contact", "services", "fees"]),
   validateObjectId("id"),
   validateUpdateApartment,
   updateApartment
 );
 
-// 📄 Listeleme
-router.get("/", validateAdminApartmentQuery, adminGetAllApartments);
-
-// 🔍 Tekil getirme
-router.get("/:id", validateObjectId("id"), adminGetApartmentById);
-
-// 🗑 Silme
 router.delete("/:id", validateObjectId("id"), deleteApartment);
 
 export default router;

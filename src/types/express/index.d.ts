@@ -65,6 +65,7 @@ declare global {
         | "team"
         | "portfolio"
         | "skill"
+        | "apartment"
         | "default";
 
 

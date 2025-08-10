@@ -1,0 +1,21 @@
+{
+  "apartmentcategory": {
+    "create": {
+      "success": "Kategorie erfolgreich erstellt: {name}.",
+      "error": "Kategorie konnte nicht erstellt werden."
+    },
+    "list": {
+      "success": "Kategorienliste erfolgreich abgerufen.",
+      "error": "Kategorienliste konnte nicht abgerufen werden."
+    },
+    "invalidId": "Ungültige ID.",
+    "notFound": "Kategorie nicht gefunden.",
+    "fetch": { "success": "Kategorie erfolgreich abgerufen." },
+    "update": {
+      "success": "Kategorie aktualisiert: {name}.",
+      "error": "Kategorie konnte nicht aktualisiert werden."
+    },
+    "delete": { "success": "Kategorie gelöscht: {name}." },
+    "duplicate": "Slug ist innerhalb dieses Tenants bereits vorhanden."
+  }
+}
