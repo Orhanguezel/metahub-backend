@@ -1,5 +1,4 @@
-// src/modules/modules/moduleSetting.router.ts (FINAL)
-
+// src/modules/modules/moduleSetting.router.ts
 import express from "express";
 import {
   updateModuleSetting,
@@ -14,16 +13,17 @@ const router = express.Router();
 
 // ADMIN / AUTH PROTECTED
 router.use(authenticate, authorizeRoles("admin"));
-// GET: Header'daki tenant için tüm module settings
+
+// GET: tenant için tüm settings
 router.get("/", getTenantModuleSettings);
 
-// PATCH: Header'daki tenant için tek module setting override (enabled/sidebar/analytics/dashboard/roles/order/seo*)
+// PATCH: tenant için module setting override
 router.patch("/", validateTenantModuleSetting, updateModuleSetting);
 
-// DELETE: Header'daki tenant için tek mapping sil (body: { module })
+// DELETE: tenant için tek mapping sil
 router.delete("/", deleteModuleSetting);
 
-// DELETE: Header'daki tenant için TÜM mappingleri sil (tenant cleanup)
+// DELETE: tenant için tüm mapping’leri sil
 router.delete("/tenant", deleteAllSettingsForTenant);
 
 export default router;

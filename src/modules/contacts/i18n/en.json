@@ -1,0 +1,22 @@
+{
+  "contact.replyGreeting": "Hello, {{name}}",
+  "contact.replyInfo": "We have received your message at {{brand}} and will respond as soon as possible.",
+  "contact.subject": "Subject",
+  "contact.message": "Message",
+  "contact.sign": "Best regards,<br />The {{brand}} Team",
+  "contact.replyTitle": "Contact Reply",
+  "allFieldsRequired": "All fields are required.",
+  "messageSent": "Your message has been sent.",
+  "messagesFetched": "Messages fetched successfully.",
+  "invalidMessageId": "Invalid message ID.",
+  "messageNotFound": "Message not found.",
+  "messageDeleted": "Message deleted successfully.",
+  "validation.nameRequired": "Name is required.",
+  "validation.nameLength": "Name must be between {{min}} and {{max}} characters.",
+  "validation.emailRequired": "Email is required.",
+  "validation.emailInvalid": "Please enter a valid email address.",
+  "validation.subjectRequired": "Subject is required.",
+  "validation.subjectLength": "Subject must be between {{min}} and {{max}} characters.",
+  "validation.messageRequired": "Message is required.",
+  "validation.messageLength": "Message must be between {{min}} and {{max}} characters."
+}

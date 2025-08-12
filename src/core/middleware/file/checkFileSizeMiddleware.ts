@@ -23,3 +23,6 @@ export const checkFileSizeMiddleware = (req: Request, res: Response, next: NextF
 
   next();
 };
+
+export default checkFileSizeMiddleware;
+

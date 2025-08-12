@@ -1,3 +1,4 @@
+// src/modules/apartment/public.controller.ts
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { isValidObjectId } from "@/core/utils/validation";
@@ -46,6 +47,7 @@ export const publicGetAllApartment = asyncHandler(async (req: Request, res: Resp
     ];
   }
 
+  // near (geo)
   if (nearLng && nearLat) {
     const lng = Number(nearLng);
     const lat = Number(nearLat);
@@ -84,14 +86,13 @@ export const publicGetApartmentBySlug = asyncHandler(async (req: Request, res: R
 
   const doc = await Apartment.findOne({
     tenant: req.tenant,
-    slug: slug.toLowerCase(),
+    slug: String(slug || "").toLowerCase(),
     isActive: true,
     isPublished: true,
   })
     .populate([
       { path: "category", select: "name slug" },
       { path: "customer", select: "companyName contactName email phone" },
-      { path: "services.service", select: "title price durationMinutes slug" },
       { path: "contact.customerRef", select: "companyName contactName email phone" },
       { path: "contact.userRef", select: "name email" },
     ])

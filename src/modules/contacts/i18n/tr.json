@@ -1,0 +1,22 @@
+{
+  "contact.replyGreeting": "Merhaba {{name}}",
+  "contact.replyInfo": "{{brand}} olarak mesajınızı aldık ve en kısa sürede yanıtlayacağız.",
+  "contact.subject": "Konu",
+  "contact.message": "Mesaj",
+  "contact.sign": "Saygılarımızla,<br />{{brand}} Ekibi",
+  "contact.replyTitle": "İletişim Yanıtı",
+  "allFieldsRequired": "Tüm alanlar zorunludur.",
+  "messageSent": "Mesajınız başarıyla gönderildi.",
+  "messagesFetched": "Mesajlar başarıyla getirildi.",
+  "invalidMessageId": "Geçersiz mesaj ID'si.",
+  "messageNotFound": "Mesaj bulunamadı.",
+  "messageDeleted": "Mesaj başarıyla silindi.",
+  "validation.nameRequired": "Ad alanı zorunludur.",
+  "validation.nameLength": "Ad en az {{min}} ve en fazla {{max}} karakter olmalıdır.",
+  "validation.emailRequired": "E-posta alanı zorunludur.",
+  "validation.emailInvalid": "Geçerli bir e-posta adresi giriniz.",
+  "validation.subjectRequired": "Konu alanı zorunludur.",
+  "validation.subjectLength": "Konu en az {{min}} ve en fazla {{max}} karakter olmalıdır.",
+  "validation.messageRequired": "Mesaj alanı zorunludur.",
+  "validation.messageLength": "Mesaj en az {{min}} ve en fazla {{max}} karakter olmalıdır."
+}

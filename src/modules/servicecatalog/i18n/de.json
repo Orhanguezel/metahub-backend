@@ -1,0 +1,25 @@
+{
+  "log": {
+    "listed": "Dienste aufgelistet.",
+    "fetched": "Dienst erfolgreich abgerufen.",
+    "created": "Dienst erfolgreich erstellt.",
+    "updated": "Dienst aktualisiert.",
+    "deleted": "Dienst gelöscht.",
+    "listFetched": "Dienstliste erfolgreich abgerufen."
+  },
+  "error": {
+    "invalid_id": "Ungültige ID.",
+    "not_found": "Dienst nicht gefunden.",
+    "create_fail": "Fehler beim Erstellen des Dienstes."
+  },
+  "validation": {
+    "invalidObjectId": "Ungültige Objekt-ID.",
+    "tagsArray": "Tags müssen ein Array sein.",
+    "durationMinutesPositive": "Dauer muss eine positive Zahl sein.",
+    "pricePositive": "Preis muss eine positive Zahl sein.",
+    "invalidCategory": "Ungültige Kategorie-ID.",
+    "invalidRemovedImages": "Format der entfernten Bilder ist ungültig.",
+    "booleanField": "Dieses Feld muss true oder false sein.",
+    "invalidLanguage": "Ungültiger Sprachcode."
+  }
+}

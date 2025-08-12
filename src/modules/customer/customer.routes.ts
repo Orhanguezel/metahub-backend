@@ -14,20 +14,63 @@ import {
   updateCustomerValidator,
   validateCustomerIdParam,
   updateCustomerPublicValidator,
-} from "./customer.validation";
+  customersAdminQueryValidator,
+} from "./validation";
+import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
 
-// PUBLIC (login müşteri)
+/* PUBLIC (login müşteri) */
 router.get("/public/:id", authenticate, validateCustomerIdParam, getCustomerPublicById);
-router.put("/public/:id", authenticate, validateCustomerIdParam, updateCustomerPublicValidator, updateCustomerPublic);
+router.put(
+  "/public/:id",
+  authenticate,
+  validateCustomerIdParam,
+  updateCustomerPublicValidator,
+  updateCustomerPublic
+);
 
-// ADMIN (admin)
-router.get("/admin", authenticate, authorizeRoles("admin"), getAllCustomers);
-router.get("/admin/:id", authenticate, authorizeRoles("admin"), validateCustomerIdParam, getCustomerById);
-router.post("/admin", authenticate, authorizeRoles("admin"), createCustomerValidator, createCustomer);
-router.put("/admin/:id", authenticate, authorizeRoles("admin"), validateCustomerIdParam, updateCustomerValidator, updateCustomer);
-router.delete("/admin/:id", authenticate, authorizeRoles("admin"), validateCustomerIdParam, deleteCustomer);
+/* ADMIN */
+router.get(
+  "/admin",
+  authenticate,
+  authorizeRoles("admin"),
+  customersAdminQueryValidator,
+  getAllCustomers
+);
+router.get(
+  "/admin/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateCustomerIdParam,
+  getCustomerById
+);
 
+router.post(
+  "/admin",
+  authenticate,
+  authorizeRoles("admin"),
+  transformNestedFields(["addresses", "billing", "tags"]),
+  createCustomerValidator,
+  createCustomer
+);
+
+router.put(
+  "/admin/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateCustomerIdParam,
+  transformNestedFields(["addresses", "billing", "tags"]),
+  updateCustomerValidator,
+  updateCustomer
+);
+
+router.delete(
+  "/admin/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  validateCustomerIdParam,
+  deleteCustomer
+);
 
 export default router;

@@ -1,6 +1,6 @@
+// src/modules/modules/types.ts
 import { SupportedLocale } from "@/types/common";
 
-// Çoklu dil alanı
 export type TranslatedLabel = Record<SupportedLocale, string>;
 
 export interface IModuleMeta {
@@ -17,7 +17,7 @@ export interface IModuleMeta {
   history?: Array<{
     version: string;
     by: string;
-    date: string;
+    date: Date;      // ← schema'da Date, burada da Date
     note?: string;
   }>;
   routes?: Array<{

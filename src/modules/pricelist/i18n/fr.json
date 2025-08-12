@@ -1,0 +1,21 @@
+{
+  "validation.invalidObjectId": "Format d'identifiant invalide.",
+  "validation.missingTitle": "Le titre est obligatoire dans au moins une langue.",
+  "validation.invalidMultilang": "Le titre doit être un objet multilingue.",
+  "validation.missingPrice": "Le champ prix est obligatoire.",
+  "validation.invalidPrice": "Le prix doit être un nombre.",
+  "validation.invalidCurrency": "La devise doit être USD, EUR ou TRY.",
+  "validation.invalidPeriod": "La période doit être 'monthly' ou 'yearly'.",
+  "validation.invalidLanguage": "Code de langue non pris en charge.",
+  "validation.booleanField": "Ce champ doit être un booléen (true/false).",
+  "error.invalid_id": "ID de tarification invalide.",
+  "error.not_found": "Forfait de tarification introuvable.",
+  "error.missing_fields": "Certains champs obligatoires sont manquants.",
+  "log.admin_listed": "Tous les forfaits de tarification ont été listés.",
+  "log.admin_fetched": "Forfait de tarification récupéré.",
+  "log.admin_created": "Forfait de tarification créé avec succès.",
+  "log.admin_updated": "Forfait de tarification mis à jour.",
+  "log.admin_deleted": "Forfait de tarification supprimé.",
+  "log.listed": "Forfaits de tarification listés avec succès.",
+  "log.fetched": "Forfait de tarification récupéré."
+}

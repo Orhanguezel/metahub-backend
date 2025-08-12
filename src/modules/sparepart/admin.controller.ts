@@ -30,11 +30,11 @@ const parseIfJson = (value: any) => {
   }
 };
 
-// ✅ CREATE
+// ✅ CREATE (+ düşük stok bildirimi v2)
 export const createSparepart = asyncHandler(
   async (req: Request, res: Response) => {
     const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Sparepart } = await getTenantModels(req);
+    const { Sparepart, Notification } = await getTenantModels(req);
     const t = (key: string, vars?: Record<string, string | number>) =>
       translate(key, locale, translations, vars);
 
@@ -69,21 +69,13 @@ export const createSparepart = asyncHandler(
       // String arrayler
       tags = parseIfJson(tags);
       if (typeof tags === "string") {
-        try {
-          tags = JSON.parse(tags);
-        } catch {
-          tags = [tags];
-        }
+        try { tags = JSON.parse(tags); } catch { tags = [tags]; }
       }
       if (!Array.isArray(tags)) tags = [];
 
       color = parseIfJson(color);
       if (typeof color === "string") {
-        try {
-          color = JSON.parse(color);
-        } catch {
-          color = [color];
-        }
+        try { color = JSON.parse(color); } catch { color = [color]; }
       }
       if (!Array.isArray(color)) color = [];
 
@@ -142,6 +134,37 @@ export const createSparepart = asyncHandler(
         likes: 0,
       });
 
+      // --- DÜŞÜK STOK NOTIFICATION (create, v2) ---
+      const threshold = product.stockThreshold ?? 5;
+      if (typeof product.stock === "number" && product.stock <= threshold) {
+        const nameObj = product.name || {};
+        const title: Record<SupportedLocale, string> = {} as any;
+        const message: Record<SupportedLocale, string> = {} as any;
+
+        for (const lng of SUPPORTED_LOCALES) {
+          title[lng] = translate("criticalStock.title", lng, translations);
+          message[lng] = translate("criticalStock.message", lng, translations, {
+            name: nameObj[lng] || String(product._id),
+            stock: product.stock,
+          });
+        }
+
+        await Notification.create({
+          tenant: req.tenant,
+          type: "warning",
+          title,
+          message,
+          channels: ["inapp"],
+          target: { roles: ["admin", "moderator"] },
+          priority: 4,
+          source: { module: "sparepart", entity: "sparepart", refId: product._id, event: "stock.low" },
+          dedupeKey: `stock:${req.tenant}:sparepart:${product._id}`,
+          dedupeWindowMin: 60,
+          tags: ["stock", "sparepart"],
+          data: { productId: product._id, stock: product.stock, productType: "sparepart" },
+        });
+      }
+
       logger.withReq.info(req, t("log.created"), {
         ...getRequestContext(req),
         event: "sparepart.create",
@@ -149,9 +172,7 @@ export const createSparepart = asyncHandler(
         sparepartId: product._id,
       });
 
-      res
-        .status(201)
-        .json({ success: true, message: t("log.created"), data: product });
+      res.status(201).json({ success: true, message: t("log.created"), data: product });
     } catch (err: any) {
       logger.withReq.error(req, t("error.create_fail"), {
         ...getRequestContext(req),
@@ -163,7 +184,9 @@ export const createSparepart = asyncHandler(
       res.status(500).json({ success: false, message: t("error.create_fail") });
     }
   }
-); // ✅ UPDATE + Kritik Stok Notification
+);
+
+// ✅ UPDATE (+ kritik stok bildirimi v2)
 export const updateSparepart = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -194,22 +217,14 @@ export const updateSparepart = asyncHandler(
     if (updates.tags !== undefined) {
       let newTags = parseIfJson(updates.tags);
       if (typeof newTags === "string") {
-        try {
-          newTags = JSON.parse(newTags);
-        } catch {
-          newTags = [newTags];
-        }
+        try { newTags = JSON.parse(newTags); } catch { newTags = [newTags]; }
       }
       product.tags = Array.isArray(newTags) ? newTags : [];
     }
     if (updates.color !== undefined) {
       let newColors = parseIfJson(updates.color);
       if (typeof newColors === "string") {
-        try {
-          newColors = JSON.parse(newColors);
-        } catch {
-          newColors = [newColors];
-        }
+        try { newColors = JSON.parse(newColors); } catch { newColors = [newColors]; }
       }
       product.color = Array.isArray(newColors) ? newColors : [];
     }
@@ -267,18 +282,11 @@ export const updateSparepart = asyncHandler(
     if (updates.removedImages) {
       try {
         const removed = JSON.parse(updates.removedImages);
-        product.images = product.images.filter(
-          (img: any) => !removed.includes(img.url)
-        );
+        product.images = product.images.filter((img: any) => !removed.includes(img.url));
         for (const img of removed) {
-          const localPath = path.join(
-            "uploads",
-            req.tenant,
-            "sparepart-images",
-            path.basename(img.url)
-          );
+          const localPath = path.join("uploads", req.tenant, "sparepart-images", path.basename(img.url));
           if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-          if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
+          // img burada URL string'i ise publicId erişilemez; yalnızca local dosyayı temizliyoruz.
         }
       } catch (e) {
         console.warn("Invalid removedImages JSON:", e);
@@ -287,27 +295,27 @@ export const updateSparepart = asyncHandler(
 
     await product.save();
 
-    // === KRİTİK STOK NOTIFICATION ===
+    // === KRİTİK STOK NOTIFICATION (update, v2) ===
     const threshold = product.stockThreshold ?? 5;
     if (typeof product.stock === "number" && product.stock <= threshold) {
+      // hızlı anti-spam kontrol
       const existing = await Notification.findOne({
         tenant: req.tenant,
         type: "warning",
         "data.productId": product._id,
+        isActive: true,
         isRead: false,
       });
 
       if (!existing) {
-        // ÇEVİRİLERİ TÜM DİLLERDE OLUŞTUR
         const nameObj = product.name || {};
         const title: Record<SupportedLocale, string> = {} as any;
         const message: Record<SupportedLocale, string> = {} as any;
 
         for (const lng of SUPPORTED_LOCALES) {
-          // t(key, lang, translations, vars)
           title[lng] = translate("criticalStock.title", lng, translations);
           message[lng] = translate("criticalStock.message", lng, translations, {
-            name: nameObj[lng] || "-",
+            name: nameObj[lng] || String(product._id),
             stock: product.stock,
           });
         }
@@ -317,11 +325,14 @@ export const updateSparepart = asyncHandler(
           type: "warning",
           title,
           message,
-          data: { productId: product._id, stock: product.stock },
-          isActive: true,
-          isRead: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          channels: ["inapp"],
+          target: { roles: ["admin", "moderator"] },
+          priority: 4,
+          source: { module: "sparepart", entity: "sparepart", refId: product._id, event: "stock.low" },
+          dedupeKey: `stock:${req.tenant}:sparepart:${product._id}`,
+          dedupeWindowMin: 60,
+          tags: ["stock", "sparepart"],
+          data: { productId: product._id, stock: product.stock, productType: "sparepart" },
         });
       }
     }
@@ -333,11 +344,10 @@ export const updateSparepart = asyncHandler(
       sparepartId: id,
     });
 
-    res
-      .status(200)
-      .json({ success: true, message: t("log.updated"), data: product });
+    res.status(200).json({ success: true, message: t("log.updated"), data: product });
   }
 );
+
 
 // ✅ DELETE
 export const deleteSparepart = asyncHandler(

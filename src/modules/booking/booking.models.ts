@@ -20,7 +20,7 @@ const bookingSchema = new Schema<IBooking>(
     date: { type: String, required: true }, // YYYY-MM-DD
     time: { type: String, required: true }, // HH:mm
     service: { type: Schema.Types.ObjectId, ref: "services", required: true },
-    slotRef: { type: Schema.Types.ObjectId, ref: "BookingSlot" },
+    slotRef: { type: Schema.Types.ObjectId, ref: "bookingslotrule" },
     durationMinutes: { type: Number, default: 60 },
     status: {
       type: String,

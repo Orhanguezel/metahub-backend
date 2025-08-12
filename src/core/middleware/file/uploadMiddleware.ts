@@ -9,6 +9,7 @@ import { uploadSizeLimits } from "./uploadTypeWrapper";
 
 // --- Upload klasörleri ---
 export const UPLOAD_FOLDERS = {
+  // mevcutlar (aynen korundu)
   profile: "profile-images",
   product: "product-images",
   ensotekprod: "ensotekprod-images",
@@ -38,7 +39,24 @@ export const UPLOAD_FOLDERS = {
   team: "team-images",
   portfolio: "portfolio-images",
   skill: "skill-images",
+  servicecatalog: "servicecatalog-images",
   default: "misc",
+
+  // --- yeni modüller (Apartment projesi) ---
+  // Not: burada -images eki kullanmadım; bu klasörlerde image+pdf+csv gibi karışık tipler olabilir.
+  files: "files",
+  documents: "documents",
+  contracts: "contracts",
+  invoices: "invoices",
+  payments: "payments",
+  expenses: "expenses",
+  operationtemplates: "operationtemplates",
+  operationsjobs: "operationsjobs",
+  employees: "employees",
+  contacts: "contacts",
+  pricelist: "pricelist",
+  reports: "reports",
+  cashbook: "cashbook",
 } as const;
 
 export type UploadFolderKeys = keyof typeof UPLOAD_FOLDERS;
@@ -76,14 +94,24 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // --- Dosya uzantı ve mime kontrolü ---
+// CSV/XLSX desteği (cashbook/pricelist/report import’ları için) eklendi.
 const allowedExtensions = [
-  ".jpg", ".jpeg", ".png", ".webp", ".gif", ".pdf", ".docx", ".pptx",
+  ".jpg", ".jpeg", ".png", ".webp", ".gif",
+  ".pdf", ".docx", ".pptx",
+  ".csv", ".xls", ".xlsx",
 ];
+
 const allowedMimeTypes = [
   "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif",
-  "application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/msword", "application/vnd.ms-powerpoint",
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/msword",
+  "application/vnd.ms-powerpoint",
   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  // CSV / Excel
+  "text/csv",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ];
 
 const fileFilter = (
@@ -97,13 +125,15 @@ const fileFilter = (
     !allowedExtensions.includes(fileExtension)
   ) {
     console.warn(`[UPLOAD] Unsupported file type or extension: ${file.originalname}`);
-    return cb(new Error(`Unsupported file type or extension: ${file.originalname}`));
+    cb(new Error(`Unsupported file type or extension: ${file.originalname}`));
+    return;
   }
   cb(null, true);
 };
 
 /**
  * Dinamik upload middleware (tenant-slug guaranteed)
+ * Limit değerleri uploadTypeWrapper > uploadSizeLimits üzerinden gelir.
  */
 export const upload = (type: UploadFolderKeys) => {
   return multer({
@@ -114,9 +144,8 @@ export const upload = (type: UploadFolderKeys) => {
 };
 
 export const serveUploads = express.static(BASE_UPLOAD_DIR);
-// runtime’da tenant’a göre kullanılmalı, ör: /uploads/ensotek/about-images/...
+// runtime’da tenant’a göre kullanılmalı, ör: /uploads/<tenant>/<folder>/...
 export { BASE_URL_VALUE as BASE_URL };
 
-// 🔥 Export getTenantSlug VE resolveUploadPath fonksiyonlarını,
-// storageAdapter ve diğer fonksiyonlar da **her zaman** tenant’a göre path kurar!
-// Yani backend’in her yerinde tenant isolation garanti!
+// 🔥 getTenantSlug ve resolveUploadPath tenant izolasyonunu garanti eder.
+// storageAdapter ve diğer yardımcılar da path’leri tenant bazlı kurmalıdır.
