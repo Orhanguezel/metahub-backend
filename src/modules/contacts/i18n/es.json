@@ -1,0 +1,22 @@
+{
+  "contact.replyGreeting": "Hola, {{name}}",
+  "contact.replyInfo": "Hemos recibido tu mensaje en {{brand}} y responderemos lo antes posible.",
+  "contact.subject": "Asunto",
+  "contact.message": "Mensaje",
+  "contact.sign": "Atentamente,<br />El equipo de {{brand}}",
+  "contact.replyTitle": "Respuesta de contacto",
+  "allFieldsRequired": "Todos los campos son obligatorios.",
+  "messageSent": "Tu mensaje ha sido enviado.",
+  "messagesFetched": "Mensajes obtenidos con éxito.",
+  "invalidMessageId": "ID de mensaje no válida.",
+  "messageNotFound": "Mensaje no encontrado.",
+  "messageDeleted": "Mensaje eliminado con éxito.",
+  "validation.nameRequired": "El nombre es obligatorio.",
+  "validation.nameLength": "El nombre debe tener entre {{min}} y {{max}} caracteres.",
+  "validation.emailRequired": "El correo electrónico es obligatorio.",
+  "validation.emailInvalid": "Por favor, introduce una dirección de correo válida.",
+  "validation.subjectRequired": "El asunto es obligatorio.",
+  "validation.subjectLength": "El asunto debe tener entre {{min}} y {{max}} caracteres.",
+  "validation.messageRequired": "El mensaje es obligatorio.",
+  "validation.messageLength": "El mensaje debe tener entre {{min}} y {{max}} caracteres."
+}

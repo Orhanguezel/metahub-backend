@@ -33,11 +33,11 @@ import { Favorite } from "@/modules/favorite/favorite.model";
 import { Feedback } from "@/modules/feedback/feedback.models";
 import { Address } from "@/modules/address/address.models";
 import { Company } from "@/modules/company/company.models";
-import { Customer } from "@/modules/customer/customer.models";
+import { Customer } from "@/modules/customer/models";
 import { FAQ } from "@/modules/faq/faq.models";
-import { Invoice } from "@/modules/invoice/invoice.models";
+import { Invoice } from "@/modules/invoicing/models";
 import { Offer } from "@/modules/offer/offer.models";
-import { Payment } from "@/modules/payment/payment.models";
+import { Payment } from "@/modules/payments/models";
 import { Shipment } from "@/modules/shipment/shipment.models";
 import { Task } from "@/modules/task/task.models";
 import { Activity } from "@/modules/activity/models";
@@ -58,8 +58,6 @@ import { SportCategory } from "@/modules/sportcategory/sportcategory.models";
 import { Bike } from "@/modules/bikes/model";
 import { BikeCategory } from "@/modules/bikescategory/models";
 import { SectionSetting, SectionMeta } from "@/modules/section/section.models";
-import { Apartment } from "@/modules/apartment/models";
-import { ApartmentCategory } from "@/modules/apartmentcategory/category.models";
 import { Apikey, Apikeylog } from "@/modules/apikey/apikey.models";
 import { News } from "@/modules/news/models";
 import { NewsCategory } from "@/modules/newscategory/category.models";
@@ -74,6 +72,23 @@ import { Skill } from "@/modules/skill/models";
 import { SkillCategory } from "@/modules/skillcategory/category.models";
 import { CatalogRequest } from "@/modules/catalog/catalog.models";
 import { Pricing } from "@/modules/pricing/models";
+
+import { Apartment } from "@/modules/apartment/models";
+import { ApartmentCategory } from "@/modules/apartmentcategory/category.models";
+import { BillingPlan, BillingOccurrence } from "@/modules/billing/models";
+import { Contract } from "@/modules/contracts/models";
+import { OperationJob } from "@/modules/operationsjobs/models";
+import { OperationTemplate } from "@/modules/operationstemplates/models";
+import { ReportRun, ReportDefinition } from "@/modules/reports/models";
+import { SchedulePlan } from "@/modules/scheduling/models";
+import { TimeEntry } from "@/modules/timetracking/models";
+import { Employee } from "@/modules/employees/models";
+import { Expense } from "@/modules/expenses/models";
+import { ServiceCatalog } from "@/modules/servicecatalog/models";
+import { Contact } from "@/modules/contacts/models";
+import { PriceList, PriceListItem } from "@/modules/pricelist/models";
+import { CashAccount, CashEntry } from "@/modules/cashbook/models";
+import { FileObject } from "@/modules/files/models";
 
 export const getTenantModels = async (req: Request) => ({
   Settings: await req.getModel("settings", Settings.schema),
@@ -187,4 +202,22 @@ export const getTenantModels = async (req: Request) => ({
   CatalogRequest: await req.getModel("catalogrequest", CatalogRequest.schema),
   Newsletter: await req.getModel("newsletter", Newsletter.schema),
   Pricing: await req.getModel("pricing", Pricing.schema),
+  BillingPlan: await req.getModel("billingplan", BillingPlan.schema),
+  BillingOccurrence: await req.getModel("billingoccurrence", BillingOccurrence.schema),
+  Contract: await req.getModel("contract", Contract.schema),
+  OperationJob: await req.getModel("operationjob", OperationJob.schema),
+  OperationTemplate: await req.getModel("operationtemplate", OperationTemplate.schema),
+  ReportRun: await req.getModel("reportrun", ReportRun.schema),
+  ReportDefinition: await req.getModel("reportdefinition", ReportDefinition.schema),
+  SchedulePlan: await req.getModel("scheduleplan", SchedulePlan.schema),
+  TimeEntry: await req.getModel("timeentry", TimeEntry.schema),
+  Employee: await req.getModel("employee", Employee.schema),
+  Expense: await req.getModel("expense", Expense.schema),
+  ServiceCatalog: await req.getModel("servicecatalog", ServiceCatalog.schema),
+  Contact: await req.getModel("contact", Contact.schema),
+  PriceList: await req.getModel("pricelist", PriceList.schema),
+  PriceListItem: await req.getModel("pricelistitem", PriceListItem.schema),
+  CashAccount: await req.getModel("cashaccount", CashAccount.schema),
+  CashEntry: await req.getModel("cashentry", CashEntry.schema),
+  FileObject: await req.getModel("fileobject", FileObject.schema),
 });

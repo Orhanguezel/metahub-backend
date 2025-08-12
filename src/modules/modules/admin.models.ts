@@ -1,79 +1,85 @@
+// src/modules/modules/modules.model.ts
 import mongoose, { Schema, Model, models } from "mongoose";
 import type { IModuleMeta, IModuleSetting } from "@/modules/modules/types";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
-// Çoklu dil alanı şeması
-const labelSchemaFields = SUPPORTED_LOCALES.reduce((fields, lang) => {
-  fields[lang] = { type: String, required: true };
+/** localized helpers */
+const buildLocalizedRequired = () => {
+  const fields: Record<string, any> = {};
+  for (const lang of SUPPORTED_LOCALES) {
+    fields[lang] = { type: String, required: true, trim: true };
+  }
   return fields;
-}, {});
-
-// Çoklu dil SEO şeması
-const seoFieldSchema = SUPPORTED_LOCALES.reduce((fields, lang) => {
-  fields[lang] = { type: String, default: "" };
+};
+const buildLocalizedOptional = () => {
+  const fields: Record<string, any> = {};
+  for (const lang of SUPPORTED_LOCALES) {
+    fields[lang] = { type: String, default: "", trim: true };
+  }
   return fields;
-}, {});
+};
 
-// --- 1️⃣ Tenant-aware ModuleMeta ---
+/** 1) ModuleMeta (tenant-aware) */
 const ModuleMetaSchema = new Schema<IModuleMeta>(
   {
     tenant: { type: String, required: true, index: true },
-    name: { type: String, required: true },
-    label: labelSchemaFields,
-    icon: { type: String, default: "box" },
+    name: { type: String, required: true, trim: true },
+    label: buildLocalizedRequired(),
+    icon: { type: String, default: "box", trim: true },
     roles: { type: [String], default: ["admin"] },
     enabled: { type: Boolean, default: true },
     language: { type: String, enum: SUPPORTED_LOCALES, default: "en" },
-    version: { type: String, default: "1.0.0" },
+    version: { type: String, default: "1.0.0", trim: true },
     order: { type: Number, default: 0 },
-    statsKey: { type: String },
+    statsKey: { type: String, trim: true },
     history: [
       {
-        version: { type: String, required: true },
-        by: { type: String, required: true },
+        version: { type: String, required: true, trim: true },
+        by: { type: String, required: true, trim: true },
         date: { type: Date, default: Date.now },
-        note: { type: String },
+        note: { type: String, trim: true },
       },
     ],
     routes: [
       {
-        method: { type: String, required: true },
-        path: { type: String, required: true },
+        method: { type: String, required: true, trim: true },
+        path: { type: String, required: true, trim: true },
         auth: { type: Boolean, default: false },
-        summary: { type: String },
+        summary: { type: String, trim: true },
         body: { type: Object },
       },
     ],
   },
   { timestamps: true }
 );
-// UNIQUE: tenant+name birlikte unique!
-ModuleMetaSchema.index({ name: 1, tenant: 1 }, { unique: true });
+
+// UNIQUE: tenant + name
+ModuleMetaSchema.index({ tenant: 1, name: 1 }, { unique: true });
 
 export const ModuleMeta: Model<IModuleMeta> =
   models.modulemeta || mongoose.model<IModuleMeta>("modulemeta", ModuleMetaSchema);
 
-// --- 2️⃣ ModuleSetting (SEO+Override+Tenant aware) ---
+/** 2) ModuleSetting (tenant-aware + SEO overrides) */
 const ModuleSettingSchema = new Schema<IModuleSetting>(
   {
-    module: { type: String, required: true, index: true },
-    tenant: { type: String, required: true, index: true },
+    module: { type: String, required: true, index: true, trim: true },
+    tenant: { type: String, required: true, index: true, trim: true },
     enabled: { type: Boolean },
     visibleInSidebar: { type: Boolean },
     useAnalytics: { type: Boolean },
     showInDashboard: { type: Boolean },
     roles: { type: [String] },
     order: { type: Number },
-    // --- SEO override alanları (çoklu dil) ---
-    seoTitle: { type: seoFieldSchema, default: () => ({}) },
-    seoDescription: { type: seoFieldSchema, default: () => ({}) },
-    seoSummary: { type: seoFieldSchema, default: () => ({}) },
-    seoOgImage: { type: String, default: "" },
+    seoTitle: { type: buildLocalizedOptional(), default: () => ({}) },
+    seoDescription: { type: buildLocalizedOptional(), default: () => ({}) },
+    seoSummary: { type: buildLocalizedOptional(), default: () => ({}) },
+    seoOgImage: { type: String, default: "", trim: true },
   },
   { timestamps: true }
 );
-// UNIQUE: tenant+module birlikte unique!
-ModuleSettingSchema.index({ module: 1, tenant: 1 }, { unique: true });
+
+// UNIQUE: tenant + module
+ModuleSettingSchema.index({ tenant: 1, module: 1 }, { unique: true });
 
 export const ModuleSetting: Model<IModuleSetting> =
   models.modulesetting || mongoose.model<IModuleSetting>("modulesetting", ModuleSettingSchema);

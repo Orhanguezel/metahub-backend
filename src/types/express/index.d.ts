@@ -66,6 +66,20 @@ declare global {
         | "portfolio"
         | "skill"
         | "apartment"
+        | "servicecatalog"
+        | "files"
+        | "documents"
+        | "contracts"
+        | "invoices"
+        | "payments"
+        | "expenses"
+        | "operationtemplates"
+        | "operationsjobs"
+        | "employees"
+        | "contacts"
+        | "pricelist"
+        | "reports"
+        | "cashbook"
         | "default";
 
 

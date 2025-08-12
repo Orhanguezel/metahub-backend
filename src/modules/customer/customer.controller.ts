@@ -8,47 +8,57 @@ import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 
-// ✅ Tüm müşterileri getir
-export const getAllCustomers = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const t = (key: string, params?: any) => translate(key, locale, translations, params);
+const tByReq = (req: Request) => (k: string, p?: any) =>
+  translate(k, (req.locale as SupportedLocale) || getLogLocale(), translations, p);
 
+// basit normalizer
+const normEmail = (s?: string) => (s || "").trim().toLowerCase();
+
+export const getAllCustomers = asyncHandler(async (req, res, next) => {
+  const t = tByReq(req);
   try {
     const { Customer } = await getTenantModels(req);
-    const customers = await Customer.find({ tenant: req.tenant })
-      .populate("addresses")
-      .sort({ createdAt: -1 });
+    const { q, kind, isActive } = req.query as Record<string, string>;
+    const filter: any = { tenant: req.tenant };
 
-    res.status(200).json({
-      success: true,
-      message: t("customer.success.fetched"),
-      data: customers,
-    });
-    logger.info(t("customer.success.fetched"), {
+    if (kind && ["person", "organization"].includes(kind)) filter.kind = kind;
+    if (typeof isActive === "string") filter.isActive = isActive === "true";
+
+    if (q?.trim()) {
+      const r = new RegExp(q.trim(), "i");
+      filter.$or = [
+        { companyName: r },
+        { contactName: r },
+        { email: r },
+        { phone: r },
+        { slug: r },
+        { tags: r },
+      ];
+    }
+
+    const customers = await Customer.find(filter).populate("addresses").sort({ createdAt: -1 });
+    res.status(200).json({ success: true, message: t("customer.success.fetched"), data: customers });
+
+    logger.withReq.info(req, t("customer.success.fetched"), {
       ...getRequestContext(req),
       module: "customer",
       event: "customer.getAll",
       status: "success",
+      resultCount: customers.length,
     });
     return;
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 });
 
-// ✅ ID ile müşteri getir
-export const getCustomerById = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const t = (key: string, params?: any) => translate(key, locale, translations, params);
-
+export const getCustomerById = asyncHandler(async (req, res, next) => {
+  const t = tByReq(req);
   try {
     const { Customer } = await getTenantModels(req);
-    const customer = await Customer.findOne({ _id: req.params.id, tenant: req.tenant })
-      .populate("addresses");
+    const customer = await Customer.findOne({ _id: req.params.id, tenant: req.tenant }).populate("addresses");
 
     if (!customer) {
       res.status(404).json({ success: false, message: t("customer.errors.notFound") });
-      logger.warn(t("customer.errors.notFound"), {
+      logger.withReq.warn(req, t("customer.errors.notFound"), {
         ...getRequestContext(req),
         module: "customer",
         event: "customer.getById",
@@ -58,11 +68,8 @@ export const getCustomerById = asyncHandler(async (req: Request, res: Response, 
       return;
     }
 
-    res.status(200).json({
-      success: true,
-      data: customer,
-    });
-    logger.info(t("customer.success.fetched"), {
+    res.status(200).json({ success: true, message: t("customer.success.fetched"), data: customer });
+    logger.withReq.info(req, t("customer.success.fetched"), {
       ...getRequestContext(req),
       module: "customer",
       event: "customer.getById",
@@ -70,30 +77,32 @@ export const getCustomerById = asyncHandler(async (req: Request, res: Response, 
       customerId: req.params.id,
     });
     return;
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 });
 
-// ✅ Müşteri oluştur
-// ✅ Müşteri oluştur (adres opsiyonel, company mantığıyla aynı)
-export const createCustomer = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const t = (key: string, params?: any) => translate(key, locale, translations, params);
-
+// CREATE (companyName artık opsiyonel; kind/billing/tags desteklenir)
+export const createCustomer = asyncHandler(async (req, res, next) => {
+  const t = tByReq(req);
   try {
     const { Customer, Address } = await getTenantModels(req);
-    const { companyName, contactName, email, phone, addresses, notes } = req.body;
+    const {
+      kind,
+      companyName,
+      contactName,
+      email,
+      phone,
+      addresses,
+      billing,
+      tags,
+      notes,
+      slug,
+      isActive,
+    } = req.body;
 
-    // Zorunlu alan kontrolü (adres yok!)
-    if (
-      !companyName ||
-      !contactName ||
-      !email ||
-      !phone
-    ) {
+    // Zorunlu alanlar (companyName değil)
+    if (!contactName || !email || !phone) {
       res.status(400).json({ success: false, message: t("customer.errors.requiredFields") });
-      logger.warn(t("customer.errors.requiredFields"), {
+      logger.withReq.warn(req, t("customer.errors.requiredFields"), {
         ...getRequestContext(req),
         module: "customer",
         event: "customer.create",
@@ -102,23 +111,22 @@ export const createCustomer = asyncHandler(async (req: Request, res: Response, n
       return;
     }
 
-    // Aynı tenantta aynı email varsa hata
-    const existing = await Customer.findOne({ tenant: req.tenant, email });
-    if (existing) {
+    // Uniqueness: tenant+email & tenant+phone
+    const emailNorm = normEmail(email);
+    const existingEmail = await Customer.findOne({ tenant: req.tenant, email: emailNorm });
+    if (existingEmail) {
       res.status(409).json({ success: false, message: t("customer.errors.emailExists") });
-      logger.warn(t("customer.errors.emailExists"), {
-        ...getRequestContext(req),
-        module: "customer",
-        event: "customer.create",
-        status: "fail",
-        email,
-      });
+      return;
+    }
+    const existingPhone = await Customer.findOne({ tenant: req.tenant, phone: phone });
+    if (existingPhone) {
+      res.status(409).json({ success: false, message: t("customer.errors.phoneExists") });
       return;
     }
 
-    // Adresler (varsa) eklenir, yoksa boş array
+    // Adresler (opsiyonel)
     let addressIds: any[] = [];
-    if (addresses && Array.isArray(addresses) && addresses.length > 0) {
+    if (Array.isArray(addresses) && addresses.length > 0) {
       for (const address of addresses) {
         const addr = await Address.create({ ...address, tenant: req.tenant, customerId: null });
         addressIds.push(addr._id);
@@ -127,28 +135,26 @@ export const createCustomer = asyncHandler(async (req: Request, res: Response, n
 
     const customer = await Customer.create({
       tenant: req.tenant,
+      kind: kind || "person",
       companyName,
       contactName,
-      email,
+      email: emailNorm,
       phone,
       addresses: addressIds,
+      billing: billing || undefined,
+      tags: Array.isArray(tags) ? tags : undefined,
       notes,
+      slug, // verilirse; yoksa model slugify eder
+      isActive: isActive === "false" ? false : isActive === false ? false : true,
     });
 
-    // Adreslere customerId ekle (varsa)
     if (addressIds.length > 0) {
       await Address.updateMany({ _id: { $in: addressIds } }, { $set: { customerId: customer._id } });
     }
 
-    // Müşteriyle beraber adresleri de populate dön
-    const createdCustomer = await Customer.findById(customer._id).populate("addresses");
-
-    res.status(201).json({
-      success: true,
-      message: t("customer.success.created"),
-      data: createdCustomer,
-    });
-    logger.info(t("customer.success.created"), {
+    const created = await Customer.findById(customer._id).populate("addresses");
+    res.status(201).json({ success: true, message: t("customer.success.created"), data: created });
+    logger.withReq.info(req, t("customer.success.created"), {
       ...getRequestContext(req),
       module: "customer",
       event: "customer.create",
@@ -156,24 +162,18 @@ export const createCustomer = asyncHandler(async (req: Request, res: Response, n
       customerId: customer._id,
     });
     return;
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 });
 
-// ✅ Müşteri güncelle (adres company gibi opsiyonel & array olarak)
-export const updateCustomer = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const t = (key: string, params?: any) => translate(key, locale, translations, params);
-
+// UPDATE (tüm v2 alanları; email/phone değişiminde çakışma kontrolü)
+export const updateCustomer = asyncHandler(async (req, res, next) => {
+  const t = tByReq(req);
   try {
     const { Customer, Address } = await getTenantModels(req);
-
-    // Eski müşteri kaydını bul
     const customer = await Customer.findOne({ _id: req.params.id, tenant: req.tenant });
     if (!customer) {
       res.status(404).json({ success: false, message: t("customer.errors.notFound") });
-      logger.warn(t("customer.errors.notFound"), {
+      logger.withReq.warn(req, t("customer.errors.notFound"), {
         ...getRequestContext(req),
         module: "customer",
         event: "customer.update",
@@ -183,13 +183,26 @@ export const updateCustomer = asyncHandler(async (req: Request, res: Response, n
       return;
     }
 
-    // Adres güncelleme (company mantığı ile)
-    let addressIds: any[] = customer.addresses || [];
-    if ("addresses" in req.body && Array.isArray(req.body.addresses)) {
+    const {
+      kind,
+      companyName,
+      contactName,
+      email,
+      phone,
+      addresses,
+      billing,
+      tags,
+      notes,
+      slug,
+      isActive,
+    } = req.body || {};
+
+    // addresses (tam liste yaklaşımı)
+    let addressIds: any[] = Array.isArray(customer.addresses) ? [...customer.addresses] : [];
+    if (Array.isArray(addresses)) {
       addressIds = [];
-      for (const address of req.body.addresses) {
-        // Eğer address._id varsa update et, yoksa yeni oluştur
-        if (address._id) {
+      for (const address of addresses) {
+        if (address?._id) {
           await Address.findByIdAndUpdate(address._id, address, { new: true });
           addressIds.push(address._id);
         } else {
@@ -199,28 +212,44 @@ export const updateCustomer = asyncHandler(async (req: Request, res: Response, n
       }
     }
 
-    // Customer alanlarını güncelle
-    const updates: any = {
-      ...req.body,
-      addresses: addressIds
-    };
-
-    // Adresler hariç tüm alanları güncelle
-    Object.keys(updates).forEach(field => {
-      if (typeof updates[field] !== "undefined") {
-        (customer as any)[field] = updates[field];
+    // email/phone uniqueness
+    if (typeof email !== "undefined") {
+      const emailNorm = normEmail(email);
+      if (emailNorm !== customer.email) {
+        const exists = await Customer.findOne({ tenant: req.tenant, email: emailNorm, _id: { $ne: customer._id } });
+        if (exists) {
+          res.status(409).json({ success: false, message: t("customer.errors.emailExists") });
+          return;
+        }
+        customer.email = emailNorm;
       }
-    });
+    }
+    if (typeof phone !== "undefined" && phone !== customer.phone) {
+      const exists = await Customer.findOne({ tenant: req.tenant, phone, _id: { $ne: customer._id } });
+      if (exists) {
+        res.status(409).json({ success: false, message: t("customer.errors.phoneExists") });
+        return;
+      }
+      customer.phone = phone;
+    }
+
+    if (typeof kind !== "undefined") customer.kind = kind;
+    if (typeof companyName !== "undefined") customer.companyName = companyName;
+    if (typeof contactName !== "undefined") customer.contactName = contactName;
+    if (typeof notes !== "undefined") customer.notes = notes;
+    if (typeof slug !== "undefined") (customer as any).slug = slug; // model normalize eder
+    if (typeof isActive !== "undefined") customer.isActive = isActive === "true" || isActive === true;
+
+    if (typeof billing !== "undefined") (customer as any).billing = billing || undefined;
+    if (typeof tags !== "undefined") (customer as any).tags = Array.isArray(tags) ? tags : undefined;
+
+    if (Array.isArray(addresses)) (customer as any).addresses = addressIds;
 
     await customer.save();
     const updated = await Customer.findById(customer._id).populate("addresses");
 
-    res.status(200).json({
-      success: true,
-      message: t("customer.success.updated"),
-      data: updated,
-    });
-    logger.info(t("customer.success.updated"), {
+    res.status(200).json({ success: true, message: t("customer.success.updated"), data: updated });
+    logger.withReq.info(req, t("customer.success.updated"), {
       ...getRequestContext(req),
       module: "customer",
       event: "customer.update",
@@ -228,24 +257,18 @@ export const updateCustomer = asyncHandler(async (req: Request, res: Response, n
       customerId: req.params.id,
     });
     return;
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 });
 
-
-// ✅ Müşteri sil
-export const deleteCustomer = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const t = (key: string, params?: any) => translate(key, locale, translations, params);
-
+export const deleteCustomer = asyncHandler(async (req, res, next) => {
+  const t = tByReq(req);
   try {
     const { Customer, Address } = await getTenantModels(req);
     const deleted = await Customer.findOneAndDelete({ _id: req.params.id, tenant: req.tenant });
 
     if (!deleted) {
       res.status(404).json({ success: false, message: t("customer.errors.notFound") });
-      logger.warn(t("customer.errors.notFound"), {
+      logger.withReq.warn(req, t("customer.errors.notFound"), {
         ...getRequestContext(req),
         module: "customer",
         event: "customer.delete",
@@ -255,15 +278,10 @@ export const deleteCustomer = asyncHandler(async (req: Request, res: Response, n
       return;
     }
 
-    // İlgili adresleri de sil (isteğe bağlı, eğer orphan kalmasın istiyorsan)
-    await Address.deleteMany({ customerId: req.params.id });
+    await Address.deleteMany({ customerId: req.params.id }); // isteğe bağlı orphans cleanup
 
-    res.status(200).json({
-      success: true,
-      message: t("customer.success.deleted"),
-      id: req.params.id,
-    });
-    logger.info(t("customer.success.deleted"), {
+    res.status(200).json({ success: true, message: t("customer.success.deleted"), id: req.params.id });
+    logger.withReq.info(req, t("customer.success.deleted"), {
       ...getRequestContext(req),
       module: "customer",
       event: "customer.delete",
@@ -271,108 +289,62 @@ export const deleteCustomer = asyncHandler(async (req: Request, res: Response, n
       customerId: req.params.id,
     });
     return;
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 });
 
-// ✅ PUBLIC: Müşteri kendi bilgilerini günceller (sadece izin verilen alanlar, adres yok!)
-export const updateCustomerPublic = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const t = (key: string, params?: any) => translate(key, locale, translations, params);
+/* -------- PUBLIC -------- */
 
+export const updateCustomerPublic = asyncHandler(async (req, res, next) => {
+  const t = tByReq(req);
   try {
     const { Customer } = await getTenantModels(req);
 
-    // Kimlik kontrolü
-    const authUserId = req.user?._id?.toString?.() || req.user?.id?.toString?.();
-    if (!authUserId) {
-      res.status(401).json({ success: false, message: t("customer.errors.unauthorized") });
-      return;
-    }
-    if (authUserId !== req.params.id) {
-      res.status(403).json({ success: false, message: t("customer.errors.forbidden") });
-      return;
-    }
+    const authUserId = req.user?._id?.toString?.() || (req.user as any)?.id?.toString?.();
+    if (!authUserId) { res.status(401).json({ success: false, message: t("customer.errors.unauthorized") }); return; }
+    if (authUserId !== req.params.id) { res.status(403).json({ success: false, message: t("customer.errors.forbidden") }); return; }
 
-    // Müşteri kaydını bul
     const customer = await Customer.findOne({ _id: req.params.id, tenant: req.tenant });
-    if (!customer) {
-      res.status(404).json({ success: false, message: t("customer.errors.notFound") });
-      return;
-    }
+    if (!customer) { res.status(404).json({ success: false, message: t("customer.errors.notFound") }); return; }
 
-    // Sadece belirli alanlar güncellenebilir (adres hariç!)
     const allowedFields = ["companyName", "contactName", "email", "phone", "notes"];
-    let updatedFields: any = {};
-    allowedFields.forEach((field) => {
-      if (typeof req.body[field] !== "undefined") {
-        updatedFields[field] = req.body[field];
-      }
-    });
+    const updates: any = {};
+    for (const f of allowedFields) if (typeof req.body[f] !== "undefined") updates[f] = req.body[f];
 
-    // Email değişiyorsa başka müşteriyle çakışmasın
-    if (
-      updatedFields.email &&
-      updatedFields.email !== customer.email
-    ) {
-      const exists = await Customer.findOne({ email: updatedFields.email, tenant: req.tenant });
-      if (exists) {
-        res.status(409).json({ success: false, message: t("customer.errors.emailExists") });
-        return;
+    // uniqueness checks for email/phone
+    if (typeof updates.email !== "undefined") {
+      const emailNorm = normEmail(updates.email);
+      if (emailNorm !== customer.email) {
+        const exists = await Customer.findOne({ tenant: req.tenant, email: emailNorm, _id: { $ne: customer._id } });
+        if (exists) { res.status(409).json({ success: false, message: t("customer.errors.emailExists") }); return; }
+        updates.email = emailNorm;
       }
     }
+    if (typeof updates.phone !== "undefined" && updates.phone !== customer.phone) {
+      const exists = await Customer.findOne({ tenant: req.tenant, phone: updates.phone, _id: { $ne: customer._id } });
+      if (exists) { res.status(409).json({ success: false, message: t("customer.errors.phoneExists") }); return; }
+    }
 
-    // Update ve dön
-    Object.assign(customer, updatedFields);
+    Object.assign(customer, updates);
     await customer.save();
 
-    res.status(200).json({
-      success: true,
-      message: t("customer.success.updated"),
-      data: customer,
-    });
+    res.status(200).json({ success: true, message: t("customer.success.updated"), data: customer });
     return;
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 });
 
-
-// ✅ PUBLIC: Müşteri kendi kaydını görebilir
-export const getCustomerPublicById = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const t = (key: string, params?: any) => translate(key, locale, translations, params);
-
+export const getCustomerPublicById = asyncHandler(async (req, res, next) => {
+  const t = tByReq(req);
   try {
     const { Customer } = await getTenantModels(req);
 
-    // Kimlik kontrolü
-    const authUserId = req.user?._id?.toString?.() || req.user?.id?.toString?.();
-    if (!authUserId) {
-      res.status(401).json({ success: false, message: t("customer.errors.unauthorized") });
-      return;
-    }
-    if (authUserId !== req.params.id) {
-      res.status(403).json({ success: false, message: t("customer.errors.forbidden") });
-      return;
-    }
+    const authUserId = req.user?._id?.toString?.() || (req.user as any)?.id?.toString?.();
+    if (!authUserId) { res.status(401).json({ success: false, message: t("customer.errors.unauthorized") }); return; }
+    if (authUserId !== req.params.id) { res.status(403).json({ success: false, message: t("customer.errors.forbidden") }); return; }
 
-    // Sadece kendi kaydını çekebilir!
     const customer = await Customer.findOne({ _id: req.params.id, tenant: req.tenant }).populate("addresses");
-    if (!customer) {
-      res.status(404).json({ success: false, message: t("customer.errors.notFound") });
-      return;
-    }
+    if (!customer) { res.status(404).json({ success: false, message: t("customer.errors.notFound") }); return; }
 
-    res.status(200).json({
-      success: true,
-      data: customer,
-    });
+    res.status(200).json({ success: true, message: t("customer.success.fetched"), data: customer });
     return;
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 });
-
-

@@ -1,0 +1,22 @@
+{
+  "contact.replyGreeting": "Hallo, {{name}}",
+  "contact.replyInfo": "Wir haben Ihre Nachricht bei {{brand}} erhalten und werden so schnell wie möglich antworten.",
+  "contact.subject": "Betreff",
+  "contact.message": "Nachricht",
+  "contact.sign": "Mit freundlichen Grüßen,<br />Ihr {{brand}} Team",
+  "contact.replyTitle": "Kontaktantwort",
+  "allFieldsRequired": "Alle Felder sind erforderlich.",
+  "messageSent": "Ihre Nachricht wurde gesendet.",
+  "messagesFetched": "Nachrichten erfolgreich abgerufen.",
+  "invalidMessageId": "Ungültige Nachrichten-ID.",
+  "messageNotFound": "Nachricht nicht gefunden.",
+  "messageDeleted": "Nachricht erfolgreich gelöscht.",
+  "validation.nameRequired": "Name ist erforderlich.",
+  "validation.nameLength": "Der Name muss zwischen {{min}} und {{max}} Zeichen lang sein.",
+  "validation.emailRequired": "E-Mail ist erforderlich.",
+  "validation.emailInvalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+  "validation.subjectRequired": "Betreff ist erforderlich.",
+  "validation.subjectLength": "Der Betreff muss zwischen {{min}} und {{max}} Zeichen lang sein.",
+  "validation.messageRequired": "Nachricht ist erforderlich.",
+  "validation.messageLength": "Die Nachricht muss zwischen {{min}} und {{max}} Zeichen lang sein."
+}

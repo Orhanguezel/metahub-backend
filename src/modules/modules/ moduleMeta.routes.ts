@@ -1,3 +1,4 @@
+// src/modules/modules/moduleMeta.routes.ts
 import express from "express";
 import {
   createModuleMeta,
@@ -16,29 +17,13 @@ import {
 
 const router = express.Router();
 
-// ADMIN / AUTH KORUMALI
 router.use(authenticate, authorizeRoles("admin"));
 
-// ➕ Global meta oluştur
 router.post("/", validateCreateModuleMeta, createModuleMeta);
-
 router.post("/bulk-import", importModuleMetas);
-
-// 📋 Tüm global meta kayıtlarını getir
 router.get("/", getAllModuleMetas);
-
-// 🔍 Belirli meta kaydını getir
 router.get("/:name", validateModuleNameParam, getModuleMetaByName);
-
-// ✏️ Belirli meta kaydını güncelle
-router.patch(
-  "/:name",
-  validateModuleNameParam,
-  validateUpdateModuleMeta,
-  updateModuleMeta
-);
-
-// 🗑️ Belirli meta kaydını sil
+router.patch("/:name", validateModuleNameParam, validateUpdateModuleMeta, updateModuleMeta);
 router.delete("/:name", validateModuleNameParam, deleteModuleMeta);
 
 export default router;

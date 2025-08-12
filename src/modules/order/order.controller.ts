@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import type { Model } from "mongoose";
 import asyncHandler from "express-async-handler";
 import { sendEmail } from "@/services/emailService";
 import { orderConfirmationTemplate } from "@/modules/order/templates/orderConfirmation";
@@ -41,8 +42,9 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     Sparepart,
   } = await getTenantModels(req);
 
-  const { items, addressId, shippingAddress, paymentMethod, couponCode } =
-    req.body;
+  type ProductType = "bike" | "ensotekprod" | "sparepart";
+
+  const { items, addressId, shippingAddress, paymentMethod, couponCode } = req.body;
   const userId = req.user?._id;
   const userName = req.user?.name || "";
   const userEmail = req.user?.email || "";
@@ -51,29 +53,18 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   // Tenant bilgileri
   const tenantData = req.tenantData;
   const brandName =
-    tenantData?.name?.[locale] ||
-    tenantData?.name?.en ||
-    tenantData?.name ||
-    "Brand";
+    tenantData?.name?.[locale] || tenantData?.name?.[ "en" ] || tenantData?.name || "Brand";
   const brandWebsite =
-    (tenantData?.domain?.main && `https://${tenantData.domain.main}`) ||
-    process.env.BRAND_WEBSITE;
-  const senderEmail =
-    tenantData?.emailSettings?.senderEmail || "noreply@example.com";
-  const adminEmail = tenantData?.emailSettings?.adminEmail || senderEmail;
+    (tenantData?.domain?.main && `https://${tenantData.domain.main}`) || process.env.BRAND_WEBSITE;
+  const senderEmail = tenantData?.emailSettings?.senderEmail || "noreply@example.com";
+  const adminEmail  = tenantData?.emailSettings?.adminEmail  || senderEmail;
 
-  // --- Adres kontrolü
+  // --- Adres kontrolü (değişmedi) ---
   let shippingAddressWithTenant: IShippingAddress;
   if (addressId) {
-    const addressDoc = await Address.findOne({
-      _id: addressId,
-      tenant: req.tenant,
-    }).lean();
+    const addressDoc = await Address.findOne({ _id: addressId, tenant: req.tenant }).lean();
     if (!addressDoc) {
-      res.status(400).json({
-        success: false,
-        message: orderT("error.addressNotFound", locale),
-      });
+      res.status(400).json({ success: false, message: orderT("error.addressNotFound", locale) });
       return;
     }
     shippingAddressWithTenant = {
@@ -90,22 +81,11 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       ...(shippingAddress || {}),
     };
   } else {
-    shippingAddressWithTenant = {
-      ...shippingAddress,
-      tenant: req.tenant,
-      email: userEmail,
-    };
+    shippingAddressWithTenant = { ...shippingAddress, tenant: req.tenant, email: userEmail };
   }
 
-  // --- Zorunlu alan kontrolü
-  const requiredFields = [
-    "name",
-    "phone",
-    "street",
-    "city",
-    "postalCode",
-    "country",
-  ];
+  // --- Zorunlu alanlar (değişmedi) ---
+  const requiredFields = ["name", "phone", "street", "city", "postalCode", "country"];
   for (const field of requiredFields) {
     if (!shippingAddressWithTenant[field]) {
       logger.withReq.warn(req, orderT("error.shippingAddressRequired", locale));
@@ -126,93 +106,97 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  // --- Ürünlerin enrichment & stok kontrol ---
-  const modelMap = {
-    bike: Bike,
-    ensotekprod: Ensotekprod,
-    sparepart: Sparepart,
-  } as const;
+  // --- Ürünler & stok (v2 notification entegrasyonu bu blokta) ---
+  const modelMap: Record<ProductType, Model<any>> = {
+  bike: Bike as unknown as Model<any>,
+  ensotekprod: Ensotekprod as unknown as Model<any>,
+  sparepart: Sparepart as unknown as Model<any>,
+};
+
   let total = 0;
   const enrichedItems: IOrderItem[] = [];
   const criticalStockWarnings: string[] = [];
   const itemsForMail: string[] = [];
 
+
   for (const item of items) {
     const modelName = item.productType?.toLowerCase?.();
-    const ProductModel = modelMap[modelName];
+    const ProductModel = modelMap[modelName as keyof typeof modelMap];
     if (!ProductModel) {
-      res.status(400).json({
-        success: false,
-        message: `Model not supported: ${item.productType}`,
-      });
+      res.status(400).json({ success: false, message: `Model not supported: ${item.productType}` });
       return;
     }
 
-    const product = await ProductModel.findOne({
-      _id: item.product,
-      tenant: req.tenant,
-    });
+    const product = await ProductModel.findOne({ _id: item.product, tenant: req.tenant });
     if (!product) {
-      res.status(404).json({
-        success: false,
-        message: orderT("error.productNotFound", locale),
-      });
+      res.status(404).json({ success: false, message: orderT("error.productNotFound", locale) });
       return;
     }
     if (product.stock < item.quantity) {
-      res.status(400).json({
-        success: false,
-        message: orderT("error.insufficientStock", locale),
-      });
+      res.status(400).json({ success: false, message: orderT("error.insufficientStock", locale) });
       return;
     }
+
     product.stock -= item.quantity;
     await product.save();
 
-    // --- Kritik Stok Bildirimi (NOTIFICATION) ---
+    // --- Kritik Stok Bildirimi (Notification v2, roles + dedupe + source + link + tags) ---
     const threshold = product.stockThreshold ?? 5;
     if (typeof product.stock === "number" && product.stock <= threshold) {
-      const existing = await Notification.findOne({
+      // Çok dilli title/message
+      const nameObj = product.name || {};
+      const title: Record<SupportedLocale, string> = {} as any;
+      const message: Record<SupportedLocale, string> = {} as any;
+      for (const lng of SUPPORTED_LOCALES) {
+        title[lng] = orderT("criticalStock.title", lng);
+        message[lng] = orderT("criticalStock.message", lng, {
+          name: nameObj[lng] || nameObj["en"] || String(product._id),
+          stock: product.stock,
+          productType: modelName,
+        });
+      }
+
+      // 30 dk dedupe; stok değeri anahtara dahil (stok daha da düşerse yeni bildirim çıkar)
+      const dedupeWindowMin = 30;
+      const dedupeKey = `${req.tenant}:stocklow:${modelName}:${product._id}:${product.stock}`;
+      const since = new Date(Date.now() - dedupeWindowMin * 60_000);
+      const dup = await Notification.findOne({
         tenant: req.tenant,
-        type: "warning",
-        "data.productId": product._id,
-        isRead: false,
+        dedupeKey,
+        createdAt: { $gte: since },
       });
 
-      if (!existing) {
-        // Çoklu dilde title/message hazırla
-        const nameObj = product.name || {};
-        const title: Record<SupportedLocale, string> = {} as any;
-        const message: Record<SupportedLocale, string> = {} as any;
-
-        for (const lng of SUPPORTED_LOCALES) {
-          title[lng] = orderT("criticalStock.title", lng);
-          message[lng] = orderT("criticalStock.message", lng, {
-            name: nameObj[lng] || nameObj["en"] || String(product._id),
-            stock: product.stock,
-            productType: modelName,
-          });
-        }
-
+      if (!dup) {
         await Notification.create({
           tenant: req.tenant,
           type: "warning",
           title,
           message,
+          channels: ["inapp"],
+          target: { roles: ["admin", "moderator"] }, // yöneticilere düşsün
           data: {
             productId: product._id,
             stock: product.stock,
             productType: modelName,
           },
-          isActive: true,
-          isRead: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          source: {
+            module: "inventory",
+            entity: modelName,     // "bike" | "ensotekprod" | "sparepart"
+            refId: product._id,
+            event: "stock.low",
+          },
+          tags: ["inventory", "stock", "low"],
+          link: {
+            routeName: "admin.products.detail",
+            params: { type: modelName, id: String(product._id) },
+          },
+          dedupeKey,
+          dedupeWindowMin,
         });
       }
     }
 
-    // Klasik order enrichment
+    // enrich
     enrichedItems.push({
       product: product._id,
       productType: modelName,
@@ -220,23 +204,20 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       unitPrice: product.price,
       tenant: req.tenant,
     });
-    itemsForMail.push(
-      `• ${product.name?.[locale] || product.name?.en} – Qty: ${item.quantity}`
-    );
+    itemsForMail.push(`• ${product.name?.[locale] || product.name?.en} – Qty: ${item.quantity}`);
     total += product.price * item.quantity;
 
     if (product.stock <= (product.stockThreshold ?? 5)) {
       criticalStockWarnings.push(
         orderT("warning.lowStock", locale, {
-          name:
-            product.name?.[locale] || product.name?.en || String(product._id),
+          name: product.name?.[locale] || product.name?.en || String(product._id),
           stock: String(product.stock),
         })
       );
     }
   }
 
-  // --- Kupon kontrolü (değişiklik yok) ---
+  // --- Kupon (değişmedi) ---
   let discount = 0;
   let coupon = null;
   if (couponCode) {
@@ -247,26 +228,20 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       expiresAt: { $gte: new Date() },
     });
     if (!coupon) {
-      res.status(400).json({
-        success: false,
-        message: orderT("error.invalidCoupon", locale),
-      });
+      res.status(400).json({ success: false, message: orderT("error.invalidCoupon", locale) });
       return;
     }
     discount = Math.round(total * (coupon.discount / 100));
   }
 
-  // --- Ödeme yöntemi kontrolü ---
+  // --- Ödeme yöntemi (değişmedi) ---
   const method: PaymentMethod = paymentMethod || "cash_on_delivery";
   if (!["cash_on_delivery", "credit_card", "paypal"].includes(method)) {
-    res.status(400).json({
-      success: false,
-      message: orderT("error.invalidPaymentMethod", locale),
-    });
+    res.status(400).json({ success: false, message: orderT("error.invalidPaymentMethod", locale) });
     return;
   }
 
-  // --- Order kaydı ---
+  // --- Order kaydı (değişmedi) ---
   const order = await Order.create({
     user: userId,
     tenant: req.tenant,
@@ -298,7 +273,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     await order.save();
   }
 
-  // --- Email: Customer ---
+  // --- Email: Customer (değişmedi) ---
   const customerEmail = userEmail;
   await sendEmail({
     tenantSlug: req.tenant,
@@ -323,7 +298,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     from: senderEmail,
   });
 
-  // --- Email: Admin ---
+  // --- Email: Admin (değişmedi) ---
   await sendEmail({
     tenantSlug: req.tenant,
     to: adminEmail,
@@ -342,26 +317,48 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     from: senderEmail,
   });
 
-  // --- Sipariş başarı bildirimi ---
+  // --- Sipariş başarı bildirimi (Notification v2, user feed + dedupe + source/tags) ---
   const notifyTitle: Record<SupportedLocale, string> = {} as any;
-  const notifyMsg: Record<SupportedLocale, string> = {} as any;
+  const notifyMsg:   Record<SupportedLocale, string> = {} as any;
   for (const lng of SUPPORTED_LOCALES) {
     notifyTitle[lng] = orderT("notification.orderReceivedTitle", lng);
-    notifyMsg[lng] = orderT("notification.orderReceived", lng, { total: total - discount });
+    notifyMsg[lng]   = orderT("notification.orderReceived", lng, { total: total - discount });
   }
-  await Notification.create({
-    user: userId,
+
+  // 5 dk dedupe — aynı kullanıcıya aynı sipariş bildirimi üst üste gelmesin
+  const userKey = String(userId || "guest");
+  const orderDedupeKey = `${req.tenant}:order:created:${order._id}:${userKey}`;
+  const orderDedupeWindowMin = 5;
+  const orderSince = new Date(Date.now() - orderDedupeWindowMin * 60_000);
+  const orderDup = await Notification.findOne({
     tenant: req.tenant,
-    type: "success",
-    title: notifyTitle,
-    message: notifyMsg,
-    data: { orderId: String(order._id) },
+    dedupeKey: orderDedupeKey,
+    createdAt: { $gte: orderSince },
   });
+
+  if (!orderDup) {
+    await Notification.create({
+      tenant: req.tenant,
+      user: userId || undefined,     // kullanıcının feed'ine düşsün
+      type: "success",
+      title: notifyTitle,
+      message: notifyMsg,
+      channels: ["inapp"],
+      data: { orderId: String(order._id), total: total - discount },
+      source: { module: "order", entity: "order", refId: order._id, event: "order.created" },
+      tags: ["order", "customer"],
+      dedupeKey: orderDedupeKey,
+      dedupeWindowMin: orderDedupeWindowMin,
+      link: {
+        routeName: "account.orders.detail",
+        params: { id: String(order._id) },
+      },
+    });
+  }
 
   logger.withReq.info(
     req,
-    orderT("order.created.success", locale) +
-      ` | User: ${userId} | Order: ${order._id}`
+    orderT("order.created.success", locale) + ` | User: ${userId} | Order: ${order._id}`
   );
 
   res.status(201).json({
@@ -377,6 +374,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     },
   });
 });
+
 
 
 // --- Sipariş Detay (owner veya admin) ---

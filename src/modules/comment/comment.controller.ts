@@ -15,145 +15,159 @@ import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import { IComment, CommentType } from "./types";
 
-// --- Yardımcılar
-const normalizeContentType = (type: string): CommentContentType =>
-  type.toLowerCase() as CommentContentType;
+// --- Güvenli normalizasyon (null/undefined korumalı)
+const normalizeContentType = (v: unknown): CommentContentType =>
+  String(v || "").toLowerCase() as CommentContentType;
 
 // --- Yorum oluştur ---
-export const createComment = asyncHandler(
-  async (req: Request, res: Response) => {
-    const {
-      comment,
-      contentType,
-      contentId,
-      label,
-      text,
-      type = "comment",
-      name,
-      profileImage,
-      email,
-      rating,
-    } = req.body;
-    const user = req.user;
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const t = (key: string, params?: any) =>
-      translate(key, locale, translations, params);
+export const createComment = asyncHandler(async (req: Request, res: Response) => {
+  const {
+    comment,
+    contentType,
+    contentId,
+    label,
+    text,
+    type = "comment",
+    name,
+    profileImage,
+    email,
+    rating,
+  } = req.body;
 
-    try {
-      const normalizedType = contentType?.toLowerCase();
-      const finalContentType = normalizeContentType(normalizedType);
-      const finalType: CommentType = (type || "comment").toLowerCase();
+  const user = req.user as any;
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const t = (key: string, params?: any) => translate(key, locale, translations, params);
 
-      const { Comment, Notification } = await getTenantModels(req);
+  try {
+    const finalContentType = normalizeContentType(contentType);
+    const finalType: CommentType = (type || "comment").toLowerCase() as CommentType;
 
-      if (!user && (!name || !email)) {
-        res.status(400).json({
-          success: false,
-          message: t("comment.nameEmailRequired"),
-        });
-        return;
-      }
+    const { Comment, Notification } = await getTenantModels(req);
 
-      if (!ALLOWED_COMMENT_CONTENT_TYPES.includes(finalContentType)) {
-        logger.withReq.info(
-          req,
-          t("comment.invalidContentType", { contentType: finalContentType })
-        );
-        res.status(400).json({
-          success: false,
-          message: t("comment.invalidContentType", {
-            contentType: finalContentType,
-          }),
-        });
-        return;
-      }
+    if (!user && (!name || !email)) {
+      res.status(400).json({ success: false, message: t("comment.nameEmailRequired") });
+      return;
+    }
 
-      if (!ALLOWED_COMMENT_TYPES.includes(finalType)) {
-        res.status(400).json({
-          success: false,
-          message: t("comment.invalidType", { type: finalType }),
-        });
-        return;
-      }
-
-      if (!isValidObjectId(contentId)) {
-        logger.withReq.info(req, t("comment.invalidContentId", { contentId }));
-        res.status(400).json({
-          success: false,
-          message: t("comment.invalidContentId", { contentId }),
-        });
-        return;
-      }
-
-      const newComment = await Comment.create({
-        name: user?.name || name,
-        profileImage,
-        tenant: req.tenant,
-        email: user?.email || email,
-        userId: user?._id,
-        label: label || comment,
-        text: text || comment,
-        contentType: finalContentType,
-        contentId,
-        type: finalType,
-        rating: typeof rating === "number" ? rating : undefined,
-        isPublished: false,
-        isActive: true,
+    if (!ALLOWED_COMMENT_CONTENT_TYPES.includes(finalContentType)) {
+      logger.withReq.info(req, t("comment.invalidContentType", { contentType: finalContentType }));
+      res.status(400).json({
+        success: false,
+        message: t("comment.invalidContentType", { contentType: finalContentType }),
       });
+      return;
+    }
 
-      const title: Record<SupportedLocale, string> = {} as any;
-      const message: Record<SupportedLocale, string> = {} as any;
-      for (const lng of SUPPORTED_LOCALES) {
-        const tLang = (key: string, params?: any) =>
-          translate(key, lng, translations, params);
+    if (!ALLOWED_COMMENT_TYPES.includes(finalType)) {
+      res.status(400).json({ success: false, message: t("comment.invalidType", { type: finalType }) });
+      return;
+    }
 
-        title[lng] = tLang("comment.notification.title");
-        message[lng] = tLang("comment.notification.created", {
-          contentType: finalContentType,
-        });
-      }
+    if (!isValidObjectId(contentId)) {
+      logger.withReq.info(req, t("comment.invalidContentId", { contentId }));
+      res.status(400).json({ success: false, message: t("comment.invalidContentId", { contentId }) });
+      return;
+    }
 
-      // Bildirim
+    const newComment = await Comment.create({
+      name: user?.name || name,
+      profileImage,
+      tenant: req.tenant,
+      email: user?.email || email,
+      userId: user?._id,
+      label: label || comment,
+      text: text || comment,
+      contentType: finalContentType,
+      contentId,
+      type: finalType,
+      rating: typeof rating === "number" ? rating : undefined,
+      isPublished: false,
+      isActive: true,
+    });
+
+    // Çok dilli başlık & mesaj
+    const title: Record<SupportedLocale, string> = {} as any;
+    const message: Record<SupportedLocale, string> = {} as any;
+    for (const lng of SUPPORTED_LOCALES) {
+      const tLang = (key: string, params?: any) => translate(key, lng, translations, params);
+      title[lng] = tLang("comment.notification.title");
+      message[lng] = tLang("comment.notification.created", { contentType: finalContentType });
+    }
+
+    // Bildirim verisi
+    const preview = (label || comment || "").slice(0, 80);
+    const source = {
+      module: "comment",
+      entity: finalContentType,    // örn: "apartment"
+      refId: newComment._id,
+      event: "comment.created",
+    };
+
+    // Admin/moderatöre görünür hale getir
+    const target = { roles: ["admin", "moderator"] };
+
+    // Basit dedupe (5 dk): aynı tenant + aynı içerik + aynı kullanıcı/e-posta
+    const dedupeWindowMin = 5;
+    const actorKey = (user?._id || email || "guest").toString();
+    const dedupeKey = `${req.tenant}:${finalContentType}:${contentId}:comment:${actorKey}`;
+    const since = new Date(Date.now() - dedupeWindowMin * 60 * 1000);
+    const existing = await Notification.findOne({
+      tenant: req.tenant,
+      dedupeKey,
+      createdAt: { $gte: since },
+    }).sort({ createdAt: -1 });
+
+    if (!existing) {
       await Notification.create({
-        title,
-        message,
         tenant: req.tenant,
         type: "info",
+        title,
+        message,
         user: user?._id || null,
+        target,                      // 👈 admin/moderator feed
+        channels: ["inapp"],         // 👈 in-app feed
         data: {
           commentId: newComment._id,
           contentId,
           contentType: finalContentType,
-          preview: (label || comment || "").slice(0, 80),
+          preview,
           name: user?.name || name,
           email: user?.email || email,
         },
+        priority: 3,
+        source,                      // 👈 izleme/rapor
+        tags: ["comment", "moderation", finalContentType],
+        dedupeKey,
+        dedupeWindowMin,
         isActive: true,
-        isRead: false,
-        createdAt: new Date(),
+        // timestamps otomatik; createdAt set etmiyoruz
+        link: {
+          routeName: "admin.comments", // FE route adınızla eşleyin
+          params: { id: String(newComment._id) },
+        },
       });
-
-      logger.withReq.info(req, t("comment.submitted"));
-
-      res.status(201).json({
-        success: true,
-        message: t("comment.submitted"),
-        data: newComment,
+    } else {
+      logger.withReq.info(req, "notification_deduped_comment", {
+        tenant: req.tenant,
+        dedupeKey,
+        windowMin: dedupeWindowMin,
       });
-      return;
-    } catch (err: any) {
-      logger.withReq.error(req, "Comment create error", {
-        error: err.message,
-        stack: err.stack,
-      });
-      res.status(500).json({
-        success: false,
-        message: t("comment.createError", { error: err.message }),
-      });
-      return;
     }
+
+    logger.withReq.info(req, t("comment.submitted"));
+    res.status(201).json({
+      success: true,
+      message: t("comment.submitted"),
+      data: newComment,
+    });
+    return;
+  } catch (err: any) {
+    logger.withReq.error(req, "Comment create error", { error: err.message, stack: err.stack });
+    res.status(500).json({ success: false, message: t("comment.createError", { error: err.message }) });
+    return;
   }
-);
+});
+
 
 // --- İçeriğe ait yorumları çek (filtreli: sadece yayınlanmış) ---
 export const getCommentsForContent = asyncHandler(

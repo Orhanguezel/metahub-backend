@@ -1,0 +1,21 @@
+{
+  "validation.invalidObjectId": "Formato de ID no válido.",
+  "validation.missingTitle": "El título es obligatorio en al menos un idioma.",
+  "validation.invalidMultilang": "El título debe ser un objeto multilingüe.",
+  "validation.missingPrice": "El campo de precio es obligatorio.",
+  "validation.invalidPrice": "El precio debe ser un número.",
+  "validation.invalidCurrency": "La moneda debe ser USD, EUR o TRY.",
+  "validation.invalidPeriod": "El período debe ser 'monthly' o 'yearly'.",
+  "validation.invalidLanguage": "Código de idioma no compatible.",
+  "validation.booleanField": "Este campo debe ser booleano (true/false).",
+  "error.invalid_id": "ID de paquete de precio no válido.",
+  "error.not_found": "Paquete de precios no encontrado.",
+  "error.missing_fields": "Faltan algunos campos obligatorios.",
+  "log.admin_listed": "Todos los paquetes de precios listados.",
+  "log.admin_fetched": "Paquete de precios obtenido.",
+  "log.admin_created": "Paquete de precios creado con éxito.",
+  "log.admin_updated": "Paquete de precios actualizado.",
+  "log.admin_deleted": "Paquete de precios eliminado.",
+  "log.listed": "Paquetes de precios listados con éxito.",
+  "log.fetched": "Paquete de precios obtenido."
+}

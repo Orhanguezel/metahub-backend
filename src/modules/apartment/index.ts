@@ -1,5 +1,4 @@
 // src/modules/apartment/index.ts
-
 import express from "express";
 import adminRoutes from "./admin.routes";
 import publicRoutes from "./public.routes";
@@ -11,5 +10,6 @@ router.use("/admin", adminRoutes);
 
 // 🌍 Public Routes
 router.use("/", publicRoutes);
+
 
 export default router;

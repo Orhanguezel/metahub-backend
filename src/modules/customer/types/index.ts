@@ -1,15 +1,30 @@
 import type { Document, Types } from "mongoose";
-import type { Address } from "@/modules/address/types";
+
+export type CustomerKind = "person" | "organization";
+export type CurrencyCode = "USD" | "EUR" | "TRY";
+
+export interface ICustomerBilling {
+  taxNumber?: string;
+  iban?: string;
+  defaultCurrency?: CurrencyCode;
+  paymentTermDays?: number;        // ör: Net 14
+  defaultDueDayOfMonth?: number;   // 1-28 (aylık vade için)
+}
 
 export interface ICustomer extends Document {
-  tenant: string;                   // Zorunlu, tenant separation için
-  companyName: string;              // Zorunlu, firma adı
-  contactName: string;              // Zorunlu, muhatap kişi
-  email: string;                    // Zorunlu, benzersiz
-  phone: string;                    // Zorunlu
-  addresses?: Array<Types.ObjectId | string>;     // Çoklu adres desteği (referans)
-  isActive: boolean;                // Aktif/Pasif müşteri yönetimi için
-  notes?: string;                   // Opsiyonel: Notlar/admin açıklama
+  tenant: string;                        // zorunlu
+  kind?: CustomerKind;                   // kişi/kurum ayırımı (ops.)
+  companyName?: string;                  // artık ZORUNLU DEĞİL
+  contactName: string;                   // zorunlu (muhatap)
+  email: string;                         // zorunlu, tenant+email unique
+  phone: string;                         // zorunlu, tenant+phone unique
+  slug: string;                          // otomatik (companyName/contactName)
+  addresses?: Array<Types.ObjectId>;     // ref: address
+  billing?: ICustomerBilling;            // basit faturalama tercihleri
+  tags?: string[];                       // etiketler
+  notes?: string;
+
+  isActive: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

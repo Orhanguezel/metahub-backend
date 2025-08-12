@@ -1,13 +1,18 @@
+// src/scripts/sync/seedAllModuleMeta.ts
 import "@/core/config/envLoader";
 import fs from "fs";
 import path from "path";
+import mongoose from "mongoose";
 import { Tenants } from "@/modules/tenants/tenants.model";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import logger from "@/core/middleware/logger/logger";
-import { t } from "@/core/utils/i18n/translate";
+import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "@/modules/modules/i18n";
 import { getTenantDbConnection } from "@/core/config/tenantDb";
 import { getTenantModelsFromConnection } from "@/core/middleware/tenant/getTenantModelsFromConnection";
+
+const t = (key: string, lng = "tr", params?: any) =>
+  translate(key, lng as any, translations, params);
 
 const DEFAULT_META = {
   icon: "box",
@@ -16,129 +21,139 @@ const DEFAULT_META = {
   language: "en",
   version: "1.0.0",
   order: 0,
-  routes: [],
-  history: [],
+  routes: [] as any[],
+  history: [] as any[],
   statsKey: "",
 };
 
+function resolveModulesDir(): string {
+  const candidates = [
+    path.resolve(process.cwd(), "src/modules"),
+    path.resolve(__dirname, "../../modules"),
+    path.resolve(process.cwd(), "dist/modules"),
+  ];
+  for (const p of candidates) if (fs.existsSync(p)) return p;
+  throw new Error(`modules klasörü bulunamadı.`);
+}
+
+/** Master (Tenants) bağlantısı */
+async function connectMasterDb() {
+  const uri =
+    process.env.MONGO_URI ||
+    process.env.MONGODB_URI ||
+    "mongodb://127.0.0.1:27017/metahub";
+  const dbName = process.env.MONGO_DB || undefined;
+
+  logger.info(`[META] Mongo'ya bağlanılıyor: ${uri} db=${dbName ?? "(default)"}`);
+  await mongoose.connect(uri, {
+    dbName,
+    serverSelectionTimeoutMS: 15000,
+    connectTimeoutMS: 15000,
+  } as any);
+  logger.info("[META] Mongo bağlantısı kuruldu.");
+}
+
 export async function seedAllModuleMeta() {
-  try {
-    const modulesDir = path.resolve(process.cwd(), "src/modules");
-    if (!fs.existsSync(modulesDir)) {
-      throw new Error(`src/modules dizini bulunamadı: ${modulesDir}`);
-    }
-    // 1️⃣ Aktif tenantları çek
-    const tenants = await Tenants.find({ isActive: true }).lean();
-    if (!tenants.length) {
-      logger.warn("[META] Hiç aktif tenant yok!", {
-        script: "seedAllModuleMeta",
-        event: "meta.no_tenants",
-        status: "warning",
-      });
-      return;
-    }
-    // 2️⃣ Modül klasörlerini oku
-    const allEntries = fs.readdirSync(modulesDir);
-    const modules: string[] = [];
-    for (const entry of allEntries) {
-      const fullPath = path.join(modulesDir, entry);
-      try {
-        if (fs.statSync(fullPath).isDirectory()) {
-          modules.push(entry);
-        }
-      } catch (err) {
-        logger.warn(`[META] Klasör okunamadı: ${entry} (${err.message})`, {
-          script: "seedAllModuleMeta",
-          event: "fs.error",
-          status: "warning",
-        });
-      }
-    }
-    if (modules.length === 0) {
-      logger.warn(`[META] Hiç modül klasörü bulunamadı. Path: ${modulesDir}`, {
-        script: "seedAllModuleMeta",
-        event: "meta.no_modules",
-        status: "warning",
-      });
-      console.log(`[META] Hiç modül klasörü bulunamadı!`);
-      return;
-    }
+  const modulesDir = resolveModulesDir();
+  logger.info(`[META] modulesDir = ${modulesDir}`);
 
-    let count = 0;
-    // 3️⃣ Her tenant-modül kombinasyonu için meta oluştur
-    for (const tenant of tenants) {
-      // Tenant'ın kendi DB connection'unu al
-      const conn = await getTenantDbConnection(tenant.slug);
-      const { ModuleMeta } = getTenantModelsFromConnection(conn);
-
-      for (const moduleName of modules) {
-        try {
-          // Aynı tenant+modül için zaten varsa atla
-          const exists = await ModuleMeta.findOne({ name: moduleName, tenant: tenant.slug });
-          if (!exists) {
-            const label = fillAllLocales(moduleName);
-            await ModuleMeta.create({
-              tenant: tenant.slug,
-              name: moduleName,
-              label,
-              ...DEFAULT_META,
-            });
-            count++;
-            logger.info(
-              t("sync.metaCreated", "tr", translations, { moduleName }),
-              {
-                script: "seedAllModuleMeta",
-                event: "meta.created",
-                status: "success",
-                tenant: tenant.slug,
-                module: moduleName,
-              }
-            );
-            console.log(`[META] ${moduleName} meta kaydı eklendi → ${tenant.slug}`);
-          } else {
-            logger.info(
-              t("sync.metaExists", "tr", translations, { moduleName }),
-              {
-                script: "seedAllModuleMeta",
-                event: "meta.exists",
-                status: "info",
-                tenant: tenant.slug,
-                module: moduleName,
-              }
-            );
-          }
-        } catch (err) {
-          logger.error(
-            `[META] Meta eklenemedi: ${moduleName} → ${tenant.slug} (${err.message})`,
-            {
-              script: "seedAllModuleMeta",
-              event: "meta.create_error",
-              status: "fail",
-              moduleName,
-              tenant: tenant.slug,
-            }
-          );
-          console.error(`[META] Meta eklenemedi: ${moduleName} → ${tenant.slug}:`, err);
-        }
-      }
-    }
-    logger.info(
-      t("sync.metaSummary", "tr", translations, { count }),
-      {
-        script: "seedAllModuleMeta",
-        event: "meta.summary",
-        status: "info",
-        count,
-      }
-    );
-    console.log(`[META] Toplam ${count} yeni meta kaydı eklendi.`);
-  } catch (e: any) {
-    logger.error(`[META] seedAllModuleMeta hata: ${e.message}`, {
-      script: "seedAllModuleMeta",
-      event: "meta.error",
-      status: "fail",
-    });
-    console.error(`[META] seedAllModuleMeta hata:`, e);
-    throw e;
+  // 1) Aktif tenantlar
+  const tenants = await Tenants.find({ isActive: true }).lean();
+  if (!tenants.length) {
+    logger.warn("[META] Hiç aktif tenant yok!");
+    return;
   }
+
+  // 2) Modül klasörleri
+  const entries = fs.readdirSync(modulesDir);
+  const modules = entries.filter((e) => {
+    const full = path.join(modulesDir, e);
+    return fs.statSync(full).isDirectory() && !e.startsWith("_");
+  });
+
+  if (!modules.length) {
+    logger.warn(`[META] Modül klasörü yok: ${modulesDir}`);
+    return;
+  }
+
+  // 3) Tenant başına upsert (sadece insert yoksa)
+  let createdCount = 0;
+
+  for (const tenant of tenants) {
+    const conn = await getTenantDbConnection(tenant.slug);
+    const { ModuleMeta } = getTenantModelsFromConnection(conn);
+
+    try {
+      for (const moduleName of modules) {
+        const label = fillAllLocales(moduleName);
+
+        // 🔑 ÖNEMLİ: Sadece $setOnInsert — mevcut varsa dokunma!
+        const res = await ModuleMeta.updateOne(
+          { tenant: tenant.slug, name: moduleName },
+          {
+            $setOnInsert: {
+              ...DEFAULT_META,
+              label,
+              name: moduleName,
+              tenant: tenant.slug,
+              // istersen tarih/historiyi de sadece insert'te ver
+              history: [
+                {
+                  version: DEFAULT_META.version,
+                  by: "seed",
+                  date: new Date(),
+                  note: "Module created by seed",
+                },
+              ],
+            },
+          },
+          { upsert: true }
+        );
+
+        if ((res as any).upsertedCount) {
+          createdCount++;
+          logger.info(
+            t("sync.metaCreated", "tr", { moduleName }) ||
+              `[META] ${moduleName} eklendi → ${tenant.slug}`
+          );
+        } else {
+          logger.info(
+            t("sync.metaExists", "tr", { moduleName }) ||
+              `[META] ${moduleName} zaten var → ${tenant.slug}`
+          );
+        }
+      }
+    } catch (err: any) {
+      logger.error(
+        `[META] ${tenant.slug} için seed hata: ${err.message}`,
+        { tenant: tenant.slug, module: "seedAllModuleMeta" }
+      );
+    } finally {
+      // tenant bağlantısını kapat
+      try { await conn.close(); } catch {}
+    }
+  }
+
+  logger.info(
+    t("sync.metaSummary", "tr", { count: createdCount }) ||
+      `[META] Toplam ${createdCount} yeni meta kaydı.`
+  );
+  console.log(`[META] Toplam ${createdCount} yeni meta kaydı eklendi.`);
+}
+
+// CLI çalıştırma
+if (require.main === module) {
+  (async () => {
+    try {
+      await connectMasterDb();
+      await seedAllModuleMeta();
+      await mongoose.disconnect();
+      console.log("[META] Seed tamamlandı.");
+      process.exit(0);
+    } catch (err) {
+      console.error("[META] Seed hata:", err);
+      try { await mongoose.disconnect(); } catch {}
+      process.exit(1);
+    }
+  })();
 }

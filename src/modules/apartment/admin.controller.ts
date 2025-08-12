@@ -29,13 +29,12 @@ const parseIfJson = (value: any) => {
   }
 };
 
-// Boş/Geçersiz referansları temizle
+// boş/geçersiz referansları temizle
 const cleanContactRefs = (raw: any) => {
   const obj = parseIfJson(raw) || {};
   if (!isValidObjectId(obj?.customerRef)) delete obj.customerRef;
   if (!isValidObjectId(obj?.userRef)) delete obj.userRef;
 
-  // boş stringleri temizle
   ["name", "phone", "email", "role"].forEach((k) => {
     if (obj[k] === "") delete obj[k];
   });
@@ -61,22 +60,17 @@ export const createApartment = asyncHandler(async (req: Request, res: Response) 
       location,
       customer,
       contact,
-      services,
-      fees,
       slug: bodySlug,
     } = req.body;
 
     if (!category || !isValidObjectId(category)) {
-      res.status(400).json({ success: false, message: t("categoryRequired") });
-      return;
+      res.status(400).json({ success: false, message: t("categoryRequired") }); return;
     }
     if (!address) {
-      res.status(400).json({ success: false, message: t("addressRequired") });
-      return;
+      res.status(400).json({ success: false, message: t("addressRequired") }); return;
     }
     if (!files.length) {
-      res.status(400).json({ success: false, message: t("imageRequired") });
-      return;
+      res.status(400).json({ success: false, message: t("imageRequired") }); return;
     }
 
     const baseTitle = fillAllLocales(parseIfJson(title));
@@ -84,14 +78,12 @@ export const createApartment = asyncHandler(async (req: Request, res: Response) 
     const addressObj = parseIfJson(address) || {};
     const locationObj = parseIfJson(location);
     const contactObj = cleanContactRefs(contact);
-    const servicesArr = Array.isArray(services) ? services : parseIfJson(services);
-    const feesArr = Array.isArray(fees) ? fees : parseIfJson(fees);
 
     // images[]
     const imageDocs: IApartmentImage[] = [];
     for (const file of files) {
       const imageUrl = getImagePath(file);
-      if (!imageUrl) continue; // güvenlik: path bulunamazsa atla
+      if (!imageUrl) continue;
       let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
       if (shouldProcessImage()) {
         const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
@@ -124,12 +116,14 @@ export const createApartment = asyncHandler(async (req: Request, res: Response) 
       location: locationObj,
       customer: isValidObjectId(customer) ? customer : undefined,
       contact: contactObj,
-      services: Array.isArray(servicesArr) ? servicesArr : [],
-      fees: Array.isArray(feesArr) ? feesArr : [],
+      // yayın & durum — şema defaultlarına saygı
       isPublished:
-        isPublished === undefined ? true : isPublished === "true" || isPublished === true,
-      publishedAt: isPublished ? publishedAt || new Date() : undefined,
-      isActive: true,
+        isPublished === undefined ? undefined : (isPublished === "true" || isPublished === true),
+      publishedAt:
+        isPublished === "true" || isPublished === true
+          ? (publishedAt || new Date())
+          : undefined,
+      isActive: true, // şema default’u da true ama burada açıkça set edilmesi sorun değil
     });
 
     logger.withReq.info(req, t("created"), {
@@ -159,14 +153,12 @@ export const updateApartment = asyncHandler(async (req: Request, res: Response) 
   const t = (key: string, params?: any) => translate(key, locale, translations, params);
 
   if (!isValidObjectId(id)) {
-    res.status(400).json({ success: false, message: t("invalidId") });
-    return;
+    res.status(400).json({ success: false, message: t("invalidId") }); return;
   }
 
   const apartment = await Apartment.findOne({ _id: id, tenant: req.tenant });
   if (!apartment) {
-    res.status(404).json({ success: false, message: t("notFound") });
-    return;
+    res.status(404).json({ success: false, message: t("notFound") }); return;
   }
 
   const payload = req.body;
@@ -184,12 +176,13 @@ export const updateApartment = asyncHandler(async (req: Request, res: Response) 
     (apartment as any).contact = { ...current, ...incoming };
   }
 
-  if (payload.services) apartment.services = parseIfJson(payload.services) || [];
-  if (payload.fees) apartment.fees = parseIfJson(payload.fees) || [];
-
-  if (payload.isPublished !== undefined)
+  if (payload.isPublished !== undefined) {
     apartment.isPublished = payload.isPublished === "true" || payload.isPublished === true;
-  if (payload.publishedAt) apartment.publishedAt = payload.publishedAt;
+    if (!apartment.isPublished) {
+      apartment.publishedAt = undefined;
+    }
+  }
+  if (payload.publishedAt) apartment.publishedAt = payload.publishedAt as any;
   if (payload.isActive !== undefined)
     apartment.isActive = payload.isActive === "true" || payload.isActive === true;
 
@@ -204,7 +197,7 @@ export const updateApartment = asyncHandler(async (req: Request, res: Response) 
         thumbnail = processed.thumbnail;
         webp = processed.webp;
       }
-      apartment.images.push({
+      (apartment as any).images.push({
         url: imageUrl,
         thumbnail,
         webp,
@@ -220,8 +213,10 @@ export const updateApartment = asyncHandler(async (req: Request, res: Response) 
         ? payload.removedImages
         : JSON.parse(payload.removedImages);
 
-      const targetObjs = apartment.images.filter((img: any) => removed.includes(img.url));
-      apartment.images = apartment.images.filter((img: any) => !removed.includes(img.url));
+      const targetObjs = (apartment as any).images.filter((img: any) => removed.includes(img.url));
+      (apartment as any).images = (apartment as any).images.filter(
+        (img: any) => !removed.includes(img.url)
+      );
 
       for (const imgObj of targetObjs) {
         const localPath = path.join(
@@ -253,7 +248,6 @@ export const updateApartment = asyncHandler(async (req: Request, res: Response) 
   logger.withReq.info(req, t("updated"), { ...getRequestContext(req), id });
   res.status(200).json({ success: true, message: t("updated"), data: apartment });
 });
-
 
 // GET ALL (admin)
 export const adminGetAllApartment = asyncHandler(async (req: Request, res: Response) => {
@@ -315,7 +309,6 @@ export const adminGetAllApartment = asyncHandler(async (req: Request, res: Respo
     .populate([
       { path: "category", select: "name slug" },
       { path: "customer", select: "companyName contactName email phone" },
-      { path: "services.service", select: "title price durationMinutes slug" },
       { path: "contact.customerRef", select: "companyName contactName email phone" },
       { path: "contact.userRef", select: "name email" },
     ])
@@ -338,15 +331,13 @@ export const adminGetApartmentById = asyncHandler(async (req: Request, res: Resp
 
   if (!isValidObjectId(id)) {
     logger.withReq.warn(req, t("invalidId"), { ...getRequestContext(req), id });
-    res.status(400).json({ success: false, message: t("invalidId") });
-    return;
+    res.status(400).json({ success: false, message: t("invalidId") }); return;
   }
 
   const doc = await Apartment.findOne({ _id: id, tenant: req.tenant })
     .populate([
       { path: "category", select: "name slug" },
       { path: "customer", select: "companyName contactName email phone" },
-      { path: "services.service", select: "title price durationMinutes slug" },
       { path: "contact.customerRef", select: "companyName contactName email phone" },
       { path: "contact.userRef", select: "name email" },
     ])
@@ -354,8 +345,7 @@ export const adminGetApartmentById = asyncHandler(async (req: Request, res: Resp
 
   if (!doc || (doc as any).isActive === false) {
     logger.withReq.warn(req, t("notFound"), { ...getRequestContext(req), id });
-    res.status(404).json({ success: false, message: t("notFound") });
-    return;
+    res.status(404).json({ success: false, message: t("notFound") }); return;
   }
 
   res.status(200).json({ success: true, message: t("fetched"), data: doc });
@@ -370,19 +360,17 @@ export const deleteApartment = asyncHandler(async (req: Request, res: Response) 
 
   if (!isValidObjectId(id)) {
     logger.withReq.warn(req, t("invalidId"), { ...getRequestContext(req), id });
-    res.status(400).json({ success: false, message: t("invalidId") });
-    return;
+    res.status(400).json({ success: false, message: t("invalidId") }); return;
   }
 
   const apartment = await Apartment.findOne({ _id: id, tenant: req.tenant });
   if (!apartment) {
     logger.withReq.warn(req, t("notFound"), { ...getRequestContext(req), id });
-    res.status(404).json({ success: false, message: t("notFound") });
-    return;
+    res.status(404).json({ success: false, message: t("notFound") }); return;
   }
 
   // resimleri temizle
-  for (const img of apartment.images || []) {
+  for (const img of (apartment as any).images || []) {
     const localPath = path.join(
       "uploads",
       req.tenant,

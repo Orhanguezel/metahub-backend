@@ -11,12 +11,10 @@ import { CatalogReplyTemplate } from "@/modules/catalog/templates/catalogReplyTe
 import logger from "@/core/middleware/logger/logger";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
-// ✅ Sadece kullanıcının verdiği direkt katalog linki ile çalışır
 export const sendCatalogRequest = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const t = (key: string, params?: any) =>
-      translate(key, locale, translations, params);
+    const locale: SupportedLocale = (req as any).locale || getLogLocale();
+    const t = (key: string, params?: any) => translate(key, locale, translations, params);
 
     try {
       const {
@@ -27,15 +25,12 @@ export const sendCatalogRequest = asyncHandler(
         locale: formLocale,
         subject,
         message,
-        catalogFileUrl, // <== ARTIK SADECE BUNU KULLANIYORUZ!
+        catalogFileUrl,      // ✅ sadece direkt link
         catalogFileName,
       } = req.body;
 
       if (!name || !email || !subject || !catalogFileUrl) {
-        res.status(400).json({
-          success: false,
-          message: t("allFieldsRequired"),
-        });
+        res.status(400).json({ success: false, message: t("allFieldsRequired") });
         return;
       }
 
@@ -48,11 +43,11 @@ export const sendCatalogRequest = asyncHandler(
         req.tenantData?.name ||
         "Brand";
       const senderEmail = req.tenantData?.emailSettings?.senderEmail;
-      const adminEmail = req.tenantData?.emailSettings?.adminEmail;
+      const adminEmail  = req.tenantData?.emailSettings?.adminEmail;
       const brandWebsite =
-        (req.tenantData?.domain?.main && `https://${req.tenantData.domain.main}`);
+        (req.tenantData?.domain?.main && `https://${req.tenantData.domain.main}`) || undefined;
 
-      // --- 1) DB'ye kaydet
+      // 1) Kayıt
       const newRequest = await CatalogRequest.create({
         name,
         email,
@@ -60,14 +55,14 @@ export const sendCatalogRequest = asyncHandler(
         company,
         tenant: req.tenant,
         locale: finalLocale,
-        sentCatalog: { url: catalogFileUrl, fileName: catalogFileName }, // Sadece bu!
+        sentCatalog: { url: catalogFileUrl, fileName: catalogFileName },
         subject,
         message,
         isRead: false,
         isArchived: false,
       });
 
-      // --- 2) Kullanıcıya PDF linkini gönder
+      // 2) Müşteri e-postası
       await sendEmail({
         tenantSlug: req.tenant,
         to: email,
@@ -85,7 +80,7 @@ export const sendCatalogRequest = asyncHandler(
         from: senderEmail,
       });
 
-      // --- 3) Admin’e bilgilendirme (opsiyonel)
+      // 3) Admin e-postası (opsiyonel)
       if (adminEmail) {
         await sendEmail({
           tenantSlug: req.tenant,
@@ -98,7 +93,7 @@ export const sendCatalogRequest = asyncHandler(
               <li><b>E-Posta:</b> ${email}</li>
               <li><b>Telefon:</b> ${phone || "-"}</li>
               <li><b>Firma:</b> ${company || "-"}</li>
-              <li><b>Katalog Dosyası:</b> <a href="${catalogFileUrl}" target="_blank">${catalogFileName || "PDF dosyası"}</a></li>
+              <li><b>Katalog Dosyası:</b> <a href="${catalogFileUrl}" target="_blank">${catalogFileName || "PDF"}</a></li>
               <li><b>Konu:</b> ${subject}</li>
               <li><b>Mesaj:</b> <br/>${message || "-"}</li>
             </ul>
@@ -108,42 +103,74 @@ export const sendCatalogRequest = asyncHandler(
         });
       }
 
-      // --- 4) Admin notification log
-      const notifTitle: Record<SupportedLocale, string> = Object.fromEntries(
-        SUPPORTED_LOCALES.map(lng => [lng, `${name} yeni katalog talebi gönderdi`])
-      ) as Record<SupportedLocale, string>;
-
-      const notifMsg: Record<SupportedLocale, string> = Object.fromEntries(
-        SUPPORTED_LOCALES.map(lng => [lng, `${name} (${email}) yeni bir katalog talebinde bulundu.`])
-      ) as Record<SupportedLocale, string>;
-
+      // 4) 🔔 v2 Notification (admin + moderator)
+      const title: Record<SupportedLocale, string> = {} as any;
+      const msg:   Record<SupportedLocale, string> = {} as any;
       for (const lng of SUPPORTED_LOCALES) {
-        notifTitle[lng] = `${name} yeni katalog talebi gönderdi`;
-        notifMsg[lng] = `${name} (${email}) yeni bir katalog talebinde bulundu.`;
+        const tLng = (k: string, p?: any) => translate(k, lng, translations, p);
+        title[lng] = tLng("catalog.notification.title") || "Yeni katalog talebi";
+        msg[lng]   = tLng("catalog.notification.message", { name, email }) ||
+                     `${name} (${email}) yeni bir katalog talebinde bulundu.`;
       }
 
-      await Notification.create({
-        tenant: req.tenant,
-        type: "info",
-        title: notifTitle,
-        message: notifMsg,
-        data: {
-          name,
-          email,
-          company: company || "",
-          phone: phone || "",
-          locale: finalLocale,
-          subject,
-          requestId: newRequest._id,
-          sentCatalog: { url: catalogFileUrl, fileName: catalogFileName },
-        },
-        isRead: false,
-      });
+      const target = { roles: ["admin", "moderator"] };
+      const source = {
+        module: "catalog",
+        entity: "request",
+        refId: newRequest._id,
+        event: "catalog.requested",
+      };
+      const tags = ["catalog", "request"];
 
-      logger.withReq.info(
-        req,
-        `[Katalog Talebi] Kullanıcıya PDF linki gönderildi - ${email}`
-      );
+      // 10 dk dedupe: aynı tenant + email + subject
+      const dedupeWindowMin = 10;
+      const dedupeKey = `${req.tenant}:catalog:${(email || "").toLowerCase()}:${subject || ""}`;
+
+      const since = new Date(Date.now() - dedupeWindowMin * 60 * 1000);
+      const dup = await Notification.findOne({
+        tenant: req.tenant,
+        dedupeKey,
+        createdAt: { $gte: since },
+      }).sort({ createdAt: -1 });
+
+      if (!dup) {
+        await Notification.create({
+          tenant: req.tenant,
+          type: "info",
+          title,
+          message: msg,
+          user: (req.user as any)?._id || (req.user as any)?.id || null, // varsa aktör
+          target,                 // 🎯 admin & moderator
+          channels: ["inapp"],    // FE in-app feed
+          priority: 3,
+          data: {
+            requestId: newRequest._id,
+            name,
+            email,
+            phone: phone || "",
+            company: company || "",
+            subject,
+            message: message || "",
+            sentCatalog: { url: catalogFileUrl, fileName: catalogFileName },
+          },
+          source,
+          tags,
+          dedupeKey,
+          dedupeWindowMin,
+          link: {
+            routeName: "admin.catalog.requests",   // FE’deki gerçek route adınızı koyun
+            params: { id: String(newRequest._id) },
+          },
+        });
+      } else {
+        logger.withReq.info(req, "notification_deduped_catalog", {
+          tenant: req.tenant,
+          dedupeKey,
+          windowMin: dedupeWindowMin,
+        });
+      }
+
+      logger.withReq.info(req, `[Katalog Talebi] PDF linki gönderildi - ${email}`);
 
       res.status(201).json({
         success: true,
@@ -155,6 +182,7 @@ export const sendCatalogRequest = asyncHandler(
     }
   }
 );
+
 
 
 // ✅ 2) Admin: Tüm katalog taleplerini getir

@@ -33,11 +33,11 @@ import { Favorite } from "@/modules/favorite/favorite.model";
 import { Feedback } from "@/modules/feedback/feedback.models";
 import { Address } from "@/modules/address/address.models";
 import { Company } from "@/modules/company/company.models";
-import { Customer } from "@/modules/customer/customer.models";
+import { Customer } from "@/modules/customer/models";
 import { FAQ } from "@/modules/faq/faq.models";
-import { Invoice } from "@/modules/invoice/invoice.models";
+import { Invoice } from "@/modules/invoicing/models";
 import { Offer } from "@/modules/offer/offer.models";
-import { Payment } from "@/modules/payment/payment.models";
+import { Payment } from "@/modules/payments/models";
 import { Shipment } from "@/modules/shipment/shipment.models";
 import { Task } from "@/modules/task/task.models";
 import { Activity } from "@/modules/activity/models";
@@ -58,8 +58,6 @@ import { SportCategory } from "@/modules/sportcategory/sportcategory.models";
 import { Bike } from "@/modules/bikes/model";
 import { BikeCategory } from "@/modules/bikescategory/models";
 import { SectionSetting, SectionMeta } from "@/modules/section/section.models";
-import { Apartment } from "@/modules/apartment/models";
-import { ApartmentCategory } from "@/modules/apartmentcategory/category.models";
 import { Apikey, Apikeylog } from "@/modules/apikey/apikey.models";
 import { News } from "@/modules/news/models";
 import { NewsCategory } from "@/modules/newscategory/category.models";
@@ -75,6 +73,23 @@ import { SkillCategory } from "@/modules/skillcategory/category.models";
 import { CatalogRequest } from "@/modules/catalog/catalog.models";
 import { Newsletter } from "@/modules/newsletter/newsletter.models";
 import { Pricing } from "@/modules/pricing/models";
+
+import { Apartment } from "@/modules/apartment/models";
+import { ApartmentCategory } from "@/modules/apartmentcategory/category.models";
+import { BillingPlan, BillingOccurrence } from "@/modules/billing/models";
+import { Contract } from "@/modules/contracts/models";
+import { OperationJob } from "@/modules/operationsjobs/models";
+import { OperationTemplate } from "@/modules/operationstemplates/models";
+import { ReportRun, ReportDefinition } from "@/modules/reports/models";
+import { SchedulePlan } from "@/modules/scheduling/models";
+import { TimeEntry } from "@/modules/timetracking/models";
+import { Employee } from "@/modules/employees/models";
+import { Expense } from "@/modules/expenses/models";
+import { ServiceCatalog } from "@/modules/servicecatalog/models";
+import { Contact } from "@/modules/contacts/models";
+import { PriceList, PriceListItem } from "@/modules/pricelist/models";
+import { CashAccount, CashEntry } from "@/modules/cashbook/models";
+import { FileObject } from "@/modules/files/models";
 
 // ✅ Ana export
 export const getTenantModelsFromConnection = (conn: Connection) => ({
@@ -159,4 +174,22 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   CatalogRequest: conn.model("catalogrequest", CatalogRequest.schema),
   Newsletter: conn.model("newsletter", Newsletter.schema),
   Pricing: conn.model("pricing", Pricing.schema),
+  BillingPlan: conn.model("billingplan", BillingPlan.schema),
+  BillingOccurrence: conn.model("billingoccurrence", BillingOccurrence.schema),
+  Contract: conn.model("contract", Contract.schema),
+  OperationJob: conn.model("operationjob", OperationJob.schema),
+  OperationTemplate: conn.model("operationtemplate", OperationTemplate.schema),
+  ReportRun: conn.model("reportrun", ReportRun.schema),
+  ReportDefinition: conn.model("reportdefinition", ReportDefinition.schema),
+  SchedulePlan: conn.model("scheduleplan", SchedulePlan.schema),
+  TimeEntry: conn.model("timeentry", TimeEntry.schema),
+  Employee: conn.model("employee", Employee.schema),
+  Expense: conn.model("expense", Expense.schema),
+  ServiceCatalog: conn.model("servicecatalog", ServiceCatalog.schema),
+  Contact: conn.model("contact", Contact.schema),
+  PriceList: conn.model("pricelist", PriceList.schema),
+  PriceListItem: conn.model("pricelistitem", PriceListItem.schema),
+  CashAccount: conn.model("cashaccount", CashAccount.schema),
+  CashEntry: conn.model("cashentry", CashEntry.schema),
+  FileObject: conn.model("fileobject", FileObject.schema),
 });

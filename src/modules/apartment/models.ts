@@ -3,7 +3,7 @@ import type { IApartment, IApartmentImage } from "./types";
 import { SUPPORTED_LOCALES } from "@/types/common";
 import { isValidObjectId as isValidObjId } from "@/core/utils/validation";
 
-// --- i18n string field (aynen) ---
+/* i18n string alanı */
 const localizedStringField = () => {
   const fields: Record<string, any> = {};
   for (const locale of SUPPORTED_LOCALES) {
@@ -12,7 +12,7 @@ const localizedStringField = () => {
   return fields;
 };
 
-// --- Images (aynen) ---
+/* Images */
 const ApartmentImageSchema = new Schema<IApartmentImage>(
   {
     url: { type: String, required: true },
@@ -23,7 +23,7 @@ const ApartmentImageSchema = new Schema<IApartmentImage>(
   { _id: false }
 );
 
-// --- Address & Geo ---
+/* Address & Geo */
 const AddressSchema = new Schema(
   {
     street: String,
@@ -32,7 +32,7 @@ const AddressSchema = new Schema(
     city: { type: String, required: true },
     state: String,
     zip: String,
-    country: { type: String, required: true }, // ISO-2 (DE/TR/…)
+    country: { type: String, required: true }, // ISO-2
     fullText: String,
   },
   { _id: false }
@@ -46,16 +46,16 @@ const GeoPointSchema = new Schema(
   { _id: false }
 );
 
-// --- Contact (Responsible) ---
+/* Contact (snapshot + opsiyonel referanslar) */
 const ContactSchema = new Schema(
   {
-    customerRef: { 
-      type: Schema.Types.ObjectId, 
+    customerRef: {
+      type: Schema.Types.ObjectId,
       ref: "customer",
       set: (v: any) => (isValidObjId(v) ? v : undefined),
     },
-    userRef: { 
-      type: Schema.Types.ObjectId, 
+    userRef: {
+      type: Schema.Types.ObjectId,
       ref: "user",
       set: (v: any) => (isValidObjId(v) ? v : undefined),
     },
@@ -67,52 +67,10 @@ const ContactSchema = new Schema(
   { _id: false }
 );
 
-// --- Service assignment & fees ---
-const ServiceAssignmentSchema = new Schema(
-  {
-    service: { type: Schema.Types.ObjectId, ref: "services", required: true },
-    name: { type: Object }, // TranslatedLabel snapshot
-    priceSnapshot: { type: Number, min: 0 },
-    durationMinutesSnapshot: { type: Number, min: 0 },
-    period: {
-      every: { type: Number, required: true, min: 1 },
-      unit: { type: String, enum: ["day", "week", "month"], required: true },
-      daysOfWeek: [{ type: Number, min: 0, max: 6 }],
-    },
-    lastPerformedAt: Date,
-    nextPlannedAt: Date,
-    isActive: { type: Boolean, default: true },
-    notes: { type: Object }, // TranslatedLabel
-  },
-  { _id: false }
-);
-
-const FeeSchema = new Schema(
-  {
-    type: {
-      type: String,
-      enum: ["dues", "cleaning", "security", "trash", "custom"],
-      required: true,
-    },
-    label: { type: Object }, // TranslatedLabel
-    amount: { type: Number, required: true, min: 0 },
-    currency: { type: String, required: true, default: "EUR" },
-    period: {
-      type: String,
-      enum: ["once", "weekly", "monthly", "quarterly", "yearly"],
-      required: true,
-    },
-    validFrom: Date,
-    validTo: Date,
-    isActive: { type: Boolean, default: true },
-  },
-  { _id: false }
-);
-
-// --- Apartment ---
+/* --- Apartment (sade) --- */
 const ApartmentSchema = new Schema<IApartment>(
   {
-    // i18n content
+    // i18n içerik
     title: localizedStringField(),
     content: localizedStringField(),
 
@@ -123,32 +81,28 @@ const ApartmentSchema = new Schema<IApartment>(
       required: true,
       lowercase: true,
       trim: true,
-      index: true, // unique kaldırıldı; compound unique aşağıda
+      index: true, // unique => compound aşağıda
     },
 
-    // media
+    // medya
     images: { type: [ApartmentImageSchema], default: [], required: true },
 
-    // classification
+    // sınıflandırma
     category: {
       type: Schema.Types.ObjectId,
       ref: "apartmentcategory",
       required: true,
     },
 
-    // location
+    // konum
     address: { type: AddressSchema, required: true },
     location: { type: GeoPointSchema },
 
-    // relations
+    // ilişkiler
     customer: { type: Schema.Types.ObjectId, ref: "customer" },
     contact: { type: ContactSchema, required: true },
 
-    // services & fees
-    services: { type: [ServiceAssignmentSchema], default: [] },
-    fees: { type: [FeeSchema], default: [] },
-
-    // publish & status
+    // yayın & durum
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
     isActive: { type: Boolean, default: true },
@@ -156,13 +110,14 @@ const ApartmentSchema = new Schema<IApartment>(
   { timestamps: true }
 );
 
-// --- Indexes ---
+/* Indexes */
 ApartmentSchema.index({ tenant: 1, slug: 1 }, { unique: true });
 ApartmentSchema.index({ "address.city": 1, "address.zip": 1, tenant: 1 });
 ApartmentSchema.index({ location: "2dsphere" });
 ApartmentSchema.index({ "address.fullText": "text" });
+ApartmentSchema.index({ tenant: 1, isPublished: 1, isActive: 1 });
 
-// --- Helpers ---
+/* Helpers */
 ApartmentSchema.pre("validate", function (next) {
   if (!this.slug && this.title?.en) {
     this.slug = this.title.en
@@ -176,10 +131,16 @@ ApartmentSchema.pre("validate", function (next) {
 });
 
 ApartmentSchema.pre("save", function (next) {
+  // address.fullText otomatik üret
   if (this.isModified("address")) {
     const a = this.address || ({} as any);
     if (!a.fullText) {
-      const parts = [a.street && `${a.street} ${a.number || ""}`, a.zip, a.city, a.country]
+      const parts = [
+        a.street && `${a.street} ${a.number || ""}`,
+        a.zip,
+        a.city,
+        a.country,
+      ]
         .filter(Boolean)
         .map((s) => String(s).trim());
       this.address.fullText = parts.join(", ");
