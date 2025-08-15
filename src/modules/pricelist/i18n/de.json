@@ -1,21 +1,35 @@
 {
-  "validation.invalidObjectId": "Ungültiges ID-Format.",
-  "validation.missingTitle": "Titel ist in mindestens einer Sprache erforderlich.",
-  "validation.invalidMultilang": "Titel muss ein mehrsprachiges Objekt sein.",
-  "validation.missingPrice": "Preisfeld ist erforderlich.",
-  "validation.invalidPrice": "Preis muss eine Zahl sein.",
-  "validation.invalidCurrency": "Währung muss USD, EUR oder TRY sein.",
-  "validation.invalidPeriod": "Zeitraum muss 'monthly' oder 'yearly' sein.",
-  "validation.invalidLanguage": "Nicht unterstützter Sprachcode.",
-  "validation.booleanField": "Dieses Feld muss ein Boolean (true/false) sein.",
-  "error.invalid_id": "Ungültige Preis-ID.",
-  "error.not_found": "Preispaket nicht gefunden.",
-  "error.missing_fields": "Einige erforderliche Felder fehlen.",
-  "log.admin_listed": "Alle Preispakete wurden aufgelistet.",
-  "log.admin_fetched": "Preispaket abgerufen.",
-  "log.admin_created": "Preispaket erfolgreich erstellt.",
-  "log.admin_updated": "Preispaket aktualisiert.",
-  "log.admin_deleted": "Preispaket gelöscht.",
-  "log.listed": "Preispakete erfolgreich aufgelistet.",
-  "log.fetched": "Preispaket abgerufen."
+  "created": "Erstellt.",
+  "updated": "Aktualisiert.",
+  "deleted": "Gelöscht.",
+  "notFound": "Nicht gefunden.",
+  "invalidId": "Ungültige ID.",
+  "listFetched": "Liste abgerufen.",
+  "fetched": "Abgerufen.",
+
+  "error": {
+    "duplicate": "Ein Datensatz mit denselben eindeutigen Schlüsseln existiert bereits.",
+    "create_fail": "Preisliste konnte nicht erstellt werden.",
+    "update_fail": "Preisliste konnte nicht aktualisiert werden.",
+    "not_found": "Ressource nicht gefunden.",
+    "invalid_params": "Fehlende oder ungültige Abfrageparameter."
+  },
+
+  "log": {
+    "listed": "Aufgelistet.",
+    "fetched": "Abgerufen."
+  },
+
+  "validation": {
+    "invalidObjectId": "Ungültige Objekt-ID.",
+    "invalidCode": "Code muss UPPER_SNAKE_CASE sein (A-Z, 0-9, Unterstrich).",
+    "invalidCurrency": "Währung muss eine von USD, EUR, TRY sein.",
+    "invalidDate": "Ungültiges Datumsformat (ISO 8601 erforderlich).",
+    "invalidStatus": "Status muss einer der folgenden sein: draft, active, archived.",
+    "booleanField": "Dieses Feld muss ein boolescher Wert sein.",
+    "invalidCategoryArray": "apartmentCategoryIds muss ein Array von ObjectId-Zeichenketten sein.",
+    "invalidServiceCode": "serviceCode muss UPPER_SNAKE_CASE sein (A-Z, 0-9, Unterstrich).",
+    "amountPositive": "amount muss eine Zahl größer oder gleich 0 sein.",
+    "invalidPeriod": "period muss einer der Werte sein: weekly, monthly, quarterly, yearly, once."
+  }
 }

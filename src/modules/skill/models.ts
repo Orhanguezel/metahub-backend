@@ -1,55 +1,91 @@
-import { Schema, Model, Types, models, model } from "mongoose";
-import type { ISkill, ISkillImage } from "./types";
+import { Schema, Model, models, model, Types } from "mongoose";
+import type { SupportedLocale } from "@/types/common";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
-// 🔤 Çok dilli alan tipi tanımı
+/* ---- Types ---- */
+export type TranslatedLabel = { [key in SupportedLocale]?: string };
+
+export interface ISkillImage {
+  _id?: Types.ObjectId;         // V2: alt dokümanda id açık
+  url: string;
+  thumbnail: string;
+  webp?: string;
+  publicId?: string;
+}
+
+export interface ISkill {
+  title: TranslatedLabel;
+  tenant: string;
+  slug: string;
+  summary: TranslatedLabel;
+  content: TranslatedLabel;
+  images: ISkillImage[];
+  tags: string[];
+  author?: string;
+  category: Types.ObjectId;
+  isPublished: boolean;
+  publishedAt?: Date;
+  comments: Types.ObjectId[];
+  isActive: boolean;
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/* ---- Helpers ---- */
 const localizedStringField = () => {
   const fields: Record<string, any> = {};
-  for (const locale of SUPPORTED_LOCALES) {
-    fields[locale] = { type: String, trim: true };
-  }
+  for (const locale of SUPPORTED_LOCALES) fields[locale] = { type: String, trim: true };
   return fields;
 };
 
+/* ---- Schemas ---- */
 const SkillImageSchema = new Schema<ISkillImage>(
   {
-    url: { type: String, required: true },
-    thumbnail: { type: String, required: true },
-    webp: { type: String },
-    publicId: { type: String },
+    url: { type: String, required: true, trim: true },
+    thumbnail: { type: String, required: true, trim: true },
+    webp: { type: String, trim: true },
+    publicId: { type: String, trim: true },
   },
-  { _id: false }
+  { _id: true }                          // V2: _id açık
 );
 
 const SkillSchema = new Schema<ISkill>(
   {
     title: localizedStringField(),
-    tenant: { type: String, required: true, index: true },
+    tenant: { type: String, required: true, index: true, trim: true },
     summary: localizedStringField(),
     content: localizedStringField(),
-    slug: { type: String, required: true, unique: true, lowercase: true },
+    slug: { type: String, required: true, lowercase: true, trim: true },
     images: { type: [SkillImageSchema], default: [] },
-    tags: { type: [String], default: [] },
-    author: { type: String },
-    category: {
-      type: Schema.Types.ObjectId,
-      ref: "skillcategory",
-      required: true,
-    },
-    isPublished: { type: Boolean, default: false },
+    tags: { type: [String], default: [], set: (arr: string[]) => [...new Set((arr || []).map(s => s.trim()).filter(Boolean))] },
+    author: { type: String, trim: true },
+    category: { type: Schema.Types.ObjectId, ref: "skillcategory", required: true },
+    isPublished: { type: Boolean, default: false, index: true },
     publishedAt: { type: Date },
     comments: { type: [Schema.Types.ObjectId], ref: "comment", default: [] },
-    isActive: { type: Boolean, default: true },
+    isActive: { type: Boolean, default: true, index: true },
+    order: { type: Number, default: 0, index: true },
   },
   { timestamps: true, minimize: false }
 );
 
+/* ---- Indexes ---- */
+// tenant + slug benzersiz
+SkillSchema.index({ tenant: 1, slug: 1 }, { unique: true });
+SkillSchema.index({ tenant: 1, createdAt: -1 });
+
+/* ---- Hooks ---- */
 SkillSchema.pre("validate", function (next) {
   if (!Array.isArray(this.images)) this.images = [];
   if (!Array.isArray(this.tags)) this.tags = [];
   if (!Array.isArray(this.comments)) this.comments = [];
-  if (!this.slug && this.title?.en) {
-    this.slug = this.title.en
+
+  // slug yoksa başlıktan üret
+  if (!this.slug) {
+    const first =
+      this.title?.tr || this.title?.en || Object.values(this.title || {})[0] || "skill";
+    this.slug = String(first)
       .toLowerCase()
       .replace(/\s+/g, "-")
       .replace(/[^\w\-]+/g, "")
@@ -59,8 +95,13 @@ SkillSchema.pre("validate", function (next) {
   next();
 });
 
+// publish değişimini yönet
+SkillSchema.pre("save", function (next) {
+  if (this.isModified("isPublished")) {
+    if (this.isPublished && !this.publishedAt) this.publishedAt = new Date();
+    if (!this.isPublished) this.publishedAt = undefined;
+  }
+  next();
+});
 
-const Skill: Model<ISkill> =
-  models.skill || model<ISkill>("skill", SkillSchema);
-
-export { Skill, SkillImageSchema, SkillSchema };
+export const Skill: Model<ISkill> = models.skill || model<ISkill>("skill", SkillSchema);

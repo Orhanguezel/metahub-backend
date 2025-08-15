@@ -23,10 +23,6 @@ export const PriceListSchema = new Schema<IPriceList>(
 
     defaultCurrency: { type: String, required: true, enum: ["USD", "EUR", "TRY"] },
 
-    segment: { type: String, trim: true },
-    region: { type: String, trim: true },
-    apartmentCategoryIds: [{ type: Schema.Types.ObjectId, ref: "apartmentcategory" }],
-
     effectiveFrom: { type: Date, required: true },
     effectiveTo: { type: Date },
 
@@ -40,9 +36,8 @@ export const PriceListSchema = new Schema<IPriceList>(
 PriceListSchema.index({ tenant: 1, code: 1 }, { unique: true });
 PriceListSchema.index({ tenant: 1, isActive: 1 });
 PriceListSchema.index({ tenant: 1, status: 1, effectiveFrom: 1 });
-PriceListSchema.index({ tenant: 1, region: 1, segment: 1 });
 
-// Çok dilli arama için text index (opsiyonel ama faydalı)
+// Çok dilli arama için text index
 const nameTextIndex: Record<string, "text"> = {};
 for (const l of SUPPORTED_LOCALES) nameTextIndex[`name.${l}`] = "text";
 PriceListSchema.index(nameTextIndex);
@@ -52,7 +47,6 @@ PriceListSchema.pre("validate", function (next) {
   if (this.code) {
     this.code = toUpperSnake(this.code);
   } else {
-    // name içinden üret (ilk dolu locale)
     const n = this.name || ({} as any);
     const base =
       SUPPORTED_LOCALES.map((l) => (n[l] || "") as string).find((v) => v?.trim()) ||
@@ -63,7 +57,7 @@ PriceListSchema.pre("validate", function (next) {
 });
 
 export const PriceList: Model<IPriceList> =
-  models.pricelist || model<IPriceList>("pricelist", PriceListSchema);
+  (models as any).pricelist || model<IPriceList>("pricelist", PriceListSchema);
 
 /* ----------------- PriceListItem ----------------- */
 export const PriceListItemSchema = new Schema<IPriceListItem>(
@@ -74,7 +68,7 @@ export const PriceListItemSchema = new Schema<IPriceListItem>(
 
     amount: { type: Number, required: true, min: 0 },
     currency: { type: String, enum: ["USD", "EUR", "TRY"] },
-    period: { type: String, required: true, enum: ["weekly", "monthly", "quarterly", "yearly", "once"] },
+    period: { type: String, required: true, enum: ["weekly", "ten_days", "fifteen_days","monthly", "quarterly", "yearly", "once"] },
     notes: { type: String, trim: true },
 
     isActive: { type: Boolean, default: true },
@@ -93,4 +87,4 @@ PriceListItemSchema.pre("validate", function (next) {
 });
 
 export const PriceListItem: Model<IPriceListItem> =
-  models.pricelistitem || model<IPriceListItem>("pricelistitem", PriceListItemSchema);
+  (models as any).pricelistitem || model<IPriceListItem>("pricelistitem", PriceListItemSchema);

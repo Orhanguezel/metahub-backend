@@ -8,7 +8,7 @@ const localized = () => ({ type: Object, default: {} });
 const AnchorSchema = new Schema(
   {
     apartmentRef: { type: Schema.Types.ObjectId, ref: "apartment", required: true },
-    categoryRef: { type: Schema.Types.ObjectId, ref: "apartmentcategory" },
+    categoryRef: { type: Schema.Types.ObjectId, ref: "neighborhood" },
     serviceRef: { type: Schema.Types.ObjectId, ref: "servicecatalog" },
     templateRef: { type: Schema.Types.ObjectId, ref: "operationtemplate" },
     contractRef: { type: Schema.Types.ObjectId, ref: "contract" },

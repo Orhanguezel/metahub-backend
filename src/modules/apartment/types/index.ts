@@ -19,8 +19,8 @@ export interface IAddress {
   city: string;
   state?: string;
   zip?: string;
-  country: string;         // ISO-2 (DE/TR/…)
-  fullText?: string;       // "Hansaring 12, 53111 Bonn, DE"
+  country: string;          // ISO-2 (DE/TR/…)
+  fullText?: string;
 }
 
 export interface IGeoPoint {
@@ -28,39 +28,101 @@ export interface IGeoPoint {
   coordinates: [number, number]; // [lng, lat]
 }
 
-/** Sorumlu kişi snapshot + referanslar (opsiyonel bağlar) */
+/** Konumsal referanslar (normalize) */
+export interface IPlaceRefs {
+  neighborhood?: Types.ObjectId;  // ref: "neighborhood"
+  cityCode?: string;
+  districtCode?: string;
+  zip?: string;
+}
+
+/** Snapshot’lar (listeyi zenginleştirmek için) */
+export interface IApartmentSnapshots {
+  neighborhoodName?: TranslatedLabel;
+  managerName?: string;                    // yeni (opsiyonel)
+  serviceNames?: TranslatedLabel[];        // yeni (opsiyonel)
+  lastPriceLabel?: string;                 // yeni (opsiyonel) — "€120 / Aylık" gibi
+}
+
+/** YÖNETİCİ snapshot (userRef kaldırıldı) */
 export interface IContactPerson {
   customerRef?: Types.ObjectId; // ref: "customer"
-  userRef?: Types.ObjectId;     // ref: "user"
-  name: string;                 // zorunlu (snapshot)
+  name: string;
   phone?: string;
   email?: string;
   role?: string;
 }
 
-/** Apartment (yalın/master data) */
+/* ===== Ops bağları ===== */
+export interface IServiceBinding {
+  service: Types.ObjectId;             // ref: "servicecatalog"
+  schedulePlan?: Types.ObjectId;       // ref: "scheduleplan"
+  operationTemplate?: Types.ObjectId;  // ref: "operationtemplate"
+  priceListItem?: Types.ObjectId;      // ref: "pricelistitem"
+  isActive?: boolean;
+  notes?: string;
+}
+
+export interface IApartmentOpsNotifyPrefs {
+  managerOnJobCompleted?: boolean;
+  managerOnJobAssigned?: boolean;
+  employeeOnJobAssigned?: boolean;
+}
+
+export interface IApartmentOps {
+  employees: Types.ObjectId[];         // ref: "employee"
+  supervisor?: Types.ObjectId;         // ref: "employee"
+  services: IServiceBinding[];
+
+  cleaningPlan?: Types.ObjectId;       // ref: "scheduleplan"
+  trashPlan?: Types.ObjectId;          // ref: "scheduleplan"
+
+  cashCollectionDay?: number;          // 1..31
+  notify?: IApartmentOpsNotifyPrefs;
+}
+
+/* ===== Diğer modül linkleri (opsiyonel) ===== */
+export interface IApartmentLinks {
+  contracts?: Types.ObjectId[];
+  billingPlans?: Types.ObjectId[];
+  invoices?: Types.ObjectId[];
+  payments?: Types.ObjectId[];
+  priceLists?: Types.ObjectId[];
+  operationJobs?: Types.ObjectId[];
+  operationTemplates?: Types.ObjectId[];
+  timeEntries?: Types.ObjectId[];
+  reportDefs?: Types.ObjectId[];
+  reportRuns?: Types.ObjectId[];
+  files?: Types.ObjectId[];
+  contacts?: Types.ObjectId[];
+}
+
+/** Apartment (master data) */
 export interface IApartment {
   _id?: Types.ObjectId;
 
   // İçerik
   title?: TranslatedLabel;
   content?: TranslatedLabel;
-  images: IApartmentImage[];         // en az 1 görsel UI ile zorunlu
+  images: IApartmentImage[];
 
   // Multi-tenant & URL
-  tenant: string;                    // zorunlu
-  slug: string;                      // zorunlu, unique(tenant+slug)
+  tenant: string;
+  slug: string;
 
   // Konum
-  address: IAddress;                 // zorunlu
-  location?: IGeoPoint;              // GeoJSON
-
-  // Sınıflandırma
-  category: Types.ObjectId;          // ref: "apartmentcategory" (zorunlu)
+  address: IAddress;
+  location?: IGeoPoint;
+  place?: IPlaceRefs;
+  snapshots?: IApartmentSnapshots;
 
   // İlişkiler
-  customer?: Types.ObjectId;         // ref: "customer" (opsiyonel)
-  contact: IContactPerson;           // min: { name }
+  customer?: Types.ObjectId;      // apartman yöneticisi (Customer)
+  contact: IContactPerson;        // yöneticinin snapshot’ı
+
+  // Operasyon & linkler
+  ops?: IApartmentOps;
+  links?: IApartmentLinks;
 
   // Yayın & durum
   isPublished: boolean;

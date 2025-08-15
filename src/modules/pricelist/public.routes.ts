@@ -4,17 +4,16 @@ import {
   getPriceListByCodePublic,
   getPriceForServicePublic,
 } from "./public.controller";
-import { validatePublicListQuery, validateCodeParam, validatePriceLookupQuery } from "./validation";
 
 const router = express.Router();
 
 // Lists visible to public (active + in-window)
-router.get("/", validatePublicListQuery, getAllPriceListsPublic);
+router.get("/",  getAllPriceListsPublic);
 
 // List by code (with items)
-router.get("/code/:code", validateCodeParam, getPriceListByCodePublic);
+router.get("/code/:code",  getPriceListByCodePublic);
 
 // Quick price lookup for a service (by price list code)
-router.get("/code/:code/price", validateCodeParam, validatePriceLookupQuery, getPriceForServicePublic);
+router.get("/code/:code/price", getPriceForServicePublic);
 
 export default router;

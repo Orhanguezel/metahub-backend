@@ -1,4 +1,5 @@
-import { Request, Response } from "express";
+// src/modules/skill/public.controller.ts
+import { Request, Response, RequestHandler } from "express";
 import asyncHandler from "express-async-handler";
 import { isValidObjectId } from "@/core/utils/validation";
 import logger from "@/core/middleware/logger/logger";
@@ -9,7 +10,6 @@ import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import translations from "./i18n";
 import { t as translate } from "@/core/utils/i18n/translate";
 
-// Güvenli normalization fonksiyonu
 function normalizeSkillItem(item: any) {
   return {
     ...item,
@@ -19,11 +19,10 @@ function normalizeSkillItem(item: any) {
   };
 }
 
-// 📥 GET /skill (Public)
-export const getAllSkill = asyncHandler(async (req: Request, res: Response) => {
-  const { category, onlyLocalized } = req.query;
-  const locale: SupportedLocale =
-    (req.locale as SupportedLocale) || getLogLocale() || "en";
+// GET /skill
+export const getAllSkill: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
+  const { category, onlyLocalized } = req.query as { category?: string; onlyLocalized?: string };
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale() || "en";
   const t = (key: string) => translate(key, locale, translations);
   const { Skill } = await getTenantModels(req);
 
@@ -36,7 +35,6 @@ export const getAllSkill = asyncHandler(async (req: Request, res: Response) => {
   if (typeof category === "string" && isValidObjectId(category)) {
     filter.category = category;
   }
-
   if (onlyLocalized === "true") {
     filter[`title.${locale}`] = { $exists: true };
   }
@@ -44,10 +42,9 @@ export const getAllSkill = asyncHandler(async (req: Request, res: Response) => {
   const skillList = await Skill.find(filter)
     .populate("comments")
     .populate("category", "name slug")
-    .sort({ createdAt: -1 })
+    .sort({ order: 1, createdAt: -1 })
     .lean();
 
-  // --- Güvenli array normalization ---
   const normalizedList = (skillList || []).map(normalizeSkillItem);
 
   logger.withReq.info(req, t("log.listed"), {
@@ -57,119 +54,100 @@ export const getAllSkill = asyncHandler(async (req: Request, res: Response) => {
     resultCount: normalizedList.length,
   });
 
-  res.status(200).json({
-    success: true,
-    message: t("log.listed"),
-    data: normalizedList,
-  });
+  res.status(200).json({ success: true, message: t("log.listed"), data: normalizedList });
 });
 
-// 📥 GET /skill/:id (Public)
-export const getSkillById = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const locale: SupportedLocale =
-      (req.locale as SupportedLocale) || getLogLocale() || "en";
-    const t = (key: string) => translate(key, locale, translations);
-    const { Skill } = await getTenantModels(req);
+// GET /skill/:id
+export const getSkillById: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale() || "en";
+  const t = (key: string) => translate(key, locale, translations);
+  const { Skill } = await getTenantModels(req);
 
-    if (!isValidObjectId(id)) {
-      logger.withReq.warn(req, t("error.invalid_id"), {
-        ...getRequestContext(req),
-        event: "skill.public_getById",
-        module: "skill",
-        status: "fail",
-        id,
-      });
-      res.status(400).json({ success: false, message: t("error.invalid_id") });
-      return;
-    }
-
-    const skill = await Skill.findOne({
-      _id: id,
-      isActive: true,
-      isPublished: true,
-      tenant: req.tenant,
-    })
-      .populate("comments")
-      .populate("category", "name slug")
-      .lean();
-
-    if (!skill) {
-      logger.withReq.warn(req, t("error.not_found"), {
-        ...getRequestContext(req),
-        event: "skill.public_getById",
-        module: "skill",
-        status: "fail",
-        id,
-      });
-      res.status(404).json({ success: false, message: t("error.not_found") });
-      return;
-    }
-
-    // --- Güvenli array normalization ---
-    const normalized = normalizeSkillItem(skill);
-
-    logger.withReq.info(req, t("log.fetched"), {
+  if (!isValidObjectId(id)) {
+    logger.withReq.warn(req, t("error.invalid_id"), {
       ...getRequestContext(req),
       event: "skill.public_getById",
       module: "skill",
-      skillId: normalized._id,
+      status: "fail",
+      id,
     });
-
-    res.status(200).json({
-      success: true,
-      message: t("log.fetched"),
-      data: normalized,
-    });
+    res.status(400).json({ success: false, message: t("error.invalid_id") });
+    return;
   }
-);
 
-// 📥 GET /skill/slug/:slug (Public)
-export const getSkillBySlug = asyncHandler(
-  async (req: Request, res: Response) => {
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const t = (key: string) => translate(key, locale, translations);
-    const { Skill } = await getTenantModels(req);
-    const { slug } = req.params;
+  const skill = await Skill.findOne({
+    _id: id,
+    isActive: true,
+    isPublished: true,
+    tenant: req.tenant,
+  })
+    .populate("comments")
+    .populate("category", "name slug")
+    .lean();
 
-    const skill = await Skill.findOne({
-      slug,
-      tenant: req.tenant,
-      isActive: true,
-      isPublished: true,
-    })
-      .populate("comments")
-      .populate("category", "name slug")
-      .lean();
+  if (!skill) {
+    logger.withReq.warn(req, t("error.not_found"), {
+      ...getRequestContext(req),
+      event: "skill.public_getById",
+      module: "skill",
+      status: "fail",
+      id,
+    });
+    res.status(404).json({ success: false, message: t("error.not_found") });
+    return;
+  }
 
-    if (!skill) {
-      logger.withReq.warn(req, t("error.not_found"), {
-        ...getRequestContext(req),
-        event: "skill.public_getBySlug",
-        module: "skill",
-        status: "fail",
-        slug,
-      });
-      res.status(404).json({ success: false, message: t("error.not_found") });
-      return;
-    }
+  const normalized = normalizeSkillItem(skill);
 
-    // --- Güvenli array normalization ---
-    const normalized = normalizeSkillItem(skill);
+  logger.withReq.info(req, t("log.fetched"), {
+    ...getRequestContext(req),
+    event: "skill.public_getById",
+    module: "skill",
+    skillId: normalized._id,
+  });
 
-    logger.withReq.info(req, t("log.fetched"), {
+  res.status(200).json({ success: true, message: t("log.fetched"), data: normalized });
+});
+
+// GET /skill/slug/:slug
+export const getSkillBySlug: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale() || "en";
+  const t = (key: string) => translate(key, locale, translations);
+  const { Skill } = await getTenantModels(req);
+  const { slug } = req.params;
+
+  const skill = await Skill.findOne({
+    slug,
+    tenant: req.tenant,
+    isActive: true,
+    isPublished: true,
+  })
+    .populate("comments")
+    .populate("category", "name slug")
+    .lean();
+
+  if (!skill) {
+    logger.withReq.warn(req, t("error.not_found"), {
       ...getRequestContext(req),
       event: "skill.public_getBySlug",
       module: "skill",
+      status: "fail",
       slug,
-      skillId: normalized._id,
     });
-
-    res.status(200).json({
-      success: true,
-      message: t("log.fetched"),
-      data: normalized,
-    });
+    res.status(404).json({ success: false, message: t("error.not_found") });
+    return;
   }
-);
+
+  const normalized = normalizeSkillItem(skill);
+
+  logger.withReq.info(req, t("log.fetched"), {
+    ...getRequestContext(req),
+    event: "skill.public_getBySlug",
+    module: "skill",
+    slug,
+    skillId: normalized._id,
+  });
+
+  res.status(200).json({ success: true, message: t("log.fetched"), data: normalized });
+});

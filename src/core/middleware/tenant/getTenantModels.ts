@@ -74,7 +74,6 @@ import { CatalogRequest } from "@/modules/catalog/catalog.models";
 import { Pricing } from "@/modules/pricing/models";
 
 import { Apartment } from "@/modules/apartment/models";
-import { ApartmentCategory } from "@/modules/apartmentcategory/category.models";
 import { BillingPlan, BillingOccurrence } from "@/modules/billing/models";
 import { Contract } from "@/modules/contracts/models";
 import { OperationJob } from "@/modules/operationsjobs/models";
@@ -89,6 +88,7 @@ import { Contact } from "@/modules/contacts/models";
 import { PriceList, PriceListItem } from "@/modules/pricelist/models";
 import { CashAccount, CashEntry } from "@/modules/cashbook/models";
 import { FileObject } from "@/modules/files/models";
+import { Neighborhood } from "@/modules/neighborhood/models";
 
 export const getTenantModels = async (req: Request) => ({
   Settings: await req.getModel("settings", Settings.schema),
@@ -176,10 +176,6 @@ export const getTenantModels = async (req: Request) => ({
   SectionSetting: await req.getModel("sectionsetting", SectionSetting.schema),
   SectionMeta: await req.getModel("sectionmeta", SectionMeta.schema),
   Apartment: await req.getModel("apartment", Apartment.schema),
-  ApartmentCategory: await req.getModel(
-    "apartmentcategory",
-    ApartmentCategory.schema
-  ),
   Apikey: await req.getModel("apikey", Apikey.schema),
   Apikeylog: await req.getModel("apikeylog", Apikeylog.schema),
   News: await req.getModel("news", News.schema),
@@ -220,4 +216,5 @@ export const getTenantModels = async (req: Request) => ({
   CashAccount: await req.getModel("cashaccount", CashAccount.schema),
   CashEntry: await req.getModel("cashentry", CashEntry.schema),
   FileObject: await req.getModel("fileobject", FileObject.schema),
+  Neighborhood: await req.getModel("neighborhood", Neighborhood.schema),
 });
