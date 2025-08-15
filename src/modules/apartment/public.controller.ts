@@ -1,31 +1,36 @@
-// src/modules/apartment/public.controller.ts
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { isValidObjectId } from "@/core/utils/validation";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
-import { SupportedLocale, SUPPORTED_LOCALES } from "@/types/common";
+import { SUPPORTED_LOCALES, type SupportedLocale } from "@/types/common";
 import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 
+/* helpers */
+const tByReq = (req: Request) => (k: string, p?: any) =>
+  translate(k, (req.locale as SupportedLocale) || getLogLocale(), translations, p);
+
 export const publicGetAllApartment = asyncHandler(async (req: Request, res: Response) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
+  const t = tByReq(req);
   const { Apartment } = await getTenantModels(req);
-  const t = (key: string) => translate(key, locale, translations);
 
   const {
     language,
-    category,
+    neighborhood,       // ObjectId (v2)
+    cityCode,           // v2 normalize
+    districtCode,       // v2 normalize
     city,
     zip,
     q,
     nearLng,
     nearLat,
-    nearRadius, // metre
+    nearRadius,         // metre
+    service,            // ops.services.service (opsiyonel, public filtre)
     limit = "200",
-  } = req.query;
+  } = req.query as Record<string, string>;
 
   const filter: Record<string, any> = {
     tenant: req.tenant,
@@ -33,19 +38,27 @@ export const publicGetAllApartment = asyncHandler(async (req: Request, res: Resp
     isPublished: true,
   };
 
-  if (typeof language === "string" && SUPPORTED_LOCALES.includes(language as SupportedLocale)) {
+  if (language && SUPPORTED_LOCALES.includes(language as SupportedLocale)) {
     filter[`title.${language}`] = { $exists: true };
   }
-  if (typeof category === "string" && isValidObjectId(category)) filter.category = category;
-  if (typeof city === "string") filter["address.city"] = city;
-  if (typeof zip === "string") filter["address.zip"] = zip;
+  if (neighborhood && isValidObjectId(neighborhood)) filter["place.neighborhood"] = neighborhood;
+  if (cityCode) filter["place.cityCode"] = cityCode;
+  if (districtCode) filter["place.districtCode"] = districtCode;
+  if (city) filter["address.city"] = city;
 
-  if (typeof q === "string" && q.trim()) {
-    filter.$or = [
-      { "address.fullText": { $regex: q.trim(), $options: "i" } },
-      { slug: { $regex: q.trim(), $options: "i" } },
-    ];
+  const orParts: any[] = [];
+  if (zip) orParts.push({ "place.zip": zip }, { "address.zip": zip });
+
+  if (q && q.trim()) {
+    const qx = q.trim();
+    orParts.push(
+      { slug: { $regex: qx, $options: "i" } },
+      { "address.fullText": { $regex: qx, $options: "i" } },
+      ...SUPPORTED_LOCALES.map((lng) => ({ [`title.${lng}`]: { $regex: qx, $options: "i" } })),
+      ...SUPPORTED_LOCALES.map((lng) => ({ [`snapshots.neighborhoodName.${lng}`]: { $regex: qx, $options: "i" } }))
+    );
   }
+  if (orParts.length) filter.$or = orParts;
 
   // near (geo)
   if (nearLng && nearLat) {
@@ -62,9 +75,14 @@ export const publicGetAllApartment = asyncHandler(async (req: Request, res: Resp
     }
   }
 
+  // ops/services public filtresi (gizli alan döndürmüyoruz, sadece filtreleme)
+  if (service && isValidObjectId(service)) {
+    filter["ops.services.service"] = service;
+  }
+
   const list = await Apartment.find(filter)
-    .select("title slug images address location category")
-    .populate([{ path: "category", select: "name slug" }])
+    .select("title slug images address location place snapshots.neighborhoodName") // güvenli seçim
+    .populate([{ path: "place.neighborhood", select: "name slug" }])
     .limit(Math.min(Number(limit) || 200, 500))
     .sort({ createdAt: -1 })
     .lean();
@@ -79,9 +97,8 @@ export const publicGetAllApartment = asyncHandler(async (req: Request, res: Resp
 });
 
 export const publicGetApartmentBySlug = asyncHandler(async (req: Request, res: Response) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
+  const t = tByReq(req);
   const { Apartment } = await getTenantModels(req);
-  const t = (key: string) => translate(key, locale, translations);
   const { slug } = req.params;
 
   const doc = await Apartment.findOne({
@@ -90,12 +107,9 @@ export const publicGetApartmentBySlug = asyncHandler(async (req: Request, res: R
     isActive: true,
     isPublished: true,
   })
-    .populate([
-      { path: "category", select: "name slug" },
-      { path: "customer", select: "companyName contactName email phone" },
-      { path: "contact.customerRef", select: "companyName contactName email phone" },
-      { path: "contact.userRef", select: "name email" },
-    ])
+    // public detay: içerik ve i18n başlıklar verilebilir; müşteri/iletişim/ops/link verilmez
+    .select("title content images address location place snapshots slug createdAt updatedAt")
+    .populate([{ path: "place.neighborhood", select: "name slug" }])
     .lean();
 
   if (!doc) {

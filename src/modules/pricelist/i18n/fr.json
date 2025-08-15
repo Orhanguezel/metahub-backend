@@ -1,21 +1,35 @@
 {
-  "validation.invalidObjectId": "Format d'identifiant invalide.",
-  "validation.missingTitle": "Le titre est obligatoire dans au moins une langue.",
-  "validation.invalidMultilang": "Le titre doit être un objet multilingue.",
-  "validation.missingPrice": "Le champ prix est obligatoire.",
-  "validation.invalidPrice": "Le prix doit être un nombre.",
-  "validation.invalidCurrency": "La devise doit être USD, EUR ou TRY.",
-  "validation.invalidPeriod": "La période doit être 'monthly' ou 'yearly'.",
-  "validation.invalidLanguage": "Code de langue non pris en charge.",
-  "validation.booleanField": "Ce champ doit être un booléen (true/false).",
-  "error.invalid_id": "ID de tarification invalide.",
-  "error.not_found": "Forfait de tarification introuvable.",
-  "error.missing_fields": "Certains champs obligatoires sont manquants.",
-  "log.admin_listed": "Tous les forfaits de tarification ont été listés.",
-  "log.admin_fetched": "Forfait de tarification récupéré.",
-  "log.admin_created": "Forfait de tarification créé avec succès.",
-  "log.admin_updated": "Forfait de tarification mis à jour.",
-  "log.admin_deleted": "Forfait de tarification supprimé.",
-  "log.listed": "Forfaits de tarification listés avec succès.",
-  "log.fetched": "Forfait de tarification récupéré."
+  "created": "Créé.",
+  "updated": "Mis à jour.",
+  "deleted": "Supprimé.",
+  "notFound": "Introuvable.",
+  "invalidId": "Identifiant invalide.",
+  "listFetched": "Liste récupérée.",
+  "fetched": "Récupéré.",
+
+  "error": {
+    "duplicate": "Un enregistrement avec les mêmes clés uniques existe déjà.",
+    "create_fail": "Échec de la création de la liste de prix.",
+    "update_fail": "Échec de la mise à jour de la liste de prix.",
+    "not_found": "Ressource introuvable.",
+    "invalid_params": "Paramètres de requête manquants ou invalides."
+  },
+
+  "log": {
+    "listed": "Répertorié.",
+    "fetched": "Récupéré."
+  },
+
+  "validation": {
+    "invalidObjectId": "Identifiant d’objet invalide.",
+    "invalidCode": "Le code doit être en UPPER_SNAKE_CASE (A-Z, 0-9, soulignement).",
+    "invalidCurrency": "La devise doit être USD, EUR ou TRY.",
+    "invalidDate": "Format de date invalide (ISO 8601 requis).",
+    "invalidStatus": "Le statut doit être l’un de : draft, active, archived.",
+    "booleanField": "Ce champ doit être un booléen.",
+    "invalidCategoryArray": "apartmentCategoryIds doit être un tableau d’ObjectId au format chaîne.",
+    "invalidServiceCode": "serviceCode doit être en UPPER_SNAKE_CASE (A-Z, 0-9, soulignement).",
+    "amountPositive": "amount doit être un nombre supérieur ou égal à 0.",
+    "invalidPeriod": "period doit être l’un de : weekly, monthly, quarterly, yearly, once."
+  }
 }

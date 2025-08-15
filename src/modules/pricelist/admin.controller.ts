@@ -17,7 +17,7 @@ const parseIfJson = (v: any) => { try { return typeof v === "string" ? JSON.pars
 const toUpperSnake = (s: string) =>
   s?.toString().trim().replace(/\s+/g, "_").replace(/[^A-Za-z0-9_]/g, "").toUpperCase();
 
-// yardımcı: her zaman full locale map'e çevir
+// her zaman full locale map'e çevir
 const toFullLocales = (v: any) => fillAllLocales(v || {});
 
 /* ===================== PRICE LIST ===================== */
@@ -29,12 +29,10 @@ export const createPriceList = asyncHandler(async (req: Request, res: Response) 
   const { PriceList } = await getTenantModels(req);
 
   try {
-    let { code, name, description, defaultCurrency, segment, region, apartmentCategoryIds, effectiveFrom, effectiveTo, status, isActive } = req.body;
+    let { code, name, description, defaultCurrency, effectiveFrom, effectiveTo, status, isActive } = req.body;
 
     name = toFullLocales(parseIfJson(name));
-  description = toFullLocales(parseIfJson(description));
-    apartmentCategoryIds = parseIfJson(apartmentCategoryIds);
-    if (!Array.isArray(apartmentCategoryIds)) apartmentCategoryIds = [];
+    description = toFullLocales(parseIfJson(description));
 
     const doc: Partial<IPriceList> = {
       tenant: req.tenant,
@@ -42,9 +40,6 @@ export const createPriceList = asyncHandler(async (req: Request, res: Response) 
       name,
       description,
       defaultCurrency,
-      segment,
-      region,
-      apartmentCategoryIds,
       effectiveFrom: effectiveFrom ? new Date(effectiveFrom) : new Date(),
       effectiveTo: effectiveTo ? new Date(effectiveTo) : undefined,
       status: status || "draft",
@@ -102,20 +97,10 @@ export const updatePriceList = asyncHandler(async (req: Request, res: Response) 
       const incoming = toFullLocales(parseIfJson(b.description));
       doc.description = mergeLocalesForUpdate(current, incoming);
     }
-    
+
     if (b.defaultCurrency) doc.defaultCurrency = b.defaultCurrency;
-
-    if (b.segment !== undefined) doc.segment = b.segment;
-    if (b.region !== undefined) doc.region = b.region;
-
-    if (b.apartmentCategoryIds !== undefined) {
-      const arr = parseIfJson(b.apartmentCategoryIds);
-      doc.apartmentCategoryIds = Array.isArray(arr) ? arr : [];
-    }
-
     if (b.effectiveFrom !== undefined) doc.effectiveFrom = new Date(b.effectiveFrom);
     if (b.effectiveTo !== undefined) doc.effectiveTo = b.effectiveTo ? new Date(b.effectiveTo) : undefined;
-
     if (b.status !== undefined) doc.status = b.status;
     if (b.isActive !== undefined) doc.isActive = b.isActive === "true" || b.isActive === true;
 
@@ -144,13 +129,11 @@ export const adminGetAllPriceLists = asyncHandler(async (req: Request, res: Resp
   const t = (k: string) => translate(k, locale, translations);
   const { PriceList } = await getTenantModels(req);
 
-  const { q, status, isActive, region, segment, effectiveAt } = req.query as Record<string, string>;
+  const { q, status, isActive, effectiveAt } = req.query as Record<string, string>;
   const filter: Record<string, any> = { tenant: req.tenant };
 
   if (status) filter.status = status;
   if (typeof isActive === "string") filter.isActive = isActive === "true";
-  if (region) filter.region = region;
-  if (segment) filter.segment = segment;
 
   if (effectiveAt) {
     const d = new Date(effectiveAt);

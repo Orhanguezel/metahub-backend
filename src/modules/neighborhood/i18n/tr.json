@@ -1,0 +1,13 @@
+{
+  "neighborhood.create.success": "Mahalle oluşturuldu.",
+  "neighborhood.create.error": "Mahalle oluşturulurken hata oluştu.",
+  "neighborhood.update.success": "Mahalle güncellendi.",
+  "neighborhood.update.error": "Mahalle güncellenirken hata oluştu.",
+  "neighborhood.delete.success": "Mahalle silindi.",
+  "neighborhood.list.success": "Mahalle listesi getirildi.",
+  "neighborhood.list.error": "Mahalle listesi alınırken hata oluştu.",
+  "neighborhood.fetch.success": "Mahalle getirildi.",
+  "neighborhood.invalidId": "Geçersiz kimlik.",
+  "neighborhood.notFound": "Mahalle bulunamadı.",
+  "neighborhood.duplicate": "Bu slug zaten kullanılıyor."
+}

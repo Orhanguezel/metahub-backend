@@ -1,0 +1,13 @@
+{
+  "neighborhood.create.success": "Neighborhood created.",
+  "neighborhood.create.error": "Failed to create neighborhood.",
+  "neighborhood.update.success": "Neighborhood updated.",
+  "neighborhood.update.error": "Failed to update neighborhood.",
+  "neighborhood.delete.success": "Neighborhood deleted.",
+  "neighborhood.list.success": "Neighborhood list fetched.",
+  "neighborhood.list.error": "Failed to fetch neighborhood list.",
+  "neighborhood.fetch.success": "Neighborhood fetched.",
+  "neighborhood.invalidId": "Invalid id.",
+  "neighborhood.notFound": "Neighborhood not found.",
+  "neighborhood.duplicate": "This slug is already in use."
+}

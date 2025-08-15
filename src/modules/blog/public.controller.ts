@@ -1,4 +1,5 @@
-import { Request, Response } from "express";
+// src/modules/blog/public.controller.ts
+import { Request, Response, RequestHandler } from "express";
 import asyncHandler from "express-async-handler";
 import { isValidObjectId } from "@/core/utils/validation";
 import logger from "@/core/middleware/logger/logger";
@@ -9,7 +10,6 @@ import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import translations from "./i18n";
 import { t as translate } from "@/core/utils/i18n/translate";
 
-// Güvenli normalization fonksiyonu
 function normalizeBlogItem(item: any) {
   return {
     ...item,
@@ -19,11 +19,10 @@ function normalizeBlogItem(item: any) {
   };
 }
 
-// 📥 GET /blog (Public)
-export const getAllBlog = asyncHandler(async (req: Request, res: Response) => {
-  const { category, onlyLocalized } = req.query;
-  const locale: SupportedLocale =
-    (req.locale as SupportedLocale) || getLogLocale() || "en";
+// GET /blog
+export const getAllBlog: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
+  const { category, onlyLocalized } = req.query as { category?: string; onlyLocalized?: string };
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale() || "en";
   const t = (key: string) => translate(key, locale, translations);
   const { Blog } = await getTenantModels(req);
 
@@ -36,7 +35,6 @@ export const getAllBlog = asyncHandler(async (req: Request, res: Response) => {
   if (typeof category === "string" && isValidObjectId(category)) {
     filter.category = category;
   }
-
   if (onlyLocalized === "true") {
     filter[`title.${locale}`] = { $exists: true };
   }
@@ -44,10 +42,9 @@ export const getAllBlog = asyncHandler(async (req: Request, res: Response) => {
   const blogList = await Blog.find(filter)
     .populate("comments")
     .populate("category", "name slug")
-    .sort({ createdAt: -1 })
+    .sort({ order: 1, createdAt: -1 })
     .lean();
 
-  // --- Güvenli array normalization ---
   const normalizedList = (blogList || []).map(normalizeBlogItem);
 
   logger.withReq.info(req, t("log.listed"), {
@@ -57,119 +54,100 @@ export const getAllBlog = asyncHandler(async (req: Request, res: Response) => {
     resultCount: normalizedList.length,
   });
 
-  res.status(200).json({
-    success: true,
-    message: t("log.listed"),
-    data: normalizedList,
-  });
+  res.status(200).json({ success: true, message: t("log.listed"), data: normalizedList });
 });
 
-// 📥 GET /blog/:id (Public)
-export const getBlogById = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const locale: SupportedLocale =
-      (req.locale as SupportedLocale) || getLogLocale() || "en";
-    const t = (key: string) => translate(key, locale, translations);
-    const { Blog } = await getTenantModels(req);
+// GET /blog/:id
+export const getBlogById: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale() || "en";
+  const t = (key: string) => translate(key, locale, translations);
+  const { Blog } = await getTenantModels(req);
 
-    if (!isValidObjectId(id)) {
-      logger.withReq.warn(req, t("error.invalid_id"), {
-        ...getRequestContext(req),
-        event: "blog.public_getById",
-        module: "blog",
-        status: "fail",
-        id,
-      });
-      res.status(400).json({ success: false, message: t("error.invalid_id") });
-      return;
-    }
-
-    const blog = await Blog.findOne({
-      _id: id,
-      isActive: true,
-      isPublished: true,
-      tenant: req.tenant,
-    })
-      .populate("comments")
-      .populate("category", "name slug")
-      .lean();
-
-    if (!blog) {
-      logger.withReq.warn(req, t("error.not_found"), {
-        ...getRequestContext(req),
-        event: "blog.public_getById",
-        module: "blog",
-        status: "fail",
-        id,
-      });
-      res.status(404).json({ success: false, message: t("error.not_found") });
-      return;
-    }
-
-    // --- Güvenli array normalization ---
-    const normalized = normalizeBlogItem(blog);
-
-    logger.withReq.info(req, t("log.fetched"), {
+  if (!isValidObjectId(id)) {
+    logger.withReq.warn(req, t("error.invalid_id"), {
       ...getRequestContext(req),
       event: "blog.public_getById",
       module: "blog",
-      blogId: normalized._id,
+      status: "fail",
+      id,
     });
-
-    res.status(200).json({
-      success: true,
-      message: t("log.fetched"),
-      data: normalized,
-    });
+    res.status(400).json({ success: false, message: t("error.invalid_id") });
+    return;
   }
-);
 
-// 📥 GET /blog/slug/:slug (Public)
-export const getBlogBySlug = asyncHandler(
-  async (req: Request, res: Response) => {
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const t = (key: string) => translate(key, locale, translations);
-    const { Blog } = await getTenantModels(req);
-    const { slug } = req.params;
+  const blog = await Blog.findOne({
+    _id: id,
+    isActive: true,
+    isPublished: true,
+    tenant: req.tenant,
+  })
+    .populate("comments")
+    .populate("category", "name slug")
+    .lean();
 
-    const blog = await Blog.findOne({
-      slug,
-      tenant: req.tenant,
-      isActive: true,
-      isPublished: true,
-    })
-      .populate("comments")
-      .populate("category", "name slug")
-      .lean();
+  if (!blog) {
+    logger.withReq.warn(req, t("error.not_found"), {
+      ...getRequestContext(req),
+      event: "blog.public_getById",
+      module: "blog",
+      status: "fail",
+      id,
+    });
+    res.status(404).json({ success: false, message: t("error.not_found") });
+    return;
+  }
 
-    if (!blog) {
-      logger.withReq.warn(req, t("error.not_found"), {
-        ...getRequestContext(req),
-        event: "blog.public_getBySlug",
-        module: "blog",
-        status: "fail",
-        slug,
-      });
-      res.status(404).json({ success: false, message: t("error.not_found") });
-      return;
-    }
+  const normalized = normalizeBlogItem(blog);
 
-    // --- Güvenli array normalization ---
-    const normalized = normalizeBlogItem(blog);
+  logger.withReq.info(req, t("log.fetched"), {
+    ...getRequestContext(req),
+    event: "blog.public_getById",
+    module: "blog",
+    blogId: normalized._id,
+  });
 
-    logger.withReq.info(req, t("log.fetched"), {
+  res.status(200).json({ success: true, message: t("log.fetched"), data: normalized });
+});
+
+// GET /blog/slug/:slug
+export const getBlogBySlug: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale() || "en";
+  const t = (key: string) => translate(key, locale, translations);
+  const { Blog } = await getTenantModels(req);
+  const { slug } = req.params;
+
+  const blog = await Blog.findOne({
+    slug,
+    tenant: req.tenant,
+    isActive: true,
+    isPublished: true,
+  })
+    .populate("comments")
+    .populate("category", "name slug")
+    .lean();
+
+  if (!blog) {
+    logger.withReq.warn(req, t("error.not_found"), {
       ...getRequestContext(req),
       event: "blog.public_getBySlug",
       module: "blog",
+      status: "fail",
       slug,
-      blogId: normalized._id,
     });
-
-    res.status(200).json({
-      success: true,
-      message: t("log.fetched"),
-      data: normalized,
-    });
+    res.status(404).json({ success: false, message: t("error.not_found") });
+    return;
   }
-);
+
+  const normalized = normalizeBlogItem(blog);
+
+  logger.withReq.info(req, t("log.fetched"), {
+    ...getRequestContext(req),
+    event: "blog.public_getBySlug",
+    module: "blog",
+    slug,
+    blogId: normalized._id,
+  });
+
+  res.status(200).json({ success: true, message: t("log.fetched"), data: normalized });
+});

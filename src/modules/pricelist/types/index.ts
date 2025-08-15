@@ -3,7 +3,14 @@ import type { Types } from "mongoose";
 
 export type TranslatedLabel = { [key in SupportedLocale]?: string };
 export type CurrencyCode = "USD" | "EUR" | "TRY";
-export type BillingPeriod = "weekly" | "monthly" | "quarterly" | "yearly" | "once";
+export type BillingPeriod =
+  | "ten_days"       // 10 günlük
+  | "fifteen_days"   // 15 günde bir
+  | "weekly"
+  | "monthly"
+  | "quarterly"
+  | "yearly"
+  | "once";
 export type PriceListStatus = "draft" | "active" | "archived";
 
 export interface IPriceList {
@@ -17,11 +24,8 @@ export interface IPriceList {
   name: TranslatedLabel;          // boş locale'ler "" olabilir
   description?: TranslatedLabel;
 
-  // kapsam & varsayılanlar
+  // varsayılanlar
   defaultCurrency: CurrencyCode;  // list default
-  segment?: string;
-  region?: string;
-  apartmentCategoryIds?: Types.ObjectId[];  // ref: "apartmentcategory"[]
 
   // geçerlilik
   effectiveFrom: Date;

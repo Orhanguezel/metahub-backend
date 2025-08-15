@@ -1,21 +1,35 @@
 {
-  "validation.invalidObjectId": "Formato de ID no válido.",
-  "validation.missingTitle": "El título es obligatorio en al menos un idioma.",
-  "validation.invalidMultilang": "El título debe ser un objeto multilingüe.",
-  "validation.missingPrice": "El campo de precio es obligatorio.",
-  "validation.invalidPrice": "El precio debe ser un número.",
-  "validation.invalidCurrency": "La moneda debe ser USD, EUR o TRY.",
-  "validation.invalidPeriod": "El período debe ser 'monthly' o 'yearly'.",
-  "validation.invalidLanguage": "Código de idioma no compatible.",
-  "validation.booleanField": "Este campo debe ser booleano (true/false).",
-  "error.invalid_id": "ID de paquete de precio no válido.",
-  "error.not_found": "Paquete de precios no encontrado.",
-  "error.missing_fields": "Faltan algunos campos obligatorios.",
-  "log.admin_listed": "Todos los paquetes de precios listados.",
-  "log.admin_fetched": "Paquete de precios obtenido.",
-  "log.admin_created": "Paquete de precios creado con éxito.",
-  "log.admin_updated": "Paquete de precios actualizado.",
-  "log.admin_deleted": "Paquete de precios eliminado.",
-  "log.listed": "Paquetes de precios listados con éxito.",
-  "log.fetched": "Paquete de precios obtenido."
+  "created": "Creado.",
+  "updated": "Actualizado.",
+  "deleted": "Eliminado.",
+  "notFound": "No encontrado.",
+  "invalidId": "ID no válida.",
+  "listFetched": "Lista obtenida.",
+  "fetched": "Obtenido.",
+
+  "error": {
+    "duplicate": "Ya existe un registro con las mismas claves únicas.",
+    "create_fail": "No se pudo crear la lista de precios.",
+    "update_fail": "No se pudo actualizar la lista de precios.",
+    "not_found": "Recurso no encontrado.",
+    "invalid_params": "Parámetros de consulta faltantes o inválidos."
+  },
+
+  "log": {
+    "listed": "Listado.",
+    "fetched": "Obtenido."
+  },
+
+  "validation": {
+    "invalidObjectId": "ID de objeto no válida.",
+    "invalidCode": "El código debe estar en UPPER_SNAKE_CASE (A-Z, 0-9, guion bajo).",
+    "invalidCurrency": "La moneda debe ser USD, EUR o TRY.",
+    "invalidDate": "Formato de fecha no válido (se requiere ISO 8601).",
+    "invalidStatus": "El estado debe ser uno de: draft, active, archived.",
+    "booleanField": "Este campo debe ser booleano.",
+    "invalidCategoryArray": "apartmentCategoryIds debe ser un arreglo de ObjectId en formato cadena.",
+    "invalidServiceCode": "serviceCode debe estar en UPPER_SNAKE_CASE (A-Z, 0-9, guion bajo).",
+    "amountPositive": "amount debe ser un número mayor o igual que 0.",
+    "invalidPeriod": "period debe ser uno de: weekly, monthly, quarterly, yearly, once."
+  }
 }

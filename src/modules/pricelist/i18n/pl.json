@@ -1,21 +1,35 @@
 {
-  "validation.invalidObjectId": "Nieprawidłowy format identyfikatora.",
-  "validation.missingTitle": "Tytuł jest wymagany w co najmniej jednym języku.",
-  "validation.invalidMultilang": "Tytuł musi być obiektem wielojęzycznym.",
-  "validation.missingPrice": "Pole cena jest wymagane.",
-  "validation.invalidPrice": "Cena musi być liczbą.",
-  "validation.invalidCurrency": "Waluta musi być jedną z: USD, EUR lub TRY.",
-  "validation.invalidPeriod": "Okres musi być 'monthly' lub 'yearly'.",
-  "validation.invalidLanguage": "Nieobsługiwany kod języka.",
-  "validation.booleanField": "To pole musi być typu boolean (true/false).",
-  "error.invalid_id": "Nieprawidłowy identyfikator ceny.",
-  "error.not_found": "Pakiet cenowy nie został znaleziony.",
-  "error.missing_fields": "Brakuje niektórych wymaganych pól.",
-  "log.admin_listed": "Wszystkie pakiety cenowe zostały wyświetlone.",
-  "log.admin_fetched": "Pakiet cenowy pobrany.",
-  "log.admin_created": "Pakiet cenowy został pomyślnie utworzony.",
-  "log.admin_updated": "Pakiet cenowy zaktualizowany.",
-  "log.admin_deleted": "Pakiet cenowy usunięty.",
-  "log.listed": "Pakiety cenowe wyświetlone pomyślnie.",
-  "log.fetched": "Pakiet cenowy pobrany."
+  "created": "Utworzono.",
+  "updated": "Zaktualizowano.",
+  "deleted": "Usunięto.",
+  "notFound": "Nie znaleziono.",
+  "invalidId": "Nieprawidłowy identyfikator.",
+  "listFetched": "Listę pobrano.",
+  "fetched": "Pobrano.",
+
+  "error": {
+    "duplicate": "Rekord z takimi samymi unikalnymi kluczami już istnieje.",
+    "create_fail": "Nie udało się utworzyć cennika.",
+    "update_fail": "Nie udało się zaktualizować cennika.",
+    "not_found": "Nie znaleziono zasobu.",
+    "invalid_params": "Brakujące lub nieprawidłowe parametry zapytania."
+  },
+
+  "log": {
+    "listed": "Wylistowano.",
+    "fetched": "Pobrano."
+  },
+
+  "validation": {
+    "invalidObjectId": "Nieprawidłowy identyfikator obiektu.",
+    "invalidCode": "Kod musi być w formacie UPPER_SNAKE_CASE (A-Z, 0-9, podkreślenie).",
+    "invalidCurrency": "Waluta musi być jedną z: USD, EUR, TRY.",
+    "invalidDate": "Nieprawidłowy format daty (wymagany ISO 8601).",
+    "invalidStatus": "Status musi być jednym z: draft, active, archived.",
+    "booleanField": "To pole musi mieć wartość logiczną (boolean).",
+    "invalidCategoryArray": "apartmentCategoryIds musi być tablicą identyfikatorów ObjectId w postaci łańcuchów.",
+    "invalidServiceCode": "serviceCode musi być w formacie UPPER_SNAKE_CASE (A-Z, 0-9, podkreślenie).",
+    "amountPositive": "amount musi być liczbą większą lub równą 0.",
+    "invalidPeriod": "period musi mieć jedną z wartości: weekly, monthly, quarterly, yearly, once."
+  }
 }

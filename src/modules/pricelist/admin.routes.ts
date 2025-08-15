@@ -33,14 +33,14 @@ router.get("/:id", validateObjectId("id"), adminGetPriceListById);
 
 router.post(
   "/",
-  transformNestedFields(["name", "description", "apartmentCategoryIds"]),
+  transformNestedFields(["name", "description"]),
   validateCreatePriceList,
   createPriceList
 );
 
 router.put(
   "/:id",
-  transformNestedFields(["name", "description", "apartmentCategoryIds"]),
+  transformNestedFields(["name", "description"]),
   validateObjectId("id"),
   validateUpdatePriceList,
   updatePriceList
@@ -51,26 +51,8 @@ router.delete("/:id", validateObjectId("id"), deletePriceList);
 // PriceList Items
 router.get("/:listId/items", validateObjectId("listId"), validatePriceListItemsAdminQuery, adminGetAllPriceListItems);
 
-router.post(
-  "/:listId/items",
-  validateObjectId("listId"),
-  validateCreatePriceListItem,
-  createPriceListItem
-);
-
-router.put(
-  "/:listId/items/:itemId",
-  validateObjectId("listId"),
-  validateObjectId("itemId"),
-  validateUpdatePriceListItem,
-  updatePriceListItem
-);
-
-router.delete(
-  "/:listId/items/:itemId",
-  validateObjectId("listId"),
-  validateObjectId("itemId"),
-  deletePriceListItem
-);
+router.post("/:listId/items", validateObjectId("listId"), validateCreatePriceListItem, createPriceListItem);
+router.put("/:listId/items/:itemId", validateObjectId("listId"), validateObjectId("itemId"), validateUpdatePriceListItem, updatePriceListItem);
+router.delete("/:listId/items/:itemId", validateObjectId("listId"), validateObjectId("itemId"), deletePriceListItem);
 
 export default router;

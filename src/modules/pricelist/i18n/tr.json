@@ -1,21 +1,35 @@
 {
-  "validation.invalidObjectId": "Geçersiz ID formatı.",
-  "validation.missingTitle": "Başlık en az bir dilde zorunludur.",
-  "validation.invalidMultilang": "Başlık çoklu dil objesi olarak gönderilmeli.",
-  "validation.missingPrice": "Fiyat alanı zorunludur.",
-  "validation.invalidPrice": "Fiyat sayısal olmalıdır.",
-  "validation.invalidCurrency": "Para birimi sadece USD, EUR veya TRY olabilir.",
-  "validation.invalidPeriod": "Dönem sadece 'monthly' veya 'yearly' olabilir.",
-  "validation.invalidLanguage": "Dil kodu desteklenmiyor.",
-  "validation.booleanField": "Bu alan boolean (true/false) olmalı.",
-  "error.invalid_id": "Geçersiz fiyat paketi ID'si.",
-  "error.not_found": "Fiyat paketi bulunamadı.",
-  "error.missing_fields": "Bazı zorunlu alanlar eksik.",
-  "log.admin_listed": "Tüm fiyatlandırma paketleri listelendi.",
-  "log.admin_fetched": "Fiyatlandırma paketi getirildi.",
-  "log.admin_created": "Fiyatlandırma paketi başarıyla eklendi.",
-  "log.admin_updated": "Fiyatlandırma paketi güncellendi.",
-  "log.admin_deleted": "Fiyatlandırma paketi silindi.",
-  "log.listed": "Fiyat paketleri başarıyla listelendi.",
-  "log.fetched": "Fiyat paketi getirildi."
+  "created": "Oluşturuldu.",
+  "updated": "Güncellendi.",
+  "deleted": "Silindi.",
+  "notFound": "Bulunamadı.",
+  "invalidId": "Geçersiz kimlik.",
+  "listFetched": "Liste alındı.",
+  "fetched": "Getirildi.",
+
+  "error": {
+    "duplicate": "Aynı benzersiz anahtarlara sahip bir kayıt zaten mevcut.",
+    "create_fail": "Fiyat listesi oluşturulamadı.",
+    "update_fail": "Fiyat listesi güncellenemedi.",
+    "not_found": "Kaynak bulunamadı.",
+    "invalid_params": "Sorgu parametreleri eksik veya geçersiz."
+  },
+
+  "log": {
+    "listed": "Listelendi.",
+    "fetched": "Getirildi."
+  },
+
+  "validation": {
+    "invalidObjectId": "Geçersiz nesne kimliği.",
+    "invalidCode": "Kod UPPER_SNAKE_CASE olmalıdır (A-Z, 0-9, alt çizgi).",
+    "invalidCurrency": "Para birimi USD, EUR veya TRY olmalıdır.",
+    "invalidDate": "Geçersiz tarih biçimi (ISO 8601 gerekli).",
+    "invalidStatus": "Durum draft, active veya archived olmalıdır.",
+    "booleanField": "Bu alan boolean olmalıdır.",
+    "invalidCategoryArray": "apartmentCategoryIds, dize türünde ObjectId’lerden oluşan bir dizi olmalıdır.",
+    "invalidServiceCode": "serviceCode UPPER_SNAKE_CASE olmalıdır (A-Z, 0-9, alt çizgi).",
+    "amountPositive": "amount, 0’a eşit veya daha büyük bir sayı olmalıdır.",
+    "invalidPeriod": "period weekly, monthly, quarterly, yearly veya once olmalıdır."
+  }
 }

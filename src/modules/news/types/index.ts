@@ -24,6 +24,7 @@ export interface INews {
   publishedAt?: Date;
   comments: Types.ObjectId[];
   isActive: boolean;
+  order: number;
   createdAt: Date;
   updatedAt: Date;
 }

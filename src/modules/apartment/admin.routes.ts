@@ -33,8 +33,18 @@ router.post(
   "/",
   uploadTypeWrapper("apartment"),
   upload("apartment").array("images", 10),
-  // JSON -> object: v2 (services/fees kaldırıldı, location eklendi)
-  transformNestedFields(["title", "content", "address", "contact", "location"]),
+  // v3: place, snapshots, ops, links eklendi
+  transformNestedFields([
+    "title",
+    "content",
+    "address",
+    "contact",
+    "location",
+    "place",
+    "snapshots",
+    "ops",
+    "links"
+  ]),
   validateCreateApartment,
   createApartment
 );
@@ -43,7 +53,17 @@ router.put(
   "/:id",
   uploadTypeWrapper("apartment"),
   upload("apartment").array("images", 10),
-  transformNestedFields(["title", "content", "address", "contact", "location"]),
+  transformNestedFields([
+    "title",
+    "content",
+    "address",
+    "contact",
+    "location",
+    "place",
+    "snapshots",
+    "ops",
+    "links"
+  ]),
   validateObjectId("id"),
   validateUpdateApartment,
   updateApartment

@@ -75,7 +75,6 @@ import { Newsletter } from "@/modules/newsletter/newsletter.models";
 import { Pricing } from "@/modules/pricing/models";
 
 import { Apartment } from "@/modules/apartment/models";
-import { ApartmentCategory } from "@/modules/apartmentcategory/category.models";
 import { BillingPlan, BillingOccurrence } from "@/modules/billing/models";
 import { Contract } from "@/modules/contracts/models";
 import { OperationJob } from "@/modules/operationsjobs/models";
@@ -90,6 +89,7 @@ import { Contact } from "@/modules/contacts/models";
 import { PriceList, PriceListItem } from "@/modules/pricelist/models";
 import { CashAccount, CashEntry } from "@/modules/cashbook/models";
 import { FileObject } from "@/modules/files/models";
+import { Neighborhood } from "@/modules/neighborhood/models";
 
 // ✅ Ana export
 export const getTenantModelsFromConnection = (conn: Connection) => ({
@@ -153,7 +153,6 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   SectionSetting: conn.model("sectionsetting", SectionSetting.schema),
   SectionMeta: conn.model("sectionmeta", SectionMeta.schema),
   Apartment: conn.model("apartment", Apartment.schema),
-  ApartmentCategory: conn.model("apartmentcategory", ApartmentCategory.schema),
   Apikey: conn.model("apikey", Apikey.schema),
   Apikeylog: conn.model("apikeylog", Apikeylog.schema),
   News: conn.model("news", News.schema),
@@ -192,4 +191,5 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   CashAccount: conn.model("cashaccount", CashAccount.schema),
   CashEntry: conn.model("cashentry", CashEntry.schema),
   FileObject: conn.model("fileobject", FileObject.schema),
+  Neighborhood: conn.model("neighborhood", Neighborhood.schema),
 });

@@ -863,5 +863,29 @@
     "required": false,
     "defaultOrder": 20,
     "defaultEnabled": false
+  },
+  {
+    "sectionKey": "apartment",
+    "label": {
+      "tr": "Apartmanlar sectionu",
+      "en": "Apartments Section",
+      "de": "Apartments Abschnitt",
+      "pl": "Sekcja Apartamenty",
+      "fr": "Section Appartements",
+      "es": "Sección Apartamentos"
+    },
+    "description": {
+      "tr": "Müşteri referansları ve görüşleri",
+      "en": "Customer references and testimonials",
+      "de": "Kundenreferenzen und Erfahrungsberichte",
+      "pl": "Referencje i opinie klientów",
+      "fr": "Références et témoignages clients",
+      "es": "Referencias y testimonios de clientes"
+    },
+    "icon": "MdStar",
+    "variant": "classic",
+    "required": false,
+    "defaultOrder": 11,
+    "defaultEnabled": false
   }
 ]

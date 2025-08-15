@@ -31,22 +31,20 @@ export const createCustomerValidator = [
   body("kind").optional().isIn(["person", "organization"]).withMessage((_, { req }) =>
     tMsg("customer.validation.kindInvalid", req)
   ),
-  // companyName artık zorunlu değil
   body("companyName").optional().isString().withMessage((_, { req }) =>
     tMsg("customer.validation.invalidString", req)
   ),
-  body("contactName").exists().isString().withMessage((_, { req }) =>
-    tMsg("customer.validation.contactNameRequired", req)
+  body("contactName").optional().isString(),     // userRef varsa doldurulabilir
+  body("email").optional().isEmail(),
+  body("phone").optional().isString(),
+
+  // NEW
+  body("userRef").optional().isMongoId().withMessage((_, { req }) =>
+    tMsg("customer.validation.invalidObjectId", req)
   ),
-  body("email").exists().isEmail().withMessage((_, { req }) =>
-    tMsg("customer.validation.invalidEmail", req)
-  ),
-  body("phone").exists().isString().withMessage((_, { req }) =>
-    tMsg("customer.validation.phoneRequired", req)
-  ),
+
   body("slug").optional().isString().trim(),
 
-  // billing (opsiyonel obje)
   body("billing").optional().customSanitizer(parseIfJson).custom((val, { req }) => {
     if (!val) return true;
     if (typeof val !== "object") throw new Error(tMsg("customer.validation.invalidBilling", req));
@@ -59,14 +57,12 @@ export const createCustomerValidator = [
     return true;
   }),
 
-  // addresses opsiyonel, array
   body("addresses").optional().custom((val, { req }) => {
     const arr = parseIfJson(val);
     if (!Array.isArray(arr)) throw new Error(tMsg("customer.validation.addressesMustBeArray", req));
     return true;
   }),
 
-  // tags opsiyonel, string array
   body("tags").optional().custom((val, { req }) => {
     const arr = parseIfJson(val);
     if (!Array.isArray(arr)) throw new Error(tMsg("customer.validation.tagsMustBeArray", req));
@@ -99,6 +95,12 @@ export const updateCustomerValidator = [
   body("phone").optional().isString().withMessage((_, { req }) =>
     tMsg("customer.validation.invalidString", req)
   ),
+
+  // NEW
+  body("userRef").optional().isMongoId().withMessage((_, { req }) =>
+    tMsg("customer.validation.invalidObjectId", req)
+  ),
+
   body("slug").optional().isString().trim(),
 
   body("billing").optional().customSanitizer(parseIfJson).custom((val, { req }) => {
@@ -151,11 +153,14 @@ export const updateCustomerPublicValidator = [
   body("notes").optional().isString().withMessage((_, { req }) =>
     tMsg("customer.validation.invalidString", req)
   ),
-  // adres ve diğer yönetim alanları yasak
+
+  // adres & yönetim alanları yasak
   body("addresses").not().exists().withMessage("Adres güncelleme bu endpointte desteklenmiyor!"),
   body("billing").not().exists(),
   body("tags").not().exists(),
   body("slug").not().exists(),
   body("kind").not().exists(),
+  body("userRef").not().exists(), // NEW: public'te userRef değiştirilemez
+
   validateRequest,
 ];
