@@ -1,0 +1,370 @@
+[
+  {
+    "_id": "6878eeab260cf9b67f2c2201",
+    "type": "image",
+    "title": {
+      "tr": "Dayanıklı Tasarım",
+      "en": "Robust Design",
+      "de": "Robustes Design",
+      "pl": "Solidna Konstrukcja",
+      "fr": "Conception Robuste",
+      "es": "Diseño Robusto"
+    },
+    "slug": "dayanikli-tasarim",
+    "summary": {
+      "tr": "Ürünlerimiz özel, paslanmaz malzemelerden üretilmiş olup uzun ömürlüdür.",
+      "en": "Our products are made of special, stainless materials and are particularly durable.",
+      "de": "Unsere Produkte sind aus speziellen, rostfreien Materialien gefertigt und besonders langlebig.",
+      "pl": "Nasze produkty wykonane są ze specjalnych, nierdzewnych materiałów i są wyjątkowo trwałe.",
+      "fr": "Nos produits sont fabriqués à partir de matériaux spéciaux et inoxydables et sont particulièrement durables.",
+      "es": "Nuestros productos están fabricados con materiales especiales e inoxidables y son especialmente duraderos."
+    },
+    "content": {
+      "tr": "Ürünlerimiz özel, paslanmaz malzemelerden üretilmiş olup uzun ömürlüdür.",
+      "en": "Our products are made of special, stainless materials and are particularly durable.",
+      "de": "Unsere Produkte sind aus speziellen, rostfreien Materialien gefertigt und besonders langlebig.",
+      "pl": "Nasze produkty wykonane są ze specjalnych, nierdzewnych materiałów i są wyjątkowo trwałe.",
+      "fr": "Nos produits sont fabriqués à partir de matériaux spéciaux et inoxydables et sont particulièrement durables.",
+      "es": "Nuestros productos están fabricados con materiales especiales e inoxidables y son especialmente duraderos."
+    },
+    "tenant": "ensotek",
+    "tags": [],
+    "images": [
+      {
+        "url": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771273/uploads/metahub/gallery/1-1752771270894-986291286.webp",
+        "thumbnail": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771273/uploads/metahub/gallery/1-1752771270894-986291286.webp",
+        "webp": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771273/uploads/metahub/gallery/1-1752771270894-986291286.webp"
+      }
+    ],
+    "category": "6878e89d260cf9b67f2c2101",
+    "author": "System",
+    "isPublished": true,
+    "isActive": true,
+    "comments": [],
+    "order": 8,
+    "createdAt": "2025-07-17T13:00:00.000Z",
+    "updatedAt": "2025-07-17T16:55:57.574Z"
+  },
+  {
+    "_id": "6878eeab260cf9b67f2c2202",
+    "type": "image",
+    "title": {
+      "tr": "Dünya Çapında Tanınırlık",
+      "en": "Worldwide Recognition",
+      "de": "Weltweit Anerkannt",
+      "pl": "Uznanie na Świecie",
+      "fr": "Reconnaissance Mondiale",
+      "es": "Reconocimiento Mundial"
+    },
+    "slug": "dunya-capinda-taninirlik",
+    "summary": {
+      "tr": "Ürünlerimiz dünya çapında profesyonellerin tercihi ve takdirini kazanmıştır.",
+      "en": "Our products are valued worldwide and are the preferred choice of professionals.",
+      "de": "Unsere Produkte werden weltweit geschätzt und sind die bevorzugte Wahl der Profis.",
+      "pl": "Nasze produkty są doceniane na całym świecie i są preferowanym wyborem profesjonalistów.",
+      "fr": "Nos produits sont appréciés dans le monde entier et sont le choix préféré des professionnels.",
+      "es": "Nuestros productos son valorados en todo el mundo y son la opción preferida de los profesionales."
+    },
+    "content": {
+      "tr": "Ürünlerimiz dünya çapında profesyonellerin tercihi ve takdirini kazanmıştır.",
+      "en": "Our products are valued worldwide and are the preferred choice of professionals.",
+      "de": "Unsere Produkte werden weltweit geschätzt und sind die bevorzugte Wahl der Profis.",
+      "pl": "Nasze produkty są doceniane na całym świecie i są preferowanym wyborem profesjonalistów.",
+      "fr": "Nos produits sont appréciés dans le monde entier et sont le choix préféré des professionnels.",
+      "es": "Nuestros productos son valorados en todo el mundo y son la opción preferida de los profesionales."
+    },
+    "tenant": "ensotek",
+    "tags": [],
+    "images": [
+      {
+        "url": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771255/uploads/metahub/gallery/2-1752771253118-97352961.webp",
+        "thumbnail": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771255/uploads/metahub/gallery/2-1752771253118-97352961.webp",
+        "webp": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771255/uploads/metahub/gallery/2-1752771253118-97352961.webp"
+      }
+    ],
+    "category": "6878e89d260cf9b67f2c2101",
+    "author": "System",
+    "isPublished": true,
+    "isActive": true,
+    "comments": [],
+    "order": 7,
+    "createdAt": "2025-07-17T13:00:00.000Z",
+    "updatedAt": "2025-07-17T16:56:06.267Z"
+  },
+  {
+    "_id": "6878eeab260cf9b67f2c2203",
+    "type": "image",
+    "title": {
+      "tr": "Güçlü ve Güvenilir",
+      "en": "Strong and Reliable",
+      "de": "Stark und Zuverlässig",
+      "pl": "Mocny i Niezawodny",
+      "fr": "Solide et Fiable",
+      "es": "Fuerte y Confiable"
+    },
+    "slug": "guclu-ve-guvenilir",
+    "summary": {
+      "tr": "Dayanıklı yapısı ile uzun süreli kullanım için idealdir.",
+      "en": "Durable and ideal for long-term use.",
+      "de": "Langlebig und ideal für den dauerhaften Einsatz.",
+      "pl": "Wytrzymały i idealny do długotrwałego użytkowania.",
+      "fr": "Durable et idéal pour une utilisation à long terme.",
+      "es": "Duradero e ideal para un uso prolongado."
+    },
+    "content": {
+      "tr": "Dayanıklı yapısı ile uzun süreli kullanım için idealdir.",
+      "en": "Durable and ideal for long-term use.",
+      "de": "Langlebig und ideal für den dauerhaften Einsatz.",
+      "pl": "Wytrzymały i idealny do długotrwałego użytkowania.",
+      "fr": "Durable et idéal pour une utilisation à long terme.",
+      "es": "Duradero e ideal para un uso prolongado."
+    },
+    "tenant": "ensotek",
+    "tags": [],
+    "images": [
+      {
+        "url": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771220/uploads/metahub/gallery/3-1752771216789-111437706.webp",
+        "thumbnail": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771220/uploads/metahub/gallery/3-1752771216789-111437706.webp",
+        "webp": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771220/uploads/metahub/gallery/3-1752771216789-111437706.webp"
+      }
+    ],
+    "category": "6878e89d260cf9b67f2c2101",
+    "author": "System",
+    "isPublished": true,
+    "isActive": true,
+    "comments": [],
+    "order": 6,
+    "createdAt": "2025-07-17T13:00:00.000Z",
+    "updatedAt": "2025-07-17T16:56:14.595Z"
+  },
+  {
+    "_id": "6878eeab260cf9b67f2c2204",
+    "type": "image",
+    "title": {
+      "tr": "Verimli ve Enerji Tasarruflu",
+      "en": "Efficient and Energy-Saving",
+      "de": "Effizient und Energiesparend",
+      "pl": "Wydajny i Oszczędny Energetycznie",
+      "fr": "Efficace et Économique en Énergie",
+      "es": "Eficiente y de Bajo Consumo Energético"
+    },
+    "slug": "verimli-ve-enerji-tasarruflu",
+    "summary": {
+      "tr": "Ürünlerimiz yüksek verim ve düşük enerji tüketimi ile öne çıkar.",
+      "en": "Our products combine high efficiency with low energy consumption.",
+      "de": "Unsere Produkte kombinieren hohe Effizienz mit geringem Energieverbrauch.",
+      "pl": "Nasze produkty łączą wysoką wydajność z niskim zużyciem energii.",
+      "fr": "Nos produits allient haute efficacité et faible consommation d'énergie.",
+      "es": "Nuestros productos combinan alta eficiencia con bajo consumo de energía."
+    },
+    "content": {
+      "tr": "Ürünlerimiz yüksek verim ve düşük enerji tüketimi ile öne çıkar.",
+      "en": "Our products combine high efficiency with low energy consumption.",
+      "de": "Unsere Produkte kombinieren hohe Effizienz mit geringem Energieverbrauch.",
+      "pl": "Nasze produkty łączą wysoką wydajność z niskim zużyciem energii.",
+      "fr": "Nos produits allient haute efficacité et faible consommation d'énergie.",
+      "es": "Nuestros productos combinan alta eficiencia con bajo consumo de energía."
+    },
+    "tenant": "ensotek",
+    "tags": [],
+    "images": [
+      {
+        "url": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771195/uploads/metahub/gallery/4-1752771191653-812677165.webp",
+        "thumbnail": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771195/uploads/metahub/gallery/4-1752771191653-812677165.webp",
+        "webp": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771195/uploads/metahub/gallery/4-1752771191653-812677165.webp"
+      }
+    ],
+    "category": "6878e89d260cf9b67f2c2101",
+    "author": "System",
+    "isPublished": true,
+    "isActive": true,
+    "comments": [],
+    "order": 5,
+    "createdAt": "2025-07-17T13:00:00.000Z",
+    "updatedAt": "2025-07-17T16:56:47.295Z"
+  },
+  {
+    "_id": "6878eeab260cf9b67f2c2205",
+    "type": "image",
+    "title": {
+      "tr": "Kolay Kurulum",
+      "en": "Easy Installation",
+      "de": "Einfache Installation",
+      "pl": "Łatwy Montaż",
+      "fr": "Installation Facile",
+      "es": "Instalación Fácil"
+    },
+    "slug": "kolay-kurulum",
+    "summary": {
+      "tr": "Kullanıcı dostu ürünlerimiz kolayca kurulur ve bakımı rahattır.",
+      "en": "Our user-friendly products are easy to install and maintain.",
+      "de": "Unsere benutzerfreundlichen Produkte sind leicht zu installieren und zu warten.",
+      "pl": "Nasze produkty są łatwe w instalacji i konserwacji.",
+      "fr": "Nos produits conviviaux sont faciles à installer et à entretenir.",
+      "es": "Nuestros productos fáciles de usar son fáciles de instalar y mantener."
+    },
+    "content": {
+      "tr": "Kullanıcı dostu ürünlerimiz kolayca kurulur ve bakımı rahattır.",
+      "en": "Our user-friendly products are easy to install and maintain.",
+      "de": "Unsere benutzerfreundlichen Produkte sind leicht zu installieren und zu warten.",
+      "pl": "Nasze produkty są łatwe w instalacji i konserwacji.",
+      "fr": "Nos produits conviviaux sont faciles à installer et à entretenir.",
+      "es": "Nuestros productos fáciles de usar son fáciles de instalar y mantener."
+    },
+    "tenant": "ensotek",
+    "tags": [],
+    "images": [
+      {
+        "url": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771156/uploads/metahub/gallery/5-1752771151250-964450161.webp",
+        "thumbnail": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771156/uploads/metahub/gallery/5-1752771151250-964450161.webp",
+        "webp": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771156/uploads/metahub/gallery/5-1752771151250-964450161.webp"
+      }
+    ],
+    "category": "6878e89d260cf9b67f2c2101",
+    "author": "System",
+    "isPublished": true,
+    "isActive": true,
+    "comments": [],
+    "order": 4,
+    "createdAt": "2025-07-17T13:00:00.000Z",
+    "updatedAt": "2025-07-17T16:56:57.071Z"
+  },
+  {
+    "_id": "6878eeab260cf9b67f2c2206",
+    "type": "image",
+    "title": {
+      "tr": "Çevre Dostu",
+      "en": "Environmentally Friendly",
+      "de": "Umweltfreundlich",
+      "pl": "Przyjazny Środowisku",
+      "fr": "Écologique",
+      "es": "Respetuoso con el Medio Ambiente"
+    },
+    "slug": "cevre-dostu",
+    "summary": {
+      "tr": "Sürdürülebilir malzemelerle üretilmiş ürünlerimiz çevreyi korur.",
+      "en": "Made from sustainable materials, our products are environmentally friendly.",
+      "de": "Aus nachhaltigen Materialien gefertigt, schonen unsere Produkte die Umwelt.",
+      "pl": "Wykonane z materiałów zrównoważonych, nasze produkty są przyjazne dla środowiska.",
+      "fr": "Fabriqués à partir de matériaux durables, nos produits protègent l'environnement.",
+      "es": "Fabricados con materiales sostenibles, nuestros productos respetan el medio ambiente."
+    },
+    "content": {
+      "tr": "Sürdürülebilir malzemelerle üretilmiş ürünlerimiz çevreyi korur.",
+      "en": "Made from sustainable materials, our products are environmentally friendly.",
+      "de": "Aus nachhaltigen Materialien gefertigt, schonen unsere Produkte die Umwelt.",
+      "pl": "Wykonane z materiałów zrównoważonych, nasze produkty są przyjazne dla środowiska.",
+      "fr": "Fabriqués à partir de matériaux durables, nos produits protègent l'environnement.",
+      "es": "Fabricados con materiales sostenibles, nuestros productos respetan el medio ambiente."
+    },
+    "tenant": "ensotek",
+    "tags": [],
+    "images": [
+      {
+        "url": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771124/uploads/metahub/gallery/6-1752771119350-50918009.webp",
+        "thumbnail": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771124/uploads/metahub/gallery/6-1752771119350-50918009.webp",
+        "webp": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771124/uploads/metahub/gallery/6-1752771119350-50918009.webp"
+      }
+    ],
+    "category": "6878e89d260cf9b67f2c2101",
+    "author": "System",
+    "isPublished": true,
+    "isActive": true,
+    "comments": [],
+    "order": 3,
+    "createdAt": "2025-07-17T13:00:00.000Z",
+    "updatedAt": "2025-07-17T16:57:06.297Z"
+  },
+  {
+    "_id": "6878eeab260cf9b67f2c2207",
+    "type": "image",
+    "title": {
+      "tr": "Yenilikçi Teknoloji",
+      "en": "Innovative Technology",
+      "de": "Innovative Technologie",
+      "pl": "Innowacyjna Technologia",
+      "fr": "Technologie Innovante",
+      "es": "Tecnología Innovadora"
+    },
+    "slug": "yenilikci-teknoloji",
+    "summary": {
+      "tr": "En modern teknolojilerle üretilen ürünlerimiz yüksek performans sunar.",
+      "en": "Manufactured with the latest technology, our products offer top performance.",
+      "de": "Mit modernster Technologie hergestellt, bieten unsere Produkte höchste Leistung.",
+      "pl": "Produkowane z użyciem najnowocześniejszych technologii, oferują najwyższą wydajność.",
+      "fr": "Fabriqués avec la technologie la plus moderne, nos produits offrent les meilleures performances.",
+      "es": "Fabricados con la última tecnología, nuestros productos ofrecen el máximo rendimiento."
+    },
+    "content": {
+      "tr": "En modern teknolojilerle üretilen ürünlerimiz yüksek performans sunar.",
+      "en": "Manufactured with the latest technology, our products offer top performance.",
+      "de": "Mit modernster Technologie hergestellt, bieten unsere Produkte höchste Leistung.",
+      "pl": "Produkowane z użyciem najnowocześniejszych technologii, oferują najwyższą wydajność.",
+      "fr": "Fabriqués avec la technologie la plus moderne, nos produits offrent les meilleures performances.",
+      "es": "Fabricados con la última tecnología, nuestros productos ofrecen el máximo rendimiento."
+    },
+    "tenant": "ensotek",
+    "tags": [],
+    "images": [
+      {
+        "url": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771102/uploads/metahub/gallery/7-1752771097801-678897496.webp",
+        "thumbnail": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771102/uploads/metahub/gallery/7-1752771097801-678897496.webp",
+        "webp": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771102/uploads/metahub/gallery/7-1752771097801-678897496.webp"
+      }
+    ],
+    "category": "6878e89d260cf9b67f2c2101",
+    "author": "System",
+    "isPublished": true,
+    "isActive": true,
+    "comments": [],
+    "order": 2,
+    "createdAt": "2025-07-17T13:00:00.000Z",
+    "updatedAt": "2025-07-17T16:57:14.858Z"
+  },
+  {
+    "_id": "6878eeab260cf9b67f2c2208",
+    "type": "image",
+    "title": {
+      "tr": "Hızlı Teslimat",
+      "en": "Fast Delivery",
+      "de": "Schnelle Lieferung",
+      "pl": "Szybka Dostawa",
+      "fr": "Livraison Rapide",
+      "es": "Entrega Rápida"
+    },
+    "slug": "hizli-teslimat",
+    "summary": {
+      "tr": "Hızlı teslimat ve üstün müşteri hizmeti ile yanınızdayız.",
+      "en": "With fast delivery and excellent customer service, we are here for you.",
+      "de": "Mit schneller Lieferung und exzellentem Kundenservice sind wir für Sie da.",
+      "pl": "Dzięki szybkiej dostawie i doskonałej obsłudze klienta jesteśmy do Twojej dyspozycji.",
+      "fr": "Avec une livraison rapide et un excellent service client, nous sommes là pour vous.",
+      "es": "Con entrega rápida y un excelente servicio al cliente, estamos aquí para usted."
+    },
+    "content": {
+      "tr": "Hızlı teslimat ve üstün müşteri hizmeti ile yanınızdayız.",
+      "en": "With fast delivery and excellent customer service, we are here for you.",
+      "de": "Mit schneller Lieferung und exzellentem Kundenservice sind wir für Sie da.",
+      "pl": "Dzięki szybkiej dostawie i doskonałej obsłudze klienta jesteśmy do Twojej dyspozycji.",
+      "fr": "Avec une livraison rapide et un excellent service client, nous sommes là pour vous.",
+      "es": "Con entrega rápida y un excelente servicio al cliente, estamos aquí para usted."
+    },
+    "tenant": "ensotek",
+    "tags": [],
+    "images": [
+      {
+        "url": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771064/uploads/metahub/gallery/8-1752771062653-586545826.webp",
+        "thumbnail": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771064/uploads/metahub/gallery/8-1752771062653-586545826.webp",
+        "webp": "https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771064/uploads/metahub/gallery/8-1752771062653-586545826.webp"
+      }
+    ],
+    "category": "6878e89d260cf9b67f2c2101",
+    "author": "System",
+    "isPublished": true,
+    "isActive": true,
+    "comments": [],
+    "order": 1,
+    "createdAt": "2025-07-17T13:00:00.000Z",
+    "updatedAt": "2025-07-17T16:57:22.485Z"
+  }
+]

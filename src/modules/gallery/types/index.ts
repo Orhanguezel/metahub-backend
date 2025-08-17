@@ -1,28 +1,32 @@
 import type { SupportedLocale } from "@/types/common";
 import type { Types, Document } from "mongoose";
 
-export type TranslatedLabel = { [key in SupportedLocale]: string };
+export type TranslatedLabel = { [key in SupportedLocale]?: string };
 
-// ✅ SubItem interface
-export interface IGalleryItem {
+export interface IGalleryImage {
+  _id?: string;           // subdoc id açık
   url: string;
   thumbnail: string;
   webp?: string;
   publicId?: string;
-  name: { [key in SupportedLocale]: string };
-  description: { [key in SupportedLocale]: string };
-  order?: number;
 }
 
-// ✅ Main Item interface
-export interface IGallery {
-  images: IGalleryItem[];
-  tenant: string;
-  category: Types.ObjectId;
+export interface IGallery extends Document {
   type: "image" | "video";
+  title: TranslatedLabel;
+  tenant: string;
+  slug: string;
+  summary: TranslatedLabel;
+  content: TranslatedLabel;
+  images: IGalleryImage[];
+  tags: string[];
+  author?: string;
+  category: Types.ObjectId;
   isPublished: boolean;
+  publishedAt?: Date;
+  comments: Types.ObjectId[];
   isActive: boolean;
-  priority?: number;
+  order: number;
   createdAt: Date;
   updatedAt: Date;
 }

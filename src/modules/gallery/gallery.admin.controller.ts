@@ -1,589 +1,407 @@
-import { Request, Response } from "express";
+import { Request, Response, RequestHandler } from "express";
 import asyncHandler from "express-async-handler";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId, Types } from "mongoose";
 import slugify from "slugify";
 import path from "path";
 import fs from "fs";
 import { v2 as cloudinary } from "cloudinary";
+
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 import {
   getImagePath,
   getFallbackThumbnail,
   processImageLocal,
   shouldProcessImage,
 } from "@/core/middleware/file/uploadUtils";
-import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
-import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
-import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
-import logger from "@/core/middleware/logger/logger";
-import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
+import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
 import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
-import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
-import { IGallery, IGalleryItem } from "./types";
+import logger from "@/core/middleware/logger/logger";
+import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 
-// Utility
-const parseIfJson = (value: any) => {
-  try {
-    return typeof value === "string" ? JSON.parse(value) : value;
-  } catch {
-    return value;
+/* ---------- helpers ---------- */
+
+type TL = Partial<Record<SupportedLocale, string>>;
+type TLFull = Record<SupportedLocale, string>;
+
+const parseIfJson = (v: unknown): unknown => {
+  try { return typeof v === "string" ? JSON.parse(v) : v; } catch { return v; }
+};
+
+const ensureTL = (v: unknown): TLFull => {
+  return fillAllLocales((parseIfJson(v) as TL) || {});
+};
+
+const normalizeTags = (tags: unknown): string[] => {
+  const parsed = parseIfJson(tags);
+  let arr: string[] = [];
+  if (Array.isArray(parsed)) {
+    arr = (parsed as unknown[]).map((s) => String(s)).map((s) => s.trim()).filter(Boolean);
+  } else if (typeof parsed === "string") {
+    arr = parsed.split(",").map((s) => s.trim()).filter(Boolean);
+  }
+  return Array.from(new Set(arr));
+};
+
+const coerceObjectId = (v: unknown): Types.ObjectId | undefined => {
+  const s = typeof v === "object" && v && (v as any).$oid ? (v as any).$oid : v;
+  return isValidObjectId(String(s)) ? new Types.ObjectId(String(s)) : undefined;
+};
+
+const ensureUniqueSlug = async (
+  tenant: string,
+  base: string,
+  GalleryModel: any,
+  currentId?: string
+): Promise<string> => {
+  let slug = base;
+  let i = 2;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const clash = await GalleryModel.findOne({
+      tenant,
+      slug,
+      ...(currentId ? { _id: { $ne: currentId } } : {}),
+    }).lean();
+    if (!clash) return slug;
+    slug = `${base}-${i++}`;
   }
 };
 
-// ✅ Create Gallery Item
-export const createGalleryItem = asyncHandler(
-  async (req: Request, res: Response) => {
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Gallery } = await getTenantModels(req);
-    const t = (key: string, vars?: Record<string, any>) =>
-      translate(key, locale, translations, vars);
+/* ---------- LIST (Admin) ---------- */
+export const getAllGalleryItems: RequestHandler = asyncHandler(async (req, res) => {
+  const { Gallery } = await getTenantModels(req);
+  const locale: SupportedLocale = (req as any).locale || "tr";
+  const t = (k: string, p?: any) => translate(k, locale, translations, p);
 
-    try {
-      let { name, description, category, type = "image", order } = req.body;
+  const { q = "", category, isPublished, isActive, type, tag, page = "1", limit = "50" } =
+    req.query as Record<string, string>;
 
-      name = fillAllLocales(parseIfJson(name));
-      description = fillAllLocales(parseIfJson(description));
+  const filter: any = { tenant: (req as any).tenant };
+  if (type) filter.type = type;
+  if (tag) filter.tags = tag;
+  if (category && isValidObjectId(category)) filter.category = category;
+  if (typeof isPublished === "string") filter.isPublished = isPublished === "true";
+  if (typeof isActive === "string") filter.isActive = isActive === "true";
 
-      if (!category || !isValidObjectId(category)) {
-        res.status(400).json({
-          success: false,
-          message: t("error.validCategoryRequired"),
-        });
-        return;
+  if (q) {
+    const rx = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+    filter.$or = [
+      { slug: rx },
+      ...SUPPORTED_LOCALES.map((l) => ({ [`title.${l}`]: rx })),
+      ...SUPPORTED_LOCALES.map((l) => ({ [`summary.${l}`]: rx })),
+      ...SUPPORTED_LOCALES.map((l) => ({ [`content.${l}`]: rx })),
+    ];
+  }
+
+  const pageNum = Math.max(1, parseInt(String(page), 10) || 1);
+  const lim = Math.max(1, Math.min(200, parseInt(String(limit), 10) || 50));
+  const skip = (pageNum - 1) * lim;
+
+  const [items, total] = await Promise.all([
+    Gallery.find(filter).sort({ order: 1, createdAt: -1 }).skip(skip).limit(lim).lean(),
+    Gallery.countDocuments(filter),
+  ]);
+
+  res.set("X-Total-Count", String(total));
+  res.status(200).json(items);
+  return;
+});
+
+/* ---------- CREATE ---------- */
+export const createGalleryItem: RequestHandler = asyncHandler(async (req, res) => {
+  const { Gallery } = await getTenantModels(req);
+  const locale: SupportedLocale = (req as any).locale || "tr";
+  const t = (k: string, p?: any) => translate(k, locale, translations, p);
+
+  const {
+    type = "image",
+    category,
+    isPublished,
+    publishedAt,
+    order,
+    slug,
+    tags,
+    author,
+  } = req.body;
+
+  const title = ensureTL(req.body.title);
+  const summary = ensureTL(req.body.summary);
+  const content = ensureTL(req.body.content);
+
+  const cat = coerceObjectId(category);
+  if (!cat) { res.status(422).json({ success: false, message: t("validation.category") }); return; }
+
+  const baseSlug = slug
+    ? slugify(String(slug), { lower: true, strict: true })
+    : slugify(title?.[locale] || title?.en || "gallery", { lower: true, strict: true });
+  const uniqueSlug = await ensureUniqueSlug((req as any).tenant, baseSlug, Gallery);
+
+  const tagList = normalizeTags(tags);
+  const orderNum = Number.isFinite(+order) ? +order : 0;
+
+  const images: Array<{ url: string; thumbnail: string; webp?: string; publicId?: string }> = [];
+  if (Array.isArray(req.files)) {
+    for (const file of req.files as Express.Multer.File[]) {
+      const imageUrl = getImagePath(file);
+      let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
+      if (shouldProcessImage()) {
+        const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+        thumbnail = processed.thumbnail;
+        webp = processed.webp;
       }
+      images.push({ url: imageUrl, thumbnail, webp, publicId: (file as any).public_id });
+    }
+  }
 
-      const images: IGallery["images"] = [];
+  const doc = await Gallery.create({
+    tenant: (req as any).tenant,
+    type,
+    title,
+    summary,
+    content,
+    slug: uniqueSlug,
+    images,
+    tags: tagList,
+    category: cat,
+    author: author ?? (req as any).user?.name ?? "System",
+    isActive: true,
+    isPublished: isPublished === true || isPublished === "true",
+    publishedAt: isPublished ? (publishedAt ? new Date(publishedAt) : new Date()) : undefined,
+    order: orderNum,
+  });
 
-      if (Array.isArray(req.files)) {
-        for (const file of req.files as Express.Multer.File[]) {
-          const imageUrl = getImagePath(file);
-          let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
-          if (shouldProcessImage()) {
-            const processed = await processImageLocal(
-              file.path,
-              file.filename,
-              path.dirname(file.path)
-            );
-            thumbnail = processed.thumbnail;
-            webp = processed.webp;
-          }
-          images.push({
-            url: imageUrl,
-            thumbnail,
-            webp,
-            publicId: (file as any).public_id,
-            name: fillAllLocales({ [locale]: file.originalname }),
-            description: fillAllLocales({ [locale]: "" }),
-            order: order ? Number(order) : 0,
-          });
+  logger.withReq.info(req, t("created"), { ...getRequestContext(req), id: doc._id });
+  res.status(201).json(doc);
+  return;
+});
+
+/* ---------- UPDATE ---------- */
+export const updateGalleryItem: RequestHandler = asyncHandler(async (req, res) => {
+  const { Gallery } = await getTenantModels(req);
+  const locale: SupportedLocale = (req as any).locale || "tr";
+  const t = (k: string, p?: any) => translate(k, locale, translations, p);
+
+  const { id } = req.params;
+  if (!isValidObjectId(id)) { res.status(400).json({ success: false, message: t("invalidId") }); return; }
+
+  const doc = await Gallery.findOne({ _id: id, tenant: (req as any).tenant });
+  if (!doc) { res.status(404).json({ success: false, message: t("notFound") }); return; }
+
+  const U = req.body as Record<string, unknown>;
+
+  if (U.title !== undefined) doc.title = mergeLocalesForUpdate(doc.title, U.title);
+  if (U.summary !== undefined) doc.summary = mergeLocalesForUpdate(doc.summary, U.summary);
+  if (U.content !== undefined) doc.content = mergeLocalesForUpdate(doc.content, U.content);
+
+  if (U.type !== undefined) doc.type = String(U.type) as any;
+
+  if (U.slug !== undefined) {
+    const base = slugify(String(U.slug), { lower: true, strict: true });
+    doc.slug = await ensureUniqueSlug((req as any).tenant, base, Gallery, doc._id.toString());
+  }
+
+  if (U.category !== undefined) {
+    const cat = coerceObjectId(U.category);
+    if (!cat) { res.status(422).json({ success: false, message: t("validation.category") }); return; }
+    doc.category = cat;
+  }
+
+  if (U.tags !== undefined) doc.tags = normalizeTags(U.tags);
+  if (U.order !== undefined) doc.order = Number.isFinite(+(U.order as any)) ? +(U.order as any) : doc.order;
+  if (U.isActive !== undefined) doc.isActive = U.isActive === true || U.isActive === "true";
+  if (U.author !== undefined) doc.author = String(U.author);
+
+  if (U.isPublished !== undefined) {
+    const want = U.isPublished === true || U.isPublished === "true";
+    doc.isPublished = want;
+    doc.publishedAt = want ? (U.publishedAt ? new Date(U.publishedAt as string) : doc.publishedAt || new Date()) : undefined;
+  }
+
+  // Yeni görseller
+  if (Array.isArray(req.files)) {
+    for (const file of req.files as Express.Multer.File[]) {
+      const imageUrl = getImagePath(file);
+      let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
+      if (shouldProcessImage()) {
+        const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+        thumbnail = processed.thumbnail;
+        webp = processed.webp;
+      }
+      doc.images.push({ url: imageUrl, thumbnail, webp, publicId: (file as any).public_id });
+    }
+  }
+
+  // Silme (ids)
+  const rawRemove = (U as any).removeImageIds ?? (U as any)["removeImageIds[]"];
+  const removeIds: string[] = Array.isArray(rawRemove)
+    ? (rawRemove as unknown[]).map((v) => String(v))
+    : typeof rawRemove === "string" && rawRemove
+      ? [String(rawRemove)]
+      : [];
+  if (removeIds.length) {
+    const ids = new Set<string>(removeIds.map((s) => String(s)));
+    doc.images = (doc.images || []).filter((img: any) => (img._id ? !ids.has(String(img._id)) : true));
+  }
+
+  // Silme (by url/publicId)
+  if (U.removedImages) {
+    try {
+      const removed: Array<{ url?: string; publicId?: string }> = JSON.parse(String(U.removedImages));
+      const byUrl = new Set<string>(removed.map((r) => r.url).filter((u): u is string => !!u));
+      doc.images = (doc.images || []).filter((img) => !byUrl.has(img.url));
+      for (const r of removed) {
+        if (r.url) {
+          const localPath = path.join("uploads", (req as any).tenant, "gallery-images", path.basename(r.url));
+          if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
         }
+        if (r.publicId) { try { await cloudinary.uploader.destroy(r.publicId); } catch {} }
       }
-
-      const gallery = await Gallery.create({
-        tenant: req.tenant,
-        category,
-        type,
-        isPublished: true,
-        isActive: true,
-        priority: 0,
-        images,
-      });
-
-      logger.withReq.info(req, t("create.success"), {
-        ...getRequestContext(req),
-        module: "gallery",
-        event: "create",
-        galleryId: gallery._id.toString(),
-      });
-
-      res.status(201).json({
-        success: true,
-        message: t("create.success"),
-        data: gallery,
-      });
-    } catch (error: any) {
-      logger.withReq.error(req, t("error.creating_item"), {
-        ...getRequestContext(req),
-        module: "gallery",
-        event: "create",
-        error: error.message,
-      });
-      res.status(500).json({
-        success: false,
-        message: t("error.creating_item"),
-        error: error.message,
-      });
-    }
+    } catch {}
   }
-);
-// ✅ Update Gallery Item (EXACT & MODERN & FUTURE-PROOF)
-export const updateGalleryItem = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Gallery } = await getTenantModels(req);
-    const t = (key: string, vars?: Record<string, any>) =>
-      translate(key, locale, translations, vars);
 
-    if (!isValidObjectId(id)) {
-      res.status(400).json({ success: false, message: t("error.invalid_id") });
-      return;
-    }
-
-    const gallery = await Gallery.findOne({ _id: id, tenant: req.tenant });
-    if (!gallery) {
-      res.status(404).json({ success: false, message: t("error.not_found") });
-      return;
-    }
-
-    const updates = req.body;
-
+  // Reorder
+  if (U.existingImagesOrder) {
     try {
-      let {
-        name,
-        description,
-        category,
-        type,
-        isPublished,
-        isActive,
-        priority,
-        order,
-        existingImages, // frontend'den gelen (korunacak) url dizisi
-        removedImages, // frontend'den gelen (silinen) url dizisi
-      } = updates;
-
-      // ---------- IMAGE UPDATE LOGIC BAŞLANGIÇ ----------
-      // Resim array güvenliği
-      if (!Array.isArray(gallery.images)) gallery.images = [];
-
-      // Multer fields() (object: {images:[], ...}) desteği
-      if (
-        req.files &&
-        typeof req.files === "object" &&
-        !Array.isArray(req.files)
-      ) {
-        // Images
-        if (Array.isArray((req.files as any)["images"])) {
-          for (const file of (req.files as any)["images"]) {
-            if (file.mimetype && file.mimetype.startsWith("image/")) {
-              const imageUrl = getImagePath(file);
-              let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
-              if (shouldProcessImage()) {
-                const processed = await processImageLocal(
-                  file.path,
-                  file.filename,
-                  path.dirname(file.path)
-                );
-                thumbnail = processed.thumbnail;
-                webp = processed.webp;
-              }
-              gallery.images.push({
-                url: imageUrl,
-                thumbnail,
-                webp,
-                publicId: (file as any).public_id,
-                name: fillAllLocales({ [locale]: file.originalname }),
-                description: fillAllLocales({ [locale]: "" }),
-                order: order ? Number(order) : 0,
-              });
-            }
-          }
-        }
+      const orderSig = JSON.parse(String(U.existingImagesOrder)) as string[];
+      const map = new Map<string, any>();
+      for (const img of doc.images) {
+        const key = img.publicId || img.url;
+        if (key) map.set(String(key), img);
       }
-
-      // Multer array() desteği
-      if (Array.isArray(req.files)) {
-        for (const file of req.files as Express.Multer.File[]) {
-          if (
-            file.fieldname === "images" &&
-            file.mimetype &&
-            file.mimetype.startsWith("image/")
-          ) {
-            const imageUrl = getImagePath(file);
-            let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
-            if (shouldProcessImage()) {
-              const processed = await processImageLocal(
-                file.path,
-                file.filename,
-                path.dirname(file.path)
-              );
-              thumbnail = processed.thumbnail;
-              webp = processed.webp;
-            }
-            gallery.images.push({
-              url: imageUrl,
-              thumbnail,
-              webp,
-              publicId: (file as any).public_id,
-              name: fillAllLocales({ [locale]: file.originalname }),
-              description: fillAllLocales({ [locale]: "" }),
-              order: order ? Number(order) : 0,
-            });
-          }
-        }
+      const next: any[] = [];
+      for (const k of orderSig) {
+        const hit = map.get(String(k));
+        if (hit) { next.push(hit); map.delete(String(k)); }
       }
-
-      // --- IMAGE REMOVE (tamamen güvenli, hem diziden hem cloud hem lokal sil) ---
-      if (removedImages) {
-        try {
-          const removed: string[] = Array.isArray(removedImages)
-            ? removedImages
-            : typeof removedImages === "string"
-            ? JSON.parse(removedImages)
-            : [];
-          for (const imgUrl of removed) {
-            const imgIdx = gallery.images.findIndex(
-              (i: any) => i.url === imgUrl
-            );
-            if (imgIdx > -1) {
-              const imgObj = gallery.images[imgIdx];
-              // Lokalde ise sil
-              const localPath = path.join(
-                "uploads",
-                req.tenant,
-                "gallery-images",
-                path.basename(imgUrl)
-              );
-              if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-              // Cloudinary'de ise sil
-              if (imgObj?.publicId)
-                await cloudinary.uploader.destroy(imgObj.publicId);
-              // Diziden çıkar
-              gallery.images.splice(imgIdx, 1);
-            }
-          }
-        } catch (e) {
-          logger.withReq.warn(req, t("invalidRemovedImages"), {
-            ...getRequestContext(req),
-            error: e,
-          });
-        }
-      }
-
-      // --- Kalan resimler (korunacaklar) sadece existingImages ile güncellensin (Opsiyonel, eğer frontend yolluyorsa!) ---
-      if (existingImages) {
-        let keepUrls: string[] = Array.isArray(existingImages)
-          ? existingImages
-          : typeof existingImages === "string"
-          ? JSON.parse(existingImages)
-          : [];
-        if (keepUrls.length > 0) {
-          gallery.images = gallery.images.filter((img) =>
-            keepUrls.includes(img.url)
-          );
-        }
-      }
-      // ---------- IMAGE UPDATE LOGIC SONU ----------
-
-      // 5️⃣ Name/Description/Order: Sadece tekli resim güncelliyorsa uygula, çoklu ise her bir resim frontend'den ayrı güncellenmeli.
-      if (name && gallery.images.length === 1) {
-        gallery.images[0].name = mergeLocalesForUpdate(
-          gallery.images[0].name,
-          parseIfJson(name)
-        );
-      }
-      if (description && gallery.images.length === 1) {
-        gallery.images[0].description = mergeLocalesForUpdate(
-          gallery.images[0].description,
-          parseIfJson(description)
-        );
-      }
-      if (order !== undefined) {
-        gallery.images.forEach((img) => (img.order = Number(order)));
-      }
-
-      // 6️⃣ Diğer ana alanlar
-      if (category && isValidObjectId(category)) gallery.category = category;
-      if (type) gallery.type = type;
-      if (isPublished !== undefined)
-        gallery.isPublished = isPublished === "true" || isPublished === true;
-      if (isActive !== undefined)
-        gallery.isActive = isActive === "true" || isActive === true;
-      if (priority !== undefined) gallery.priority = parseInt(priority);
-
-      await gallery.save();
-
-      logger.withReq.info(req, t("update.success"), {
-        ...getRequestContext(req),
-        module: "gallery",
-        event: "update",
-        galleryId: id,
-      });
-
-      res.status(200).json({
-        success: true,
-        message: t("update.success"),
-        data: gallery,
-      });
-    } catch (error: any) {
-      logger.withReq.error(req, t("error.updating_item"), {
-        ...getRequestContext(req),
-        module: "gallery",
-        event: "update",
-        error: error.message,
-      });
-      res.status(500).json({
-        success: false,
-        message: t("error.updating_item"),
-        error: error.message,
-      });
-    }
+      doc.images = [...next, ...Array.from(map.values())];
+    } catch {}
   }
-);
 
-export const getAllGalleryItems = asyncHandler(
-  async (req: Request, res: Response) => {
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Gallery } = await getTenantModels(req);
-    const t = (key: string) => translate(key, locale, translations);
+  await doc.save();
+  logger.withReq.info(req, t("updated"), { ...getRequestContext(req), id: doc._id });
+  res.status(200).json(doc.toJSON());
+  return;
+});
 
+/* ---------- TOGGLE PUBLISH ---------- */
+export const togglePublishGalleryItem: RequestHandler = asyncHandler(async (req, res) => {
+  const { Gallery } = await getTenantModels(req);
+  const { id } = req.params;
+
+  if (!isValidObjectId(id)) { res.status(400).json({ success: false, message: "invalidId" }); return; }
+
+  const doc = await Gallery.findOne({ _id: id, tenant: (req as any).tenant });
+  if (!doc) { res.status(404).json({ success: false, message: "notFound" }); return; }
+
+  doc.isPublished = !doc.isPublished;
+  doc.publishedAt = doc.isPublished ? (doc.publishedAt || new Date()) : undefined;
+
+  await doc.save();
+  res.status(200).json(doc);
+  return;
+});
+
+/* ---------- SOFT DELETE / RESTORE ---------- */
+export const softDeleteGalleryItem: RequestHandler = asyncHandler(async (req, res) => {
+  const { Gallery } = await getTenantModels(req);
+  const { id } = req.params;
+
+  if (!isValidObjectId(id)) { res.status(400).json({ success: false, message: "invalidId" }); return; }
+
+  const doc = await Gallery.findOne({ _id: id, tenant: (req as any).tenant });
+  if (!doc) { res.status(404).json({ success: false, message: "notFound" }); return; }
+
+  doc.isActive = false;
+  await doc.save();
+  res.status(200).json(doc);
+  return;
+});
+
+export const restoreGalleryItem: RequestHandler = asyncHandler(async (req, res) => {
+  const { Gallery } = await getTenantModels(req);
+  const { id } = req.params;
+
+  if (!isValidObjectId(id)) { res.status(400).json({ success: false, message: "invalidId" }); return; }
+
+  const doc = await Gallery.findOne({ _id: id, tenant: (req as any).tenant });
+  if (!doc) { res.status(404).json({ success: false, message: "notFound" }); return; }
+
+  doc.isActive = true;
+  await doc.save();
+  res.status(200).json(doc);
+  return;
+});
+
+/* ---------- HARD DELETE ---------- */
+export const deleteGalleryItem: RequestHandler = asyncHandler(async (req, res) => {
+  const { Gallery } = await getTenantModels(req);
+  const { id } = req.params;
+
+  if (!isValidObjectId(id)) { res.status(400).json({ success: false, message: "invalidId" }); return; }
+
+  const doc = await Gallery.findOne({ _id: id, tenant: (req as any).tenant });
+  if (!doc) { res.status(404).json({ success: false, message: "notFound" }); return; }
+
+  for (const img of doc.images || []) {
     try {
-      const {
-        isPublished,
-        isActive,
-        page = "1",
-        limit = "100",
-        category,
-      } = req.query;
-
-      const pageNum = parseInt(page as string);
-      const limitNum = parseInt(limit as string);
-      const skip = (pageNum - 1) * limitNum;
-
-      const filters: any = { tenant: req.tenant };
-
-      if (category && isValidObjectId(category as string)) {
-        filters.category = category;
-      }
-      if (typeof isPublished === "string") {
-        filters.isPublished = isPublished === "true";
-      }
-      if (typeof isActive === "string") {
-        filters.isActive = isActive === "true";
-      } else {
-        filters.isActive = true;
-      }
-
-      const [items, total] = await Promise.all([
-        Gallery.find(filters)
-          .sort({ priority: -1, createdAt: -1 })
-          .skip(skip)
-          .limit(limitNum)
-          .populate("category")
-          .lean(),
-        Gallery.countDocuments(filters),
-      ]);
-
-      res.status(200).json({
-        success: true,
-        message: t("fetch.success"),
-        data: items,
-        pagination: {
-          total,
-          page: pageNum,
-          totalPages: Math.ceil(total / limitNum),
-        },
-      });
-    } catch (err: any) {
-      logger.withReq.error(req, t("error.fetching_items"), {
-        module: "gallery",
-        error: err.message,
-      });
-      res
-        .status(500)
-        .json({ success: false, message: t("error.fetching_items") });
-    }
+      const localPath = path.join("uploads", (req as any).tenant, "gallery-images", path.basename(img.url));
+      if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+      if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
+    } catch {}
   }
-);
 
-export const softDeleteGalleryItem = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Gallery } = await getTenantModels(req);
-    const t = (key: string) => translate(key, locale, translations);
+  await doc.deleteOne();
+  res.status(200).json({ ok: true });
+  return;
+});
 
-    try {
-      if (!isValidObjectId(id)) {
-        res
-          .status(400)
-          .json({ success: false, message: t("error.invalid_id") });
-        return;
-      }
+/* ---------- BATCH ---------- */
+export const batchPublishGalleryItems: RequestHandler = asyncHandler(async (req, res) => {
+  const { Gallery } = await getTenantModels(req);
+  const { ids = [], publish } = req.body as { ids: string[]; publish: boolean };
 
-      const item = await Gallery.findOne({ _id: id, tenant: req.tenant });
-      if (!item) {
-        res.status(404).json({ success: false, message: t("error.not_found") });
-        return;
-      }
+  const valid = (Array.isArray(ids) ? ids : []).filter((id) => isValidObjectId(id));
+  if (!valid.length) { res.status(400).json({ success: false, message: "noValidIds" }); return; }
 
-      item.isActive = false;
-      await item.save();
-
-      res.status(200).json({
-        success: true,
-        message: t("archive.success"),
-      });
-    } catch (err: any) {
-      logger.withReq.error(req, t("error.archiving_item"), {
-        module: "gallery",
-        error: err.message,
-      });
-      res
-        .status(500)
-        .json({ success: false, message: t("error.archiving_item") });
-    }
+  if (publish) {
+    const r = await Gallery.updateMany(
+      { _id: { $in: valid }, tenant: (req as any).tenant },
+      { $set: { isPublished: true, publishedAt: new Date() } }
+    );
+    res.status(200).json({ modified: r.modifiedCount });
+    return;
+  } else {
+    const r = await Gallery.updateMany(
+      { _id: { $in: valid }, tenant: (req as any).tenant },
+      { $set: { isPublished: false }, $unset: { publishedAt: "" } }
+    );
+    res.status(200).json({ modified: r.modifiedCount });
+    return;
   }
-);
+});
 
-export const deleteGalleryItem = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Gallery } = await getTenantModels(req);
-    const t = (key: string) => translate(key, locale, translations);
+export const batchDeleteGalleryItems: RequestHandler = asyncHandler(async (req, res) => {
+  const { Gallery } = await getTenantModels(req);
+  const { ids = [] } = req.body as { ids: string[] };
 
-    try {
-      if (!isValidObjectId(id)) {
-        res
-          .status(400)
-          .json({ success: false, message: t("error.invalid_id") });
-        return;
-      }
+  const valid = (Array.isArray(ids) ? ids : []).filter((id) => isValidObjectId(id));
+  if (!valid.length) { res.status(400).json({ success: false, message: "noValidIds" }); return; }
 
-      const result = await Gallery.deleteOne({ _id: id, tenant: req.tenant });
-      if (result.deletedCount === 0) {
-        res.status(404).json({ success: false, message: t("error.not_found") });
-        return;
-      }
-
-      res.status(200).json({
-        success: true,
-        message: t("delete.success"),
-      });
-    } catch (err: any) {
-      logger.withReq.error(req, t("error.deleting_item"), {
-        module: "gallery",
-        error: err.message,
-      });
-      res
-        .status(500)
-        .json({ success: false, message: t("error.deleting_item") });
+  const docs = await Gallery.find({ _id: { $in: valid }, tenant: (req as any).tenant });
+  for (const doc of docs) {
+    for (const img of doc.images || []) {
+      try {
+        const localPath = path.join("uploads", (req as any).tenant, "gallery-images", path.basename(img.url));
+        if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+        if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
+      } catch {}
     }
+    await doc.deleteOne();
   }
-);
 
-export const togglePublishGalleryItem = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Gallery } = await getTenantModels(req);
-    const t = (key: string) => translate(key, locale, translations);
-
-    try {
-      if (!isValidObjectId(id)) {
-        res
-          .status(400)
-          .json({ success: false, message: t("error.invalid_id") });
-        return;
-      }
-
-      const item = await Gallery.findOne({ _id: id, tenant: req.tenant });
-      if (!item) {
-        res.status(404).json({ success: false, message: t("error.not_found") });
-        return;
-      }
-
-      item.isPublished = !item.isPublished;
-      await item.save();
-
-      res.status(200).json({
-        success: true,
-        message: item.isPublished
-          ? t("publish.success")
-          : t("unpublish.success"),
-        data: item,
-      });
-    } catch (err: any) {
-      logger.withReq.error(req, t("error.toggling_publish"), {
-        module: "gallery",
-        error: err.message,
-      });
-      res
-        .status(500)
-        .json({ success: false, message: t("error.toggling_publish") });
-    }
-  }
-);
-
-export const batchPublishGalleryItems = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { ids, publish } = req.body;
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Gallery } = await getTenantModels(req);
-    const t = (key: string) => translate(key, locale, translations);
-
-    try {
-      if (!Array.isArray(ids) || typeof publish !== "boolean") {
-        res
-          .status(400)
-          .json({ success: false, message: t("error.invalid_body") });
-        return;
-      }
-
-      await Gallery.updateMany(
-        { _id: { $in: ids }, tenant: req.tenant },
-        { $set: { isPublished: publish } }
-      );
-
-      res.status(200).json({
-        success: true,
-        message: publish
-          ? t("publish.success_all")
-          : t("unpublish.success_all"),
-      });
-    } catch (err: any) {
-      logger.withReq.error(req, t("error.batch_publish"), {
-        module: "gallery",
-        error: err.message,
-      });
-      res
-        .status(500)
-        .json({ success: false, message: t("error.batch_publish") });
-    }
-  }
-);
-
-export const batchDeleteGalleryItems = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { ids } = req.body;
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Gallery } = await getTenantModels(req);
-    const t = (key: string) => translate(key, locale, translations);
-
-    try {
-      if (!Array.isArray(ids)) {
-        res
-          .status(400)
-          .json({ success: false, message: t("error.invalid_body") });
-        return;
-      }
-
-      await Gallery.deleteMany({ _id: { $in: ids }, tenant: req.tenant });
-
-      res.status(200).json({
-        success: true,
-        message: t("delete.success_all"),
-      });
-    } catch (err: any) {
-      logger.withReq.error(req, t("error.batch_delete"), {
-        module: "gallery",
-        error: err.message,
-      });
-      res
-        .status(500)
-        .json({ success: false, message: t("error.batch_delete") });
-    }
-  }
-);
+  res.status(200).json({ deleted: docs.length });
+  return;
+});

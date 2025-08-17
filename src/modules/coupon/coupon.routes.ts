@@ -20,20 +20,19 @@ import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
 
+// coupon.routes.ts
 router.get("/", getCoupons);
-
-// ✅ Public - Check valid coupon by code
 router.get("/check/:code", getCouponByCode);
 
-// ✅ Admin routes (auth+role required)
+// Admin (auth)
 router.use(authenticate, authorizeRoles("admin"));
 
-// Get all coupons (admin only)
+// ✔ Admin list
 router.get("/admin", validateAdminQuery, getAllCoupons);
 
-// Create new coupon (admin only)
+// ✔ Admin create
 router.post(
-  "/",
+  "/admin",
   uploadTypeWrapper("coupons"),
   upload("coupons").array("images", 5),
   transformNestedFields(["title", "description"]),
@@ -41,9 +40,9 @@ router.post(
   createCoupon
 );
 
-// Update coupon (admin only)
+// ✔ Admin update
 router.put(
-  "/:id",
+  "/admin/:id",
   uploadTypeWrapper("coupons"),
   upload("coupons").array("images", 5),
   transformNestedFields(["title", "description"]),
@@ -51,7 +50,8 @@ router.put(
   updateCoupon
 );
 
-// Delete coupon (admin only)
-router.delete("/:id", validateObjectId("id"), deleteCoupon);
+// ✔ Admin delete
+router.delete("/admin/:id", validateObjectId("id"), deleteCoupon);
+
 
 export default router;
