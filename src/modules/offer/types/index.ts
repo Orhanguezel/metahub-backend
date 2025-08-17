@@ -1,52 +1,93 @@
+// modules/offers/types.ts
 import type { ObjectId } from "mongoose";
 import type { TranslatedLabel } from "@/types/common";
-import { Types } from "mongoose";
+
+export type OfferStatus = "draft" | "preparing" | "sent" | "pending" | "approved" | "rejected";
+
+export type OfferItemType = "ensotekprod" | "sparepart";
 
 export interface IOfferItem {
-  product?: Types.ObjectId;          // ref: "product"
-  ensotekprod?: Types.ObjectId;      // ref: "ensotekprod"
+  // Discriminant + ilgili ref
+  productType: OfferItemType;
+  ensotekprod?: ObjectId;      // productType === "ensotekprod" ise zorunlu
+  sparepart?: ObjectId;        // productType === "sparepart"  ise zorunlu
+
   productName: TranslatedLabel;
   quantity: number;
   unitPrice: number;
   customPrice?: number;
-  vat: number;
-  total: number;
+  vat: number;                 // %
+  total: number;               // line gross (calc)
 }
 
 export interface IOfferRevision {
   pdfUrl: string;
   updatedAt: Date;
-  by: Types.ObjectId;     // ref: "user"
+  by: ObjectId;                // ref: "user"
   note?: string;
+}
+
+export interface IStatusHistory {
+  status: OfferStatus;
+  at: Date;
+  by?: ObjectId | null;
+  note?: string;
+}
+
+export interface IOfferEmailMeta {
+  to?: string;
+  cc?: string[];
+  bcc?: string[];
+  subject?: TranslatedLabel;
+  body?: TranslatedLabel;
+  lastEmailError?: string | null;
 }
 
 export interface IOffer {
   _id?: ObjectId;
   tenant: string;
   offerNumber: string;
-  user?: ObjectId | null;           // ref: "user" | null
-  company?: ObjectId | null;        // ref: "company" | null
-  customer?: ObjectId | null;      // ref: "customer" | null
+
+  source?: "internal" | "publicForm" | "import";
+  rfqId?: ObjectId | null;
+
+  user?: ObjectId | null;      // ref: "user"
+  company?: ObjectId | null;   // ref: "company"
+  customer?: ObjectId | null;  // ref: "customer"
   contactPerson?: string;
+
   items: IOfferItem[];
   shippingCost?: number;
   additionalFees?: number;
   discount?: number;
+
   currency: string;
   paymentTerms: TranslatedLabel;
   notes?: TranslatedLabel;
+
   validUntil: Date;
-  status: "draft" | "preparing" | "sent" | "pending" | "approved" | "rejected";
+
+  status: OfferStatus;
+  statusHistory?: IStatusHistory[];
+
   totalNet: number;
   totalVat: number;
   totalGross: number;
+
   pdfUrl?: string;
+  revisionHistory?: IOfferRevision[];
+
+  email?: IOfferEmailMeta;
   sentByEmail?: boolean;
   sentAt?: Date;
   acceptedAt?: Date;
   declinedAt?: Date;
-  revisionHistory?: IOfferRevision[];
-  createdBy?: ObjectId | null;      // ref: "user" | null
+
+  acceptTokenHash?: string | null;
+
+  attachments?: Array<{ url: string; name?: string; mime?: string; size?: number }>;
+
+  createdBy?: ObjectId | null;
   createdAt: Date;
   updatedAt: Date;
 }

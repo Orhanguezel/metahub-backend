@@ -1,28 +1,63 @@
 {
-  "offer.success.created": "Offre créée avec succès.",
-  "offer.success.updated": "Offre mise à jour avec succès.",
-  "offer.success.deleted": "Offre supprimée avec succès.",
-  "offer.success.statusUpdated": "Le statut de l'offre est passé à '{{status}}'.",
-
-  "offer.errors.requiredFields": "Les champs obligatoires sont manquants ou invalides.",
-  "offer.errors.companyNotFound": "Entreprise introuvable.",
-  "offer.errors.customerNotFound": "Client introuvable.",
-  "offer.errors.productNotFound": "Produit introuvable : {{id}}",
-  "offer.errors.ensotekprodNotFound": "Produit Ensotek introuvable : {{id}}",
-  "offer.errors.noProductReference": "Chaque ligne de l'offre doit contenir au moins un produit.",
-  "offer.errors.offerNotFound": "Offre introuvable.",
-
-  "offer.validation.invalidObjectId": "ID invalide.",
-  "offer.validation.itemNeedsProduct": "Chaque ligne doit référencer un produit ou un produit Ensotek.",
-  "offer.validation.invalidProductId": "ID du produit invalide.",
-  "offer.validation.invalidEnsotekprodId": "ID du produit Ensotek invalide.",
-  "offer.validation.quantityInvalid": "La quantité doit être au moins de 1.",
-  "offer.validation.companyRequired": "Le champ société est obligatoire.",
-  "offer.validation.customerRequired": "Le champ client est obligatoire.",
-  "offer.validation.itemsArrayRequired": "Vous devez ajouter au moins un produit.",
-  "offer.validation.itemsNotEmpty": "Au moins un article est requis dans l'offre.",
-  "offer.validation.paymentTermsInvalid": "Les conditions de paiement sont manquantes ou invalides.",
-  "offer.validation.validUntilInvalid": "Date de validité invalide.",
-  "offer.validation.currencyInvalid": "Devise invalide.",
-  "offer.validation.invalidOfferStatus": "Statut d'offre invalide."
+  "validation": {
+    "invalidObjectId": "ObjectId invalide.",
+    "itemNeedsProduct": "Chaque ligne doit référencer un produit ou un produit Ensotek.",
+    "invalidProductId": "Identifiant de produit invalide.",
+    "invalidEnsotekprodId": "Identifiant de produit Ensotek invalide.",
+    "quantityInvalid": "La quantité doit être un nombre positif.",
+    "unitPriceInvalid": "Le prix unitaire ne peut pas être négatif.",
+    "customPriceInvalid": "Le prix personnalisé ne peut pas être négatif.",
+    "vatInvalid": "La TVA doit être comprise entre 0 et 100.",
+    "companyRequired": "L’entreprise est obligatoire.",
+    "customerRequired": "Le client est obligatoire.",
+    "itemsArrayRequired": "Les lignes doivent être un tableau non vide.",
+    "validUntilInvalid": "\"validUntil\" doit être une date ISO valide.",
+    "invalidOfferStatus": "Statut d’offre invalide.",
+    "invalidProductType": "Type de produit invalide."
+  },
+  "errors": {
+    "required_fields": "Veuillez remplir tous les champs obligatoires.",
+    "company_not_found": "Entreprise introuvable.",
+    "customer_not_found": "Client introuvable.",
+    "product_not_found": "Produit introuvable : {id}",
+    "ensotekprod_not_found": "Produit Ensotek introuvable : {id}",
+    "bike_not_found": "Vélo introuvable.",
+    "sparepart_not_found": "Pièce détachée introuvable.",
+    "no_product_reference": "Aucune référence de produit fournie.",
+    "offer_not_found": "Offre introuvable."
+  },
+  "success": {
+    "created": "Offre créée.",
+    "updated": "Offre mise à jour.",
+    "requested": "Votre demande a été reçue. Nous vous répondrons bientôt."
+  },
+  "notifications": {
+    "offerRequest": {
+      "title": "Nouvelle demande d’offre",
+      "message": "Offre demandée pour {customerName}. Produit : {productLabel}"
+    }
+  },
+   "email": {
+    "offer": {
+      "subject": "Votre offre {no}",
+      "title": "Votre offre {no}",
+      "hi": "Bonjour {name},",
+      "intro": "Votre offre {no} de {brand} est prête.",
+      "items": "Articles",
+      "qty": "Qté",
+      "unit": "Prix unitaire",
+      "total": "Total",
+      "subtotal": "Sous-total",
+      "vat": "TVA",
+      "shipping": "Expédition",
+      "fees": "Frais additionnels",
+      "discount": "Remise",
+      "grandTotal": "Total",
+      "validUntil": "Valable jusqu’au",
+      "ctaView": "Voir l’offre",
+      "ctaPdf": "Télécharger le PDF",
+      "questions": "Pour toute question, répondez simplement à cet e-mail.",
+      "sign": "{brand}{sender}"
+    }
+  }
 }

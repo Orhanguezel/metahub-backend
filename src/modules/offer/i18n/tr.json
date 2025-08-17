@@ -1,30 +1,63 @@
 {
-  "offer.success.created": "Teklif başarıyla oluşturuldu.",
-  "offer.success.updated": "Teklif başarıyla güncellendi.",
-  "offer.success.deleted": "Teklif başarıyla silindi.",
-  "offer.success.statusUpdated": "Teklif durumu '{{status}}' olarak güncellendi.",
-
-  "offer.errors.requiredFields": "Zorunlu alanlar eksik veya hatalı.",
-  "offer.errors.companyNotFound": "Şirket bulunamadı.",
-  "offer.errors.customerNotFound": "Müşteri bulunamadı.",
-  "offer.errors.productNotFound": "Ürün bulunamadı: {{id}}",
-  "offer.errors.ensotekprodNotFound": "Ensotek ürünü bulunamadı: {{id}}",
-  "offer.errors.noProductReference": "Her teklif kaleminde en az bir ürün seçilmelidir.",
-  "offer.errors.offerNotFound": "Teklif bulunamadı.",
-
-  "offer.validation.invalidObjectId": "Geçersiz ID.",
-  "offer.validation.itemNeedsProduct": "Her kalem için ürün veya Ensotek ürünü seçilmelidir.",
-  "offer.validation.invalidProductId": "Geçersiz ürün ID'si.",
-  "offer.validation.invalidEnsotekprodId": "Geçersiz Ensotek ürün ID'si.",
-  "offer.validation.quantityInvalid": "Adet en az 1 olmalıdır.",
-  "offer.validation.companyRequired": "Şirket alanı zorunludur.",
-  "offer.validation.customerRequired": "Müşteri alanı zorunludur.",
-  "offer.validation.itemsArrayRequired": "En az bir ürün eklemelisiniz.",
-  "offer.validation.itemsNotEmpty": "Teklifte en az bir ürün bulunmalı.",
-  "offer.validation.paymentTermsInvalid": "Ödeme şartı eksik veya hatalı.",
-  "offer.validation.validUntilInvalid": "Geçerlilik tarihi hatalı.",
-  "offer.validation.currencyInvalid": "Para birimi hatalı.",
-  "offer.validation.invalidOfferStatus": "Geçersiz teklif durumu.",
-  "pdf.generated": "Teklif PDF’i oluşturuldu.",
-  "pdf.generated_success": "Teklif PDF’i başarıyla oluşturuldu ve kaydedildi."
+  "validation": {
+    "invalidObjectId": "Geçersiz ObjectId.",
+    "itemNeedsProduct": "Her kalem bir ürün ya da ensotek ürünü içermelidir.",
+    "invalidProductId": "Geçersiz ürün kimliği.",
+    "invalidEnsotekprodId": "Geçersiz ensotek ürün kimliği.",
+    "quantityInvalid": "Miktar pozitif bir sayı olmalıdır.",
+    "unitPriceInvalid": "Birim fiyat sıfırdan küçük olamaz.",
+    "customPriceInvalid": "Özel fiyat sıfırdan küçük olamaz.",
+    "vatInvalid": "KDV 0 ile 100 arasında olmalıdır.",
+    "companyRequired": "Şirket alanı zorunludur.",
+    "customerRequired": "Müşteri alanı zorunludur.",
+    "itemsArrayRequired": "Kalemler boş olmayan bir dizi olmalıdır.",
+    "validUntilInvalid": "\"validUntil\" geçerli bir ISO tarih olmalıdır.",
+    "invalidOfferStatus": "Geçersiz teklif durumu.",
+    "invalidProductType": "Geçersiz ürün tipi."
+  },
+  "errors": {
+    "required_fields": "Zorunlu alanları doldurunuz.",
+    "company_not_found": "Şirket bulunamadı.",
+    "customer_not_found": "Müşteri bulunamadı.",
+    "product_not_found": "Ürün bulunamadı: {id}",
+    "ensotekprod_not_found": "Ensotek ürünü bulunamadı: {id}",
+    "bike_not_found": "Bisiklet bulunamadı.",
+    "sparepart_not_found": "Yedek parça bulunamadı.",
+    "no_product_reference": "Ürün referansı belirtilmedi.",
+    "offer_not_found": "Teklif bulunamadı."
+  },
+  "success": {
+    "created": "Teklif oluşturuldu.",
+    "updated": "Teklif güncellendi.",
+    "requested": "Talebiniz alındı. En kısa sürede dönüş yapacağız."
+  },
+  "notifications": {
+    "offerRequest": {
+      "title": "Yeni teklif isteği",
+      "message": "{customerName} için teklif talebi. Ürün: {productLabel}"
+    }
+  },
+  "email": {
+    "offer": {
+      "subject": "Teklifiniz {no}",
+      "title": "Teklifiniz {no}",
+      "hi": "Merhaba {name},",
+      "intro": "{brand} tarafından hazırlanan {no} numaralı teklifiniz hazır.",
+      "items": "Kalemler",
+      "qty": "Adet",
+      "unit": "Birim Fiyat",
+      "total": "Tutar",
+      "subtotal": "Ara Toplam",
+      "vat": "KDV",
+      "shipping": "Kargo",
+      "fees": "Ek Ücretler",
+      "discount": "İndirim",
+      "grandTotal": "Genel Toplam",
+      "validUntil": "Geçerlilik Tarihi",
+      "ctaView": "Teklifi görüntüle",
+      "ctaPdf": "PDF indir",
+      "questions": "Herhangi bir sorunuz olursa bu e-postaya yanıt verebilirsiniz.",
+      "sign": "{brand}{sender}"
+    }
+  }
 }

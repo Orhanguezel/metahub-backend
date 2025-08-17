@@ -1,3 +1,4 @@
+// modules/customers/model.ts
 import { Schema, model, models, type Model } from "mongoose";
 import type { ICustomer } from "./types";
 
@@ -31,8 +32,8 @@ const CustomerSchema = new Schema<ICustomer>(
 
     slug:        { type: String, required: true, trim: true, lowercase: true },
 
-    // NEW
-    userRef:     { type: Schema.Types.ObjectId, ref: "user", default: null },
+    // IMPORTANT: null değil, undefined!!
+    userRef:     { type: Schema.Types.ObjectId, ref: "user", default: undefined },
 
     addresses:   [{ type: Schema.Types.ObjectId, ref: "address" }],
 
@@ -58,17 +59,20 @@ CustomerSchema.index({ tenant: 1, slug: 1 },  { unique: true });
 CustomerSchema.index({ tenant: 1, isActive: 1 });
 CustomerSchema.index({ tenant: 1, companyName: 1, contactName: 1 });
 
-// NEW: aynı tenant içinde aynı userRef’e bağlı tek müşteri
-CustomerSchema.index({ tenant: 1, userRef: 1 }, { unique: true, sparse: true });
+// Yalnızca userRef gerçekten var ve null değilse benzersiz olsun
+CustomerSchema.index(
+  { tenant: 1, userRef: 1 },
+  { unique: true, partialFilterExpression: { userRef: { $exists: true, $ne: null } } }
+);
 
 /* slug & normalize & tags */
 CustomerSchema.pre("validate", function (next) {
   if (!this.slug || !this.slug.trim()) {
-    // NEW: userRef üzerinden doldurulmuş contactName yoksa email’den de türetebilir
-    const base = this.companyName?.trim()
-      || this.contactName?.trim()
-      || this.email?.split("@")[0]
-      || "customer";
+    const base =
+      this.companyName?.trim() ||
+      this.contactName?.trim() ||
+      this.email?.split("@")[0] ||
+      "customer";
     this.slug = slugify(base);
   } else {
     this.slug = slugify(this.slug);
