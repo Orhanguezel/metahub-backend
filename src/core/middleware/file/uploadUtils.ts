@@ -1,3 +1,5 @@
+// src/core/middleware/file/uploadUtils.ts
+
 import path from "path";
 import { BASE_URL, getTenantSlug, resolveUploadPath } from "./uploadMiddleware";
 import sharp from "sharp";

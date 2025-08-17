@@ -1,28 +1,63 @@
 {
-  "offer.success.created": "Offer created successfully.",
-  "offer.success.updated": "Offer updated successfully.",
-  "offer.success.deleted": "Offer deleted successfully.",
-  "offer.success.statusUpdated": "Offer status updated to '{{status}}'.",
-
-  "offer.errors.requiredFields": "Required fields are missing or invalid.",
-  "offer.errors.companyNotFound": "Company not found.",
-  "offer.errors.customerNotFound": "Customer not found.",
-  "offer.errors.productNotFound": "Product not found: {{id}}",
-  "offer.errors.ensotekprodNotFound": "Ensotek product not found: {{id}}",
-  "offer.errors.noProductReference": "Each offer item must have at least one product.",
-  "offer.errors.offerNotFound": "Offer not found.",
-
-  "offer.validation.invalidObjectId": "Invalid ID.",
-  "offer.validation.itemNeedsProduct": "Each item must have a product or ensotek product reference.",
-  "offer.validation.invalidProductId": "Invalid product ID.",
-  "offer.validation.invalidEnsotekprodId": "Invalid ensotek product ID.",
-  "offer.validation.quantityInvalid": "Quantity must be at least 1.",
-  "offer.validation.companyRequired": "Company is required.",
-  "offer.validation.customerRequired": "Customer is required.",
-  "offer.validation.itemsArrayRequired": "You must add at least one product.",
-  "offer.validation.itemsNotEmpty": "At least one item is required in the offer.",
-  "offer.validation.paymentTermsInvalid": "Payment terms are missing or invalid.",
-  "offer.validation.validUntilInvalid": "Invalid validity date.",
-  "offer.validation.currencyInvalid": "Invalid currency.",
-  "offer.validation.invalidOfferStatus": "Invalid offer status."
+  "validation": {
+    "invalidObjectId": "Invalid ObjectId.",
+    "itemNeedsProduct": "Each item must include a product or an Ensotek product.",
+    "invalidProductId": "Invalid product ID.",
+    "invalidEnsotekprodId": "Invalid Ensotek product ID.",
+    "quantityInvalid": "Quantity must be a positive number.",
+    "unitPriceInvalid": "Unit price cannot be less than zero.",
+    "customPriceInvalid": "Custom price cannot be less than zero.",
+    "vatInvalid": "VAT must be between 0 and 100.",
+    "companyRequired": "Company field is required.",
+    "customerRequired": "Customer field is required.",
+    "itemsArrayRequired": "Items must be a non-empty array.",
+    "validUntilInvalid": "\"validUntil\" must be a valid ISO date.",
+    "invalidOfferStatus": "Invalid offer status.",
+    "invalidProductType": "Invalid product type."
+  },
+  "errors": {
+    "required_fields": "Please fill in the required fields.",
+    "company_not_found": "Company not found.",
+    "customer_not_found": "Customer not found.",
+    "product_not_found": "Product not found: {id}",
+    "ensotekprod_not_found": "Ensotek product not found: {id}",
+    "bike_not_found": "Bike not found.",
+    "sparepart_not_found": "Spare part not found.",
+    "no_product_reference": "Product reference was not specified.",
+    "offer_not_found": "Offer not found."
+  },
+  "success": {
+    "created": "Offer created.",
+    "updated": "Offer updated.",
+    "requested": "Your request has been received. We'll get back to you as soon as possible."
+  },
+  "notifications": {
+    "offerRequest": {
+      "title": "New offer request",
+      "message": "Offer request for {customerName}. Product: {productLabel}"
+    }
+  },
+  "email": {
+    "offer": {
+      "subject": "Your Offer {no}",
+      "title": "Your Offer {no}",
+      "hi": "Hello {name},",
+      "intro": "Your offer {no} from {brand} is ready.",
+      "items": "Items",
+      "qty": "Qty",
+      "unit": "Unit Price",
+      "total": "Total",
+      "subtotal": "Subtotal",
+      "vat": "VAT",
+      "shipping": "Shipping",
+      "fees": "Additional Fees",
+      "discount": "Discount",
+      "grandTotal": "Grand Total",
+      "validUntil": "Valid Until",
+      "ctaView": "View Offer",
+      "ctaPdf": "Download PDF",
+      "questions": "If you have any questions, simply reply to this email.",
+      "sign": "{brand}{sender}"
+    }
+  }
 }

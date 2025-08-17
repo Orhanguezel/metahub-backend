@@ -36,7 +36,7 @@ import { Company } from "@/modules/company/company.models";
 import { Customer } from "@/modules/customer/models";
 import { FAQ } from "@/modules/faq/faq.models";
 import { Invoice } from "@/modules/invoicing/models";
-import { Offer } from "@/modules/offer/offer.models";
+import { Offer } from "@/modules/offer/models";
 import { Payment } from "@/modules/payments/models";
 import { Shipment } from "@/modules/shipment/shipment.models";
 import { Task } from "@/modules/task/task.models";

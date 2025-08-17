@@ -1,14 +1,4 @@
-import express from "express";
-import {
-  createOffer,
-  getOffers,
-  getOfferById,
-  updateOffer,
-  updateOfferStatus,
-  deleteOffer,
-  generateOfferPdfAndLink,
-  requestOfferHandler,
-} from "./offer.controller";
+import { Router } from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
   idParamValidator,
@@ -17,50 +7,24 @@ import {
   validateUpdateOfferStatus,
   validateListOffers,
   validateRequestOffer,
-} from "./offer.validation";
+} from "./validation";
 
-const router = express.Router();
+import { requestOfferHandler } from "./public.controller";
+import {
+  listOffers, getOffer, createOffer, updateOffer, updateOfferStatus, deleteOffer
+} from "./admin.controller";
 
-// --- PUBLIC: Teklif İstek Formu ---
-router.post(
-  "/request-offer",
-  validateRequestOffer,
-  requestOfferHandler // → Doğrudan public, auth yok!
-);
+const router = Router();
 
-// 🔐 Admin: Teklifleri listele (filtre opsiyonlu)
-router.get(
-  "/",
-  authenticate,
-  authorizeRoles("admin"),
-  validateListOffers,
-  getOffers
-);
+// --- PUBLIC ---
+router.post("/request-offer", validateRequestOffer, requestOfferHandler);
 
-// 📝 Yeni teklif oluştur
+// --- ADMIN ---
+router.get("/", authenticate, authorizeRoles("admin"), validateListOffers, listOffers);
+router.get("/:id", authenticate, idParamValidator, getOffer);
 router.post("/", authenticate, validateCreateOffer, createOffer);
-
-// 📌 Teklif detay (get/update/delete)
-router
-  .route("/:id")
-  .get(authenticate, idParamValidator, getOfferById)
-  .put(authenticate, idParamValidator, validateUpdateOffer, updateOffer)
-  .delete(authenticate, authorizeRoles("admin"), idParamValidator, deleteOffer);
-
-// 🔄 Statü güncelleme
-router.patch(
-  "/:id/status",
-  authenticate,
-  idParamValidator,
-  validateUpdateOfferStatus,
-  updateOfferStatus
-);
-
-router.post(
-  "/:id/generate-pdf",
-  authenticate,
-  idParamValidator,
-  generateOfferPdfAndLink
-);
+router.put("/:id", authenticate, idParamValidator, validateUpdateOffer, updateOffer);
+router.patch("/:id/status", authenticate, idParamValidator, validateUpdateOfferStatus, updateOfferStatus);
+router.delete("/:id", authenticate, authorizeRoles("admin"), idParamValidator, deleteOffer);
 
 export default router;

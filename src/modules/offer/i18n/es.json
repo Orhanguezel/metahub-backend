@@ -1,28 +1,63 @@
 {
-  "offer.success.created": "Oferta creada con éxito.",
-  "offer.success.updated": "Oferta actualizada con éxito.",
-  "offer.success.deleted": "Oferta eliminada con éxito.",
-  "offer.success.statusUpdated": "El estado de la oferta se actualizó a '{{status}}'.",
-
-  "offer.errors.requiredFields": "Faltan campos obligatorios o son inválidos.",
-  "offer.errors.companyNotFound": "Empresa no encontrada.",
-  "offer.errors.customerNotFound": "Cliente no encontrado.",
-  "offer.errors.productNotFound": "Producto no encontrado: {{id}}",
-  "offer.errors.ensotekprodNotFound": "Producto Ensotek no encontrado: {{id}}",
-  "offer.errors.noProductReference": "Cada línea de la oferta debe contener al menos un producto.",
-  "offer.errors.offerNotFound": "Oferta no encontrada.",
-
-  "offer.validation.invalidObjectId": "ID no válido.",
-  "offer.validation.itemNeedsProduct": "Cada línea debe referenciar un producto o producto Ensotek.",
-  "offer.validation.invalidProductId": "ID de producto no válido.",
-  "offer.validation.invalidEnsotekprodId": "ID de producto Ensotek no válido.",
-  "offer.validation.quantityInvalid": "La cantidad debe ser al menos 1.",
-  "offer.validation.companyRequired": "El campo empresa es obligatorio.",
-  "offer.validation.customerRequired": "El campo cliente es obligatorio.",
-  "offer.validation.itemsArrayRequired": "Debe agregar al menos un producto.",
-  "offer.validation.itemsNotEmpty": "Se requiere al menos un artículo en la oferta.",
-  "offer.validation.paymentTermsInvalid": "Las condiciones de pago faltan o son inválidas.",
-  "offer.validation.validUntilInvalid": "Fecha de validez no válida.",
-  "offer.validation.currencyInvalid": "Moneda no válida.",
-  "offer.validation.invalidOfferStatus": "Estado de oferta no válido."
+  "validation": {
+    "invalidObjectId": "ObjectId no válido.",
+    "itemNeedsProduct": "Cada ítem debe referenciar un producto o un producto de Ensotek.",
+    "invalidProductId": "ID de producto no válido.",
+    "invalidEnsotekprodId": "ID de producto Ensotek no válido.",
+    "quantityInvalid": "La cantidad debe ser un número positivo.",
+    "unitPriceInvalid": "El precio unitario no puede ser negativo.",
+    "customPriceInvalid": "El precio personalizado no puede ser negativo.",
+    "vatInvalid": "El IVA debe estar entre 0 y 100.",
+    "companyRequired": "La empresa es obligatoria.",
+    "customerRequired": "El cliente es obligatorio.",
+    "itemsArrayRequired": "Los ítems deben ser un arreglo no vacío.",
+    "validUntilInvalid": "\"validUntil\" debe ser una fecha ISO válida.",
+    "invalidOfferStatus": "Estado de oferta no válido.",
+    "invalidProductType": "Tipo de producto no válido."
+  },
+  "errors": {
+    "required_fields": "Complete todos los campos obligatorios.",
+    "company_not_found": "Empresa no encontrada.",
+    "customer_not_found": "Cliente no encontrado.",
+    "product_not_found": "Producto no encontrado: {id}",
+    "ensotekprod_not_found": "Producto Ensotek no encontrado: {id}",
+    "bike_not_found": "Bicicleta no encontrada.",
+    "sparepart_not_found": "Repuesto no encontrado.",
+    "no_product_reference": "No se proporcionó referencia de producto.",
+    "offer_not_found": "Oferta no encontrada."
+  },
+  "success": {
+    "created": "Oferta creada.",
+    "updated": "Oferta actualizada.",
+    "requested": "Hemos recibido su solicitud. Nos pondremos en contacto pronto."
+  },
+  "notifications": {
+    "offerRequest": {
+      "title": "Nueva solicitud de oferta",
+      "message": "Se solicitó una oferta para {customerName}. Producto: {productLabel}"
+    }
+  },
+  "email": {
+    "offer": {
+      "subject": "Su oferta {no}",
+      "title": "Su oferta {no}",
+      "hi": "Hola {name},",
+      "intro": "Su oferta {no} de {brand} está lista.",
+      "items": "Artículos",
+      "qty": "Cant.",
+      "unit": "Precio unit.",
+      "total": "Total",
+      "subtotal": "Subtotal",
+      "vat": "IVA",
+      "shipping": "Envío",
+      "fees": "Cargos adicionales",
+      "discount": "Descuento",
+      "grandTotal": "Total",
+      "validUntil": "Válido hasta",
+      "ctaView": "Ver oferta",
+      "ctaPdf": "Descargar PDF",
+      "questions": "Si tiene preguntas, responda a este correo.",
+      "sign": "{brand}{sender}"
+    }
+  }
 }
