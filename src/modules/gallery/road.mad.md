@@ -57,7 +57,7 @@
   "total": 50,
   "byCategory": {
     "hero": 10,
-    "about": 5,
+    "gallery": 5,
     "products": 20
   },
   "published": 40,

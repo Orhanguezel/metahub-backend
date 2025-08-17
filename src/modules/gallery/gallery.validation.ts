@@ -8,80 +8,55 @@ import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import translations from "./i18n";
 import { validateMultilangField } from "@/core/utils/i18n/validationUtils";
 
-// ✅ JSON Parse Helper
-function parseIfJson(value: any) {
-  try {
-    return typeof value === "string" ? JSON.parse(value) : value;
-  } catch {
-    return value;
-  }
-}
+/* helpers */
+const parseIfJson = (value: any) => {
+  try { return typeof value === "string" ? JSON.parse(value) : value; } catch { return value; }
+};
+const sanitizeTagsFlexible = (value: any) => {
+  const v = parseIfJson(value);
+  if (Array.isArray(v)) return v.map(String).map((s) => s.trim()).filter(Boolean);
+  if (typeof v === "string") return v.split(",").map((s) => s.trim()).filter(Boolean);
+  return [];
+};
 
-
-// ✅ ObjectId Validator
+/* ObjectId */
 export const validateObjectId = (field: string) => [
   param(field)
     .isMongoId()
-    .withMessage((_, { req }) => {
-      const t = (key: string) =>
-        translate(key, req.locale || getLogLocale(), translations);
-      return t("validation.invalidObjectId");
-    }),
+    .withMessage((_, { req }) =>
+      translate("validation.invalidObjectId", req.locale || getLogLocale(), translations)
+    ),
   validateRequest,
 ];
 
-// --- CREATE Validation (Gallery) ---
-export const validateUploadGallery = [
-  // Çok dilli zorunlu alan: name
-  validateMultilangField("name"),
-
-  // Çok dilli opsiyonel alan: description
-  body("description").optional().customSanitizer(parseIfJson),
-
-  // Diğer zorunlu ve opsiyonel alanlar
+/* Create */
+export const validateCreateGallery = [
+  validateMultilangField("title"),
+  body("summary").optional().customSanitizer(parseIfJson),
+  body("content").optional().customSanitizer(parseIfJson),
+  body("tags").optional().customSanitizer(sanitizeTagsFlexible),
   body("category")
-    .optional()
+    .exists({ checkFalsy: true })
+    .withMessage((_, { req }) =>
+      translate("validation.invalidCategory", req.locale || getLogLocale(), translations)
+    )
+    .bail()
     .isMongoId()
     .withMessage((_, { req }) =>
-      translate(
-        "validation.invalidCategory",
-        req.locale || getLogLocale(),
-        translations
-      )
+      translate("validation.invalidCategory", req.locale || getLogLocale(), translations)
     ),
-  body("type")
-    .optional()
-    .isIn(["image", "video"])
-    .withMessage((_, { req }) =>
-      translate(
-        "validation.invalidType",
-        req.locale || getLogLocale(),
-        translations
-      )
-    ),
-  body("order")
-    .optional()
-    .custom((v) => !isNaN(Number(v)))
-    .withMessage("Order must be a number."),
-
   validateRequest,
 ];
 
-// --- UPDATE Validation (Gallery) ---
+/* Update */
 export const validateUpdateGallery = [
-  // Çok dilli opsiyonel alanlar
-  body("name").optional().customSanitizer(parseIfJson),
-  body("description").optional().customSanitizer(parseIfJson),
-
-  body("category").optional(),
-  body("type").optional(),
-  body("order")
-    .optional()
-    .custom((v) => !isNaN(Number(v)))
-    .withMessage("Order must be a number."),
-  body("isPublished").optional().toBoolean(),
-  body("isActive").optional().toBoolean(),
-  body("priority").optional().custom((v) => !isNaN(Number(v))),
+  body("title").optional().customSanitizer(parseIfJson),
+  body("summary").optional().customSanitizer(parseIfJson),
+  body("content").optional().customSanitizer(parseIfJson),
+  body("tags").optional().customSanitizer(sanitizeTagsFlexible),
+  body("category").optional().isMongoId().withMessage((_, { req }) =>
+    translate("validation.invalidCategory", req.locale || getLogLocale(), translations)
+  ),
   body("removedImages")
     .optional()
     .custom((val, { req }) => {
@@ -90,8 +65,7 @@ export const validateUpdateGallery = [
         if (!Array.isArray(parsed)) throw new Error();
         return true;
       } catch {
-        const t = (key: string) =>
-          translate(key, req.locale || getLogLocale(), translations);
+        const t = (key: string) => translate(key, req.locale || getLogLocale(), translations);
         logger.withReq.warn(req as any, t("validation.invalidRemovedImages"), {
           ...getRequestContext(req),
           value: val,
@@ -100,66 +74,37 @@ export const validateUpdateGallery = [
         throw new Error(t("validation.invalidRemovedImages"));
       }
     }),
-
   validateRequest,
 ];
 
-// --- Param Validation (ObjectId için) ---
-export const validateGalleryIdParam = [
-  param("id")
-    .isMongoId()
-    .withMessage((_, { req }) => {
-      const t = (key: string) =>
-        translate(key, req.locale || getLogLocale(), translations);
-      return t("validation.invalidObjectId");
-    }),
-  validateRequest,
-];
-
-// --- Query Validation (Admin filtreleme vs.) ---
+/* Admin query */
 export const validateAdminQuery = [
-   query("language")
-    .optional()
-    .isIn(SUPPORTED_LOCALES)
-    .withMessage((_, { req }) =>
-      translate(
-        "validation.invalidLanguage",
-        req.locale || getLogLocale(),
-        translations
-      )
-    ),
-  query("category")
-    .optional()
-    .isMongoId()
-    .withMessage((_, { req }) =>
-      translate(
-        "validation.invalidCategory",
-        req.locale || getLogLocale(),
-        translations
-      )
-    ),
-  query("isPublished")
-    .optional()
-    .toBoolean()
-    .isBoolean()
-    .withMessage((_, { req }) =>
-      translate(
-        "validation.booleanField",
-        req.locale || getLogLocale(),
-        translations
-      )
-    ),
-  query("isActive")
-    .optional()
-    .toBoolean()
-    .isBoolean()
-    .withMessage((_, { req }) =>
-      translate(
-        "validation.booleanField",
-        req.locale || getLogLocale(),
-        translations
-      )
-    ),
+  query("language").optional().isIn(SUPPORTED_LOCALES).withMessage((_, { req }) =>
+    translate("validation.invalidLanguage", req.locale || getLogLocale(), translations)
+  ),
+  query("category").optional().isMongoId().withMessage((_, { req }) =>
+    translate("validation.invalidCategory", req.locale || getLogLocale(), translations)
+  ),
+  query("isPublished").optional().toBoolean().isBoolean().withMessage((_, { req }) =>
+    translate("validation.booleanField", req.locale || getLogLocale(), translations)
+  ),
+  query("isActive").optional().toBoolean().isBoolean().withMessage((_, { req }) =>
+    translate("validation.booleanField", req.locale || getLogLocale(), translations)
+  ),
   validateRequest,
 ];
 
+/* Public query */
+export const validatePublicQuery = [
+  query("category").optional().isMongoId().withMessage((_, { req }) =>
+    translate("validation.invalidCategory", req.locale || getLogLocale(), translations)
+  ),
+  query("onlyLocalized").optional().isIn(["true", "false"]).withMessage((_, { req }) =>
+    translate("validation.booleanField", req.locale || getLogLocale(), translations)
+  ),
+  validateRequest,
+];
+
+/* (İsterseniz) Eski isimlerle alias export — router değişmeden çalışsın */
+export const validateUploadGallery = validateCreateGallery;
+export const validateGalleryIdParam = (reqField = "id") => validateObjectId(reqField);

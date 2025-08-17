@@ -1,7 +1,7 @@
+import type { Document } from "mongoose";
 import type { SupportedLocale } from "@/types/common";
-import type { Types, Document } from "mongoose";
 
-export type TranslatedLabel = { [key in SupportedLocale]: string };
+export type TranslatedLabel = { [key in SupportedLocale]?: string };
 
 export interface ICouponImage {
   url: string;
@@ -10,19 +10,17 @@ export interface ICouponImage {
   publicId?: string;
 }
 
-
-// ✅ Coupon Interface
 export interface ICoupon extends Document {
   code: string;
-  tenant: string; // Çok kiracılı sistem için
+  tenant: string;
   title: TranslatedLabel;
   description: TranslatedLabel;
   images?: ICouponImage[];
-  discount: number;
+  discount: number;           // 1–100
   expiresAt: Date;
-   isPublished: boolean;
+  isPublished: boolean;
   publishedAt?: Date;
-  createdAt?: Date;
   isActive: boolean;
+  createdAt?: Date;
   updatedAt?: Date;
 }

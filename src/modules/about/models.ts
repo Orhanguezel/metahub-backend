@@ -1,36 +1,7 @@
 import { Schema, Model, models, model, Types } from "mongoose";
 import type { SupportedLocale } from "@/types/common";
 import { SUPPORTED_LOCALES } from "@/types/common";
-
-/* ---- Types ---- */
-export type TranslatedLabel = { [key in SupportedLocale]?: string };
-
-export interface IAboutImage {
-  _id?: Types.ObjectId;         // V2: alt dokümanda id açık
-  url: string;
-  thumbnail: string;
-  webp?: string;
-  publicId?: string;
-}
-
-export interface IAbout {
-  title: TranslatedLabel;
-  tenant: string;
-  slug: string;
-  summary: TranslatedLabel;
-  content: TranslatedLabel;
-  images: IAboutImage[];
-  tags: string[];
-  author?: string;
-  category: Types.ObjectId;
-  isPublished: boolean;
-  publishedAt?: Date;
-  comments: Types.ObjectId[];
-  isActive: boolean;
-  order: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import type { IAbout, IAboutImage } from "./types";
 
 /* ---- Helpers ---- */
 const localizedStringField = () => {

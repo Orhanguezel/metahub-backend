@@ -3,91 +3,63 @@ import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import { upload } from "@/core/middleware/file/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/file/uploadTypeWrapper";
 import { checkFileSizeMiddleware } from "@/core/middleware/file/checkFileSizeMiddleware";
-import {
-  validateUploadGallery,
-  validateGalleryIdParam,
-} from "./gallery.validation";
 
 import * as publicController from "./gallery.public.controller";
 import * as adminController from "./gallery.admin.controller";
 
+import {
+  validateCreateGallery,
+  validateUpdateGallery,
+  validateObjectId,
+  validateAdminQuery,
+  validatePublicQuery,
+} from "./gallery.validation";
+import { transformNestedFields } from "@/core/middleware/transformNestedFields";
+
 const router = express.Router();
 
-// 🔓 Public routes
-// Get all published gallery items with pagination and filters
-router.get("/published", publicController.getPublishedGalleryItems);
-
-// Search gallery items with filters
+/* 🔓 Public */
+router.get("/published", validatePublicQuery, publicController.getPublishedGalleryItems);
 router.get("/search", publicController.searchGalleryItems);
-
-// Get stats related to gallery items
 router.get("/stats", publicController.getGalleryStats);
-
-// Get all categories with published gallery items
-router.get("/categories", publicController.getPublishedGalleryItemsByCategory);
-
-// 🛡️ Important: place this at the END to avoid route collisions
-// Get a single gallery item by ID
+router.get("/categories", publicController.getGalleryCategories);
+router.get("/category/:category", publicController.getPublishedGalleryItemsByCategory);
+// tekil
 router.get("/:id", publicController.getGalleryItemById);
 
-// 🔐 Admin routes
+/* 🔐 Admin */
 router.use(authenticate, authorizeRoles("admin"));
 
-// Admin: Get all gallery items with pagination
-router.get("/", adminController.getAllGalleryItems);
+router.get("/", validateAdminQuery, adminController.getAllGalleryItems);
 
-// Admin: Upload new gallery items (image/video)
 router.post(
   "/upload",
   uploadTypeWrapper("gallery"),
   upload("gallery").array("images", 30),
   checkFileSizeMiddleware,
-  validateUploadGallery,
+  transformNestedFields(["title", "summary", "content", "tags"]),
+  validateCreateGallery,
   adminController.createGalleryItem
 );
 
-// Admin: Update an existing gallery item by ID
 router.put(
   "/:id",
   uploadTypeWrapper("gallery"),
   upload("gallery").array("images", 30),
   checkFileSizeMiddleware,
-  validateGalleryIdParam,
+  transformNestedFields(["title", "summary", "content", "tags"]),
+  validateObjectId("id"),
+  validateUpdateGallery,
   adminController.updateGalleryItem
 );
 
-// Admin: Toggle publish status for a gallery item
-router.patch(
-  "/:id/toggle",
-  validateGalleryIdParam,
-  adminController.togglePublishGalleryItem
-);
+router.patch("/:id/toggle", validateObjectId("id"), adminController.togglePublishGalleryItem);
+router.patch("/:id/archive", validateObjectId("id"), adminController.softDeleteGalleryItem);
+router.patch("/:id/restore", validateObjectId("id"), adminController.restoreGalleryItem);
 
-// Admin: Archive (soft delete) a gallery item
-router.patch(
-  "/:id/archive",
-  validateGalleryIdParam,
-  adminController.softDeleteGalleryItem
-);
+router.delete("/:id", validateObjectId("id"), adminController.deleteGalleryItem);
 
-// Admin: Delete a gallery item permanently
-router.delete(
-  "/:id",
-  validateGalleryIdParam,
-  adminController.deleteGalleryItem
-);
-
-// Admin: Restore a soft-deleted gallery item
-router.patch(
-  "/:id/restore",
-  validateGalleryIdParam,
-  adminController.updateGalleryItem
-);
-
-// Admin: Batch publish/unpublish gallery items
 router.patch("/batch/publish", adminController.batchPublishGalleryItems);
-
-// Admin: Batch delete gallery items permanently
 router.delete("/batch", adminController.batchDeleteGalleryItems);
 
 export default router;
