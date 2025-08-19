@@ -1,32 +1,29 @@
 {
-  "delete": {
-    "success": "Mesaj silindi.",
-    "notFound": "Mesaj bulunamadı.",
-    "invalidIds": "Geçersiz mesaj ID'leri."
-  },
-  "sendMessage": {
-    "success": "Mesaj gönderildi.",
-    "missingParams": "Eksik parametre(ler)."
-  },
-  "markAsRead": {
-    "success": "Mesajlar okundu olarak işaretlendi."
-  },
-  "manualMessage": {
-    "roomIdRequired": "Oda ID'si zorunludur.",
-    "roomIdString": "Oda ID'si bir string olmalı.",
-    "messageRequired": "Mesaj zorunludur.",
-    "messageString": "Mesaj bir string olmalı.",
-    "closeBoolean": "Kapat parametresi boolean olmalı."
-  },
-  "bulkDelete": {
-    "idsArray": "ID'ler en az bir eleman içeren bir dizi olmalı.",
-    "idMongo": "Her ID geçerli bir MongoDB ObjectId olmalı."
-  },
-  "singleId": {
-    "invalid": "Geçersiz mesaj ID'si."
-  },
-  "roomIdParam": {
-    "required": "Oda ID'si zorunludur.",
-    "string": "Oda ID'si bir string olmalı."
-  }
+  "delete.notFound": "Mesaj bulunamadı.",
+  "delete.success": "Mesaj silindi.",
+  "delete.invalidIds": "Geçersiz mesaj ID listesi.",
+
+  "manualMessage.roomIdRequired": "roomId zorunludur.",
+  "manualMessage.roomIdString": "roomId bir string olmalıdır.",
+  "manualMessage.messageRequired": "Mesaj metni zorunludur.",
+  "manualMessage.messageString": "Mesaj metni string olmalıdır.",
+  "manualMessage.closeBoolean": "close alanı boolean olmalıdır.",
+
+  "bulkDelete.idsArray": "ids alanı en az bir öğe içeren bir dizi olmalıdır.",
+  "bulkDelete.idMongo": "Her id geçerli bir MongoId olmalıdır.",
+
+  "singleId.invalid": "Geçersiz ID parametresi.",
+
+  "roomIdParam.required": "roomId parametresi zorunludur.",
+  "roomIdParam.string": "roomId parametresi string olmalıdır.",
+
+  "markAsRead.success": "Mesajlar okundu olarak işaretlendi.",
+
+  "chat.errors.missingParams": "Eksik parametreler.",
+  "chat.errors.tenantRequired": "Tenant bilgisi gerekli.",
+  "chat.errors.roomIdRequired": "roomId gerekli.",
+
+  "sendMessage.missingParams": "roomId, message ve kullanıcı bilgisi zorunludur.",
+  "sendMessage.success": "Mesaj gönderildi.",
+  "chat.send.success": "Mesaj gönderildi."
 }

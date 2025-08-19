@@ -1,32 +1,29 @@
 {
-  "delete": {
-    "success": "Mensaje eliminado.",
-    "notFound": "Mensaje no encontrado.",
-    "invalidIds": "IDs de mensajes no válidos."
-  },
-  "sendMessage": {
-    "success": "Mensaje enviado.",
-    "missingParams": "Faltan parámetros."
-  },
-  "markAsRead": {
-    "success": "Mensajes marcados como leídos."
-  },
-  "manualMessage": {
-    "roomIdRequired": "El ID de la sala es obligatorio.",
-    "roomIdString": "El ID de la sala debe ser una cadena.",
-    "messageRequired": "El mensaje es obligatorio.",
-    "messageString": "El mensaje debe ser una cadena.",
-    "closeBoolean": "Cerrar debe ser un booleano."
-  },
-  "bulkDelete": {
-    "idsArray": "Los IDs deben ser una matriz con al menos un elemento.",
-    "idMongo": "Cada ID debe ser un MongoDB ObjectId válido."
-  },
-  "singleId": {
-    "invalid": "ID de mensaje no válido."
-  },
-  "roomIdParam": {
-    "required": "El ID de la sala es obligatorio.",
-    "string": "El ID de la sala debe ser una cadena."
-  }
+  "delete.notFound": "Mensaje no encontrado.",
+  "delete.success": "Mensaje eliminado.",
+  "delete.invalidIds": "Lista de IDs de mensajes no válida.",
+
+  "manualMessage.roomIdRequired": "roomId es obligatorio.",
+  "manualMessage.roomIdString": "roomId debe ser una cadena.",
+  "manualMessage.messageRequired": "El texto del mensaje es obligatorio.",
+  "manualMessage.messageString": "El mensaje debe ser una cadena.",
+  "manualMessage.closeBoolean": "close debe ser booleano.",
+
+  "bulkDelete.idsArray": "ids debe ser un arreglo con al menos un elemento.",
+  "bulkDelete.idMongo": "Cada id debe ser un MongoId válido.",
+
+  "singleId.invalid": "Parámetro de ID no válido.",
+
+  "roomIdParam.required": "El parámetro roomId es obligatorio.",
+  "roomIdParam.string": "El parámetro roomId debe ser una cadena.",
+
+  "markAsRead.success": "Mensajes marcados como leídos.",
+
+  "chat.errors.missingParams": "Faltan parámetros.",
+  "chat.errors.tenantRequired": "Se requiere tenant.",
+  "chat.errors.roomIdRequired": "Se requiere roomId.",
+
+  "sendMessage.missingParams": "Se requieren roomId, message y usuario.",
+  "sendMessage.success": "Mensaje enviado.",
+  "chat.send.success": "Mensaje enviado."
 }

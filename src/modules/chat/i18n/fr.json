@@ -1,32 +1,29 @@
 {
-  "delete": {
-    "success": "Message supprimé.",
-    "notFound": "Message non trouvé.",
-    "invalidIds": "Identifiants de message non valides."
-  },
-  "sendMessage": {
-    "success": "Message envoyé.",
-    "missingParams": "Paramètres manquants."
-  },
-  "markAsRead": {
-    "success": "Messages marqués comme lus."
-  },
-  "manualMessage": {
-    "roomIdRequired": "L'identifiant de la salle est requis.",
-    "roomIdString": "L'identifiant de la salle doit être une chaîne.",
-    "messageRequired": "Le message est requis.",
-    "messageString": "Le message doit être une chaîne.",
-    "closeBoolean": "La fermeture doit être un booléen."
-  },
-  "bulkDelete": {
-    "idsArray": "Les identifiants doivent être un tableau avec au moins un élément.",
-    "idMongo": "Chaque identifiant doit être un identifiant MongoDB valide."
-  },
-  "singleId": {
-    "invalid": "Identifiant de message non valide."
-  },
-  "roomIdParam": {
-    "required": "L'identifiant de la salle est requis.",
-    "string": "L'identifiant de la salle doit être une chaîne."
-  }
+  "delete.notFound": "Message introuvable.",
+  "delete.success": "Message supprimé.",
+  "delete.invalidIds": "Liste d'identifiants de message invalide.",
+
+  "manualMessage.roomIdRequired": "roomId est requis.",
+  "manualMessage.roomIdString": "roomId doit être une chaîne.",
+  "manualMessage.messageRequired": "Le texte du message est requis.",
+  "manualMessage.messageString": "Le message doit être une chaîne.",
+  "manualMessage.closeBoolean": "close doit être un booléen.",
+
+  "bulkDelete.idsArray": "ids doit être un tableau contenant au moins un élément.",
+  "bulkDelete.idMongo": "Chaque id doit être un MongoId valide.",
+
+  "singleId.invalid": "Paramètre d'ID invalide.",
+
+  "roomIdParam.required": "Le paramètre roomId est requis.",
+  "roomIdParam.string": "Le paramètre roomId doit être une chaîne.",
+
+  "markAsRead.success": "Messages marqués comme lus.",
+
+  "chat.errors.missingParams": "Paramètres manquants.",
+  "chat.errors.tenantRequired": "Le tenant est requis.",
+  "chat.errors.roomIdRequired": "roomId est requis.",
+
+  "sendMessage.missingParams": "roomId, message et utilisateur sont requis.",
+  "sendMessage.success": "Message envoyé.",
+  "chat.send.success": "Message envoyé."
 }

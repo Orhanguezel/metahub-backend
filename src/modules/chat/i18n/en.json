@@ -1,32 +1,29 @@
 {
-  "delete": {
-    "success": "Message deleted.",
-    "notFound": "Message not found.",
-    "invalidIds": "Invalid message IDs."
-  },
-  "sendMessage": {
-    "success": "Message sent.",
-    "missingParams": "Missing parameters."
-  },
-  "markAsRead": {
-    "success": "Messages marked as read."
-  },
-  "manualMessage": {
-    "roomIdRequired": "Room ID is required.",
-    "roomIdString": "Room ID must be a string.",
-    "messageRequired": "Message is required.",
-    "messageString": "Message must be a string.",
-    "closeBoolean": "Close must be a boolean."
-  },
-  "bulkDelete": {
-    "idsArray": "IDs must be an array with at least one ID.",
-    "idMongo": "Each ID must be a valid MongoDB ObjectId."
-  },
-  "singleId": {
-    "invalid": "Invalid message ID."
-  },
-  "roomIdParam": {
-    "required": "Room ID is required.",
-    "string": "Room ID must be a string."
-  }
+  "delete.notFound": "Message not found.",
+  "delete.success": "Message deleted.",
+  "delete.invalidIds": "Invalid message ID list.",
+
+  "manualMessage.roomIdRequired": "roomId is required.",
+  "manualMessage.roomIdString": "roomId must be a string.",
+  "manualMessage.messageRequired": "Message text is required.",
+  "manualMessage.messageString": "Message must be a string.",
+  "manualMessage.closeBoolean": "close must be a boolean.",
+
+  "bulkDelete.idsArray": "ids must be an array with at least one item.",
+  "bulkDelete.idMongo": "Each id must be a valid MongoId.",
+
+  "singleId.invalid": "Invalid ID parameter.",
+
+  "roomIdParam.required": "roomId parameter is required.",
+  "roomIdParam.string": "roomId parameter must be a string.",
+
+  "markAsRead.success": "Messages marked as read.",
+
+  "chat.errors.missingParams": "Missing parameters.",
+  "chat.errors.tenantRequired": "Tenant is required.",
+  "chat.errors.roomIdRequired": "roomId is required.",
+
+  "sendMessage.missingParams": "roomId, message and user are required.",
+  "sendMessage.success": "Message sent.",
+  "chat.send.success": "Message sent."
 }
