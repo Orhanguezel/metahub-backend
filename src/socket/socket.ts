@@ -14,7 +14,7 @@ import { getTenantModelsFromConnection } from "@/core/middleware/tenant/getTenan
 
 interface ChatMessagePayload {
   room?: string;
-  roomId?: string; // Hem "room" hem "roomId" desteklenir
+  roomId?: string; // her ikisi de desteklenir
   message: string;
   language?: TranslatedLabel | string;
 }
@@ -25,7 +25,18 @@ interface IUserToken {
   name: string;
   tenant: string;
   lang?: SupportedLocale;
+  role?: string; // admin-message için basit rol kontrolü
 }
+
+type TenantKey = string; // "gzl"
+type UserKey = string;   // tenant:userId
+
+// Tenant modellerinin tipi (getTenantModelsFromConnection’un dönüş tipinden türet)
+type TenantModels = ReturnType<typeof getTenantModelsFromConnection>;
+
+// Basit rate limit (mesaj spam'ine karşı)
+const RL_MAX = 10;            // 10 mesaj
+const RL_WINDOW_MS = 5_000;   // 5 saniye
 
 export const initializeSocket = (server: HttpServer): SocketIOServer => {
   const lang = getLogLocale();
@@ -38,13 +49,10 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
   }
 
   const io = new SocketIOServer(server, {
-    cors: {
-      origin: corsOrigins,
-      credentials: true,
-    },
+    cors: { origin: corsOrigins, credentials: true },
   });
 
-  // 1️⃣ Oturum kimliği, tenant slug vs parse edilir
+  // 1) Auth & Context (cookie → JWT → socket.data)
   io.use((socket, next) => {
     try {
       const cookieHeader = socket.handshake.headers.cookie;
@@ -55,27 +63,24 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
         socket.data.user = decoded;
         socket.data.tenant = decoded.tenant || "";
         socket.data.lang = decoded.lang || "tr";
+        socket.data.role = decoded.role || "user";
       }
       next();
     } catch (err) {
-      logger.warn(
-        t("socket.auth.tokenParseError", lang, translations) + ` ${err}`
-      );
+      logger.warn(t("socket.auth.tokenParseError", lang, translations) + ` ${err}`);
       next();
     }
   });
 
-  const onlineUsers = new Map<string, string>();
+  // online kullanıcı haritası: tenant:userId → roomId
+  const onlineUsers = new Map<UserKey, string>();
 
   io.on("connection", async (socket: Socket) => {
-    // 1️⃣ Tenant Algılama
-    let tenant: string =
+    // 2) Tenant çöz (JWT → header → query)
+    const tenant: TenantKey =
       socket.data.tenant ||
-      (typeof socket.handshake.headers["x-tenant"] === "string"
-        ? socket.handshake.headers["x-tenant"]
-        : "") ||
-      // Yeni ekle:
-      (socket.handshake.query?.tenant as string) || // <-- Query’den oku!
+      (typeof socket.handshake.headers["x-tenant"] === "string" ? socket.handshake.headers["x-tenant"] : "") ||
+      (socket.handshake.query?.tenant as string) ||
       "";
 
     if (!tenant) {
@@ -83,84 +88,117 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
       return socket.disconnect(true);
     }
 
-    // 3️⃣ DB bağlantısı ve model cache’i tenant’a göre alınır
-    let conn;
-    let models: any;
+    // 3) Tenant DB/Modeller — tipli ve 'conn' için any yok
+    let models!: TenantModels; // definite assignment
     try {
-      conn = await getTenantDbConnection(tenant);
-      models = getTenantModelsFromConnection(conn);
+      const conn = await getTenantDbConnection(tenant);     // mongoose.Connection
+      models = getTenantModelsFromConnection(conn);         // TenantModels
     } catch (err) {
       logger.error(`[Socket] Tenant bağlantısı kurulamadı: ${tenant} / ${err}`);
       return socket.disconnect(true);
     }
 
-    // 4️⃣ Kullanıcı (JWT varsa) ve roomId
-    const user = socket.data.user;
+    // 4) Kullanıcı ve default oda
+    const user = socket.data.user as IUserToken | undefined;
     const userId = user?.id;
-    const userLang = socket.data.lang || "tr";
-    const roomId = userId || uuidv4();
+    const defaultRoomId = userId || uuidv4();
 
-    socket.data.roomId = roomId;
+    socket.data.roomId = defaultRoomId;
     socket.data.tenant = tenant;
-    socket.join(roomId);
-    socket.emit("room-assigned", roomId);
 
-    // 5️⃣ ChatSession kaydı
+    // Kişisel odaya join (DM bildirimleri vs. için faydalı)
+    socket.join(defaultRoomId);
+    socket.emit("room-assigned", defaultRoomId);
+
+    // 5) ChatSession upsert (tenant filtreli!)
     try {
-      await models.chatsession.findOneAndUpdate(
-        { roomId },
-        {
-          roomId,
-          tenant,
-          user: userId || undefined,
-          createdAt: new Date(),
-        },
+      await models.ChatSession.findOneAndUpdate(
+        { tenant, roomId: defaultRoomId },
+        { $setOnInsert: { roomId: defaultRoomId, tenant, user: userId || undefined, createdAt: new Date() } },
         { upsert: true, new: true }
       );
     } catch (err) {
-      logger.error(
-        t("socket.session.saveError", lang, translations) + ` ${err}`
-      );
+      logger.error(t("socket.session.saveError", lang, translations) + ` ${err}`);
     }
 
     if (userId) {
-      onlineUsers.set(userId, roomId);
+      const key: UserKey = `${tenant}:${userId}`;
+      onlineUsers.set(key, defaultRoomId);
       io.emit("online-users", Array.from(onlineUsers.entries()));
     }
 
     logger.info(
       t("socket.connection", lang, translations, {
         user: userId ?? "Guest",
-        room: roomId,
+        room: defaultRoomId,
         tenant,
       })
     );
 
-    // 6️⃣ Kullanıcı mesajı (chat-message)
-    socket.on("chat-message", async (payload: ChatMessagePayload) => {
-      const room = payload.room || payload.roomId;
-      const message = payload.message;
-      const language = payload.language;
-      if (!message?.trim() || !room) return;
+    // === ODA YÖNETİMİ (forum/channel/chat için gerekli) ===
 
+    // Odaya katıl
+    socket.on("join-room", async (payload: { roomId: string }) => {
+      const room = String(payload?.roomId || "").trim();
+      if (!room || room.length > 128) return;
+
+      // Oda/session yoksa oluştur (tenant izolasyonuyla)
       try {
-        const preferredLang =
-          (user?.lang as SupportedLocale) ||
-          (typeof language === "string" ? undefined : undefined) ||
-          "tr";
+        await models.ChatSession.updateOne(
+          { tenant, roomId: room },
+          { $setOnInsert: { tenant, roomId: room, user: userId || undefined, createdAt: new Date() } },
+          { upsert: true }
+        );
+      } catch (e) {
+        logger.warn(`[Socket] join-room upsert uyarısı: ${e}`);
+      }
+
+      socket.join(room);
+      socket.emit("joined-room", { roomId: room });
+    });
+
+    // Odadan ayrıl
+    socket.on("leave-room", async (payload: { roomId: string }) => {
+      const room = String(payload?.roomId || "").trim();
+      if (!room) return;
+      socket.leave(room);
+      socket.emit("left-room", { roomId: room });
+    });
+
+    // === RATE LIMIT STATE ===
+    let msgCount = 0;
+    let windowStart = Date.now();
+    const allowMessage = () => {
+      const now = Date.now();
+      if (now - windowStart > RL_WINDOW_MS) {
+        windowStart = now; msgCount = 0;
+      }
+      msgCount += 1;
+      return msgCount <= RL_MAX;
+    };
+
+    // === KULLANICI MESAJI ===
+    socket.on("chat-message", async (payload: ChatMessagePayload) => {
+      try {
+        const room = String(payload.room || payload.roomId || "").trim();
+        const message = String(payload.message || "");
+        const language = payload.language;
+
+        if (!room || !message.trim()) return;
+        if (message.length > 5000) return;        // şema ile uyumlu limit
+        if (!allowMessage()) return;              // basit rate limit
+
+        const preferredLang = (user?.lang as SupportedLocale) || "tr";
         let languageObj: TranslatedLabel;
         if (language && typeof language === "object") {
-          languageObj = {
-            ...fillAllLocales(message, preferredLang),
-            ...language,
-          };
+          languageObj = { ...fillAllLocales(message, preferredLang), ...language };
         } else if (typeof language === "string") {
           languageObj = fillAllLocales(language, preferredLang);
         } else {
           languageObj = fillAllLocales(message, preferredLang);
         }
 
-        const newMsg = await models.chatmessage.create({
+        const newMsg = await models.ChatMessage.create({
           sender: userId ? userId : null,
           tenant,
           roomId: room,
@@ -174,16 +212,10 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
         const populated = await newMsg.populate("sender", "name email");
         const sender = populated.sender as any;
 
-        io.to(room).emit("chat-message", {
+        const payloadOut = {
           _id: populated.id.toString(),
           message: populated.get("message"),
-          sender: sender
-            ? {
-                _id: sender._id,
-                name: sender.name,
-                email: sender.email,
-              }
-            : null,
+          sender: sender ? { _id: sender._id, name: sender.name, email: sender.email } : null,
           roomId: room,
           tenant,
           createdAt: populated.get("createdAt"),
@@ -191,90 +223,85 @@ export const initializeSocket = (server: HttpServer): SocketIOServer => {
           isFromBot: false,
           isRead: false,
           language: populated.get("language"),
-        });
+        };
+
+        // Socket.IO publish
+        io.to(room).emit("chat-message", payloadOut);
       } catch (err) {
         logger.error(`[Socket] chat-message kaydetme hatası: ${err}`);
       }
     });
 
-    // 7️⃣ Admin mesajı (admin-message)
-    socket.on(
-      "admin-message",
-      async ({ room, message, language }: ChatMessagePayload) => {
-        if (!message?.trim() || !room) return;
-        try {
-          const preferredLang =
-            (user?.lang as SupportedLocale) ||
-            (typeof language === "string" ? undefined : undefined) ||
-            "tr";
-          let languageObj: TranslatedLabel;
-          if (language && typeof language === "object") {
-            languageObj = {
-              ...fillAllLocales(message, preferredLang),
-              ...language,
-            };
-          } else if (typeof language === "string") {
-            languageObj = fillAllLocales(message, preferredLang);
-          } else {
-            languageObj = fillAllLocales(message, preferredLang);
-          }
+    // === ADMIN MESAJI ===
+    socket.on("admin-message", async ({ room, roomId, message, language }: ChatMessagePayload) => {
+      try {
+        const target = String(room || roomId || "").trim();
+        const msg = String(message || "");
+        if (!target || !msg.trim()) return;
 
-          const adminChat = await models.chatmessage.create({
-            sender: userId ? userId : null,
-            tenant,
-            roomId: room,
-            message,
-            isFromAdmin: true,
-            isRead: true,
-            language: languageObj,
-          });
-
-          const populated = await adminChat.populate("sender", "name email");
-          const sender = populated.sender as any;
-
-          io.to(room).emit("chat-message", {
-            _id: populated.id.toString(),
-            message: populated.get("message"),
-            sender: sender
-              ? {
-                  _id: sender._id,
-                  name: sender.name,
-                  email: sender.email,
-                }
-              : null,
-            roomId: room,
-            tenant,
-            createdAt: populated.get("createdAt"),
-            isFromAdmin: true,
-            isFromBot: false,
-            isRead: true,
-            language: populated.get("language"),
-          });
-
-          logger.info(
-            t("socket.adminMessage.success", lang, translations, {
-              email: sender?.email,
-              room,
-              tenant,
-            })
-          );
-        } catch (err) {
-          logger.error(
-            t("socket.adminMessage.error", lang, translations) + ` ${err}`
-          );
+        // Basit rol kontrolü
+        const role = socket.data.role as string | undefined;
+        const isAdmin = role === "admin" || role === "superadmin";
+        if (!isAdmin) {
+          logger.warn(`[Socket] admin-message yetkisiz istek. user=${userId}`);
+          return;
         }
-      }
-    );
 
-    // 8️⃣ Disconnect eventi
+        const preferredLang = (user?.lang as SupportedLocale) || "tr";
+        let languageObj: TranslatedLabel;
+        if (language && typeof language === "object") {
+          languageObj = { ...fillAllLocales(msg, preferredLang), ...language };
+        } else if (typeof language === "string") {
+          languageObj = fillAllLocales(language, preferredLang);
+        } else {
+          languageObj = fillAllLocales(msg, preferredLang);
+        }
+
+        const adminChat = await models.ChatMessage.create({
+          sender: userId ? userId : null,
+          tenant,
+          roomId: target,
+          message: msg,
+          isFromAdmin: true,
+          isRead: true,
+          language: languageObj,
+        });
+
+        const populated = await adminChat.populate("sender", "name email");
+        const sender = populated.sender as any;
+
+        const payloadOut = {
+          _id: populated.id.toString(),
+          message: populated.get("message"),
+          sender: sender ? { _id: sender._id, name: sender.name, email: sender.email } : null,
+          roomId: target,
+          tenant,
+          createdAt: populated.get("createdAt"),
+          isFromAdmin: true,
+          isFromBot: false,
+          isRead: true,
+          language: populated.get("language"),
+        };
+
+        io.to(target).emit("chat-message", payloadOut);
+
+        logger.info(t("socket.adminMessage.success", lang, translations, {
+          email: sender?.email, room: target, tenant,
+        }));
+      } catch (err) {
+        logger.error(t("socket.adminMessage.error", lang, translations) + ` ${err}`);
+      }
+    });
+
+    // === Disconnect ===
     socket.on("disconnect", () => {
-      if (userId) {
-        onlineUsers.delete(userId);
+      const uId = userId; // closure safety
+      if (uId) {
+        const key: UserKey = `${tenant}:${uId}`;
+        onlineUsers.delete(key);
         io.emit("online-users", Array.from(onlineUsers.entries()));
       }
-      logger.info(
-        t("socket.disconnect", lang, translations, { user: userId ?? "Guest" })
-      );
+      logger.info(t("socket.disconnect", lang, translations, { user: userId ?? "Guest" }));
     });
   });
 
