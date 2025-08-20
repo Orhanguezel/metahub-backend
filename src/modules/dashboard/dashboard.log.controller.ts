@@ -1,3 +1,4 @@
+// src/modules/dashboard/admin/dashboard.log.controller.ts
 import { Request, Response } from "express";
 import logger from "@/core/middleware/logger/logger";
 import { ensureTenant, validatePagination } from "./dashboard.validation";
@@ -13,15 +14,15 @@ import type { Model, FilterQuery } from "mongoose";
 type LeanDoc = Record<string, any>;
 
 type EventItem = {
-  /** BACKWARD COMPAT */
+  // BACKWARD COMPAT
   ts: Date | string | number | null;
   type: string;
 
-  /** NEW - analytics friendly */
-  timestamp?: string; // ISO
-  eventType?: string; // status/type vs.
-  module?: string;    // module 'name' (e.g. "blog", "pricing")
-  modelKey?: string;  // e.g. "Invoice" (opsiyonel, debug için)
+  // NEW - analytics friendly
+  timestamp?: string;        // ISO
+  eventType?: string;        // status/type vs.
+  module?: string;           // module adı (“blog”, “pricing”)
+  modelKey?: string;         // “Invoice” gibi (opsiyonel)
 
   title?: string;
   status?: string;
@@ -30,7 +31,7 @@ type EventItem = {
   method?: string;
   refId: string;
 
-  /** geo & meta */
+  // geo & meta
   location?: { type: "Point"; coordinates: [number, number] };
   city?: string;
   country?: string;
@@ -49,9 +50,8 @@ function parseDate(v: any): Date | null {
   return isNaN(d.getTime()) ? null : d;
 }
 function get<T = any>(obj: any, path: string, d?: T): T | undefined {
-  try {
-    return path.split(".").reduce((acc, k) => (acc == null ? acc : acc[k]), obj) ?? d;
-  } catch { return d; }
+  try { return path.split(".").reduce((acc, k) => (acc == null ? acc : acc[k]), obj) ?? d; }
+  catch { return d; }
 }
 function pickTs(doc: LeanDoc, fields: string[]): Date | null {
   for (const f of fields) {
@@ -77,7 +77,6 @@ function pickTitle(doc: any, locale: string): string | undefined {
     get<string>(doc, "label." + locale),
     doc.title, doc.name, doc.subject, doc.code, doc.filename, doc.fullName,
   ].filter(Boolean);
-
   const first = candidates.find((x) => typeof x === "string" && x.trim() !== "");
   if (first) return String(first);
 
@@ -143,7 +142,7 @@ function defaultSelectForLogs(extra: string[] = []) {
     "_id", "updatedAt", "createdAt", "status", "title", "name", "subject",
     "date", "amount", "total", "totals", "currency", "code", "filename",
     "minutes", "rating", "type", "method",
-    // NEW
+    // NEW (geo + client)
     "location", "geo", "ip", "userAgent", "city", "country", "userId", "createdBy",
   ];
   return [...new Set([...base, ...extra])].join(" ");
@@ -163,16 +162,23 @@ export async function getDashboardLogs(req: Request, res: Response) {
       event: "tenant.missing",
     });
     res.status(404).json({ success: false, message: "tenant.resolve.fail" });
-  return;
+    return;
   }
 
   const { limit, offset } = validatePagination(req.query.limit as any, req.query.offset as any);
+
+  // 🔹 alias desteği: dateFrom/dateTo || from/to || startDate/endDate
+  const dateFrom = parseDate(
+    (req.query.dateFrom as any) || req.query.from || req.query.startDate
+  );
+  const dateTo = parseDate(
+    (req.query.dateTo as any) || req.query.to || req.query.endDate
+  );
+
   const include = String(req.query.include || req.query.types || "")
     .split(",").map((s) => s.trim()).filter(Boolean);
   const exclude = String(req.query.exclude || "")
     .split(",").map((s) => s.trim()).filter(Boolean);
-  const dateFrom = parseDate(req.query.dateFrom);
-  const dateTo = parseDate(req.query.dateTo);
 
   const reqCtx = getRequestContext(req);
 
@@ -180,6 +186,7 @@ export async function getDashboardLogs(req: Request, res: Response) {
     const models = await getTenantModels(req);
     const { ModuleSetting, ModuleMeta } = models;
 
+    // 1) dashboard’ta gösterilecek modüller
     const settingQuery: any = { tenant, showInDashboard: true, enabled: { $ne: false } };
     let settings = await ModuleSetting.find(settingQuery)
       .select("module tenant enabled showInDashboard")
@@ -211,6 +218,7 @@ export async function getDashboardLogs(req: Request, res: Response) {
       return;
     }
 
+    // 2) meta
     const metas = await ModuleMeta.find({ tenant, name: { $in: moduleNames } })
       .select("name label statsKey")
       .lean();
@@ -243,8 +251,13 @@ export async function getDashboardLogs(req: Request, res: Response) {
         const select = defaultSelectForLogs([dateField]);
         const sortKey = dateField || "updatedAt";
 
-        // NOT: tarih aralığını DB tarafında uygulatmak istiyorsan burada q'ya ekleyebilirsin.
+        // 🔹 tarih aralığını mümkünse DB tarafında uygula
         const q: FilterQuery<any> = { tenant };
+        if (dateFrom || dateTo) {
+          const $gte = dateFrom ? dateFrom : undefined;
+          const $lte = dateTo ? dateTo : undefined;
+          (q as any)[dateField] = { ...( $gte && { $gte } ), ...( $lte && { $lte } ) };
+        }
 
         const docs = (await m
           .find(q)
@@ -259,7 +272,7 @@ export async function getDashboardLogs(req: Request, res: Response) {
         const mapped: EventItem[] = docs.map((d) => {
           const ts = pickTs(d, tsFields);
 
-          // koordinatları bul (location.coordinates veya geo.lon/lat)
+          // koordinatlar: location.coordinates ([lon,lat]) || geo.lon/lat
           const coordsFromLoc = get<any>(d, "location.coordinates");
           const lon = Number(get<any>(d, "geo.lon"));
           const lat = Number(get<any>(d, "geo.lat"));
@@ -275,11 +288,11 @@ export async function getDashboardLogs(req: Request, res: Response) {
             ts,
             type: modName,
 
-            // new fields
+            // new normalized fields
             timestamp: ts ? new Date(ts).toISOString() : undefined,
             eventType: String(d.type || d.status || modName),
-            module: modName,          // grafikte görmek istediğimiz isim
-            modelKey: modelKeyStr,    // opsiyonel (debug)
+            module: modName,          // FE’nin “module” filtresi bunu kullanıyor
+            modelKey: modelKeyStr,
 
             refId: String(d._id),
             status: d.status || d.type,
@@ -308,7 +321,7 @@ export async function getDashboardLogs(req: Request, res: Response) {
           return item;
         });
 
-        // tarih aralığı (varsa)
+        // 🔹 emniyet için post-filter (DB-side uygulayamadıysa)
         const filtered = mapped.filter((e) => {
           const tval = e.timestamp || e.ts;
           if (!tval) return false;

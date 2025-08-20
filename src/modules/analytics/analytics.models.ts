@@ -1,48 +1,53 @@
+// src/modules/analytics/model.ts
 import mongoose, { Schema, model } from "mongoose";
 import type { IAnalyticsLog } from "./types";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
-// --- ŞEMA ---
 const analyticsSchema = new Schema<IAnalyticsLog>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "user", required: false },
+    userId: { type: Schema.Types.ObjectId, ref: "user" },
     tenant: { type: String, required: true, index: true },
-    module: { type: String, required: true },
-    eventType: { type: String, required: true },
-    path: { type: String },
-    method: { type: String },
-    ip: { type: String },
-    country: { type: String },
-    city: { type: String },
+    project: { type: String, index: true }, // NEW
+    module: { type: String, required: true, index: true },
+    eventType: { type: String, required: true, index: true },
+
+    path: String,
+    method: String,
+    ip: String,
+    country: String,
+    city: String,
+
     location: {
-      type: {
-        type: String,
-        enum: ["Point"],
-      },
-      coordinates: {
-        type: [Number],
-      },
+      type: { type: String, enum: ["Point"] },
+      coordinates: { type: [Number] }, // [lon, lat]
     },
 
-    userAgent: { type: String },
-    query: { type: Object },
-    body: { type: Object },
-    status: { type: Number },
-    message: { type: String },
-    meta: { type: Object },
+    userAgent: String,
+    query: Object,
+    body: Object,
+    status: Number,
+    message: String,
+    meta: Object,
     uploadedFiles: [{ type: String }],
+
     language: {
       type: String,
       enum: SUPPORTED_LOCALES,
       default: "en",
+      index: true,
     },
-    timestamp: { type: Date, default: Date.now },
+
+    timestamp: { type: Date, default: Date.now, index: true },
   },
   { timestamps: false }
 );
 
-// **2️⃣ Otomatik 2dsphere index**
-analyticsSchema.index({ location: "2dsphere" }); // Bunu ekle!
+// index’ler
+analyticsSchema.index({ location: "2dsphere" });
+analyticsSchema.index({ tenant: 1, timestamp: -1 });
+analyticsSchema.index({ tenant: 1, module: 1, eventType: 1, timestamp: -1 });
+analyticsSchema.index({ tenant: 1, project: 1, timestamp: -1 });
+analyticsSchema.index({ tenant: 1, country: 1, city: 1, timestamp: -1 });
 
 const Analytics =
   (mongoose.models.analytics as mongoose.Model<IAnalyticsLog>) ||
