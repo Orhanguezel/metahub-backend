@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import { Response } from "express";
 
 
+
+
 /**
  * ✅ ObjectId geçerlilik kontrolü
  */
@@ -36,7 +38,7 @@ export const getUserOrFail = async (id: string, res: Response) => {
  * ✅ Geçerli rol kontrolü
  */
 export const isValidRole = (role: string): boolean => {
-  const validRoles = ["admin", "user", "moderator", "customer", "staff"];
+  const validRoles = ["superadmin", "admin", "user", "moderator", "customer", "staff"];
   return validRoles.includes(role);
 };
 

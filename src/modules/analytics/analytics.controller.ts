@@ -1,215 +1,215 @@
+// src/modules/analytics/analytics.controller.ts
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
+import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
+import { SupportedLocale } from "@/types/common";
+import { t as translate } from "@/core/utils/i18n/translate";
+import translations from "./i18n";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
-import type { SupportedLocale } from "@/types/common";
-import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
-import translations from "../activity/i18n";
-import { t as translate } from "@/core/utils/i18n/translate";
+import { isValidObjectId, validateJsonField } from "@/core/utils/validation";
 
-// Helper: Her yerde aynı dili tespit et
-function resolveLanguage(req: Request): SupportedLocale {
-  // Öncelik: GET ise query, POST ise body, sonra locale, fallback "en"
-  return (
-    (typeof req.query.language === "string" && req.query.language) ||
-    req.body?.language ||
-    req.body?.locale ||
-    req.locale ||
-    "en"
-  ) as SupportedLocale;
+/* ----------------- Helpers ----------------- */
+const tByReq = (req: Request) => (k: string, p?: any) =>
+  translate(k, (req.locale as SupportedLocale) || getLogLocale(), translations, p);
+
+// numeric coerce
+function toNumber(v: any, d?: number) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : d;
 }
 
-// 1️⃣ Event Kaydı (POST /analytics/events)
+function isValidPoint(loc: any): loc is { type: "Point"; coordinates: [number, number] } {
+  return (
+    loc &&
+    loc.type === "Point" &&
+    Array.isArray(loc.coordinates) &&
+    loc.coordinates.length === 2 &&
+    typeof loc.coordinates[0] === "number" &&
+    typeof loc.coordinates[1] === "number"
+  );
+}
+
+// request dilini (string) çözümler — tByReq’i değiştirmiyoruz
+function resolveLanguageStr(req: Request): SupportedLocale {
+  return ((req.locale as SupportedLocale) || getLogLocale()) as SupportedLocale;
+}
+
+/* ---------------- controllers ---------------- */
+
+// POST /analytics/events
 export const createAnalyticsEvent = asyncHandler(async (req: Request, res: Response) => {
-  const language = resolveLanguage(req);
-  const t = (key: string, params?: any) =>
-    translate(key, language, translations, params);
+  const t = tByReq(req);
+  const language = resolveLanguageStr(req);
   const ctx = getRequestContext(req);
 
-  // Orijinal body clone
-  const sanitizedBody = { ...req.body };
-
-  // Eğer eski { lat, lon } formatı gelirse GeoJSON Point'e çevir
-  if (
-    sanitizedBody.location &&
-    typeof sanitizedBody.location === "object" &&
-    typeof sanitizedBody.location.lat === "number" &&
-    typeof sanitizedBody.location.lon === "number"
-  ) {
-    sanitizedBody.location = {
-      type: "Point",
-      coordinates: [sanitizedBody.location.lon, sanitizedBody.location.lat], // GeoJSON: [lon, lat]
-    };
-  }
-
-  // Body'deki hatalı location verisini sil
-  if (
-    sanitizedBody.location &&
-    (sanitizedBody.location.type !== "Point" ||
-      !Array.isArray(sanitizedBody.location.coordinates) ||
-      sanitizedBody.location.coordinates.length !== 2 ||
-      typeof sanitizedBody.location.coordinates[0] !== "number" ||
-      typeof sanitizedBody.location.coordinates[1] !== "number")
-  ) {
-    delete sanitizedBody.location;
-  }
-
-  // Analytics açık mı kontrol et
-  const moduleName = sanitizedBody.module;
-  const project = process.env.APP_ENV;
   const { Analytics, ModuleSetting } = await getTenantModels(req);
 
-  if (!moduleName || !project) {
-    res.status(400).json({
-      success: false,
-      message: "Module name or project is missing.",
-    });
+  const project = process.env.APP_ENV || (ctx as any)?.project || undefined;
+  const body = { ...(req.body || {}) };
+
+  // quick validations
+  if (!body?.module) {
+    res.status(400).json({ success: false, message: "Module is required." });
+    return;
+  }
+  if (!project) {
+    res.status(400).json({ success: false, message: "Project is missing." });
+    return;
+  }
+  if (body.userId && !isValidObjectId(body.userId)) {
+    res.status(400).json({ success: false, message: "Invalid userId." });
     return;
   }
 
-  const moduleSetting = await ModuleSetting.findOne({
-    module: moduleName,
-    tenant: req.tenant,
-    project,
-  });
+  // JSON alanları güvenli parse
+  try {
+    body.query = validateJsonField(body.query, "query");
+    body.body = validateJsonField(body.body, "body");
+    body.meta = validateJsonField(body.meta, "meta");
+  } catch (err: any) {
+    res.status(400).json({ success: false, message: err?.message || "Invalid JSON." });
+    return;
+  }
 
-  if (!moduleSetting || !moduleSetting.useAnalytics) {
+  // legacy -> GeoJSON
+  if (body.location && typeof body.location === "object" && "lat" in body.location && "lon" in body.location) {
+    const lon = toNumber(body.location.lon);
+    const lat = toNumber(body.location.lat);
+    if (Number.isFinite(lon) && Number.isFinite(lat)) {
+      body.location = { type: "Point", coordinates: [lon, lat] };
+    } else {
+      delete body.location;
+    }
+  }
+  if (body.location && !isValidPoint(body.location)) delete body.location;
+
+  // analytics açık mı?
+  const ms = await ModuleSetting.findOne({
+    tenant: (req as any).tenant,
+    module: body.module,
+    project,
+  })
+    .select("useAnalytics enabled")
+    .lean();
+
+  if (!ms || ms.enabled === false || ms.useAnalytics !== true) {
     logger.withReq.info(req, t("Analytics disabled or module not found:"), {
-      module: moduleName,
+      module: body.module,
       project,
     });
-    res.status(204).send();
-    return; // No content
+    res.status(204).send(); // No Content
+    return;
   }
 
-  // IP'den gelen location'ı kontrol et (override önceliği)
-  let geoLocation:
-    | { type: "Point"; coordinates: [number, number] }
-    | undefined = undefined;
-  if (
-    ctx.location &&
-    ctx.location.type === "Point" &&
-    Array.isArray(ctx.location.coordinates) &&
-    ctx.location.coordinates.length === 2 &&
-    typeof ctx.location.coordinates[0] === "number" &&
-    typeof ctx.location.coordinates[1] === "number"
-  ) {
-    geoLocation = ctx.location;
+  // ctx’ten geo varsa öncelik ver
+  let finalLocation = body.location;
+  if (ctx.location && isValidPoint(ctx.location)) {
+    finalLocation = ctx.location;
   }
 
-  // Final veri objesi (location sadece geçerliyse eklenecek!)
-  const eventData: Record<string, any> = {
-    ...sanitizedBody,
-    timestamp: sanitizedBody.timestamp || new Date(),
-    userId: sanitizedBody.userId || ctx.userId || undefined,
+  const doc = await Analytics.create({
+    ...body,
+    project,
+    tenant: (req as any).tenant,
+    language,
+    userId: body.userId || ctx.userId || undefined,
     ip: ctx.ip,
     country: ctx.country,
     city: ctx.city,
     userAgent: ctx.userAgent,
-    language,
-    tenant: req.tenant,
-  };
-
-  if (geoLocation) {
-    eventData.location = geoLocation;
-  }
-
-  // Mongo'ya kaydet
-  const event = await Analytics.create(eventData);
+    timestamp: body.timestamp ? new Date(body.timestamp) : new Date(),
+    ...(finalLocation ? { location: finalLocation } : {}),
+  });
 
   logger.withReq.info(req, t("analytics.event_created"), {
-    module: event.module,
-    eventType: event.eventType,
-    userId: event.userId,
-    ip: event.ip,
-    country: event.country,
-    city: event.city,
-    location: event.location,
+    module: doc.module,
+    eventType: doc.eventType,
+    tenant: (req as any).tenant,
+    project,
     language,
-    timestamp: event.timestamp,
-    tenant: req.tenant,
   });
 
-  res.status(201).json({
-    success: true,
-    message: "Event logged",
-    data: event,
-  });
+  res.status(201).json({ success: true, message: "Event logged", data: doc });
 });
 
-// 2️⃣ Event Listesi (GET /analytics/events)
+// GET /analytics/events
 export const getAnalyticsEvents = asyncHandler(async (req: Request, res: Response) => {
-  const language = resolveLanguage(req);
-  const t = (key: string, params?: any) =>
-    translate(key, language, translations, params);
+  const t = tByReq(req);
+  const language = resolveLanguageStr(req);
+  const q = req.query as any;
 
-  const {
-    limit = "100",
-    skip = "0",
-    module,
-    eventType,
-    userId,
-    path,
-    method,
-    country,
-    city,
-    status,
-    startDate,
-    endDate,
-    sort = "-timestamp",
-    nearLat,
-    nearLon,
-    nearDistance,
-  } = req.query;
+  const limit = Math.min(toNumber(q.limit, 100)!, 1000);
+  const skip = toNumber(q.skip, 0)!;
 
-  const filter: Record<string, any> = { tenant: req.tenant };
-  if (module) filter.module = module;
-  if (eventType) filter.eventType = eventType;
-  if (userId) filter.userId = userId;
-  if (path) filter.path = path;
-  if (method) filter.method = method;
-  if (country) filter.country = country;
-  if (city) filter.city = city;
-  if (status) filter.status = Number(status);
-  if (language) filter.language = language;
-
-  // Coğrafi (geoNear) sorgu desteği (sadece tam geo location olanlar)
-  let geoQuery = {};
-  if (nearLat && nearLon) {
-    geoQuery = {
-      location: {
-        $near: {
-          $geometry: {
-            type: "Point",
-            coordinates: [Number(nearLon), Number(nearLat)],
-          },
-          $maxDistance: nearDistance ? Number(nearDistance) : 50000,
-        },
-      },
-    };
+  if (q.userId && !isValidObjectId(q.userId)) {
+    res.status(400).json({ success: false, message: "Invalid userId." });
+    return;
   }
 
-  if (startDate || endDate) {
+  const filter: Record<string, any> = {
+    tenant: (req as any).tenant,
+    ...(q.project ? { project: q.project } : {}),
+    ...(q.module ? { module: q.module } : {}),
+    ...(q.eventType ? { eventType: q.eventType } : {}),
+    ...(q.userId ? { userId: q.userId } : {}),
+    ...(q.path ? { path: q.path } : {}),
+    ...(q.method ? { method: q.method } : {}),
+    ...(q.country ? { country: q.country } : {}),
+    ...(q.city ? { city: q.city } : {}),
+    ...(q.status ? { status: toNumber(q.status) } : {}),
+    // Dil filtresi sadece explicit istendiyse uygula:
+    ...(q.language ? { language } : {}),
+  };
+
+  // tarih aralığı (startDate/endDate veya from/to)
+  const start = q.startDate || q.from;
+  const end = q.endDate || q.to;
+  if (start || end) {
     filter.timestamp = {};
-    if (startDate) filter.timestamp.$gte = new Date(String(startDate));
-    if (endDate) filter.timestamp.$lte = new Date(String(endDate));
+    if (start) filter.timestamp.$gte = new Date(String(start));
+    if (end) filter.timestamp.$lte = new Date(String(end));
   }
 
-  const queryObj = Object.keys(geoQuery).length
-    ? { ...filter, ...geoQuery }
-    : filter;
+  // GeoNear (simple $near)
+  const nearLat = toNumber(q.nearLat);
+  const nearLon = toNumber(q.nearLon);
+  const nearDistance = toNumber(q.nearDistance, 50000);
+  const geoQuery =
+    Number.isFinite(nearLat) && Number.isFinite(nearLon)
+      ? {
+          location: {
+            $near: {
+              $geometry: { type: "Point", coordinates: [nearLon!, nearLat!] },
+              $maxDistance: nearDistance!,
+            },
+          },
+        }
+      : {};
 
   const { Analytics } = await getTenantModels(req);
 
+  const projection =
+    q.fields && typeof q.fields === "string"
+      ? q.fields.split(",").join(" ")
+      : "_id tenant project module eventType timestamp location city country ip userAgent status path method title message language";
+
+  const sort = typeof q.sort === "string" ? q.sort : "-timestamp";
+  const queryObj = Object.keys(geoQuery).length ? { ...filter, ...geoQuery } : filter;
+
   const events = await Analytics.find(queryObj)
-    .sort(String(sort))
-    .skip(Number(skip))
-    .limit(Math.min(Number(limit), 1000));
+    .select(projection)
+    .sort(sort)
+    .skip(skip)
+    .limit(limit)
+    .lean();
 
   logger.withReq.info(req, t("analytics.events_listed"), {
     filter: queryObj,
     count: events.length,
   });
+
   res.status(200).json({
     success: true,
     count: events.length,
@@ -217,74 +217,67 @@ export const getAnalyticsEvents = asyncHandler(async (req: Request, res: Respons
   });
 });
 
-// 3️⃣ Event Sayısı (GET /analytics/count)
+// GET /analytics/count
 export const getAnalyticsCount = asyncHandler(async (req: Request, res: Response) => {
-  const language = resolveLanguage(req);
-  const t = (key: string, params?: any) =>
-    translate(key, language, translations, params);
+  const t = tByReq(req);
+  const language = resolveLanguageStr(req);
+  const q = req.query as any;
 
-  const { module, eventType, userId, country, city } = req.query;
+  if (q.userId && !isValidObjectId(q.userId)) {
+    res.status(400).json({ success: false, message: "Invalid userId." });
+    return;
+  }
+
   const { Analytics } = await getTenantModels(req);
-  const filter: Record<string, any> = { tenant: req.tenant };
-  if (module) filter.module = module;
-  if (eventType) filter.eventType = eventType;
-  if (userId) filter.userId = userId;
-  if (country) filter.country = country;
-  if (city) filter.city = city;
-  if (language) filter.language = language;
+
+  const filter: Record<string, any> = {
+    tenant: (req as any).tenant,
+    ...(q.project ? { project: q.project } : {}),
+    ...(q.module ? { module: q.module } : {}),
+    ...(q.eventType ? { eventType: q.eventType } : {}),
+    ...(q.userId ? { userId: q.userId } : {}),
+    ...(q.country ? { country: q.country } : {}),
+    ...(q.city ? { city: q.city } : {}),
+    ...(q.language ? { language } : {}),
+  };
 
   const count = await Analytics.countDocuments(filter);
 
   logger.withReq.info(req, t("analytics.event_count"), { filter, count });
-  res.status(200).json({
-    success: true,
-    count,
-    filter,
-  });
+  res.status(200).json({ success: true, count, filter });
 });
 
-// 4️⃣ Event Trendleri (GET /analytics/trends)
+// GET /analytics/trends
 export const getEventTrends = asyncHandler(async (req: Request, res: Response) => {
-  const language = resolveLanguage(req);
-  const t = (key: string, params?: any) =>
-    translate(key, language, translations, params);
+  const t = tByReq(req);
+  const language = resolveLanguageStr(req);
+  const q = req.query as any;
 
-  const {
-    module,
-    eventType,
-    period = "day",
-    startDate,
-    endDate,
-    country,
-    city,
-  } = req.query;
   const { Analytics } = await getTenantModels(req);
 
-  const match: Record<string, any> = { tenant: req.tenant };
-  if (module) match.module = module;
-  if (eventType) match.eventType = eventType;
-  if (language) match.language = language;
-  if (country) match.country = country;
-  if (city) match.city = city;
-  if (startDate || endDate) {
+  const match: Record<string, any> = {
+    tenant: (req as any).tenant,
+    ...(q.project ? { project: q.project } : {}),
+    ...(q.module ? { module: q.module } : {}),
+    ...(q.eventType ? { eventType: q.eventType } : {}),
+    ...(q.language ? { language } : {}),
+    ...(q.country ? { country: q.country } : {}),
+    ...(q.city ? { city: q.city } : {}),
+  };
+
+  const start = q.startDate || q.from;
+  const end = q.endDate || q.to;
+  if (start || end) {
     match.timestamp = {};
-    if (startDate) match.timestamp.$gte = new Date(String(startDate));
-    if (endDate) match.timestamp.$lte = new Date(String(endDate));
+    if (start) match.timestamp.$gte = new Date(String(start));
+    if (end) match.timestamp.$lte = new Date(String(end));
   }
 
-  let groupId;
-  if (period === "month") {
-    groupId = {
-      year: { $year: "$timestamp" },
-      month: { $month: "$timestamp" },
-    };
-  } else {
-    groupId = {
-      year: { $year: "$timestamp" },
-      month: { $month: "$timestamp" },
-      day: { $dayOfMonth: "$timestamp" },
-    };
-  }
+  const period = q.period === "month" ? "month" : "day";
+  const groupId =
+    period === "month"
+      ? { year: { $year: "$timestamp" }, month: { $month: "$timestamp" } }
+      : { year: { $year: "$timestamp" }, month: { $month: "$timestamp" }, day: { $dayOfMonth: "$timestamp" } };
 
   const trends = await Analytics.aggregate([
     { $match: match },
@@ -297,37 +290,36 @@ export const getEventTrends = asyncHandler(async (req: Request, res: Response) =
     period,
     count: trends.length,
   });
-  res.status(200).json({
-    success: true,
-    period,
-    data: trends,
-  });
+
+  res.status(200).json({ success: true, period, data: trends });
 });
 
-// 5️⃣ Event Silme (DELETE /analytics/events)
+// DELETE /analytics/events
 export const deleteAnalyticsEvents = asyncHandler(async (req: Request, res: Response) => {
-  const language = resolveLanguage(req);
-  const t = (key: string, params?: any) =>
-    translate(key, language, translations, params);
+  const t = tByReq(req);
+  const language = resolveLanguageStr(req);
+  const b = req.body as any;
 
-  const { module, eventType, beforeDate, country, city } = req.body;
   const { Analytics } = await getTenantModels(req);
-  const filter: Record<string, any> = { tenant: req.tenant };
-  if (module) filter.module = module;
-  if (eventType) filter.eventType = eventType;
-  if (language) filter.language = language;
-  if (country) filter.country = country;
-  if (city) filter.city = city;
-  if (beforeDate) filter.timestamp = { $lt: new Date(beforeDate) };
+
+  const filter: Record<string, any> = {
+    tenant: (req as any).tenant,
+    ...(b.project ? { project: b.project } : {}),
+    ...(b.module ? { module: b.module } : {}),
+    ...(b.eventType ? { eventType: b.eventType } : {}),
+    ...(b.language ? { language } : {}),
+    ...(b.country ? { country: b.country } : {}),
+    ...(b.city ? { city: b.city } : {}),
+  };
+
+  if (b.beforeDate) filter.timestamp = { $lt: new Date(b.beforeDate) };
 
   const result = await Analytics.deleteMany(filter);
+
   logger.withReq.info(req, t("analytics.events_deleted"), {
     filter,
     deleted: result.deletedCount,
   });
 
-  res.status(200).json({
-    success: true,
-    deleted: result.deletedCount,
-  });
+  res.status(200).json({ success: true, deleted: result.deletedCount });
 });

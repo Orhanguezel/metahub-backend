@@ -1,3 +1,4 @@
+// src/modules/analytics/analytics.routes.ts
 import express from "express";
 import {
   createAnalyticsEvent,
