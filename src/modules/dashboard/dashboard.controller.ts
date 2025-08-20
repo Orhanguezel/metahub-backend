@@ -1,130 +1,111 @@
-// src/modules/dashboard/dashboard.controller.ts
-
+/**
+ * (opsiyonel) tek-çağrı “hepsi” endpoint’i (v2, tenant-aware + i18n)
+ * GET /api/dashboard?include=overview,stats,latest&groupBy=week&dateFrom=...&dateTo=...&latestLimit=10
+ */
 import { Request, Response } from "express";
-import asyncHandler from "express-async-handler";
-import { getDashboardStatsDynamic } from "./dashboard.stats";
+import logger from "@/core/middleware/logger/logger";
+import { ensureTenant, validateRange, validateGroupBy } from "./dashboard.validation";
+import { getOverview, getLatest, getTimeSeries } from "./dashboard.stats";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
+import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
+import { t as translate } from "@/core/utils/i18n/translate";
+import translations from "./i18n";
+import type { SupportedLocale } from "@/types/common";
 
-// 📊 Dashboard ana istatistikleri (dinamik model sayımı, toplam ciro)
-export const getDashboardStats = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { User, Order } = await getTenantModels(req);
-    const userCount = await User.countDocuments();
-    const orderCount = await Order.countDocuments();
-    const revenueAgg = await Order.aggregate([
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$totalPrice" },
-          tenant: { $first: "$tenant" },
-        },
-      },
-    ]);
-    const stats = await getDashboardStatsDynamic();
-    res.status(200).json({
-      success: true,
-      message: "Dashboard stats fetched successfully.",
-      stats,
+export async function getDashboardAll(req: Request, res: Response) {
+  const startedAt = Date.now();
+  const locale: SupportedLocale = (req as any).locale || "en";
+  const t = (key: string, params?: any) => translate(key, locale, translations, params);
+
+  const tenant = ensureTenant(req);
+  if (!tenant) {
+    logger.withReq.warn(req, "[DASHBOARD] tenant missing on request", {
+      module: "dashboard",
+      event: "tenant.missing",
     });
+    res.status(404).json({ success: false, message: "tenant.resolve.fail" });
+    return;
   }
-);
 
-// 📅 Günlük özet: yeni kullanıcı, yeni sipariş, bugünkü ciro
-export const getDailyOverview = asyncHandler(
-  async (req: Request, res: Response) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const { User, Order } = await getTenantModels(req);
-    const userCount = await User.countDocuments();
-    const orderCount = await Order.countDocuments();
+  const includeSet = new Set(
+    String(req.query.include || "overview,stats,latest")
+      .split(",")
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean)
+  );
 
-    const [newUsers, newOrders, revenueAgg] = await Promise.all([
-      User.countDocuments({ createdAt: { $gte: today } }),
-      Order.countDocuments({ createdAt: { $gte: today } }),
-      Order.aggregate([
-        { $match: { createdAt: { $gte: today } } },
-        {
-          $group: {
-            _id: null,
-            total: { $sum: "$totalPrice" },
-            tenant: { $first: "$tenant" },
-          },
-        },
-      ]),
-    ]);
-
-    const revenueToday = revenueAgg.length > 0 ? revenueAgg[0].total : 0;
-
-    res.status(200).json({
-      success: true,
-      message: "Daily overview data fetched successfully.",
-      data: {
-        newUsers,
-        newOrders,
-        revenueToday,
-      },
-    });
+  const r = validateRange(req.query as any);
+  if ("error" in r) {
+    res.status(422).json({ success: false, message: r.error });
+    return;
   }
-);
+  const g = validateGroupBy((req.query as any).groupBy);
+  if ("error" in g) {
+    res.status(422).json({ success: false, message: g.error });
+    return;
+  }
 
-// 📈 Son 12 ayın sipariş sayıları
-export const getMonthlyOrders = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { Order } = await getTenantModels(req);
-    const orders = await Order.aggregate([
-      {
-        $group: {
-          _id: { $month: "$createdAt" },
-          total: { $sum: 1 },
-          tenant: { $first: "$tenant" },
-        },
-      },
-      { $sort: { _id: 1 } },
-    ]);
+  const latestLimit = Math.max(5, Math.min(50, Number(req.query.latestLimit ?? 10)));
 
-    const formatted = Array.from({ length: 12 }, (_, i) => {
-      const found = orders.find((o) => o._id === i + 1);
-      return {
-        month: new Date(0, i).toLocaleString("default", { month: "short" }),
-        totalOrders: found?.total || 0,
-      };
-    });
+  try {
+    // Tenant’a özel modeller
+    const models = await getTenantModels(req);
+
+    // Parçalı çalış – olmayan modelde hata verme
+    const overviewP = includeSet.has("overview")
+      ? getOverview(tenant, r.range, models)
+      : Promise.resolve(null);
+
+    // NOT: getTimeSeries = klasik 5 seri (revenue/expenses/net/jobs/time)
+    //      Dinamik seri istenirse stats endpoint’ini kullanıyoruz.
+    const statsP = includeSet.has("stats")
+      ? getTimeSeries(tenant, r.range, g.groupBy, {
+          Payment: models.Payment,
+          Expense: models.Expense,
+          OperationJob: models.OperationJob,
+          TimeEntry: models.TimeEntry,
+        })
+      : Promise.resolve(null);
+
+    const latestP = includeSet.has("latest")
+      ? getLatest(tenant, latestLimit, models)
+      : Promise.resolve(null);
+
+    const [overview, stats, latest] = await Promise.all([overviewP, statsP, latestP]);
 
     res.status(200).json({
       success: true,
-      message: "Monthly order stats fetched successfully.",
-      data: formatted,
-    });
-  }
-);
-
-// 💸 Son 12 ayın geliri
-export const getMonthlyRevenue = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { Order } = await getTenantModels(req);
-    const revenue = await Order.aggregate([
-      {
-        $group: {
-          _id: { $month: "$createdAt" },
-          total: { $sum: "$totalPrice" },
-          tenant: { $first: "$tenant" },
-        },
+      message: t("dashboard.all.success", { parts: Array.from(includeSet).join(",") }),
+      data: { overview, stats, latest },
+      meta: {
+        groupBy: g.groupBy,
+        range: { from: r.range.from, to: r.range.to },
+        latestLimit,
+        include: Array.from(includeSet),
       },
-      { $sort: { _id: 1 } },
-    ]);
-
-    const formatted = Array.from({ length: 12 }, (_, i) => {
-      const found = revenue.find((o) => o._id === i + 1);
-      return {
-        month: new Date(0, i).toLocaleString("default", { month: "short" }),
-        totalRevenue: found?.total || 0,
-      };
     });
 
-    res.status(200).json({
-      success: true,
-      message: "Monthly revenue stats fetched successfully.",
-      data: formatted,
+    logger.withReq.info(req, "[DASHBOARD] all endpoint ok", {
+      module: "dashboard",
+      event: "all.ok",
+      tenant,
+      include: Array.from(includeSet),
+      groupBy: g.groupBy,
+      range: { from: r.range.from.toISOString(), to: r.range.to.toISOString() },
+      tookMs: Date.now() - startedAt,
+      context: getRequestContext(req),
     });
+    return;
+  } catch (err: any) {
+    logger.withReq.error(req, "[DASHBOARD] all fail", {
+      module: "dashboard",
+      event: "all.fail",
+      tenant,
+      error: err?.message,
+      stack: err?.stack,
+      context: getRequestContext(req),
+    });
+    res.status(500).json({ success: false, message: "dashboard.all.error" });
+    return;
   }
-);
+}

@@ -1,35 +1,55 @@
-import { query } from "express-validator";
-import { validateRequest } from "@/core/middleware/validateRequest";
+import { Request } from "express";
 
-// 📊 Analytics Logs Query Validation
-export const validateGetAnalyticsLogs = [
-  query("limit").optional().isInt({ min: 1, max: 1000 })
-    .withMessage("Limit must be an integer between 1 and 1000."),
-  query("module").optional().isString()
-    .withMessage("Module must be a string."),
-  query("eventType").optional().isString()
-    .withMessage("Event type must be a string."),
-  query("userId").optional().isMongoId()
-    .withMessage("User ID must be a valid MongoDB ObjectId."),
-  query("startDate").optional().isISO8601()
-    .withMessage("Start date must be a valid ISO8601 date."),
-  query("endDate").optional().isISO8601()
-    .withMessage("End date must be a valid ISO8601 date."),
-  validateRequest,
-];
+/** Allowed groupBy */
+const GROUPS = ["day", "week", "month"] as const;
+export type GroupBy = typeof GROUPS[number];
 
-// 📈 Charts (orders, revenue) Query Validation - Tarih aralığı desteği
-export const validateChartQuery = [
-  query("startDate").optional().isISO8601()
-    .withMessage("Start date must be a valid ISO8601 date."),
-  query("endDate").optional().isISO8601()
-    .withMessage("End date must be a valid ISO8601 date."),
-  validateRequest,
-];
+export type Range = { from: Date; to: Date };
 
-// 📑 Raporlar için (ileride genişletilebilir)
-export const validateReportQuery = [
-  query("limit").optional().isInt({ min: 1, max: 100 })
-    .withMessage("Limit must be an integer between 1 and 100."),
-  validateRequest,
-];
+export interface BaseQuery {
+  dateFrom?: string;
+  dateTo?: string;
+  groupBy?: GroupBy;
+  limit?: string | number;
+  offset?: string | number;
+  tz?: string; // optional, default Europe/Istanbul
+}
+
+const TZ_DEFAULT = "Europe/Istanbul";
+
+/** ISO (YYYY-MM-DD) veya ISO datetime kabul eder. */
+export function parseDate(value?: string): Date | null {
+  if (!value) return null;
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/** Tarih aralığı doğrulama + normalizasyon */
+export function validateRange(q: BaseQuery): { range: Range; tz: string } | { error: string } {
+  const tz = (q.tz && typeof q.tz === "string" ? q.tz : TZ_DEFAULT);
+
+  const to = parseDate(q.dateTo) ?? new Date(); // now
+  const from = parseDate(q.dateFrom) ?? new Date(to.getTime() - 30 * 24 * 60 * 60 * 1000); // last 30d
+
+  if (from > to) return { error: "dashboard.validation.invalidRange" };
+
+  return { range: { from, to }, tz };
+}
+
+export function validateGroupBy(groupBy?: string): { groupBy: GroupBy } | { error: string } {
+  const g = (groupBy || "day").toLowerCase();
+  if (!GROUPS.includes(g as GroupBy)) return { error: "dashboard.validation.invalidGroupBy" };
+  return { groupBy: g as GroupBy };
+}
+
+export function validatePagination(limit?: string | number, offset?: string | number) {
+  const l = Math.max(1, Math.min(100, Number(limit ?? 20)));
+  const o = Math.max(0, Number(offset ?? 0));
+  return { limit: l, offset: o };
+}
+
+/** Request guard: tenant zorunlu */
+export function ensureTenant(req: Request): string | null {
+  return (req as any).tenant || null;
+}
+

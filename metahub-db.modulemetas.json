@@ -1,0 +1,2471 @@
+[
+  {
+    "_id": "685e9142500c19b0e4b286c3",
+    "label": {
+      "tr": "Hakkında",
+      "en": "About",
+      "de": "Über Uns",
+      "pl": "O nas",
+      "fr": "À propos",
+      "es": "Acerca de"
+    },
+    "name": "about",
+    "icon": "MdInfo",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:34.548Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:06.888Z"
+    },
+    "__v": 4,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9142500c19b0e4b286c6",
+    "label": {
+      "tr": "Hakkında Kategorileri",
+      "en": "About Categories",
+      "de": "Über-Kategorien",
+      "pl": "Kategorie O nas",
+      "fr": "Catégories À propos",
+      "es": "Categorías sobre"
+    },
+    "name": "aboutcategory",
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:34.662Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:07.686Z"
+    },
+    "__v": 2,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9142500c19b0e4b286c9",
+    "label": {
+      "tr": "Aktiviteler",
+      "en": "Activities",
+      "de": "Aktivitäten",
+      "pl": "Aktywności",
+      "fr": "Activités",
+      "es": "Actividades"
+    },
+    "name": "activity",
+    "icon": "MdEvent",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:34.787Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:08.034Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9142500c19b0e4b286cc",
+    "label": {
+      "tr": "Aktivite Kategorileri",
+      "en": "Activity Categories",
+      "de": "Aktivitätskategorien",
+      "pl": "Kategorie aktywności",
+      "fr": "Catégories d'activités",
+      "es": "Categorías de actividades"
+    },
+    "name": "activitycategory",
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:34.901Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:08.221Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9143500c19b0e4b286cf",
+    "label": {
+      "tr": "Adresler",
+      "en": "Addresses",
+      "de": "Adressen",
+      "pl": "Adresy",
+      "fr": "Adresses",
+      "es": "Direcciones"
+    },
+    "name": "address",
+    "icon": "MdLocationOn",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:35.024Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:08.297Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9143500c19b0e4b286d2",
+    "label": {
+      "tr": "Analitik",
+      "en": "Analytics",
+      "de": "Analytik",
+      "pl": "Analizy",
+      "fr": "Analytique",
+      "es": "Analítica"
+    },
+    "name": "analytics",
+    "icon": "MdAnalytics",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:35.136Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:08.381Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9143500c19b0e4b286d5",
+    "label": {
+      "tr": "Daireler",
+      "en": "Apartments",
+      "de": "Wohnungen",
+      "pl": "Mieszkania",
+      "fr": "Appartements",
+      "es": "Apartamentos"
+    },
+    "name": "apartment",
+    "icon": "MdApartment",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:35.236Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:08.441Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9143500c19b0e4b286d8",
+    "label": {
+      "tr": "Daire Kategorileri",
+      "en": "Apartment Categories",
+      "de": "Wohnungskategorien",
+      "pl": "Kategorie mieszkań",
+      "fr": "Catégories d’appartements",
+      "es": "Categorías de apartamentos"
+    },
+    "name": "apartmentcategory",
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:35.335Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:08.490Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9143500c19b0e4b286db",
+    "label": {
+      "tr": "API Anahtarları",
+      "en": "API Keys",
+      "de": "API-Schlüssel",
+      "pl": "Klucze API",
+      "fr": "Clés API",
+      "es": "Claves API"
+    },
+    "name": "apikey",
+    "icon": "MdVpnKey",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:35.434Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:08.539Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9143500c19b0e4b286de",
+    "label": {
+      "tr": "Makaleler",
+      "en": "Articles",
+      "de": "Artikel",
+      "pl": "Artykuły",
+      "fr": "Articles",
+      "es": "Artículos"
+    },
+    "name": "articles",
+    "icon": "MdDescription",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:35.532Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:08.584Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9143500c19b0e4b286e1",
+    "label": {
+      "tr": "Makale Kategorileri",
+      "en": "Article Categories",
+      "de": "Artikelkategorien",
+      "pl": "Kategorie artykułów",
+      "fr": "Catégories d’articles",
+      "es": "Categorías de artículos"
+    },
+    "name": "articlescategory",
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:35.669Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:08.631Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9143500c19b0e4b286e4",
+    "label": {
+      "tr": "Bisikletler",
+      "en": "Bikes",
+      "de": "Fahrräder",
+      "pl": "Rowery",
+      "fr": "Vélos",
+      "es": "Bicicletas"
+    },
+    "name": "bikes",
+    "icon": "MdDirectionsBike",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:35.779Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:08.681Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9143500c19b0e4b286e7",
+    "label": {
+      "tr": "Bisiklet Kategorileri",
+      "en": "Bike Categories",
+      "de": "Fahrradkategorien",
+      "pl": "Kategorie rowerów",
+      "fr": "Catégories de vélos",
+      "es": "Categorías de bicicletas"
+    },
+    "name": "bikescategory",
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:35.882Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:08.729Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9143500c19b0e4b286ea",
+    "label": {
+      "tr": "Blog",
+      "en": "Blog",
+      "de": "Blog",
+      "pl": "Blog",
+      "fr": "Blog",
+      "es": "Blog"
+    },
+    "name": "blog",
+    "icon": "MdArticle",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:35.981Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:08.833Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9144500c19b0e4b286ed",
+    "label": {
+      "tr": "Blog Kategorileri",
+      "en": "Blog Categories",
+      "de": "Blog-Kategorien",
+      "pl": "Kategorie blogów",
+      "fr": "Catégories de blogs",
+      "es": "Categorías de blogs"
+    },
+    "name": "blogcategory",
+    "icon": "MdLabel",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:36.089Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:08.880Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9144500c19b0e4b286f0",
+    "label": {
+      "tr": "Rezervasyonlar",
+      "en": "Bookings",
+      "de": "Buchungen",
+      "pl": "Rezerwacje",
+      "fr": "Réservations",
+      "es": "Reservas"
+    },
+    "name": "booking",
+    "icon": "MdEventAvailable",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:36.192Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:08.931Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9144500c19b0e4b286f3",
+    "label": {
+      "tr": "Rezervasyon Saatleri",
+      "en": "Booking Slots",
+      "de": "Buchungszeiten",
+      "pl": "Godziny rezerwacji",
+      "fr": "Plages de réservation",
+      "es": "Horarios de reserva"
+    },
+    "name": "bookingslot",
+    "icon": "MdAccessTime",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:36.344Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:08.981Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9144500c19b0e4b286f6",
+    "label": {
+      "tr": "Sepet",
+      "en": "Cart",
+      "de": "Warenkorb",
+      "pl": "Koszyk",
+      "fr": "Panier",
+      "es": "Carrito"
+    },
+    "name": "cart",
+    "icon": "MdShoppingCart",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:36.493Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:09.031Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9144500c19b0e4b286f9",
+    "label": {
+      "tr": "Sohbet",
+      "en": "Chat",
+      "de": "Chat",
+      "pl": "Czat",
+      "fr": "Chat",
+      "es": "Chat"
+    },
+    "name": "chat",
+    "icon": "MdChat",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:36.599Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:09.181Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9144500c19b0e4b286fc",
+    "label": {
+      "tr": "Yorumlar",
+      "en": "Comments",
+      "de": "Kommentare",
+      "pl": "Komentarze",
+      "fr": "Commentaires",
+      "es": "Comentarios"
+    },
+    "name": "comment",
+    "icon": "MdComment",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:36.712Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:09.231Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9144500c19b0e4b286ff",
+    "label": {
+      "tr": "Şirket",
+      "en": "Company",
+      "de": "Firma",
+      "pl": "Firma",
+      "fr": "Entreprise",
+      "es": "Empresa"
+    },
+    "name": "company",
+    "icon": "MdBusiness",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:36.819Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:09.281Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9144500c19b0e4b28702",
+    "label": {
+      "tr": "İletişim",
+      "en": "Contact",
+      "de": "Kontakt",
+      "pl": "Kontakt",
+      "fr": "Contact",
+      "es": "Contacto"
+    },
+    "name": "contact",
+    "icon": "MdContactMail",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:36.931Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:09.331Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9145500c19b0e4b28705",
+    "label": {
+      "tr": "Kuponlar",
+      "en": "Coupons",
+      "de": "Gutscheine",
+      "pl": "Kupony",
+      "fr": "Coupons",
+      "es": "Cupones"
+    },
+    "name": "coupon",
+    "icon": "MdLocalOffer",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:37.034Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:09.481Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9145500c19b0e4b28708",
+    "label": {
+      "tr": "Müşteriler",
+      "en": "Customers",
+      "de": "Kunden",
+      "pl": "Klienci",
+      "fr": "Clients",
+      "es": "Clientes"
+    },
+    "name": "customer",
+    "icon": "MdPeople",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:37.151Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:09.530Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9145500c19b0e4b2870b",
+    "label": {
+      "tr": "dashboard",
+      "en": "dashboard",
+      "de": "dashboard",
+      "pl": "dashboard",
+      "fr": "dashboard",
+      "es": "dashboard"
+    },
+    "name": "dashboard",
+    "icon": "box",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:37.264Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:09.582Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9145500c19b0e4b2870e",
+    "label": {
+      "tr": "E-postalar",
+      "en": "Emails",
+      "de": "E-Mails",
+      "pl": "E-maile",
+      "fr": "E-mails",
+      "es": "Correos"
+    },
+    "name": "email",
+    "icon": "MdEmail",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:37.372Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:09.633Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9145500c19b0e4b28711",
+    "label": {
+      "tr": "Ensotek Kategorileri",
+      "en": "Ensotek Categories",
+      "de": "Ensotek-Kategorien",
+      "pl": "Kategorie Ensotek",
+      "fr": "Catégories Ensotek",
+      "es": "Categorías Ensotek"
+    },
+    "name": "ensotekcategory",
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:37.471Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:09.731Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9145500c19b0e4b28714",
+    "label": {
+      "tr": "Ensotek Ürünleri",
+      "en": "Ensotek Products",
+      "de": "Ensotek Produkte",
+      "pl": "Produkty Ensotek",
+      "fr": "Produits Ensotek",
+      "es": "Productos Ensotek"
+    },
+    "name": "ensotekprod",
+    "icon": "MdFactory",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:37.581Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:09.781Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9145500c19b0e4b2871a",
+    "label": {
+      "tr": "Sıkça Sorulan Sorular",
+      "en": "FAQ",
+      "de": "FAQ",
+      "pl": "FAQ",
+      "fr": "FAQ",
+      "es": "FAQ"
+    },
+    "name": "faq",
+    "icon": "MdQuiz",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:37.783Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:09.891Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9145500c19b0e4b2871d",
+    "label": {
+      "tr": "Favoriler",
+      "en": "Favorites",
+      "de": "Favoriten",
+      "pl": "Ulubione",
+      "fr": "Favoris",
+      "es": "Favoritos"
+    },
+    "name": "favorite",
+    "icon": "MdFavorite",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:37.890Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:09.942Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9145500c19b0e4b28720",
+    "label": {
+      "tr": "Geri Bildirimler",
+      "en": "Feedback",
+      "de": "Feedback",
+      "pl": "Opinie",
+      "fr": "Retours",
+      "es": "Comentarios"
+    },
+    "name": "feedback",
+    "icon": "MdFeedback",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:37.992Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:09.991Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9146500c19b0e4b28723",
+    "label": {
+      "tr": "Galeri",
+      "en": "Gallery",
+      "de": "Galerie",
+      "pl": "Galeria",
+      "fr": "Galerie",
+      "es": "Galería"
+    },
+    "name": "gallery",
+    "icon": "MdPhotoLibrary",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:38.096Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:10.091Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9146500c19b0e4b28726",
+    "label": {
+      "tr": "Galeri Kategorileri",
+      "en": "Gallery Categories",
+      "de": "Galeriekategorien",
+      "pl": "Kategorie galerii",
+      "fr": "Catégories de galerie",
+      "es": "Categorías de galería"
+    },
+    "name": "gallerycategory",
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:38.203Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:10.141Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9146500c19b0e4b28729",
+    "label": {
+      "tr": "Faturalar",
+      "en": "Invoices",
+      "de": "Rechnungen",
+      "pl": "Faktury",
+      "fr": "Factures",
+      "es": "Facturas"
+    },
+    "name": "invoice",
+    "icon": "MdRequestQuote",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:38.302Z",
+    "updatedAt": "2025-06-27T12:40:38.302Z",
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9146500c19b0e4b2872c",
+    "label": {
+      "tr": "Kütüphane",
+      "en": "Library",
+      "de": "Bibliothek",
+      "pl": "Biblioteka",
+      "fr": "Bibliothèque",
+      "es": "Biblioteca"
+    },
+    "name": "library",
+    "icon": "MdMenuBook",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:38.405Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:10.241Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9146500c19b0e4b2872f",
+    "label": {
+      "tr": "Yönetim",
+      "en": "Admin",
+      "de": "Admin",
+      "pl": "Admin",
+      "fr": "Admin",
+      "es": "Admin"
+    },
+    "name": "modules",
+    "icon": "MdAdminPanelSettings",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:38.514Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:10.442Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9146500c19b0e4b28732",
+    "label": {
+      "tr": "Haberler",
+      "en": "News",
+      "de": "Nachrichten",
+      "pl": "Aktualności",
+      "fr": "Actualités",
+      "es": "Noticias"
+    },
+    "name": "news",
+    "icon": "MdNewspaper",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:38.616Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:10.542Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9146500c19b0e4b28735",
+    "label": {
+      "tr": "Haber Kategorileri",
+      "en": "News Categories",
+      "de": "Nachrichtenkategorien",
+      "pl": "Kategorie wiadomości",
+      "fr": "Catégories de nouvelles",
+      "es": "Categorías de noticias"
+    },
+    "name": "newscategory",
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:38.723Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:10.591Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9146500c19b0e4b28738",
+    "label": {
+      "tr": "Bildirimler",
+      "en": "Notifications",
+      "de": "Benachrichtigungen",
+      "pl": "Powiadomienia",
+      "fr": "Notifications",
+      "es": "Notificaciones"
+    },
+    "name": "notification",
+    "icon": "MdNotificationsActive",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [
+      {
+        "version": null,
+        "by": "orhan",
+        "date": "2025-07-30T21:03:19.994Z",
+        "note": "Module meta updated"
+      },
+      {
+        "version": null,
+        "by": "orhan",
+        "date": "2025-07-30T21:03:20.914Z",
+        "note": "Module meta updated"
+      }
+    ],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:38.836Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:10.690Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9146500c19b0e4b2873b",
+    "label": {
+      "tr": "Teklifler",
+      "en": "Offers",
+      "de": "Angebote",
+      "pl": "Oferty",
+      "fr": "Offres",
+      "es": "Ofertas"
+    },
+    "name": "offer",
+    "icon": "MdLocalOffer",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:38.935Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:10.738Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9147500c19b0e4b2873e",
+    "label": {
+      "tr": "Siparişler",
+      "en": "Orders",
+      "de": "Bestellungen",
+      "pl": "Zamówienia",
+      "fr": "Commandes",
+      "es": "Pedidos"
+    },
+    "name": "order",
+    "icon": "MdReceiptLong",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:39.044Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:10.891Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9147500c19b0e4b28741",
+    "label": {
+      "tr": "Ödeme",
+      "en": "Payment",
+      "de": "Zahlung",
+      "pl": "Płatność",
+      "fr": "Paiement",
+      "es": "Pago"
+    },
+    "name": "payment",
+    "icon": "MdPayment",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [
+      {
+        "version": null,
+        "by": "Orhan Güzel",
+        "date": "2025-07-22T14:15:26.408Z",
+        "note": "Module meta updated"
+      }
+    ],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:39.152Z",
+    "updatedAt": {
+      "$date": "2025-07-22T14:15:26.408Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9147500c19b0e4b28744",
+    "label": {
+      "tr": "Ürünler",
+      "en": "Products",
+      "de": "Produkte",
+      "pl": "Produkty",
+      "fr": "Produits",
+      "es": "Productos"
+    },
+    "name": "product",
+    "icon": "MdInventory2",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:39.259Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:11.141Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9147500c19b0e4b28747",
+    "label": {
+      "tr": "Referanslar",
+      "en": "References",
+      "de": "Referenzen",
+      "pl": "Referencje",
+      "fr": "Références",
+      "es": "Referencias"
+    },
+    "name": "references",
+    "icon": "MdCollectionsBookmark",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:39.367Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:11.191Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9147500c19b0e4b2874a",
+    "label": {
+      "tr": "Referans Kategorileri",
+      "en": "Reference Categories",
+      "de": "Referenzkategorien",
+      "pl": "Kategorie referencyjne",
+      "fr": "Catégories de référence",
+      "es": "Categorías de referencia"
+    },
+    "name": "referencescategory",
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:39.473Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:11.241Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9147500c19b0e4b2874d",
+    "label": {
+      "tr": "Değerlendirmeler",
+      "en": "Reviews",
+      "de": "Bewertungen",
+      "pl": "Opinie",
+      "fr": "Avis",
+      "es": "Reseñas"
+    },
+    "name": "review",
+    "icon": "MdRateReview",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:39.572Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:11.342Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9147500c19b0e4b28750",
+    "label": {
+      "tr": "Bölümler",
+      "en": "Sections",
+      "de": "Abschnitte",
+      "pl": "Sekcje",
+      "fr": "Sections",
+      "es": "Secciones"
+    },
+    "name": "section",
+    "icon": "MdViewAgenda",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:39.672Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:11.441Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9147500c19b0e4b28753",
+    "label": {
+      "tr": "Hizmetler",
+      "en": "Services",
+      "de": "Dienstleistungen",
+      "pl": "Usługi",
+      "fr": "Services",
+      "es": "Servicios"
+    },
+    "name": "services",
+    "icon": "MdBuild",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:39.772Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:11.544Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9147500c19b0e4b28756",
+    "label": {
+      "tr": "Hizmet Kategorileri",
+      "en": "Service Categories",
+      "de": "Dienstleistungskategorien",
+      "pl": "Kategorie usług",
+      "fr": "Catégories de services",
+      "es": "Categorías de servicios"
+    },
+    "name": "servicescategory",
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:39.872Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:11.599Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9148500c19b0e4b2875c",
+    "label": {
+      "tr": "Kargolar",
+      "en": "Shipments",
+      "de": "Lieferungen",
+      "pl": "Wysyłki",
+      "fr": "Expéditions",
+      "es": "Envíos"
+    },
+    "name": "shipment",
+    "icon": "MdLocalShipping",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:40.084Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:11.702Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9148500c19b0e4b2875f",
+    "label": {
+      "tr": "Yedek Parçalar",
+      "en": "Spare Parts",
+      "de": "Ersatzteile",
+      "pl": "Części zamienne",
+      "fr": "Pièces détachées",
+      "es": "Repuestos"
+    },
+    "name": "sparepart",
+    "icon": "MdBuildCircle",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:40.183Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:11.851Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9148500c19b0e4b28762",
+    "label": {
+      "tr": "Spor",
+      "en": "Sport",
+      "de": "Sport",
+      "pl": "Sport",
+      "fr": "Sport",
+      "es": "Deporte"
+    },
+    "name": "sport",
+    "icon": "MdSportsSoccer",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:40.284Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:11.951Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9148500c19b0e4b28765",
+    "label": {
+      "tr": "Spor Kategorileri",
+      "en": "Sport Categories",
+      "de": "Sportkategorien",
+      "pl": "Kategorie sportowe",
+      "fr": "Catégories de sport",
+      "es": "Categorías deportivas"
+    },
+    "name": "sportcategory",
+    "icon": "MdCategory",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:40.384Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:12.002Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9148500c19b0e4b28768",
+    "label": {
+      "tr": "Stok Hareketleri",
+      "en": "Stock Movements",
+      "de": "Lagerbewegungen",
+      "pl": "Ruchy magazynowe",
+      "fr": "Mouvements de stock",
+      "es": "Movimientos de stock"
+    },
+    "name": "stockmovement",
+    "icon": "MdCompareArrows",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:40.483Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:12.051Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9148500c19b0e4b2876b",
+    "label": {
+      "tr": "Görevler",
+      "en": "Tasks",
+      "de": "Aufgaben",
+      "pl": "Zadania",
+      "fr": "Tâches",
+      "es": "Tareas"
+    },
+    "name": "task",
+    "icon": "MdChecklist",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:40.584Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:12.100Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9148500c19b0e4b2876e",
+    "label": {
+      "tr": "Kiracılar",
+      "en": "Tenants",
+      "de": "Mieter",
+      "pl": "Najemcy",
+      "fr": "Locataires",
+      "es": "Inquilinos"
+    },
+    "name": "tenants",
+    "icon": "MdBusiness",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:40.684Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:12.202Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9148500c19b0e4b28771",
+    "label": {
+      "tr": "Kullanıcılar",
+      "en": "Users",
+      "de": "Benutzer",
+      "pl": "Użytkownicy",
+      "fr": "Utilisateurs",
+      "es": "Usuarios"
+    },
+    "name": "users",
+    "icon": "MdPeopleAlt",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:40.782Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:12.301Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": "685e9148500c19b0e4b28774",
+    "label": {
+      "tr": "İstek Listesi",
+      "en": "Wishlist",
+      "de": "Wunschliste",
+      "pl": "Lista życzeń",
+      "fr": "Liste de souhaits",
+      "es": "Lista de deseos"
+    },
+    "name": "wishlist",
+    "icon": "MdFavoriteBorder",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [],
+    "routes": [],
+    "createdAt": "2025-06-27T12:40:40.888Z",
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:12.351Z"
+    },
+    "__v": 0,
+    "tenant": "ensotek"
+  },
+  {
+    "_id": {
+      "$oid": "6868671a20c63bee393ac643"
+    },
+    "name": "settings",
+    "label": {
+      "tr": "Ayarlar",
+      "en": "Settings",
+      "de": "Einstellungen",
+      "pl": "Ustawienia",
+      "fr": "Paramètres",
+      "es": "Configuraciones"
+    },
+    "icon": "MdSettings",
+    "roles": ["admin"],
+    "enabled": true,
+    "language": "en",
+    "version": "1.0.0",
+    "order": 0,
+    "statsKey": "",
+    "history": [
+      {
+        "version": "1.0.0",
+        "by": "orhan",
+        "date": "2025-07-10T19:08:51.675Z",
+        "note": "Module meta updated"
+      },
+      {
+        "version": "1.0.0",
+        "by": "orhan",
+        "date": "2025-07-10T19:08:53.008Z",
+        "note": "Module meta updated"
+      },
+      {
+        "version": "1.0.0",
+        "by": "Orhan Güzel",
+        "date": "2025-07-13T03:04:08.817Z",
+        "note": "Module meta updated"
+      }
+    ],
+    "routes": [],
+    "createdAt": {
+      "$date": "2025-07-04T23:43:22.134Z"
+    },
+    "updatedAt": {
+      "$date": "2025-08-13T01:45:11.650Z"
+    },
+    "__v": 3,
+    "tenant": "ensotek"
+  },{
+  "_id": { "$oid": "687d094b18e8f58b54e099f3" },
+  "name": "librarycategory",
+  "label": {
+    "tr": "Kütüphane Kategorisi",
+    "en": "Library Category",
+    "de": "Bibliothekskategorie",
+    "pl": "Kategoria biblioteki",
+    "fr": "Catégorie de bibliothèque",
+    "es": "Categoría de biblioteca"
+  },
+  "icon": "MdLocalLibrary",
+  "roles": ["admin"],
+  "enabled": true,
+  "language": "en",
+  "version": "1.0.0",
+  "order": 0,
+  "statsKey": "",
+  "history": [],
+  "routes": [],
+  "createdAt": { "$date": "2025-07-20T15:20:43.638Z" },
+  "updatedAt": { "$date": "2025-08-13T01:45:10.290Z" },
+  "__v": 0,
+  "tenant": "ensotek"
+},
+{
+  "_id": { "$oid": "687f12b1e1cc1c6650a33cbd" },
+  "name": "sparepartcategory",
+  "label": {
+    "tr": "Yedek Parça Kategorisi",
+    "en": "Spare Parts Category",
+    "de": "Ersatzteilkategorie",
+    "pl": "Kategoria części zamiennych",
+    "fr": "Catégorie de pièces détachées",
+    "es": "Categoría de repuestos"
+  },
+  "icon": "MdBuild",
+  "roles": ["admin"],
+  "enabled": true,
+  "language": "en",
+  "version": "1.0.0",
+  "order": 0,
+  "statsKey": "",
+  "history": [],
+  "routes": [],
+  "createdAt": { "$date": "2025-07-22T04:25:21.326Z" },
+  "updatedAt": { "$date": "2025-08-13T01:45:11.900Z" },
+  "__v": 0,
+  "tenant": "ensotek"
+},
+{
+  "_id": { "$oid": "6883f2246fc9fa9a36c56e19" },
+  "name": "team",
+  "label": {
+    "tr": "Ekip",
+    "en": "Team",
+    "de": "Team",
+    "pl": "Zespół",
+    "fr": "Équipe",
+    "es": "Equipo"
+  },
+  "icon": "MdGroups",
+  "roles": ["admin"],
+  "enabled": true,
+  "language": "en",
+  "version": "1.0.0",
+  "order": 0,
+  "statsKey": "",
+  "history": [],
+  "routes": [],
+  "createdAt": { "$date": "2025-07-25T21:07:48.069Z" },
+  "updatedAt": { "$date": "2025-08-13T01:45:12.151Z" },
+  "__v": 0,
+  "tenant": "ensotek"
+},
+{
+  "_id": { "$oid": "688545c8b6620bc5e2d304a9" },
+  "name": "portfolio",
+  "label": {
+    "tr": "Portföy",
+    "en": "Portfolio",
+    "de": "Portfolio",
+    "pl": "Portfolio",
+    "fr": "Portfolio",
+    "es": "Portafolio"
+  },
+  "icon": "MdViewModule",
+  "roles": ["admin"],
+  "enabled": true,
+  "language": "en",
+  "version": "1.0.0",
+  "order": 0,
+  "statsKey": "",
+  "history": [],
+  "routes": [],
+  "createdAt": { "$date": "2025-07-26T21:16:56.652Z" },
+  "updatedAt": { "$date": "2025-08-13T01:45:10.991Z" },
+  "__v": 0,
+  "tenant": "ensotek"
+},
+{
+  "_id": { "$oid": "688a1f20f63076804af1e67e" },
+  "name": "catalog",
+  "label": {
+    "tr": "Katalog",
+    "en": "Catalog",
+    "de": "Katalog",
+    "pl": "Katalog",
+    "fr": "Catalogue",
+    "es": "Catálogo"
+  },
+  "icon": "MdMenuBook",
+  "roles": ["admin"],
+  "enabled": true,
+  "language": "en",
+  "version": "1.0.0",
+  "order": 0,
+  "statsKey": "",
+  "history": [],
+  "routes": [],
+  "createdAt": { "$date": "2025-07-30T13:33:20.673Z" },
+  "updatedAt": { "$date": "2025-08-13T01:45:09.133Z" },
+  "__v": 0,
+  "tenant": "ensotek"
+},
+{
+  "_id": { "$oid": "688ac84bf4e1cb4902f5e6d5" },
+  "name": "skill",
+  "label": {
+    "tr": "Yetenek",
+    "en": "Skill",
+    "de": "Fähigkeit",
+    "pl": "Umiejętność",
+    "fr": "Compétence",
+    "es": "Habilidad"
+  },
+  "icon": "MdAutoAwesome",
+  "roles": ["admin"],
+  "enabled": true,
+  "language": "en",
+  "version": "1.0.0",
+  "order": 0,
+  "statsKey": "",
+  "history": [],
+  "routes": [],
+  "createdAt": { "$date": "2025-07-31T01:35:07.291Z" },
+  "updatedAt": { "$date": "2025-08-13T01:45:11.751Z" },
+  "__v": 0,
+  "tenant": "ensotek"
+},
+{
+  "_id": { "$oid": "688c16f39fc799cd585a0040" },
+  "name": "skillcategory",
+  "label": {
+    "tr": "Yetenek Kategorisi",
+    "en": "Skill Category",
+    "de": "Fähigkeitskategorie",
+    "pl": "Kategoria umiejętności",
+    "fr": "Catégorie de compétences",
+    "es": "Categoría de habilidades"
+  },
+  "icon": "MdCategory",
+  "roles": ["admin"],
+  "enabled": true,
+  "language": "en",
+  "version": "1.0.0",
+  "order": 0,
+  "statsKey": "",
+  "history": [],
+  "routes": [],
+  "createdAt": { "$date": "2025-08-01T01:22:59.245Z" },
+  "updatedAt": { "$date": "2025-08-13T01:45:11.802Z" },
+  "__v": 0,
+  "tenant": "ensotek"
+},
+{
+  "_id": { "$oid": "688d011d0a8f210980d8ab29" },
+  "name": "massage",
+  "label": {
+    "tr": "Masaj",
+    "en": "Massage",
+    "de": "Massage",
+    "pl": "Masaż",
+    "fr": "Massage",
+    "es": "Masaje"
+  },
+  "icon": "MdVolunteerActivism",
+  "roles": ["admin"],
+  "enabled": true,
+  "language": "en",
+  "version": "1.0.0",
+  "order": 0,
+  "statsKey": "",
+  "history": [],
+  "routes": [],
+  "createdAt": { "$date": "2025-08-01T18:02:05.096Z" },
+  "updatedAt": { "$date": "2025-08-13T01:45:10.340Z" },
+  "__v": 0,
+  "tenant": "ensotek"
+},
+{
+  "_id": { "$oid": "688d011d0a8f210980d8ab2c" },
+  "name": "massagecategory",
+  "label": {
+    "tr": "Masaj Kategorisi",
+    "en": "Massage Category",
+    "de": "Massagekategorie",
+    "pl": "Kategoria masażu",
+    "fr": "Catégorie de massage",
+    "es": "Categoría de masaje"
+  },
+  "icon": "MdCategory",
+  "roles": ["admin"],
+  "enabled": true,
+  "language": "en",
+  "version": "1.0.0",
+  "order": 0,
+  "statsKey": "",
+  "history": [],
+  "routes": [],
+  "createdAt": { "$date": "2025-08-01T18:02:05.200Z" },
+  "updatedAt": { "$date": "2025-08-13T01:45:10.391Z" },
+  "__v": 0,
+  "tenant": "ensotek"
+},
+{
+  "_id": { "$oid": "688d54099d806ca3e84a3f71" },
+  "name": "newsletter",
+  "label": {
+    "tr": "Bülten",
+    "en": "Newsletter",
+    "de": "Newsletter",
+    "pl": "Biuletyn",
+    "fr": "Lettre d’information",
+    "es": "Boletín"
+  },
+  "icon": "MdMailOutline",
+  "roles": ["admin"],
+  "enabled": true,
+  "language": "en",
+  "version": "1.0.0",
+  "order": 0,
+  "statsKey": "",
+  "history": [],
+  "routes": [],
+  "createdAt": { "$date": "2025-08-01T23:55:53.489Z" },
+  "updatedAt": { "$date": "2025-08-13T01:45:10.641Z" },
+  "__v": 0,
+  "tenant": "ensotek"
+},
+{
+  "_id": { "$oid": "6892bc17dcdf78b8f42a9231" },
+  "name": "pricing",
+  "label": {
+    "tr": "Fiyatlandırma",
+    "en": "Pricing",
+    "de": "Preisgestaltung",
+    "pl": "Cennik",
+    "fr": "Tarification",
+    "es": "Precios"
+  },
+  "icon": "MdAttachMoney",
+  "roles": ["admin"],
+  "enabled": true,
+  "language": "en",
+  "version": "1.0.0",
+  "order": 0,
+  "statsKey": "",
+  "history": [],
+  "routes": [],
+  "createdAt": { "$date": "2025-08-06T02:21:11.218Z" },
+  "updatedAt": { "$date": "2025-08-13T01:45:11.091Z" },
+  "__v": 0,
+  "tenant": "ensotek"
+},
+{
+  "_id": { "$oid": "689a3d46e306364882601409" },
+  "name": "billing",
+  "tenant": "ensotek",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-11T18:58:14.266Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-11T18:58:14.265Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689a3d4653e0a7f340441d55" }
+    }
+  ],
+  "icon": "MdReceiptLong",
+  "label": {
+    "tr": "Faturalama",
+    "en": "Billing",
+    "de": "Abrechnung",
+    "pl": "Rozliczenia",
+    "fr": "Facturation",
+    "es": "Facturación"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:08.782Z" },
+  "version": "1.0.0"
+},
+{
+  "_id": { "$oid": "689a3d46e30636488260140a" },
+  "name": "cashbook",
+  "tenant": "ensotek",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-11T18:58:14.566Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-11T18:58:14.566Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689a3d4653e0a7f340441d67" }
+    }
+  ],
+  "icon": "MdAccountBalanceWallet",
+  "label": {
+    "tr": "Nakit Defteri",
+    "en": "Cashbook",
+    "de": "Kassenbuch",
+    "pl": "Księga kasowa",
+    "fr": "Livre de caisse",
+    "es": "Libro de caja"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:09.080Z" },
+  "version": "1.0.0"
+},
+{
+  "_id": { "$oid": "689a3d46e30636488260140b" },
+  "name": "contacts",
+  "tenant": "ensotek",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-11T18:58:14.873Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-11T18:58:14.872Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689a3d4653e0a7f340441d73" }
+    }
+  ],
+  "icon": "MdContacts",
+  "label": {
+    "tr": "Kişiler",
+    "en": "Contacts",
+    "de": "Kontakte",
+    "pl": "Kontakty",
+    "fr": "Contacts",
+    "es": "Contactos"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:09.383Z" },
+  "version": "1.0.0"
+},
+{
+  "_id": { "$oid": "689a3d46e30636488260140c" },
+  "name": "contracts",
+  "tenant": "ensotek",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-11T18:58:14.915Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-11T18:58:14.915Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689a3d4653e0a7f340441d75" }
+    }
+  ],
+  "icon": "MdAssignmentTurnedIn",
+  "label": {
+    "tr": "Sözleşmeler",
+    "en": "Contracts",
+    "de": "Verträge",
+    "pl": "Umowy",
+    "fr": "Contrats",
+    "es": "Contratos"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:09.431Z" },
+  "version": "1.0.0"
+},
+{
+  "_id": { "$oid": "689a3d47e30636488260140d" },
+  "name": "employees",
+  "tenant": "ensotek",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-11T18:58:15.166Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-11T18:58:15.166Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689a3d4753e0a7f340441d7f" }
+    }
+  ],
+  "icon": "MdPeopleAlt",
+  "label": {
+    "tr": "Çalışanlar",
+    "en": "Employees",
+    "de": "Mitarbeiter",
+    "pl": "Pracownicy",
+    "fr": "Employés",
+    "es": "Empleados"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:09.680Z" },
+  "version": "1.0.0"
+},
+{
+  "_id": { "$oid": "689a3d47e30636488260140e" },
+  "name": "expenses",
+  "tenant": "ensotek",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-11T18:58:15.314Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-11T18:58:15.313Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689a3d4753e0a7f340441d85" }
+    }
+  ],
+  "icon": "MdMoneyOff",
+  "label": {
+    "tr": "Giderler",
+    "en": "Expenses",
+    "de": "Ausgaben",
+    "pl": "Wydatki",
+    "fr": "Dépenses",
+    "es": "Gastos"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:09.840Z" },
+  "version": "1.0.0"
+},
+{
+  "_id": { "$oid": "689a3d47e30636488260140f" },
+  "name": "files",
+  "tenant": "ensotek",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-11T18:58:15.507Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-11T18:58:15.507Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689a3d4753e0a7f340441d8d" }
+    }
+  ],
+  "icon": "MdFolder",
+  "label": {
+    "tr": "Dosyalar",
+    "en": "Files",
+    "de": "Dateien",
+    "pl": "Pliki",
+    "fr": "Fichiers",
+    "es": "Archivos"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:10.044Z" },
+  "version": "1.0.0"
+},
+{
+  "_id": { "$oid": "689a3d47e306364882601410" },
+  "name": "invoicing",
+  "tenant": "ensotek",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-11T18:58:15.655Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-11T18:58:15.655Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689a3d4753e0a7f340441d93" }
+    }
+  ],
+  "icon": "MdRequestQuote",
+  "label": {
+    "tr": "Faturalandırma",
+    "en": "Invoicing",
+    "de": "Rechnungsstellung",
+    "pl": "Fakturowanie",
+    "fr": "Facturation",
+    "es": "Facturación"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:10.191Z" },
+  "version": "1.0.0"
+},
+{
+  "_id": { "$oid": "689a3d48e306364882601411" },
+  "name": "operationsjobs",
+  "tenant": "ensotek",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-11T18:58:16.184Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-11T18:58:16.184Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689a3d4853e0a7f340441da9" }
+    }
+  ],
+  "icon": "MdPrecisionManufacturing",
+  "label": {
+    "tr": "Operasyon İşleri",
+    "en": "Operations Jobs",
+    "de": "Betriebsaufgaben",
+    "pl": "Zadania operacyjne",
+    "fr": "Tâches opérationnelles",
+    "es": "Tareas operativas"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:10.791Z" },
+  "version": "1.0.0"
+},
+{
+  "_id": { "$oid": "689a3d48e306364882601412" },
+  "name": "operationstemplates",
+  "tenant": "ensotek",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-11T18:58:16.235Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-11T18:58:16.234Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689a3d4853e0a7f340441dab" }
+    }
+  ],
+  "icon": "MdSettingsApplications",
+  "label": {
+    "tr": "Operasyon Şablonları",
+    "en": "Operations Templates",
+    "de": "Operationsvorlagen",
+    "pl": "Szablony operacyjne",
+    "fr": "Modèles d’opérations",
+    "es": "Plantillas de operaciones"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:10.841Z" },
+  "version": "1.0.0"
+},
+{
+  "_id": { "$oid": "689a3d48e306364882601413" },
+  "name": "payments",
+  "tenant": "ensotek",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-11T18:58:16.343Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-11T18:58:16.343Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689a3d4853e0a7f340441daf" }
+    }
+  ],
+  "icon": "MdCreditCard",
+  "label": {
+    "tr": "Ödemeler",
+    "en": "Payments",
+    "de": "Zahlungen",
+    "pl": "Płatności",
+    "fr": "Paiements",
+    "es": "Pagos"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:10.942Z" },
+  "version": "1.0.0"
+},
+{
+  "_id": { "$oid": "689a3d48e306364882601414" },
+  "tenant": "ensotek",
+  "name": "pricelist",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-11T18:58:16.463Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-11T18:58:16.462Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689a3d4853e0a7f340441db3" }
+    }
+  ],
+  "icon": "MdLocalOffer",
+  "label": {
+    "tr": "Fiyat Listesi",
+    "en": "Price List",
+    "de": "Preisliste",
+    "pl": "Cennik",
+    "fr": "Tarifs",
+    "es": "Lista de precios"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:11.043Z" },
+  "version": "1.0.0"
+},
+{
+  "_id": { "$oid": "689a3d48e306364882601415" },
+  "name": "reports",
+  "tenant": "ensotek",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-11T18:58:16.705Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-11T18:58:16.705Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689a3d4853e0a7f340441dbd" }
+    }
+  ],
+  "icon": "MdBarChart",
+  "label": {
+    "tr": "Raporlar",
+    "en": "Reports",
+    "de": "Berichte",
+    "pl": "Raporty",
+    "fr": "Rapports",
+    "es": "Informes"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:11.291Z" },
+  "version": "1.0.0"
+},
+{
+  "_id": { "$oid": "689a3d48e306364882601416" },
+  "name": "scheduling",
+  "tenant": "ensotek",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-11T18:58:16.812Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-11T18:58:16.812Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689a3d4853e0a7f340441dc1" }
+    }
+  ],
+  "icon": "MdSchedule",
+  "label": {
+    "tr": "Planlama",
+    "en": "Scheduling",
+    "de": "Terminplanung",
+    "pl": "Planowanie",
+    "fr": "Planification",
+    "es": "Programación"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:11.391Z" },
+  "version": "1.0.0"
+},
+{
+  "_id": { "$oid": "689a3d48e306364882601417" },
+  "tenant": "ensotek",
+  "name": "servicecatalog",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-11T18:58:16.906Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-11T18:58:16.906Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689a3d4853e0a7f340441dc5" }
+    }
+  ],
+  "icon": "MdLibraryBooks",
+  "label": {
+    "tr": "Hizmet Kataloğu",
+    "en": "Service Catalog",
+    "de": "Servicekatalog",
+    "pl": "Katalog usług",
+    "fr": "Catalogue de services",
+    "es": "Catálogo de servicios"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:11.490Z" },
+  "version": "1.0.0"
+},
+{
+  "_id": { "$oid": "689a3d49e306364882601418" },
+  "name": "timetracking",
+  "tenant": "ensotek",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-11T18:58:17.657Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-11T18:58:17.656Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689a3d4953e0a7f340441de3" }
+    }
+  ],
+  "icon": "MdTimer",
+  "label": {
+    "tr": "Zaman Takibi",
+    "en": "Time Tracking",
+    "de": "Zeiterfassung",
+    "pl": "Rejestrowanie czasu",
+    "fr": "Suivi du temps",
+    "es": "Seguimiento del tiempo"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:12.253Z" },
+  "version": "1.0.0"
+},
+{
+  "_id": { "$oid": "689bee26e3063648826014ca" },
+  "name": "neighborhood",
+  "tenant": "ensotek",
+  "__v": 0,
+  "createdAt": { "$date": "2025-08-13T01:45:10.494Z" },
+  "enabled": true,
+  "history": [
+    {
+      "version": "1.0.0",
+      "by": "seed",
+      "date": { "$date": "2025-08-13T01:45:10.494Z" },
+      "note": "Module created by seed",
+      "_id": { "$oid": "689bee26bbb39bcd0413a933" }
+    }
+  ],
+  "icon": "MdPlace",
+  "label": {
+    "tr": "Mahalle",
+    "en": "Neighborhood",
+    "de": "Nachbarschaft",
+    "pl": "Sąsiedztwo",
+    "fr": "Quartier",
+    "es": "Vecindario"
+  },
+  "language": "en",
+  "order": 0,
+  "roles": ["admin"],
+  "routes": [],
+  "statsKey": "",
+  "updatedAt": { "$date": "2025-08-13T01:45:10.494Z" },
+  "version": "1.0.0"
+}
+]

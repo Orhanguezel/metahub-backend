@@ -1,0 +1,18 @@
+{
+  "tenant.resolve.fail": "Le locataire n’a pas pu être résolu.",
+  "dashboard.charts.success": "Graphiques générés.",
+  "dashboard.charts.noModules": "Aucun module n’est configuré pour le tableau de bord.",
+  "dashboard.charts.error": "Une erreur est survenue lors de la génération des graphiques.",
+  "dashboard.logs.success": "{count} événements récents récupérés.",
+  "dashboard.logs.error": "Échec du chargement des journaux.",
+  "dashboard.all.success": "Éléments chargés : {parts}.",
+  "dashboard.all.error": "La requête combinée du tableau de bord a échoué.",
+  "dashboard.stats.empty": "Aucun module n’est configuré pour les statistiques.",
+  "dashboard.stats.success": "Statistiques générées.",
+  "dashboard.stats.error": "Échec du chargement des statistiques.",
+  "dashboard.overview.success": "Vue d’ensemble prête.",
+  "dashboard.overview.empty": "Aucun module n’est configuré pour la vue d’ensemble.",
+  "dashboard.overview.error": "Échec du chargement de la vue d’ensemble.",
+  "dashboard.report.success": "Rapport prêt.",
+  "dashboard.report.error": "Échec de la génération du rapport."
+}

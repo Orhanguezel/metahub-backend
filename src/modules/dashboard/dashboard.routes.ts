@@ -1,44 +1,50 @@
-import express from "express";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { getAnalyticsLogs } from "./dashboard.log.controller";
-import { getDashboardStats } from "./dashboard.controller";
-import {
-  getMonthlyOrders,
-  getMonthlyRevenue,
-} from "./dashboard.chart.controller";
-import {
-  getTopProducts,
-  getUserRoleStats,
-} from "./dashboard.report.controller";
-import { getDailyOverview } from "./dashboard.overview.controller";
+import { Router } from "express";
+import { getDashboardAll } from "./dashboard.controller";
+import { getDashboardOverview } from "./dashboard.overview.controller";
+import { getDashboardStats } from "./dashboard.stats.controller";
+import { getDashboardCharts } from "./dashboard.chart.controller";
+import { getDashboardLogs } from "./dashboard.log.controller";
+import { getDashboardReport } from "./dashboard.report.controller";
+import logger from "@/core/middleware/logger/logger";
+import type { SupportedLocale } from "@/types/common";
 
-// ✅ VALIDATION
-import {
-  validateGetAnalyticsLogs,
-  validateChartQuery,
-  validateReportQuery,
-} from "./dashboard.validation";
+// İsteğe bağlı: Tenant ve locale bağlamını zenginleştir
+const setDashboardContext = (req: any, _res: any, next: any) => {
+  // Locale – query > header(x-locale) > Accept-Language > default
+  const qLng = (req.query.lang || req.query.locale || "").toString().split(",")[0].trim();
+  const hLng = (req.headers["x-locale"] || req.headers["accept-language"] || "").toString().split(",")[0].trim();
+  const locale = (qLng || hLng || "en") as SupportedLocale;
+  req.locale = locale;
 
-const router = express.Router();
+  // Debug amaçlı minimal giriş logu (controller’lar ayrıntılı logluyor)
+  logger.withReq.debug(req, "[DASHBOARD] route hit", {
+    module: "dashboard",
+    path: req.originalUrl,
+    method: req.method,
+  });
+  next();
+};
 
-// 🔐 Tüm dashboard endpointleri admin yetkisi ister
-router.use(authenticate, authorizeRoles("admin"));
+const router = Router();
+router.use(setDashboardContext);
 
-// Dashboard ana kartlar/statistik
-router.get("/", getDashboardStats);
+/** v2 endpoints (tenant-aware controller’lar) */
+router.get("/", getDashboardAll);
+router.get("/overview", getDashboardOverview);
+router.get("/stats", getDashboardStats);
+router.get("/charts", getDashboardCharts); // v1 uyumluluk dataset
+router.get("/logs", getDashboardLogs);
+router.get("/report", getDashboardReport);
 
-// Grafikler
-router.get("/charts/orders", validateChartQuery, getMonthlyOrders);
-router.get("/charts/revenue", validateChartQuery, getMonthlyRevenue);
-
-// Raporlar
-router.get("/reports/top-products", validateReportQuery, getTopProducts);
-router.get("/reports/user-roles", validateReportQuery, getUserRoleStats);
-
-// Günlük özet
-router.get("/daily-overview", getDailyOverview);
-
-// Analytics logları
-router.get("/logs", validateGetAnalyticsLogs, getAnalyticsLogs);
+/** Opsiyonel: hızlı sağlık kontrolü */
+router.get("/_health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    module: "dashboard",
+    message: "ok",
+    locale: (req as any).locale || "en",
+    time: new Date().toISOString(),
+  });
+});
 
 export default router;

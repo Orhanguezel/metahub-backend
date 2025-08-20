@@ -1,0 +1,18 @@
+{
+  "tenant.resolve.fail": "No se pudo resolver el inquilino.",
+  "dashboard.charts.success": "Gráficos generados.",
+  "dashboard.charts.noModules": "No hay módulos configurados para el panel.",
+  "dashboard.charts.error": "Se produjo un error al generar los gráficos.",
+  "dashboard.logs.success": "Se recuperaron {count} eventos recientes.",
+  "dashboard.logs.error": "No se pudieron cargar los registros.",
+  "dashboard.all.success": "Secciones cargadas: {parts}.",
+  "dashboard.all.error": "La solicitud combinada del panel falló.",
+  "dashboard.stats.empty": "No hay módulos configurados para estadísticas.",
+  "dashboard.stats.success": "Estadísticas generadas.",
+  "dashboard.stats.error": "No se pudieron cargar las estadísticas.",
+  "dashboard.overview.success": "Resumen general listo.",
+  "dashboard.overview.empty": "No hay módulos configurados para el resumen general.",
+  "dashboard.overview.error": "No se pudo cargar el resumen general.",
+  "dashboard.report.success": "Informe listo.",
+  "dashboard.report.error": "No se pudo generar el informe."
+}

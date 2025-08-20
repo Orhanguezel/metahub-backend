@@ -1,0 +1,18 @@
+{
+  "tenant.resolve.fail": "Tenant could not be resolved.",
+  "dashboard.charts.success": "Charts generated.",
+  "dashboard.charts.noModules": "No modules configured for dashboard.",
+  "dashboard.charts.error": "An error occurred while generating charts.",
+  "dashboard.logs.success": "Retrieved {count} recent events.",
+  "dashboard.logs.error": "Failed to load logs.",
+  "dashboard.all.success": "Loaded parts: {parts}.",
+  "dashboard.all.error": "Combined dashboard request failed.",
+  "dashboard.stats.empty": "No modules configured for stats.",
+  "dashboard.stats.success": "Stats generated.",
+  "dashboard.stats.error": "Failed to load stats.",
+  "dashboard.overview.success": "Overview is ready.",
+  "dashboard.overview.empty": "No modules configured for overview.",
+  "dashboard.overview.error": "Failed to load overview.",
+  "dashboard.report.success": "Report is ready.",
+  "dashboard.report.error": "Failed to generate report."
+}
