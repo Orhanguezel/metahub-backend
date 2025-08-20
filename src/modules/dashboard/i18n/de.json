@@ -1,0 +1,18 @@
+{
+  "tenant.resolve.fail": "Mandant konnte nicht ermittelt werden.",
+  "dashboard.charts.success": "Diagramme wurden erstellt.",
+  "dashboard.charts.noModules": "Für das Dashboard sind keine Module konfiguriert.",
+  "dashboard.charts.error": "Beim Erzeugen der Diagramme ist ein Fehler aufgetreten.",
+  "dashboard.logs.success": "Die letzten {count} Ereignisse wurden abgerufen.",
+  "dashboard.logs.error": "Protokolle konnten nicht geladen werden.",
+  "dashboard.all.success": "Geladene Teile: {parts}.",
+  "dashboard.all.error": "Kombinierte Dashboard-Anfrage fehlgeschlagen.",
+  "dashboard.stats.empty": "Für Statistiken sind keine Module konfiguriert.",
+  "dashboard.stats.success": "Statistiken wurden erstellt.",
+  "dashboard.stats.error": "Statistiken konnten nicht geladen werden.",
+  "dashboard.overview.success": "Übersicht ist bereit.",
+  "dashboard.overview.empty": "Für die Übersicht sind keine Module konfiguriert.",
+  "dashboard.overview.error": "Übersicht konnte nicht geladen werden.",
+  "dashboard.report.success": "Bericht ist bereit.",
+  "dashboard.report.error": "Bericht konnte nicht erstellt werden."
+}

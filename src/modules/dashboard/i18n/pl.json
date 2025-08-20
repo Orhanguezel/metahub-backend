@@ -1,0 +1,18 @@
+{
+  "tenant.resolve.fail": "Nie udało się ustalić tenanta.",
+  "dashboard.charts.success": "Wykresy wygenerowano.",
+  "dashboard.charts.noModules": "Brak skonfigurowanych modułów dla dashboardu.",
+  "dashboard.charts.error": "Wystąpił błąd podczas generowania wykresów.",
+  "dashboard.logs.success": "Pobrano {count} ostatnich zdarzeń.",
+  "dashboard.logs.error": "Nie udało się wczytać logów.",
+  "dashboard.all.success": "Załadowane elementy: {parts}.",
+  "dashboard.all.error": "Zbiorcze żądanie dashboardu nie powiodło się.",
+  "dashboard.stats.empty": "Brak skonfigurowanych modułów dla statystyk.",
+  "dashboard.stats.success": "Statystyki wygenerowano.",
+  "dashboard.stats.error": "Nie udało się wczytać statystyk.",
+  "dashboard.overview.success": "Przegląd gotowy.",
+  "dashboard.overview.empty": "Brak skonfigurowanych modułów dla przeglądu.",
+  "dashboard.overview.error": "Nie udało się wczytać przeglądu.",
+  "dashboard.report.success": "Raport gotowy.",
+  "dashboard.report.error": "Nie udało się wygenerować raportu."
+}

@@ -1,0 +1,18 @@
+{
+  "tenant.resolve.fail": "Tenant çözümlenemedi.",
+  "dashboard.charts.success": "Grafikler üretildi.",
+  "dashboard.charts.noModules": "Dashboard için yapılandırılmış modül yok.",
+  "dashboard.charts.error": "Grafikler oluşturulurken bir hata oluştu.",
+  "dashboard.logs.success": "Son {count} olay getirildi.",
+  "dashboard.logs.error": "Loglar yüklenemedi.",
+  "dashboard.all.success": "Yüklenen bölümler: {parts}.",
+  "dashboard.all.error": "Birleşik dashboard isteği başarısız.",
+  "dashboard.stats.empty": "İstatistik için yapılandırılmış modül yok.",
+  "dashboard.stats.success": "İstatistikler oluşturuldu.",
+  "dashboard.stats.error": "İstatistikler yüklenemedi.",
+  "dashboard.overview.success": "Genel bakış hazır.",
+  "dashboard.overview.empty": "Genel bakış için yapılandırılmış modül yok.",
+  "dashboard.overview.error": "Genel bakış yüklenemedi.",
+  "dashboard.report.success": "Rapor hazır.",
+  "dashboard.report.error": "Rapor oluşturulamadı."
+}
