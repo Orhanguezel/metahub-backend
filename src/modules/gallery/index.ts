@@ -1,13 +1,14 @@
 import express from "express";
-import galleryRoutes from "./gallery.routes";
-import  {Gallery } from "./gallery.models";
-import * as publicController from "./gallery.public.controller";
-import * as adminController from "./gallery.admin.controller";
+import adminRoutes from "./admin.routes";
+import publicRoutes from "./public.routes";
+
 
 const router = express.Router();
-router.use("/", galleryRoutes);
 
-export { Gallery, publicController, adminController };
-export * from "./gallery.validation";
+// Admin panel erişimi
+router.use("/admin", adminRoutes);
+
+// Public erişim
+router.use("/", publicRoutes);
 
 export default router;

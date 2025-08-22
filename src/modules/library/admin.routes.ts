@@ -1,4 +1,3 @@
-// src/modules/library/admin.library.routes.ts
 import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
@@ -7,7 +6,7 @@ import {
   updateLibrary,
   deleteLibrary,
   createLibrary,
-  incrementLibraryDownloadCount, // YENİ
+  incrementLibraryDownloadCount,
 } from "./admin.controller";
 
 import {
@@ -28,15 +27,13 @@ router.use(authenticate, authorizeRoles("admin", "moderator"));
 
 // 🌟 Admin Endpoints
 router.get("/", validateAdminQuery, adminGetAllLibrary);
-
 router.get("/:id", validateObjectId("id"), adminGetLibraryById);
 
 router.post(
   "/",
   uploadTypeWrapper("library"),
-  // Çoklu upload: images + files (aynı anda destekli)
   upload("library").fields([
-    { name: "images", maxCount: 5 },
+    { name: "images", maxCount: 8 },
     { name: "files", maxCount: 10 },
   ]),
   transformNestedFields(["title", "summary", "content", "tags"]),
@@ -48,7 +45,7 @@ router.put(
   "/:id",
   uploadTypeWrapper("library"),
   upload("library").fields([
-    { name: "images", maxCount: 5 },
+    { name: "images", maxCount: 8 },
     { name: "files", maxCount: 10 },
   ]),
   transformNestedFields([
@@ -56,8 +53,13 @@ router.put(
     "summary",
     "content",
     "tags",
+    // ↓ silme/sıralama alanları
     "removedImages",
     "removedFiles",
+    "removeImageIds",
+    "removedImageIds",
+    "existingImagesOrderIds",
+    "existingImagesOrder",
   ]),
   validateObjectId("id"),
   validateUpdateLibrary,
@@ -66,11 +68,6 @@ router.put(
 
 router.delete("/:id", validateObjectId("id"), deleteLibrary);
 
-// 🌟 Download sayacı public endpoint (isteğe bağlı, gerekirse authenticate eklenebilir)
-router.post(
-  "/:id/increment-download",
-  validateObjectId("id"),
-  incrementLibraryDownloadCount
-);
+router.post("/:id/increment-download", validateObjectId("id"), incrementLibraryDownloadCount);
 
 export default router;

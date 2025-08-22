@@ -24,7 +24,6 @@ export interface IGallery extends Document {
   category: Types.ObjectId;
   isPublished: boolean;
   publishedAt?: Date;
-  comments: Types.ObjectId[];
   isActive: boolean;
   order: number;
   createdAt: Date;

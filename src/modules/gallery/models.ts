@@ -40,7 +40,6 @@ const GallerySchema = new Schema<IGallery>(
     category: { type: Schema.Types.ObjectId, ref: "gallerycategory", required: true },
     isPublished: { type: Boolean, default: false, index: true },
     publishedAt: { type: Date },
-    comments: { type: [Schema.Types.ObjectId], ref: "comment", default: [] },
     isActive: { type: Boolean, default: true, index: true },
     order: { type: Number, default: 0, index: true },
   },
@@ -55,7 +54,6 @@ GallerySchema.index({ tenant: 1, createdAt: -1 });
 GallerySchema.pre("validate", function (next) {
   if (!Array.isArray(this.images)) this.images = [];
   if (!Array.isArray(this.tags)) this.tags = [];
-  if (!Array.isArray(this.comments)) this.comments = [];
 
   if (!this.slug) {
     const first =

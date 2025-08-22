@@ -15,7 +15,7 @@ import {
   BookingSlotOverride,
 } from "@/modules/bookingslot/bookingslot.models";
 import { Coupon } from "@/modules/coupon/coupon.models";
-import { Gallery } from "@/modules/gallery/gallery.models";
+import { Gallery } from "@/modules/gallery/models";
 import { GalleryCategory } from "@/modules/gallerycategory/models";
 import { Services } from "@/modules/services/models";
 import { ServicesCategory } from "@/modules/servicescategory/category.models";

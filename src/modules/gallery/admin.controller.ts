@@ -1,3 +1,4 @@
+// src/modules/gallery/gallery.admin.controller.ts
 import { Request, Response, RequestHandler } from "express";
 import asyncHandler from "express-async-handler";
 import { isValidObjectId, Types } from "mongoose";
@@ -5,7 +6,6 @@ import slugify from "slugify";
 import path from "path";
 import fs from "fs";
 import { v2 as cloudinary } from "cloudinary";
-
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 import {
@@ -30,15 +30,17 @@ const parseIfJson = (v: unknown): unknown => {
   try { return typeof v === "string" ? JSON.parse(v) : v; } catch { return v; }
 };
 
+// Partial TL → full TL
 const ensureTL = (v: unknown): TLFull => {
   return fillAllLocales((parseIfJson(v) as TL) || {});
 };
 
+// tags: unknown → string[]
 const normalizeTags = (tags: unknown): string[] => {
   const parsed = parseIfJson(tags);
   let arr: string[] = [];
   if (Array.isArray(parsed)) {
-    arr = (parsed as unknown[]).map((s) => String(s)).map((s) => s.trim()).filter(Boolean);
+    arr = (parsed as unknown[]).map((s) => String(s).trim()).filter(Boolean);
   } else if (typeof parsed === "string") {
     arr = parsed.split(",").map((s) => s.trim()).filter(Boolean);
   }
@@ -82,7 +84,10 @@ export const getAllGalleryItems: RequestHandler = asyncHandler(async (req, res) 
   const filter: any = { tenant: (req as any).tenant };
   if (type) filter.type = type;
   if (tag) filter.tags = tag;
-  if (category && isValidObjectId(category)) filter.category = category;
+
+  const cat = coerceObjectId(category);
+  if (cat) filter.category = cat;
+
   if (typeof isPublished === "string") filter.isPublished = isPublished === "true";
   if (typeof isActive === "string") filter.isActive = isActive === "true";
 
@@ -96,18 +101,29 @@ export const getAllGalleryItems: RequestHandler = asyncHandler(async (req, res) 
     ];
   }
 
-  const pageNum = Math.max(1, parseInt(String(page), 10) || 1);
-  const lim = Math.max(1, Math.min(200, parseInt(String(limit), 10) || 50));
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const lim = Math.max(1, Math.min(200, parseInt(limit, 10) || 50));
   const skip = (pageNum - 1) * lim;
 
   const [items, total] = await Promise.all([
-    Gallery.find(filter).sort({ order: 1, createdAt: -1 }).skip(skip).limit(lim).lean(),
+    Gallery.find(filter)
+      .populate([{ path: "category", select: "name slug" }])
+      .sort({ order: 1, createdAt: -1 })
+      .skip(skip)
+      .limit(lim)
+      .lean(),
     Gallery.countDocuments(filter),
   ]);
 
+  const data = (items || []).map((it: any) => ({
+    ...it,
+    images: Array.isArray(it.images) ? it.images : [],
+    tags: Array.isArray(it.tags) ? it.tags : [],
+    comments: Array.isArray(it.comments) ? it.comments : [],
+  }));
+
   res.set("X-Total-Count", String(total));
-  res.status(200).json(items);
-  return;
+  res.status(200).json({ success: true, message: t("fetched"), data, meta: { total, page: pageNum, limit: lim } });
 });
 
 /* ---------- CREATE ---------- */
@@ -127,7 +143,7 @@ export const createGalleryItem: RequestHandler = asyncHandler(async (req, res) =
     author,
   } = req.body;
 
-  const title = ensureTL(req.body.title);
+  const title   = ensureTL(req.body.title);
   const summary = ensureTL(req.body.summary);
   const content = ensureTL(req.body.content);
 
@@ -159,9 +175,7 @@ export const createGalleryItem: RequestHandler = asyncHandler(async (req, res) =
   const doc = await Gallery.create({
     tenant: (req as any).tenant,
     type,
-    title,
-    summary,
-    content,
+    title, summary, content,
     slug: uniqueSlug,
     images,
     tags: tagList,
@@ -174,8 +188,7 @@ export const createGalleryItem: RequestHandler = asyncHandler(async (req, res) =
   });
 
   logger.withReq.info(req, t("created"), { ...getRequestContext(req), id: doc._id });
-  res.status(201).json(doc);
-  return;
+  res.status(201).json({ success: true, message: t("created"), data: doc });
 });
 
 /* ---------- UPDATE ---------- */
@@ -192,7 +205,7 @@ export const updateGalleryItem: RequestHandler = asyncHandler(async (req, res) =
 
   const U = req.body as Record<string, unknown>;
 
-  if (U.title !== undefined) doc.title = mergeLocalesForUpdate(doc.title, U.title);
+  if (U.title   !== undefined) doc.title   = mergeLocalesForUpdate(doc.title,   U.title);
   if (U.summary !== undefined) doc.summary = mergeLocalesForUpdate(doc.summary, U.summary);
   if (U.content !== undefined) doc.content = mergeLocalesForUpdate(doc.content, U.content);
 
@@ -209,10 +222,10 @@ export const updateGalleryItem: RequestHandler = asyncHandler(async (req, res) =
     doc.category = cat;
   }
 
-  if (U.tags !== undefined) doc.tags = normalizeTags(U.tags);
-  if (U.order !== undefined) doc.order = Number.isFinite(+(U.order as any)) ? +(U.order as any) : doc.order;
+  if (U.tags !== undefined)   doc.tags  = normalizeTags(U.tags);
+  if (U.order !== undefined)  doc.order = Number.isFinite(+(U.order as any)) ? +(U.order as any) : doc.order;
   if (U.isActive !== undefined) doc.isActive = U.isActive === true || U.isActive === "true";
-  if (U.author !== undefined) doc.author = String(U.author);
+  if (U.author !== undefined)   doc.author   = String(U.author);
 
   if (U.isPublished !== undefined) {
     const want = U.isPublished === true || U.isPublished === "true";
@@ -227,28 +240,25 @@ export const updateGalleryItem: RequestHandler = asyncHandler(async (req, res) =
       let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
       if (shouldProcessImage()) {
         const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
-        thumbnail = processed.thumbnail;
-        webp = processed.webp;
+        thumbnail = processed.thumbnail; webp = processed.webp;
       }
       doc.images.push({ url: imageUrl, thumbnail, webp, publicId: (file as any).public_id });
     }
   }
 
-  // Silme (ids)
+  // Silinecek görseller: removeImageIds[] veya removedImages
   const rawRemove = (U as any).removeImageIds ?? (U as any)["removeImageIds[]"];
   const removeIds: string[] = Array.isArray(rawRemove)
     ? (rawRemove as unknown[]).map((v) => String(v))
-    : typeof rawRemove === "string" && rawRemove
-      ? [String(rawRemove)]
-      : [];
+    : typeof rawRemove === "string" && rawRemove ? [String(rawRemove)] : [];
   if (removeIds.length) {
     const ids = new Set<string>(removeIds.map((s) => String(s)));
     doc.images = (doc.images || []).filter((img: any) => (img._id ? !ids.has(String(img._id)) : true));
   }
 
-  // Silme (by url/publicId)
   if (U.removedImages) {
     try {
+      // About paternindeki gibi: [{ url?, publicId? }, ...]
       const removed: Array<{ url?: string; publicId?: string }> = JSON.parse(String(U.removedImages));
       const byUrl = new Set<string>(removed.map((r) => r.url).filter((u): u is string => !!u));
       doc.images = (doc.images || []).filter((img) => !byUrl.has(img.url));
@@ -282,8 +292,7 @@ export const updateGalleryItem: RequestHandler = asyncHandler(async (req, res) =
 
   await doc.save();
   logger.withReq.info(req, t("updated"), { ...getRequestContext(req), id: doc._id });
-  res.status(200).json(doc.toJSON());
-  return;
+  res.status(200).json({ success: true, message: t("updated"), data: doc });
 });
 
 /* ---------- TOGGLE PUBLISH ---------- */
@@ -300,8 +309,11 @@ export const togglePublishGalleryItem: RequestHandler = asyncHandler(async (req,
   doc.publishedAt = doc.isPublished ? (doc.publishedAt || new Date()) : undefined;
 
   await doc.save();
-  res.status(200).json(doc);
-  return;
+  res.status(200).json({
+    success: true,
+    message: doc.isPublished ? "published" : "unpublished",
+    data: doc,
+  });
 });
 
 /* ---------- SOFT DELETE / RESTORE ---------- */
@@ -316,8 +328,7 @@ export const softDeleteGalleryItem: RequestHandler = asyncHandler(async (req, re
 
   doc.isActive = false;
   await doc.save();
-  res.status(200).json(doc);
-  return;
+  res.status(200).json({ success: true, message: "archived", data: doc });
 });
 
 export const restoreGalleryItem: RequestHandler = asyncHandler(async (req, res) => {
@@ -331,19 +342,20 @@ export const restoreGalleryItem: RequestHandler = asyncHandler(async (req, res) 
 
   doc.isActive = true;
   await doc.save();
-  res.status(200).json(doc);
-  return;
+  res.status(200).json({ success: true, message: "restored", data: doc });
 });
 
 /* ---------- HARD DELETE ---------- */
 export const deleteGalleryItem: RequestHandler = asyncHandler(async (req, res) => {
   const { Gallery } = await getTenantModels(req);
-  const { id } = req.params;
+  const locale: SupportedLocale = (req as any).locale || "tr";
+  const t = (k: string, p?: any) => translate(k, locale, translations, p);
 
-  if (!isValidObjectId(id)) { res.status(400).json({ success: false, message: "invalidId" }); return; }
+  const { id } = req.params;
+  if (!isValidObjectId(id)) { res.status(400).json({ success: false, message: t("invalidId") }); return; }
 
   const doc = await Gallery.findOne({ _id: id, tenant: (req as any).tenant });
-  if (!doc) { res.status(404).json({ success: false, message: "notFound" }); return; }
+  if (!doc) { res.status(404).json({ success: false, message: t("notFound") }); return; }
 
   for (const img of doc.images || []) {
     try {
@@ -354,8 +366,7 @@ export const deleteGalleryItem: RequestHandler = asyncHandler(async (req, res) =
   }
 
   await doc.deleteOne();
-  res.status(200).json({ ok: true });
-  return;
+  res.status(200).json({ success: true, message: t("deleted") });
 });
 
 /* ---------- BATCH ---------- */
@@ -366,21 +377,12 @@ export const batchPublishGalleryItems: RequestHandler = asyncHandler(async (req,
   const valid = (Array.isArray(ids) ? ids : []).filter((id) => isValidObjectId(id));
   if (!valid.length) { res.status(400).json({ success: false, message: "noValidIds" }); return; }
 
-  if (publish) {
-    const r = await Gallery.updateMany(
-      { _id: { $in: valid }, tenant: (req as any).tenant },
-      { $set: { isPublished: true, publishedAt: new Date() } }
-    );
-    res.status(200).json({ modified: r.modifiedCount });
-    return;
-  } else {
-    const r = await Gallery.updateMany(
-      { _id: { $in: valid }, tenant: (req as any).tenant },
-      { $set: { isPublished: false }, $unset: { publishedAt: "" } }
-    );
-    res.status(200).json({ modified: r.modifiedCount });
-    return;
-  }
+  const update = publish
+    ? { $set: { isPublished: true, publishedAt: new Date() } }
+    : { $set: { isPublished: false }, $unset: { publishedAt: "" } };
+
+  const r = await Gallery.updateMany({ _id: { $in: valid }, tenant: (req as any).tenant }, update);
+  res.status(200).json({ success: true, data: { modified: r.modifiedCount } });
 });
 
 export const batchDeleteGalleryItems: RequestHandler = asyncHandler(async (req, res) => {
@@ -402,6 +404,24 @@ export const batchDeleteGalleryItems: RequestHandler = asyncHandler(async (req, 
     await doc.deleteOne();
   }
 
-  res.status(200).json({ deleted: docs.length });
-  return;
+  res.status(200).json({ success: true, data: { deleted: docs.length } });
+});
+
+/* ---------- GET ONE (Admin) ---------- */
+export const getGalleryItemByIdAdmin: RequestHandler = asyncHandler(async (req, res) => {
+  const { Gallery } = await getTenantModels(req);
+  const locale: SupportedLocale = (req as any).locale || "tr";
+  const t = (k: string, p?: any) => translate(k, locale, translations, p);
+
+  const { id } = req.params;
+  if (!isValidObjectId(id)) { res.status(400).json({ success: false, message: t("invalidId") }); return; }
+
+  const item = await Gallery.findOne({ _id: id, tenant: (req as any).tenant }).lean();
+  if (!item) { res.status(404).json({ success: false, message: t("notFound") }); return; }
+
+  res.status(200).json({ success: true, data: {
+    ...item,
+    images: Array.isArray(item.images) ? item.images : [],
+    tags: Array.isArray(item.tags) ? item.tags : [],
+  }});
 });

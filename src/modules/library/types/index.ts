@@ -1,11 +1,12 @@
 import type { SupportedLocale } from "@/types/common";
-import type { Types, Document } from "mongoose";
+import type { Types } from "mongoose";
 
 // Çoklu dil etiket
 export type TranslatedLabel = { [key in SupportedLocale]: string };
 
 // Görsel dosya
 export interface ILibraryImage {
+  _id?: Types.ObjectId;           // alt doküman id (sıralama/silme için)
   url: string;
   thumbnail: string;
   webp?: string;
@@ -14,6 +15,7 @@ export interface ILibraryImage {
 
 // Genel dosya (pdf, docx, xlsx vs.)
 export interface ILibraryFile {
+  _id?: Types.ObjectId;           // opsiyonel
   url: string;
   name: string;
   size?: number;
