@@ -1,5 +1,4 @@
 import { Schema, Model, models, model, Types } from "mongoose";
-import type { SupportedLocale } from "@/types/common";
 import { SUPPORTED_LOCALES } from "@/types/common";
 import type { IAbout, IAboutImage } from "./types";
 

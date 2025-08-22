@@ -1,6 +1,6 @@
 import { body, param, query } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
-import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
+import { SUPPORTED_LOCALES } from "@/types/common";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import { t as translate } from "@/core/utils/i18n/translate";
@@ -74,6 +74,16 @@ export const validateUpdateGallery = [
         throw new Error(t("validation.invalidRemovedImages"));
       }
     }),
+  // (opsiyonel) mevcut görsellerin sırası string[] JSON
+  body("existingImagesOrder").optional().custom((val) => {
+    try {
+      const parsed = typeof val === "string" ? JSON.parse(val) : val;
+      if (!Array.isArray(parsed)) throw new Error();
+      return true;
+    } catch {
+      return false;
+    }
+  }),
   validateRequest,
 ];
 
@@ -105,6 +115,6 @@ export const validatePublicQuery = [
   validateRequest,
 ];
 
-/* (İsterseniz) Eski isimlerle alias export — router değişmeden çalışsın */
+/* Eski isimlerle alias */
 export const validateUploadGallery = validateCreateGallery;
 export const validateGalleryIdParam = (reqField = "id") => validateObjectId(reqField);

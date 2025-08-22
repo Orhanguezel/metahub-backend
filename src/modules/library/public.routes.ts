@@ -1,10 +1,5 @@
-// src/modules/library/public.library.routes.ts
 import express from "express";
-import {
-  getAllLibrary,
-  getLibraryById,
-  getLibraryBySlug,
-} from "./public.controller";
+import { getAllLibrary, getLibraryById, getLibraryBySlug } from "./public.controller";
 import { validateObjectId } from "./validation";
 
 const router = express.Router();

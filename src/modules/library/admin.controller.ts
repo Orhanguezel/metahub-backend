@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
+import { isValidObjectId, Types } from "mongoose";
 import asyncHandler from "express-async-handler";
 import { ILibrary } from "@/modules/library/types";
-import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
 import path from "path";
 import fs from "fs";
@@ -22,275 +22,119 @@ import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 
-// -- Helpers --
-const parseIfJson = (value: any) => {
-  try {
-    return typeof value === "string" ? JSON.parse(value) : value;
-  } catch {
-    return value;
+/* ---------- helpers ---------- */
+type TL = Partial<Record<SupportedLocale, string>>;
+
+const parseIfJson = (v: unknown): unknown => {
+  try { return typeof v === "string" ? JSON.parse(v) : v; } catch { return v; }
+};
+
+const ensureTL = (v: unknown) => fillAllLocales((parseIfJson(v) as TL) || {});
+
+// tags: unknown → string[]
+const normalizeTags = (tags: unknown): string[] => {
+  const parsed = parseIfJson(tags);
+  let arr: string[] = [];
+  if (Array.isArray(parsed)) {
+    arr = parsed.map((s: any) => String(s)).map((s) => s.trim()).filter(Boolean);
+  } else if (typeof parsed === "string") {
+    arr = parsed.split(",").map((s) => s.trim()).filter(Boolean);
+  }
+  return Array.from(new Set(arr));
+};
+
+const coerceObjectId = (v: unknown): Types.ObjectId | undefined =>
+  isValidObjectId(String((v as any)?.$oid ?? v)) ? new Types.ObjectId(String((v as any)?.$oid ?? v)) : undefined;
+
+const ensureUniqueSlug = async (tenant: string, base: string, Model: any, currentId?: string): Promise<string> => {
+  let slug = base;
+  let i = 2;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const clash = await Model.findOne({ tenant, slug, ...(currentId ? { _id: { $ne: currentId } } : {}) }).lean();
+    if (!clash) return slug;
+    slug = `${base}-${i++}`;
   }
 };
 
-// ✅ CREATE
-// ... importlar ve yardımcılar yukarıdaki gibi ...
+const normalizeUrl = (u?: string) => {
+  if (!u) return "";
+  try {
+    const url = new URL(u, "http://localhost");
+    url.hash = "";
+    url.search = "";
+    return url.toString().replace(/\/+$/, "");
+  } catch {
+    return (u || "").replace(/\/+$/, "");
+  }
+};
 
-// ✅ CREATE
-export const createLibrary = asyncHandler(
-  async (req: Request, res: Response) => {
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Library } = await getTenantModels(req);
-    const t = (key: string, params?: any) =>
-      translate(key, locale, translations, params);
-
-    try {
-      let {
-        title,
-        summary,
-        content,
-        tags,
-        category,
-        isPublished,
-        publishedAt,
-      } = req.body;
-
-      title = fillAllLocales(parseIfJson(title));
-      summary = fillAllLocales(parseIfJson(summary));
-      content = fillAllLocales(parseIfJson(content));
-      tags = parseIfJson(tags);
-
-      if (typeof tags === "string") {
-        try {
-          tags = JSON.parse(tags);
-        } catch {
-          tags = [tags];
-        }
-      }
-      if (!Array.isArray(tags)) tags = [];
-
-      const images: ILibrary["images"] = [];
-      const files: ILibrary["files"] = [];
-
-      // --- Hem fields hem array için kesin kontrol ---
-      // Eğer multer.fields() ise:
-      if (
-        req.files &&
-        typeof req.files === "object" &&
-        !Array.isArray(req.files)
-      ) {
-        // images
-        if (Array.isArray((req.files as any)["images"])) {
-          for (const file of (req.files as any)["images"]) {
-            if (file.mimetype && file.mimetype.startsWith("image/")) {
-              const imageUrl = getImagePath(file);
-              let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
-              if (shouldProcessImage()) {
-                const processed = await processImageLocal(
-                  file.path,
-                  file.filename,
-                  path.dirname(file.path)
-                );
-                thumbnail = processed.thumbnail;
-                webp = processed.webp;
-              }
-              images.push({
-                url: imageUrl,
-                thumbnail,
-                webp,
-                publicId: (file as any).public_id,
-              });
-            } else {
-              console.warn(
-                "[UPLOAD] 'images' alanında image olmayan dosya yollandı:",
-                file.originalname,
-                file.mimetype
-              );
-            }
-          }
-        }
-        // files
-        if (Array.isArray((req.files as any)["files"])) {
-          for (const file of (req.files as any)["files"]) {
-            files.push({
-              url: getImagePath(file),
-              name: file.originalname,
-              size: file.size,
-              type: file.mimetype,
-              publicId: (file as any).public_id,
-            });
-          }
-        }
-      }
-
-      // Eğer multer.array() ise:
-      if (Array.isArray(req.files)) {
-        for (const file of req.files as Express.Multer.File[]) {
-          if (
-            file.fieldname === "images" &&
-            file.mimetype &&
-            file.mimetype.startsWith("image/")
-          ) {
-            const imageUrl = getImagePath(file);
-            let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
-            if (shouldProcessImage()) {
-              const processed = await processImageLocal(
-                file.path,
-                file.filename,
-                path.dirname(file.path)
-              );
-              thumbnail = processed.thumbnail;
-              webp = processed.webp;
-            }
-            images.push({
-              url: imageUrl,
-              thumbnail,
-              webp,
-              publicId: (file as any).public_id,
-            });
-          }
-          if (file.fieldname === "files") {
-            files.push({
-              url: getImagePath(file),
-              name: file.originalname,
-              size: file.size,
-              type: file.mimetype,
-              publicId: (file as any).public_id,
-            });
-          }
-        }
-      }
-
-      const nameForSlug = title?.[locale] || title?.en || "library";
-      const slug = slugify(nameForSlug, { lower: true, strict: true });
-
-      const library = await Library.create({
-        title,
-        slug,
-        summary,
-        tenant: req.tenant,
-        content,
-        tags,
-        category: isValidObjectId(category) ? category : undefined,
-        isPublished: isPublished === "true" || isPublished === true,
-        publishedAt: isPublished ? publishedAt || new Date() : undefined,
-        images,
-        files,
-        author: req.user?.name || "System",
-        isActive: true,
-        views: 0,
-        downloadCount: 0,
-      });
-
-      logger.withReq.info(req, t("created"), {
-        ...getRequestContext(req),
-        id: library._id,
-      });
-      res
-        .status(201)
-        .json({ success: true, message: t("created"), data: library });
-    } catch (err: any) {
-      logger.withReq.error(req, t("error.create_fail"), {
-        ...getRequestContext(req),
-        event: "library.create",
-        module: "library",
-        status: "fail",
-        error: err.message,
-      });
-      res.status(500).json({ success: false, message: t("error.create_fail") });
+// form alan adları esnek okunsun (simple, json, tekil)
+const pickArray = (body: any, keys: string[]) => {
+  for (const k of keys) {
+    const v = body?.[k];
+    if (v === undefined) continue;
+    if (Array.isArray(v)) return v;
+    if (typeof v === "string") {
+      try { const parsed = JSON.parse(v); if (Array.isArray(parsed)) return parsed; } catch {/* ignore */}
+      return [v];
     }
   }
-); // ✅ FINAL & CLEAN - Supports fields(), array(), add+remove images/files at once
-export const updateLibrary = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Library } = await getTenantModels(req);
-    const t = (key: string, params?: any) =>
-      translate(key, locale, translations, params);
+  return [];
+};
 
-    if (!isValidObjectId(id)) {
-      logger.withReq.warn(req, t("invalidId"), {
-        ...getRequestContext(req),
-        id,
-      });
-      res.status(400).json({ success: false, message: t("invalidId") });
-      return;
+type RemoveImgInput = { id?: string; publicId?: string; url?: string };
+const parseRemovedImages = (body: any): RemoveImgInput[] => {
+  const raw = pickArray(body, ["removedImages", "removedImages[]"]);
+  const out: RemoveImgInput[] = [];
+  for (const it of raw) {
+    if (typeof it === "string") out.push({ url: normalizeUrl(it) });
+    else if (it && typeof it === "object") {
+      const id = String((it as any)._id || (it as any).id || "");
+      const publicId = (it as any).publicId ? String((it as any).publicId) : undefined;
+      const url = (it as any).url ? normalizeUrl(String((it as any).url)) : undefined;
+      if (id || publicId || url) out.push({ id, publicId, url });
     }
+  }
+  return out;
+};
+/* ---------------------------------------- */
 
-    const library = await Library.findOne({ _id: id, tenant: req.tenant });
-    if (!library) {
-      logger.withReq.warn(req, t("notFound"), {
-        ...getRequestContext(req),
-        id,
-      });
-      res.status(404).json({ success: false, message: t("notFound") });
-      return;
-    }
+// ✅ CREATE
+export const createLibrary = asyncHandler(async (req: Request, res: Response) => {
+  const { Library } = await getTenantModels(req);
+  const locale: SupportedLocale = (req as any).locale || getLogLocale() || "tr";
+  const t = (k: string, p?: any) => translate(k, locale, translations, p);
 
-    const updates = req.body;
-    if (updates.title)
-      library.title = mergeLocalesForUpdate(
-        library.title,
-        parseIfJson(updates.title)
-      );
-    if (updates.summary)
-      library.summary = mergeLocalesForUpdate(
-        library.summary,
-        parseIfJson(updates.summary)
-      );
-    if (updates.content)
-      library.content = mergeLocalesForUpdate(
-        library.content,
-        parseIfJson(updates.content)
-      );
+  try {
+    let { title, summary, content, tags, category, isPublished, publishedAt } = req.body;
 
-    const updatableFields: (keyof ILibrary)[] = [
-      "tags",
-      "category",
-      "isPublished",
-      "publishedAt",
-    ];
-    for (const field of updatableFields) {
-      if (updates[field] !== undefined)
-        (library as any)[field] = updates[field];
-    }
+    title = ensureTL(title);
+    summary = ensureTL(summary);
+    content = ensureTL(content);
+    const tagsArr = normalizeTags(tags);
 
-    if (!Array.isArray(library.images)) library.images = [];
-    if (!Array.isArray(library.files)) library.files = [];
+    const images: ILibrary["images"] = [];
+    const files: ILibrary["files"] = [];
 
-    // ---- Multer fields() (object: {images:[], files:[]}) destegi ----
-    if (
-      req.files &&
-      typeof req.files === "object" &&
-      !Array.isArray(req.files)
-    ) {
-      // Images
+    // ---- uploads (fields) ----
+    if (req.files && typeof req.files === "object" && !Array.isArray(req.files)) {
       if (Array.isArray((req.files as any)["images"])) {
         for (const file of (req.files as any)["images"]) {
-          if (file.mimetype && file.mimetype.startsWith("image/")) {
+          if (file.mimetype?.startsWith("image/")) {
             const imageUrl = getImagePath(file);
             let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
             if (shouldProcessImage()) {
-              const processed = await processImageLocal(
-                file.path,
-                file.filename,
-                path.dirname(file.path)
-              );
-              thumbnail = processed.thumbnail;
-              webp = processed.webp;
+              const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+              thumbnail = processed.thumbnail; webp = processed.webp;
             }
-            library.images.push({
-              url: imageUrl,
-              thumbnail,
-              webp,
-              publicId: (file as any).public_id,
-            });
+            images.push({ url: imageUrl, thumbnail, webp, publicId: (file as any).public_id });
           }
         }
       }
-      // Files (PDF/doküman)
       if (Array.isArray((req.files as any)["files"])) {
         for (const file of (req.files as any)["files"]) {
-          library.files.push({
+          files.push({
             url: getImagePath(file),
             name: file.originalname,
             size: file.size,
@@ -300,35 +144,20 @@ export const updateLibrary = asyncHandler(
         }
       }
     }
-
-    // ---- Multer array() destegi ----
+    // ---- uploads (array) ----
     if (Array.isArray(req.files)) {
       for (const file of req.files as Express.Multer.File[]) {
-        if (
-          file.fieldname === "images" &&
-          file.mimetype &&
-          file.mimetype.startsWith("image/")
-        ) {
+        if (file.fieldname === "images" && file.mimetype?.startsWith("image/")) {
           const imageUrl = getImagePath(file);
           let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
           if (shouldProcessImage()) {
-            const processed = await processImageLocal(
-              file.path,
-              file.filename,
-              path.dirname(file.path)
-            );
-            thumbnail = processed.thumbnail;
-            webp = processed.webp;
+            const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+            thumbnail = processed.thumbnail; webp = processed.webp;
           }
-          library.images.push({
-            url: imageUrl,
-            thumbnail,
-            webp,
-            publicId: (file as any).public_id,
-          });
+          images.push({ url: imageUrl, thumbnail, webp, publicId: (file as any).public_id });
         }
         if (file.fieldname === "files") {
-          library.files.push({
+          files.push({
             url: getImagePath(file),
             name: file.originalname,
             size: file.size,
@@ -339,285 +168,345 @@ export const updateLibrary = asyncHandler(
       }
     }
 
-    // --- IMAGE REMOVE (tamamen güvenli) ---
-    if (updates.removedImages) {
-      try {
-        const removed: string[] = Array.isArray(updates.removedImages)
-          ? updates.removedImages
-          : typeof updates.removedImages === "string"
-          ? JSON.parse(updates.removedImages)
-          : [];
-        for (const imgUrl of removed) {
-          const imgIdx = library.images.findIndex((i: any) => i.url === imgUrl);
-          if (imgIdx > -1) {
-            const imgObj = library.images[imgIdx];
-            const localPath = path.join(
-              "uploads",
-              req.tenant,
-              "library-images",
-              path.basename(imgUrl)
-            );
-            if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-            if (imgObj?.publicId)
-              await cloudinary.uploader.destroy(imgObj.publicId);
-            library.images.splice(imgIdx, 1);
-          }
-        }
-      } catch (e) {
-        logger.withReq.warn(req, t("invalidRemovedImages"), {
-          ...getRequestContext(req),
-          error: e,
-        });
-      }
-    }
+    const nameForSlug = (title as any)?.[locale] || (title as any)?.en || "library";
+    const baseSlug = slugify(String(nameForSlug), { lower: true, strict: true });
+    const slug = await ensureUniqueSlug(req.tenant, baseSlug, Library);
 
-    // --- FILE REMOVE ---
-    if (updates.removedFiles) {
-      try {
-        const removed: string[] = Array.isArray(updates.removedFiles)
-          ? updates.removedFiles
-          : typeof updates.removedFiles === "string"
-          ? JSON.parse(updates.removedFiles)
-          : [];
-        for (const fileUrl of removed) {
-          const fileIdx = library.files.findIndex(
-            (f: any) => f.url === fileUrl
-          );
-          if (fileIdx > -1) {
-            const fileObj = library.files[fileIdx];
-            // Eğer local ise localPath, cloudinary ise cloudinary'den sil
-            const localPath = path.join(
-              "uploads",
-              req.tenant,
-              "library-files",
-              path.basename(fileUrl)
-            );
-            if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-            if (fileObj?.publicId)
-              await cloudinary.uploader.destroy(fileObj.publicId);
-            library.files.splice(fileIdx, 1);
-          }
-        }
-      } catch (e) {
-        logger.withReq.warn(req, t("invalidRemovedFiles"), {
-          ...getRequestContext(req),
-          error: e,
-        });
-      }
-    }
-
-    await library.save();
-    logger.withReq.info(req, t("updated"), { ...getRequestContext(req), id });
-    res
-      .status(200)
-      .json({ success: true, message: t("updated"), data: library });
-  }
-);
-
-// ✅ GET ALL
-export const adminGetAllLibrary = asyncHandler(
-  async (req: Request, res: Response) => {
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Library } = await getTenantModels(req);
-    const t = (key: string) => translate(key, locale, translations);
-    const { language, category, isPublished, isActive } = req.query;
-    const filter: Record<string, any> = {
+    const library = await Library.create({
+      title,
+      slug,
+      summary,
       tenant: req.tenant,
-    };
+      content,
+      tags: tagsArr,
+      category: coerceObjectId(category),
+      isPublished: isPublished === "true" || isPublished === true,
+      publishedAt: isPublished ? (publishedAt || new Date()) : undefined,
+      images,
+      files,
+      author: req.user?.name || "System",
+      isActive: true,
+      views: 0,
+      downloadCount: 0,
+    });
 
-    if (
-      typeof language === "string" &&
-      SUPPORTED_LOCALES.includes(language as SupportedLocale)
-    ) {
-      filter[`title.${language}`] = { $exists: true };
-    }
-
-    if (typeof category === "string" && isValidObjectId(category)) {
-      filter.category = category;
-    }
-
-    if (typeof isPublished === "string") {
-      filter.isPublished = isPublished === "true";
-    }
-
-    if (typeof isActive === "string") {
-      filter.isActive = isActive === "true";
-    } else {
-      filter.isActive = true;
-    }
-
-    const libraryList = await Library.find(filter)
-      .populate([
-        { path: "comments", strictPopulate: false },
-        { path: "category", select: "title" },
-      ])
-      .sort({ createdAt: -1 })
-      .lean();
-
-    logger.withReq.info(req, t("listFetched"), {
+    logger.withReq.info(req, t("created"), { ...getRequestContext(req), id: library._id });
+    res.status(201).json({ success: true, message: t("created"), data: library });
+  } catch (err: any) {
+    logger.withReq.error(req, t("error.create_fail"), {
       ...getRequestContext(req),
-      resultCount: libraryList.length,
+      event: "library.create", module: "library", status: "fail", error: err.message,
     });
-    res
-      .status(200)
-      .json({ success: true, message: t("listFetched"), data: libraryList });
+    res.status(500).json({ success: false, message: t("error.create_fail") });
   }
-);
+});
 
-// ✅ GET BY ID + VIEWS INCREMENT
-export const adminGetLibraryById = asyncHandler(
-  async (req: Request, res: Response) => {
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const { Library } = await getTenantModels(req);
-    const t = (key: string) => translate(key, locale, translations);
-    const { id } = req.params;
+// ✅ UPDATE (supports add/remove/reorder images + file remove)
+export const updateLibrary = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { Library } = await getTenantModels(req);
+  const locale: SupportedLocale = (req as any).locale || getLogLocale() || "tr";
+  const t = (k: string, p?: any) => translate(k, locale, translations, p);
 
-    if (!isValidObjectId(id)) {
-      logger.withReq.warn(req, t("invalidId"), {
-        ...getRequestContext(req),
-        id,
-      });
-      res.status(400).json({ success: false, message: t("invalidId") });
-      return;
+  if (!isValidObjectId(id)) {
+    logger.withReq.warn(req, t("invalidId"), { ...getRequestContext(req), id });
+    res.status(400).json({ success: false, message: t("invalidId") });
+    return;
+  }
+
+  const library = await Library.findOne({ _id: id, tenant: req.tenant });
+  if (!library) {
+    logger.withReq.warn(req, t("notFound"), { ...getRequestContext(req), id });
+    res.status(404).json({ success: false, message: t("notFound") });
+    return;
+  }
+
+  const updates = req.body;
+
+  // Çok dilli alanlar
+  if (updates.title)   library.title   = mergeLocalesForUpdate(library.title,   parseIfJson(updates.title) as any);
+  if (updates.summary) library.summary = mergeLocalesForUpdate(library.summary, parseIfJson(updates.summary) as any);
+  if (updates.content) library.content = mergeLocalesForUpdate(library.content, parseIfJson(updates.content) as any);
+
+  // Diğer alanlar
+  if (updates.tags !== undefined) library.tags = normalizeTags(updates.tags);
+  if (updates.category !== undefined) library.category = coerceObjectId(updates.category) || library.category;
+  if (updates.isPublished !== undefined) library.isPublished = (updates.isPublished === "true" || updates.isPublished === true);
+  if (updates.publishedAt !== undefined) library.publishedAt = updates.publishedAt;
+
+  if (!Array.isArray(library.images)) library.images = [];
+  if (!Array.isArray(library.files)) library.files = [];
+
+  // ---- Yeni uploadlar ----
+  if (req.files && typeof req.files === "object" && !Array.isArray(req.files)) {
+    if (Array.isArray((req.files as any)["images"])) {
+      for (const file of (req.files as any)["images"]) {
+        if (file.mimetype?.startsWith("image/")) {
+          const imageUrl = getImagePath(file);
+          let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
+          if (shouldProcessImage()) {
+            const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+            thumbnail = processed.thumbnail; webp = processed.webp;
+          }
+          library.images.push({ url: imageUrl, thumbnail, webp, publicId: (file as any).public_id });
+        }
+      }
     }
-
-    // views otomatik artır
-    const library = await Library.findOneAndUpdate(
-      { _id: id, tenant: req.tenant, isActive: true },
-      { $inc: { views: 1 } },
-      { new: true }
-    )
-      .populate([
-        { path: "comments", strictPopulate: false },
-        { path: "category", select: "title" },
-      ])
-      .lean();
-
-    if (!library || Array.isArray(library) || !library.isActive) {
-      logger.withReq.warn(req, t("notFound"), {
-        ...getRequestContext(req),
-        id,
-      });
-      res.status(404).json({ success: false, message: t("notFound") });
-      return;
+    if (Array.isArray((req.files as any)["files"])) {
+      for (const file of (req.files as any)["files"]) {
+        library.files.push({
+          url: getImagePath(file),
+          name: file.originalname,
+          size: file.size,
+          type: file.mimetype,
+          publicId: (file as any).public_id,
+        });
+      }
     }
+  }
+  if (Array.isArray(req.files)) {
+    for (const file of req.files as Express.Multer.File[]) {
+      if (file.fieldname === "images" && file.mimetype?.startsWith("image/")) {
+        const imageUrl = getImagePath(file);
+        let { thumbnail, webp } = getFallbackThumbnail(imageUrl);
+        if (shouldProcessImage()) {
+          const processed = await processImageLocal(file.path, file.filename, path.dirname(file.path));
+          thumbnail = processed.thumbnail; webp = processed.webp;
+        }
+        library.images.push({ url: imageUrl, thumbnail, webp, publicId: (file as any).public_id });
+      }
+      if (file.fieldname === "files") {
+        library.files.push({
+          url: getImagePath(file),
+          name: file.originalname,
+          size: file.size,
+          type: file.mimetype,
+          publicId: (file as any).public_id,
+        });
+      }
+    }
+  }
 
-    res.status(200).json({
-      success: true,
-      message: t("fetched"),
-      data: library,
+  // ---- Görsel silme: id/publicId/url + legacy url dizisi ----
+  const removedIds = pickArray(updates, ["removeImageIds", "removeImageIds[]", "removedImageIds", "removedImageIds[]"])
+    .map((x) => String(x));
+
+  const removedMixed = parseRemovedImages(updates);
+
+  // legacy: removedImages: ["https://.../a.jpg", "..."]
+  if (!removedMixed.length && updates.removedImages) {
+    try {
+      const arr = typeof updates.removedImages === "string" ? JSON.parse(updates.removedImages) : updates.removedImages;
+      if (Array.isArray(arr) && arr.every((s: any) => typeof s === "string")) {
+        for (const u of arr) removedMixed.push({ url: normalizeUrl(u) });
+      }
+    } catch {/* ignore */}
+  }
+
+  const removeOneByIndex = async (idx: number) => {
+    const imgObj = library.images[idx] as any;
+    const imgUrl = imgObj?.url;
+    const localPath = path.join("uploads", req.tenant, "library-images", path.basename(imgUrl || ""));
+    if (imgUrl && fs.existsSync(localPath)) fs.unlinkSync(localPath);
+    if (imgObj?.publicId) { try { await cloudinary.uploader.destroy(imgObj.publicId); } catch {/* ignore */} }
+    library.images.splice(idx, 1);
+  };
+
+  if (removedIds.length || removedMixed.length) {
+    // id ile
+    for (const rid of removedIds) {
+      const idx = library.images.findIndex((i: any) => String(i?._id || "") === rid);
+      if (idx > -1) await removeOneByIndex(idx);
+    }
+    // publicId/url/id object ile
+    for (const r of removedMixed) {
+      let idx = -1;
+      if (r.id) idx = library.images.findIndex((i: any) => String(i?._id || "") === String(r.id));
+      if (idx === -1 && r.publicId) idx = library.images.findIndex((i: any) => i?.publicId === r.publicId);
+      if (idx === -1 && r.url) {
+        const target = normalizeUrl(r.url);
+        idx = library.images.findIndex((i: any) => normalizeUrl(i?.url) === target);
+      }
+      if (idx > -1) await removeOneByIndex(idx);
+    }
+  }
+
+  // ---- Sıralama ----
+  const orderIds = pickArray(updates, ["existingImagesOrderIds", "existingImagesOrderIds[]"]).map(String);
+  const orderSigRaw = pickArray(updates, ["existingImagesOrder"]).map(String);
+
+  if (orderIds.length) {
+    const indexMap = new Map(orderIds.map((v, i) => [String(v), i]));
+    library.images = library.images.slice().sort((a: any, b: any) => {
+      const ai = indexMap.get(String(a?._id || ""));
+      const bi = indexMap.get(String(b?._id || ""));
+      if (ai !== undefined && bi !== undefined) return ai - bi;
+      if (ai !== undefined) return -1;
+      if (bi !== undefined) return 1;
+      return 0;
+    });
+  } else if (orderSigRaw.length) {
+    const sig = (img: any) => String(img?.publicId || normalizeUrl(img?.url || ""));
+    const indexMap = new Map(orderSigRaw.map((v, i) => [String(v), i]));
+    library.images = library.images.slice().sort((a: any, b: any) => {
+      const ai = indexMap.get(sig(a));
+      const bi = indexMap.get(sig(b));
+      if (ai !== undefined && bi !== undefined) return ai - bi;
+      if (ai !== undefined) return -1;
+      if (bi !== undefined) return 1;
+      return 0;
     });
   }
-);
 
-// ✅ DOWNLOAD COUNT INCREMENT (public endpoint)
-export const incrementLibraryDownloadCount = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { Library } = await getTenantModels(req);
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const t = (key: string) => translate(key, locale, translations);
-
-    if (!isValidObjectId(id)) {
-      logger.withReq.warn(req, t("invalidId"), {
-        ...getRequestContext(req),
-        id,
-      });
-      res.status(400).json({ success: false, message: t("invalidId") });
-      return;
+  // ---- Dosya silme (URL listesi) ----
+  if (updates.removedFiles) {
+    try {
+      const removed: string[] = Array.isArray(updates.removedFiles)
+        ? updates.removedFiles
+        : typeof updates.removedFiles === "string"
+        ? JSON.parse(updates.removedFiles)
+        : [];
+      for (const fileUrlRaw of removed) {
+        const fileUrl = String(fileUrlRaw);
+        const fileIdx = library.files.findIndex((f: any) => f.url === fileUrl);
+        if (fileIdx > -1) {
+          const fileObj = library.files[fileIdx];
+          const localPath = path.join("uploads", req.tenant, "library-files", path.basename(fileUrl));
+          if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+          if (fileObj?.publicId) { try { await cloudinary.uploader.destroy(fileObj.publicId); } catch {/* ignore */} }
+          library.files.splice(fileIdx, 1);
+        }
+      }
+    } catch (e) {
+      logger.withReq.warn(req, t("invalidRemovedFiles"), { ...getRequestContext(req), error: e });
     }
-
-    const library = await Library.findOneAndUpdate(
-      { _id: id, tenant: req.tenant, isActive: true },
-      { $inc: { downloadCount: 1 } },
-      { new: true }
-    );
-    if (!library) {
-      logger.withReq.warn(req, t("notFound"), {
-        ...getRequestContext(req),
-        id,
-      });
-      res.status(404).json({ success: false, message: t("notFound") });
-      return;
-    }
-    res.status(200).json({
-      success: true,
-      message: t("downloadCountIncreased"),
-      data: { downloadCount: library.downloadCount },
-    });
   }
-);
+
+  await library.save();
+  logger.withReq.info(req, t("updated"), { ...getRequestContext(req), id });
+  res.status(200).json({ success: true, message: t("updated"), data: library });
+});
+
+// ✅ ADMIN LIST
+export const adminGetAllLibrary = asyncHandler(async (req: Request, res: Response) => {
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const { Library } = await getTenantModels(req);
+  const t = (key: string) => translate(key, locale, translations);
+  const { language, category, isPublished, isActive } = req.query;
+  const filter: Record<string, any> = { tenant: req.tenant };
+
+  if (typeof language === "string" && SUPPORTED_LOCALES.includes(language as SupportedLocale)) {
+    filter[`title.${language}`] = { $exists: true };
+  }
+  if (typeof category === "string" && isValidObjectId(category)) filter.category = category;
+  if (typeof isPublished === "string") filter.isPublished = isPublished === "true";
+  if (typeof isActive === "string") filter.isActive = isActive === "true";
+  else filter.isActive = true;
+
+  const list = await Library.find(filter)
+    .populate([
+      { path: "comments", strictPopulate: false },
+      { path: "category", select: "name slug" }, // FE uyumu
+    ])
+    .sort({ createdAt: -1 })
+    .lean();
+
+  logger.withReq.info(req, t("listFetched"), { ...getRequestContext(req), resultCount: list.length });
+  res.status(200).json({ success: true, message: t("listFetched"), data: list });
+});
+
+// ✅ ADMIN GET BY ID + VIEWS++
+export const adminGetLibraryById = asyncHandler(async (req: Request, res: Response) => {
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const { Library } = await getTenantModels(req);
+  const t = (key: string) => translate(key, locale, translations);
+  const { id } = req.params;
+
+  if (!isValidObjectId(id)) {
+    logger.withReq.warn(req, t("invalidId"), { ...getRequestContext(req), id });
+    res.status(400).json({ success: false, message: t("invalidId") });
+    return;
+  }
+
+  const library = await Library.findOneAndUpdate(
+    { _id: id, tenant: req.tenant, isActive: true },
+    { $inc: { views: 1 } },
+    { new: true }
+  )
+    .populate([
+      { path: "comments", strictPopulate: false },
+      { path: "category", select: "name slug" }, // FE uyumu
+    ])
+    .lean();
+
+  if (!library || Array.isArray(library) || !library.isActive) {
+    logger.withReq.warn(req, t("notFound"), { ...getRequestContext(req), id });
+    res.status(404).json({ success: false, message: t("notFound") });
+    return;
+  }
+
+  res.status(200).json({ success: true, message: t("fetched"), data: library });
+});
 
 // ✅ DELETE
-export const deleteLibrary = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { Library } = await getTenantModels(req);
-    const locale: SupportedLocale = req.locale || getLogLocale();
-    const t = (key: string) => translate(key, locale, translations);
+export const deleteLibrary = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { Library } = await getTenantModels(req);
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const t = (key: string) => translate(key, locale, translations);
 
-    if (!isValidObjectId(id)) {
-      logger.withReq.warn(req, t("invalidId"), {
-        ...getRequestContext(req),
-        id,
-      });
-      res.status(400).json({ success: false, message: t("invalidId") });
-      return;
-    }
-
-    const library = await Library.findOne({ _id: id, tenant: req.tenant });
-    if (!library) {
-      logger.withReq.warn(req, t("notFound"), {
-        ...getRequestContext(req),
-        id,
-      });
-      res.status(404).json({ success: false, message: t("notFound") });
-      return;
-    }
-
-    // Tüm image ve file fiziksel silme
-    for (const img of library.images || []) {
-      const localPath = path.join(
-        "uploads",
-        req.tenant,
-        "library-images",
-        path.basename(img.url)
-      );
-      if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-      if (img.publicId) {
-        try {
-          await cloudinary.uploader.destroy(img.publicId);
-        } catch (err) {
-          logger.withReq.error(req, t("Cloudinary delete error"), {
-            ...getRequestContext(req),
-            publicId: img.publicId,
-          });
-        }
-      }
-    }
-    for (const file of library.files || []) {
-      const localPath = path.join(
-        "uploads",
-        req.tenant,
-        "library-files",
-        path.basename(file.url)
-      );
-      if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-      if (file.publicId) {
-        try {
-          await cloudinary.uploader.destroy(file.publicId);
-        } catch (err) {
-          logger.withReq.error(req, t("Cloudinary delete error"), {
-            ...getRequestContext(req),
-            publicId: file.publicId,
-          });
-        }
-      }
-    }
-
-    await library.deleteOne();
-
-    logger.withReq.info(req, t("deleted"), { ...getRequestContext(req), id });
-    res.status(200).json({ success: true, message: t("deleted") });
+  if (!isValidObjectId(id)) {
+    logger.withReq.warn(req, t("invalidId"), { ...getRequestContext(req), id });
+    res.status(400).json({ success: false, message: t("invalidId") });
+    return;
   }
-);
+
+  const library = await Library.findOne({ _id: id, tenant: req.tenant });
+  if (!library) {
+    logger.withReq.warn(req, t("notFound"), { ...getRequestContext(req), id });
+    res.status(404).json({ success: false, message: t("notFound") });
+    return;
+  }
+
+  // fiziksel silme
+  for (const img of library.images || []) {
+    const localPath = path.join("uploads", req.tenant, "library-images", path.basename(img.url));
+    if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+    if (img.publicId) { try { await cloudinary.uploader.destroy(img.publicId); } catch {/* log geç */} }
+  }
+  for (const file of library.files || []) {
+    const localPath = path.join("uploads", req.tenant, "library-files", path.basename(file.url));
+    if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+    if (file.publicId) { try { await cloudinary.uploader.destroy(file.publicId); } catch {/* log geç */} }
+  }
+
+  await library.deleteOne();
+  logger.withReq.info(req, t("deleted"), { ...getRequestContext(req), id });
+  res.status(200).json({ success: true, message: t("deleted") });
+});
+
+// ✅ DOWNLOAD COUNT INCREMENT (public endpoint)
+export const incrementLibraryDownloadCount = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { Library } = await getTenantModels(req);
+  const locale: SupportedLocale = req.locale || getLogLocale();
+  const t = (key: string) => translate(key, locale, translations);
+
+  if (!isValidObjectId(id)) {
+    logger.withReq.warn(req, t("invalidId"), { ...getRequestContext(req), id });
+    res.status(400).json({ success: false, message: t("invalidId") });
+    return;
+  }
+
+  const library = await Library.findOneAndUpdate(
+    { _id: id, tenant: req.tenant, isActive: true },
+    { $inc: { downloadCount: 1 } },
+    { new: true }
+  );
+  if (!library) {
+    logger.withReq.warn(req, t("notFound"), { ...getRequestContext(req), id });
+    res.status(404).json({ success: false, message: t("notFound") });
+    return;
+  }
+  res.status(200).json({ success: true, message: t("downloadCountIncreased"), data: { downloadCount: library.downloadCount } });
+});

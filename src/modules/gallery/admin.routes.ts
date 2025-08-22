@@ -3,35 +3,31 @@ import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import { upload } from "@/core/middleware/file/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/file/uploadTypeWrapper";
 import { checkFileSizeMiddleware } from "@/core/middleware/file/checkFileSizeMiddleware";
-
-import * as publicController from "./gallery.public.controller";
-import * as adminController from "./gallery.admin.controller";
-
+import * as adminController from "./admin.controller";
 import {
   validateCreateGallery,
   validateUpdateGallery,
   validateObjectId,
   validateAdminQuery,
-  validatePublicQuery,
-} from "./gallery.validation";
+} from "./validation";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
 
-/* 🔓 Public */
-router.get("/published", validatePublicQuery, publicController.getPublishedGalleryItems);
-router.get("/search", publicController.searchGalleryItems);
-router.get("/stats", publicController.getGalleryStats);
-router.get("/categories", publicController.getGalleryCategories);
-router.get("/category/:category", publicController.getPublishedGalleryItemsByCategory);
-// tekil
-router.get("/:id", publicController.getGalleryItemById);
-
-/* 🔐 Admin */
+/* 🔐 Admin (korumalı) */
 router.use(authenticate, authorizeRoles("admin"));
 
+/* Liste */
 router.get("/", validateAdminQuery, adminController.getAllGalleryItems);
 
+/* Tekil (Admin) – isActive/isPublished filtresi yok */
+router.get(
+  "/:id([0-9a-fA-F]{24})",
+  validateObjectId("id"),
+  adminController.getGalleryItemByIdAdmin // ← admin controller’da mevcut
+);
+
+/* Oluştur */
 router.post(
   "/upload",
   uploadTypeWrapper("gallery"),
@@ -42,8 +38,13 @@ router.post(
   adminController.createGalleryItem
 );
 
+/* ✅ Batch rotaları parametreli rotalardan önce */
+router.patch("/batch/publish", adminController.batchPublishGalleryItems);
+router.delete("/batch", adminController.batchDeleteGalleryItems);
+
+/* Güncelle */
 router.put(
-  "/:id",
+  "/:id([0-9a-fA-F]{24})",
   uploadTypeWrapper("gallery"),
   upload("gallery").array("images", 30),
   checkFileSizeMiddleware,
@@ -53,13 +54,12 @@ router.put(
   adminController.updateGalleryItem
 );
 
-router.patch("/:id/toggle", validateObjectId("id"), adminController.togglePublishGalleryItem);
-router.patch("/:id/archive", validateObjectId("id"), adminController.softDeleteGalleryItem);
-router.patch("/:id/restore", validateObjectId("id"), adminController.restoreGalleryItem);
+/* Toggle / Archive / Restore */
+router.patch("/:id([0-9a-fA-F]{24})/toggle", validateObjectId("id"), adminController.togglePublishGalleryItem);
+router.patch("/:id([0-9a-fA-F]{24})/archive", validateObjectId("id"), adminController.softDeleteGalleryItem);
+router.patch("/:id([0-9a-fA-F]{24})/restore", validateObjectId("id"), adminController.restoreGalleryItem);
 
-router.delete("/:id", validateObjectId("id"), adminController.deleteGalleryItem);
-
-router.patch("/batch/publish", adminController.batchPublishGalleryItems);
-router.delete("/batch", adminController.batchDeleteGalleryItems);
+/* Sil */
+router.delete("/:id([0-9a-fA-F]{24})", validateObjectId("id"), adminController.deleteGalleryItem);
 
 export default router;
