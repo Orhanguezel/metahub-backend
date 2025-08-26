@@ -1,0 +1,20 @@
+{
+  "promotions.created": "Promocja utworzona.",
+  "promotions.updated": "Promocja zaktualizowana.",
+  "promotions.deleted": "Promocja usunięta.",
+  "promotions.fetched": "Promocja pobrana.",
+  "promotions.listFetched": "Promocje pobrane.",
+  "promotions.notFound": "Nie znaleziono promocji.",
+  "validation.invalidObjectId": "Nieprawidłowy identyfikator.",
+  "validation.failed": "Walidacja nie powiodła się.",
+  "promotions.statusChanged": "Zaktualizowano status promocji.",
+  "promotions.publishChanged": "Zaktualizowano status publikacji.",
+  "promotions.evaluate.noMatch": "Nie znaleziono pasującej promocji.",
+  "promotions.evaluate.applied": "Zastosowano promocję.",
+  "promotions.redeem.ok": "Promocja została zrealizowana.",
+  "promotions.redeem.duplicate": "Promocja została już zrealizowana.",
+  "promotions.redeem.limitReached": "Osiągnięto limit realizacji.",
+  "promotions.redeem.perUserLimit": "Osiągnięto limit na użytkownika.",
+  "promotions.redeem.firstOrderOnly": "Ta promocja obowiązuje tylko przy pierwszym zamówieniu.",
+  "promotions.notPublished": "Promocja nieopublikowana."
+}

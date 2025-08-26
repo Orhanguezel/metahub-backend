@@ -1,4 +1,3 @@
-// src/scripts/sync/seedAllModuleMeta.ts
 import "@/core/config/envLoader";
 import fs from "fs";
 import path from "path";
@@ -36,8 +35,9 @@ function resolveModulesDir(): string {
   throw new Error(`modules klasörü bulunamadı.`);
 }
 
-/** Master (Tenants) bağlantısı */
-async function connectMasterDb() {
+// ✅ Master (Tenants) için bağlantı açık mı? Değilse aç.
+async function ensureMasterConnection() {
+  if (mongoose.connection.readyState === 1) return; // connected
   const uri =
     process.env.MONGO_URI ||
     process.env.MONGODB_URI ||
@@ -54,6 +54,9 @@ async function connectMasterDb() {
 }
 
 export async function seedAllModuleMeta() {
+  // ✅ Master bağlantı garantisi
+  await ensureMasterConnection();
+
   const modulesDir = resolveModulesDir();
   logger.info(`[META] modulesDir = ${modulesDir}`);
 
@@ -96,7 +99,6 @@ export async function seedAllModuleMeta() {
               label,
               name: moduleName,
               tenant: tenant.slug,
-              // istersen tarih/historiyi de sadece insert'te ver
               history: [
                 {
                   version: DEFAULT_META.version,
@@ -110,7 +112,12 @@ export async function seedAllModuleMeta() {
           { upsert: true }
         );
 
-        if ((res as any).upsertedCount) {
+        // Mongoose 7: res.upsertedCount doğrudur; eski sürümde res.upserted olabilir.
+        const upserted =
+          (res as any).upsertedCount ||
+          ((res as any).upserted && (res as any).upserted.length);
+
+        if (upserted) {
           createdCount++;
           logger.info(
             t("sync.metaCreated", "tr", { moduleName }) ||
@@ -129,8 +136,10 @@ export async function seedAllModuleMeta() {
         { tenant: tenant.slug, module: "seedAllModuleMeta" }
       );
     } finally {
-      // tenant bağlantısını kapat
-      try { await conn.close(); } catch {}
+      // ✅ tenant bağlantısını kapat
+      try {
+        await conn.close();
+      } catch {}
     }
   }
 
@@ -145,9 +154,9 @@ export async function seedAllModuleMeta() {
 if (require.main === module) {
   (async () => {
     try {
-      await connectMasterDb();
+      await ensureMasterConnection(); // ✅
       await seedAllModuleMeta();
-      await mongoose.disconnect();
+      await mongoose.disconnect();    // ✅
       console.log("[META] Seed tamamlandı.");
       process.exit(0);
     } catch (err) {

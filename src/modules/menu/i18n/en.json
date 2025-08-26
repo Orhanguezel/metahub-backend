@@ -1,0 +1,25 @@
+{
+  "created": "Menu created.",
+  "updated": "Menu updated.",
+  "deleted": "Menu deleted.",
+  "fetched": "Record fetched.",
+  "listFetched": "List fetched.",
+  "notFound": "Record not found.",
+  "invalidId": "Invalid id.",
+  "error.create_fail": "An error occurred while creating the menu.",
+  "validation": {
+    "invalidObjectId": "Invalid ObjectId.",
+    "booleanField": "Invalid boolean value.",
+    "codeRequired": "Code is required.",
+    "nameRequired": "Name (at least one locale) is required.",
+    "slugInvalid": "Invalid slug.",
+    "orderInvalid": "Order must be between 0 and 100000.",
+    "categoriesInvalid": "Categories must be an array.",
+    "categoryIdInvalid": "Invalid category id.",
+    "branchesInvalid": "Branches must be an array.",
+    "branchIdInvalid": "Invalid branch id.",
+    "datesInvalid": "Invalid date range.",
+    "imagesInvalid": "Images must be an array.",
+    "imageRemoveInvalid": "Invalid removedImages list."
+  }
+}

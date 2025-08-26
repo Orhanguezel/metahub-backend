@@ -1,6 +1,8 @@
+// src/scripts/sync/masterSync.ts
 import "@/core/config/envLoader";
 import fs from "fs/promises";
 import path from "path";
+import mongoose from "mongoose";                // ✅ EKLE
 import { Tenants } from "@/modules/tenants/tenants.model";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
@@ -12,28 +14,21 @@ import { seedAllModuleMeta } from "./seedAllModuleMeta";
 import { healthCheckMetaSettings } from "./healthCheckMetaSettings";
 import { seedSettingsForNewModule } from "./seedSettingsForNewModule";
 
-// --- Ortak Sabitler ---
 const MODULES_PATH = path.resolve(process.cwd(), "src/modules");
 
-/**
- * Tüm fiziksel modül klasörlerini döner (lowercase).
- */
 async function getAllModuleNames(): Promise<string[]> {
   const modules = await fs.readdir(MODULES_PATH, { withFileTypes: true });
-  return modules
-    .filter((m) => m.isDirectory())
-    .map((m) => m.name.toLowerCase());
+  // İsterseniz lowercase kullanmaya devam edin; sorun değil.
+  return modules.filter(m => m.isDirectory()).map(m => m.name);
 }
 
-/**
- * Her tenant’ın DB’sinde: Orphan meta ve ayar cleanup — sadece fiziksel modül olmayanları temizle!
- */
 async function cleanupOrphanModules(validModuleNames: string[]) {
   const tenants = await Tenants.find({ isActive: true }).lean();
 
   for (const tenant of tenants) {
+    let conn: mongoose.Connection | null = null;
     try {
-      const conn = await getTenantDbConnection(tenant.slug);
+      conn = await getTenantDbConnection(tenant.slug);
       const { ModuleMeta, ModuleSetting } = getTenantModelsFromConnection(conn);
 
       const allMetas = await ModuleMeta.find();
@@ -41,66 +36,40 @@ async function cleanupOrphanModules(validModuleNames: string[]) {
       let orphanSettingCount = 0;
 
       for (const meta of allMetas) {
-        if (!validModuleNames.includes(meta.name.toLowerCase())) {
-          const deletedSettings = await ModuleSetting.deleteMany({
-            module: meta.name,
-          });
-          await ModuleMeta.deleteOne({ name: meta.name });
+        if (!validModuleNames.includes(String(meta.name).toLowerCase())) {
+          const deletedSettings = await ModuleSetting.deleteMany({ module: meta.name, tenant: tenant.slug });
+await ModuleMeta.deleteOne({ name: meta.name, tenant: tenant.slug });
           orphanMetaCount++;
           orphanSettingCount += deletedSettings.deletedCount || 0;
+
           logger.info(
             t("sync.orphanMetaDeleted", "tr", translations, {
-              moduleName: meta.name,
-              count: deletedSettings.deletedCount,
-              tenant: tenant.slug,
+              moduleName: meta.name, count: deletedSettings.deletedCount, tenant: tenant.slug,
             }),
-            {
-              script: "fullSyncModulesAndSettings",
-              event: "orphan.meta.deleted",
-              status: "success",
-              module: meta.name,
-              tenant: tenant.slug,
-            }
+            { script: "fullSyncModulesAndSettings", event: "orphan.meta.deleted", status: "success", module: meta.name, tenant: tenant.slug }
           );
-          console.log(
-            `[CLEANUP] Orphan meta silindi: ${meta.name} [tenant: ${tenant.slug}] (${deletedSettings.deletedCount} setting)`
-          );
+          console.log(`[CLEANUP] Orphan meta silindi: ${meta.name} [tenant: ${tenant.slug}] (${deletedSettings.deletedCount} setting)`);
         }
       }
+
       if (orphanMetaCount > 0) {
         logger.info(
-          t("sync.orphanCleanupSummary", "tr", translations, {
-            orphanMetaCount,
-            orphanSettingCount,
-          }),
-          {
-            script: "fullSyncModulesAndSettings",
-            event: "orphan.cleanup.summary",
-            status: "info",
-            orphanMetaCount,
-            orphanSettingCount,
-            tenant: tenant.slug,
-          }
+          t("sync.orphanCleanupSummary", "tr", translations, { orphanMetaCount, orphanSettingCount }),
+          { script: "fullSyncModulesAndSettings", event: "orphan.cleanup.summary", status: "info", orphanMetaCount, orphanSettingCount, tenant: tenant.slug }
         );
-        console.log(
-          `[RESULT] ${orphanMetaCount} orphan meta, ${orphanSettingCount} orphan setting kaldırıldı. [tenant: ${tenant.slug}]`
-        );
+        console.log(`[RESULT] ${orphanMetaCount} orphan meta, ${orphanSettingCount} orphan setting kaldırıldı. [tenant: ${tenant.slug}]`);
       }
-    } catch (e) {
+    } catch (e: any) {
       logger.error(`[CLEANUP][ERROR] ${tenant.slug}: ${e?.message || e}`, {
-        script: "fullSyncModulesAndSettings",
-        event: "cleanup.error",
-        status: "fail",
-        tenant: tenant.slug,
-        error: e?.message || e,
+        script: "fullSyncModulesAndSettings", event: "cleanup.error", status: "fail", tenant: tenant.slug, error: e?.message || e,
       });
+    } finally {
+      // ✅ Tenant bağlantısını kapat
+      try { await conn?.close(); } catch {}
     }
   }
 }
 
-/**
- * Her tenant+modül için eksik setting’i tamamlar (yalnızca eksik mapping'ler için çalışır!)
- */
 async function seedMissingSettingsForAllTenantsAndModules() {
   const tenants = await Tenants.find({ isActive: true }).lean();
   const allModuleNames = await getAllModuleNames();
@@ -108,78 +77,53 @@ async function seedMissingSettingsForAllTenantsAndModules() {
   for (const tenant of tenants) {
     try {
       for (const moduleName of allModuleNames) {
-        await seedSettingsForNewModule(moduleName, tenant.slug); // Bu fonksiyon da multi-tenant aware olmalı!
-        // (İçinde kendi connection ile çalışıyor olmalı!)
+        await seedSettingsForNewModule(moduleName, tenant.slug);
         logger.info(
-          t("sync.settingCreated", "tr", translations, {
-            moduleName,
-            tenant: tenant.slug,
-          }),
-          {
-            script: "fullSyncModulesAndSettings",
-            event: "setting.created",
-            status: "success",
-            tenant: tenant.slug,
-            module: moduleName,
-          }
+          t("sync.settingCreated", "tr", translations, { moduleName, tenant: tenant.slug }),
+          { script: "fullSyncModulesAndSettings", event: "setting.created", status: "success", tenant: tenant.slug, module: moduleName }
         );
         console.log(`✅ [Seed] ${moduleName} → ${tenant.slug} tamamlandı.`);
       }
-    } catch (e) {
+    } catch (e: any) {
       logger.error(
-        t("sync.settingSeedError", "tr", translations, {
-          message: (e as any)?.message,
-        }),
-        {
-          script: "fullSyncModulesAndSettings",
-          event: "setting.error",
-          status: "fail",
-          tenant: tenant.slug,
-          error: (e as any)?.message,
-        }
+        t("sync.settingSeedError", "tr", translations, { message: e?.message }),
+        { script: "fullSyncModulesAndSettings", event: "setting.error", status: "fail", tenant: tenant.slug, error: e?.message }
       );
-      console.error(
-        `❌ [Seed] ${tenant.slug} hata:`,
-        (e as any)?.message || e
-      );
+      console.error(`❌ [Seed] ${tenant.slug} hata:`, e?.message || e);
     }
   }
 }
 
-/**
- * Ana senkronizasyon fonksiyonu
- */
 export async function fullSyncModulesAndSettings() {
-  logger.info("[Sync] Tam bulk sync başlatılıyor...", {
-    script: "fullSyncModulesAndSettings",
-  });
+  // ✅ Master’a bağlanmadan Tenants.find() çağırmayın!
+  await mongoose.connect(
+    process.env.MONGO_URI || process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/metahub",
+    { dbName: process.env.MONGO_DB, serverSelectionTimeoutMS: 15000, connectTimeoutMS: 15000 } as any
+  );
+
+  logger.info("[Sync] Tam bulk sync başlatılıyor...", { script: "fullSyncModulesAndSettings" });
+
   const allModuleNames = await getAllModuleNames();
   if (!allModuleNames.length) {
-    logger.warn("Hiç modül bulunamadı.", {
-      script: "fullSyncModulesAndSettings",
-    });
+    logger.warn("Hiç modül bulunamadı.", { script: "fullSyncModulesAndSettings" });
     return;
   }
-  logger.info(`[Sync] ${allModuleNames.length} modül klasörü bulundu.`, {
-    script: "fullSyncModulesAndSettings",
-  });
+  logger.info(`[Sync] ${allModuleNames.length} modül klasörü bulundu.`, { script: "fullSyncModulesAndSettings" });
 
-  // --- Her tenant için: (1) orphan temizliği, (2) meta seed, (3) health check, (4) eksik settings seed ---
   await cleanupOrphanModules(allModuleNames);
-  await seedAllModuleMeta();         // Bu fonksiyon da tenant-aware olmalı!
-  await healthCheckMetaSettings();   // Bu da tenant-aware olmalı!
+  await seedAllModuleMeta();        // Bu fonksiyon da Tenants kullandığı için master conn lazım
+  await healthCheckMetaSettings();  // Aynı şekilde
   await seedMissingSettingsForAllTenantsAndModules();
 
-  logger.info(`[Sync] Bulk işlemler başarıyla tamamlandı.`, {
-    script: "fullSyncModulesAndSettings",
-  });
+  logger.info(`[Sync] Bulk işlemler başarıyla tamamlandı.`, { script: "fullSyncModulesAndSettings" });
 }
 
-// --- CLI veya CI/CD ile manuel çalıştırma desteği ---
+// CLI
 if (require.main === module) {
   (async () => {
     try {
       await fullSyncModulesAndSettings();
+      await mongoose.disconnect();    // ✅ master conn kapat
       process.exit(0);
     } catch (e) {
       logger.error("❌ [Sync] Hata oluştu:", {
@@ -187,6 +131,7 @@ if (require.main === module) {
         error: (e as any)?.stack || (e as any)?.message || e,
       });
       console.error("❌ [Sync] Hata oluştu:", e);
+      try { await mongoose.disconnect(); } catch {}
       process.exit(1);
     }
   })();

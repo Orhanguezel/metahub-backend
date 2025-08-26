@@ -6,19 +6,9 @@ import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 
-const validStatuses = [
-  "pending",
-  "preparing",
-  "shipped",
-  "completed",
-  "cancelled",
-] as const;
+const validStatuses = ["pending","preparing","shipped","completed","cancelled"] as const;
 
-function orderT(
-  key: string,
-  locale: SupportedLocale,
-  vars?: Record<string, string | number>
-) {
+function orderT(key: string, locale: SupportedLocale, vars?: Record<string, string | number>) {
   return t(key, locale, orderTranslations, vars);
 }
 
@@ -30,17 +20,20 @@ function isPopulatedUser(
 
 // --- TÜM SİPARİŞLERİ GETİR ---
 export const getAllOrders = asyncHandler(async (req: Request, res: Response) => {
-  const { lang } = req.query;
-  const locale: SupportedLocale = req.locale || getLogLocale();
+  const { lang, serviceType, status } = req.query as Record<string, string>;
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale();
 
   const filter: any = { tenant: req.tenant };
   if (lang) filter.language = lang;
+  if (serviceType) filter.serviceType = serviceType;
+  if (status) filter.status = status;
 
   const { Order } = await getTenantModels(req);
 
   const orders = await Order.find(filter)
     .populate("user", "name email")
     .populate("items.product")
+    .populate("branch", "code name")
     .sort({ createdAt: -1 });
 
   res.status(200).json({

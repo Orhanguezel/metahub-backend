@@ -220,6 +220,7 @@ export const adminGetPayments = asyncHandler(async (req: Request, res: Response)
     amountMin,
     amountMax,
     limit = "200",
+    order
   } = req.query as Record<string, string>;
 
   const filter: Record<string, any> = { tenant: req.tenant };
@@ -234,6 +235,7 @@ export const adminGetPayments = asyncHandler(async (req: Request, res: Response)
   if (apartment && isValidObjectId(apartment)) filter["links.apartment"] = apartment;
   if (contract && isValidObjectId(contract)) filter["links.contract"] = contract;
   if (invoice && isValidObjectId(invoice)) filter["allocations.invoice"] = invoice;
+  if (order && isValidObjectId(order)) filter["links.order"] = order;
 
   if (q && q.trim()) {
     filter.$or = [
@@ -261,6 +263,7 @@ export const adminGetPayments = asyncHandler(async (req: Request, res: Response)
       { path: "links.customer", select: "companyName contactName" },
       { path: "links.apartment", select: "title slug" },
       { path: "links.contract", select: "code status" },
+      { path: "links.order",     select: "status finalTotal serviceType" },
       { path: "allocations.invoice", select: "code status totals.currency" },
     ])
     .limit(Math.min(Number(limit) || 200, 500))
@@ -326,3 +329,85 @@ export const deletePayment = asyncHandler(async (req: Request, res: Response) =>
   res.status(200).json({ success: true, message: t("deleted") });
   return;
 });
+
+/* ============== REFUND (POST /:id/refund) ============== */
+export const refundPayment = asyncHandler(async (req: Request, res: Response) => {
+  const t = tByReq(req);
+  const { id } = req.params;
+
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: t("validation.invalidObjectId") });
+    return;
+  }
+
+  const { Payment, Order } = await getTenantModels(req);
+
+  const pay = await Payment.findOne({ _id: id, tenant: req.tenant });
+  if (!pay) {
+    res.status(404).json({ success: false, message: t("notFound") });
+    return;
+  }
+
+  // Basit guard'lar (MVP – tam iade)
+  if (pay.kind === "refund") {
+    res.status(400).json({ success: false, message: t("alreadyRefunded") });
+    return;
+  }
+  if (["canceled", "failed"].includes(pay.status)) {
+    res.status(400).json({ success: false, message: t("cannotRefundThisStatus") });
+    return;
+  }
+
+  // Refund kaydı oluştur (ayrı belge)
+  const refundDoc = await Payment.create({
+    tenant: req.tenant,
+    kind: "refund",
+    status: "confirmed",
+    method: pay.method,
+    provider: pay.provider,
+    providerRef: pay.providerRef,
+    reference: `RF-${pay.reference || pay.code || String(pay._id)}`,
+    grossAmount: pay.grossAmount,         // Tam iade (MVP)
+    currency: pay.currency,
+    fees: [],                              // MVP: iade ücreti yok
+    receivedAt: new Date(),
+    payer: pay.payer,
+    instrument: pay.instrument,
+    links: pay.links,                      // order/customer vb. koru
+    allocations: [],                       // MVP: negatif allocation yapmıyoruz
+    metadata: { ...(pay.metadata || {}), refundOf: String(pay._id) },
+  });
+
+  // Orijinal ödemeyi işaretle
+  (pay as any).status = "refunded";
+  (pay as any).refundedAt = new Date();
+  await pay.save();
+
+  // (Opsiyonel) Order’ı gevşekçe güncelle: tamamen geri ödendiyse isPaid=false
+  try {
+    const orderId = (pay as any)?.links?.order;
+    if (orderId && isValidObjectId(orderId)) {
+      const order = await Order.findOne({ _id: orderId, tenant: req.tenant });
+      if (order) {
+        // Basit mantık: tek bir ödeme vardıysa ve o iade edildiyse isPaid=false
+        order.isPaid = false;
+        await order.save();
+      }
+    }
+  } catch (e) {
+    logger.withReq.warn(req, "Order update after refund failed", { error: (e as Error)?.message });
+  }
+
+  logger.withReq.info(req, t("refunded"), {
+    ...getRequestContext(req),
+    id,
+    refundId: refundDoc._id,
+  });
+
+  res.status(201).json({
+    success: true,
+    message: t("refunded"),
+    data: { original: pay, refund: refundDoc },
+  });
+});
+

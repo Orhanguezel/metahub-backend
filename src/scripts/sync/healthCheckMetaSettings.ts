@@ -1,13 +1,18 @@
 import "@/core/config/envLoader";
+import mongoose from "mongoose";
 import { Tenants } from "@/modules/tenants/tenants.model";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "@/modules/modules/i18n";
-import type { SupportedLocale } from "@/types/common";
+import { SUPPORTED_LOCALES, type SupportedLocale } from "@/types/common";
 import { getTenantDbConnection } from "@/core/config/tenantDb";
 import { getTenantModelsFromConnection } from "@/core/middleware/tenant/getTenantModelsFromConnection";
 
-// Modeldeki tüm setting alanları için default değer (SEO override field’ları dahil)
+const emptyLocaleObj = SUPPORTED_LOCALES.reduce((obj, lng) => {
+  obj[lng] = "";
+  return obj;
+}, {} as Record<string, string>);
+
 const DEFAULT_SETTING = {
   enabled: true,
   visibleInSidebar: true,
@@ -15,22 +20,31 @@ const DEFAULT_SETTING = {
   showInDashboard: true,
   roles: ["admin"],
   order: 0,
-  seoTitle: {},
-  seoDescription: {},
-  seoSummary: {},
+  seoTitle: { ...emptyLocaleObj },
+  seoDescription: { ...emptyLocaleObj },
+  seoSummary: { ...emptyLocaleObj },
   seoOgImage: "",
 };
 
+async function ensureMasterConnection() {
+  if (mongoose.connection.readyState === 1) return;
+  const uri = process.env.MONGO_URI || process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/metahub";
+  const dbName = process.env.MONGO_DB || undefined;
+  await mongoose.connect(uri, {
+    dbName,
+    serverSelectionTimeoutMS: 15000,
+    connectTimeoutMS: 15000,
+  } as any);
+}
+
 /**
- * Her tenant'ın kendi DB’sinde, tenant’a ait tüm meta+setting ilişkisini sağlık kontrolünden geçirir;
- * eksik setting’i varsa tenant’ın DB’sine ekler!
+ * Her tenant DB’sinde ModuleMeta ↔ ModuleSetting tutarlılığı;
+ * eksik olan setting varsa tenant contextinde oluşturur.
  */
 export async function healthCheckMetaSettings() {
   const locale: SupportedLocale = "en";
-  let repaired: { tenant: string; module: string }[] = [];
-  let errorCount = 0;
+  await ensureMasterConnection();
 
-  // 1️⃣ Aktif tenant listesini al
   const tenants = await Tenants.find({ isActive: true }).lean();
   if (!tenants.length) {
     logger.warn("[healthCheck] Hiç aktif tenant yok!", {
@@ -41,121 +55,95 @@ export async function healthCheckMetaSettings() {
     return;
   }
 
-  // 2️⃣ Her tenant için kendi connection ve modellerini çek, meta/setting’i kontrol et
+  let repairedCount = 0;
+  let errorCount = 0;
+
   for (const tenant of tenants) {
     try {
       const conn = await getTenantDbConnection(tenant.slug);
       const { ModuleMeta, ModuleSetting } = getTenantModelsFromConnection(conn);
 
-      // Bu tenant’ın meta’larını çek
-      const modules = await ModuleMeta.find({});
+      // ⚠️ Tenant scoped
+      const modules = await ModuleMeta.find({ tenant: tenant.slug }).lean();
+
       for (const mod of modules) {
         try {
-          const exists = await ModuleSetting.findOne({ module: mod.name });
+          const exists = await ModuleSetting.findOne({ module: mod.name, tenant: tenant.slug }).lean();
           if (!exists) {
             await ModuleSetting.create({
               module: mod.name,
+              tenant: tenant.slug,        // 👈 zorunlu
               enabled: mod.enabled ?? DEFAULT_SETTING.enabled,
               visibleInSidebar: DEFAULT_SETTING.visibleInSidebar,
               useAnalytics: DEFAULT_SETTING.useAnalytics,
               showInDashboard: DEFAULT_SETTING.showInDashboard,
-              roles:
-                Array.isArray(mod.roles) && mod.roles.length > 0
-                  ? mod.roles
-                  : DEFAULT_SETTING.roles,
+              roles: Array.isArray(mod.roles) && mod.roles.length ? mod.roles : DEFAULT_SETTING.roles,
               order: typeof mod.order === "number" ? mod.order : DEFAULT_SETTING.order,
-              seoTitle: DEFAULT_SETTING.seoTitle,
-              seoDescription: DEFAULT_SETTING.seoDescription,
-              seoSummary: DEFAULT_SETTING.seoSummary,
+              seoTitle: { ...DEFAULT_SETTING.seoTitle },
+              seoDescription: { ...DEFAULT_SETTING.seoDescription },
+              seoSummary: { ...DEFAULT_SETTING.seoSummary },
               seoOgImage: DEFAULT_SETTING.seoOgImage,
             });
-            repaired.push({ tenant: tenant.slug, module: mod.name });
+            repairedCount++;
             logger.info(
-              t("sync.settingRepaired", locale, translations, {
-                moduleName: mod.name,
-                tenant: tenant.slug,
-              }),
-              {
-                script: "healthCheckMetaSettings",
-                event: "setting.repaired",
-                status: "success",
-                tenant: tenant.slug,
-                module: mod.name,
-              }
+              t("sync.settingRepaired", locale, translations, { moduleName: mod.name, tenant: tenant.slug }),
+              { script: "healthCheckMetaSettings", event: "setting.repaired", status: "success", tenant: tenant.slug, module: mod.name }
             );
-            console.log(`[REPAIRED] ${tenant.slug} için ${mod.name} setting eklendi`);
           }
         } catch (err: any) {
           errorCount++;
-          logger.error(
-            `[healthCheck] Setting eklenemedi: ${tenant.slug} - ${mod.name} (${err.message})`,
-            {
-              script: "healthCheckMetaSettings",
-              event: "setting.create_error",
-              status: "fail",
-              tenant: tenant.slug,
-              module: mod.name,
-            }
-          );
-          console.error(`[REPAIRED][ERROR] ${tenant.slug} için ${mod.name}:`, err);
+          logger.error(`[healthCheck] Setting eklenemedi: ${tenant.slug} - ${mod.name} (${err.message})`, {
+            script: "healthCheckMetaSettings",
+            event: "setting.create_error",
+            status: "fail",
+            tenant: tenant.slug,
+            module: mod.name,
+          });
         }
       }
+
+      try { await conn.close(); } catch {}
     } catch (err: any) {
       errorCount++;
-      logger.error(
-        `[healthCheck] Tenant bağlantı hatası: ${tenant.slug} (${err.message})`,
-        {
-          script: "healthCheckMetaSettings",
-          event: "tenant.conn_error",
-          status: "fail",
-          tenant: tenant.slug,
-        }
-      );
+      logger.error(`[healthCheck] Tenant bağlantı hatası: ${tenant.slug} (${err.message})`, {
+        script: "healthCheckMetaSettings",
+        event: "tenant.conn_error",
+        status: "fail",
+        tenant: tenant.slug,
+      });
     }
   }
 
-  // --- Sonuç ve özet log ---
-  if (!repaired.length && errorCount === 0) {
+  if (!repairedCount && !errorCount) {
     logger.info(t("sync.settingsOk", locale, translations), {
       script: "healthCheckMetaSettings",
       event: "settings.ok",
       status: "info",
     });
-    console.log("Tüm meta ve settings tam, eksik yok!");
   } else {
     logger.info(
-      t("sync.missingSettings", locale, translations, {
-        count: repaired.length,
-      }),
+      t("sync.missingSettings", locale, translations, { count: repairedCount }),
       {
         script: "healthCheckMetaSettings",
         event: "settings.repaired",
-        status: errorCount > 0 ? "warning" : "success",
-        repairedCount: repaired.length,
+        status: errorCount ? "warning" : "success",
+        repairedCount,
         errorCount,
       }
     );
-    if (repaired.length) {
-      console.log("Eksik eklenenler:", repaired);
-    }
-    if (errorCount > 0) {
-      console.log(`[REPAIRED][WARN] Toplam ${errorCount} tenant/modül kaydı eklenemedi!`);
-    }
   }
 }
 
-// --- CLI desteği ---
+// CLI
 if (require.main === module) {
   (async () => {
     try {
       await healthCheckMetaSettings();
+      await mongoose.disconnect();
       process.exit(0);
     } catch (err: any) {
-      logger.error("❌ [healthCheck] Hata oluştu:", {
-        script: "healthCheckMetaSettings",
-        error: err?.message || err,
-      });
-      console.error("❌ [healthCheck] Hata:", err);
+      console.error("❌ [healthCheck] Hata:", err?.message || err);
+      try { await mongoose.disconnect(); } catch {}
       process.exit(1);
     }
   })();

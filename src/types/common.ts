@@ -1,3 +1,4 @@
+// src/types/common.ts
 // 🌍 Desteklenen diller
 export const SUPPORTED_LOCALES = ["tr", "en", "de", "pl", "fr", "es"] as const;
 

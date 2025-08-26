@@ -1,0 +1,32 @@
+{
+  "created": "Oddział utworzony.",
+  "updated": "Oddział zaktualizowany.",
+  "deleted": "Oddział usunięty.",
+  "fetched": "Rekord pobrany.",
+  "listFetched": "Lista pobrana.",
+  "notFound": "Nie znaleziono rekordu.",
+  "invalidId": "Nieprawidłowy identyfikator.",
+  "error.create_fail": "Błąd podczas tworzenia oddziału.",
+  "validation": {
+    "invalidObjectId": "Nieprawidłowy ObjectId.",
+    "booleanField": "Nieprawidłowa wartość logiczna.",
+    "codeRequired": "Wymagany jest kod.",
+    "locationRequired": "Wymagana lokalizacja (GeoJSON Point).",
+    "locationInvalid": "Nieprawidłowa lokalizacja.",
+    "locationType": "Typ lokalizacji musi być 'Point'.",
+    "locationCoordinates": "Współrzędne muszą mieć format [lng, lat].",
+    "locationRange": "Współrzędne poza zakresem.",
+    "servicesRequired": "Wymagany co najmniej jeden typ usługi.",
+    "invalidServiceType": "Nieprawidłowy typ usługi.",
+    "openingHoursInvalid": "Godziny otwarcia muszą być tablicą.",
+    "openingEntryInvalid": "Nieprawidłowy wpis godzin otwarcia.",
+    "openingDayRange": "Dzień w zakresie 0–6.",
+    "openingTimeFormat": "Czas w formacie 'HH:mm'.",
+    "minPrepInvalid": "Minimalny czas przygotowania 0–240.",
+    "deliveryZonesInvalid": "Strefy dostaw muszą być tablicą.",
+    "zonePolygonInvalid": "Nieprawidłowe współrzędne poligonu.",
+    "zoneFeeInvalidAmount": "Opłata za dostawę nie może być ujemna.",
+    "zoneFeeInvalidCurrency": "Nieprawidłowa waluta.",
+    "zoneNameInvalid": "Nieprawidłowa nazwa strefy."
+  }
+}

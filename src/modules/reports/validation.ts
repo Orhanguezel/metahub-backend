@@ -5,6 +5,14 @@ import translations from "./i18n";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { isValidObjectId } from "@/core/utils/validation";
 
+const KIND_LIST = [
+  "ar_aging","ap_aging","revenue","expense","cashflow",
+  "profitability","billing_forecast","invoice_collections",
+  "employee_utilization","workload","service_performance",
+  "hourly_sales","coupon_performance","order_cancellations",
+  "profitability_kpi","on_time_rate",
+] as const;
+
 const parseIfJson = (v: any) => {
   try { return typeof v === "string" ? JSON.parse(v) : v; } catch { return v; }
 };
@@ -21,15 +29,9 @@ export const validateCreateDefinition = [
   body("name").isString().trim().notEmpty().withMessage((_, { req }) =>
     translate("validation.requiredName", req.locale || getLogLocale(), translations)
   ),
-  body("kind")
-    .isIn([
-      "ar_aging","ap_aging","revenue","expense","cashflow",
-      "profitability","billing_forecast","invoice_collections",
-      "employee_utilization","workload","service_performance",
-    ])
-    .withMessage((_, { req }) =>
-      translate("validation.invalidKind", req.locale || getLogLocale(), translations)
-    ),
+  body("kind").isIn(KIND_LIST as any).withMessage((_, { req }) =>
+    translate("validation.invalidKind", req.locale || getLogLocale(), translations)
+  ),
   body("defaultFilters").optional().customSanitizer(parseIfJson).custom(() => true),
   body("view").optional().customSanitizer(parseIfJson).custom(() => true),
   body("exportFormats").optional().isArray(),
@@ -43,13 +45,7 @@ export const validateCreateDefinition = [
 
 export const validateUpdateDefinition = [
   body("name").optional().isString().trim().notEmpty(),
-  body("kind")
-    .optional()
-    .isIn([
-      "ar_aging","ap_aging","revenue","expense","cashflow",
-      "profitability","billing_forecast","invoice_collections",
-      "employee_utilization","workload","service_performance",
-    ]),
+  body("kind").optional().isIn(KIND_LIST as any),
   body("defaultFilters").optional().customSanitizer(parseIfJson).custom(() => true),
   body("view").optional().customSanitizer(parseIfJson).custom(() => true),
   body("exportFormats").optional().isArray(),
@@ -89,6 +85,30 @@ export const validateRunListQuery = [
   query("kind").optional().isString(),
   query("status").optional().isIn(["queued","running","success","error","cancelled"]),
   query("definitionRef").optional().isMongoId(),
+  query("from").optional().isISO8601(),
+  query("to").optional().isISO8601(),
+  query("limit").optional().isInt({ min: 1, max: 500 }),
+  validateRequest,
+];
+
+export const validateHourlySalesQuery = [
+  query("from").optional().isISO8601(),
+  query("to").optional().isISO8601(),
+  query("branchId").optional().custom((v) => !v || isValidObjectId(v)),
+  query("tz").optional().isString(),
+  query("limit").optional().isInt({ min: 1, max: 500 }),
+  validateRequest,
+];
+
+export const validateCouponPerfQuery = [
+  query("from").optional().isISO8601(),
+  query("to").optional().isISO8601(),
+  query("code").optional().isString(),
+  query("limit").optional().isInt({ min: 1, max: 500 }),
+  validateRequest,
+];
+
+export const validateOrderCancelQuery = [
   query("from").optional().isISO8601(),
   query("to").optional().isISO8601(),
   query("limit").optional().isInt({ min: 1, max: 500 }),

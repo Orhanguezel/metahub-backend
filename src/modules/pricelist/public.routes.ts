@@ -3,17 +3,23 @@ import {
   getAllPriceListsPublic,
   getPriceListByCodePublic,
   getPriceForServicePublic,
+  publicGetCatalogItems,
+  publicGetCatalogItemByCode,
 } from "./public.controller";
+import {
+  validatePublicCatalogQuery,
+  validatePublicPriceQuery
+} from "./validation";
 
 const router = express.Router();
 
-// Lists visible to public (active + in-window)
-router.get("/",  getAllPriceListsPublic);
+/* Price Lists (active + window) */
+router.get("/", getAllPriceListsPublic);
+router.get("/code/:code", getPriceListByCodePublic);
+router.get("/code/:code/price", validatePublicPriceQuery, getPriceForServicePublic);
 
-// List by code (with items)
-router.get("/code/:code",  getPriceListByCodePublic);
-
-// Quick price lookup for a service (by price list code)
-router.get("/code/:code/price", getPriceForServicePublic);
+/* Catalog items (public) */
+router.get("/catalog", validatePublicCatalogQuery, publicGetCatalogItems);
+router.get("/catalog/:code", publicGetCatalogItemByCode);
 
 export default router;

@@ -1,3 +1,4 @@
+// modules/payments/admin.routes.ts
 import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
@@ -7,6 +8,7 @@ import {
   adminGetPayments,
   adminGetPaymentById,
   deletePayment,
+  refundPayment,              // <-- eklendi
 } from "./admin.controller";
 import {
   validateObjectId,
@@ -63,6 +65,13 @@ router.patch(
   validateObjectId("id"),
   validateChangePaymentStatus,
   changePaymentStatus
+);
+
+// Refund (full)
+router.post(
+  "/:id/refund",
+  validateObjectId("id"),
+  refundPayment
 );
 
 // Delete

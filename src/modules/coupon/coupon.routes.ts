@@ -13,7 +13,7 @@ import {
   validateUpdateCoupon,
   validateObjectId,
   validateAdminQuery,
-} from "./coupon.validation";
+} from "./validation";
 import { upload } from "@/core/middleware/file/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/file/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";

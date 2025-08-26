@@ -80,6 +80,9 @@ declare global {
         | "pricelist"
         | "reports"
         | "cashbook"
+        | "menucategory"
+        | "menuitem"
+        | "menu"
         | "default";
 
 

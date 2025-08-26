@@ -67,6 +67,7 @@ export interface IPaymentLinks {
   customer?: Types.ObjectId;   // ref: customer
   apartment?: Types.ObjectId;  // ref: apartment
   contract?: Types.ObjectId;   // ref: contract
+  order?: Types.ObjectId;      // ✅ ref: order  (YENİ)
 }
 
 /** Ana Payment dokümanı (schema ile birebir) */

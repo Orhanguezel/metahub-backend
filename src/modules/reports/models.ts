@@ -2,6 +2,15 @@
 import { Schema, model, models, type Model } from "mongoose";
 import type { IReportDefinition, IReportRun } from "./types";
 
+const KIND_ENUM = [
+  "ar_aging","ap_aging","revenue","expense","cashflow",
+  "profitability","billing_forecast","invoice_collections",
+  "employee_utilization","workload","service_performance",
+  // v2
+  "hourly_sales","coupon_performance","order_cancellations",
+  "profitability_kpi","on_time_rate",
+] as const;
+
 /* ---------- Sub Schemas ---------- */
 const FileAssetSchema = new Schema(
   {
@@ -46,16 +55,7 @@ const ReportDefinitionSchema = new Schema<IReportDefinition>(
     code:   { type: String, index: true },
 
     name:   { type: String, required: true, trim: true },
-    kind:   {
-      type: String,
-      enum: [
-        "ar_aging","ap_aging","revenue","expense","cashflow",
-        "profitability","billing_forecast","invoice_collections",
-        "employee_utilization","workload","service_performance",
-      ],
-      required: true,
-      index: true,
-    },
+    kind: { type: String, enum: KIND_ENUM, required: true, index: true },
     description: String,
 
     // esnek alanlar için Mixed kullanmak TS tarafında daha güvenli
@@ -88,16 +88,7 @@ const ReportRunSchema = new Schema<IReportRun>(
   {
     tenant: { type: String, required: true, index: true },
     definitionRef: { type: Schema.Types.ObjectId, ref: "reportdefinition", index: true },
-    kind: {
-      type: String,
-      enum: [
-        "ar_aging","ap_aging","revenue","expense","cashflow",
-        "profitability","billing_forecast","invoice_collections",
-        "employee_utilization","workload","service_performance",
-      ],
-      required: true,
-      index: true,
-    },
+    kind: { type: String, enum: KIND_ENUM, required: true, index: true },
     code: { type: String, index: true },
     triggeredBy: { type: String, enum: ["manual","schedule","api"], default: "manual" },
 

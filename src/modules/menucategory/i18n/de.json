@@ -1,0 +1,20 @@
+{
+  "created": "Kategorie erstellt.",
+  "updated": "Kategorie aktualisiert.",
+  "deleted": "Kategorie gelöscht.",
+  "fetched": "Datensatz abgerufen.",
+  "listFetched": "Liste abgerufen.",
+  "notFound": "Datensatz nicht gefunden.",
+  "invalidId": "Ungültige ID.",
+  "error.create_fail": "Beim Erstellen der Kategorie ist ein Fehler aufgetreten.",
+  "validation": {
+    "invalidObjectId": "Ungültige ObjectId.",
+    "booleanField": "Ungültiger Boolescher Wert.",
+    "codeRequired": "Code ist erforderlich.",
+    "nameRequired": "Name (mindestens eine Sprache) ist erforderlich.",
+    "slugInvalid": "Ungültiger Slug.",
+    "orderInvalid": "Reihenfolge muss 0–100000 sein.",
+    "imagesInvalid": "Bilder müssen ein Array sein.",
+    "imageRemoveInvalid": "Ungültige removedImages-Liste."
+  }
+}

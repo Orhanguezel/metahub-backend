@@ -1,4 +1,4 @@
-// modules/invoicing/admin.controller.ts (güncel öneri)
+// modules/invoicing/admin.controller.ts
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
@@ -51,8 +51,6 @@ export const updateInvoice = asyncHandler(async (req: Request, res: Response) =>
     return;
   }
 
-  // Draft dışındakileri kilitlemek istersen guard ekleyebilirsin
-
   const up = req.body || {};
   const updatableKeys: Array<
     | "type" | "status" | "issueDate" | "dueDate" | "periodStart" | "periodEnd"
@@ -91,7 +89,6 @@ export const changeInvoiceStatus = asyncHandler(async (req: Request, res: Respon
 
   (inv as any).status = status as InvoiceStatus;
 
-  // basit otomasyonlar
   if (status === "sent" && !(inv as any).sentAt) (inv as any).sentAt = new Date();
   if (status === "paid" && !(inv as any).paidAt) (inv as any).paidAt = new Date();
 
@@ -100,14 +97,15 @@ export const changeInvoiceStatus = asyncHandler(async (req: Request, res: Respon
   res.status(200).json({ success: true, message: t("messages.statusChanged"), data: inv });
 });
 
-/* ================== GET LIST ================== */
+/* ================== GET LIST (+meta) ================== */
 export const adminGetInvoices = asyncHandler(async (req: Request, res: Response) => {
   const t = tByReq(req);
   const { Invoice } = await getTenantModels(req);
 
   const {
     status, type, customer, apartment, contract, billingPlan,
-    q, issueFrom, issueTo, dueFrom, dueTo, limit = "200",
+    q, issueFrom, issueTo, dueFrom, dueTo,
+    page = "1", limit = "20", sort = "issueDate:desc",
   } = req.query as Record<string, string>;
 
   const filter: Record<string, any> = { tenant: req.tenant };
@@ -138,8 +136,12 @@ export const adminGetInvoices = asyncHandler(async (req: Request, res: Response)
     if (dueTo)   filter.dueDate.$lte = new Date(String(dueTo));
   }
 
-  const numLimit = Math.min(Number(limit) || 200, 500);
+  const p = Math.max(1, Number(page) || 1);
+  const l = Math.min(Math.max(1, Number(limit) || 20), 100);
+  const [sortField, sortDirRaw] = String(sort).split(":");
+  const sortObj: any = { [sortField || "issueDate"]: (sortDirRaw || "desc").toLowerCase() === "asc" ? 1 : -1 };
 
+  const total = await Invoice.countDocuments(filter);
   const list = await Invoice.find(filter)
     .select("-__v")
     .populate([
@@ -149,12 +151,18 @@ export const adminGetInvoices = asyncHandler(async (req: Request, res: Response)
       { path: "links.billingPlan",      select: "code status" },
       { path: "links.billingOccurrences", select: "seq dueAt status" },
     ])
-    .limit(numLimit)
-    .sort({ issueDate: -1, createdAt: -1 })
+    .sort(sortObj)
+    .skip((p - 1) * l)
+    .limit(l)
     .lean();
 
   logger.withReq.info(req, t("messages.listFetched"), { ...getRequestContext(req), resultCount: list.length });
-  res.status(200).json({ success: true, message: t("messages.listFetched"), data: list });
+  res.status(200).json({
+    success: true,
+    message: t("messages.listFetched"),
+    data: list,
+    meta: { page: p, limit: l, total },
+  });
 });
 
 /* ================== GET BY ID ================== */
@@ -206,4 +214,116 @@ export const deleteInvoice = asyncHandler(async (req: Request, res: Response) =>
   await inv.deleteOne();
   logger.withReq.info(req, t("messages.deleted"), { ...getRequestContext(req), id });
   res.status(200).json({ success: true, message: t("messages.deleted") });
+});
+
+/* ================== CREATE FROM ORDER (MVP fiş) ================== */
+export const createInvoiceFromOrder = asyncHandler(async (req: Request, res: Response) => {
+  const t = tByReq(req);
+  const { orderId } = (req.body || {}) as { orderId: string };
+  if (!isValidObjectId(orderId)) {
+    res.status(400).json({ success: false, message: t("validation.invalidObjectId") });
+    return;
+  }
+
+  const { Order, Invoice, User } = await getTenantModels(req);
+  const order = await Order.findOne({ _id: orderId, tenant: req.tenant }).lean<any>();
+  if (!order) {
+    res.status(404).json({ success: false, message: t("messages.notFound") });
+    return;
+  }
+
+  // Buyer snapshot
+  const buyerName =
+    order?.shippingAddress?.name ||
+    order?.userName ||
+    "Customer";
+  const buyer: any = {
+    name: buyerName,
+    email: order?.userEmail,
+    phone: order?.shippingAddress?.phone,
+    addressLine: [order?.shippingAddress?.street, order?.shippingAddress?.city, order?.shippingAddress?.postalCode]
+      .filter(Boolean)
+      .join(", "),
+  };
+
+  // Seller snapshot (tenant adını koyuyoruz; gerekirse ayarlardan zenginleştir)
+  const seller: any = {
+    name: req.tenantData?.name?.[req.locale as any] || req.tenantData?.name?.en || req.tenant || "Seller",
+    email: req.tenantData?.emailSettings?.senderEmail,
+  };
+
+  // Items → invoice items
+  const items = [];
+  let itemsSubtotal = 0;
+
+  for (const it of order.items || []) {
+    const qty = Math.max(1, Number(it.quantity || 1));
+    const unitPrice = Number(it.unitPrice || 0);
+    itemsSubtotal += qty * unitPrice;
+
+    const nameLabel = (it.menu?.snapshot?.name as any) || {};
+    const name: Record<string, string> =
+      typeof nameLabel === "object" && Object.keys(nameLabel).length
+        ? nameLabel
+        : { tr: "Ürün", en: "Product" };
+
+    items.push({
+      kind: "product",
+      ref: it.product,
+      name,
+      quantity: qty,
+      unitPrice,
+      taxRate: 0,
+    });
+  }
+
+  // Fees as separate items (delivery/service/tip) if any
+  const addFee = (labelTr: string, labelEn: string, amount: number) => {
+    if (amount && amount > 0) {
+      items.push({
+        kind: "fee",
+        name: { tr: labelTr, en: labelEn },
+        quantity: 1,
+        unitPrice: amount,
+        taxRate: 0,
+      });
+      itemsSubtotal += amount;
+    }
+  };
+  addFee("Teslimat Ücreti", "Delivery Fee", Number(order.deliveryFee || 0));
+  addFee("Servis Ücreti", "Service Fee", Number(order.serviceFee || 0));
+  addFee("Bahşiş", "Tip", Number(order.tipAmount || 0));
+
+  const currency = order.currency || "TRY";
+  const taxTotal = Number(order.taxTotal || 0);
+  const invoiceDiscountTotal = Number(order.discount || 0);
+  const rounding = 0;
+  const grandTotal = Math.max(0, itemsSubtotal + taxTotal - invoiceDiscountTotal + rounding);
+
+  const payload = {
+    tenant: req.tenant,
+    type: "invoice",
+    status: "issued" as InvoiceStatus,
+    issueDate: new Date(),
+    dueDate: undefined,
+    seller,
+    buyer,
+    links: { order: order._id },
+    items,
+    invoiceDiscount: invoiceDiscountTotal ? { type: "amount", value: invoiceDiscountTotal } : undefined,
+    totals: {
+      currency,
+      itemsSubtotal,
+      itemsDiscountTotal: 0,
+      invoiceDiscountTotal,
+      taxTotal,
+      rounding,
+      grandTotal,
+      amountPaid: 0,
+      balance: grandTotal,
+    },
+  };
+
+  const doc = await Invoice.create(payload as any);
+  res.status(201).json({ success: true, message: t("messages.created"), data: doc });
 });

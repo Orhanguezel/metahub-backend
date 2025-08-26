@@ -1,0 +1,16 @@
+{
+  "webhooks.created": "Webhook uç noktası oluşturuldu.",
+  "webhooks.updated": "Webhook uç noktası güncellendi.",
+  "webhooks.deleted": "Webhook uç noktası silindi.",
+  "webhooks.fetched": "Webhook uç noktası getirildi.",
+  "webhooks.listFetched": "Webhook uç noktaları listelendi.",
+  "webhooks.notFound": "Webhook uç noktası bulunamadı.",
+  "validation.invalidObjectId": "Geçersiz nesne kimliği.",
+  "validation.failed": "Doğrulama başarısız.",
+  "webhooks.statusChanged": "Webhook durumu güncellendi.",
+  "webhooks.testSent": "Test olayı gönderildi.",
+  "webhooks.deliveryQueued": "Teslimat kuyruğa alındı.",
+  "webhooks.deliveryRetried": "Teslimat yeniden denemesi planlandı.",
+  "webhooks.invalidUrl": "Geçersiz webhook URL'si.",
+  "webhooks.secretRotated": "Gizli anahtar yenilendi."
+}

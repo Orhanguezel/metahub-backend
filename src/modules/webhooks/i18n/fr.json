@@ -1,0 +1,16 @@
+{
+  "webhooks.created": "Point de terminaison du webhook créé.",
+  "webhooks.updated": "Point de terminaison du webhook mis à jour.",
+  "webhooks.deleted": "Point de terminaison du webhook supprimé.",
+  "webhooks.fetched": "Point de terminaison du webhook récupéré.",
+  "webhooks.listFetched": "Points de terminaison du webhook récupérés.",
+  "webhooks.notFound": "Point de terminaison du webhook introuvable.",
+  "validation.invalidObjectId": "ID d’objet invalide.",
+  "validation.failed": "Échec de la validation.",
+  "webhooks.statusChanged": "Statut du webhook modifié.",
+  "webhooks.testSent": "Événement de test envoyé.",
+  "webhooks.deliveryQueued": "Livraison mise en file d’attente.",
+  "webhooks.deliveryRetried": "Nouvelle tentative de livraison planifiée.",
+  "webhooks.invalidUrl": "URL de webhook invalide.",
+  "webhooks.secretRotated": "Secret renouvelé."
+}

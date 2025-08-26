@@ -37,7 +37,13 @@ export type ReportKind =
   | "invoice_collections"  // tahsilat performansı
   | "employee_utilization" // personel doluluk / zaman kullanımı
   | "workload"             // iş yükü (planlanan saat vs kapasite)
-  | "service_performance"; // servis SLA / tamamlama
+  | "service_performance" // servis SLA / tamamlama
+  // v2 (Faz-2) eklenenler:
+  | "hourly_sales"           // saatlik satış ısı haritası
+  | "coupon_performance"     // kupon kullanımı & etki
+  | "order_cancellations"    // iptal nedenleri dağılımı
+  | "profitability_kpi"      // kategori/ürün kârlılık (opsiyonel tanım)
+  | "on_time_rate";          // zamanında teslim/pickup oranı (opsiyonel tanım)
 
 /** Rapor varsayılan filtreleri */
 export interface IReportFilters {

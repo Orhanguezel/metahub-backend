@@ -17,35 +17,33 @@ import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
 
-// 🌟 Admin Authentication
+// 🔐 Admin
 router.use(authenticate, authorizeRoles("admin", "moderator"));
 
-// 🌟 Admin Endpoints
-
-// Listele (Tüm paketler)
+// List
 router.get("/", validateAdminQuery, getAllPricingAdmin);
 
-// Tekil paket
+// Detail
 router.get("/:id", validateObjectId("id"), getPricingByIdAdmin);
 
-// Yeni paket ekle
+// Create
 router.post(
   "/",
-  transformNestedFields(["title", "description"]),
+  transformNestedFields(["title","description","ctaLabel","unitName","features","featureItems","tiers"]),
   validateCreatePricing,
   createPricing
 );
 
-// Paket güncelle
+// Update
 router.put(
   "/:id",
-  transformNestedFields(["title", "description"]),
+  transformNestedFields(["title","description","ctaLabel","unitName","features","featureItems","tiers"]),
   validateObjectId("id"),
   validateUpdatePricing,
   updatePricing
 );
 
-// Paket sil
+// Delete
 router.delete("/:id", validateObjectId("id"), deletePricing);
 
 export default router;

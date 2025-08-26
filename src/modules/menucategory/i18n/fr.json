@@ -1,0 +1,20 @@
+{
+  "created": "Catégorie créée.",
+  "updated": "Catégorie mise à jour.",
+  "deleted": "Catégorie supprimée.",
+  "fetched": "Enregistrement récupéré.",
+  "listFetched": "Liste récupérée.",
+  "notFound": "Enregistrement introuvable.",
+  "invalidId": "ID invalide.",
+  "error.create_fail": "Erreur lors de la création de la catégorie.",
+  "validation": {
+    "invalidObjectId": "ObjectId invalide.",
+    "booleanField": "Valeur booléenne invalide.",
+    "codeRequired": "Le code est requis.",
+    "nameRequired": "Nom (au moins une langue) requis.",
+    "slugInvalid": "Slug invalide.",
+    "orderInvalid": "Ordre entre 0 et 100000.",
+    "imagesInvalid": "Les images doivent être un tableau.",
+    "imageRemoveInvalid": "Liste removedImages invalide."
+  }
+}

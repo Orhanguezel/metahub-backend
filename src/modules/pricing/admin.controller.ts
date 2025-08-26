@@ -11,286 +11,200 @@ import translations from "./i18n";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import { fillAllLocalesArray } from "@/core/utils/i18n/fillAllLocalesArray";
 import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
-import { mergeLocalesArrayForUpdate } from "@/core/utils/i18n/mergeLocalesArrayForUpdate";
 
+const parseIfJson = (v: any) => { try { return typeof v === "string" ? JSON.parse(v) : v; } catch { return v; } };
+const tByReq = (req: Request) => (k: string, p?: any) => translate(k, (req.locale as SupportedLocale) || getLogLocale(), translations, p);
 
-// JSON string'i parse et, obje olarak dön
-const parseIfJson = (value: any) => {
-  try {
-    return typeof value === "string" ? JSON.parse(value) : value;
-  } catch {
-    return value;
-  }
-};
+// normalize for outbound
+function normalizePricingItem(item: any) { return { ...item }; }
 
-function normalizePricingItem(item: any) {
-  // Sadece nesneyi döndür (gerekirse alanlar burada array normalization yapılır)
-  return {
-    ...item,
-  };
-}
-
-
-
-// 📥 GET /admin/pricing
+/* ============ ADMIN: LIST ============ */
 export const getAllPricingAdmin = asyncHandler(async (req: Request, res: Response) => {
-  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale() || "en";
-  const t = (key: string) => translate(key, locale, translations);
+  const t = tByReq(req);
   const { Pricing } = await getTenantModels(req);
 
-  const pricingList = await Pricing.find({ tenant: req.tenant })
-    .sort({ order: 1, createdAt: -1 })
-    .lean();
+  const {
+    q, status, isActive, isPublished, category, planType,
+    segment, region, onDate, limit="50", page="1", sort="order:asc"
+  } = req.query as Record<string,string>;
 
-  const normalizedList = pricingList.map(normalizePricingItem);
+  const filter: Record<string, any> = { tenant: req.tenant };
+  if (status) filter.status = status;
+  if (typeof isActive === "string") filter.isActive = isActive === "true";
+  if (typeof isPublished === "string") filter.isPublished = isPublished === "true";
+  if (category) filter.category = category;
+  if (planType) filter.planType = planType;
+  if (segment) filter.segments = { $in: [segment] };
+  if (region) filter.regions = { $in: [region] };
+  if (onDate) {
+    const d = new Date(onDate);
+    filter.$and = [
+      { $or: [{ effectiveFrom: { $exists: false } }, { effectiveFrom: { $lte: d } }] },
+      { $or: [{ effectiveTo: { $exists: false } }, { effectiveTo: { $gte: d } }] },
+    ];
+  }
+  if (q?.trim()) {
+    const rx = new RegExp(q.trim(), "i");
+    filter.$or = [
+      { code: rx }, { slug: rx }, { category: rx },
+      ...["en","de","fr","tr","es","pl"].map(l => ({ [`title.${l}`]: rx }))
+    ];
+  }
 
-  logger.withReq.info(req, t("log.admin_listed"), {
-    ...getRequestContext(req),
-    event: "pricing.admin_list",
-    module: "pricing",
-    resultCount: normalizedList.length,
-  });
+  const [sortField, sortDirRaw] = String(sort).split(":");
+  const sortDir = sortDirRaw === "asc" ? 1 : -1;
+  const lim = Math.min(Math.max(parseInt(String(limit), 10) || 50, 1), 200);
+  const skip = (Math.max(parseInt(String(page), 10) || 1, 1) - 1) * lim;
 
-  res.status(200).json({
-    success: true,
-    message: t("log.admin_listed"),
-    data: normalizedList,
-  });
-  return;
+  const [items, total] = await Promise.all([
+    Pricing.find(filter).sort({ [sortField]: sortDir }).skip(skip).limit(lim).lean(),
+    Pricing.countDocuments(filter),
+  ]);
+
+  logger.withReq.info(req, t("log.admin_listed"), { ...getRequestContext(req), resultCount: items.length });
+  res.status(200).json({ success: true, message: t("log.admin_listed"), data: items.map(normalizePricingItem), paging: { total, limit: lim, page: Number(page) } });
 });
 
-// 📥 GET /admin/pricing/:id
+/* ============ ADMIN: GET BY ID ============ */
 export const getPricingByIdAdmin = asyncHandler(async (req: Request, res: Response) => {
+  const t = tByReq(req);
   const { id } = req.params;
-  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale() || "en";
-  const t = (key: string) => translate(key, locale, translations);
   const { Pricing } = await getTenantModels(req);
 
-  if (!isValidObjectId(id)) {
-    logger.withReq.warn(req, t("error.invalid_id"), {
-      ...getRequestContext(req),
-      event: "pricing.admin_getById",
-      module: "pricing",
-      status: "fail",
-      id,
-    });
-    res.status(400).json({ success: false, message: t("error.invalid_id") });
-    return;
-  }
+  if (!isValidObjectId(id)) { res.status(400).json({ success: false, message: t("error.invalid_id") }); return; }
 
   const pricing = await Pricing.findOne({ _id: id, tenant: req.tenant }).lean();
+  if (!pricing) { res.status(404).json({ success: false, message: t("error.not_found") }); return; }
 
-  if (!pricing) {
-    logger.withReq.warn(req, t("error.not_found"), {
-      ...getRequestContext(req),
-      event: "pricing.admin_getById",
-      module: "pricing",
-      status: "fail",
-      id,
-    });
-    res.status(404).json({ success: false, message: t("error.not_found") });
-    return;
-  }
-
-  const normalized = normalizePricingItem(pricing);
-
-  logger.withReq.info(req, t("log.admin_fetched"), {
-    ...getRequestContext(req),
-    event: "pricing.admin_getById",
-    module: "pricing",
-    pricingId: normalized._id,
-  });
-
-  res.status(200).json({
-    success: true,
-    message: t("log.admin_fetched"),
-    data: normalized,
-  });
-  return;
+  res.status(200).json({ success: true, message: t("log.admin_fetched"), data: normalizePricingItem(pricing) });
 });
 
-// 📥 POST /admin/pricing
+/* ============ ADMIN: CREATE ============ */
 export const createPricing = asyncHandler(async (req: Request, res: Response) => {
-  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale() || "en";
-  const t = (key: string) => translate(key, locale, translations);
+  const t = tByReq(req);
   const { Pricing } = await getTenantModels(req);
 
-  let {
-    title,
-    description,
-    features,
-    category,
-    price,
-    currency,
-    period,
-    isPublished,
-    publishedAt,
-    isPopular,
-    order,
-    isActive,
-  } = req.body;
+  const b = req.body || {};
 
-  // Çoklu dil otomatik doldurma
-  title = fillAllLocales(parseIfJson(title));
-  description = fillAllLocales(parseIfJson(description));
-  features = fillAllLocalesArray(parseIfJson(features));
-
-  // Zorunlu alan kontrolü
-  if (!title || typeof price !== "number" || !currency || !period) {
-    res.status(400).json({ success: false, message: t("error.missing_fields") });
-    return;
-  }
-
-  // period: "monthly" | "yearly" | "once" dışında bir şey gelirse hata döndür!
-  if (!["monthly", "yearly", "once"].includes(period)) {
-    res.status(400).json({ success: false, message: t("error.invalid_period") });
-    return;
-  }
-
-  const newPricing = await Pricing.create({
-    title,
+  const doc = {
     tenant: req.tenant,
-    description,
-    features,
-    category,
-    price,
-    currency,
-    period,
-    isPublished: !!isPublished,
-    publishedAt,
-    isPopular: !!isPopular,
-    order: typeof order === "number" ? order : 0,
-    isActive: typeof isActive === "boolean" ? isActive : true,
-  });
+    code: b.code,
+    slug: b.slug,
 
-  logger.withReq.info(req, t("log.admin_created"), {
-    ...getRequestContext(req),
-    event: "pricing.admin_created",
-    module: "pricing",
-    pricingId: newPricing._id,
-  });
+    title: fillAllLocales(parseIfJson(b.title)),
+    description: fillAllLocales(parseIfJson(b.description)),
+    ctaLabel: fillAllLocales(parseIfJson(b.ctaLabel)),
+    ctaUrl: b.ctaUrl,
+    iconUrl: b.iconUrl,
+    imageUrl: b.imageUrl,
 
-  res.status(201).json({
-    success: true,
-    message: t("log.admin_created"),
-    data: normalizePricingItem(newPricing.toObject()),
-  });
-  return;
+    planType: b.planType,
+    category: b.category,
+    status: b.status || "draft",
+    isActive: b.isActive !== undefined ? !!b.isActive : true,
+
+    isPublished: !!b.isPublished,
+    publishedAt: b.publishedAt ? new Date(b.publishedAt) : undefined,
+
+    price: Number(b.price),
+    compareAtPrice: b.compareAtPrice != null ? Number(b.compareAtPrice) : undefined,
+    currency: b.currency,
+    period: b.period,
+    setupFee: b.setupFee != null ? Number(b.setupFee) : undefined,
+    priceIncludesTax: b.priceIncludesTax != null ? !!b.priceIncludesTax : undefined,
+    vatRate: b.vatRate != null ? Number(b.vatRate) : undefined,
+
+    unitName: fillAllLocales(parseIfJson(b.unitName)),
+    includedUnits: b.includedUnits != null ? Number(b.includedUnits) : undefined,
+    pricePerUnit: b.pricePerUnit != null ? Number(b.pricePerUnit) : undefined,
+    tiers: Array.isArray(b.tiers) ? b.tiers : parseIfJson(b.tiers),
+
+    trialDays: b.trialDays != null ? Number(b.trialDays) : undefined,
+    minTermMonths: b.minTermMonths != null ? Number(b.minTermMonths) : undefined,
+
+    features: fillAllLocalesArray(parseIfJson(b.features)),
+    featureItems: Array.isArray(b.featureItems) ? b.featureItems.map(parseIfJson) : (parseIfJson(b.featureItems) || []),
+
+    regions: Array.isArray(b.regions) ? b.regions : (typeof b.regions === "string" ? b.regions.split(",").map((s:string)=>s.trim()).filter(Boolean) : []),
+    segments: Array.isArray(b.segments) ? b.segments : (typeof b.segments === "string" ? b.segments.split(",").map((s:string)=>s.trim()).filter(Boolean) : []),
+
+    isPopular: !!b.isPopular,
+    order: b.order != null ? Number(b.order) : 0,
+
+    effectiveFrom: b.effectiveFrom ? new Date(b.effectiveFrom) : undefined,
+    effectiveTo: b.effectiveTo ? new Date(b.effectiveTo) : undefined,
+  };
+
+  const created = await Pricing.create(doc as any);
+  logger.withReq.info(req, t("log.admin_created"), { ...getRequestContext(req), pricingId: created._id });
+  res.status(201).json({ success: true, message: t("log.admin_created"), data: normalizePricingItem(created.toObject()) });
 });
 
-// 📥 PUT /admin/pricing/:id
+/* ============ ADMIN: UPDATE ============ */
 export const updatePricing = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale() || "en";
-  const t = (key: string) => translate(key, locale, translations);
+  const t = tByReq(req);
   const { Pricing } = await getTenantModels(req);
+  const { id } = req.params;
 
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ success: false, message: t("error.invalid_id") });
-    return;
+  if (!isValidObjectId(id)) { res.status(400).json({ success: false, message: t("error.invalid_id") }); return; }
+
+  const existing = await Pricing.findOne({ _id: id, tenant: req.tenant });
+  if (!existing) { res.status(404).json({ success: false, message: t("error.not_found") }); return; }
+
+  const b = req.body || {};
+
+  if (b.code !== undefined) (existing as any).code = b.code;
+  if (b.slug !== undefined) (existing as any).slug = b.slug;
+
+  if (b.title) existing.title = mergeLocalesForUpdate(existing.title, parseIfJson(b.title));
+  if (b.description) existing.description = mergeLocalesForUpdate(existing.description, parseIfJson(b.description));
+  if (b.ctaLabel) existing.ctaLabel = mergeLocalesForUpdate(existing.ctaLabel || {}, parseIfJson(b.ctaLabel));
+  if (b.unitName) existing.unitName = mergeLocalesForUpdate(existing.unitName || {}, parseIfJson(b.unitName));
+
+  const fields = [
+    "ctaUrl","iconUrl","imageUrl","planType","category","status","currency","period",
+    "priceIncludesTax"
+  ] as const;
+
+  for (const f of fields) if (b[f] !== undefined) (existing as any)[f] = b[f];
+  if (b.isActive !== undefined) existing.isActive = !!b.isActive;
+  if (b.isPublished !== undefined) existing.isPublished = !!b.isPublished;
+
+  const numFields = ["price","compareAtPrice","setupFee","vatRate","includedUnits","pricePerUnit","trialDays","minTermMonths","order"] as const;
+  for (const f of numFields) if (b[f] !== undefined) (existing as any)[f] = Number(b[f]);
+
+  if (b.tiers !== undefined) (existing as any).tiers = Array.isArray(b.tiers) ? b.tiers : parseIfJson(b.tiers);
+  if (b.features !== undefined) (existing as any).features = fillAllLocalesArray(parseIfJson(b.features));
+  if (b.featureItems !== undefined) (existing as any).featureItems = Array.isArray(b.featureItems) ? b.featureItems : (parseIfJson(b.featureItems) || []);
+
+  if (b.regions !== undefined) {
+    (existing as any).regions = Array.isArray(b.regions) ? b.regions : (typeof b.regions === "string" ? b.regions.split(",").map((s:string)=>s.trim()).filter(Boolean) : []);
+  }
+  if (b.segments !== undefined) {
+    (existing as any).segments = Array.isArray(b.segments) ? b.segments : (typeof b.segments === "string" ? b.segments.split(",").map((s:string)=>s.trim()).filter(Boolean) : []);
   }
 
-  const pricing = await Pricing.findOne({ _id: id, tenant: req.tenant }).lean();
+  if (b.publishedAt !== undefined) (existing as any).publishedAt = b.publishedAt ? new Date(b.publishedAt) : undefined;
+  if (b.effectiveFrom !== undefined) (existing as any).effectiveFrom = b.effectiveFrom ? new Date(b.effectiveFrom) : undefined;
+  if (b.effectiveTo !== undefined) (existing as any).effectiveTo = b.effectiveTo ? new Date(b.effectiveTo) : undefined;
 
-  if (!pricing) {
-    res.status(404).json({ success: false, message: t("error.not_found") });
-    return;
-  }
+  const updated = await existing.save();
 
-  const updates = req.body;
-
-  if (updates.title) {
-    pricing.title = mergeLocalesForUpdate(pricing.title, parseIfJson(updates.title));
-  }
-  if (updates.description) {
-    pricing.description = mergeLocalesForUpdate(pricing.description, parseIfJson(updates.description));
-  }
- if (updates.features) {
-  pricing.features = mergeLocalesArrayForUpdate(
-    pricing.features || {},
-    parseIfJson(updates.features)
-  );
-}
-
-
-  const updatableFields: (keyof typeof pricing)[] = [
-    "title",
-    "description",
-    "features",
-    "category",
-    "price",
-    "currency",
-    "period",
-    "isPublished",
-    "publishedAt",
-    "isPopular",
-    "order",
-    "isActive",
-  ];
-
-  for (const field of updatableFields) {
-    if (updates[field] !== undefined) (pricing as any)[field] = updates[field];
-  }
-
-  // Tenant overwrite güvenliği
-  pricing.tenant = req.tenant;
-
-  const updated = await Pricing.findOneAndUpdate(
-    { _id: id, tenant: req.tenant },
-    pricing,
-    { new: true, lean: true }
-  );
-
-  if (!updated) {
-    res.status(404).json({ success: false, message: t("error.not_found") });
-    return;
-  }
-
-  logger.withReq.info(req, t("log.admin_updated"), {
-    ...getRequestContext(req),
-    event: "pricing.admin_updated",
-    module: "pricing",
-    pricingId: updated._id,
-  });
-
-  res.status(200).json({
-    success: true,
-    message: t("log.admin_updated"),
-    data: normalizePricingItem(updated),
-  });
-  return;
+  logger.withReq.info(req, t("log.admin_updated"), { ...getRequestContext(req), pricingId: updated._id });
+  res.status(200).json({ success: true, message: t("log.admin_updated"), data: normalizePricingItem(updated.toObject()) });
 });
 
-// 📥 DELETE /admin/pricing/:id
+/* ============ ADMIN: DELETE ============ */
 export const deletePricing = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale() || "en";
-  const t = (key: string) => translate(key, locale, translations);
+  const t = tByReq(req);
   const { Pricing } = await getTenantModels(req);
+  const { id } = req.params;
 
-  if (!isValidObjectId(id)) {
-    res.status(400).json({ success: false, message: t("error.invalid_id") });
-    return;
-  }
+  if (!isValidObjectId(id)) { res.status(400).json({ success: false, message: t("error.invalid_id") }); return; }
 
   const deleted = await Pricing.findOneAndDelete({ _id: id, tenant: req.tenant });
+  if (!deleted) { res.status(404).json({ success: false, message: t("error.not_found") }); return; }
 
-  if (!deleted) {
-    res.status(404).json({ success: false, message: t("error.not_found") });
-    return;
-  }
-
-  logger.withReq.info(req, t("log.admin_deleted"), {
-    ...getRequestContext(req),
-    event: "pricing.admin_deleted",
-    module: "pricing",
-    pricingId: deleted._id,
-  });
-
-  res.status(200).json({
-    success: true,
-    message: t("log.admin_deleted"),
-    data: normalizePricingItem(deleted.toObject ? deleted.toObject() : deleted),
-  });
-  return;
+  logger.withReq.info(req, t("log.admin_deleted"), { ...getRequestContext(req), pricingId: deleted._id });
+  res.status(200).json({ success: true, message: t("log.admin_deleted"), data: normalizePricingItem(deleted.toObject ? deleted.toObject() : deleted) });
 });

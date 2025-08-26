@@ -9,115 +9,68 @@ import translations from "./i18n";
 import { t as translate } from "@/core/utils/i18n/translate";
 import { isValidObjectId } from "@/core/utils/validation";
 
-// --- normalizePricingItem: Çoklu dil destekli fields ---
-function normalizePricingItem(item: any) {
-  // Özellikle features gibi Map alanlar JSON'a çevrildiğinde düz obje olur.
-  // Burada gerekirse ek array normalization eklenebilir.
-  return {
-    ...item,
-    features:
-      item.features && typeof item.features === "object"
-        ? Object.fromEntries(Object.entries(item.features))
-        : {},
-  };
-}
+const tByReq = (req: Request) => (k: string, p?: any) =>
+  translate(k, (req.locale as SupportedLocale) || getLogLocale(), translations, p);
 
-// 📥 GET /pricing (Public, liste)
+const normalizePricingItem = (item: any) => ({ ...item });
+
+/* LIST (public) */
 export const getAllPricing = asyncHandler(async (req: Request, res: Response) => {
-  const { category, onlyLocalized } = req.query;
-  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale() || "en";
-  const t = (key: string) => translate(key, locale, translations);
+  const t = tByReq(req);
   const { Pricing } = await getTenantModels(req);
+
+  const {
+    category, planType, region, segment, onlyPopular, onDate, limit="100"
+  } = req.query as Record<string,string>;
+
+  const now = onDate ? new Date(onDate) : new Date();
 
   const filter: Record<string, any> = {
     tenant: req.tenant,
     isActive: true,
     isPublished: true,
+    status: "active",
+    $and: [
+      { $or: [{ effectiveFrom: { $exists: false } }, { effectiveFrom: { $lte: now } }] },
+      { $or: [{ effectiveTo: { $exists: false } }, { effectiveTo: { $gte: now } }] },
+    ],
   };
+  if (category) filter.category = category;
+  if (planType) filter.planType = planType;
+  if (region) filter.regions = { $in: [region] };
+  if (segment) filter.segments = { $in: [segment] };
+  if (onlyPopular === "true") filter.isPopular = true;
 
-  // Kategoriye göre filtre
-  if (typeof category === "string" && category.length > 0) {
-    filter.category = category;
-  }
+  const lim = Math.min(Math.max(parseInt(String(limit), 10) || 100, 1), 500);
+  const list = await Pricing.find(filter).sort({ order: 1, createdAt: -1 }).limit(lim).lean();
 
-  // Sadece seçili dilde başlık varsa göster
-  if (onlyLocalized === "true") {
-    filter[`title.${locale}`] = { $exists: true, $ne: "" };
-  }
-
-  const pricingList = await Pricing.find(filter)
-    .sort({ order: 1, createdAt: -1 })
-    .lean();
-
-  // Features ve diğer map alanları düzleştir
-  const normalizedList = (pricingList || []).map(normalizePricingItem);
-
-  logger.withReq.info(req, t("log.listed"), {
-    ...getRequestContext(req),
-    event: "pricing.public_list",
-    module: "pricing",
-    resultCount: normalizedList.length,
-  });
-
-  res.status(200).json({
-    success: true,
-    message: t("log.listed"),
-    data: normalizedList,
-  });
-  return;
+  logger.withReq.info(req, t("log.listed"), { ...getRequestContext(req), resultCount: list.length });
+  res.status(200).json({ success: true, message: t("log.listed"), data: list.map(normalizePricingItem) });
 });
 
-// 📥 GET /pricing/:id (Public, tekil)
+/* DETAIL (public) */
 export const getPricingById = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale() || "en";
-  const t = (key: string) => translate(key, locale, translations);
+  const t = tByReq(req);
   const { Pricing } = await getTenantModels(req);
+  const { id } = req.params;
 
-  if (!isValidObjectId(id)) {
-    logger.withReq.warn(req, t("error.invalid_id"), {
-      ...getRequestContext(req),
-      event: "pricing.public_getById",
-      module: "pricing",
-      status: "fail",
-      id,
-    });
-    res.status(400).json({ success: false, message: t("error.invalid_id") });
-    return;
-  }
+  if (!isValidObjectId(id)) { res.status(400).json({ success: false, message: t("error.invalid_id") }); return; }
+
+  const now = req.query.onDate ? new Date(String(req.query.onDate)) : new Date();
 
   const pricing = await Pricing.findOne({
     _id: id,
     tenant: req.tenant,
     isActive: true,
     isPublished: true,
+    status: "active",
+    $and: [
+      { $or: [{ effectiveFrom: { $exists: false } }, { effectiveFrom: { $lte: now } }] },
+      { $or: [{ effectiveTo: { $exists: false } }, { effectiveTo: { $gte: now } }] },
+    ],
   }).lean();
 
-  if (!pricing) {
-    logger.withReq.warn(req, t("error.not_found"), {
-      ...getRequestContext(req),
-      event: "pricing.public_getById",
-      module: "pricing",
-      status: "fail",
-      id,
-    });
-    res.status(404).json({ success: false, message: t("error.not_found") });
-    return;
-  }
+  if (!pricing) { res.status(404).json({ success: false, message: t("error.not_found") }); return; }
 
-  const normalized = normalizePricingItem(pricing);
-
-  logger.withReq.info(req, t("log.fetched"), {
-    ...getRequestContext(req),
-    event: "pricing.public_getById",
-    module: "pricing",
-    pricingId: normalized._id,
-  });
-
-  res.status(200).json({
-    success: true,
-    message: t("log.fetched"),
-    data: normalized,
-  });
-  return;
+  res.status(200).json({ success: true, message: t("log.fetched"), data: normalizePricingItem(pricing) });
 });

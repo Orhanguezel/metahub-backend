@@ -1,0 +1,16 @@
+{
+  "webhooks.created": "Endpoint de webhook creado.",
+  "webhooks.updated": "Endpoint de webhook actualizado.",
+  "webhooks.deleted": "Endpoint de webhook eliminado.",
+  "webhooks.fetched": "Endpoint de webhook obtenido.",
+  "webhooks.listFetched": "Lista de endpoints obtenida.",
+  "webhooks.notFound": "No se encontró el endpoint de webhook.",
+  "validation.invalidObjectId": "ID de objeto no válido.",
+  "validation.failed": "Error de validación.",
+  "webhooks.statusChanged": "Estado del webhook cambiado.",
+  "webhooks.testSent": "Evento de prueba enviado.",
+  "webhooks.deliveryQueued": "Entrega en cola.",
+  "webhooks.deliveryRetried": "Reintento de entrega programado.",
+  "webhooks.invalidUrl": "URL de webhook no válida.",
+  "webhooks.secretRotated": "Se rotó la clave secreta."
+}

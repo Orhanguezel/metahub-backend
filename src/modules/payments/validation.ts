@@ -52,6 +52,7 @@ const validateLinksOptional = body("links")
     if (!checkId(l.customer)) throw new Error(t("validation.linksCustomer"));
     if (!checkId(l.apartment)) throw new Error(t("validation.linksApartment"));
     if (!checkId(l.contract)) throw new Error(t("validation.linksContract"));
+    if (!checkId(l.order))    throw new Error(t("validation.linksOrder"));      // ✅ YENİ
     return true;
   });
 
@@ -170,6 +171,7 @@ export const validatePaymentListQuery = [
   query("provider").optional().isString(),
   query("customer").optional().isMongoId(),
   query("apartment").optional().isMongoId(),
+  query("order").optional().isMongoId(),
   query("contract").optional().isMongoId(),
   query("invoice").optional().isMongoId(),
   query("reconciled").optional().isBoolean().toBoolean(),

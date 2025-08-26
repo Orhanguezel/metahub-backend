@@ -57,12 +57,20 @@ export interface IInvoiceItem {
   rowSubtotal?: number;
   rowTax?: number;
   rowTotal?: number;
+
+  // NEW (optional): menuitem gibi satırlara ekstra bilgi taşıyabilmek için
+  meta?: any; // { menu?: { variantCode, modifiers, snapshot... }, priceComponents?: {...} } vb.
 }
 
 export interface IInvoiceTotals {
   currency: string;
   fxRate?: number;
+  // NEW (optional): brüt toplam (satır indirimleri öncesi)
+  itemsGrossTotal?: number;
+
+  // FIX: bu alan “satır indirimi sonrası ara toplam”ı temsil etmeli
   itemsSubtotal: number;
+
   itemsDiscountTotal: number;
   invoiceDiscountTotal: number;
   taxTotal: number;
