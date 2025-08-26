@@ -1,0 +1,20 @@
+{
+  "promotions.created": "Kampanya oluşturuldu.",
+  "promotions.updated": "Kampanya güncellendi.",
+  "promotions.deleted": "Kampanya silindi.",
+  "promotions.fetched": "Kampanya getirildi.",
+  "promotions.listFetched": "Kampanyalar listelendi.",
+  "promotions.notFound": "Kampanya bulunamadı.",
+  "validation.invalidObjectId": "Geçersiz kimlik.",
+  "validation.failed": "Doğrulama başarısız.",
+  "promotions.statusChanged": "Kampanya durumu güncellendi.",
+  "promotions.publishChanged": "Yayın durumu güncellendi.",
+  "promotions.evaluate.noMatch": "Uygulanabilir kampanya bulunamadı.",
+  "promotions.evaluate.applied": "Kampanya uygulandı.",
+  "promotions.redeem.ok": "Kampanya kullanıldı.",
+  "promotions.redeem.duplicate": "Kampanya zaten kullanılmış.",
+  "promotions.redeem.limitReached": "Kullanım limiti aşıldı.",
+  "promotions.redeem.perUserLimit": "Kullanıcı başına limit aşıldı.",
+  "promotions.redeem.firstOrderOnly": "Bu kampanya yalnızca ilk sipariş için geçerlidir.",
+  "promotions.notPublished": "Kampanya yayınlanmamış."
+}

@@ -42,6 +42,9 @@ export const UPLOAD_FOLDERS = {
   portfolio: "portfolio-images",
   skill: "skill-images",
   servicecatalog: "servicecatalog-images",
+  menucategory: "menucategory-images",
+  menuitem: "menuitem-images",
+  menu: "menu-images",
   default: "misc",
 
   // --- yeni modüller (Apartment projesi) ---

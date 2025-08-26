@@ -1,0 +1,25 @@
+{
+  "created": "Menü oluşturuldu.",
+  "updated": "Menü güncellendi.",
+  "deleted": "Menü silindi.",
+  "fetched": "Kayıt getirildi.",
+  "listFetched": "Liste getirildi.",
+  "notFound": "Kayıt bulunamadı.",
+  "invalidId": "Geçersiz kimlik.",
+  "error.create_fail": "Menü oluşturulurken bir hata oluştu.",
+  "validation": {
+    "invalidObjectId": "Geçersiz ObjectId.",
+    "booleanField": "Geçersiz boolean değer.",
+    "codeRequired": "Kod zorunludur.",
+    "nameRequired": "Ad (en az bir dil) zorunludur.",
+    "slugInvalid": "Slug geçersiz.",
+    "orderInvalid": "Sıra 0-100000 arasında olmalıdır.",
+    "categoriesInvalid": "Kategoriler dizisi geçersiz.",
+    "categoryIdInvalid": "Geçersiz kategori kimliği.",
+    "branchesInvalid": "Şubeler dizisi geçersiz.",
+    "branchIdInvalid": "Geçersiz şube kimliği.",
+    "datesInvalid": "Tarih aralığı geçersiz.",
+    "imagesInvalid": "Görseller dizisi geçersiz.",
+    "imageRemoveInvalid": "Kaldırılacak görseller listesi geçersiz."
+  }
+}

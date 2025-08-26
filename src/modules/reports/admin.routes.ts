@@ -18,7 +18,15 @@ import {
   validateDefinitionListQuery,
   validateCreateRun,
   validateRunListQuery,
+  validateHourlySalesQuery,
+  validateCouponPerfQuery,
+  validateOrderCancelQuery,
 } from "./validation";
+import {
+  getHourlySales,
+  getCouponPerformance,
+  getOrderCancellations,
+} from "./analytics.controller";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
@@ -85,6 +93,24 @@ router.delete(
   "/runs/:id",
   validateObjectId("id"),
   deleteReportRun
+);
+
+router.get(
+  "/analytics/sales/hourly",
+  validateHourlySalesQuery,
+  getHourlySales
+);
+
+router.get(
+  "/analytics/coupons/performance",
+  validateCouponPerfQuery,
+  getCouponPerformance
+);
+
+router.get(
+  "/analytics/orders/cancellations",
+  validateOrderCancelQuery,
+  getOrderCancellations
 );
 
 export default router;

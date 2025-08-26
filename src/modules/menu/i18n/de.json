@@ -1,0 +1,25 @@
+{
+  "created": "Menü erstellt.",
+  "updated": "Menü aktualisiert.",
+  "deleted": "Menü gelöscht.",
+  "fetched": "Datensatz abgerufen.",
+  "listFetched": "Liste abgerufen.",
+  "notFound": "Datensatz nicht gefunden.",
+  "invalidId": "Ungültige ID.",
+  "error.create_fail": "Beim Erstellen des Menüs ist ein Fehler aufgetreten.",
+  "validation": {
+    "invalidObjectId": "Ungültige ObjectId.",
+    "booleanField": "Ungültiger Boolescher Wert.",
+    "codeRequired": "Code ist erforderlich.",
+    "nameRequired": "Name (mindestens eine Sprache) ist erforderlich.",
+    "slugInvalid": "Ungültiger Slug.",
+    "orderInvalid": "Reihenfolge muss 0–100000 sein.",
+    "categoriesInvalid": "Kategorien müssen ein Array sein.",
+    "categoryIdInvalid": "Ungültige Kategorie-ID.",
+    "branchesInvalid": "Filialen müssen ein Array sein.",
+    "branchIdInvalid": "Ungültige Filial-ID.",
+    "datesInvalid": "Ungültiger Datumsbereich.",
+    "imagesInvalid": "Bilder müssen ein Array sein.",
+    "imageRemoveInvalid": "Ungültige removedImages-Liste."
+  }
+}

@@ -1,3 +1,4 @@
+// modules/invoicing/admin.routes.ts
 import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
@@ -7,6 +8,7 @@ import {
   adminGetInvoices,
   adminGetInvoiceById,
   deleteInvoice,
+  createInvoiceFromOrder,   // <-- eklendi
 } from "./admin.controller";
 import {
   validateObjectId,
@@ -43,6 +45,9 @@ router.post(
   validateCreateInvoice,
   createInvoice
 );
+
+// Create from order (MVP)
+router.post("/from-order", createInvoiceFromOrder);
 
 // Update (full/partial)
 router.put(

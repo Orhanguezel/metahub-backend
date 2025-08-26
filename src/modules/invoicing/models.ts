@@ -34,8 +34,8 @@ const ItemSchema = new Schema(
   {
     kind: { type: String, enum: ["service", "fee", "product", "custom"], required: true },
     ref: { type: Schema.Types.ObjectId },
-    name: { type: Object, required: true },        // TranslatedLabel
-    description: { type: Object },                 // TranslatedLabel
+    name: { type: Object, required: true },
+    description: { type: Object },
     quantity: { type: Number, required: true, min: 0 },
     unit: { type: String },
     unitPrice: { type: Number, required: true, min: 0 },
@@ -44,6 +44,9 @@ const ItemSchema = new Schema(
     rowSubtotal: { type: Number, min: 0 },
     rowTax: { type: Number, min: 0 },
     rowTotal: { type: Number, min: 0 },
+
+    // NEW
+    meta: { type: Schema.Types.Mixed },
   },
   { _id: false }
 );
@@ -52,6 +55,10 @@ const TotalsSchema = new Schema(
   {
     currency: { type: String, required: true, default: "EUR" },
     fxRate: { type: Number, min: 0 },
+
+    // NEW (optional)
+    itemsGrossTotal: { type: Number, min: 0, default: 0 },
+
     itemsSubtotal: { type: Number, required: true, min: 0, default: 0 },
     itemsDiscountTotal: { type: Number, required: true, min: 0, default: 0 },
     invoiceDiscountTotal: { type: Number, required: true, min: 0, default: 0 },
@@ -134,17 +141,21 @@ InvoiceSchema.index({ tenant: 1, "links.company": 1, issueDate: 1 });
 InvoiceSchema.pre("validate", function (next) {
   if (!this.code) {
     const y = new Date(this.issueDate ?? Date.now()).getFullYear();
-    (this as any).code = `INV-${y}-${String(Date.now()).slice(-6)}`;
+    const prefix = this.type === "creditNote" ? "CN" : "INV";
+    (this as any).code = `${prefix}-${y}-${String(Date.now()).slice(-6)}`;
   }
   next();
 });
 
-/* Basit toplam hesap */
+/* Basit toplam hesap — itemsSubtotal düzeltildi, round helper eklendi */
 function calcDiscount(base: number, d?: { type: string; value: number }) {
   if (!d) return 0;
   if (d.type === "rate") return Math.max(0, Math.min(100, d.value)) * base / 100;
   return Math.min(base, Math.max(0, d.value));
 }
+
+
+const r2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
 
 InvoiceSchema.pre("save", function (next) {
   const items = (this as any).items || [];
@@ -157,9 +168,10 @@ InvoiceSchema.pre("save", function (next) {
     const rowTax = Math.max(0, rowSubtotal * ((it.taxRate || 0) / 100));
     const rowTotal = rowSubtotal + rowTax;
 
-    it.rowSubtotal = rowSubtotal;
-    it.rowTax = rowTax;
-    it.rowTotal = rowTotal;
+    // satır değerlerini (2 ondalık) normalize et
+    it.rowSubtotal = r2(rowSubtotal);
+    it.rowTax = r2(rowTax);
+    it.rowTotal = r2(rowTotal);
 
     itemsGross += gross;
     itemsDisc += rowDisc;
@@ -175,19 +187,27 @@ InvoiceSchema.pre("save", function (next) {
   (this as any).totals = {
     currency,
     fxRate: (this as any).totals?.fxRate,
-    itemsSubtotal: itemsGross,
-    itemsDiscountTotal: itemsDisc,
-    invoiceDiscountTotal: invDisc,
-    taxTotal,
-    rounding,
-    grandTotal: grand,
-    amountPaid: (this as any).totals?.amountPaid ?? 0,
-    balance: Math.max(0, grand - ((this as any).totals?.amountPaid ?? 0)),
+    // NEW: brüt toplam (satır indirimleri öncesi)
+    itemsGrossTotal: r2(itemsGross),
+
+    // FIX: ara toplam = satır indirimi SONRASI (vergiden ÖNCE)
+    itemsSubtotal: r2(itemsSub),
+
+    itemsDiscountTotal: r2(itemsDisc),
+    invoiceDiscountTotal: r2(invDisc),
+    taxTotal: r2(taxTotal),
+    rounding: r2(rounding),
+    grandTotal: r2(grand),
+    amountPaid: r2((this as any).totals?.amountPaid ?? 0),
+    balance: 0, // altta set edilecek
   };
 
+  const paid = (this as any).totals.amountPaid || 0;
+  (this as any).totals.balance = r2((this as any).totals.grandTotal - paid);
+
   if (this.type === "creditNote") {
-    (this as any).totals.grandTotal = -Math.abs((this as any).totals.grandTotal || 0);
-    (this as any).totals.balance = (this as any).totals.grandTotal - ((this as any).totals.amountPaid || 0);
+    (this as any).totals.grandTotal = r2(-Math.abs((this as any).totals.grandTotal || 0));
+    (this as any).totals.balance = r2((this as any).totals.grandTotal - paid);
   }
 
   next();

@@ -1,0 +1,17 @@
+{
+  "webhooks.created": "Utworzono endpoint webhooka.",
+  "webhooks.updated": "Zaktualizowano endpoint webhooka.",
+  "webhooks.deleted": "Usunięto endpoint webhooka.",
+  "webhooks.fetched": "Pobrano endpoint webhooka.",
+  "webhooks.listFetched": "Pobrano listę endpointów webhooka.",
+  "webhooks.notFound": "Nie znaleziono endpointu webhooka.",
+  "validation.invalidObjectId": "Nieprawidłowy identyfikator obiektu.",
+  "validation.failed": "Błąd walidacji.",
+  "webhooks.statusChanged": "Zmieniono status webhooka.",
+  "webhooks.testSent": "Wysłano zdarzenie testowe.",
+  "webhooks.deliveryQueued": "Dostarczenie zakolejkowane.",
+  "webhooks.deliveryRetried": "Ponowna próba dostarczenia zaplanowana.",
+  "webhooks.invalidUrl": "Nieprawidłowy adres URL webhooka.",
+  "webhooks.secretRotated": "Zaktualizowano tajny klucz."
+}
+

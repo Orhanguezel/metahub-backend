@@ -5,8 +5,8 @@ import { Request } from "express";
 import { Settings } from "@/modules/settings/settings.models";
 import { User } from "@/modules/users/users.models";
 import { Product } from "@/modules/product/product.models";
-import { Order } from "@/modules/order/order.models";
-import { Cart } from "@/modules/cart/cart.models";
+import { Order } from "@/modules/order/models";
+import { Cart } from "@/modules/cart/models";
 import { Blog } from "@/modules/blog/models";
 import { BlogCategory } from "@/modules/blogcategory/category.models";
 import { Booking } from "@/modules/booking/booking.models";
@@ -14,7 +14,7 @@ import {
   BookingSlotRule,
   BookingSlotOverride,
 } from "@/modules/bookingslot/bookingslot.models";
-import { Coupon } from "@/modules/coupon/coupon.models";
+import { Coupon } from "@/modules/coupon/models";
 import { Gallery } from "@/modules/gallery/models";
 import { GalleryCategory } from "@/modules/gallerycategory/models";
 import { Services } from "@/modules/services/models";
@@ -90,6 +90,13 @@ import { PriceList, PriceListItem } from "@/modules/pricelist/models";
 import { CashAccount, CashEntry } from "@/modules/cashbook/models";
 import { FileObject } from "@/modules/files/models";
 import { Neighborhood } from "@/modules/neighborhood/models";
+
+import { Branch } from "@/modules/branch/models";
+import { MenuCategory } from "@/modules/menucategory/models";
+import { Menu } from "@/modules/menu/models";
+import { MenuItem } from "@/modules/menuitem/models";
+import { Promotion,PromotionRedemption } from "@/modules/promotions/models";
+import { WebhookDelivery, WebhookEndpoint } from "@/modules/webhooks/models";
 
 export const getTenantModels = async (req: Request) => ({
   Settings: await req.getModel("settings", Settings.schema),
@@ -218,4 +225,13 @@ export const getTenantModels = async (req: Request) => ({
   CashEntry: await req.getModel("cashentry", CashEntry.schema),
   FileObject: await req.getModel("fileobject", FileObject.schema),
   Neighborhood: await req.getModel("neighborhood", Neighborhood.schema),
+
+  Branch: await req.getModel("branch", Branch.schema),
+  MenuCategory: await req.getModel("menucategory", MenuCategory.schema),
+  Menu: await req.getModel("menu", Menu.schema),
+  MenuItem: await req.getModel("menuitem", MenuItem.schema),
+  Promotion: await req.getModel("promotion", Promotion.schema),
+  PromotionRedemption: await req.getModel("promotionredemption", PromotionRedemption.schema),
+  WebhookEndpoint: await req.getModel("webhookendpoint", WebhookEndpoint.schema),
+  WebhookDelivery: await req.getModel("webhookdelivery", WebhookDelivery.schema),
 });

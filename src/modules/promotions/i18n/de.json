@@ -1,0 +1,20 @@
+{
+  "promotions.created": "Aktion erstellt.",
+  "promotions.updated": "Aktion aktualisiert.",
+  "promotions.deleted": "Aktion gelöscht.",
+  "promotions.fetched": "Aktion abgerufen.",
+  "promotions.listFetched": "Aktionen abgerufen.",
+  "promotions.notFound": "Aktion nicht gefunden.",
+  "validation.invalidObjectId": "Ungültige Kennung.",
+  "validation.failed": "Validierung fehlgeschlagen.",
+  "promotions.statusChanged": "Aktionsstatus aktualisiert.",
+  "promotions.publishChanged": "Veröffentlichungsstatus aktualisiert.",
+  "promotions.evaluate.noMatch": "Keine passende Aktion gefunden.",
+  "promotions.evaluate.applied": "Aktion angewendet.",
+  "promotions.redeem.ok": "Aktion eingelöst.",
+  "promotions.redeem.duplicate": "Aktion bereits eingelöst.",
+  "promotions.redeem.limitReached": "Einlöselimit erreicht.",
+  "promotions.redeem.perUserLimit": "Einlöselimit pro Benutzer erreicht.",
+  "promotions.redeem.firstOrderOnly": "Diese Aktion gilt nur für die erste Bestellung.",
+  "promotions.notPublished": "Aktion nicht veröffentlicht."
+}

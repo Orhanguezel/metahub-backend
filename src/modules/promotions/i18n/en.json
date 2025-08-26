@@ -1,0 +1,20 @@
+{
+  "promotions.created": "Promotion created.",
+  "promotions.updated": "Promotion updated.",
+  "promotions.deleted": "Promotion deleted.",
+  "promotions.fetched": "Promotion fetched.",
+  "promotions.listFetched": "Promotions fetched.",
+  "promotions.notFound": "Promotion not found.",
+  "validation.invalidObjectId": "Invalid identifier.",
+  "validation.failed": "Validation failed.",
+  "promotions.statusChanged": "Promotion status updated.",
+  "promotions.publishChanged": "Publish state updated.",
+  "promotions.evaluate.noMatch": "No applicable promotion found.",
+  "promotions.evaluate.applied": "Promotion applied.",
+  "promotions.redeem.ok": "Promotion redeemed.",
+  "promotions.redeem.duplicate": "Promotion already redeemed.",
+  "promotions.redeem.limitReached": "Redemption limit reached.",
+  "promotions.redeem.perUserLimit": "Per-user redemption limit reached.",
+  "promotions.redeem.firstOrderOnly": "This promotion is valid only for the first order.",
+  "promotions.notPublished": "Promotion is not published."
+}

@@ -106,20 +106,26 @@ export async function removeTenantSettingsAndUnusedMetas(
 if (require.main === module) {
   const tenantSlug = process.argv[2];
   if (!tenantSlug) {
-    console.error(
-      "Kullanım: bun x ts-node .../removeTenantSettingsAndUnusedMetas.ts <tenantSlug>"
-    );
+    console.error("Kullanım: ts-node removeTenantSettingsAndUnusedMetas.ts <tenantSlug>");
     process.exit(1);
   }
 
   (async () => {
     try {
-      // Artık merkezi MONGO_URI ile bağlanmaya gerek yok, çünkü her tenant kendi DB'sini kullanıyor!
+      // 👇 master bağlantısı
+      const uri = process.env.MONGO_URI || process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/metahub";
+      const dbName = process.env.MONGO_DB || undefined;
+      await mongoose.connect(uri, { dbName } as any);
+
       await removeTenantSettingsAndUnusedMetas(tenantSlug);
+
+      await mongoose.disconnect();
       process.exit(0);
     } catch (err) {
       console.error("MongoDB bağlantı hatası veya script hatası:", err);
+      try { await mongoose.disconnect(); } catch {}
       process.exit(2);
     }
   })();
 }
+

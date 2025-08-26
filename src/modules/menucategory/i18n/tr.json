@@ -1,0 +1,20 @@
+{
+  "created": "Kategori oluşturuldu.",
+  "updated": "Kategori güncellendi.",
+  "deleted": "Kategori silindi.",
+  "fetched": "Kayıt getirildi.",
+  "listFetched": "Liste getirildi.",
+  "notFound": "Kayıt bulunamadı.",
+  "invalidId": "Geçersiz kimlik.",
+  "error.create_fail": "Kategori oluşturulurken bir hata oluştu.",
+  "validation": {
+    "invalidObjectId": "Geçersiz ObjectId.",
+    "booleanField": "Geçersiz boolean değer.",
+    "codeRequired": "Kod zorunludur.",
+    "nameRequired": "Ad (en az bir dil) zorunludur.",
+    "slugInvalid": "Slug geçersiz.",
+    "orderInvalid": "Sıra 0-100000 arasında olmalıdır.",
+    "imagesInvalid": "Görseller dizisi geçersiz.",
+    "imageRemoveInvalid": "Kaldırılacak görseller listesi geçersiz."
+  }
+}

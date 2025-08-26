@@ -6,8 +6,8 @@ import { Connection } from "mongoose";
 import { Settings } from "@/modules/settings/settings.models";
 import { User } from "@/modules/users/users.models";
 import { Product } from "@/modules/product/product.models";
-import { Order } from "@/modules/order/order.models";
-import { Cart } from "@/modules/cart/cart.models";
+import { Order } from "@/modules/order/models";
+import { Cart } from "@/modules/cart/models";
 import { Blog } from "@/modules/blog/models";
 import { BlogCategory } from "@/modules/blogcategory/category.models";
 import { Booking } from "@/modules/booking/booking.models";
@@ -15,7 +15,7 @@ import {
   BookingSlotRule,
   BookingSlotOverride,
 } from "@/modules/bookingslot/bookingslot.models";
-import { Coupon } from "@/modules/coupon/coupon.models";
+import { Coupon } from "@/modules/coupon/models";
 import { Gallery } from "@/modules/gallery/models";
 import { GalleryCategory } from "@/modules/gallerycategory/models";
 import { Services } from "@/modules/services/models";
@@ -91,6 +91,13 @@ import { PriceList, PriceListItem } from "@/modules/pricelist/models";
 import { CashAccount, CashEntry } from "@/modules/cashbook/models";
 import { FileObject } from "@/modules/files/models";
 import { Neighborhood } from "@/modules/neighborhood/models";
+
+import { Branch } from "@/modules/branch/models";
+import { MenuCategory } from "@/modules/menucategory/models";
+import { Menu } from "@/modules/menu/models";
+import { MenuItem } from "@/modules/menuitem/models";
+import { Promotion,PromotionRedemption } from "@/modules/promotions/models";
+import { WebhookDelivery, WebhookEndpoint } from "@/modules/webhooks/models";
 
 // ✅ Ana export
 export const getTenantModelsFromConnection = (conn: Connection) => ({
@@ -193,4 +200,12 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   CashEntry: conn.model("cashentry", CashEntry.schema),
   FileObject: conn.model("fileobject", FileObject.schema),
   Neighborhood: conn.model("neighborhood", Neighborhood.schema),
+  Branch: conn.model("branch", Branch.schema),
+  MenuCategory: conn.model("menucategory", MenuCategory.schema),
+  Menu: conn.model("menu", Menu.schema),
+  MenuItem: conn.model("menuitem", MenuItem.schema),
+  Promotion: conn.model("promotion", Promotion.schema),
+  PromotionRedemption: conn.model("promotionredemption", PromotionRedemption.schema),
+  WebhookEndpoint: conn.model("webhookendpoint", WebhookEndpoint.schema),
+  WebhookDelivery: conn.model("webhookdelivery", WebhookDelivery.schema),
 });

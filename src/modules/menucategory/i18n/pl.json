@@ -1,0 +1,20 @@
+{
+  "created": "Kategoria utworzona.",
+  "updated": "Kategoria zaktualizowana.",
+  "deleted": "Kategoria usunięta.",
+  "fetched": "Rekord pobrany.",
+  "listFetched": "Lista pobrana.",
+  "notFound": "Nie znaleziono rekordu.",
+  "invalidId": "Nieprawidłowy identyfikator.",
+  "error.create_fail": "Błąd podczas tworzenia kategorii.",
+  "validation": {
+    "invalidObjectId": "Nieprawidłowy ObjectId.",
+    "booleanField": "Nieprawidłowa wartość logiczna.",
+    "codeRequired": "Wymagany jest kod.",
+    "nameRequired": "Wymagana nazwa (co najmniej jeden język).",
+    "slugInvalid": "Nieprawidłowy slug.",
+    "orderInvalid": "Kolejność 0–100000.",
+    "imagesInvalid": "Obrazy muszą być tablicą.",
+    "imageRemoveInvalid": "Nieprawidłowa lista removedImages."
+  }
+}

@@ -40,6 +40,9 @@ export const uploadSizeLimits: Record<UploadFolderKeys, number> = {
   portfolio: 30 * 1024 * 1024,
   skill: 10 * 1024 * 1024,
   servicecatalog: 20 * 1024 * 1024,
+  menucategory: 30 * 1024 * 1024,
+  menuitem: 30 * 1024 * 1024,
+  menu: 30 * 1024 * 1024,
 
   // -- yeni modüller (Apartment projesi) --
   /**

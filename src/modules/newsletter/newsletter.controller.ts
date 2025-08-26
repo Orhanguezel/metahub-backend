@@ -9,49 +9,155 @@ import type { SupportedLocale } from "@/types/common";
 import { sendEmail } from "@/services/emailService";
 import logger from "@/core/middleware/logger/logger";
 import { SUPPORTED_LOCALES } from "@/types/common";
-import { newsletterTemplate } from "./templates/newsletterTemplate"; 
+import { newsletterTemplate } from "./templates/newsletterTemplate";
 
-// ✅ Public: Subscribe to newsletter (double opt-in ready)
-// ✅ Public: Subscribe (double opt-in ready) — v2 notifications
+/* ---------- reCAPTCHA yardımcıları ---------- */
+const RECAPTCHA_MIN_SCORE = Number(process.env.RECAPTCHA_MIN_SCORE ?? 0.5);
+const REQUIRE_RECAPTCHA = process.env.NODE_ENV === "production"; // prod'da zorunlu
+const MIN_TTS_MS = Number(process.env.SEC_NEWSLETTER_MIN_TTS ?? 800);
+
+function getClientIp(req: Request) {
+  const fwd = (req.headers["x-forwarded-for"] as string) || "";
+  return (fwd.split(",")[0] || req.ip || "").trim();
+}
+
+async function verifyRecaptchaV3(token: string | undefined, req: Request) {
+  if (!REQUIRE_RECAPTCHA) {
+    return { ok: true, score: 1, action: "dev", raw: null as any };
+  }
+  const secret = process.env.RECAPTCHA_SECRET;
+  if (!secret) {
+    logger.warn("[reCAPTCHA] RECAPTCHA_SECRET missing. Failing closed.");
+    return { ok: false, score: 0, action: "missing-secret", raw: null as any };
+  }
+  if (!token) {
+    return { ok: false, score: 0, action: "missing-token", raw: null as any };
+  }
+
+  try {
+    // Node 18+ global fetch
+    const body = new URLSearchParams({
+      secret,
+      response: token,
+      remoteip: getClientIp(req) || "",
+    }).toString();
+
+    const resp = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+    });
+
+    const json: any = await resp.json();
+    const ok = !!json?.success && Number(json?.score ?? 0) >= RECAPTCHA_MIN_SCORE;
+    return { ok, score: Number(json?.score ?? 0), action: json?.action, raw: json };
+  } catch (err) {
+    logger.error(`[reCAPTCHA] verify error: ${err}`);
+    return { ok: false, score: 0, action: "verify-error", raw: null as any };
+  }
+}
+
+/* ============================================================
+   PUBLIC: SUBSCRIBE (double opt-in ready) — güvenlik eklendi
+   ============================================================ */
 export const subscribeNewsletter = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const locale: SupportedLocale = req.locale || getLogLocale();
     const t = (k: string, p?: any) => translate(k, locale, translations, p);
 
     try {
-      const { email, lang, meta } = req.body;
+      const { email, lang, meta, recaptchaToken, hp, tts } = req.body as {
+        email?: string;
+        lang?: string;
+        meta?: any;
+        recaptchaToken?: string;
+        hp?: string;
+        tts?: number;
+      };
+
       const tenantData = req.tenantData;
-      const brandName   = tenantData?.name?.[locale] || tenantData?.name?.en || tenantData?.name || "Brand";
+      const brandName =
+        tenantData?.name?.[locale] || tenantData?.name?.en || (tenantData?.name as any) || "Brand";
       const senderEmail = tenantData?.emailSettings?.senderEmail || "noreply@example.com";
-      const brandWebsite = tenantData?.domain?.main ? `https://${tenantData.domain.main}` : process.env.BRAND_WEBSITE;
+      const brandWebsite =
+        tenantData?.domain?.main ? `https://${tenantData.domain.main}` : process.env.BRAND_WEBSITE;
 
       if (!email) {
         res.status(400).json({ success: false, message: t("emailRequired") });
         return;
       }
 
-      const { Newsletter, Notification } = await getTenantModels(req);
-      const emailNorm = String(email).toLowerCase().trim();
-
-      // zaten var mı?
-      const exists = await Newsletter.findOne({ tenant: req.tenant, email: emailNorm });
-      if (exists?.verified) {
-        res.status(200).json({ success: true, message: t("alreadySubscribed") });
+      // 🔒 1) Honeypot: botlar doldurur
+      if (typeof hp === "string" && hp.trim().length > 0) {
+        res.status(400).json({ success: false, message: t("security.botDetected", "Bot davranışı algılandı.") });
         return;
       }
 
+      // 🔒 2) İnsan-zamanı (çok hızlı gönderim)
+      if (typeof tts === "number" && tts < MIN_TTS_MS) {
+        res.status(400).json({ success: false, message: t("security.tooFast", "Çok hızlı gönderim tespit edildi.") });
+        return;
+      }
+
+      // 🔒 3) reCAPTCHA v3 doğrulaması
+      const captcha = await verifyRecaptchaV3(recaptchaToken, req);
+      if (!captcha.ok) {
+        res.status(400).json({
+          success: false,
+          message: t("security.captchaFailed", "reCAPTCHA doğrulaması başarısız."),
+          score: captcha.score,
+        });
+        return;
+      }
+
+      const { Newsletter, Notification } = await getTenantModels(req);
+      const emailNorm = String(email).toLowerCase().trim();
+
+      // 🔒 4) Soft rate-limit: 60 sn içinde aynı email için tekrar denemeyi engelle
+      const since = new Date(Date.now() - 60_000);
+      const recent = await Newsletter.findOne({
+        tenant: req.tenant,
+        email: emailNorm,
+        updatedAt: { $gte: since },
+      });
+      if (recent) {
+        res.status(429).json({
+          success: false,
+          message: t("security.tooMany", "Çok sık denediniz, lütfen sonra tekrar deneyin."),
+        });
+        return;
+      }
+
+      // zaten var mı?
+      const exists = await Newsletter.findOne({ tenant: req.tenant, email: emailNorm });
+
+      const securityMeta = {
+        ...(meta || {}),
+        sec: {
+          ip: getClientIp(req),
+          ua: req.headers["user-agent"] || "",
+          recaptcha: { score: captcha.score, action: captcha.action },
+          tts: typeof tts === "number" ? tts : undefined,
+          at: new Date().toISOString(),
+        },
+      };
+
       const newsletter = exists
-        ? await Newsletter.findOneAndUpdate({ _id: exists._id }, { lang, meta }, { new: true })
+        ? await Newsletter.findOneAndUpdate(
+            { _id: exists._id },
+            { lang, meta: { ...(exists.meta || {}), ...securityMeta } },
+            { new: true }
+          )
         : await Newsletter.create({
             tenant: req.tenant,
             email: emailNorm,
             verified: false,
             lang,
-            meta,
+            meta: securityMeta,
             subscribeDate: new Date(),
           });
 
-      // Opt-in maili
+      // Opt-in e-posta
       await sendEmail({
         to: emailNorm,
         subject: t("email.verifySubject", { brand: brandName }),
@@ -60,19 +166,23 @@ export const subscribeNewsletter = asyncHandler(
         from: senderEmail,
       });
 
-      // 🔔 v2 Notification (admin + moderator) + 10dk dedupe
+      // 🔔 Yönetici bildirimi (10 dk dedupe)
       const title: Record<SupportedLocale, string> = {} as any;
       const message: Record<SupportedLocale, string> = {} as any;
       for (const lng of SUPPORTED_LOCALES) {
         const tl = (k: string, p?: any) => translate(k, lng, translations, p);
-        title[lng]   = tl("notification.newSubscriberTitle", { brand: brandName });
-        message[lng] = tl("notification.newSubscriberMsg",   { email: emailNorm });
+        title[lng] = tl("notification.newSubscriberTitle", { brand: brandName });
+        message[lng] = tl("notification.newSubscriberMsg", { email: emailNorm });
       }
 
       const dedupeWindowMin = 10;
       const dedupeKey = `${req.tenant}:newsletter:subscribe:${emailNorm}`;
-      const since = new Date(Date.now() - dedupeWindowMin * 60_000);
-      const dup = await Notification.findOne({ tenant: req.tenant, dedupeKey, createdAt: { $gte: since } });
+      const dupSince = new Date(Date.now() - dedupeWindowMin * 60_000);
+      const dup = await Notification.findOne({
+        tenant: req.tenant,
+        dedupeKey,
+        createdAt: { $gte: dupSince },
+      });
       if (!dup) {
         await Notification.create({
           tenant: req.tenant,
@@ -80,24 +190,32 @@ export const subscribeNewsletter = asyncHandler(
           title,
           message,
           channels: ["inapp"],
-          target: { roles: ["admin","moderator"] },
-          source: { module: "newsletter", entity: "subscriber", refId: newsletter._id, event: "newsletter.subscribed" },
-          tags: ["newsletter","subscribe"],
-          link: { routeName: "admin.newsletter.subscribers", params: { id: String(newsletter._id) } },
+          target: { roles: ["admin", "moderator"] },
+          source: {
+            module: "newsletter",
+            entity: "subscriber",
+            refId: newsletter._id,
+            event: "newsletter.subscribed",
+          },
+          tags: ["newsletter", "subscribe"],
+          link: {
+            routeName: "admin.newsletter.subscribers",
+            params: { id: String(newsletter._id) },
+          },
           dedupeKey,
           dedupeWindowMin,
         });
       }
 
-      res.status(201).json({ success: true, message: t("subscriptionSuccess"), data: newsletter });
+      res
+        .status(exists?.verified ? 200 : 201)
+        .json({ success: true, message: t("subscriptionSuccess"), data: newsletter });
     } catch (error) {
       next(error);
     }
   }
 );
 
-
-// ✅ Public: Unsubscribe (çıkış)
 // ✅ Public: Unsubscribe — v2 notifications
 export const unsubscribeNewsletter = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {

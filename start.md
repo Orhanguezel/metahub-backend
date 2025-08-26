@@ -29,6 +29,8 @@ npx ts-node -r tsconfig-paths/register src/scripts/section/masterSyncSections.ts
 
 npx ts-node -r tsconfig-paths/register src/scripts/sync/cloneModuleMetaToTenants.ts
 
+npx ts-node -r tsconfig-paths/register src/scripts/sync/seedAllModuleMeta.ts
+
 
 git fetch origin
 git reset --hard origin/main

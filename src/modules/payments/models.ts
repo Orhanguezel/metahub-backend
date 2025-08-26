@@ -51,6 +51,7 @@ const LinksSchema = new Schema(
     customer: { type: Schema.Types.ObjectId, ref: "customer" },
     apartment: { type: Schema.Types.ObjectId, ref: "apartment" },
     contract: { type: Schema.Types.ObjectId, ref: "contract" },
+    order:    { type: Schema.Types.ObjectId, ref: "order" },   // ✅ YENİ
   },
   { _id: false }
 );
@@ -106,6 +107,7 @@ const PaymentSchema = new Schema<IPayment>(
 );
 
 /* Indexler */
+PaymentSchema.index({ tenant: 1, "links.order": 1, receivedAt: 1 });
 PaymentSchema.index({ tenant: 1, code: 1 }, { unique: true });
 PaymentSchema.index({ tenant: 1, status: 1, receivedAt: 1 });
 PaymentSchema.index({ tenant: 1, "links.customer": 1, receivedAt: 1 });
