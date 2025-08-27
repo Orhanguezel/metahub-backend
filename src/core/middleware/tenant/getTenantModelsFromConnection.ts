@@ -45,7 +45,7 @@ import { ActivityCategory } from "@/modules/activitycategory/category.models";
 import { About } from "@/modules/about/models";
 import { AboutCategory } from "@/modules/aboutcategory/category.models";
 import { References } from "@/modules/references/models";
-import { ReferencesCategory } from "@/modules/referencescategory/category.models";
+import { ReferencesCategory } from "@/modules/referencescategory/models";
 import { Articles } from "@/modules/articles/models";
 import { ArticlesCategory } from "@/modules/articlescategory/category.models";
 import { Library } from "@/modules/library/models";
@@ -96,7 +96,7 @@ import { Branch } from "@/modules/branch/models";
 import { MenuCategory } from "@/modules/menucategory/models";
 import { Menu } from "@/modules/menu/models";
 import { MenuItem } from "@/modules/menuitem/models";
-import { Promotion,PromotionRedemption } from "@/modules/promotions/models";
+import { Promotion, PromotionRedemption } from "@/modules/promotions/models";
 import { WebhookDelivery, WebhookEndpoint } from "@/modules/webhooks/models";
 
 // ✅ Ana export
