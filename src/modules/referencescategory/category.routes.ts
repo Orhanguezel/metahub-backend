@@ -3,6 +3,7 @@ import {
   createReferencesCategory,
   getAllReferencesCategories,
   getReferencesCategoryById,
+  getReferencesCategoryBySlug,   // NEW
   updateReferencesCategory,
   deleteReferencesCategory,
 } from "./category.controller";
@@ -10,16 +11,17 @@ import {
   validateCreateReferencesCategory,
   validateUpdateReferencesCategory,
   validateObjectId,
-} from "./category.validation";
+} from "./validation";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 
 const router = express.Router();
 
-// 🌿 Public Routes
+/* 🌿 Public */
 router.get("/", getAllReferencesCategories);
+router.get("/slug/:slug", getReferencesCategoryBySlug); // NEW — slug ile
 router.get("/:id", validateObjectId("id"), getReferencesCategoryById);
 
-// 🔐 Admin Routes
+/* 🔐 Admin */
 router.post(
   "/",
   authenticate,

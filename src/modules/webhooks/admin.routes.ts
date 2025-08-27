@@ -1,4 +1,3 @@
-// src/modules/webhooks/routes.ts
 import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {

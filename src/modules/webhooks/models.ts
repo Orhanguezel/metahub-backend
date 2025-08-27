@@ -1,4 +1,3 @@
-// src/modules/webhooks/model.ts
 import { Schema, model, models, type Model } from "mongoose";
 import type { IWebhookEndpoint, IWebhookDelivery } from "./types";
 
@@ -37,7 +36,8 @@ const WebhookEndpointSchema = new Schema<IWebhookEndpoint>(
     httpMethod: { type: String, enum: ["POST","PUT"], default: "POST" },
     isActive: { type: Boolean, default: true, index: true },
     events: { type: [String], default: ["*"], index: true },
-    secret: { type: String, required: true },
+    // gizlilik: API yanıtlarına dâhil edilmesin
+    secret: { type: String, required: true, select: false },
     headers: { type: [HeaderKVSchema], default: [] },
     verifySSL: { type: Boolean, default: true },
     signing: { type: SigningSchema, default: {} },
@@ -47,6 +47,14 @@ const WebhookEndpointSchema = new Schema<IWebhookEndpoint>(
   },
   { timestamps: true }
 );
+
+// JSON dönüşümünde secret zaten select:false; yine de güvence:
+WebhookEndpointSchema.set("toJSON", {
+  transform: (_doc, ret) => {
+    delete (ret as any).secret;
+    return ret;
+  }
+});
 
 WebhookEndpointSchema.index({ tenant: 1, targetUrl: 1 }, { unique: false });
 
@@ -65,6 +73,7 @@ const WebhookDeliverySchema = new Schema<IWebhookDelivery>(
     responseStatus: Number,
     responseBody: { type: String, maxlength: 20000 },
     error: String,
+    durationMs: Number,
   },
   { timestamps: true }
 );

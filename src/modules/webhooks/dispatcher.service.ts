@@ -23,18 +23,14 @@ type DispatchOptions = {
   };
 };
 
+const RESERVED_HEADERS = new Set(["content-type","x-mh-signature","x-mh-timestamp","x-mh-event"]);
+
 function signBody(secret: string, body: string, timestamp: number) {
   const base = `${timestamp}.${body}`;
   const h = crypto.createHmac("sha256", secret).update(base, "utf8").digest("hex");
   return { signature: h, timestamp };
 }
 
-/**
- * Event'i uygun endpoint'lere gönderir.
- * - nonBlocking=true ise: her endpoint için derhal "queued" bir delivery kaydı oluşturur,
- *   gerçek HTTP gönderimi arkaplanda yapar ve oluşturulan delivery dokümanlarını (queued) geri döner.
- * - nonBlocking=false/undefined ise: HTTP gönderimini bekler, delivery kayıtları son durumlarıyla döner.
- */
 export async function publishEvent(
   WebhookEndpoint: Model<IWebhookEndpoint>,
   WebhookDelivery: Model<IWebhookDelivery>,
@@ -46,35 +42,47 @@ export async function publishEvent(
   if (onlyEndpointId) filter._id = onlyEndpointId;
   else filter.$or = [{ events: "*" }, { events: eventType }];
 
-  const endpoints = await WebhookEndpoint.find(filter).lean<IWebhookEndpoint[]>();
+  // secret select:false olduğundan burada explicit seçiyoruz
+  const endpoints = await WebhookEndpoint.find(filter)
+    .select("+secret")
+    .lean<IWebhookEndpoint[]>();
 
   const tasks = endpoints.map((ep) =>
-    deliverToEndpoint(WebhookDelivery, ep, eventType, payload, options)
+    deliverToEndpoint(WebhookEndpoint, WebhookDelivery, ep as any, eventType, payload, options)
   );
 
-  // deliverToEndpoint nonBlocking modda "queued" docu hemen döner, arka planda gönderir
   const docs = await Promise.all(tasks);
   return docs;
 }
 
 async function deliverToEndpoint(
-  WebhookDelivery: Model<IWebhookDelivery>,
+  WebhookEndpointModel: Model<IWebhookEndpoint>,
+  WebhookDeliveryModel: Model<IWebhookDelivery>,
   ep: IWebhookEndpoint,
   eventType: string,
   payload: any,
   options?: DispatchOptions
 ): Promise<IWebhookDelivery> {
   const bodyStr = JSON.stringify({ event: eventType, data: payload });
-  const { signature, timestamp } = signBody(ep.secret, bodyStr, Math.floor(Date.now() / 1000));
+  const { signature, timestamp } = signBody((ep as any).secret, bodyStr, Math.floor(Date.now() / 1000));
 
-  const headers: Record<string, string> = {
+  // ÖNCE custom header'ları filtrele, sonra sistemkileri bind et (sistem kazanır)
+  const custom: Record<string, string> = {};
+  for (const kv of ep.headers || []) {
+    const keyLc = String(kv.key || "").toLowerCase();
+    if (!keyLc || RESERVED_HEADERS.has(keyLc)) continue;
+    custom[kv.key] = String(kv.value ?? "");
+  }
+
+  const system: Record<string, string> = {
     "content-type": "application/json",
-    [(ep.signing?.headerName || "x-mh-signature")]: `t=${timestamp},v=${ep.signing?.version || "v1"},hmac=${signature}`,
+    [(ep.signing?.headerName || "x-mh-signature")]:
+      `t=${timestamp},v=${ep.signing?.version || "v1"},hmac=${signature}`,
     [(ep.signing?.timestampHeaderName || "x-mh-timestamp")]: String(timestamp),
     "x-mh-event": eventType,
   };
-  for (const kv of ep.headers || []) headers[kv.key] = kv.value;
 
+  const headers: Record<string, string> = { ...custom, ...system };
   const httpsAgent = new https.Agent({ rejectUnauthorized: ep.verifySSL !== false });
 
   const max = clamp(options?.override?.maxAttempts ?? ep.retry?.maxAttempts ?? 3, 1, 10);
@@ -85,7 +93,7 @@ async function deliverToEndpoint(
   const timeout = clamp(options?.override?.timeoutMs ?? ep.retry?.timeoutMs ?? 15000, 1000, 120000);
 
   // 1) Önce "queued" delivery'yi oluştur
-  const queued = await WebhookDelivery.create({
+  const queued = await WebhookDeliveryModel.create({
     tenant: ep.tenant,
     endpointRef: (ep as any)._id,
     eventType,
@@ -96,10 +104,12 @@ async function deliverToEndpoint(
     responseStatus: undefined,
     responseBody: undefined,
     error: "queued",
+    durationMs: 0,
   });
 
   // 2) Asıl gönderimi çalıştıracak job
   const doSend = async () => {
+    const t0 = Date.now();
     let attempt = 0;
     let success = false;
     let lastErr: any = null;
@@ -131,9 +141,11 @@ async function deliverToEndpoint(
       }
     }
 
+    const durationMs = Date.now() - t0;
+
     // sonuçları kaydet
-    await WebhookDelivery.updateOne(
-      { _id: queued._id },
+    await WebhookDeliveryModel.updateOne(
+      { _id: (queued as any)._id },
       {
         $set: {
           attempt,
@@ -141,21 +153,29 @@ async function deliverToEndpoint(
           responseStatus: lastStatus,
           responseBody: lastBody?.slice(0, 20000),
           error: success ? undefined : lastErr,
+          durationMs,
         },
       }
+    );
+
+    // endpoint quick stats
+    await WebhookEndpointModel.updateOne(
+      { _id: (ep as any)._id },
+      { $set: { lastDeliveredAt: new Date(), lastStatus: lastStatus } }
     );
   };
 
   if (options?.nonBlocking) {
     // Arkada çalıştır, "queued" doc'u hemen döndür
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    doSend();
+    (async () => {
+      try { await doSend(); } catch (_e) { /* swallow & log if you add logger */ }
+    })();
     return queued;
   } else {
-    await doSend();
-    // son hâlini okuyup döndürmek istersen:
-    const finalDoc = await WebhookDelivery.findById(queued._id).lean<IWebhookDelivery>();
-    return finalDoc;
+    try { await doSend(); } catch (_e) { /* swallow & continue */ }
+    const finalDoc = await WebhookDeliveryModel.findById((queued as any)._id).lean<IWebhookDelivery>();
+    return finalDoc!;
   }
 }
 

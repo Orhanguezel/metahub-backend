@@ -1,4 +1,3 @@
-// src/modules/webhooks/validation.ts
 import { body, param, query } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 import { t as translate } from "@/core/utils/i18n/translate";
@@ -7,6 +6,44 @@ import translations from "./i18n";
 import { isValidObjectId } from "@/core/utils/validation";
 
 const isURLish = (v: string) => /^https?:\/\//i.test(v || "");
+
+// FE + BE eşleşmesi için event listesi (test için system.ping dâhil)
+export const ALLOWED_EVENTS = [
+  "order.created",
+  "order.status.changed",
+  "payment.created",
+  "payment.refunded",
+  "promotion.redeemed",
+  "coupon.created",
+  "coupon.updated",
+  "menuitem.updated",
+  "system.ping",
+  "*",
+];
+
+const RESERVED_HEADERS = ["content-type","x-mh-signature","x-mh-timestamp","x-mh-event"];
+
+const validateHeadersArray = body("headers").optional().isArray().custom((arr) => {
+  if (!Array.isArray(arr)) return false;
+  for (const kv of arr) {
+    if (!kv || typeof kv.key !== "string") return false;
+    const keyLc = kv.key.toLowerCase();
+    if (RESERVED_HEADERS.includes(keyLc)) {
+      throw new Error("webhooks.header.reserved");
+    }
+  }
+  return true;
+});
+
+const validateEventsArray = (field = "events") =>
+  body(field).optional().isArray().custom((arr) => {
+    if (!Array.isArray(arr)) return false;
+    for (const ev of arr) {
+      if (typeof ev !== "string") return false;
+      if (!ALLOWED_EVENTS.includes(ev)) throw new Error("webhooks.event.invalid");
+    }
+    return true;
+  });
 
 export const validateObjectId = (field: string) => [
   param(field).isMongoId().withMessage((_, { req }) =>
@@ -21,9 +58,9 @@ export const validateCreateEndpoint = [
     translate("webhooks.invalidUrl", req.locale || getLogLocale(), translations)
   ),
   body("httpMethod").optional().isIn(["POST","PUT"]),
-  body("events").optional().isArray(),
+  validateEventsArray("events"),
   body("secret").optional().isString().isLength({ min: 8 }),
-  body("headers").optional().isArray(),
+  validateHeadersArray,
   body("verifySSL").optional().toBoolean().isBoolean(),
   body("signing").optional().isObject(),
   body("retry").optional().isObject(),
@@ -34,8 +71,8 @@ export const validateUpdateEndpoint = [
   body("name").optional().isString().trim().notEmpty(),
   body("targetUrl").optional().custom((v) => isURLish(v)),
   body("httpMethod").optional().isIn(["POST","PUT"]),
-  body("events").optional().isArray(),
-  body("headers").optional().isArray(),
+  validateEventsArray("events"),
+  validateHeadersArray,
   body("verifySSL").optional().toBoolean().isBoolean(),
   body("signing").optional().isObject(),
   body("retry").optional().isObject(),
@@ -47,6 +84,7 @@ export const validateEndpointListQuery = [
   query("q").optional().isString(),
   query("isActive").optional().toBoolean().isBoolean(),
   query("event").optional().isString(),
+  query("page").optional().isInt({ min: 1 }),
   query("limit").optional().isInt({ min: 1, max: 500 }),
   validateRequest,
 ];
@@ -57,6 +95,8 @@ export const validateDeliveryListQuery = [
   query("success").optional().toBoolean().isBoolean(),
   query("from").optional().isISO8601(),
   query("to").optional().isISO8601(),
+  query("includePayload").optional().toBoolean().isBoolean(),
+  query("page").optional().isInt({ min: 1 }),
   query("limit").optional().isInt({ min: 1, max: 500 }),
   validateRequest,
 ];

@@ -1,4 +1,3 @@
-// src/modules/webhooks/types.ts
 import type { Document, Types } from "mongoose";
 
 export type WebhookEvent =
@@ -10,6 +9,7 @@ export type WebhookEvent =
   | "coupon.created"
   | "coupon.updated"
   | "menuitem.updated"
+  | "system.ping" // test endpointleri için
   | "*" // wildcard: tüm eventler
   ;
 
@@ -67,6 +67,7 @@ export interface IWebhookDelivery extends Document {
   responseStatus?: number;
   responseBody?: string;
   error?: string;
+  durationMs?: number;
 
   createdAt?: Date;
   updatedAt?: Date;
