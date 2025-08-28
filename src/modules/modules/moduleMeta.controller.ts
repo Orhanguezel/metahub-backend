@@ -200,23 +200,47 @@ export const getModuleMetaByName = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, data: meta });
 });
 
-/** delete */
+/** delete (sağlam sürüm) */
 export const deleteModuleMeta = asyncHandler(async (req, res) => {
   const locale: SupportedLocale = req.locale || getLogLocale();
   const t = (key: string, params?: any) => translate(key, locale, translations, params);
+
   const { name } = req.params;
+  const tenant = req.tenant;
   const { ModuleMeta } = await getTenantModels(req);
 
-  const meta = await ModuleMeta.findOne({ name, tenant: req.tenant });
-  if (!meta) {
-    res.status(404).json({ success: false, message: t("admin.module.notFound", { locale, name }) });
-    return;
+  // Tek adımda sil + sonucu kontrol et (yarış durumlarına dayanıklı)
+  const result = await ModuleMeta
+    .deleteMany({ tenant, name })
+    // isimde büyük/küçük harf farklılıkları olabiliyorsa:
+    .collation({ locale: "en", strength: 2 });
+
+  const { deletedCount = 0 } = result as { deletedCount?: number };
+
+  if (deletedCount === 0) {
+    logger.withReq.warn(req, `[moduleMeta] Not found for delete: ${tenant}/${name}`, {
+      module: "moduleMeta", name, tenant
+    });
+    res
+      .status(404)
+      .json({ success: false, message: t("admin.module.notFound", { locale, name }) });
+      return;
   }
 
-  await ModuleMeta.deleteOne({ _id: meta._id });
-  logger.withReq.info(req, t("admin.module.deleted", { locale, name }), { module: "moduleMeta" });
-  res.status(200).json({ success: true, message: t("admin.module.deleted", { locale, name }) });
+  logger.withReq.info(
+    req,
+    `[moduleMeta] Deleted ${deletedCount} doc(s) for ${tenant}/${name}`,
+    { module: "moduleMeta", name, tenant, deletedCount }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: t("admin.module.deleted", { locale, name }),
+    deletedCount,
+  });
+  return;
 });
+
 
 /** bulk import (tenant-locked, label normalize) */
 export const importModuleMetas = asyncHandler(async (req: Request, res: Response) => {
