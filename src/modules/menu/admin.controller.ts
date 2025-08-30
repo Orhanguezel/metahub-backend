@@ -53,6 +53,13 @@ const normalizeBranches = (raw: any) => {
   return arr.filter((id: any) => Types.ObjectId.isValid(id));
 };
 
+const normalizeOrder = (raw: any) => {
+  if (raw === undefined || raw === null || raw === "") return undefined;
+  const n = Math.round(Number(raw));
+  if (!Number.isFinite(n)) return undefined;
+  return Math.max(0, Math.min(100000, n));
+};
+
 /* ================ CREATE ================ */
 export const createMenu = asyncHandler(async (req: Request, res: Response) => {
   const t = tByReq(req);
@@ -65,7 +72,8 @@ export const createMenu = asyncHandler(async (req: Request, res: Response) => {
       code, slug, name, description,
       branches, categories,
       effectiveFrom, effectiveTo,
-      isPublished, isActive
+      isPublished, isActive,
+      order, // 👈 yeni
     } = req.body || {};
 
     if (!code || !String(code).trim()) {
@@ -91,12 +99,15 @@ export const createMenu = asyncHandler(async (req: Request, res: Response) => {
 
     const loc: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale();
     const fallbackName = baseName?.[loc] || baseName?.en || code;
-    const finalSlug = slug ? slugify(slug, { lower: true, strict: true }) : slugify(fallbackName, { lower: true, strict: true });
+    const finalSlug = slug
+      ? slugify(slug, { lower: true, strict: true })
+      : slugify(fallbackName, { lower: true, strict: true });
 
     const doc = await Menu.create({
       tenant: req.tenant,
       code: String(code).trim(),
       slug: finalSlug,
+      order: normalizeOrder(order), // 👈
       name: baseName,
       description: baseDesc,
       images,
@@ -133,7 +144,8 @@ export const updateMenu = asyncHandler(async (req: Request, res: Response) => {
     branches, categories,
     effectiveFrom, effectiveTo,
     isPublished, isActive,
-    removedImages
+    removedImages,
+    order, // 👈 yeni
   } = req.body || {};
 
   if (code !== undefined) (doc as any).code = String(code).trim();
@@ -146,6 +158,7 @@ export const updateMenu = asyncHandler(async (req: Request, res: Response) => {
   if (effectiveTo !== undefined) (doc as any).effectiveTo = effectiveTo ? new Date(effectiveTo) : undefined;
   if (isPublished !== undefined) (doc as any).isPublished = (isPublished === "true" || isPublished === true);
   if (isActive !== undefined) (doc as any).isActive = (isActive === "true" || isActive === true);
+  if (order !== undefined) (doc as any).order = normalizeOrder(order) ?? (doc as any).order; // 👈
 
   // add images
   if (files.length > 0) {
@@ -211,7 +224,8 @@ export const adminGetAllMenu = asyncHandler(async (req: Request, res: Response) 
   const list = await (Menu as any)
     .find(filter)
     .populate([{ path: "categories.category", select: "code slug name images order" }])
-    .sort({ createdAt: -1 })
+    .select("tenant code slug name images order categories effectiveFrom effectiveTo isActive isPublished createdAt updatedAt")
+    .sort({ order: 1, createdAt: -1 }) // 👈 önce order
     .limit(Math.min(Number(limit) || 200, 500))
     .lean({ virtuals: true, getters: true });
 

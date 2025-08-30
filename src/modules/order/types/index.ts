@@ -16,7 +16,7 @@ export interface IMenuModifierSelection {
 
 /** Menü satırı seçimi + snapshot */
 export interface IOrderMenuSelection {
-  variantCode?: string;
+  variantCode?: string; // opsiyonel (BE default/tek varyantı seçebilir)
   modifiers?: IMenuModifierSelection[];
   notes?: string;
   depositIncluded?: boolean; // default true (pfand)
@@ -57,12 +57,16 @@ export interface IOrderItem {
   /** Eski modeller için zorunlu olabilir, menuitem için BE hesaplar */
   unitPrice: number;
   unitCurrency?: string;
+  priceAtAddition: number;          // satır eklenirken birim fiyat
+  totalPriceAtAddition: number;   // satır eklenirken toplam fiyat (unitPrice * quantity)
+
 
   /** Menü akışı (menuitem için dolar) */
   menu?: IOrderMenuSelection;
 
   /** BE hesaplanan bileşenler (tek birim) */
   priceComponents?: IPriceComponents;
+
 }
 
 /** Kargo/adres */
@@ -74,6 +78,9 @@ export interface IShippingAddress {
   city: string;
   postalCode: string;
   country: string;
+  // opsiyonel alanlar
+  addressLine?: string;
+  houseNumber?: string;
 }
 
 /** --- ORDER --- */

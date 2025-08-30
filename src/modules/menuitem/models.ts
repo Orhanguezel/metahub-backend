@@ -1,33 +1,34 @@
 // src/modules/menuitem/model.ts
-import { Schema, Model, models, model, Types } from "mongoose";
+import { Schema, Model, models, model, Types as MTypes } from "mongoose";
 import slugify from "slugify";
 import { SUPPORTED_LOCALES, type SupportedLocale } from "@/types/common";
 import type {
   IMenuItem, IMenuItemImage, IMenuItemVariant, IMenuItemModifierGroup,
   IMenuItemModifierOption, IMenuItemCategoryRef, IKeyValueI18n,
-  ItemPrice, Money
+  ItemPrice, Money, PriceChannel, PriceKind
 } from "./types";
 import { ADDITIVE_KEYS, ALLERGEN_KEYS } from "@/modules/menuitem/constants/foodLabels";
 
-/* i18n alan fabrika */
+/* ---------- i18n yardımcı ---------- */
 const localizedStringField = () => {
   const fields: Record<SupportedLocale, any> = {} as any;
-  for (const locale of SUPPORTED_LOCALES) fields[locale as SupportedLocale] = { type: String, trim: true, default: "" };
+  for (const locale of SUPPORTED_LOCALES)
+    fields[locale as SupportedLocale] = { type: String, trim: true, default: "" };
   return fields;
 };
 
-/* --------- KV şemaları (sabit anahtar doğrulamalı) --------- */
+/* ---------- KV şemaları ---------- */
 const AllergenKV = new Schema<IKeyValueI18n>({
   key:   { type: String, required: true, trim: true, enum: ALLERGEN_KEYS },
-  value: { type: Object, required: false },
+  value: { type: Object },
 }, { _id: false });
 
 const AdditiveKV = new Schema<IKeyValueI18n>({
   key:   { type: String, required: true, trim: true, enum: ADDITIVE_KEYS },
-  value: { type: Object, required: false },
+  value: { type: Object },
 }, { _id: false });
 
-/* --------- Görsel --------- */
+/* ---------- Medya ---------- */
 const ImageSchema = new Schema<IMenuItemImage>({
   url: { type: String, required: true, trim: true },
   thumbnail: { type: String, required: true, trim: true },
@@ -35,10 +36,10 @@ const ImageSchema = new Schema<IMenuItemImage>({
   publicId: { type: String, trim: true }
 }, { _id: false });
 
-/* --------- Fiyat alt dokümanları --------- */
+/* ---------- Fiyat alt dokümanları ---------- */
 const MoneySchema = new Schema<Money>({
   amount: { type: Number, required: true, min: 0 },
-  currency: { type: String, required: true, enum: ["EUR","TRY","USD"] },
+  currency: { type: String, required: true, enum: ["EUR","TRY","USD"], uppercase: true },
   taxIncluded: { type: Boolean, default: true },
 }, { _id: false });
 
@@ -54,7 +55,7 @@ const ItemPriceSchema = new Schema<ItemPrice>({
   note: { type: String, trim: true },
 }, { _id: true });
 
-/* --------- Variant --------- */
+/* ---------- Variant & Modifiers ---------- */
 const VariantSchema = new Schema<IMenuItemVariant>({
   code: { type: String, required: true, trim: true },
   name: { type: Object, required: true, default: () => localizedStringField() },
@@ -66,25 +67,19 @@ const VariantSchema = new Schema<IMenuItemVariant>({
   volumeMl: { type: Number, min: 0, max: 100000 },
   netWeightGr: { type: Number, min: 0, max: 100000 },
 
-  // 💡 Yeni: gömülü fiyatlar
   prices: { type: [ItemPriceSchema], default: [] },
 
-  // Geriye dönük alanlar
+  // geriye dönük
   priceListItem: { type: Schema.Types.ObjectId, ref: "pricelistitem" },
   depositPriceListItem: { type: Schema.Types.ObjectId, ref: "pricelistitem" },
 }, { _id: false });
 
-/* --------- Modifier --------- */
 const ModifierOptionSchema = new Schema<IMenuItemModifierOption>({
   code: { type: String, required: true, trim: true },
   name: { type: Object, required: true, default: () => localizedStringField() },
   order: { type: Number, default: 0, min: 0, max: 100000 },
   isDefault: { type: Boolean, default: false },
-
-  // 💡 Yeni: gömülü fiyatlar
   prices: { type: [ItemPriceSchema], default: [] },
-
-  // Geriye dönük
   priceListItem: { type: Schema.Types.ObjectId, ref: "pricelistitem" },
 }, { _id: false });
 
@@ -98,14 +93,14 @@ const ModifierGroupSchema = new Schema<IMenuItemModifierGroup>({
   options: { type: [ModifierOptionSchema], default: [] },
 }, { _id: false });
 
-/* --------- Kategori ref --------- */
+/* ---------- Kategori ref ---------- */
 const CategoryRefSchema = new Schema<IMenuItemCategoryRef>({
   category: { type: Schema.Types.ObjectId, ref: "menucategory", required: true, index: true },
   order: { type: Number, default: 0, min: 0, max: 100000 },
   isFeatured: { type: Boolean, default: false },
 }, { _id: false });
 
-/* --------- Ana şema --------- */
+/* ---------- Ana şema ---------- */
 const MenuItemSchema = new Schema<IMenuItem>({
   tenant: { type: String, required: true, index: true, trim: true },
   code: { type: String, required: true, trim: true },
@@ -158,13 +153,13 @@ const MenuItemSchema = new Schema<IMenuItem>({
   isActive: { type: Boolean, default: true, index: true },
 }, { timestamps: true });
 
-/* Indexler */
+/* ---------- Indexler ---------- */
 MenuItemSchema.index({ tenant: 1, code: 1 }, { unique: true });
 MenuItemSchema.index({ tenant: 1, slug: 1 }, { unique: true });
 MenuItemSchema.index({ tenant: 1, "categories.category": 1 });
 MenuItemSchema.index({ tenant: 1, isActive: 1, isPublished: 1 });
 
-/* Slug normalize + min/max uyumu */
+/* ---------- Slug + min/max normalize ---------- */
 MenuItemSchema.pre("validate", function (next) {
   const anyThis = this as any;
   if (!anyThis.slug) {
@@ -175,14 +170,15 @@ MenuItemSchema.pre("validate", function (next) {
   }
   if (Array.isArray(anyThis.modifierGroups)) {
     for (const g of anyThis.modifierGroups) {
-      if (g.minSelect != null && g.maxSelect != null && g.minSelect > g.maxSelect) g.maxSelect = g.minSelect;
+      if (g.minSelect != null && g.maxSelect != null && g.minSelect > g.maxSelect) {
+        g.maxSelect = g.minSelect;
+      }
     }
   }
   next();
 });
 
-/* JSON dönüşümü: ObjectId -> string */
-import { Types as MTypes } from "mongoose";
+/* ---------- JSON dönüşümü: ObjectId -> string ---------- */
 function stringifyIdsDeep(obj: any): any {
   if (obj == null) return obj;
   if (obj instanceof MTypes.ObjectId) return obj.toString();
@@ -193,6 +189,51 @@ function stringifyIdsDeep(obj: any): any {
 const transform = (_: any, ret: any) => stringifyIdsDeep(ret);
 MenuItemSchema.set("toJSON", { virtuals: true, versionKey: false, transform });
 MenuItemSchema.set("toObject", { virtuals: true, versionKey: false, transform });
+
+/* ---------- Fiyat seçimi için yardımcı ---------- */
+/** embed fiyatlardan uygun olanı seçer (kanal/outlet/tarih/qty’yi dikkate alır) */
+export function selectBestItemPrice(
+  prices: ItemPrice[] | undefined,
+  kind: PriceKind,
+  opts: {
+    channel?: PriceChannel;
+    outlet?: string | null;
+    at?: Date;          // default now
+    qty?: number;       // default 1
+  } = {}
+): ItemPrice | undefined {
+  const list = (prices || []).filter(p => p?.kind === kind);
+  if (!list.length) return undefined;
+
+  const now = opts.at || new Date();
+  const qty = Math.max(1, Number(opts.qty || 1));
+  const ch  = opts.channel;
+
+  // filtrele
+  const filtered = list.filter(p => {
+    const okDate =
+      (!p.activeFrom || p.activeFrom <= now) &&
+      (!p.activeTo || p.activeTo >= now);
+    const okQty = !p.minQty || qty >= p.minQty;
+    const okCh  = !p.channels || !p.channels.length || (ch ? p.channels.includes(ch) : true);
+    const okOutlet = !p.outlet || !opts.outlet || p.outlet === opts.outlet;
+    return okDate && okQty && okCh && okOutlet;
+  });
+
+  if (!filtered.length) return undefined;
+
+  // basit bir sıralama: en yeni aktifFrom, sonra en yüksek minQty
+  filtered.sort((a, b) => {
+    const af = a.activeFrom ? +a.activeFrom : 0;
+    const bf = b.activeFrom ? +b.activeFrom : 0;
+    if (af !== bf) return bf - af;
+    const aq = a.minQty || 0, bq = b.minQty || 0;
+    if (aq !== bq) return bq - aq;
+    return 0;
+  });
+
+  return filtered[0];
+}
 
 export const MenuItem: Model<IMenuItem> =
   (models.menuitem as Model<IMenuItem>) || model<IMenuItem>("menuitem", MenuItemSchema);

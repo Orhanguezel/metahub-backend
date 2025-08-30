@@ -41,9 +41,9 @@ export const publicGetMenus = asyncHandler(async (req: Request, res: Response) =
 
   const list = await (Menu as any)
     .find(filter)
-    .select("code slug name images categories order effectiveFrom effectiveTo")
+    .select("code slug name images order categories effectiveFrom effectiveTo")
     .populate([{ path: "categories.category", select: "code slug name images order" }])
-    .sort({ createdAt: -1 })
+    .sort({ order: 1, createdAt: -1 }) // 👈 önce order
     .limit(Math.min(Number(limit) || 50, 200))
     .lean();
 
@@ -68,7 +68,7 @@ export const publicGetMenuBySlug = asyncHandler(async (req: Request, res: Respon
         { $or: [{ effectiveTo: { $exists: false } }, { effectiveTo: { $gte: now } }] },
       ],
     })
-    .select("code slug name description images categories effectiveFrom effectiveTo")
+    .select("code slug name description images order categories effectiveFrom effectiveTo")
     .populate([{ path: "categories.category", select: "code slug name images order" }])
     .lean();
 

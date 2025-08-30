@@ -37,6 +37,9 @@ const MenuSchema = new Schema<IMenu>(
     code: { type: String, required: true, trim: true },
     slug: { type: String, required: true, trim: true, lowercase: true, index: true },
 
+    /** Menünün genel sırası */
+    order: { type: Number, default: 0, min: 0, max: 100000, index: true },
+
     name: { type: Object, required: true, default: () => localizedStringField() },
     description: { type: Object, default: () => localizedStringField() },
 
@@ -57,6 +60,7 @@ const MenuSchema = new Schema<IMenu>(
 /* Indexler */
 MenuSchema.index({ tenant: 1, code: 1 }, { unique: true });
 MenuSchema.index({ tenant: 1, slug: 1 }, { unique: true });
+MenuSchema.index({ tenant: 1, order: 1 }); // sıralama için
 MenuSchema.index({ tenant: 1, isActive: 1, isPublished: 1 });
 MenuSchema.index({ tenant: 1, "categories.category": 1 });
 
@@ -93,5 +97,7 @@ MenuSchema.pre("save", function (next) {
   next();
 });
 
-export const Menu: Model<IMenu> = (models.menu as Model<IMenu>) || model<IMenu>("menu", MenuSchema);
+export const Menu: Model<IMenu> =
+  (models.menu as Model<IMenu>) || model<IMenu>("menu", MenuSchema);
+
 export { MenuSchema, MenuImageSchema, MenuCategoryRefSchema };

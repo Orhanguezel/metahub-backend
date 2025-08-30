@@ -24,6 +24,9 @@ export interface IMenu {
   code: string;                  // tenant + code unique
   slug: string;                  // url-safe (unique per tenant)
 
+  /** Menünün genel görüntüleme sırası (küçük -> önce) */
+  order?: number;                // 0..100000
+
   name: TranslatedLabel;         // en az bir dil dolu
   description?: TranslatedLabel;
 
@@ -42,6 +45,7 @@ export interface IMenu {
   updatedAt: Date;
 }
 
+/* Örnek: başka yerlerde kullandığınız opsiyon tipi (değişmedi) */
 export interface IMenuItemModifierOption {
   code: string;
   name: TranslatedLabel;

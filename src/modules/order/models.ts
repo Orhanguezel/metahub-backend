@@ -1,7 +1,7 @@
 import { Schema, model, models, Types, Model } from "mongoose";
 import type {
   IOrder, IOrderItem, IShippingAddress,
-  IOrderMenuSelection, IPriceComponents, ServiceType
+  IOrderMenuSelection, IPriceComponents
 } from "./types";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
@@ -21,7 +21,8 @@ const priceComponentsSchema = new Schema<IPriceComponents>({
 }, { _id: false });
 
 const orderMenuSelectionSchema = new Schema<IOrderMenuSelection>({
-  variantCode: { type: String, required: true, trim: true },
+  // variantCode opsiyonel (BE default/tek varyant seçebilir)
+  variantCode: { type: String, trim: true },
   modifiers: [{
     groupCode: { type: String, required: true, trim: true },
     optionCode: { type: String, required: true, trim: true },
@@ -49,7 +50,7 @@ const orderItemSchema = new Schema<IOrderItem>({
   product: {
     type: Schema.Types.ObjectId,
     required: true,
-    refPath: "items.productType",
+    refPath: "productType",
   },
   productType: {
     type: String,
@@ -59,8 +60,13 @@ const orderItemSchema = new Schema<IOrderItem>({
   tenant: { type: String, required: true, index: true },
   quantity: { type: Number, required: true, min: 1 },
 
+  // BE hesaplar (menuitem için) — 0 olabilir ama prefer > 0
   unitPrice: { type: Number, required: true, min: 0 },
   unitCurrency: { type: String, trim: true, default: "TRY" },
+
+  // Satır eklenirken yakalanan fiyatlar (FE fallback’i için)
+  priceAtAddition: { type: Number, min: 0, default: 0 },
+  totalPriceAtAddition: { type: Number, min: 0, default: 0 },
 
   menu: { type: orderMenuSelectionSchema },
   priceComponents: { type: priceComponentsSchema },
@@ -74,6 +80,11 @@ const shippingAddressSchema = new Schema<IShippingAddress>({
   city: { type: String, required: true, trim: true },
   postalCode: { type: String, required: true, trim: true },
   country: { type: String, required: true, trim: true },
+
+  // opsiyonel alanlar
+  addressLine: { type: String, trim: true },
+  houseNumber: { type: String, trim: true },
+
 }, { _id: false });
 
 const orderSchema = new Schema<IOrder>({
