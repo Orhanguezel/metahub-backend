@@ -1,44 +1,81 @@
-// modules/orders/public.controller.ts
 import { Request, Response } from "express";
 import type { Model, Types } from "mongoose";
 import asyncHandler from "express-async-handler";
 import { sendEmail } from "@/services/emailService";
 import { orderConfirmationTemplate } from "@/modules/order/templates/orderConfirmation";
 import type { SupportedLocale } from "@/types/common";
-import { t } from "@/core/utils/i18n/translate";
-import orderTranslations from "@/modules/order/i18n";
+import { t as translate } from "@/core/utils/i18n/translate";
+import orderTranslations from "./i18n";
 import logger from "@/core/middleware/logger/logger";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
-import type { IOrderItem, IShippingAddress } from "@/modules/order/types";
-import type { PaymentMethod, ServiceType } from "@/modules/order/types";
+import type { IOrderItem, IShippingAddress, PaymentMethod, ServiceType } from "@/modules/order/types";
 
 import type {
   IMenuItem,
   IMenuItemModifierGroup,
   IMenuItemVariant,
   TranslatedLabel as TLabel,
+  ItemPrice,
+  PriceKind,
 } from "@/modules/menuitem/types";
 
 import type { IPriceListItem as UPriceListItem } from "@/modules/pricelist/types";
+import translations from "./i18n";
 
-/* Basit ürün tipi (bike/ensotekprod/sparepart) — fiyat ve stok alanlarını kullanıyoruz */
-interface ISimpleProduct {
-  _id: Types.ObjectId | string;
-  name?: TLabel | Record<string, string>;
-  price?: number;
-  stock?: number;
-}
+/* ------------------------------------------------
+ * Helpers
+ * ------------------------------------------------ */
 
-/* i18n helper */
-function orderT(key: string, locale: SupportedLocale, vars?: Record<string, string | number>) {
-  return t(key, locale, orderTranslations, vars);
-}
-
-/* case-insensitive normalize */
 const norm = (s?: string) => String(s || "").trim().toLowerCase();
 
-/* --- PriceListItem'dan fiyatı çek (LIST/CATALOG uyumlu + fallback currency) --- */
+const isPosNum = (v: any) => typeof v === "number" && isFinite(v) && v > 0;
+const numOr0 = (v: any) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+const pickFirstNumber = (...vals: any[]) => {
+  for (const v of vals) {
+    const n = numOr0(v);
+    if (n > 0) return n;
+  }
+  return 0;
+};
+
+function coalesceStreetLike(a?: { street?: string; addressLine?: string; houseNumber?: string }) {
+  const street = (a?.street || "").trim();
+  if (street) return street;
+  const line = (a?.addressLine || "").trim();
+  const hn = (a?.houseNumber || "").trim();
+  return [line, hn].filter(Boolean).join(" ").trim();
+}
+
+/** Gömülü prices[] içinden uygun tutarı seç. Varsayılan: 'surcharge' (modifier için). */
+const pickEmbeddedPriceAmount = (
+  prices?: ItemPrice[],
+  kind: PriceKind = "surcharge"
+): number => {
+  if (!Array.isArray(prices) || prices.length === 0) return 0;
+  const now = new Date();
+
+  const candidates = prices.filter((p) => {
+    const startOk = !p.activeFrom || (p.activeFrom instanceof Date ? p.activeFrom : new Date(p.activeFrom)) <= now;
+    const endOk = !p.activeTo || (p.activeTo instanceof Date ? p.activeTo : new Date(p.activeTo)) >= now;
+    return startOk && endOk && (p.kind === kind || (kind === "surcharge" && p.kind === "base"));
+  });
+
+  if (candidates.length === 0) return 0;
+
+  candidates.sort((a, b) => {
+    const q = (b.minQty ?? 0) - (a.minQty ?? 0);
+    if (q !== 0) return q;
+    const af = (b.activeFrom ? +new Date(b.activeFrom as any) : 0) - (a.activeFrom ? +new Date(a.activeFrom as any) : 0);
+    return af;
+  });
+
+  return Number(candidates[0]?.value?.amount) || 0;
+};
+
+/* ------------------------------------------------
+ * PriceListItem -> price/currency
+ * ------------------------------------------------ */
 async function getPLIPrice(
   PriceListItem: Model<UPriceListItem>,
   id?: string | Types.ObjectId,
@@ -47,20 +84,16 @@ async function getPLIPrice(
   if (!id) return { price: 0, currency: fallbackCurrency };
 
   const pli = await PriceListItem.findById(id)
-    .select({ price: 1, amount: 1, currency: 1, kind: 1 })
-    .lean<{ _id: any; price?: number; amount?: number; currency?: string; kind?: "list" | "catalog" }>();
+    .select({ price: 1, amount: 1, currency: 1 })
+    .lean<{ price?: number; amount?: number; currency?: string }>();
 
-  const value = Number(
-    pli?.price != null ? pli.price :
-    pli?.amount != null ? pli.amount : 0
-  );
-
-  const currency = pli?.currency || fallbackCurrency;
-
-  return { price: value, currency };
+  const price = numOr0(pli?.price ?? pli?.amount);
+  return { price, currency: pli?.currency || fallbackCurrency };
 }
 
-/* --- Menü satırı için sunucu tarafı fiyatlama (variant opsiyonel) --- */
+/* ------------------------------------------------
+ * Types
+ * ------------------------------------------------ */
 export type ModifierSelection = { groupCode: string; optionCode: string; quantity?: number };
 
 /** Esnek varyant eşleştirici: code, slug, name[*], sizeLabel[*] */
@@ -99,27 +132,23 @@ function enforceModifierRules(
 
     const chosen = (byGroup.get(g.code) || []).filter(Boolean);
     const qtySum = chosen.reduce((s, c) => s + Math.max(1, Number(c.quantity || 1)), 0);
-    const count = qtySum; // Faz-1: min/max için quantity toplamını baz alıyoruz
+    const count = qtySum;
 
-    if (g.isRequired && count < 1) {
-      return { ok: false, errorKey: "menu.error.modifierRequiredMissing" };
-    }
-    if (count < min) {
-      return { ok: false, errorKey: "menu.error.modifierMinNotMet" };
-    }
-    if (count > max) {
-      return { ok: false, errorKey: "menu.error.modifierMaxExceeded" };
-    }
+    if (g.isRequired && count < 1) return { ok: false, errorKey: "menu.error.modifierRequiredMissing" };
+    if (count < min) return { ok: false, errorKey: "menu.error.modifierMinNotMet" };
+    if (count > max) return { ok: false, errorKey: "menu.error.modifierMaxExceeded" };
 
-    // Seçilen her option gerçekten bu grubun içinde mi?
     for (const sel of chosen) {
-      const valid = (g.options || []).some(o => o.code === sel.optionCode);
+      const valid = (g.options || []).some((o) => o.code === sel.optionCode);
       if (!valid) return { ok: false, errorKey: "menu.error.modifierOptionInvalid" };
     }
   }
   return { ok: true };
 }
 
+/* ------------------------------------------------
+ * Menü satırı fiyatlama (fallback'li)
+ * ------------------------------------------------ */
 async function priceMenuLine(
   MenuItemModel: Model<IMenuItem>,
   PriceListItemModel: Model<UPriceListItem>,
@@ -154,87 +183,89 @@ async function priceMenuLine(
           spicyLevel?: number;
         };
       };
+      selectedVariantCode?: string;
     }
   | { error: string }
 > {
   const mi = await MenuItemModel.findOne({ _id: menuItemId, tenant }).lean<IMenuItem>();
   if (!mi) return { error: "menu.error.menuItemNotFound" };
 
-  // İnaktif varyantları ele
-  const allVariants = Array.isArray(mi.variants) ? mi.variants : [];
-  const variants = allVariants.filter((v: any) => v?.isActive !== false);
-
-  // Varyant seçim mantığı (esnek eşleşme)
+  const variants = (Array.isArray(mi.variants) ? mi.variants : []).filter((v: any) => v?.isActive !== false);
   let variant: IMenuItemVariant | undefined =
-    variantCode ? variants.find(v => variantMatches(v, variantCode)) : undefined;
+    variantCode ? variants.find((v) => variantMatches(v, variantCode)) : undefined;
+  if (!variant) variant = variants.find((v: any) => !!v?.isDefault) || (variants.length === 1 ? variants[0] : undefined);
+  if (!variant && variants.length > 1) return { error: "menu.error.variantRequired" };
 
-  if (!variant) variant = variants.find(v => !!(v as any).isDefault);
-  if (!variant && variants.length === 1) variant = variants[0];
+  const ruleCheck = enforceModifierRules(mi, modifierSelections);
+  if ("errorKey" in ruleCheck) return { error: ruleCheck.errorKey };
 
-  if (!variant && variants.length > 1) {
-    return { error: "menu.error.variantRequired" };
+  // --- Fiyatlar
+  let currency = (fallbackCurrency || "TRY").toUpperCase();
+
+  // BASE
+  let base = 0;
+  if ((variant as any)?.priceListItem) {
+    const res = await getPLIPrice(PriceListItemModel, (variant as any).priceListItem, currency);
+    base = res.price;
+    currency = res.currency || currency;
+  } else {
+    // Önce gömülü prices -> 'base', yoksa eski fallback alanlar
+    base =
+      pickEmbeddedPriceAmount((variant as any)?.prices, "base") ||
+      pickFirstNumber((variant as any)?.price, (variant as any)?.amount, (mi as any)?.basePrice);
   }
 
-  // --- Modifier kurallarını zorla
- const ruleCheck = enforceModifierRules(mi, modifierSelections);
-if ("errorKey" in ruleCheck) {
-  return { error: ruleCheck.errorKey };
-}
-
-
-
-  // Fiyat bileşenleri
-  let currency = fallbackCurrency || "TRY";
-
-  // base
-  const baseRes = await getPLIPrice(PriceListItemModel, variant?.priceListItem, currency);
-  let base = baseRes.price;
-  currency = baseRes.currency || currency;
-
-  // deposit
+  // DEPOSIT
   let deposit = 0;
-  if (depositIncluded && variant?.depositPriceListItem) {
-    const depRes = await getPLIPrice(PriceListItemModel, variant.depositPriceListItem, currency);
-    deposit = depRes.price;
+  if (depositIncluded) {
+    if ((variant as any)?.depositPriceListItem) {
+      const res = await getPLIPrice(PriceListItemModel, (variant as any).depositPriceListItem, currency);
+      deposit = res.price;
+      currency = res.currency || currency;
+    } else {
+      // Gömülü prices -> 'deposit', yoksa eski fallback alanlar
+      deposit =
+        pickEmbeddedPriceAmount((variant as any)?.prices, "deposit") ||
+        pickFirstNumber((variant as any)?.deposit, (mi as any)?.deposit);
+    }
   }
 
-  // Modifiers
+  // MODIFIERS
   let modifiersTotal = 0;
   const modifiers: Array<{ code: string; qty: number; unitPrice: number; total: number }> = [];
 
-  const canAdoptModifierCurrency = (!variant || !variant.priceListItem) && !!fallbackCurrency;
-
   for (const sel of modifierSelections) {
-    const group = (mi.modifierGroups || []).find(
-      (g: IMenuItemModifierGroup) => g.code === sel.groupCode
-    );
-    if (!group) return { error: "menu.error.modifierGroupNotFound" };
+    const g = (mi.modifierGroups || []).find((x: IMenuItemModifierGroup) => x.code === sel.groupCode);
+    if (!g) return { error: "menu.error.modifierGroupNotFound" };
 
-    const opt = (group.options || []).find((o) => o.code === sel.optionCode);
+    const opt = (g.options || []).find((o) => o.code === sel.optionCode);
     if (!opt) return { error: "menu.error.modifierOptionNotFound" };
 
-    const optRes = await getPLIPrice(PriceListItemModel, opt.priceListItem, currency);
-    const optPrice = optRes.price;
-    const qty = Math.max(1, Number(sel.quantity || 1));
-    const total = optPrice * qty;
-
-    modifiersTotal += total;
-    modifiers.push({ code: `${group.code}:${opt.code}`, qty, unitPrice: optPrice, total });
-
-    if (canAdoptModifierCurrency && optRes.currency && currency === fallbackCurrency) {
-      currency = optRes.currency;
+    let optUnit = 0;
+    if (opt.priceListItem) {
+      const res = await getPLIPrice(PriceListItemModel, opt.priceListItem, currency);
+      optUnit = res.price;
+      currency = res.currency || currency;
+    } else {
+      // TS hatasını çıkaran `opt.amount` kaldırıldı; gömülü prices kullanılıyor
+      optUnit = pickEmbeddedPriceAmount((opt as any)?.prices, "surcharge");
     }
+
+    const qty = Math.max(1, numOr0(sel.quantity || 1));
+    const total = optUnit * qty;
+    modifiersTotal += total;
+    modifiers.push({ code: `${g.code}:${opt.code}`, qty, unitPrice: optUnit, total });
   }
 
   const unitPrice = base + deposit + modifiersTotal;
 
   const snapshot = {
     name: mi.name || undefined,
-    variantName: variant?.name || undefined,
-    sizeLabel: variant?.sizeLabel || undefined,
+    variantName: (variant as any)?.name || undefined,
+    sizeLabel: (variant as any)?.sizeLabel || undefined,
     image: mi.images?.[0]?.thumbnail || mi.images?.[0]?.url || undefined,
-    allergens: (mi.allergens || []).map((x) => ({ key: x.key, value: x.value })),
-    additives: (mi.additives || []).map((x) => ({ key: x.key, value: x.value })),
+    allergens: (mi.allergens || []).map((x: any) => ({ key: x.key, value: x.value })),
+    additives: (mi.additives || []).map((x: any) => ({ key: x.key, value: x.value })),
     dietary: mi.dietary
       ? {
           vegetarian: !!mi.dietary.vegetarian,
@@ -245,21 +276,36 @@ if ("errorKey" in ruleCheck) {
       : undefined,
   };
 
+  const finalCurrency = (currency || fallbackCurrency || "TRY").toUpperCase();
+
   return {
     unitPrice,
-    unitCurrency: currency,
+    unitCurrency: finalCurrency,
     priceComponents: {
       base,
       deposit,
       modifiersTotal,
       modifiers,
-      currency,
+      currency: finalCurrency,
     },
     snapshot,
+    selectedVariantCode: (variant as any)?.code || undefined,
   };
 }
 
-/* --- Sipariş OLUŞTUR --- */
+/* ------------------------------------------------
+ * Basit ürün tipi (bike/ensotekprod/sparepart)
+ * ------------------------------------------------ */
+interface ISimpleProduct {
+  _id: Types.ObjectId | string;
+  name?: TLabel | Record<string, string>;
+  price?: number;
+  stock?: number;
+}
+
+/* ------------------------------------------------
+ * CREATE ORDER
+ * ------------------------------------------------ */
 export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   const {
     Order,
@@ -275,6 +321,9 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     PriceListItem,
     Branch,
   } = await getTenantModels(req);
+
+  const locale: SupportedLocale = (req as any).locale || getLogLocale();
+  const t = (k: string, p?: any) => translate(k, locale, orderTranslations, p);
 
   type ProductType = "bike" | "ensotekprod" | "sparepart" | "menuitem";
 
@@ -295,74 +344,103 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   } = req.body;
 
   const currency = String(bodyCurrency || "TRY").toUpperCase();
-  const deliveryFeeN = Number(deliveryFee) || 0;
-  const tipAmountN = Number(tipAmount) || 0;
-  const serviceFeeN = Number(serviceFee) || 0;
-  const taxTotalN = Number(taxTotal) || 0;
+  const deliveryFeeN = numOr0(deliveryFee);
+  const tipAmountN = numOr0(tipAmount);
+  const serviceFeeN = numOr0(serviceFee);
+  const taxTotalN = numOr0(taxTotal);
 
-  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale();
   const userId = req.user?._id;
   const userName = req.user?.name || "";
   const userEmail = req.user?.email || "";
 
-  /* --- Branch ve servis doğrulaması --- */
+  /* --- Branch / servis tipi --- */
   let branchDoc: any = null;
   const st: ServiceType = serviceType;
   if (branch) {
     branchDoc = await Branch.findOne({ _id: branch, tenant: req.tenant }).lean();
     if (!branchDoc) {
-      res.status(400).json({ success: false, message: orderT("error.branchNotFound", locale) });
+      res.status(400).json({ success: false, message: t("error.branchNotFound") });
       return;
     }
     if (st && Array.isArray(branchDoc.services) && !branchDoc.services.includes(st)) {
-      res.status(400).json({
-        success: false,
-        message: orderT("error.branchServiceNotAvailable", locale),
-      });
+      res.status(400).json({ success: false, message: t("error.branchServiceNotAvailable") });
       return;
     }
   }
 
-  /* --- Adres (delivery → zorunlu) --- */
+  /* --- Adres (delivery zorunlu) --- */
   let shippingAddressWithTenant: IShippingAddress | undefined;
   if (st === "delivery") {
+    const saBody = (req.body?.shippingAddress || {}) as Partial<IShippingAddress> & {
+      addressLine?: string;
+      houseNumber?: string;
+      email?: string;
+      addressType?: string;
+    };
+
     if (addressId) {
       const addressDoc = await Address.findOne({ _id: addressId, tenant: req.tenant }).lean<any>();
       if (!addressDoc) {
-        res.status(400).json({ success: false, message: orderT("error.addressNotFound", locale) });
+        res.status(400).json({ success: false, message: t("error.addressNotFound") });
         return;
       }
+      const streetNorm = coalesceStreetLike(addressDoc) || coalesceStreetLike(saBody);
+      const cityNorm = (addressDoc.city || saBody.city || "").trim();
+      const postalNorm = (addressDoc.postalCode || saBody.postalCode || "").trim();
+      const countryNorm = (addressDoc.country || saBody.country || "TR").trim();
+      const phoneNorm = (addressDoc.phone || saBody.phone || "").trim();
+
+      if (!streetNorm || !cityNorm || !postalNorm || !countryNorm || !phoneNorm) {
+        res.status(400).json({ success: false, message: t("error.shippingAddressRequired") });
+        return;
+      }
+
       shippingAddressWithTenant = {
         name: userName,
         tenant: req.tenant,
-        phone: addressDoc.phone,
-        street: addressDoc.street,
-        city: addressDoc.city,
-        postalCode: addressDoc.postalCode || "",
-        country: addressDoc.country || "TR",
+        phone: phoneNorm,
+        street: streetNorm,
+        city: cityNorm,
+        postalCode: postalNorm,
+        country: countryNorm,
+        ...(addressDoc.addressLine ? { addressLine: addressDoc.addressLine } : {}),
+        ...(addressDoc.houseNumber ? { houseNumber: addressDoc.houseNumber } : {}),
       };
     } else {
-      const sa = shippingAddress as IShippingAddress;
+      const streetNorm = coalesceStreetLike(saBody);
       const ok =
-        sa?.name && sa?.phone && sa?.street && sa?.city && sa?.postalCode && sa?.country;
+        saBody?.name &&
+        saBody?.phone &&
+        streetNorm &&
+        saBody?.city &&
+        saBody?.postalCode &&
+        saBody?.country;
+
       if (!ok) {
-        res
-          .status(400)
-          .json({ success: false, message: orderT("error.shippingAddressRequired", locale) });
+        res.status(400).json({ success: false, message: t("error.shippingAddressRequired", locale) });
         return;
       }
-      shippingAddressWithTenant = { ...sa, tenant: req.tenant };
+
+      shippingAddressWithTenant = {
+        name: String(saBody.name),
+        tenant: req.tenant,
+        phone: String(saBody.phone),
+        street: streetNorm,
+        city: String(saBody.city),
+        postalCode: String(saBody.postalCode),
+        country: String(saBody.country),
+        ...(saBody.addressLine ? { addressLine: saBody.addressLine } : {}),
+        ...(saBody.houseNumber ? { houseNumber: saBody.houseNumber } : {}),
+      };
     }
   }
 
   if (!userEmail) {
-    res
-      .status(400)
-      .json({ success: false, message: orderT("error.userEmailRequired", locale) });
+    res.status(400).json({ success: false, message: t("error.userEmailRequired") });
     return;
   }
 
-  /* --- Model map (eski + menuitem) --- */
+  /* --- Model map --- */
   const modelMap: Record<ProductType, Model<any>> = {
     bike: Bike as Model<any>,
     ensotekprod: Ensotekprod as Model<any>,
@@ -378,9 +456,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     const ptype = String(raw.productType || "").toLowerCase() as ProductType;
     const ProductModel = modelMap[ptype];
     if (!ProductModel) {
-      res
-        .status(400)
-        .json({ success: false, message: `Model not supported: ${raw.productType}` });
+      res.status(400).json({ success: false, message: `Model not supported: ${raw.productType}` });
       return;
     }
 
@@ -389,9 +465,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
         .findOne({ _id: raw.product, tenant: req.tenant })
         .lean<IMenuItem>();
       if (!product) {
-        res
-          .status(404)
-          .json({ success: false, message: orderT("error.productNotFound", locale) });
+        res.status(404).json({ success: false, message: t("error.productNotFound") });
         return;
       }
 
@@ -412,9 +486,8 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
         menuSel.depositIncluded ?? true,
         currency
       );
-
       if ("error" in priced) {
-        res.status(400).json({ success: false, message: orderT(priced.error, locale) });
+        res.status(400).json({ success: false, message: t(priced.error) });
         return;
       }
 
@@ -423,21 +496,26 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       subtotal += lineTotal;
 
       enrichedItems.push({
-        product: product._id as any,
-        productType: "menuitem" as any,
+        product: (product as any)._id,
+        productType: "menuitem",
         quantity: qty,
         tenant: req.tenant,
+
         unitPrice: priced.unitPrice,
-        unitCurrency: priced.unitCurrency,
+        unitCurrency: (priced.unitCurrency || currency).toUpperCase(),
+
+        priceAtAddition: priced.unitPrice,
+        totalPriceAtAddition: lineTotal,
+
         menu: {
-          variantCode: menuSel.variantCode,
+          variantCode: menuSel.variantCode ?? priced.selectedVariantCode,
           modifiers: menuSel.modifiers,
           notes: menuSel.notes,
           depositIncluded: menuSel.depositIncluded ?? true,
           snapshot: priced.snapshot,
         },
         priceComponents: priced.priceComponents,
-      } as IOrderItem);
+      } as unknown as IOrderItem);
 
       const displayName =
         (priced.snapshot?.name as any)?.[locale] ||
@@ -447,32 +525,27 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
         (priced.snapshot?.variantName as any)?.[locale] ||
         (priced.snapshot?.variantName as any)?.en ||
         "";
-      itemsForMail.push(
-        `• ${displayName}${variantName ? ` (${variantName})` : ""} x ${qty}`
-      );
+      itemsForMail.push(`• ${displayName}${variantName ? ` (${variantName})` : ""} x ${qty}`);
       continue;
     }
 
-    // --- ESKİ MODELLER (bike/ensotekprod/sparepart): stok & fiyat ---
+    // --- Basit ürünler (bike/ensotekprod/sparepart)
     const product = await (ProductModel as Model<ISimpleProduct>)
       .findOne({ _id: raw.product, tenant: req.tenant })
       .lean<ISimpleProduct>();
     if (!product) {
-      res
-        .status(404)
-        .json({ success: false, message: orderT("error.productNotFound", locale) });
+      res.status(404).json({ success: false, message: t("error.productNotFound") });
       return;
     }
     if (typeof product.stock === "number" && product.stock < Number(raw.quantity || 1)) {
-      res
-        .status(400)
-        .json({ success: false, message: orderT("error.insufficientStock", locale) });
+      res.status(400).json({ success: false, message: t("error.insufficientStock") });
       return;
     }
 
     const qty = Math.max(1, Number(raw.quantity || 1));
-    const unitPrice = Number(raw.unitPrice ?? product.price ?? 0);
-    subtotal += unitPrice * qty;
+    const unitPrice = numOr0(raw.unitPrice ?? product.price);
+    const lineTotal = unitPrice * qty;
+    subtotal += lineTotal;
 
     enrichedItems.push({
       product: product._id as any,
@@ -481,12 +554,12 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       tenant: req.tenant,
       unitPrice,
       unitCurrency: currency,
-    } as IOrderItem);
+      priceAtAddition: unitPrice,
+      totalPriceAtAddition: lineTotal,
+    } as unknown as IOrderItem);
 
     const n = product.name as any;
-    itemsForMail.push(
-      `• ${n?.[locale] || n?.en || String(product._id)} – Qty: ${qty}`
-    );
+    itemsForMail.push(`• ${n?.[locale] || n?.en || String(product._id)} – Qty: ${qty}`);
   }
 
   /* --- Kupon --- */
@@ -501,27 +574,21 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       expiresAt: { $gte: new Date() },
     }).lean<any>();
     if (!coupon) {
-      res.status(400).json({ success: false, message: orderT("error.invalidCoupon", locale) });
+      res.status(400).json({ success: false, message: t("error.invalidCoupon") });
       return;
     }
-    discount = Math.round(subtotal * (Number(coupon.discount || 0) / 100));
+    discount = Math.round(subtotal * (numOr0(coupon.discount) / 100));
   }
 
   /* --- Ödeme yöntemi --- */
-  const method: PaymentMethod =
-    (paymentMethod as PaymentMethod) || "cash_on_delivery";
+  const method: PaymentMethod = (paymentMethod as PaymentMethod) || "cash_on_delivery";
   if (!["cash_on_delivery", "credit_card", "paypal"].includes(method)) {
-    res
-      .status(400)
-      .json({ success: false, message: orderT("error.invalidPaymentMethod", locale) });
+    res.status(400).json({ success: false, message: t("error.invalidPaymentMethod") });
     return;
   }
 
   /* --- Final toplam --- */
-  const finalTotal = Math.max(
-    0,
-    subtotal + deliveryFeeN + tipAmountN + serviceFeeN + taxTotalN - discount
-  );
+  const finalTotal = Math.max(0, subtotal + deliveryFeeN + tipAmountN + serviceFeeN + taxTotalN - discount);
 
   /* --- Kayıt --- */
   const order = await Order.create({
@@ -568,7 +635,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
         tenant: req.tenant,
         kind: "payment",
         status: "pending",
-        method: paymentMethodMap[method],   // "card" | "wallet"
+        method: paymentMethodMap[method],
         provider: method === "paypal" ? "paypal" : undefined,
         grossAmount: finalTotal,
         currency,
@@ -598,7 +665,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     await sendEmail({
       tenantSlug: req.tenant,
       to: userEmail,
-      subject: orderT("email.subject", locale, { brand: brandName }),
+      subject: t("email.subject", { brand: brandName }),
       html: orderConfirmationTemplate({
         name: shippingAddressWithTenant?.name || req.user?.name || "",
         itemsList: itemsForMail.join("<br/>"),
@@ -608,8 +675,8 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
         brandWebsite,
         senderEmail,
         orderId: String(order._id),
-        paymentMethod: orderT(`payment.method.${method}`, locale),
-        paymentStatus: orderT(`payment.status.pending`, locale),
+        paymentMethod: t(`payment.method.${method}`),
+        paymentStatus: t(`payment.status.pending`),
         criticalStockWarnings: "",
         couponCode: coupon ? `${coupon.code} (${coupon.discount}%)` : null,
         discount,
@@ -625,15 +692,15 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     await sendEmail({
       tenantSlug: req.tenant,
       to: adminEmail,
-      subject: orderT("email.adminSubject", locale, { brand: brandName }),
+      subject: t("email.adminSubject", { brand: brandName }),
       html: `
-        <h2>🧾 ${orderT("email.adminOrderTitle", locale, { brand: brandName })}</h2>
+        <h2>🧾 ${t("email.adminOrderTitle", { brand: brandName })}</h2>
         <ul>
           <li><strong>ID:</strong> ${order._id}</li>
-          <li><strong>${orderT("labelServiceType", locale)}:</strong> ${st}</li>
-          ${st === "dinein" ? `<li><strong>${orderT("labelTableNo", locale)}:</strong> ${order.tableNo || "-"}</li>` : ""}
-          <li><strong>${orderT("labelItems", locale)}:</strong> ${itemsForMail.join("<br/>")}</li>
-          <li><strong>${orderT("labelTotal", locale)}:</strong> ${finalTotal} ${currency}</li>
+          <li><strong>${t("labelServiceType")}:</strong> ${st}</li>
+          ${st === "dinein" ? `<li><strong>${t("labelTableNo")}:</strong> ${order.tableNo || "-"}</li>` : ""}
+          <li><strong>${t("labelItems")}:</strong> ${itemsForMail.join("<br/>")}</li>
+          <li><strong>${t("labelTotal")}:</strong> ${finalTotal} ${currency}</li>
         </ul>
       `,
       from: senderEmail,
@@ -642,10 +709,10 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     logger.withReq.warn(req, "Admin email send failed", { error: (e as Error)?.message });
   }
 
-  logger.withReq.info(req, orderT("order.created.success", locale) + ` | Order: ${order._id}`);
+  logger.withReq.info(req, t("order.created.success") + ` | Order: ${order._id}`);
   res.status(201).json({
     success: true,
-    message: orderT("order.created.success", locale),
+    message: t("order.created.success"),
     data: {
       ...order.toObject(),
       payment: paymentDoc ? paymentDoc.toObject() : undefined,
@@ -653,10 +720,12 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
+
 /* --- Sipariş Detay (owner veya admin) --- */
 export const getOrderById = asyncHandler(async (req: Request, res: Response) => {
   const { Order } = await getTenantModels(req);
-  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale();
+  const locale: SupportedLocale = (req as any).locale || getLogLocale();
+  const t = (k: string, p?: any) => translate(k, locale, translations, p);
 
   const order = await Order.findOne({ _id: req.params.id, tenant: req.tenant })
     .populate("items.product")
@@ -664,55 +733,58 @@ export const getOrderById = asyncHandler(async (req: Request, res: Response) => 
     .populate("branch", "code name");
 
   if (!order) {
-    res.status(404).json({ success: false, message: orderT("error.orderNotFound", locale) });
+    res.status(404).json({ success: false, message: t("error.orderNotFound") });
     return;
   }
   if (order.user?.toString() !== req.user?._id.toString() && req.user?.role !== "admin") {
-    res.status(403).json({ success: false, message: orderT("error.notAuthorizedViewOrder", locale) });
+    res.status(403).json({ success: false, message: t("error.notAuthorizedViewOrder") });
     return;
   }
 
   res
     .status(200)
-    .json({ success: true, message: orderT("order.fetched.success", locale), data: order });
+    .json({ success: true, message: t("order.fetched.success"), data: order });
 });
 
 /* --- Adres güncelle (owner) --- */
 export const updateShippingAddress = asyncHandler(async (req: Request, res: Response) => {
   const { Order } = await getTenantModels(req);
-  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale();
+  const locale: SupportedLocale = (req as any).locale || getLogLocale();
+  const t = (k: string, p?: any) => translate(k, locale, translations, p);
 
   const order = await Order.findOne({ _id: req.params.id, tenant: req.tenant });
   if (!order) {
-    res.status(404).json({ success: false, message: orderT("error.orderNotFound", locale) });
+    res.status(404).json({ success: false, message: t("error.orderNotFound") });
     return;
   }
   if (order.user?.toString() !== req.user?._id.toString()) {
-    res.status(403).json({ success: false, message: orderT("error.notAuthorizedUpdateOrder", locale) });
+    res.status(403).json({ success: false, message: t("error.notAuthorizedUpdateOrder") });
     return;
   }
   if (order.serviceType !== "delivery") {
-    res.status(400).json({ success: false, message: orderT("error.addressUpdateNotAllowed", locale) });
+    res.status(400).json({ success: false, message: t("error.addressUpdateNotAllowed") });
     return;
   }
 
   const { shippingAddress } = req.body;
   if (!shippingAddress) {
-    res.status(400).json({ success: false, message: orderT("error.shippingAddressRequired", locale) });
+    res.status(400).json({ success: false, message: t("error.shippingAddressRequired") });
     return;
   }
   order.shippingAddress = { ...(order.shippingAddress as any), ...shippingAddress };
   await order.save();
 
-  logger.withReq.info(req, orderT("order.addressUpdated.success", locale) + ` | Order: ${order._id}`);
+  logger.withReq.info(req, t("order.addressUpdated.success") + ` | Order: ${order._id}`);
   res
     .status(200)
-    .json({ success: true, message: orderT("order.addressUpdated.success", locale), data: order });
+    .json({ success: true, message: t("order.addressUpdated.success"), data: order });
 });
 
 /* --- Kullanıcının siparişleri (opsiyonel serviceType filtresi) --- */
 export const getMyOrders = asyncHandler(async (req: Request, res: Response) => {
   const { Order } = await getTenantModels(req);
+  const locale: SupportedLocale = (req as any).locale || getLogLocale();
+  const t = (k: string, p?: any) => translate(k, locale, translations, p);
   const { serviceType } = req.query as { serviceType?: ServiceType };
   const q: any = { user: req.user?._id, tenant: req.tenant };
   if (serviceType) q.serviceType = serviceType;
@@ -726,10 +798,10 @@ export const getMyOrders = asyncHandler(async (req: Request, res: Response) => {
   if (!orders || orders.length === 0) {
     res
       .status(404)
-      .json({ success: false, message: orderT("order.noOrdersFound", (req.locale as any) || getLogLocale()) });
+      .json({ success: false, message: t("order.noOrdersFound") });
     return;
   }
   res
     .status(200)
-    .json({ success: true, message: orderT("order.fetched.success", (req.locale as any) || getLogLocale()), data: orders });
+    .json({ success: true, message: t("order.fetched.success"), data: orders });
 });

@@ -6,26 +6,26 @@ import type { AdditiveCode, AllergenCode } from "@/modules/menuitem/constants/fo
 export type TranslatedLabel = { [key in SupportedLocale]?: string };
 
 /* --------- Fiyat tipleri --------- */
-export type CurrencyCode = "EUR" | "TRY" | "USD"; // ihtiyaca göre genişlet
+export type CurrencyCode = "EUR" | "TRY" | "USD";
 export type PriceKind = "base" | "deposit" | "surcharge" | "discount";
 export type PriceChannel = "delivery" | "pickup" | "dinein";
 
 export interface Money {
-  amount: number;           // küçük birim: 12.50 gibi normal sayı (istersen minor unit ile int tutabilirsin)
-  currency: CurrencyCode;   // "EUR" | "TRY" ...
-  taxIncluded?: boolean;    // fiyat KDV dahil mi?
+  amount: number;           // 12.5 gibi
+  currency: CurrencyCode;   // UPPERCASE
+  taxIncluded?: boolean;    // default true
 }
 
 export interface ItemPrice {
-  kind: PriceKind;                  // base, deposit, vs.
-  value: Money;                     // asıl tutar
-  listRef?: Types.ObjectId;         // varsa merkezi fiyat kalemi (pricelistitem)
-  activeFrom?: Date;                // geçerlilik aralığı (opsiyonel)
+  kind: PriceKind;
+  value: Money;
+  listRef?: Types.ObjectId;         // pricelistitem referansı (opsiyonel)
+  activeFrom?: Date;                // geçerlilik aralıkları (ops.)
   activeTo?: Date;
-  minQty?: number;                  // x adetten itibaren
-  channels?: PriceChannel[];        // sadece şu kanallarda geçerli
-  outlet?: string;                  // şube/mağaza kodu (opsiyonel)
-  note?: string;                    // açıklama/not
+  minQty?: number;                  // qty eşikleri (ops.)
+  channels?: PriceChannel[];        // geçerli kanallar (ops.)
+  outlet?: string;                  // şube kodu (ops.)
+  note?: string;                    // not (ops.)
 }
 
 /* --------- KV --------- */
@@ -54,10 +54,10 @@ export interface IMenuItemVariant {
   volumeMl?: number;
   netWeightGr?: number;
 
-  // 💡 Yeni: gömülü fiyatlar
+  // Gömülü fiyatlar (yeni nesil)
   prices?: ItemPrice[];
 
-  // Opsiyonel: merkezî referans (geriye dönük uyum)
+  // Geriye dönük merkezi referanslar (ops.)
   priceListItem?: Types.ObjectId;
   depositPriceListItem?: Types.ObjectId;
 }
@@ -67,11 +67,12 @@ export interface IMenuItemModifierOption {
   name: TranslatedLabel;
   order?: number;
   isDefault?: boolean;
+  
 
-  // 💡 Yeni: gömülü fiyatlar
+  // Gömülü fiyatlar
   prices?: ItemPrice[];
 
-  // Opsiyonel: merkezî referans (geriye dönük uyum)
+  // Geriye dönük referans
   priceListItem?: Types.ObjectId;
 }
 
@@ -85,7 +86,7 @@ export interface IMenuItemModifierGroup {
   isRequired?: boolean;
 }
 
-/* --------- Diğer alanlar aynı --------- */
+/* --------- Diğer alanlar --------- */
 export interface IMenuItemDietary {
   vegetarian?: boolean; vegan?: boolean; pescatarian?: boolean;
   halal?: boolean; kosher?: boolean; glutenFree?: boolean; lactoseFree?: boolean;

@@ -23,7 +23,6 @@ router.post(
 );
 
 router.get("/", authenticate, getMyOrders);
-
 router.get("/:id", authenticate, getOrderById);
 
 router.put(

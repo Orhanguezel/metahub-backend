@@ -46,7 +46,7 @@ export const getAllOrders = asyncHandler(async (req: Request, res: Response) => 
 // --- SİPARİŞ DURUMU GÜNCELLE ---
 export const updateOrderStatus = asyncHandler(async (req: Request, res: Response) => {
   const { status } = req.body;
-  const locale: SupportedLocale = req.locale || getLogLocale();
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale();
 
   if (!validStatuses.includes(status)) {
     res.status(400).json({
@@ -75,7 +75,6 @@ export const updateOrderStatus = asyncHandler(async (req: Request, res: Response
   order.status = status;
   await order.save();
 
-  // Her zaman locale kullan (user.language yok!)
   if (isPopulatedUser(order.user)) {
     await Notification.create({
       user: order.user._id,
@@ -96,7 +95,7 @@ export const updateOrderStatus = asyncHandler(async (req: Request, res: Response
 
 // --- TESLİMAT OLARAK İŞARETLE ---
 export const markOrderAsDelivered = asyncHandler(async (req: Request, res: Response) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale();
   const { Order, Notification } = await getTenantModels(req);
 
   const order = await Order.findOne({
@@ -138,7 +137,7 @@ export const markOrderAsDelivered = asyncHandler(async (req: Request, res: Respo
 
 // --- SİPARİŞİ SİL ---
 export const deleteOrder = asyncHandler(async (req: Request, res: Response) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale();
   const { Order } = await getTenantModels(req);
 
   const order = await Order.findOne({ _id: req.params.id, tenant: req.tenant });
