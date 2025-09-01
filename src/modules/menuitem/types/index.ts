@@ -1,4 +1,3 @@
-// src/modules/menuitem/types.ts
 import type { Types } from "mongoose";
 import type { SupportedLocale } from "@/types/common";
 import type { AdditiveCode, AllergenCode } from "@/modules/menuitem/constants/foodLabels";
@@ -11,21 +10,21 @@ export type PriceKind = "base" | "deposit" | "surcharge" | "discount";
 export type PriceChannel = "delivery" | "pickup" | "dinein";
 
 export interface Money {
-  amount: number;           // 12.5 gibi
-  currency: CurrencyCode;   // UPPERCASE
-  taxIncluded?: boolean;    // default true
+  amount: number;
+  currency: CurrencyCode;
+  taxIncluded?: boolean;
 }
 
 export interface ItemPrice {
   kind: PriceKind;
   value: Money;
-  listRef?: Types.ObjectId;         // pricelistitem referansı (opsiyonel)
-  activeFrom?: Date;                // geçerlilik aralıkları (ops.)
+  listRef?: Types.ObjectId;
+  activeFrom?: Date;
   activeTo?: Date;
-  minQty?: number;                  // qty eşikleri (ops.)
-  channels?: PriceChannel[];        // geçerli kanallar (ops.)
-  outlet?: string;                  // şube kodu (ops.)
-  note?: string;                    // not (ops.)
+  minQty?: number;
+  channels?: PriceChannel[];
+  outlet?: string;
+  note?: string;
 }
 
 /* --------- KV --------- */
@@ -41,6 +40,26 @@ export interface IMenuItemImage {
   publicId?: string;
 }
 
+/* --------- Reaction (virtual, hafif tip) --------- */
+export type ReactionKindLite = "LIKE" | "FAVORITE" | "BOOKMARK" | "EMOJI" | "RATING";
+
+export interface IMenuItemReactionLite {
+  kind: ReactionKindLite;
+  emoji?: string | null;
+  value?: number | null;
+  user?: Types.ObjectId | { _id: Types.ObjectId; name?: string; fullName?: string; email?: string; username?: string };
+  createdAt?: Date;
+}
+
+export interface IMenuItemRx {               // Opsiyonel özet (denormalize DEĞİL)
+  likes?: number;
+  favorites?: number;
+  bookmarks?: number;
+  ratingAvg?: number | null;
+  ratingCount?: number;
+  emojis?: Record<string, number>;
+}
+
 /* --------- Variant & Modifiers --------- */
 export interface IMenuItemVariant {
   code: string;
@@ -54,10 +73,8 @@ export interface IMenuItemVariant {
   volumeMl?: number;
   netWeightGr?: number;
 
-  // Gömülü fiyatlar (yeni nesil)
   prices?: ItemPrice[];
 
-  // Geriye dönük merkezi referanslar (ops.)
   priceListItem?: Types.ObjectId;
   depositPriceListItem?: Types.ObjectId;
 }
@@ -67,12 +84,9 @@ export interface IMenuItemModifierOption {
   name: TranslatedLabel;
   order?: number;
   isDefault?: boolean;
-  
 
-  // Gömülü fiyatlar
   prices?: ItemPrice[];
 
-  // Geriye dönük referans
   priceListItem?: Types.ObjectId;
 }
 
@@ -140,4 +154,8 @@ export interface IMenuItem {
 
   createdAt: Date;
   updatedAt: Date;
+
+  /* --- Virtuals (populate ile gelebilir) --- */
+  reactions?: IMenuItemReactionLite[];
+  rx?: IMenuItemRx; // eğer controller’da özet enjekte edersen burada taşınır
 }

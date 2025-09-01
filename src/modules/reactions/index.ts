@@ -12,5 +12,4 @@ router.use("/admin", adminRoutes);
 // 🌍 Public Routes
 router.use("/", publicRoutes);
 
-
 export default router;

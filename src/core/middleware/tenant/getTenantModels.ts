@@ -28,7 +28,6 @@ import { Review } from "@/modules/review/review.models";
 import { ContactMessage } from "@/modules/contact/contact.models";
 import { Newsletter } from "@/modules/newsletter/newsletter.models";
 import { EmailMessage } from "@/modules/email/email.models";
-import { Wishlist } from "@/modules/wishlist/wishlist.models";
 import { Favorite } from "@/modules/favorite/favorite.model";
 import { Feedback } from "@/modules/feedback/feedback.models";
 import { Address } from "@/modules/address/address.models";
@@ -98,6 +97,8 @@ import { MenuItem } from "@/modules/menuitem/models";
 import { Promotion, PromotionRedemption } from "@/modules/promotions/models";
 import { WebhookDelivery, WebhookEndpoint } from "@/modules/webhooks/models";
 
+import {Reaction} from "@/modules/reactions/models";
+
 export const getTenantModels = async (req: Request) => ({
   Settings: await req.getModel("settings", Settings.schema),
   User: await req.getModel("user", User.schema),
@@ -137,7 +138,6 @@ export const getTenantModels = async (req: Request) => ({
   Review: await req.getModel("review", Review.schema),
   ContactMessage: await req.getModel("contactmessage", ContactMessage.schema),
   EmailMessage: await req.getModel("emailmessage", EmailMessage.schema),
-  Wishlist: await req.getModel("wishlist", Wishlist.schema),
   Favorite: await req.getModel("favorite", Favorite.schema),
   Feedback: await req.getModel("feedback", Feedback.schema),
   Address: await req.getModel("address", Address.schema),
@@ -234,4 +234,6 @@ export const getTenantModels = async (req: Request) => ({
   PromotionRedemption: await req.getModel("promotionredemption", PromotionRedemption.schema),
   WebhookEndpoint: await req.getModel("webhookendpoint", WebhookEndpoint.schema),
   WebhookDelivery: await req.getModel("webhookdelivery", WebhookDelivery.schema),
+
+  Reaction: await req.getModel("reaction", Reaction.schema),
 });

@@ -1,0 +1,33 @@
+{
+  "created": "Dodano reakcję.",
+  "deleted": "Usunięto reakcję.",
+  "toggled_on": "Reakcja włączona.",
+  "toggled_off": "Reakcja wyłączona.",
+  "updated": "Zaktualizowano.",
+  "fetched": "Pobrano.",
+  "listed": "Lista pobrana.",
+  "deleted_many": "Usunięto.",
+  "notFound": "Nie znaleziono.",
+  "invalidId": "Nieprawidłowe ID.",
+  "error": {
+    "create_fail": "Nie udało się utworzyć reakcji.",
+    "update_fail": "Aktualizacja nie powiodła się.",
+    "invalid_payload": "Nieprawidłowe dane żądania."
+  },
+  "validation": {
+    "required": "Brak wymaganego pola.",
+    "invalidKind": "Nieprawidłowy typ reakcji.",
+    "invalidEmoji": "Nieprawidłowa emotikona.",
+    "invalidTarget": "Nieprawidłowy cel.",
+    "invalidUser": "Nieprawidłowy użytkownik.",
+    "invalidObjectId": "Nieprawidłowy ObjectId.",
+    "booleanField": "Musi być typu boolean.",
+    "arrayField": "Musi być tablicą."
+  },
+  "log": {
+    "toggled": "reactions.toggled",
+    "summary": "reactions.summary",
+    "list": "reactions.admin_list",
+    "remove": "reactions.admin_remove"
+  }
+}

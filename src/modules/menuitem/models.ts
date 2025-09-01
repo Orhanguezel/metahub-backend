@@ -1,4 +1,3 @@
-// src/modules/menuitem/model.ts
 import { Schema, Model, models, model, Types as MTypes } from "mongoose";
 import slugify from "slugify";
 import { SUPPORTED_LOCALES, type SupportedLocale } from "@/types/common";
@@ -153,6 +152,19 @@ const MenuItemSchema = new Schema<IMenuItem>({
   isActive: { type: Boolean, default: true, index: true },
 }, { timestamps: true });
 
+/* ---------- Virtual: reactions (populate) ---------- */
+// NOT: reaction koleksiyonuna doküman yazmıyoruz; sadece okurken bağlanır.
+// targetType = "menuitem" + isActive=true filtreliyoruz.
+MenuItemSchema.virtual("reactions", {
+  ref: "reaction",
+  localField: "_id",
+  foreignField: "targetId",
+  options: {
+    match: { targetType: "menuitem", isActive: true },
+    select: "kind emoji value user createdAt",
+  },
+});
+
 /* ---------- Indexler ---------- */
 MenuItemSchema.index({ tenant: 1, code: 1 }, { unique: true });
 MenuItemSchema.index({ tenant: 1, slug: 1 }, { unique: true });
@@ -191,15 +203,14 @@ MenuItemSchema.set("toJSON", { virtuals: true, versionKey: false, transform });
 MenuItemSchema.set("toObject", { virtuals: true, versionKey: false, transform });
 
 /* ---------- Fiyat seçimi için yardımcı ---------- */
-/** embed fiyatlardan uygun olanı seçer (kanal/outlet/tarih/qty’yi dikkate alır) */
 export function selectBestItemPrice(
   prices: ItemPrice[] | undefined,
   kind: PriceKind,
   opts: {
     channel?: PriceChannel;
     outlet?: string | null;
-    at?: Date;          // default now
-    qty?: number;       // default 1
+    at?: Date;
+    qty?: number;
   } = {}
 ): ItemPrice | undefined {
   const list = (prices || []).filter(p => p?.kind === kind);
@@ -209,11 +220,8 @@ export function selectBestItemPrice(
   const qty = Math.max(1, Number(opts.qty || 1));
   const ch  = opts.channel;
 
-  // filtrele
   const filtered = list.filter(p => {
-    const okDate =
-      (!p.activeFrom || p.activeFrom <= now) &&
-      (!p.activeTo || p.activeTo >= now);
+    const okDate = (!p.activeFrom || p.activeFrom <= now) && (!p.activeTo || p.activeTo >= now);
     const okQty = !p.minQty || qty >= p.minQty;
     const okCh  = !p.channels || !p.channels.length || (ch ? p.channels.includes(ch) : true);
     const okOutlet = !p.outlet || !opts.outlet || p.outlet === opts.outlet;
@@ -222,7 +230,6 @@ export function selectBestItemPrice(
 
   if (!filtered.length) return undefined;
 
-  // basit bir sıralama: en yeni aktifFrom, sonra en yüksek minQty
   filtered.sort((a, b) => {
     const af = a.activeFrom ? +a.activeFrom : 0;
     const bf = b.activeFrom ? +b.activeFrom : 0;

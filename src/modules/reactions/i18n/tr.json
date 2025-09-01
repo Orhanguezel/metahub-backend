@@ -1,0 +1,33 @@
+{
+  "created": "Tepki eklendi.",
+  "deleted": "Tepki kaldırıldı.",
+  "toggled_on": "Tepki verildi.",
+  "toggled_off": "Tepki kaldırıldı.",
+  "updated": "Güncellendi.",
+  "fetched": "Bilgiler getirildi.",
+  "listed": "Liste getirildi.",
+  "deleted_many": "Kayıtlar silindi.",
+  "notFound": "Kayıt bulunamadı.",
+  "invalidId": "Geçersiz kimlik.",
+  "error": {
+    "create_fail": "Tepki oluşturulamadı.",
+    "update_fail": "Güncelleme başarısız.",
+    "invalid_payload": "Geçersiz istek verisi."
+  },
+  "validation": {
+    "required": "Zorunlu alan eksik.",
+    "invalidKind": "Geçersiz tepki türü.",
+    "invalidEmoji": "Geçersiz emoji.",
+    "invalidTarget": "Geçersiz hedef.",
+    "invalidUser": "Geçersiz kullanıcı.",
+    "invalidObjectId": "Geçersiz ObjectId.",
+    "booleanField": "Boolean olmalı.",
+    "arrayField": "Liste olmalı."
+  },
+  "log": {
+    "toggled": "reactions.toggled",
+    "summary": "reactions.summary",
+    "list": "reactions.admin_list",
+    "remove": "reactions.admin_remove"
+  }
+}
