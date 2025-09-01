@@ -1,0 +1,33 @@
+{
+  "created": "Reaction added.",
+  "deleted": "Reaction removed.",
+  "toggled_on": "Reaction on.",
+  "toggled_off": "Reaction off.",
+  "updated": "Updated.",
+  "fetched": "Fetched.",
+  "listed": "List fetched.",
+  "deleted_many": "Removed.",
+  "notFound": "Not found.",
+  "invalidId": "Invalid id.",
+  "error": {
+    "create_fail": "Failed to create reaction.",
+    "update_fail": "Failed to update.",
+    "invalid_payload": "Invalid request data."
+  },
+  "validation": {
+    "required": "Required field is missing.",
+    "invalidKind": "Invalid reaction kind.",
+    "invalidEmoji": "Invalid emoji.",
+    "invalidTarget": "Invalid target.",
+    "invalidUser": "Invalid user.",
+    "invalidObjectId": "Invalid ObjectId.",
+    "booleanField": "Must be boolean.",
+    "arrayField": "Must be array."
+  },
+  "log": {
+    "toggled": "reactions.toggled",
+    "summary": "reactions.summary",
+    "list": "reactions.admin_list",
+    "remove": "reactions.admin_remove"
+  }
+}

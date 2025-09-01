@@ -28,7 +28,6 @@ import { Comment } from "@/modules/comment/comment.models";
 import { Review } from "@/modules/review/review.models";
 import { ContactMessage } from "@/modules/contact/contact.models";
 import { EmailMessage } from "@/modules/email/email.models";
-import { Wishlist } from "@/modules/wishlist/wishlist.models";
 import { Favorite } from "@/modules/favorite/favorite.model";
 import { Feedback } from "@/modules/feedback/feedback.models";
 import { Address } from "@/modules/address/address.models";
@@ -99,6 +98,8 @@ import { MenuItem } from "@/modules/menuitem/models";
 import { Promotion, PromotionRedemption } from "@/modules/promotions/models";
 import { WebhookDelivery, WebhookEndpoint } from "@/modules/webhooks/models";
 
+import {Reaction} from "@/modules/reactions/models";
+
 // ✅ Ana export
 export const getTenantModelsFromConnection = (conn: Connection) => ({
   Settings: conn.model("settings", Settings.schema),
@@ -126,7 +127,6 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   Review: conn.model("review", Review.schema),
   ContactMessage: conn.model("contactmessage", ContactMessage.schema),
   EmailMessage: conn.model("emailmessage", EmailMessage.schema),
-  Wishlist: conn.model("wishlist", Wishlist.schema),
   Favorite: conn.model("favorite", Favorite.schema),
   Feedback: conn.model("feedback", Feedback.schema),
   Address: conn.model("address", Address.schema),
@@ -208,4 +208,6 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   PromotionRedemption: conn.model("promotionredemption", PromotionRedemption.schema),
   WebhookEndpoint: conn.model("webhookendpoint", WebhookEndpoint.schema),
   WebhookDelivery: conn.model("webhookdelivery", WebhookDelivery.schema),
+
+  Reaction: conn.model("reaction", Reaction.schema),
 });
