@@ -24,7 +24,7 @@ import { Massage } from "@/modules/massage/models";
 import { MassageCategory } from "@/modules/massagecategory/category.models";
 import { Stockmovement } from "@/modules/stockmovement/stockmovement.models";
 import { Notification } from "@/modules/notification/notification.models";
-import { Comment } from "@/modules/comment/comment.models";
+import { Comment } from "@/modules/comment/models";
 import { Review } from "@/modules/review/review.models";
 import { ContactMessage } from "@/modules/contact/contact.models";
 import { EmailMessage } from "@/modules/email/email.models";
@@ -98,7 +98,7 @@ import { MenuItem } from "@/modules/menuitem/models";
 import { Promotion, PromotionRedemption } from "@/modules/promotions/models";
 import { WebhookDelivery, WebhookEndpoint } from "@/modules/webhooks/models";
 
-import {Reaction} from "@/modules/reactions/models";
+import { Reaction } from "@/modules/reactions/models";
 
 // ✅ Ana export
 export const getTenantModelsFromConnection = (conn: Connection) => ({
@@ -205,7 +205,10 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   Menu: conn.model("menu", Menu.schema),
   MenuItem: conn.model("menuitem", MenuItem.schema),
   Promotion: conn.model("promotion", Promotion.schema),
-  PromotionRedemption: conn.model("promotionredemption", PromotionRedemption.schema),
+  PromotionRedemption: conn.model(
+    "promotionredemption",
+    PromotionRedemption.schema
+  ),
   WebhookEndpoint: conn.model("webhookendpoint", WebhookEndpoint.schema),
   WebhookDelivery: conn.model("webhookdelivery", WebhookDelivery.schema),
 

@@ -6,6 +6,7 @@ import {
   togglePublishComment,
   deleteComment,
   replyToComment,
+  getTestimonialsPublic, // ⬅️ eklendi
 } from "./comment.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
@@ -13,15 +14,17 @@ import {
   validateCommentIdParam,
   validateContentIdParam,
   validateReplyToComment,
-} from "./comment.validation";
+  validateListTestimonials, // ⬅️ eklendi (opsiyonel query doğrulama)
+} from "./validation";
 
 const router = express.Router();
 
-// 🌍 Public Routes
+/* 🌍 Public Routes */
 router.post("/", validateCreateComment, createComment);
+router.get("/testimonials", validateListTestimonials, getTestimonialsPublic); // ⬅️ yeni public uç
 router.get("/:type/:id", validateContentIdParam, getCommentsForContent);
 
-// 🔐 Admin Routes (korumalı, admin/moderator)
+/* 🔐 Admin Routes (korumalı) */
 router.use(authenticate, authorizeRoles("admin", "moderator"));
 
 router.get("/", getAllComments);

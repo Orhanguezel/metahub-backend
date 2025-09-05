@@ -1,4 +1,4 @@
-import { body, param } from "express-validator";
+import { body, param, query } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 import {
   ALLOWED_COMMENT_CONTENT_TYPES,
@@ -7,7 +7,7 @@ import {
 } from "@/core/utils/constants";
 import { SUPPORTED_LOCALES } from "@/types/common";
 
-// --- Guest için zorunluluk
+/* --- Guest için zorunluluk + create payload --- */
 export const validateCreateComment = [
   body("name")
     .if((_, { req }) => !req.user)
@@ -21,24 +21,20 @@ export const validateCreateComment = [
     .isEmail().withMessage("A valid email address is required.")
     .normalizeEmail(),
 
-  // --- En az bir metin alanı zorunlu (text, comment, label) ---
+  // En az bir metin alanı zorunlu
   body().custom((body) => {
-    if (
-      !body.text &&
-      !body.comment &&
-      !body.label
-    ) {
+    if (!body.text && !body.comment && !body.label) {
       throw new Error("At least one of text, comment or label must be provided.");
     }
     return true;
   }),
 
-  // label/text/comment field’lar için standart validasyon
+  // label/text/comment validasyonları
   body("label").optional().isString().isLength({ min: 2, max: 150 }).withMessage("Label must be between 2 and 150 characters."),
   body("text").optional().isString().isLength({ min: 5, max: 500 }).withMessage("Text must be between 5 and 500 characters."),
   body("comment").optional().isString().isLength({ min: 5, max: 500 }).withMessage("Comment must be between 5 and 500 characters."),
 
-  // --- contentType: enum kontrolü
+  // contentType enum
   body("contentType")
     .notEmpty().withMessage("Content type is required.")
     .isString()
@@ -50,34 +46,33 @@ export const validateCreateComment = [
       return true;
     }),
 
-  // --- type alanı: enum kontrolü (opsiyonel)
+  // type enum (opsiyonel)
   body("type")
     .optional()
     .isString()
     .custom((value) => {
       const lower = String(value).toLowerCase();
       if (!ALLOWED_COMMENT_TYPES.includes(lower as any)) {
-        throw new Error(
-          `Type must be one of: ${ALLOWED_COMMENT_TYPES.join(", ")}`
-        );
+        throw new Error(`Type must be one of: ${ALLOWED_COMMENT_TYPES.join(", ")}`);
       }
       return true;
     }),
 
-  // --- rating (opsiyonel, sadece review/rating tipinde zorlanır)
+  // rating (opsiyonel)
   body("rating")
     .optional()
     .isInt({ min: 1, max: 5 }).withMessage("Rating must be a number between 1 and 5."),
 
-  // --- contentId: zorunlu ObjectId
+  // contentId (testimonial dışı zorunlu)
   body("contentId")
-  .if(body("type").not().equals("testimonial"))
-  .notEmpty().withMessage("Content ID is required.")
-  .isMongoId().withMessage("Content ID must be a valid MongoDB ObjectId."),
+    .if(body("type").not().equals("testimonial"))
+    .notEmpty().withMessage("Content ID is required.")
+    .isMongoId().withMessage("Content ID must be a valid MongoDB ObjectId."),
 
   validateRequest,
 ];
 
+/* --- Admin reply payload --- */
 export const validateReplyToComment = [
   param("id").isMongoId().withMessage("Invalid comment ID."),
   ...SUPPORTED_LOCALES.map((lng) =>
@@ -89,18 +84,22 @@ export const validateReplyToComment = [
   validateRequest,
 ];
 
-// Yorumun kendi id'si (comment id)
+/* --- Yorumun kendi id'si (comment id) --- */
 export const validateCommentIdParam = [
-  param("id")
-    .isMongoId()
-    .withMessage("Comment ID must be a valid MongoDB ObjectId."),
+  param("id").isMongoId().withMessage("Comment ID must be a valid MongoDB ObjectId."),
   validateRequest,
 ];
 
-// Bir içeriğe ait yorumları çekerken kullanılan içerik id'si (content id)
+/* --- İçerik id param (content id) --- */
 export const validateContentIdParam = [
-  param("id")
-    .isMongoId()
-    .withMessage("Content ID must be a valid MongoDB ObjectId."),
+  param("id").isMongoId().withMessage("Content ID must be a valid MongoDB ObjectId."),
+  validateRequest,
+];
+
+/* --- Public testimonials query --- */
+export const validateListTestimonials = [
+  query("page").optional().isInt({ min: 1 }).withMessage("page must be >= 1"),
+  query("limit").optional().isInt({ min: 1, max: 100 }).withMessage("limit must be 1..100"),
+  query("minRating").optional().isInt({ min: 1, max: 5 }).withMessage("minRating must be 1..5"),
   validateRequest,
 ];

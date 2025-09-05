@@ -23,7 +23,7 @@ import { Massage } from "@/modules/massage/models";
 import { MassageCategory } from "@/modules/massagecategory/category.models";
 import { Stockmovement } from "@/modules/stockmovement/stockmovement.models";
 import { Notification } from "@/modules/notification/notification.models";
-import { Comment } from "@/modules/comment/comment.models";
+import { Comment } from "@/modules/comment/models";
 import { Review } from "@/modules/review/review.models";
 import { ContactMessage } from "@/modules/contact/contact.models";
 import { Newsletter } from "@/modules/newsletter/newsletter.models";
@@ -97,7 +97,7 @@ import { MenuItem } from "@/modules/menuitem/models";
 import { Promotion, PromotionRedemption } from "@/modules/promotions/models";
 import { WebhookDelivery, WebhookEndpoint } from "@/modules/webhooks/models";
 
-import {Reaction} from "@/modules/reactions/models";
+import { Reaction } from "@/modules/reactions/models";
 
 export const getTenantModels = async (req: Request) => ({
   Settings: await req.getModel("settings", Settings.schema),
@@ -207,12 +207,21 @@ export const getTenantModels = async (req: Request) => ({
   Newsletter: await req.getModel("newsletter", Newsletter.schema),
   Pricing: await req.getModel("pricing", Pricing.schema),
   BillingPlan: await req.getModel("billingplan", BillingPlan.schema),
-  BillingOccurrence: await req.getModel("billingoccurrence", BillingOccurrence.schema),
+  BillingOccurrence: await req.getModel(
+    "billingoccurrence",
+    BillingOccurrence.schema
+  ),
   Contract: await req.getModel("contract", Contract.schema),
   OperationJob: await req.getModel("operationjob", OperationJob.schema),
-  OperationTemplate: await req.getModel("operationtemplate", OperationTemplate.schema),
+  OperationTemplate: await req.getModel(
+    "operationtemplate",
+    OperationTemplate.schema
+  ),
   ReportRun: await req.getModel("reportrun", ReportRun.schema),
-  ReportDefinition: await req.getModel("reportdefinition", ReportDefinition.schema),
+  ReportDefinition: await req.getModel(
+    "reportdefinition",
+    ReportDefinition.schema
+  ),
   SchedulePlan: await req.getModel("scheduleplan", SchedulePlan.schema),
   TimeEntry: await req.getModel("timeentry", TimeEntry.schema),
   Employee: await req.getModel("employee", Employee.schema),
@@ -231,9 +240,18 @@ export const getTenantModels = async (req: Request) => ({
   Menu: await req.getModel("menu", Menu.schema),
   MenuItem: await req.getModel("menuitem", MenuItem.schema),
   Promotion: await req.getModel("promotion", Promotion.schema),
-  PromotionRedemption: await req.getModel("promotionredemption", PromotionRedemption.schema),
-  WebhookEndpoint: await req.getModel("webhookendpoint", WebhookEndpoint.schema),
-  WebhookDelivery: await req.getModel("webhookdelivery", WebhookDelivery.schema),
+  PromotionRedemption: await req.getModel(
+    "promotionredemption",
+    PromotionRedemption.schema
+  ),
+  WebhookEndpoint: await req.getModel(
+    "webhookendpoint",
+    WebhookEndpoint.schema
+  ),
+  WebhookDelivery: await req.getModel(
+    "webhookdelivery",
+    WebhookDelivery.schema
+  ),
 
   Reaction: await req.getModel("reaction", Reaction.schema),
 });

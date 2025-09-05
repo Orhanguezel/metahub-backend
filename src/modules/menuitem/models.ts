@@ -1,3 +1,5 @@
+
+// ========================= model.ts =========================
 import { Schema, Model, models, model, Types as MTypes } from "mongoose";
 import slugify from "slugify";
 import { SUPPORTED_LOCALES, type SupportedLocale } from "@/types/common";
@@ -111,6 +113,10 @@ const MenuItemSchema = new Schema<IMenuItem>({
   images: { type: [ImageSchema], default: [] },
 
   categories: { type: [CategoryRefSchema], default: [] },
+
+  // ❌ Denormalizasyonu engellemek için fiziksel "comments" alanı kaldırıldı.
+  // comments: { type: [Schema.Types.ObjectId], ref: "comment", default: [] },
+
   variants: { type: [VariantSchema], default: [] },
   modifierGroups: { type: [ModifierGroupSchema], default: [] },
 
@@ -153,7 +159,6 @@ const MenuItemSchema = new Schema<IMenuItem>({
 }, { timestamps: true });
 
 /* ---------- Virtual: reactions (populate) ---------- */
-// NOT: reaction koleksiyonuna doküman yazmıyoruz; sadece okurken bağlanır.
 // targetType = "menuitem" + isActive=true filtreliyoruz.
 MenuItemSchema.virtual("reactions", {
   ref: "reaction",
@@ -162,6 +167,31 @@ MenuItemSchema.virtual("reactions", {
   options: {
     match: { targetType: "menuitem", isActive: true },
     select: "kind emoji value user createdAt",
+  },
+});
+
+/* ---------- Virtual: comments (populate) ---------- */
+// Yayında & aktif yorumlar; contentType: "menuitem"
+MenuItemSchema.virtual("comments", {
+  ref: "comment",
+  localField: "_id",
+  foreignField: "contentId",
+  options: {
+    match: { contentType: "menuitem", isActive: true, isPublished: true },
+    select: "name email userId profileImage text label rating type reply createdAt",
+    sort: { createdAt: -1 },
+    limit: 100,
+  },
+});
+
+// Yorum sayısı
+MenuItemSchema.virtual("commentsCount", {
+  ref: "comment",
+  localField: "_id",
+  foreignField: "contentId",
+  count: true,
+  options: {
+    match: { contentType: "menuitem", isActive: true, isPublished: true },
   },
 });
 
