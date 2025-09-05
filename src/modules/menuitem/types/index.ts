@@ -1,3 +1,4 @@
+// ========================= types.ts =========================
 import type { Types } from "mongoose";
 import type { SupportedLocale } from "@/types/common";
 import type { AdditiveCode, AllergenCode } from "@/modules/menuitem/constants/foodLabels";
@@ -124,6 +125,21 @@ export interface IMenuItemCategoryRef {
   isFeatured?: boolean;
 }
 
+/* --------- Yorum (lite) --------- */
+export interface IMenuItemCommentLite {
+  _id: string;
+  name?: string;
+  email?: string;
+  userId?: any;
+  profileImage?: string | { thumbnail?: string; url?: string };
+  text: string;
+  label?: string;
+  rating?: number;
+  type?: string;
+  reply?: { text: TranslatedLabel; createdAt?: string };
+  createdAt?: string;
+}
+
 export interface IMenuItem {
   _id?: Types.ObjectId;
   tenant: string;
@@ -136,6 +152,8 @@ export interface IMenuItem {
   images: IMenuItemImage[];
 
   categories: IMenuItemCategoryRef[];
+  // comments alanı artık fiziksel değil; virtual ile taşınacak:
+  // comments: Types.ObjectId[];  <-- KALDIRILDI
   variants: IMenuItemVariant[];
   modifierGroups?: IMenuItemModifierGroup[];
 
@@ -157,5 +175,7 @@ export interface IMenuItem {
 
   /* --- Virtuals (populate ile gelebilir) --- */
   reactions?: IMenuItemReactionLite[];
-  rx?: IMenuItemRx; // eğer controller’da özet enjekte edersen burada taşınır
+  rx?: IMenuItemRx;
+  comments?: IMenuItemCommentLite[];   // 👈 virtual
+  commentsCount?: number;              // 👈 virtual (count)
 }

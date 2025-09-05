@@ -3,6 +3,7 @@ import type { SupportedLocale } from "@/types/common";
 // Çoklu dil admin cevabı için
 export type TranslatedLabel = { [key in SupportedLocale]: string };
 
+// constants ile birebir aynı değerler:
 export type CommentContentType =
   | "news"
   | "blog"
@@ -16,20 +17,28 @@ export type CommentContentType =
   | "company"
   | "ensotekprod"
   | "sparepart"
-  | "global";
+  | "portfolio"    // ⬅️ EKLENDİ (constants'ta vardı)
+  | "menuitem"
+  | "global";      // ⬅️ testimonial için
 
-export type CommentType = "comment" | "testimonial" | "review" | "question" | "answer" | "rating";
+export type CommentType =
+  | "comment"
+  | "testimonial"
+  | "review"
+  | "question"
+  | "answer"
+  | "rating";
 
 // Ana model
 export interface IComment {
-  _id?: any; // string veya ObjectId olabilir
-  userId?: any; // string veya Types.ObjectId veya { _id, name, email }
+  _id?: any;
+  userId?: any;
   name?: string;
-  profileImage?: string | { thumbnail?: string; url?: string }; // Resim objesi veya URL
+  profileImage?: string | { thumbnail?: string; url?: string };
   email?: string;
   tenant: string;
   contentType: CommentContentType;
-  contentId: any; // string veya Types.ObjectId veya { _id, title, slug }
+  contentId: any;
   type?: CommentType; // default: "comment"
   label?: string;
   text: string;
@@ -39,7 +48,7 @@ export interface IComment {
   };
   isPublished: boolean;
   isActive: boolean;
-  rating?: number; // opsiyonel puan (örn: review için)
+  rating?: number;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -1,4 +1,4 @@
-import { Schema, model, Types, Model, models } from "mongoose";
+import { Schema, model, Model, models } from "mongoose";
 import {
   ALLOWED_COMMENT_CONTENT_TYPES,
   ALLOWED_COMMENT_TYPES,
@@ -39,37 +39,48 @@ const commentSchema = new Schema<IComment>(
     tenant: { type: String, required: true, index: true },
     label: { type: String, trim: true },
     text: { type: String, trim: true, required: true },
+
     contentType: {
       type: String,
-      enum: ALLOWED_COMMENT_CONTENT_TYPES,
+      enum: ALLOWED_COMMENT_CONTENT_TYPES, // 'global' dahil olmalı
       required: true,
     },
     contentId: {
       type: Schema.Types.ObjectId,
       required: function () {
-        // Testimonial ise gerekmesin
+        // testimonial ise gerekmesin
         return this.type !== "testimonial";
       },
-      // contentType testimonial ise refPath olmayacak!
-      refPath: function () {
+      // testimonial ise refPath olmayacak
+      refPath: function (this: any) {
         if (this.type === "testimonial") return undefined;
         return "contentType";
       },
     },
+
     type: {
       type: String,
-      enum: ALLOWED_COMMENT_TYPES,
+      enum: ALLOWED_COMMENT_TYPES, // ["comment","testimonial","review","question","answer","rating"]
       default: "comment",
     },
+
     reply: {
       text: localizedStringField(),
       createdAt: { type: String },
     },
+
     isPublished: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+
     rating: { type: Number, min: 1, max: 5, required: false },
   },
   { timestamps: true }
+);
+
+/* Performans indexleri (public listeler) */
+commentSchema.index(
+  { tenant: 1, type: 1, isPublished: 1, isActive: 1, createdAt: -1 },
+  { name: "idx_comment_public_lists" }
 );
 
 const Comment: Model<IComment> =

@@ -1,3 +1,4 @@
+// admin.controller.ts
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import slugify from "slugify";
@@ -187,7 +188,7 @@ const normModifierGroups = (raw: any) => {
             .map((o: any) => ({
               code: typeof o?.code === "string" ? o.code.trim() : undefined,
               name: fillAllLocales(o?.name),
-              order: (Number.isInteger(o?.order) || (typeof o?.order === "string" && Number.isFinite(Number(o.order)))) ? Number(o?.order) : undefined,
+              order: (Number.isInteger(o?.order) || (typeof o?.order === "string" && Number.isFinite(Number(o?.order)))) ? Number(o?.order) : undefined,
               isDefault: typeof o?.isDefault === "boolean" ? o.isDefault : undefined,
               prices: normPrices(o?.prices) || [],
               priceListItem: Types.ObjectId.isValid(o?.priceListItem) ? o.priceListItem : undefined,
@@ -197,7 +198,7 @@ const normModifierGroups = (raw: any) => {
       return {
         code: typeof g?.code === "string" ? g.code.trim() : undefined,
         name: fillAllLocales(g?.name),
-        order: (Number.isInteger(g?.order) || (typeof g?.order === "string" && Number.isFinite(Number(g.order)))) ? Number(g?.order) : undefined,
+        order: (Number.isInteger(g?.order) || (typeof g?.order === "string" && Number.isFinite(Number(g?.order)))) ? Number(g?.order) : undefined,
         minSelect: (Number.isInteger(g?.minSelect) || (typeof g?.minSelect === "string" && g.minSelect !== "")) ? Number(g?.minSelect) : undefined,
         maxSelect: (Number.isInteger(g?.maxSelect) || (typeof g?.maxSelect === "string" && g.maxSelect !== "")) ? Number(g?.maxSelect) : undefined,
         isRequired: typeof g?.isRequired === "boolean" ? g.isRequired : undefined,
@@ -452,6 +453,7 @@ export const adminGetAllMenuItem = asyncHandler(async (req: Request, res: Respon
   const list = await (MenuItem as any)
     .find(filter)
     .populate([{ path: "categories.category", select: "code slug name images order" }])
+    .populate([{ path: "commentsCount" }]) // 👈 Published+active yorum sayısı
     .sort({ createdAt: -1 })
     .limit(Math.min(Number(limit) || 200, 500))
     .lean({ virtuals: true, getters: true });
@@ -466,16 +468,25 @@ export const adminGetMenuItemById = asyncHandler(async (req: Request, res: Respo
   const { MenuItem } = await getTenantModels(req);
   const { id } = req.params;
 
+  // İsteğe bağlı yorum limiti (varsayılan 100, maks 500)
+  const commentsLimit = Math.min(Math.max(Number(req.query.commentsLimit) || 100, 0), 500);
+
   const doc = await (MenuItem as any)
     .findOne({ _id: id, tenant: req.tenant })
     .populate([
       { path: "categories.category", select: "code slug name images order" },
-      // 👇 reactions virtual + user ismi/e-posta ile
       {
         path: "reactions",
         select: "kind emoji value user createdAt",
         options: { sort: { createdAt: -1 }, limit: 200 },
         populate: { path: "user", select: "fullName name email username" }
+      },
+      { path: "commentsCount" }, // 👈 yayınlanmış/aktif yorum sayısı
+      {
+        path: "comments",        // 👈 yayınlanmış/aktif yorumlar (virtual'daki match geçerli)
+        select: "name email userId profileImage text label rating type reply createdAt",
+        options: { sort: { createdAt: -1 }, limit: commentsLimit },
+        populate: { path: "userId", select: "name email profileImage" }
       },
     ])
     .lean({ virtuals: true });

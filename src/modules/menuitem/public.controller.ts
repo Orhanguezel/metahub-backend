@@ -15,7 +15,6 @@ const tByReq = (req: Request) => (k: string, p?: any) =>
 const buildTimeWindow = (now: Date, includeUpcoming: boolean) => {
   const and: any[] = [];
 
-  // normalde: availableFrom yok/null veya <= now
   if (!includeUpcoming) {
     and.push({
       $or: [
@@ -26,7 +25,6 @@ const buildTimeWindow = (now: Date, includeUpcoming: boolean) => {
     });
   }
 
-  // her iki durumda da: availableTo yok/null veya >= now (süresi dolmamış)
   and.push({
     $or: [
       { "ops.availableTo": { $exists: false } },
@@ -78,9 +76,10 @@ export const publicGetMenuItems = asyncHandler(async (req: Request, res: Respons
     .find(filter)
     .select("code slug name images categories variants dietary ops")
     .populate([{ path: "categories.category", select: "code slug name order" }])
+    .populate([{ path: "commentsCount" }]) // yayınlanmış/aktif yorum sayısı (virtual count)
     .sort({ "categories.order": 1, createdAt: -1 })
     .limit(Math.min(Number(limit) || 200, 500))
-    .lean();
+    .lean({ virtuals: true, getters: true });
 
   logger.withReq.info(req, t("listFetched"), { ...getRequestContext(req), public: true, resultCount: list.length });
   res.status(200).json({ success: true, message: t("listFetched"), data: list });
@@ -90,12 +89,14 @@ export const publicGetMenuItemBySlug = asyncHandler(async (req: Request, res: Re
   const t = tByReq(req);
   const { MenuItem } = await getTenantModels(req);
   const { slug } = req.params;
-  const { includeUpcoming, preview } = req.query as Record<string, string>;
+  const { includeUpcoming, preview, withComments = "true", commentsLimit: rawLimit } = req.query as Record<string, string>;
 
   const now = new Date();
   const allowUpcoming = String(includeUpcoming ?? preview ?? "").toLowerCase() === "true";
+  const includeComments = String(withComments || "true").toLowerCase() === "true";
+  const commentsLimit = Math.min(Math.max(Number(rawLimit) || 10, 0), 100);
 
-  const doc = await (MenuItem as any)
+  let query = (MenuItem as any)
     .findOne({
       tenant: req.tenant,
       slug: String(slug || "").toLowerCase(),
@@ -105,7 +106,19 @@ export const publicGetMenuItemBySlug = asyncHandler(async (req: Request, res: Re
     })
     .select("code slug name description images categories variants modifierGroups allergens additives dietary ops sku barcode taxCode")
     .populate([{ path: "categories.category", select: "code slug name order" }])
-    .lean();
+    .populate([{ path: "commentsCount" }]); // yayınlanmış/aktif yorum sayısı (virtual count)
+
+  if (includeComments) {
+    query = query.populate([{
+      path: "comments",
+      select: "name userId profileImage text label rating type reply createdAt",
+      options: { sort: { createdAt: -1 }, limit: commentsLimit },
+      // PUBLIC uçta e-posta sızmaması için email alınmıyor:
+      populate: { path: "userId", select: "name profileImage" },
+    }]);
+  }
+
+  const doc = await query.lean({ virtuals: true, getters: true });
 
   if (!doc) {
     res.status(404).json({ success: false, message: t("notFound") });
