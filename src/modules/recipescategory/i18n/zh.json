@@ -1,0 +1,37 @@
+{
+  "created": "菜谱创建成功。",
+  "updated": "菜谱更新成功。",
+  "deleted": "菜谱删除成功。",
+  "fetched": "已获取菜谱。",
+  "listFetched": "已获取菜谱列表。",
+  "notFound": "未找到菜谱。",
+
+  "error": {
+    "create_fail": "创建菜谱失败。"
+  },
+
+  "validation": {
+    "orderInvalid": "排序必须是 0 到 100000 之间的整数。",
+    "stepsInvalid": "步骤无效或为空。",
+    "stepOrderInvalid": "步骤顺序必须是 1 到 100000 之间的整数。",
+    "ingredientsInvalid": "配料无效或为空。",
+    "categoriesInvalid": "分类必须是有效 ID 的数组。",
+    "categoryIdInvalid": "分类 ID 无效。",
+    "slugInvalid": "短链接（slug）无效。",
+    "titleRequired": "标题为必填（至少一种语言）。",
+    "timesInvalid": "时间必须是大于等于 0 的整数。",
+    "servingsInvalid": "份量至少为 1。",
+    "caloriesInvalid": "卡路里必须是不小于 0 的整数。",
+    "imagesRemoveInvalid": "removedImages 必须是图片 URL 的 JSON 数组。"
+  },
+
+  "recipes": {
+    "success": {
+      "generated": "菜谱已成功生成。"
+    },
+    "error": {
+      "promptInvalid": "请至少提供一个条件。",
+      "modelFormat": "模型返回了意外的格式。请重试。"
+    }
+  }
+}

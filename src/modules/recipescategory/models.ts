@@ -1,6 +1,6 @@
 import mongoose, { Schema, Model, models } from "mongoose";
 import slugify from "slugify";
-import { SUPPORTED_LOCALES, type SupportedLocale } from "@/types/common";
+import { SUPPORTED_LOCALES, type SupportedLocale } from "@/types/recipes/common";
 import type { IRecipeCategory } from "./types";
 
 // Çok dilli name alanını dinamik oluştur

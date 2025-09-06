@@ -2,12 +2,12 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
-import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
-import { t as translate } from "@/core/utils/i18n/translate";
-import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
-import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
+import { getLogLocale } from "@/core/utils/i18n/recipes/getLogLocale";
+import { t as translate } from "@/core/utils/i18n/recipes/translate";
+import { fillAllLocales } from "@/core/utils/i18n/recipes/fillAllLocales";
+import { mergeLocalesForUpdate } from "@/core/utils/i18n/recipes/mergeLocalesForUpdate";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
-import type { SupportedLocale } from "@/types/common";
+import type { SupportedLocale } from "@/types/recipes/common";
 import translations from "./i18n";
 
 // Helpers

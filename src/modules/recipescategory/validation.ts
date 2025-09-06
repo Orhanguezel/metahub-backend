@@ -1,9 +1,9 @@
 import { body, param, query } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
-import { validateMultilangField } from "@/core/utils/i18n/validationUtils";
-import { t as translate } from "@/core/utils/i18n/translate";
-import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
-import type { SupportedLocale } from "@/types/common";
+import { validateMultilangField } from "@/core/utils/i18n/recipes/validationUtils";
+import { t as translate } from "@/core/utils/i18n/recipes/translate";
+import { getLogLocale } from "@/core/utils/i18n/recipes/getLogLocale";
+import type { SupportedLocale } from "@/types/recipes/common";
 import translations from "./i18n";
 
 const tReq = (req: any) => (k: string) =>
