@@ -1,4 +1,4 @@
-import type { SupportedLocale } from "@/types/common";
+import type { SupportedLocale }  from "@/types/recipes/common";
 
 export type TranslatedLabel = { [key in SupportedLocale]?: string };
 
