@@ -1,0 +1,37 @@
+{
+  "created": "Tarif oluşturuldu.",
+  "updated": "Tarif güncellendi.",
+  "deleted": "Tarif silindi.",
+  "fetched": "Tarif getirildi.",
+  "listFetched": "Tarif listesi getirildi.",
+  "notFound": "Tarif bulunamadı.",
+
+  "error": {
+    "create_fail": "Tarif oluşturulamadı."
+  },
+
+  "validation": {
+    "orderInvalid": "Sıra değeri 0–100000 arasında bir tam sayı olmalıdır.",
+    "stepsInvalid": "Adımlar geçersiz veya boş.",
+    "stepOrderInvalid": "Adım sırası 1–100000 arasında bir tam sayı olmalıdır.",
+    "ingredientsInvalid": "Malzemeler geçersiz veya boş.",
+    "categoriesInvalid": "Kategoriler geçerli kimliklerden oluşan bir dizi olmalıdır.",
+    "categoryIdInvalid": "Kategori kimliği geçersiz.",
+    "slugInvalid": "Slug geçersiz.",
+    "titleRequired": "Başlık zorunludur (en az bir dilde).",
+    "timesInvalid": "Süreler 0 veya daha büyük tam sayı olmalıdır.",
+    "servingsInvalid": "Porsiyon sayısı en az 1 olmalıdır.",
+    "caloriesInvalid": "Kalori 0 veya daha büyük bir tam sayı olmalıdır.",
+    "imagesRemoveInvalid": "removedImages alanı resim URL’lerinden oluşan bir JSON dizisi olmalıdır."
+  },
+
+  "recipes": {
+    "success": {
+      "generated": "Tarif başarıyla üretildi."
+    },
+    "error": {
+      "promptInvalid": "Lütfen en az bir kriter belirtin.",
+      "modelFormat": "Model beklenmeyen bir format döndürdü. Lütfen tekrar deneyin."
+    }
+  }
+}

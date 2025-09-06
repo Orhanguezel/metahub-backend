@@ -5,8 +5,10 @@
   "md-hygienelogistik.de": "hygiene", 
   "ensotek.de": "ensotek", 
   "metahub.localhost": "metahub",
-  "antalya-doner-pizzeria.de": "antalya",
-  "test.guezelwebdesign.com": "antalya",
+  "antalya-doner-pizzeria.de": "tarifintarifi",
+  "test.guezelwebdesign.com": "tarifintarifi",
+  "tarifintarifi.com": "tarifintarifi",
+  "www.tarifintarifi.com": "tarifintarifi",
   "localhost": "ensotek",
   "localhost:3000": "ensotek"
   

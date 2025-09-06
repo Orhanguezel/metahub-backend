@@ -43,6 +43,7 @@ export const uploadSizeLimits: Record<UploadFolderKeys, number> = {
   menucategory: 30 * 1024 * 1024,
   menuitem: 30 * 1024 * 1024,
   menu: 30 * 1024 * 1024,
+  recipe:30 * 1024 * 1024,
 
   // -- yeni modüller (Apartment projesi) --
   /**

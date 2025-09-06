@@ -10,7 +10,7 @@ import {
   validateCreateSkillCategory,
   validateUpdateSkillCategory,
   validateObjectId,
-} from "./category.validation";
+} from "./validation";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 
 const router = express.Router();
