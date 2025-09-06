@@ -62,6 +62,7 @@ export const UPLOAD_FOLDERS = {
   pricelist: "pricelist",
   reports: "reports",
   cashbook: "cashbook",
+  recipe: "recipe",
 } as const;
 
 export type UploadFolderKeys = keyof typeof UPLOAD_FOLDERS;

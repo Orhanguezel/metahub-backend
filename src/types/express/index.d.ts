@@ -83,6 +83,7 @@ declare global {
         | "menucategory"
         | "menuitem"
         | "menu"
+        | "recipe"
         | "default";
 
 

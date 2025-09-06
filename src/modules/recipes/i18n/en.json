@@ -1,0 +1,37 @@
+{
+  "created": "Recipe created successfully.",
+  "updated": "Recipe updated successfully.",
+  "deleted": "Recipe deleted successfully.",
+  "fetched": "Recipe fetched.",
+  "listFetched": "Recipe list fetched.",
+  "notFound": "Recipe not found.",
+
+  "error": {
+    "create_fail": "Failed to create recipe."
+  },
+
+  "validation": {
+    "orderInvalid": "Order must be an integer between 0 and 100000.",
+    "stepsInvalid": "Steps are invalid or empty.",
+    "stepOrderInvalid": "Step order must be an integer between 1 and 100000.",
+    "ingredientsInvalid": "Ingredients are invalid or empty.",
+    "categoriesInvalid": "Categories must be an array of valid IDs.",
+    "categoryIdInvalid": "Category ID is invalid.",
+    "slugInvalid": "Slug is invalid.",
+    "titleRequired": "Title is required (at least one locale).",
+    "timesInvalid": "Times must be integers greater than or equal to 0.",
+    "servingsInvalid": "Servings must be at least 1.",
+    "caloriesInvalid": "Calories must be a non-negative integer.",
+    "imagesRemoveInvalid": "removedImages must be a JSON array of image URLs."
+  },
+
+  "recipes": {
+    "success": {
+      "generated": "Recipe generated successfully."
+    },
+    "error": {
+      "promptInvalid": "Please provide at least one criterion.",
+      "modelFormat": "The model returned an unexpected format. Please try again."
+    }
+  }
+}

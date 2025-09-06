@@ -1,0 +1,37 @@
+{
+  "created": "Recette créée avec succès.",
+  "updated": "Recette mise à jour avec succès.",
+  "deleted": "Recette supprimée avec succès.",
+  "fetched": "Recette récupérée.",
+  "listFetched": "Liste des recettes récupérée.",
+  "notFound": "Recette introuvable.",
+
+  "error": {
+    "create_fail": "Échec de la création de la recette."
+  },
+
+  "validation": {
+    "orderInvalid": "L'ordre doit être un entier entre 0 et 100000.",
+    "stepsInvalid": "Les étapes sont invalides ou vides.",
+    "stepOrderInvalid": "L'ordre des étapes doit être un entier entre 1 et 100000.",
+    "ingredientsInvalid": "Les ingrédients sont invalides ou vides.",
+    "categoriesInvalid": "Les catégories doivent être un tableau d'identifiants valides.",
+    "categoryIdInvalid": "Identifiant de catégorie invalide.",
+    "slugInvalid": "Le slug est invalide.",
+    "titleRequired": "Le titre est obligatoire (au moins une langue).",
+    "timesInvalid": "Les durées doivent être des entiers supérieurs ou égaux à 0.",
+    "servingsInvalid": "Le nombre de portions doit être au moins 1.",
+    "caloriesInvalid": "Les calories doivent être un entier positif ou nul.",
+    "imagesRemoveInvalid": "removedImages doit être un tableau JSON d'URL d'images."
+  },
+
+  "recipes": {
+    "success": {
+      "generated": "Recette générée avec succès."
+    },
+    "error": {
+      "promptInvalid": "Veuillez fournir au moins un critère.",
+      "modelFormat": "Le modèle a renvoyé un format inattendu. Veuillez réessayer."
+    }
+  }
+}

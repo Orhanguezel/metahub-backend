@@ -99,6 +99,8 @@ import { Promotion, PromotionRedemption } from "@/modules/promotions/models";
 import { WebhookDelivery, WebhookEndpoint } from "@/modules/webhooks/models";
 
 import { Reaction } from "@/modules/reactions/models";
+import { Recipe } from "@/modules/recipes/models";
+import { RecipeCategory } from "@/modules/recipescategory/models";
 
 // ✅ Ana export
 export const getTenantModelsFromConnection = (conn: Connection) => ({
@@ -213,4 +215,6 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   WebhookDelivery: conn.model("webhookdelivery", WebhookDelivery.schema),
 
   Reaction: conn.model("reaction", Reaction.schema),
+  Recipe: conn.model("recipe", Recipe.schema),
+  RecipeCategory: conn.model("recipecategory", RecipeCategory.schema),
 });

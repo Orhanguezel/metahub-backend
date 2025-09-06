@@ -1,0 +1,37 @@
+{
+  "created": "Rezept erfolgreich erstellt.",
+  "updated": "Rezept erfolgreich aktualisiert.",
+  "deleted": "Rezept erfolgreich gelöscht.",
+  "fetched": "Rezept abgerufen.",
+  "listFetched": "Rezeptliste abgerufen.",
+  "notFound": "Rezept nicht gefunden.",
+
+  "error": {
+    "create_fail": "Rezept konnte nicht erstellt werden."
+  },
+
+  "validation": {
+    "orderInvalid": "Die Reihenfolge muss eine ganze Zahl zwischen 0 und 100000 sein.",
+    "stepsInvalid": "Schritte sind ungültig oder leer.",
+    "stepOrderInvalid": "Die Schritt-Reihenfolge muss eine ganze Zahl zwischen 1 und 100000 sein.",
+    "ingredientsInvalid": "Zutaten sind ungültig oder leer.",
+    "categoriesInvalid": "Kategorien müssen ein Array gültiger IDs sein.",
+    "categoryIdInvalid": "Kategorie-ID ist ungültig.",
+    "slugInvalid": "Slug ist ungültig.",
+    "titleRequired": "Titel ist erforderlich (mindestens eine Sprache).",
+    "timesInvalid": "Zeiten müssen ganze Zahlen ≥ 0 sein.",
+    "servingsInvalid": "Portionen müssen mindestens 1 sein.",
+    "caloriesInvalid": "Kalorien müssen eine nicht negative ganze Zahl sein.",
+    "imagesRemoveInvalid": "removedImages muss ein JSON-Array von Bild-URLs sein."
+  },
+
+  "recipes": {
+    "success": {
+      "generated": "Rezept erfolgreich generiert."
+    },
+    "error": {
+      "promptInvalid": "Bitte gib mindestens ein Kriterium an.",
+      "modelFormat": "Das Modell hat ein unerwartetes Format zurückgegeben. Bitte versuche es erneut."
+    }
+  }
+}

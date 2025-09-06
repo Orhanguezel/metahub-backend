@@ -1,0 +1,25 @@
+{
+  "created": "Menu utworzone.",
+  "updated": "Menu zaktualizowane.",
+  "deleted": "Menu usunięte.",
+  "fetched": "Rekord pobrany.",
+  "listFetched": "Lista pobrana.",
+  "notFound": "Nie znaleziono rekordu.",
+  "invalidId": "Nieprawidłowy identyfikator.",
+  "error.create_fail": "Błąd podczas tworzenia menu.",
+  "validation": {
+    "invalidObjectId": "Nieprawidłowy ObjectId.",
+    "booleanField": "Nieprawidłowa wartość logiczna.",
+    "codeRequired": "Wymagany jest kod.",
+    "nameRequired": "Wymagana nazwa (co najmniej jeden język).",
+    "slugInvalid": "Nieprawidłowy slug.",
+    "orderInvalid": "Kolejność 0–100000.",
+    "categoriesInvalid": "Kategorie muszą być tablicą.",
+    "categoryIdInvalid": "Nieprawidłowe ID kategorii.",
+    "branchesInvalid": "Oddziały muszą być tablicą.",
+    "branchIdInvalid": "Nieprawidłowe ID oddziału.",
+    "datesInvalid": "Nieprawidłowy zakres dat.",
+    "imagesInvalid": "Obrazy muszą być tablicą.",
+    "imageRemoveInvalid": "Nieprawidłowa lista removedImages."
+  }
+}

@@ -98,6 +98,9 @@ import { Promotion, PromotionRedemption } from "@/modules/promotions/models";
 import { WebhookDelivery, WebhookEndpoint } from "@/modules/webhooks/models";
 
 import { Reaction } from "@/modules/reactions/models";
+import { Recipe } from "@/modules/recipes/models";
+import { RecipeCategory } from "@/modules/recipescategory/models";
+
 
 export const getTenantModels = async (req: Request) => ({
   Settings: await req.getModel("settings", Settings.schema),
@@ -254,4 +257,7 @@ export const getTenantModels = async (req: Request) => ({
   ),
 
   Reaction: await req.getModel("reaction", Reaction.schema),
+  Recipe: await req.getModel("recipe", Recipe.schema),
+  RecipeCategory: await req.getModel("recipecategory", RecipeCategory.schema),
+
 });
