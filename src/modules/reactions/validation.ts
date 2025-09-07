@@ -42,7 +42,6 @@ export const validateToggle = [
   validateRequest,
 ];
 
-
 export const validateSet = [
   ...validateToggle,
   body("on").isBoolean().withMessage((_, { req }) =>
@@ -51,6 +50,13 @@ export const validateSet = [
   validateRequest,
 ];
 
+/* ----- breakdown normalizer ----- */
+const normalizeBreakdown = (v: unknown) =>
+  String(v ?? "kind")
+    .replace(/\s+/g, "+") // "kind emoji" -> "kind+emoji"
+    .replace(/,/g, "+")   // "kind,emoji" -> "kind+emoji"
+    .toLowerCase();
+
 /* ----- Public: summary/my ----- */
 export const validateSummaryQuery = [
   query("targetType").isString().notEmpty(),
@@ -58,6 +64,7 @@ export const validateSummaryQuery = [
   query("targetIds").optional({ checkFalsy: true, nullable: true }).isString(), // CSV
   query("breakdown")
     .optional({ checkFalsy: true, nullable: true })
+    .customSanitizer(normalizeBreakdown)
     .isIn(["none", "kind", "emoji", "kind+emoji"]),
   validateRequest,
 ];
