@@ -1,4 +1,3 @@
-// backend/modules/recipes/ai.constants.ts
 import slugify from "slugify";
 import { SUPPORTED_LOCALES, type SupportedLocale, type TranslatedLabel } from "@/types/recipes/common";
 
@@ -37,29 +36,77 @@ export const SERVE_CUES: Record<SupportedLocale, RegExp[]> = {
 
 /** Tag sözlüğü (kanonik) */
 export const TAG_CANON: Record<string, TranslatedLabel> = {
-  "vegan": {
-    tr:"vegan", en:"vegan", fr:"végane", de:"vegan", it:"vegano", pt:"vegano",
-    ar:"نباتي", ru:"веганский", zh:"纯素", hi:"वीगन"
+  vegan: {
+    tr: "vegan",
+    en: "vegan",
+    fr: "végane",
+    de: "vegan",
+    it: "vegano",
+    pt: "vegano",
+    ar: "نباتي",
+    ru: "веганский",
+    zh: "纯素",
+    hi: "वीगन",
   },
-  "vegetarian": {
-    tr:"vejetaryen", en:"vegetarian", fr:"végétarien", de:"vegetarisch", it:"vegetariano", pt:"vegetariano",
-    ar:"نباتي", ru:"вегетарианский", zh:"素食", hi:"शाकाहारी"
+  vegetarian: {
+    tr: "vejetaryen",
+    en: "vegetarian",
+    fr: "végétarien",
+    de: "vegetarisch",
+    it: "vegetariano",
+    pt: "vegetariano",
+    ar: "نباتي",
+    ru: "вегетарианский",
+    zh: "素食",
+    hi: "शाकाहारी",
   },
   "gluten-free": {
-    tr:"glütensiz", en:"gluten-free", fr:"sans gluten", de:"glutenfrei", it:"senza glutine", pt:"sem glúten",
-    ar:"خالٍ من الغلوتين", ru:"без глютена", zh:"无麸质", hi:"ग्लूटेन-रहित"
+    tr: "glütensiz",
+    en: "gluten-free",
+    fr: "sans gluten",
+    de: "glutenfrei",
+    it: "senza glutine",
+    pt: "sem glúten",
+    ar: "خالٍ من الغلوتين",
+    ru: "без глютена",
+    zh: "无麸质",
+    hi: "ग्लूटेन-रहित",
   },
   "lactose-free": {
-    tr:"laktozsuz", en:"lactose-free", fr:"sans lactose", de:"laktosefrei", it:"senza lattosio", pt:"sem lactose",
-    ar:"خالٍ من اللاكتوز", ru:"без лактозы", zh:"无乳糖", hi:"लैक्टोज़-रहित"
+    tr: "laktozsuz",
+    en: "lactose-free",
+    fr: "sans lactose",
+    de: "laktosefrei",
+    it: "senza lattosio",
+    pt: "sem lactose",
+    ar: "خالٍ من اللاكتوز",
+    ru: "без лактозы",
+    zh: "无乳糖",
+    hi: "लैक्टोज़-रहित",
   },
-  "turkish": {
-    tr:"türk", en:"turkish", fr:"turc", de:"türkisch", it:"turco", pt:"turco",
-    ar:"تركي", ru:"турецкий", zh:"土耳其", hi:"तुर्की"
+  turkish: {
+    tr: "türk",
+    en: "turkish",
+    fr: "turc",
+    de: "türkisch",
+    it: "turco",
+    pt: "turco",
+    ar: "تركي",
+    ru: "турецкий",
+    zh: "土耳其",
+    hi: "तुर्की",
   },
-  "italian": {
-    tr:"italyan", en:"italian", fr:"italien", de:"italienisch", it:"italiano", pt:"italiano",
-    ar:"إيطالي", ru:"итальянский", zh:"意大利", hi:"इटालियन"
+  italian: {
+    tr: "italyan",
+    en: "italian",
+    fr: "italien",
+    de: "italienisch",
+    it: "italiano",
+    pt: "italiano",
+    ar: "إيطाली",
+    ru: "итальянский",
+    zh: "意大利",
+    hi: "इटालियन",
   },
 };
 
@@ -68,9 +115,17 @@ const stripDiacritics = (s: string) =>
   s?.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/İ/g, "I").replace(/ı/g, "i");
 
 export const CUISINE_CANON_KEYS = new Map<string, string>([
-  ["italian", "italian"], ["italien", "italian"], ["italiano", "italian"],
-  ["italienisch", "italian"], ["italiana", "italian"], ["italyan", "italian"], ["i̇talyan", "italian"],
-  ["turkish", "turkish"], ["türk", "turkish"], ["turk", "turkish"], ["türkisch", "turkish"],
+  ["italian", "italian"],
+  ["italien", "italian"],
+  ["italiano", "italian"],
+  ["italienisch", "italian"],
+  ["italiana", "italian"],
+  ["italyan", "italian"],
+  ["i̇talyan", "italian"],
+  ["turkish", "turkish"],
+  ["türk", "turkish"],
+  ["turk", "turkish"],
+  ["türkisch", "turkish"],
 ]);
 
 export const canonicalizeCuisine = (v: string) => {
