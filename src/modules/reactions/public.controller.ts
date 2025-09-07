@@ -14,6 +14,7 @@ export const toggleReaction: RequestHandler = asyncHandler(async (req: Request, 
   const locale = (req as any).locale || getLogLocale() || "en";
   const t = (k: string) => translate(k, locale, translations);
 
+  // 🔹 ensureActor ile guest kullanıcı gelebilir (ObjectId string)
   const userId: string | undefined = (req as any).user?._id;
   if (!userId || !isValidObjectId(userId)) {
     res.status(401).json({ success: false, message: "Unauthorized" });
@@ -110,7 +111,14 @@ export const getSummary: RequestHandler = asyncHandler(async (req: Request, res:
 
   const tenant = (req as any).tenant;
   const targetType = String(req.query.targetType);
-  const breakdown = (String(req.query.breakdown || "kind") as "none" | "kind" | "emoji" | "kind+emoji");
+
+  // 🔹 Giren değeri normalize et (boşluk/virgül → +)
+  const raw = String(req.query.breakdown ?? "kind");
+  const norm = raw.replace(/\s+/g, "+").replace(/,/g, "+").toLowerCase();
+  const breakdown: "none" | "kind" | "emoji" | "kind+emoji" =
+    norm === "none" || norm === "kind" || norm === "emoji"
+      ? (norm as any)
+      : (norm.includes("kind") && norm.includes("emoji") ? "kind+emoji" : "kind"); // fallback
 
   const ids: string[] =
     (req.query.targetIds ? String(req.query.targetIds).split(",") : [])
@@ -140,11 +148,13 @@ export const getSummary: RequestHandler = asyncHandler(async (req: Request, res:
     result[tid] ||= { total: 0, byKind: {}, byEmoji: {} };
     result[tid].total += r.count;
 
-    if (breakdown.includes("kind") && r._id.kind) {
-      result[tid].byKind[r._id.kind] = (result[tid].byKind[r._id.kind] || 0) + r.count;
+    if (breakdown.includes("kind") && (r._id as any).kind) {
+      const k = (r._id as any).kind;
+      result[tid].byKind[k] = (result[tid].byKind[k] || 0) + r.count;
     }
-    if (breakdown.includes("emoji") && r._id.emoji) {
-      result[tid].byEmoji[r._id.emoji] = (result[tid].byEmoji[r._id.emoji] || 0) + r.count;
+    if (breakdown.includes("emoji") && (r._id as any).emoji) {
+      const e = (r._id as any).emoji;
+      result[tid].byEmoji[e] = (result[tid].byEmoji[e] || 0) + r.count;
     }
   }
 
