@@ -10,6 +10,7 @@ bun run dev
 # Temizlik için:
 
 ```sh
+
 rm -rf dist
 rm -rf build
 rm -rf node_modules/.cache

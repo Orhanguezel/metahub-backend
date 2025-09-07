@@ -3,13 +3,12 @@ import { validateRequest } from "@/core/middleware/validateRequest";
 import { validateMultilangField } from "@/core/utils/i18n/validationUtils";
 import { t as translate } from "@/core/utils/i18n/recipes/translate";
 import { getLogLocale } from "@/core/utils/i18n/recipes/getLogLocale";
-import { SUPPORTED_LOCALES, type SupportedLocale } from "@/types/recipes/common";
+import { type SupportedLocale } from "@/types/recipes/common";
 import translations from "./i18n";
+import { parseIfJson } from "./utils/parse";
 
 const tReq = (req: any) => (k: string, p?: any) =>
   translate(k, (req.locale as SupportedLocale) || getLogLocale(), translations, p);
-
-const parseIfJson = (v: any) => { try { return typeof v === "string" ? JSON.parse(v) : v; } catch { return v; } };
 
 const orderValidator = (val: any, { req }: any) => {
   if (val === undefined || val === null || val === "") return true;
@@ -39,12 +38,10 @@ const ingredientsValidator = (val: any, { req }: any) => {
   for (const it of arr) {
     if (!it || typeof it !== "object") throw new Error(t("validation.ingredientsInvalid"));
     validateMultilangField(it.name);
-    // amount artık çok dilli — opsiyonel; verilirse doğrula.
     if (it.amount != null) {
       if (typeof it.amount === "object") {
         validateMultilangField(it.amount);
       } else if (typeof it.amount === "string") {
-        // string kabul (geri uyum) — normalize katmanı 10 dile yayacak
         if (it.amount.trim().length === 0) throw new Error(t("validation.ingredientsInvalid"));
       } else {
         throw new Error(t("validation.ingredientsInvalid"));
@@ -72,7 +69,6 @@ const categoriesValidator = (val: any, { req }: any) => {
   return true;
 };
 
-/** slug: hem string hem object kabul. Obje ise çok dilliliği doğrula. */
 const slugValidator = (val: any, { req }: any) => {
   const v = parseIfJson(val);
   if (v == null || v === "") return true;
@@ -102,7 +98,7 @@ export const validateCreateRecipe = [
   body("steps").custom(stepsValidator),
 
   body("cuisines").optional().customSanitizer(parseIfJson),
-  body("tags").optional().customSanitizer(parseIfJson), // çok dilli tag’ler; admin’de esnek bırakıyoruz
+  body("tags").optional().customSanitizer(parseIfJson),
   body("categories").optional().custom(categoriesValidator),
 
   body("servings").optional().isInt({ min: 1 }).withMessage((_, { req }) => tReq(req)("validation.servingsInvalid")),

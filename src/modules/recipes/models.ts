@@ -26,7 +26,7 @@ const RecipeImageSchema = new Schema<IRecipeImage>(
 const IngredientSchema = new Schema<IRecipeIngredient>(
   {
     name: { type: Object, required: true, default: () => localizedStringField() },
-    amount: { type: Object, default: () => localizedStringField() }, // <<< çok dilli amount
+    amount: { type: Object, default: () => localizedStringField() }, // çok dilli amount
     order: { type: Number, min: 0, max: 100000, default: 0 },
   },
   { _id: false, strict: false }
@@ -83,22 +83,50 @@ const RecipeSchema = new Schema<IRecipe>(
   { timestamps: true }
 );
 
-/* Indexler */
+/* Indexler (mevcut) */
 RecipeSchema.index({ tenant: 1, slugCanonical: 1 }, { unique: true });
 RecipeSchema.index({ tenant: 1, order: 1 });
 RecipeSchema.index({ tenant: 1, isActive: 1, isPublished: 1 });
-RecipeSchema.index({ tenant: 1, "categories": 1 });
+RecipeSchema.index({ tenant: 1, categories: 1 });
 for (const lng of SUPPORTED_LOCALES) {
   RecipeSchema.index({ tenant: 1, [`slug.${lng}`]: 1 });
 }
+
+/* Ek indexler (performans + arama) */
+// Yayın zaman penceresi + aktiflik
+RecipeSchema.index(
+  { tenant: 1, isActive: 1, isPublished: 1, effectiveFrom: 1, effectiveTo: 1 },
+  { name: "pub_window_idx" }
+);
+// Süre filtreleri (maxTime)
+RecipeSchema.index({ tenant: 1, totalMinutes: 1 }, { name: "time_filter_idx" });
+
+// METİN ARAMASI (q, tag) — koleksiyon başına 1 text index.
+// İhtiyaç halinde dilleri daraltabilirsiniz (ör. tr+en+de).
+RecipeSchema.index(
+  {
+    "title.tr": "text",
+    "title.en": "text",
+    "title.de": "text",
+    "title.fr": "text",
+    "description.tr": "text",
+    "description.en": "text",
+    "description.de": "text",
+    "description.fr": "text",
+    "tags.tr": "text",
+    "tags.en": "text",
+  },
+  { name: "recipe_text_search", default_language: "none" }
+);
 
 /* Slug üretimi (slug + slugCanonical) */
 function buildSlugPerLocale(input: any, title: TranslatedLabel): TranslatedLabel {
   const out: TranslatedLabel = {};
   for (const lng of SUPPORTED_LOCALES) {
-    const raw = (input && typeof input === "object" && (input as any)[lng])
-      ? (input as any)[lng]
-      : (title?.[lng] || "");
+    const raw =
+      input && typeof input === "object" && (input as any)[lng]
+        ? (input as any)[lng]
+        : (title?.[lng] || "");
     (out as any)[lng] = raw ? slugify(String(raw), { lower: true, strict: true }) : "";
   }
   return out;
@@ -126,7 +154,8 @@ RecipeSchema.pre("save", function (next) {
     anyThis.effectiveTo = undefined;
   }
   if (anyThis.totalMinutes == null) {
-    anyThis.totalMinutes = (Number(anyThis.prepMinutes) || 0) + (Number(anyThis.cookMinutes) || 0);
+    anyThis.totalMinutes =
+      (Number(anyThis.prepMinutes) || 0) + (Number(anyThis.cookMinutes) || 0);
   }
   next();
 });
@@ -136,7 +165,10 @@ function stringifyIdsDeep(obj: any): any {
   if (obj == null) return obj;
   if (obj instanceof Types.ObjectId) return obj.toString();
   if (Array.isArray(obj)) return obj.map(stringifyIdsDeep);
-  if (typeof obj === "object") { for (const k of Object.keys(obj)) obj[k] = stringifyIdsDeep(obj[k]); return obj; }
+  if (typeof obj === "object") {
+    for (const k of Object.keys(obj)) obj[k] = stringifyIdsDeep(obj[k]);
+    return obj;
+  }
   return obj;
 }
 const transform = (_: any, ret: any) => stringifyIdsDeep(ret);

@@ -1,4 +1,3 @@
-// src/types/recipes/common.ts
 // 🌍 Desteklenen diller (tenant'a özel 10 dil)
 export const SUPPORTED_LOCALES = [
   "tr", // Türkçe
