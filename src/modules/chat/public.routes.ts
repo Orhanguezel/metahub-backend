@@ -7,7 +7,7 @@ import {
   getActiveChatSessions,
   sendUserMessage,
 } from "./public.controller";
-import { authenticate } from "@/core/middleware/authMiddleware";
+import { authenticate } from "@/core/middleware/auth/authMiddleware";
 import { validateRoomIdParam, validateSendMessage } from "./validation";
 
 const router = express.Router();

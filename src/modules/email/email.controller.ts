@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { sendEmail } from "@/services/emailService";
 import { readInboxEmails } from "@/services/emailReader";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";

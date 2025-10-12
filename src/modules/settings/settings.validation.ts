@@ -66,6 +66,7 @@ const keyValidation = body("key")
 
 // --- VALUE validasyonu (her senaryo için future-proof)
 const valueValidation = body("value").custom((val, { req }) => {
+  if (typeof val === "undefined") return true;
   const key = req.body.key;
   const locale: SupportedLocale = req.locale || getLogLocale();
 

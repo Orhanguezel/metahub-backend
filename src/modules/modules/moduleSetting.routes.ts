@@ -6,7 +6,7 @@ import {
   deleteModuleSetting,
   deleteAllSettingsForTenant,
 } from "./moduleSetting.controller";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/auth/authMiddleware";
 import { validateTenantModuleSetting } from "./admin.validation";
 
 const router = express.Router();

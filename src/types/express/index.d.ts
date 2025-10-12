@@ -1,7 +1,7 @@
-// src/types/express/index.d.ts
 import { File as MulterFile } from "multer";
 import type { SupportedLocale } from "./common";
 import type { Model, Schema } from "mongoose";
+import type { AppRole } from "../roles"; // ← ortak rol tipini kullan
 
 declare global {
   namespace Express {
@@ -14,34 +14,29 @@ declare global {
       logger: import("winston").Logger;
       enabledModules?: string[];
 
-      // 👤 Auth bilgileri
+      // 👤 Auth bilgileri (tekli ve çoklu rol desteği)
       user?: {
         id: string;
         _id?: string;
-        role:
-          | "superadmin"
-          | "admin"
-          | "user"
-          | "customer"
-          | "moderator"
-          | "staff";
+        role: AppRole;          // zorunlu ana rol
+        roles?: AppRole[];      // opsiyonel ek roller (RBAC için)
         email?: string;
         name?: string;
         isActive?: boolean;
         isSuperadmin?: boolean;
+        // opsiyonel yardımcı alanlar
+        scopes?: string[];      // OAuth/scopes tarzı
+        permissions?: string[]; // route/service bazlı detay izinler
         iat?: number;
         exp?: number;
       };
 
-      // 📁 Upload bilgileri
+      // 📁 Upload bilgileri (duplicate’ler temizlendi)
       uploadType?:
         | "profile"
         | "product"
         | "ensotekprod"
-        | "bikes"
-        | "bikesCategory"
         | "ensotekCategory"
-        | "ensotekprod"
         | "category"
         | "blog"
         | "gallery"
@@ -54,6 +49,7 @@ declare global {
         | "news"
         | "articles"
         | "about"
+        | "aboutus"
         | "sport"
         | "sparepart"
         | "sparepartCategory"
@@ -65,7 +61,6 @@ declare global {
         | "team"
         | "portfolio"
         | "skill"
-        | "apartment"
         | "servicecatalog"
         | "files"
         | "documents"
@@ -84,8 +79,8 @@ declare global {
         | "menuitem"
         | "menu"
         | "recipe"
+        | "seller"
         | "default";
-
 
       uploadSizeLimit?: number;
 
@@ -94,21 +89,24 @@ declare global {
     }
   }
 
-  // 🎫 Token tipi (opsiyonel alanları destekler)
+  // 🎫 Token tipi (JWT payload ile hizalı)
   interface IUserToken extends Express.Request["user"] {}
 }
 
+// Dışarıya export edilen payload tipi
 export interface UserPayload {
   id: string;
   _id?: string;
-  role: "superadmin" | "admin" | "user" | "customer" | "moderator" | "staff";
+  role: AppRole;
+  roles?: AppRole[];
   email?: string;
   name?: string;
   isActive?: boolean;
   isSuperadmin?: boolean;
+  scopes?: string[];
+  permissions?: string[];
   iat?: number;
   exp?: number;
 }
-
 
 export {};

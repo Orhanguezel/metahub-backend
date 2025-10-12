@@ -18,6 +18,11 @@ import type { SupportedLocale } from "@/types/common";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import { ISettings } from "./types";
 
+function isSensitiveKey(key: string) {
+  return /^env[._:]/i.test(key) || /^secret[._:]/i.test(key);
+}
+
+
 export const upsertSettingImage = asyncHandler(
   async (req: Request, res: Response) => {
     const { Settings } = await getTenantModels(req);
@@ -263,80 +268,81 @@ export const deleteSetting = asyncHandler(async (req, res) => {
 
 export const upsertSetting = asyncHandler(async (req, res) => {
   const { Settings } = await getTenantModels(req);
-  const { key, value, isActive = true } = req.body;
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const t = (key: string, params?: any) =>
-    translate(key, locale, translations, params);
+  const { key, value, isActive } = req.body;
 
-  if (!key || typeof value === "undefined") {
-    res
-      .status(400)
-      .json({ success: false, message: "Key and value fields are required." });
-    return;
+  if (!key?.trim()) {
+     res.status(400).json({ success:false, message: "Key is required." });
+     return;
   }
 
-  let settings = await Settings.findOne({ key, tenant: req.tenant });
+  let settings = await Settings.findOne({ key: key.trim(), tenant: req.tenant });
 
   if (settings) {
-    settings.value = value;
-    settings.isActive =
-      typeof isActive === "boolean" ? isActive : settings.isActive;
+    // value verilmişse değiştir; verilmemişse koru
+    if (typeof value !== "undefined") settings.value = value;
+    if (typeof isActive === "boolean") settings.isActive = isActive;
     await settings.save();
   } else {
+    if (typeof value === "undefined") {
+       res.status(400).json({ success:false, message:"Value is required for create." });
+       return;
+    }
     settings = await Settings.create({
-      key,
+      key: key.trim(),
       value,
-      isActive,
+      isActive: typeof isActive === "boolean" ? isActive : true,
       tenant: req.tenant,
     });
   }
 
-  logger.withReq.info(req, t("setting.update.success"), {
-    ...getRequestContext(req),
-    key,
-  });
-  res.status(200).json({
-    success: true,
-    message: t("setting.update.success"),
-    data: settings,
-  });
-  return;
+  res.status(200).json({ success: true, message: "Updated", data: settings });
 });
+
 
 export const getAllSettingsAdmin = asyncHandler(async (req, res) => {
   const { Settings } = await getTenantModels(req);
-  const settings = await Settings.find({ tenant: req.tenant }).sort({
-    createdAt: -1,
+  const raw = await Settings.find({ tenant: req.tenant }).sort({ createdAt: -1 });
+
+  const data = raw.map((doc: any) => {
+    const o = doc.toObject();
+    if (isSensitiveKey(o.key)) {
+      return { ...o, value: undefined, hasSecret: !!doc.value }; // modele dokunmadan meta
+    }
+    return o;
   });
-  res.status(200).json({ success: true, data: settings });
-  return;
+
+  res.status(200).json({ success: true, data });
 });
 
-export const getSettingByKeyAdmin = asyncHandler(async (req, res) => {
-  const { Settings } = await getTenantModels(req);
-  const { key } = req.params;
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const t = (key: string, params?: any) =>
-    translate(key, locale, translations, params);
 
-  if (!key?.trim()) {
-    res
-      .status(400)
-      .json({ success: false, message: t("setting.error.missing") });
-    return;
+export const getSettingByKeyAdmin = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { Settings } = await getTenantModels(req);
+    const keyParam = (req.params.key || "").trim();
+
+    if (!keyParam) {
+      res.status(400).json({ success: false, message: "Key is required." });
+      return;
+    }
+
+    const setting = await Settings.findOne({ key: keyParam, tenant: req.tenant });
+
+    if (!setting) {
+      res.status(404).json({ success: false, message: "Not found" });
+      return;
+    }
+
+    const o = setting.toObject();
+
+    if (isSensitiveKey(o.key)) {
+      // gizli değerleri FE'ye göstermiyoruz
+      res.status(200).json({
+        success: true,
+        data: { ...o, value: undefined, hasSecret: Boolean(setting.value) },
+      });
+      return;
+    }
+
+    res.status(200).json({ success: true, data: o });
   }
-  // Normalize key
-  const settingKey = key.trim();
-  const settings = await Settings.findOne({
-    key: settingKey,
-    tenant: req.tenant,
-  });
-  if (!settings) {
-    res
-      .status(404)
-      .json({ success: false, message: t("setting.error.notFound") });
-    return;
-  }
-  res.status(200).json({ success: true, data: settings });
-  return;
-});
+);

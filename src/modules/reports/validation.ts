@@ -3,14 +3,14 @@ import { validateRequest } from "@/core/middleware/validateRequest";
 import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 
 const KIND_LIST = [
-  "ar_aging","ap_aging","revenue","expense","cashflow",
-  "profitability","billing_forecast","invoice_collections",
-  "employee_utilization","workload","service_performance",
-  "hourly_sales","coupon_performance","order_cancellations",
-  "profitability_kpi","on_time_rate",
+  "ar_aging", "ap_aging", "revenue", "expense", "cashflow",
+  "profitability", "billing_forecast", "invoice_collections",
+  "employee_utilization", "workload", "service_performance",
+  "hourly_sales", "coupon_performance", "order_cancellations",
+  "profitability_kpi", "on_time_rate",
 ] as const;
 
 const parseIfJson = (v: any) => {
@@ -70,7 +70,7 @@ export const validateDefinitionListQuery = [
 export const validateCreateRun = [
   body("definitionRef").optional().isMongoId(),
   body("kind").optional().isString(),
-  body("triggeredBy").optional().isIn(["manual","schedule","api"]),
+  body("triggeredBy").optional().isIn(["manual", "schedule", "api"]),
   body("filtersUsed").optional().customSanitizer(parseIfJson).custom(() => true),
   // En azından definitionRef ya da kind gelsin:
   body().custom((val) => {
@@ -83,7 +83,7 @@ export const validateCreateRun = [
 export const validateRunListQuery = [
   query("q").optional().isString(),
   query("kind").optional().isString(),
-  query("status").optional().isIn(["queued","running","success","error","cancelled"]),
+  query("status").optional().isIn(["queued", "running", "success", "error", "cancelled"]),
   query("definitionRef").optional().isMongoId(),
   query("from").optional().isISO8601(),
   query("to").optional().isISO8601(),

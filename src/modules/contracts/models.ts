@@ -1,7 +1,7 @@
 import { Schema, model, models, type Model } from "mongoose";
 import type { IContract, IContractLine, IContractBilling } from "./types";
 import { SUPPORTED_LOCALES } from "@/types/common";
-import { isValidObjectId as isValidObjId } from "@/core/utils/validation";
+import { isValidObjectId as isValidObjId } from "@/core/middleware/auth/validation";
 
 /* i18n string alanı */
 const localizedStringField = () => {
@@ -34,7 +34,7 @@ const PartiesSchema = new Schema(
 /* --- Lines --- */
 const ContractLineSchema = new Schema<IContractLine>(
   {
-    service: { type: Schema.Types.ObjectId, ref:"servicecatalog", required: true },
+    service: { type: Schema.Types.ObjectId, ref: "servicecatalog", required: true },
     name: { type: Object },               // TranslatedLabel
     description: { type: Object },        // TranslatedLabel
 

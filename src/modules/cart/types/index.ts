@@ -1,6 +1,8 @@
-import { Types } from "mongoose";
+import { Types, Document } from "mongoose";
+import { SUPPORTED_LOCALES } from "@/types/common";
 
-export type CartProductType = "bike" | "ensotekprod" | "sparepart" | "menuitem";
+export type CartProductType = "product" | "ensotekprod" | "sparepart" | "menuitem"; 
+// "product" yeni ad; geriye dönük için "ensotekprod" da kabul ediyoruz.
 
 export type ModifierSelection = {
   groupCode: string;
@@ -32,15 +34,16 @@ export interface ICartMenuSelection {
 }
 
 export interface ICartItem {
-  product: Types.ObjectId;               // refPath ile dinamik
-  productType: CartProductType;          // ürün tipi
+  _id?: Types.ObjectId;                // ⬅️ alt döküman id (UI için lineId)
+  product: Types.ObjectId;             // refPath ile dinamik
+  productType: CartProductType;        // ürün tipi
   tenant: string;
   quantity: number;
-  priceAtAddition: number;               // o anki birim fiyat (sabitlenir)
-  totalPriceAtAddition: number;          // quantity * priceAtAddition
-  unitCurrency?: string;                 // (ops) örn. "EUR"
-  menu?: ICartMenuSelection;             // sadece menuitem için
-  priceComponents?: {                    // sadece menuitem için (opsiyonel debug/analiz)
+  priceAtAddition: number;             // ekleme anı birim fiyat
+  totalPriceAtAddition: number;        // quantity * priceAtAddition
+  unitCurrency?: string;               // ISO kod
+  menu?: ICartMenuSelection;           // sadece menuitem için
+  priceComponents?: {
     base: number;
     deposit: number;
     modifiersTotal: number;
@@ -49,16 +52,26 @@ export interface ICartItem {
   };
 }
 
-export interface ICart {
+export interface ICart extends Document {
   user: Types.ObjectId;
   tenant: string;
   items: ICartItem[];
-  totalPrice: number;
+  totalPrice: number;                  // sadece satır toplamı (ara toplam)
+
+  // Ek fiyat alanları (kalıcı)
+  currency?: string;                   // sepet para birimi
+  tipAmount?: number;
+  deliveryFee?: number;
+  serviceFee?: number;
+  taxTotal?: number;
+  discount?: number;                   // kupondan gelen
+
   couponCode?: string | null;
   status: "open" | "ordered" | "cancelled";
   isActive: boolean;
-  discount?: number;
+  language: (typeof SUPPORTED_LOCALES)[number];
+
+  // timestamps
   createdAt: Date;
   updatedAt: Date;
-  language: string;
 }

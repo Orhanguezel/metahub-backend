@@ -1,0 +1,6 @@
+{
+  "tenant.required": "Tenant header (x-tenant) is required.",
+  "sitemap.urls.fetched": "Sitemap URLs fetched.",
+  "seo.siteUrl.missing": "SEO siteUrl is not configured.",
+  "not.found": "Not found."
+}

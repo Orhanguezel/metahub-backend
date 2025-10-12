@@ -1,10 +1,11 @@
+// src/modules/pricing/public.routes.ts
 import express from "express";
-import { getAllPricing, getPricingById } from "./public.controller";
-import { validateObjectId, validatePublicListQuery } from "./validation";
+import { getQuote } from "./controller";
+import { validateQuote } from "./validation";
 
+// Public (guest/cart kullanımı için de uygun)
 const router = express.Router();
 
-router.get("/", validatePublicListQuery, getAllPricing);
-router.get("/:id", validateObjectId("id"), getPricingById);
+router.post("/quote", validateQuote, getQuote);
 
 export default router;

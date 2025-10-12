@@ -1,7 +1,7 @@
 // src/modules/skill/public.controller.ts
 import { Request, Response, RequestHandler } from "express";
 import asyncHandler from "express-async-handler";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";

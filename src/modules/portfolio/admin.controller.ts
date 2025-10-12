@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { IPortfolio } from "@/modules/portfolio/types";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import slugify from "slugify";
 import path from "path";
 import fs from "fs";
@@ -32,6 +32,32 @@ const parseIfJson = (value: any) => {
     return value;
   }
 };
+
+// --- Image helpers ---
+const UPLOAD_DIR_NAME = "portfolio"; // upload("portfolio") ile hizalı
+
+type RemovedImg = { url?: string; publicId?: string } | string;
+
+/** removedImages girişini tek tipe (obje[]) indirger. string[] ile geriye uyumlu. */
+function normalizeRemovedImages(input: any): Array<{ url?: string; publicId?: string }> {
+  const raw = parseIfJson(input);
+  if (!raw) return [];
+  const arr: RemovedImg[] = Array.isArray(raw) ? raw : [raw];
+  return arr
+    .map((it) => {
+      if (typeof it === "string") return { url: it };
+      if (it && typeof it === "object") return { url: (it as any).url, publicId: (it as any).publicId };
+      return null;
+    })
+    .filter(Boolean) as Array<{ url?: string; publicId?: string }>;
+}
+
+/** İmza: publicId varsa o; yoksa url basename. */
+function imageSignature(obj: { url?: string; publicId?: string } | { url: string; publicId?: string }): string {
+  if ((obj as any)?.publicId) return String((obj as any).publicId);
+  const url = (obj as any)?.url || "";
+  return path.basename(url);
+}
 
 // 🔒 Güvenli array normalization fonksiyonu
 function normalizePortfolioItem(item: any) {
@@ -235,28 +261,84 @@ export const updatePortfolio = asyncHandler(
       }
     }
 
-    if (updates.removedImages) {
-      try {
-        const removed = JSON.parse(updates.removedImages);
-        portfolio.images = portfolio.images.filter(
-          (img: any) => !removed.includes(img.url)
-        );
-        for (const img of removed) {
-          const localPath = path.join(
-            "uploads",
-            req.tenant,
-            "portfolio-images",
-            path.basename(img.url)
-          );
-          if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-          if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
-        }
-      } catch (e) {
-        logger.withReq.warn(req, t("invalidRemovedImages"), {
-          ...getRequestContext(req),
-          error: e,
+    // ---- REMOVE IMAGES (normalize + safe delete) ----
+    try {
+      const removedNormalized = normalizeRemovedImages(updates.removedImages);
+      if (removedNormalized.length) {
+        const removedSet = new Set(removedNormalized.map((r) => imageSignature(r)));
+        // DB'den düş
+        portfolio.images = (Array.isArray(portfolio.images) ? portfolio.images : []).filter((img: any) => {
+          const sig = imageSignature(img);
+          return !removedSet.has(sig);
         });
+        // FS & Cloud sil
+        for (const rem of removedNormalized) {
+          const base = rem.url ? path.basename(rem.url) : undefined;
+          if (base) {
+            const localPath = path.join("uploads", req.tenant, UPLOAD_DIR_NAME, base);
+            try {
+              if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+            } catch (err) {
+              logger.withReq.warn(req, "portfolio.local_delete_failed", {
+                ...getRequestContext(req),
+                file: localPath,
+                error: (err as any)?.message,
+              });
+            }
+          }
+          if (rem.publicId) {
+            try {
+              await cloudinary.uploader.destroy(rem.publicId);
+            } catch (err) {
+              logger.withReq.warn(req, "portfolio.cloud_delete_failed", {
+                ...getRequestContext(req),
+                publicId: rem.publicId,
+                error: (err as any)?.message,
+              });
+            }
+          }
+        }
       }
+    } catch (e) {
+      logger.withReq.warn(req, t("invalidRemovedImages"), {
+        ...getRequestContext(req),
+        error: (e as any)?.message,
+      });
+    }
+
+    // ---- REORDER (existingImagesOrder: string[] of signature) ----
+    try {
+      const orderRaw = parseIfJson(updates.existingImagesOrder);
+      const order: string[] = Array.isArray(orderRaw)
+        ? orderRaw.map((x) => String(x)).filter(Boolean)
+        : [];
+      if (order.length && Array.isArray(portfolio.images)) {
+        const bySig = new Map<string, any>();
+        for (const img of portfolio.images) bySig.set(imageSignature(img), img);
+        const ordered: any[] = [];
+        for (const sig of order) {
+          const hit = bySig.get(sig);
+          if (hit) {
+            ordered.push(hit);
+            bySig.delete(sig);
+          }
+        }
+        // Kalanları mevcut sırayla ekle
+        for (const img of portfolio.images) {
+          const sig = imageSignature(img);
+          if (bySig.has(sig)) {
+            ordered.push(img);
+            bySig.delete(sig);
+          }
+        }
+        portfolio.images = ordered;
+      }
+    } catch (e) {
+      logger.withReq.warn(req, "portfolio.order_parse_failed", {
+        ...getRequestContext(req),
+        error: (e as any)?.message,
+      });
+      // sıralama hatası kritik değil; devam
     }
 
     await portfolio.save();
@@ -381,20 +463,30 @@ export const deletePortfolio = asyncHandler(
     }
 
     for (const img of Array.isArray(portfolio.images) ? portfolio.images : []) {
-      const localPath = path.join(
-        "uploads",
-        req.tenant,
-        "portfolio-images",
-        path.basename(img.url)
-      );
-      if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
-      if (img.publicId) {
+      // Yerel dosya
+      const base = (img as any)?.url ? path.basename((img as any).url) : undefined;
+      if (base) {
+        const localPath = path.join("uploads", req.tenant, UPLOAD_DIR_NAME, base);
         try {
-          await cloudinary.uploader.destroy(img.publicId);
+          if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+        } catch (err) {
+          logger.withReq.warn(req, "portfolio.local_delete_failed", {
+            ...getRequestContext(req),
+            file: localPath,
+            error: (err as any)?.message,
+          });
+        }
+      }
+      // Cloudinary
+      const publicId = (img as any)?.publicId;
+      if (publicId) {
+        try {
+          await cloudinary.uploader.destroy(publicId);
         } catch (err) {
           logger.withReq.error(req, t("Cloudinary delete error"), {
             ...getRequestContext(req),
-            publicId: img.publicId,
+            publicId,
+            error: (err as any)?.message,
           });
         }
       }

@@ -5,8 +5,7 @@ import { Connection } from "mongoose";
 // ✅ Tüm modül importları
 import { Settings } from "@/modules/settings/settings.models";
 import { User } from "@/modules/users/users.models";
-import { Product } from "@/modules/product/product.models";
-import { Order } from "@/modules/order/models";
+import { Order } from "@/modules/orders/models";
 import { Cart } from "@/modules/cart/models";
 import { Blog } from "@/modules/blog/models";
 import { BlogCategory } from "@/modules/blogcategory/category.models";
@@ -25,24 +24,23 @@ import { MassageCategory } from "@/modules/massagecategory/category.models";
 import { Stockmovement } from "@/modules/stockmovement/stockmovement.models";
 import { Notification } from "@/modules/notification/notification.models";
 import { Comment } from "@/modules/comment/models";
-import { Review } from "@/modules/review/review.models";
-import { ContactMessage } from "@/modules/contact/contact.models";
-import { EmailMessage } from "@/modules/email/email.models";
-import { Favorite } from "@/modules/favorite/favorite.model";
-import { Feedback } from "@/modules/feedback/feedback.models";
-import { Address } from "@/modules/address/address.models";
-import { Company } from "@/modules/company/company.models";
+import { ContactMessage } from "@/modules/contact/models";
+import { EmailMessage } from "@/modules/email/models";
+import { Address } from "@/modules/address/models";
+import { Company } from "@/modules/company/models";
 import { Customer } from "@/modules/customer/models";
-import { FAQ } from "@/modules/faq/faq.models";
+import { FAQ } from "@/modules/faq/models";
 import { Invoice } from "@/modules/invoicing/models";
 import { Offer } from "@/modules/offer/models";
-import { Payment } from "@/modules/payments/models";
-import { Shipment } from "@/modules/shipment/shipment.models";
+import { Payment } from "@/modules/payments/domain/payment.models";
+import { Shipment } from "@/modules/shipping/shipment.models";
 import { Task } from "@/modules/task/task.models";
 import { Activity } from "@/modules/activity/models";
 import { ActivityCategory } from "@/modules/activitycategory/category.models";
 import { About } from "@/modules/about/models";
+import { Aboutus } from "@/modules/aboutus/models";
 import { AboutCategory } from "@/modules/aboutcategory/category.models";
+import { AboutusCategory } from "@/modules/aboutuscategory/category.models";
 import { References } from "@/modules/references/models";
 import { ReferencesCategory } from "@/modules/referencescategory/models";
 import { Articles } from "@/modules/articles/models";
@@ -53,12 +51,7 @@ import { ChatMessage } from "@/modules/chat/message.model";
 import { ChatSession } from "@/modules/chat/session.model";
 import { Ensotekprod } from "@/modules/ensotekprod/models";
 import { EnsotekCategory } from "@/modules/ensotekcategory/models";
-import { Sport } from "@/modules/sport/sport.models";
-import { SportCategory } from "@/modules/sportcategory/sportcategory.models";
-import { Bike } from "@/modules/bikes/model";
-import { BikeCategory } from "@/modules/bikescategory/models";
-import { SectionSetting, SectionMeta } from "@/modules/section/section.models";
-import { Apikey, Apikeylog } from "@/modules/apikey/apikey.models";
+import { Section } from "@/modules/section/models";
 import { News } from "@/modules/news/models";
 import { NewsCategory } from "@/modules/newscategory/category.models";
 import { Analytics } from "@/modules/analytics/analytics.models";
@@ -72,7 +65,8 @@ import { Skill } from "@/modules/skill/models";
 import { SkillCategory } from "@/modules/skillcategory/category.models";
 import { CatalogRequest } from "@/modules/catalog/catalog.models";
 import { Newsletter } from "@/modules/newsletter/newsletter.models";
-import { Pricing } from "@/modules/pricing/models";
+import { PricingPlan } from "@/modules/pricingplan/models";
+
 
 import { Apartment } from "@/modules/apartment/models";
 import { BillingPlan, BillingOccurrence } from "@/modules/billing/models";
@@ -96,17 +90,47 @@ import { MenuCategory } from "@/modules/menucategory/models";
 import { Menu } from "@/modules/menu/models";
 import { MenuItem } from "@/modules/menuitem/models";
 import { Promotion, PromotionRedemption } from "@/modules/promotions/models";
-import { WebhookDelivery, WebhookEndpoint } from "@/modules/webhooks/models";
+import { WebhookDelivery, WebhookEndpoint } from "@/modules/payments/webhooks/models";
 
 import { Reaction } from "@/modules/reactions/models";
 import { Recipe } from "@/modules/recipes/models";
 import { RecipeCategory } from "@/modules/recipescategory/models";
+import { SeoSetting } from "@/modules/seo/models";
+import { AuthIdentity, PasswordReset, EmailChange } from "@/modules/authlite/authlite.models";
+
+import { Product } from "@/modules/product/models";
+import { Category } from "@/modules/category/models";
+import { Stockledger } from "@/modules/stockledger/models";
+import { InventoryModel } from "@/modules/inventory/models";
+import { PaymentGateway } from "@/modules/payments/gateway/models.gateway";
+import { Brand } from "@/modules/brand/models";
+import { ProductAttribute } from "@/modules/attributes/models";
+import { FeeRule } from "@/modules/fees/fee.model";
+import { ProductVariant } from "@/modules/variants/models";
+import { GeoZone } from "@/modules/tax/models.geozone";
+import { TaxRate } from "@/modules/tax/models.taxrate";
+import { Wishlist } from "@/modules/wishlist/models";
+import { Compare } from "@/modules/compare/models";
+import { Review } from "@/modules/review/models";
+import { Suggestion } from "@/modules/search/suggestion.model";
+import { SearchIndex } from "@/modules/search/search-index.model";
+import { PaymentIntent } from "@/modules/payments/intents/intent.models";
+import { StorefrontSettings } from "@/modules/storefront/models";
+import { ReturnRMA } from "@/modules/returns/model";
+import { Giftcard } from "@/modules/giftcards/models";
+import { LoyaltyLedger } from "@/modules/loyalty/models";
+import { MediaAsset } from "@/modules/media/models";
+import { Refund } from "@/modules/refunds/model";
+import { Pricing } from "@/modules/pricing/models";
+import { ShippingGeoZone } from "@/modules/shipping/geozones/geozones.models";
+import { UserReport } from "@/modules/product/userreport.model";
+import { Seller } from "@/modules/sellers/models";
+
 
 // ✅ Ana export
 export const getTenantModelsFromConnection = (conn: Connection) => ({
   Settings: conn.model("settings", Settings.schema),
   User: conn.model("user", User.schema),
-  Product: conn.model("product", Product.schema),
   Order: conn.model("order", Order.schema),
   Cart: conn.model("cart", Cart.schema),
   Blog: conn.model("blog", Blog.schema),
@@ -126,11 +150,8 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   MassageCategory: conn.model("massagecategory", MassageCategory.schema),
   Notification: conn.model("notification", Notification.schema),
   Comment: conn.model("comment", Comment.schema),
-  Review: conn.model("review", Review.schema),
   ContactMessage: conn.model("contactmessage", ContactMessage.schema),
   EmailMessage: conn.model("emailmessage", EmailMessage.schema),
-  Favorite: conn.model("favorite", Favorite.schema),
-  Feedback: conn.model("feedback", Feedback.schema),
   Address: conn.model("address", Address.schema),
   Company: conn.model("company", Company.schema),
   Customer: conn.model("customer", Customer.schema),
@@ -156,21 +177,13 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   ChatSession: conn.model("chatsession", ChatSession.schema),
   Ensotekprod: conn.model("ensotekprod", Ensotekprod.schema),
   EnsotekCategory: conn.model("ensotekcategory", EnsotekCategory.schema),
-  Sport: conn.model("sport", Sport.schema),
-  SportCategory: conn.model("sportcategory", SportCategory.schema),
-  Bike: conn.model("bike", Bike.schema),
-  BikeCategory: conn.model("bikecategory", BikeCategory.schema),
-  SectionSetting: conn.model("sectionsetting", SectionSetting.schema),
-  SectionMeta: conn.model("sectionmeta", SectionMeta.schema),
+  Section: conn.model("section", Section.schema),
   Apartment: conn.model("apartment", Apartment.schema),
-  Apikey: conn.model("apikey", Apikey.schema),
-  Apikeylog: conn.model("apikeylog", Apikeylog.schema),
   News: conn.model("news", News.schema),
   NewsCategory: conn.model("newscategory", NewsCategory.schema),
   Analytics: conn.model("analytics", Analytics.schema),
   ModuleMeta: conn.model("modulemeta", ModuleMeta.schema),
   ModuleSetting: conn.model("modulesetting", ModuleSetting.schema),
-  FeedbackMessage: conn.model("FeedbackMessage", Feedback.schema),
   FAQ: conn.model("faq", FAQ.schema),
   Stockmovement: conn.model("stockmovement", Stockmovement.schema),
   Sparepart: conn.model("sparepart", Sparepart.schema),
@@ -217,4 +230,39 @@ export const getTenantModelsFromConnection = (conn: Connection) => ({
   Reaction: conn.model("reaction", Reaction.schema),
   Recipe: conn.model("recipe", Recipe.schema),
   RecipeCategory: conn.model("recipecategory", RecipeCategory.schema),
+  SeoSetting: conn.model("seosetting", SeoSetting.schema),
+
+  AuthIdentity: conn.model("authidentity", AuthIdentity.schema),
+  PasswordReset: conn.model("passwordreset", PasswordReset.schema),
+  EmailChange: conn.model("emailchange", EmailChange.schema),
+  Aboutus: conn.model("aboutus", Aboutus.schema),
+  AboutusCategory: conn.model("aboutuscategory", AboutusCategory.schema),
+
+  Product: conn.model("product", Product.schema),
+  Category: conn.model("category", Category.schema),
+  Stockledger: conn.model("stockledger", Stockledger.schema),
+  Inventory: conn.model("inventory", InventoryModel.schema),
+  PaymentGateway: conn.model("paymentgateway", PaymentGateway.schema),
+  Brand: conn.model("brand", Brand.schema),
+  ProductAttribute: conn.model("productattribute", ProductAttribute.schema),
+  FeeRule: conn.model("feerule", FeeRule.schema),
+  ProductVariant: conn.model("productvariant", ProductVariant.schema),
+  GeoZone: conn.model("geozone", GeoZone.schema),
+  TaxRate: conn.model("taxrate", TaxRate.schema),
+  Wishlist: conn.model("wishlist", Wishlist.schema),
+  Compare: conn.model("compare", Compare.schema),
+  Review: conn.model("review", Review.schema),
+  Suggestion: conn.model("suggestion", Suggestion.schema),
+  SearchIndex: conn.model("searchindex", SearchIndex.schema),
+  PricingPlan: conn.model("pricingplan", PricingPlan.schema),
+  PaymentIntent: conn.model("paymentintent", PaymentIntent.schema),
+  StorefrontSettings: conn.model("storefrontsettings", StorefrontSettings.schema),
+  ReturnRMA: conn.model("returnrma", ReturnRMA.schema),
+  Giftcard: conn.model("giftcard", Giftcard.schema),
+  LoyaltyLedger: conn.model("loyaltyledger", LoyaltyLedger.schema),
+  MediaAsset: conn.model("mediaasset", MediaAsset.schema),
+  Refund: conn.model("refund", Refund.schema),
+  ShippingGeoZone: conn.model("shippinggeozone", ShippingGeoZone.schema),
+  UserReportModel: conn.model("userreport", UserReport.schema),
+  Seller: conn.model("seller", Seller.schema),
 });

@@ -19,12 +19,14 @@ export const validateCreatePromotion = [
   body("code").optional().isString().toUpperCase(),
   body("effect.type").notEmpty().isIn(["percentage", "fixed", "free_delivery", "bxgy"]),
   body("effect.value").optional().isFloat({ min: 0 }),
-  body("effect.bxgy").optional().custom((v) => {
-    if (!v) return true;
-    if (typeof v.buyQty !== "number" || v.buyQty < 1) throw new Error("bxgy.buyQty >= 1");
-    if (typeof v.getQty !== "number" || v.getQty < 1) throw new Error("bxgy.getQty >= 1");
-    return true;
-  }),
+  body("effect.bxgy")
+    .optional()
+    .custom((v) => {
+      if (!v) return true;
+      if (typeof v.buyQty !== "number" || v.buyQty < 1) throw new Error("bxgy.buyQty >= 1");
+      if (typeof v.getQty !== "number" || v.getQty < 1) throw new Error("bxgy.getQty >= 1");
+      return true;
+    }),
   body("rules.minOrder.amount").optional().isFloat({ min: 0 }),
   body("rules.scope.serviceTypes").optional().isArray(),
   body("priority").optional().isInt(),
@@ -36,12 +38,14 @@ export const validateUpdatePromotion = [
   body("name").optional(),
   body("effect.type").optional().isIn(["percentage", "fixed", "free_delivery", "bxgy"]),
   body("effect.value").optional().isFloat({ min: 0 }),
-  body("effect.bxgy").optional().custom((v) => {
-    if (!v) return true;
-    if (typeof v.buyQty !== "number" || v.buyQty < 1) throw new Error("bxgy.buyQty >= 1");
-    if (typeof v.getQty !== "number" || v.getQty < 1) throw new Error("bxgy.getQty >= 1");
-    return true;
-  }),
+  body("effect.bxgy")
+    .optional()
+    .custom((v) => {
+      if (!v) return true;
+      if (typeof v.buyQty !== "number" || v.buyQty < 1) throw new Error("bxgy.buyQty >= 1");
+      if (typeof v.getQty !== "number" || v.getQty < 1) throw new Error("bxgy.getQty >= 1");
+      return true;
+    }),
   validateRequest,
 ];
 
@@ -74,7 +78,7 @@ export const validateRedeem = [
   body("promotionId").notEmpty().isMongoId(),
   body("orderId").notEmpty().isMongoId(),
   body("userId").optional().isMongoId(),
-  body("amount").optional().isFloat({ min: 0 }), // server yeniden hesaplayacak olsa da tutuyoruz
+  body("amount").optional().isFloat({ min: 0 }),
   body("currency").optional().isString(),
   validateRequest,
 ];

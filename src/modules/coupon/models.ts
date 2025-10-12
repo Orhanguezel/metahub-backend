@@ -13,25 +13,30 @@ const CouponImageSchema = new Schema<ICouponImage>(
 
 const couponSchema = new Schema<ICoupon>(
   {
-    code: { type: String, required: true, uppercase: true, trim: true }, // unique kaldırıldı
+    code: { type: String, required: true, uppercase: true, trim: true },
     tenant: { type: String, required: true, index: true, trim: true },
-    // Map kullanıyoruz ama toJSON'da objeye çevireceğiz
+
+    // Çok dillilik: Map kullanıyoruz, toJSON'da objeye çeviriyoruz
     title: { type: Map, of: String, required: true, default: {} },
     description: { type: Map, of: String, required: true, default: {} },
+
     images: { type: [CouponImageSchema], default: [] },
+
     discount: { type: Number, required: true, min: 1, max: 100 },
     expiresAt: { type: Date, required: true },
+
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
+
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-// Tenant+code benzersizliği (çok kiracılı mimari)
+// Çok kiracılı yapı: aynı tenant altında code benzersiz
 couponSchema.index({ tenant: 1, code: 1 }, { unique: true });
 
-// Map -> plain object (API yanıtlarını sadeleştirir)
+// Map -> plain object
 couponSchema.set("toJSON", {
   transform: (_doc, ret) => {
     if (ret?.title instanceof Map) ret.title = Object.fromEntries(ret.title);
@@ -40,7 +45,7 @@ couponSchema.set("toJSON", {
   },
 });
 
-// Güvenli fallback kod üretimi
+// Güvenli fallback (yine de schema required olduğundan normalde gelmeli)
 couponSchema.pre("save", function (next) {
   if (!this.code) this.code = `COUPON_${Date.now()}`;
   next();

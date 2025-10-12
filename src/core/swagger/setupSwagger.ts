@@ -1,63 +1,36 @@
-// src/core/swagger/setupSwagger.ts
 import { Express } from "express";
 import swaggerUi from "swagger-ui-express";
-import { generateSwaggerSpecFromMeta } from "./generateSwaggerSpec";
-import path from "path";
-import fs from "fs";
+import { generateSwaggerFromRouters } from "./generateSwaggerFromRouters";
 
 /**
- * Sets up Swagger UI using meta-config based specification.
+ * Router tarama tabanlı Swagger UI kurulumu.
+ * - GET /swagger.json → dinamik spec
+ * - GET /api-docs     → Swagger UI
+ *
+ * ENV:
+ *  - SWAGGER_ROUTE       : Swagger UI route (varsayılan: /api-docs)
+ *  - SWAGGER_BASE_URL    : servers[0].url (örn: http://localhost:5019)
+ *  - SWAGGER_API_PREFIX  : API path prefix (varsayılan: /api)
  */
 export const setupSwagger = async (app: Express): Promise<void> => {
-  try {
-    const envProfile = process.env.APP_ENV;
-    const port = process.env.PORT;
-    const host = process.env.HOST;
-    const metaConfigPath = process.env.META_CONFIG_PATH;
+  const swaggerRoute = process.env.SWAGGER_ROUTE || "/api-docs";
 
-    if (!envProfile) {
-      throw new Error("❌ APP_ENV is not defined.");
-    }
-
-    if (!metaConfigPath) {
-      console.warn("⚠️ META_CONFIG_PATH is not defined. Swagger might not be available.");
-      return;
-    }
-
-    const swaggerDir = path.resolve(process.cwd(), metaConfigPath);
-
-    if (!fs.existsSync(swaggerDir)) {
-      console.warn(`⚠️ Swagger config folder not found: ${swaggerDir}`);
-      return;
-    }
-
-    const spec = await generateSwaggerSpecFromMeta();
-
-    if (!spec) {
-      console.warn("⚠️ Swagger spec generation failed or returned undefined.");
-      return;
-    }
-
-    app.get("/swagger.json", (_req, res) => {
-      res.setHeader("Content-Type", "application/json");
-      res.send(spec);
-    });
-
-    app.use(
-      "/api-docs",
-      swaggerUi.serve,
-      swaggerUi.setup(undefined, {
-        swaggerUrl: "/swagger.json",
-      })
-    );
-
-    if (host && port) {
-      const swaggerUrl = `${host}:${port}/api-docs`;
-      console.log(`📘 Swagger UI available at: ${swaggerUrl}`);
-    } else {
-      console.log(`📘 Swagger UI available at: /api-docs`);
-    }
-  } catch (err) {
-    console.error("❌ Failed to setup Swagger:", err);
+  const spec = await generateSwaggerFromRouters(false);
+  if (!spec) {
+    console.warn("⚠️ Swagger spec could not be generated (router scan).");
+    return;
   }
+
+  app.get("/swagger.json", (_req, res) => {
+    res.setHeader("Content-Type", "application/json");
+    res.send(spec);
+  });
+
+  app.use(
+    swaggerRoute,
+    swaggerUi.serve,
+    swaggerUi.setup(undefined, { swaggerUrl: "/swagger.json" })
+  );
+
+  console.log(`📘 Swagger UI available at: ${swaggerRoute}`);
 };

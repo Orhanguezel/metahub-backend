@@ -7,7 +7,7 @@ import {
   fetchEmailsManually,
   markAsReadOrUnread,
 } from "./email.controller";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/auth/authMiddleware";
 
 const router = express.Router();
 

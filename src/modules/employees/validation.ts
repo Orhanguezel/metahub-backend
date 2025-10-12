@@ -3,16 +3,16 @@ import { validateRequest } from "@/core/middleware/validateRequest";
 import { t as translate } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import translations from "./i18n";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 
 // helpers
 const parseIfJson = (v: any) => {
   try { return typeof v === "string" ? JSON.parse(v) : v; } catch { return v; }
 };
 
-const STATUS = ["active","inactive","onleave","terminated"];
-const LANG_LEVEL = ["basic","conversational","fluent","native"];
-const PAYCODE_KIND = ["standard","overtime","weekend","holiday","service"];
+const STATUS = ["active", "inactive", "onleave", "terminated"];
+const LANG_LEVEL = ["basic", "conversational", "fluent", "native"];
+const PAYCODE_KIND = ["standard", "overtime", "weekend", "holiday", "service"];
 
 export const validateObjectId = (field: string) => [
   param(field).isMongoId().withMessage((_, { req }) =>
@@ -58,7 +58,7 @@ export const validateCreateEmployee = [
     if (!val || typeof val !== "object") {
       throw new Error(translate("validation.employmentRequired", req.locale || getLogLocale(), translations));
     }
-    if (!["fulltime","parttime","contractor","intern"].includes(String(val.type))) {
+    if (!["fulltime", "parttime", "contractor", "intern"].includes(String(val.type))) {
       throw new Error("invalid employment.type");
     }
     if (!val.startDate) throw new Error("employment.startDate required");
@@ -113,7 +113,7 @@ export const validateUpdateEmployee = [
 
   body("employment").optional().customSanitizer(parseIfJson).custom((val: any) => {
     if (!val) return true;
-    if (val.type && !["fulltime","parttime","contractor","intern"].includes(String(val.type))) {
+    if (val.type && !["fulltime", "parttime", "contractor", "intern"].includes(String(val.type))) {
       throw new Error("invalid employment.type");
     }
     return true;

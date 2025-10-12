@@ -15,8 +15,8 @@ export interface IPromotionRules {
 
   scope?: {
     branchIds?: Types.ObjectId[];
-    categoryIds?: Types.ObjectId[];
-    itemIds?: Types.ObjectId[];
+    categoryIds?: Types.ObjectId[]; // ref’siz: category | menucategory id’leri gelebilir
+    itemIds?: Types.ObjectId[];     // ref’siz: product | menuitem id’leri gelebilir
     serviceTypes?: Array<"delivery" | "pickup" | "dinein">;
   };
 
@@ -29,7 +29,14 @@ export interface IPromotionEffect {
   type: DiscountType;
   value?: number;         // percentage(1-100) | fixed(amount) | free_delivery(ignore)
   currency?: string;      // fixed için
-  bxgy?: { buyQty: number; getQty: number; itemScope?: { itemIds?: Types.ObjectId[]; categoryIds?: Types.ObjectId[] } };
+  bxgy?: {
+    buyQty: number;
+    getQty: number;
+    itemScope?: {
+      itemIds?: Types.ObjectId[];
+      categoryIds?: Types.ObjectId[];
+    };
+  };
 }
 
 export interface IPromotion extends Document {

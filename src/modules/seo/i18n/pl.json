@@ -1,0 +1,6 @@
+{
+  "tenant.required": "Nagłówek najemcy (x-tenant) jest wymagany.",
+  "sitemap.urls.fetched": "Adresy URL mapy witryny pobrane.",
+  "seo.siteUrl.missing": "Parametr SEO siteUrl nie jest skonfigurowany.",
+  "not.found": "Nie znaleziono."
+}

@@ -4,16 +4,14 @@ import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { t as translate } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import translations from "./i18n";
-import logger from "@/core/middleware/logger/logger";
-import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import type { SupportedLocale } from "@/types/common";
 import type { IPromotion, ICartSnapshot, ICartItemInput } from "./types";
 
 /* ===== helpers ===== */
 
-const tByReq = (req: Request) => (k: string) =>
-  translate(k, (req.locale as SupportedLocale) || getLogLocale(), translations);
+const tByReq = (req: Request) => (k: string, vars?: Record<string, any>) =>
+  translate(k, (req.locale as SupportedLocale) || getLogLocale(), translations, vars);
 
 const now = () => new Date();
 
@@ -34,8 +32,8 @@ function itemMatchesScope(item: ICartItemInput, p: IPromotion): boolean {
   const sc = p.rules?.scope || {};
   if (!sc.itemIds && !sc.categoryIds) return true;
   const okItem =
-    sc.itemIds?.some((x: any) => String(x) === String(item.itemId)) ||
-    sc.categoryIds?.some((x: any) => String(x) === String(item.categoryId));
+    (sc.itemIds || []).some((x: any) => String(x) === String(item.itemId)) ||
+    (sc.categoryIds || []).some((x: any) => String(x) === String(item.categoryId));
   return !!okItem;
 }
 
@@ -59,10 +57,11 @@ async function isFirstOrder(req: Request, userId?: string): Promise<boolean> {
 }
 
 /* limit kontrol */
-async function checkLimits(req: Request, promo: IPromotion, userId?: string): Promise<{
-  ok: boolean;
-  reason?: string;
-}> {
+async function checkLimits(
+  req: Request,
+  promo: IPromotion,
+  userId?: string
+): Promise<{ ok: boolean; reason?: "limit" | "perUser" }> {
   const { PromotionRedemption } = await getTenantModels(req);
 
   if (promo.rules?.usageLimit != null) {
@@ -77,8 +76,10 @@ async function checkLimits(req: Request, promo: IPromotion, userId?: string): Pr
 }
 
 /* indirim hesaplama */
-function computeDiscount(p: IPromotion, cart: ICartSnapshot): { amount: number; freeDelivery?: boolean; details?: any } {
-  const currency = cart.currency || "TRY";
+function computeDiscount(
+  p: IPromotion,
+  cart: ICartSnapshot
+): { amount: number; freeDelivery?: boolean; details?: any } {
   const subtotal = cartSubtotal(cart);
   const eligibleItems = cart.items?.filter((it) => itemMatchesScope(it, p)) || [];
 
@@ -94,7 +95,7 @@ function computeDiscount(p: IPromotion, cart: ICartSnapshot): { amount: number; 
 
   if (p.effect.type === "free_delivery") {
     const df = Math.max(0, Number(cart.deliveryFee || 0));
-    return { amount: Math.min(df, df), freeDelivery: true };
+    return { amount: df, freeDelivery: true };
   }
 
   if (p.effect.type === "bxgy") {
@@ -104,7 +105,7 @@ function computeDiscount(p: IPromotion, cart: ICartSnapshot): { amount: number; 
     if (group <= 0 || qtySum < group) return { amount: 0 };
     const times = Math.floor(qtySum / group);
     const freeUnits = times * bxg.getQty;
-    // en ucuz uygun satırın birim fiyatını bedava yaz
+    // en ucuz uygun satırın birim fiyatı bedava
     const cheapest = eligibleItems.reduce((min, it) => Math.min(min, it.unitPrice), Infinity);
     const amount = Math.floor((isFinite(cheapest) ? cheapest : 0) * freeUnits);
     return { amount: Math.min(amount, subtotal) };
@@ -219,7 +220,11 @@ export const redeemPromotion = asyncHandler(async (req: Request, res: Response) 
   } catch (e: any) {
     // idempotent: unique violation (tenant+promotion+orderId)
     if (e?.code === 11000) {
-      const exist = await PromotionRedemption.findOne({ tenant: req.tenant, promotion: promo._id, orderId }).lean();
+      const exist = await PromotionRedemption.findOne({
+        tenant: req.tenant,
+        promotion: promo._id,
+        orderId,
+      }).lean();
       res.status(200).json({ success: true, message: t("redeemDuplicate"), data: exist });
       return;
     }

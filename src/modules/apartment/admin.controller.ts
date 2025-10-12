@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { IApartmentImage } from "@/modules/apartment/types";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import slugify from "slugify";
 import path from "path";
 import fs from "fs";
@@ -105,9 +105,9 @@ const normalizeOps = (raw: any) => {
 const normalizeLinks = (raw: any) => {
   const v = parseIfJson(raw) || {};
   const keys = [
-    "contracts","billingPlans","invoices","payments","priceLists",
-    "operationJobs","operationTemplates","timeEntries",
-    "reportDefs","reportRuns","files","contacts"
+    "contracts", "billingPlans", "invoices", "payments", "priceLists",
+    "operationJobs", "operationTemplates", "timeEntries",
+    "reportDefs", "reportRuns", "files", "contacts"
   ];
   const out: any = {};
   for (const k of keys) {
@@ -341,10 +341,10 @@ export const updateApartment = asyncHandler(async (req: Request, res: Response) 
         const localPath = path.join("uploads", req.tenant, "apartment-images", path.basename(imgObj.url));
         if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
         if (imgObj.publicId) {
-          try { await cloudinary.uploader.destroy(imgObj.publicId); } catch {}
+          try { await cloudinary.uploader.destroy(imgObj.publicId); } catch { }
         }
       }
-    } catch {}
+    } catch { }
   }
 
   await apartment.save();
@@ -519,7 +519,7 @@ export const deleteApartment = asyncHandler(async (req: Request, res: Response) 
     const localPath = path.join("uploads", req.tenant, "apartment-images", path.basename(img.url));
     if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
     if ((img as any).publicId) {
-      try { await cloudinary.uploader.destroy((img as any).publicId); } catch {}
+      try { await cloudinary.uploader.destroy((img as any).publicId); } catch { }
     }
   }
 

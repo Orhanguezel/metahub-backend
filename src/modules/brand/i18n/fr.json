@@ -1,0 +1,32 @@
+{
+  "created": "Succursale créée.",
+  "updated": "Succursale mise à jour.",
+  "deleted": "Succursale supprimée.",
+  "fetched": "Enregistrement récupéré.",
+  "listFetched": "Liste récupérée.",
+  "notFound": "Enregistrement introuvable.",
+  "invalidId": "ID invalide.",
+  "error.create_fail": "Erreur lors de la création de la succursale.",
+  "validation": {
+    "invalidObjectId": "ObjectId invalide.",
+    "booleanField": "Valeur booléenne invalide.",
+    "codeRequired": "Le code est requis.",
+    "locationRequired": "La localisation (Point GeoJSON) est requise.",
+    "locationInvalid": "Localisation invalide.",
+    "locationType": "Le type doit être 'Point'.",
+    "locationCoordinates": "Les coordonnées doivent être [lng, lat].",
+    "locationRange": "Coordonnées hors plage.",
+    "servicesRequired": "Au moins un type de service est requis.",
+    "invalidServiceType": "Type de service invalide.",
+    "openingHoursInvalid": "Les horaires doivent être un tableau.",
+    "openingEntryInvalid": "Entrée d’horaire invalide.",
+    "openingDayRange": "Jour entre 0 et 6.",
+    "openingTimeFormat": "Heure au format 'HH:mm'.",
+    "minPrepInvalid": "Préparation min. 0–240.",
+    "deliveryZonesInvalid": "Les zones de livraison doivent être un tableau.",
+    "zonePolygonInvalid": "Coordonnées du polygone invalides.",
+    "zoneFeeInvalidAmount": "Frais de livraison négatifs interdits.",
+    "zoneFeeInvalidCurrency": "Devise invalide.",
+    "zoneNameInvalid": "Nom de zone invalide."
+  }
+}

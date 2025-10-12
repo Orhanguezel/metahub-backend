@@ -1,0 +1,6 @@
+{
+  "tenant.required": "L’en-tête locataire (x-tenant) est requis.",
+  "sitemap.urls.fetched": "URLs du plan du site récupérées.",
+  "seo.siteUrl.missing": "L’URL du site (siteUrl) pour le SEO n’est pas configurée.",
+  "not.found": "Introuvable."
+}

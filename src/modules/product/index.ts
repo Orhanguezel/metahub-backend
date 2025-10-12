@@ -1,15 +1,12 @@
 import express from "express";
-import publicRoutes from "./product.routes";
-import adminRoutes from "./admin.product.routes";
-import { Product } from "./product.models";
-import * as productController from "./product.controller";
-import * as adminProductController from "./admin.product.controller";
+import publicRoutes from "./public.routes";
+import adminRoutes from "./admin.routes";
+import { sellerProductRoutes } from "./seller/seller.routes";
 
 const router = express.Router();
 
+router.use("/admin", adminRoutes);
+router.use("/seller", sellerProductRoutes);
 router.use("/", publicRoutes);
 
-router.use("/admin", adminRoutes);
-
-export { Product, productController, adminProductController };
 export default router;

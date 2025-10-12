@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
@@ -123,18 +123,18 @@ export const getAvailableSlots = asyncHandler(async (req: Request, res: Response
 
   const ruleData = ruleDoc
     ? {
-        startTime: ruleDoc.startTime,
-        endTime: ruleDoc.endTime,
-        intervalMinutes: ruleDoc.intervalMinutes,
-        breakBetweenAppointments: ruleDoc.breakBetweenAppointments,
-      }
+      startTime: ruleDoc.startTime,
+      endTime: ruleDoc.endTime,
+      intervalMinutes: ruleDoc.intervalMinutes,
+      breakBetweenAppointments: ruleDoc.breakBetweenAppointments,
+    }
     : {
-        startTime: "09:00",
-        endTime: "18:00",
-        intervalMinutes: 60,
-        breakBetweenAppointments: 15,
-        dayOfWeek: day,
-      };
+      startTime: "09:00",
+      endTime: "18:00",
+      intervalMinutes: 60,
+      breakBetweenAppointments: 15,
+      dayOfWeek: day,
+    };
 
   const override = await BookingSlotOverride.findOne({
     date,
@@ -236,13 +236,13 @@ export const getAllSlotRulesAdmin = asyncHandler(async (req: Request, res: Respo
       success: true,
       data: rules,
       message: t("slot.rule.listed", "Slot rules listed successfully."),
-    });return; 
+    }); return;
   } catch (error) {
-     res.status(500).json({
+    res.status(500).json({
       success: false,
       message: t("slot.error.listFailed", "Slot rule listing failed."),
       error: error instanceof Error ? error.message : error,
-    });return;
+    }); return;
   }
 });
 
@@ -257,12 +257,12 @@ export const getAllSlotOverridesAdmin = asyncHandler(async (req: Request, res: R
       success: true,
       data: overrides,
       message: t("slot.override.listed", "Slot overrides listed successfully."),
-    });return;
+    }); return;
   } catch (error) {
     res.status(500).json({
       success: false,
       message: t("slot.error.listFailed", "Slot override listing failed."),
       error: error instanceof Error ? error.message : error,
-    });return; 
+    }); return;
   }
 });

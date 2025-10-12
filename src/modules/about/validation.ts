@@ -1,4 +1,3 @@
-// src/modules/about/validation.ts
 import { body, param, query } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
@@ -40,8 +39,10 @@ export const validateCreateAbout = [
   validateMultilangField("title"),                                 // zorunlu, çok-dilli
   body("summary").optional().customSanitizer(parseIfJson),
   body("content").optional().customSanitizer(parseIfJson),
-  body("tags").optional().customSanitizer(sanitizeTagsFlexible),   // ← esnek tags
-  body("category")                                                 // ← create’te zorunlu (controller da istiyor)
+  // slug çok dilli olabilir → sadece parse edelim; benzersizliği controller + model hallediyor
+  body("slug").optional().customSanitizer(parseIfJson),
+  body("tags").optional().customSanitizer(sanitizeTagsFlexible),
+  body("category")
     .exists({ checkFalsy: true })
     .withMessage((_, { req }) => translate("validation.invalidCategory", req.locale || getLogLocale(), translations))
     .bail()
@@ -55,7 +56,8 @@ export const validateUpdateAbout = [
   body("title").optional().customSanitizer(parseIfJson),
   body("summary").optional().customSanitizer(parseIfJson),
   body("content").optional().customSanitizer(parseIfJson),
-  body("tags").optional().customSanitizer(sanitizeTagsFlexible),   // ← array şartı yok
+  body("slug").optional().customSanitizer(parseIfJson),
+  body("tags").optional().customSanitizer(sanitizeTagsFlexible),
   body("category")
     .optional()
     .isMongoId()

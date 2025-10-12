@@ -1,7 +1,7 @@
-// controllers/admin/users.status.controller.ts
+// src/modules/users/status.controller.ts
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { isValidObjectId, isValidRole } from "@/core/utils/validation";
+import { isValidObjectId, isValidRole } from "@/core/middleware/auth/validation";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import userTranslations from "@/modules/users/i18n";
@@ -30,11 +30,15 @@ const SAFE_PROJECTION = {
   passwordResetExpires: 0,
 } as const;
 
+// küçük yardımcılar
+const isSameUser = (req: Request, targetUserId: string) =>
+  String(req.user?.id || "") === String(targetUserId);
+
 /* ----------------------------- TOGGLE STATUS ------------------------------ */
 // ✅ Kullanıcı durumunu aktif/pasif olarak değiştir
 export const toggleUserStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-  const locale: SupportedLocale = req.locale || getLogLocale();
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale();
   const { User } = await getTenantModels(req);
 
   logger.withReq.debug(req, `[Admin] toggleUserStatus | id=${id} | tenant=${req.tenant}`);
@@ -52,6 +56,40 @@ export const toggleUserStatus = asyncHandler(async (req: Request, res: Response)
     return;
   }
 
+  // ❗ Kendini pasif edemezsin (kötü senaryoları engelle)
+  if (isSameUser(req, id) && user.isActive) {
+    res.status(403).json({
+      success: false,
+      message: userT("admin.users.cannotSelfDeactivate", locale), // i18n: yoksa key görünebilir
+    });
+    return;
+  }
+
+  // ❗ Superadmin durumunu sadece superadmin değiştirebilir
+  if (user.role === "superadmin" && req.user?.role !== "superadmin") {
+    res.status(403).json({
+      success: false,
+      message: userT("admin.users.forbiddenRoleChange", locale),
+    });
+    return;
+  }
+
+  // ❗ Son aktif superadmin'i pasif etme
+  if (user.role === "superadmin" && user.isActive) {
+    const activeSupers = await User.countDocuments({
+      tenant: req.tenant,
+      role: "superadmin",
+      isActive: true,
+    });
+    if (activeSupers <= 1) {
+      res.status(409).json({
+        success: false,
+        message: userT("admin.users.cannotDisableLastSuperadmin", locale),
+      });
+      return;
+    }
+  }
+
   user.isActive = !user.isActive;
   await user.save();
 
@@ -63,8 +101,10 @@ export const toggleUserStatus = asyncHandler(async (req: Request, res: Response)
   res.status(200).json({
     success: true,
     message: userT(user.isActive ? "admin.users.activated" : "admin.users.blocked", locale),
-    userId: String(user._id),
-    isActive: user.isActive,
+    data: {
+      userId: String(user._id),
+      isActive: user.isActive,
+    },
   });
 });
 
@@ -73,7 +113,7 @@ export const toggleUserStatus = asyncHandler(async (req: Request, res: Response)
 export const updateUserRole = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const { role } = req.body as { role?: string };
-  const locale: SupportedLocale = req.locale || getLogLocale();
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale();
   const { User } = await getTenantModels(req);
 
   logger.withReq.debug(
@@ -93,8 +133,15 @@ export const updateUserRole = asyncHandler(async (req: Request, res: Response): 
     return;
   }
 
-  // Yükseltme kısıtı: superadmin'e sadece superadmin atayabilsin
-  if (role === "superadmin" && (!req.user || req.user.role !== "superadmin")) {
+  const target = await User.findOne({ _id: id, tenant: req.tenant });
+  if (!target) {
+    logger.withReq.warn(req, `[Admin] User not found for role update: ${id}`);
+    res.status(404).json({ success: false, message: userT("admin.users.notFound", locale) });
+    return;
+  }
+
+  // ❗ Sadece superadmin, superadmin'i değiştirebilir (hedef veya yeni rol)
+  if ((target.role === "superadmin" || role === "superadmin") && req.user?.role !== "superadmin") {
     res.status(403).json({
       success: false,
       message: userT("admin.users.forbiddenRoleChange", locale),
@@ -102,7 +149,48 @@ export const updateUserRole = asyncHandler(async (req: Request, res: Response): 
     return;
   }
 
-  // Tenant izolasyonu: findOneAndUpdate + projection
+  // ❗ Kendi rolünü değiştirme guard'ı
+  if (isSameUser(req, id)) {
+    // superadmin kendi rolünü düşürebilir ama son superadmin ise engelle
+    if (target.role === "superadmin" && role !== "superadmin") {
+      const activeSupers = await User.countDocuments({
+        tenant: req.tenant,
+        role: "superadmin",
+        isActive: true,
+      });
+      if (activeSupers <= 1) {
+        res.status(409).json({
+          success: false,
+          message: userT("admin.users.cannotDemoteLastSuperadmin", locale),
+        });
+        return;
+      }
+    } else if (req.user?.role !== "superadmin") {
+      // superadmin dışındaki kullanıcılar kendi rolünü değiştiremesin
+      res.status(403).json({
+        success: false,
+        message: userT("admin.users.cannotChangeOwnRole", locale),
+      });
+      return;
+    }
+  }
+
+  // ❗ Son aktif superadmin'i düşürme
+  if (target.role === "superadmin" && role !== "superadmin") {
+    const activeSupers = await User.countDocuments({
+      tenant: req.tenant,
+      role: "superadmin",
+      isActive: true,
+    });
+    if (activeSupers <= 1) {
+      res.status(409).json({
+        success: false,
+        message: userT("admin.users.cannotDemoteLastSuperadmin", locale),
+      });
+      return;
+    }
+  }
+
   const updated = await User.findOneAndUpdate(
     { _id: id, tenant: req.tenant },
     { role },
@@ -110,7 +198,7 @@ export const updateUserRole = asyncHandler(async (req: Request, res: Response): 
   );
 
   if (!updated) {
-    logger.withReq.warn(req, `[Admin] User not found for role update: ${id}`);
+    logger.withReq.warn(req, `[Admin] User not found after role update: ${id}`);
     res.status(404).json({ success: false, message: userT("admin.users.notFound", locale) });
     return;
   }

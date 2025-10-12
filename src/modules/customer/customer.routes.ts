@@ -8,7 +8,7 @@ import {
   getCustomerPublicById,
   updateCustomerPublic,
 } from "./customer.controller";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/auth/authMiddleware";
 import {
   createCustomerValidator,
   updateCustomerValidator,

@@ -8,7 +8,7 @@ import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
-import { isValidObjectId, validateJsonField } from "@/core/utils/validation";
+import { isValidObjectId, validateJsonField } from "@/core/middleware/auth/validation";
 
 /* ----------------- Helpers ----------------- */
 const tByReq = (req: Request) => (k: string, p?: any) =>
@@ -179,13 +179,13 @@ export const getAnalyticsEvents = asyncHandler(async (req: Request, res: Respons
   const geoQuery =
     Number.isFinite(nearLat) && Number.isFinite(nearLon)
       ? {
-          location: {
-            $near: {
-              $geometry: { type: "Point", coordinates: [nearLon!, nearLat!] },
-              $maxDistance: nearDistance!,
-            },
+        location: {
+          $near: {
+            $geometry: { type: "Point", coordinates: [nearLon!, nearLat!] },
+            $maxDistance: nearDistance!,
           },
-        }
+        },
+      }
       : {};
 
   const { Analytics } = await getTenantModels(req);

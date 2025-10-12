@@ -1,7 +1,7 @@
 // modules/notifications/notification.controller.ts
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
@@ -11,7 +11,7 @@ import translations from "./i18n";
 
 const parseIfJson = (v: any) => { try { return typeof v === "string" ? JSON.parse(v) : v; } catch { return v; } };
 const toBool = (v: any) => (typeof v === "string" ? v === "true" : !!v);
-const toInt  = (v: any, d = 0) => { const n = Number(v); return Number.isFinite(n) ? n : d; };
+const toInt = (v: any, d = 0) => { const n = Number(v); return Number.isFinite(n) ? n : d; };
 
 // Projedeki tip: { id: string; _id?: string; role: "superadmin" | "admin" | ... }
 const getUserId = (req: Request) => {

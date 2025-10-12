@@ -1,7 +1,6 @@
 import { Request, Response, RequestHandler } from "express";
 import asyncHandler from "express-async-handler";
 import { isValidObjectId, Types } from "mongoose";
-import slugify from "slugify";
 import path from "path";
 import fs from "fs";
 import { v2 as cloudinary } from "cloudinary";
@@ -48,26 +47,66 @@ const coerceObjectId = (v: unknown): Types.ObjectId | undefined => {
   return isValidObjectId(String(s)) ? new Types.ObjectId(String(s)) : undefined;
 };
 
-const ensureUniqueSlug = async (
+/** Unicode güvenli slug (Çince/Arapça destekli, transliterasyonsuz) */
+function slugifyUnicode(input: string): string {
+  if (!input) return "";
+  let s = input.normalize("NFKC").trim();
+  s = s.replace(/\s+/g, "-");                 // boşluk -> -
+  s = s.replace(/[^\p{L}\p{N}\p{M}-]+/gu, ""); // harf/rakam/işaret(-) dışını at (Unicode)
+  s = s.replace(/-+/g, "-");                   // -- -> -
+  s = s.replace(/^-+|-+$/g, "");               // kenar - temizle
+  return s.toLowerCase();
+}
+
+/** Belirli bir locale için tenant scoped benzersiz slug üretimi */
+async function ensureUniqueSlugForLocale(
   tenant: string,
   base: string,
+  locale: SupportedLocale,
   AboutModel: any,
   currentId?: string
-): Promise<string> => {
-  let slug = base;
+): Promise<string> {
+  let slug = base || "about";
   let i = 2;
-  // aynı tenant içinde benzersiz
+  const pathKey = `slugLower.${locale}`;
   // eslint-disable-next-line no-constant-condition
   while (true) {
+    const lower = slug.toLowerCase();
     const clash = await AboutModel.findOne({
       tenant,
-      slug,
+      [pathKey]: lower,
       ...(currentId ? { _id: { $ne: currentId } } : {}),
     }).lean();
     if (!clash) return slug;
     slug = `${base}-${i++}`;
   }
-};
+}
+
+/** Objeyi (slug TL) sanitize + unique hale getirir */
+async function buildUniqueSlugObject(
+  tenant: string,
+  source: TL | string | undefined,
+  title: TLFull,
+  AboutModel: any,
+  currentId?: string
+): Promise<TL> {
+  const out: TL = {};
+  const src = (typeof source === "string" ? { } : (source || {})) as TL;
+
+  // Her locale için: öncelik -> src[locale] -> src(string ise yok sayılır) -> title[locale] -> title.en -> ilk değer
+  for (const loc of SUPPORTED_LOCALES) {
+    const raw =
+      (src as any)[loc] ??
+      (title as any)[loc] ??
+      (title as any)["en"] ??
+      (Object.values(title || {})[0] as string) ??
+      "about";
+
+    const base = slugifyUnicode(String(raw));
+    out[loc] = await ensureUniqueSlugForLocale(tenant, base, loc, AboutModel, currentId);
+  }
+  return out;
+}
 
 /* ---------- CREATE ---------- */
 export const createAbout: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
@@ -76,7 +115,7 @@ export const createAbout: RequestHandler = asyncHandler(async (req: Request, res
   const t = (k: string, p?: any) => translate(k, locale, translations, p);
 
   try {
-    const { category, isPublished, publishedAt, order, slug } = req.body;
+    const { category, isPublished, publishedAt, order } = req.body;
 
     // Çok dilli alanlar (tip güvenli)
     const title   = ensureTL(req.body.title);
@@ -91,11 +130,9 @@ export const createAbout: RequestHandler = asyncHandler(async (req: Request, res
     const cat = coerceObjectId(category);
     if (!cat) { res.status(422).json({ success: false, message: t("validation.category") }); return; }
 
-    // slug
-    const baseSlug = slug
-      ? slugify(String(slug), { lower: true, strict: true })
-      : slugify(title?.[locale] || title?.en || "about", { lower: true, strict: true });
-    const uniqueSlug = await ensureUniqueSlug((req as any).tenant, baseSlug, About);
+    // Çok dilli slug
+    const slugInput = parseIfJson(req.body.slug) as TL | string | undefined;
+    const slugObj = await buildUniqueSlugObject((req as any).tenant, slugInput, title, About);
 
     // Görseller
     const images: Array<{ url: string; thumbnail: string; webp?: string; publicId?: string }> = [];
@@ -115,7 +152,7 @@ export const createAbout: RequestHandler = asyncHandler(async (req: Request, res
     const doc = await About.create({
       tenant: (req as any).tenant,
       title, summary, content,
-      slug: uniqueSlug,
+      slug: slugObj, // slugLower model hook’unda otomatik set edilecek
       images,
       tags,
       category: cat,
@@ -150,17 +187,47 @@ export const updateAbout: RequestHandler = asyncHandler(async (req: Request, res
 
   const U = req.body as Record<string, unknown>;
 
-// Çok dilli alanlar (güncelleme: merge)
-if (U.title   !== undefined) doc.title   = mergeLocalesForUpdate(doc.title,   U.title);
-if (U.summary !== undefined) doc.summary = mergeLocalesForUpdate(doc.summary, U.summary);
-if (U.content !== undefined) doc.content = mergeLocalesForUpdate(doc.content, U.content);
+  // Çok dilli alanlar (güncelleme: merge)
+  if (U.title   !== undefined) doc.title   = mergeLocalesForUpdate(doc.title,   U.title);
+  if (U.summary !== undefined) doc.summary = mergeLocalesForUpdate(doc.summary, U.summary);
+  if (U.content !== undefined) doc.content = mergeLocalesForUpdate(doc.content, U.content);
 
+  // Çok dilli slug güncelleme
+  if (U.slug !== undefined) {
+    const slugInput = parseIfJson(U.slug) as TL | string | undefined;
+
+    // String geldiyse sadece mevcut locale’i güncelle
+    if (typeof slugInput === "string") {
+      const base = slugifyUnicode(slugInput);
+      const unique = await ensureUniqueSlugForLocale(
+        (req as any).tenant,
+        base,
+        locale,
+        About,
+        doc._id.toString()
+      );
+      (doc.slug as any) = { ...(doc.slug || {}), [locale]: unique };
+    } else {
+      // Object geldiyse sadece gönderilen locale’leri güncelle
+      const incoming = (slugInput || {}) as TL;
+      const next: TL = { ...(doc.slug || {}) };
+      for (const loc of SUPPORTED_LOCALES) {
+        if (incoming[loc]) {
+          const base = slugifyUnicode(String(incoming[loc]));
+          next[loc] = await ensureUniqueSlugForLocale(
+            (req as any).tenant,
+            base,
+            loc,
+            About,
+            doc._id.toString()
+          );
+        }
+      }
+      (doc.slug as any) = next;
+    }
+  }
 
   // Basit alanlar
-  if (U.slug !== undefined) {
-    const base = slugify(String(U.slug), { lower: true, strict: true });
-    doc.slug = await ensureUniqueSlug((req as any).tenant, base, About, doc._id.toString());
-  }
   if (U.category !== undefined) {
     const cat = coerceObjectId(U.category);
     if (!cat) { res.status(422).json({ success: false, message: t("validation.category") }); return; }
@@ -223,7 +290,7 @@ if (U.content !== undefined) doc.content = mergeLocalesForUpdate(doc.content, U.
       const orderSig = JSON.parse(String(U.existingImagesOrder)) as string[];
       const map = new Map<string, any>();
       for (const img of doc.images) {
-        const key = img.publicId || img.url;
+        const key = (img as any).publicId || (img as any).url;
         if (key) map.set(String(key), img);
       }
       const next: any[] = [];
@@ -263,7 +330,8 @@ export const adminGetAllAbout: RequestHandler = asyncHandler(async (req: Request
     const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const rx = new RegExp(escaped, "i");
     filter.$or = [
-      { slug: rx },
+      // slugLower.* alanlarında ara
+      ...SUPPORTED_LOCALES.map((l: SupportedLocale) => ({ [`slugLower.${l}`]: rx })),
       ...SUPPORTED_LOCALES.map((l: SupportedLocale) => ({ [`title.${l}`]: rx })),
       ...SUPPORTED_LOCALES.map((l: SupportedLocale) => ({ [`summary.${l}`]: rx })),
     ];

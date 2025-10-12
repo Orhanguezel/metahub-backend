@@ -1,3 +1,5 @@
+// src/core/utils/i18n/mergeLocalesArrayForUpdate.ts
+
 import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
 
 export function mergeLocalesArrayForUpdate(

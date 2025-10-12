@@ -1,0 +1,580 @@
+{
+	"info": {
+		"_postman_id": "52a65210-51bb-45af-a462-3cce29744f83",
+		"name": "MetaHub Payments (Admin)",
+		"description": "Smoke tests for Payments module: Create → Status → Partial/FULL allocation → List/Filters → Get → Update → Negative cases → Delete.\nAssumes Bearer auth and `x-tenant` header are set. Uses placeholder ObjectIds for related refs.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20528167",
+		"_collection_link": "https://www.postman.com/red-eclipse-24199/workspace/orhan/collection/20528167-52a65210-51bb-45af-a462-3cce29744f83?action=share&source=collection_link&creator=20528167"
+	},
+	"item": [
+		{
+			"name": "Payments (Admin)",
+			"item": [
+				{
+					"name": "Create Payment (happy path, fees w/ currency)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const now = new Date();",
+									"pm.collectionVariables.set('today_iso', now.toISOString());",
+									"pm.collectionVariables.set('pmt_code_lc', 'pmt-' + now.getUTCFullYear() + '-' + String(Date.now()).slice(-6));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('201 Created', () => pm.response.to.have.status(201));",
+									"const js = pm.response.json();",
+									"pm.test('success true', () => pm.expect(js.success).to.be.true);",
+									"const d = js.data || {};",
+									"pm.collectionVariables.set('payment_id', d._id || '');",
+									"pm.collectionVariables.set('payment_code', d.code || '');",
+									"pm.test('Code uppercased', () => pm.expect(d.code).to.eql(pm.collectionVariables.get('pmt_code_lc').toUpperCase()));",
+									"pm.test('Defaults: status pending', () => pm.expect(d.status).to.eql('pending'));",
+									"pm.test('Fee/net snapshots computed', () => { pm.expect(d.feeTotal).to.eql(5); pm.expect(d.netAmount).to.eql(95); pm.expect(d.unappliedAmount).to.eql(95); });"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-tenant",
+								"value": "{{tenant_slug}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"{{pmt_code_lc}}\",\n  \"kind\": \"payment\",\n  \"method\": \"bank_transfer\",\n  \"grossAmount\": 100,\n  \"currency\": \"eur\",\n  \"receivedAt\": \"{{today_iso}}\",\n  \"provider\": \"TestBank\",\n  \"providerRef\": \"GB-TXN-1001\",\n  \"reference\": \"REF-ABC-1001\",\n  \"fees\": [ { \"type\": \"bank\", \"amount\": 5, \"currency\": \"EUR\", \"note\": \"bank fee\" } ],\n  \"payer\": { \"name\": \"John Doe\", \"email\": \"john@doe.test\" },\n  \"instrument\": { \"type\": \"bank\", \"iban\": \"DE001234...\" },\n  \"links\": { \"customer\": \"{{customer_id}}\", \"apartment\": \"{{apartment_id}}\", \"contract\": \"{{contract_id}}\" },\n  \"allocations\": []\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/{{payments_path}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{payments_path}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Status → confirmed (no allocations yet)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('200 OK', () => pm.response.to.have.status(200));",
+									"const d = pm.response.json().data;",
+									"pm.test('Status confirmed', () => pm.expect(d.status).to.eql('confirmed'));",
+									"pm.test('Unapplied == net', () => pm.expect(d.unappliedAmount).to.eql(95));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-tenant",
+								"value": "{{tenant_slug}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"status\": \"confirmed\" }"
+						},
+						"url": {
+							"raw": "{{base_url}}/{{payments_path}}/{{payment_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{payments_path}}",
+								"{{payment_id}}",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update → add PARTIAL allocation (status → partially_allocated)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('200 OK', () => pm.response.to.have.status(200));",
+									"const d = pm.response.json().data;",
+									"pm.test('allocatedTotal 60', () => pm.expect(d.allocatedTotal).to.eql(60));",
+									"pm.test('unapplied 35', () => pm.expect(d.unappliedAmount).to.eql(35));",
+									"pm.test('status partially_allocated', () => pm.expect(d.status).to.eql('partially_allocated'));",
+									"pm.test('allocation has invoice snapshot code if resolvable', () => pm.expect(d.allocations[0]).to.be.an('object'));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-tenant",
+								"value": "{{tenant_slug}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"allocations\": [ { \"invoice\": \"{{invoice_id}}\", \"amount\": 60, \"note\": \"partial alloc\" } ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/{{payments_path}}/{{payment_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{payments_path}}",
+								"{{payment_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update → FULL allocation (status → allocated)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('200 OK', () => pm.response.to.have.status(200));",
+									"const d = pm.response.json().data;",
+									"pm.test('allocatedTotal 95', () => pm.expect(d.allocatedTotal).to.eql(95));",
+									"pm.test('unapplied 0', () => pm.expect(d.unappliedAmount).to.eql(0));",
+									"pm.test('status allocated', () => pm.expect(d.status).to.eql('allocated'));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-tenant",
+								"value": "{{tenant_slug}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"allocations\": [ { \"invoice\": \"{{invoice_id}}\", \"amount\": 95, \"note\": \"full alloc\" } ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/{{payments_path}}/{{payment_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{payments_path}}",
+								"{{payment_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Payments (q=code, status=allocated, invoice filter)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('200 OK', () => pm.response.to.have.status(200));",
+									"const arr = pm.response.json().data || [];",
+									"pm.test('Array returned', () => pm.expect(arr).to.be.an('array'));",
+									"const hit = arr.find(x => x._id === pm.collectionVariables.get('payment_id'));",
+									"pm.test('Contains created payment', () => pm.expect(!!hit).to.be.true);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-tenant",
+								"value": "{{tenant_slug}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{payments_path}}/?q={{payment_code}}&status=allocated&invoice={{invoice_id}}&limit=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{payments_path}}",
+								""
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "{{payment_code}}"
+								},
+								{
+									"key": "status",
+									"value": "allocated"
+								},
+								{
+									"key": "invoice",
+									"value": "{{invoice_id}}"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Payment by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('200 OK', () => pm.response.to.have.status(200));",
+									"const d = pm.response.json().data;",
+									"pm.test('Has links & allocations', () => { pm.expect(d.allocations).to.be.an('array'); pm.expect(d.links).to.be.an('object'); });",
+									"pm.test('isFullyAllocated virtual (unapplied==0)', () => pm.expect(d.unappliedAmount).to.eql(0));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-tenant",
+								"value": "{{tenant_slug}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{payments_path}}/{{payment_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{payments_path}}",
+								"{{payment_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update misc fields (method/card, bookedAt, fees rebalance, reconciled)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('200 OK', () => pm.response.to.have.status(200));",
+									"const d = pm.response.json().data;",
+									"pm.test('Method updated to card', () => pm.expect(d.method).to.eql('card'));",
+									"pm.test('BookedAt set', () => pm.expect(!!d.bookedAt).to.be.true);",
+									"pm.test('Reconciled true', () => pm.expect(d.reconciled).to.eql(true));",
+									"pm.test('Net still 95; status stays allocated', () => { pm.expect(d.netAmount).to.eql(95); pm.expect(d.status).to.eql('allocated'); });"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-tenant",
+								"value": "{{tenant_slug}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"card\",\n  \"bookedAt\": \"{{today_iso}}\",\n  \"fees\": [ { \"type\": \"bank\", \"amount\": 2, \"currency\": \"EUR\" }, { \"type\": \"manual\", \"amount\": 3, \"currency\": \"EUR\" } ],\n  \"reconciled\": true,\n  \"reconciledAt\": \"{{today_iso}}\",\n  \"statementRef\": \"STMT-2025-001\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/{{payments_path}}/{{payment_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{payments_path}}",
+								"{{payment_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "NEGATIVE: allocations exceed net (expect 4xx/5xx, no change persisted)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Expect 400/422/500', () => pm.expect([400,422,500]).to.include(pm.response.code));"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-tenant",
+								"value": "{{tenant_slug}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"allocations\": [ { \"invoice\": \"{{invoice_id}}\", \"amount\": 120 } ] }"
+						},
+						"url": {
+							"raw": "{{base_url}}/{{payments_path}}/admin/{{payment_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{payments_path}}",
+								"admin",
+								"{{payment_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "NEGATIVE: Get by invalid ObjectId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('400 for invalid id', () => pm.expect(pm.response.code).to.eql(400));"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-tenant",
+								"value": "{{tenant_slug}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{payments_path}}/admin/not-an-id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{payments_path}}",
+								"admin",
+								"not-an-id"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Payment (idempotent on reruns)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200/404 acceptable', () => pm.expect([200,404]).to.include(pm.response.code));"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "x-tenant",
+								"value": "{{tenant_slug}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{payments_path}}/admin/{{payment_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{payments_path}}",
+								"admin",
+								"{{payment_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5019",
+			"type": "string"
+		},
+		{
+			"key": "tenant_slug",
+			"value": "gzl",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "payments_path",
+			"value": "payments",
+			"type": "string"
+		},
+		{
+			"key": "payment_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "payment_code",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "pmt_code_lc",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "today_iso",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "invoice_id",
+			"value": "00000000000000000000000a",
+			"type": "string"
+		},
+		{
+			"key": "customer_id",
+			"value": "00000000000000000000000b",
+			"type": "string"
+		},
+		{
+			"key": "apartment_id",
+			"value": "00000000000000000000000c",
+			"type": "string"
+		},
+		{
+			"key": "contract_id",
+			"value": "00000000000000000000000d",
+			"type": "string"
+		}
+	]
+}

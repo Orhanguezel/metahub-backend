@@ -1,5 +1,7 @@
+// src/modules/users/users.routes.ts
+
 import express from "express";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/auth/authMiddleware";
 import {
   registerUser,
   loginUser,
@@ -53,14 +55,14 @@ router.post("/reset-password/:token", validateResetPassword, resetPassword);
 
 // 📋 Admin Routes
 router.get(
-  "/users",
+  "/",
   authenticate,
   authorizeRoles("admin"),
   getUsers
 );
 
 router.get(
-  "/users/:id",
+  "/:id",
   authenticate,
   authorizeRoles("admin"),
   validateUserIdParam,
@@ -68,7 +70,7 @@ router.get(
 );
 
 router.put(
-  "/users/:id",
+  "/:id",
   authenticate,
   authorizeRoles("admin"),
   validateUserIdParam,
@@ -79,7 +81,7 @@ router.put(
 );
 
 router.delete(
-  "/users/:id",
+  "/:id",
   authenticate,
   authorizeRoles("admin"),
   validateUserIdParam,
@@ -87,7 +89,7 @@ router.delete(
 );
 
 router.put(
-  "/users/:id/role",
+  "/:id/role",
   authenticate,
   authorizeRoles("admin"),
   validateUpdateUserRole,
@@ -95,7 +97,7 @@ router.put(
 );
 
 router.put(
-  "/users/:id/status",
+  "/:id/status",
   authenticate,
   authorizeRoles("admin"),
   validateToggleUserStatus,

@@ -1,12 +1,18 @@
-// models/user.model.ts
+// src/modules/users/users.models.ts
 import mongoose, { Schema, Model, models } from "mongoose";
 import {
   hashPassword,
   isPasswordHashed,
   comparePasswords,
-} from "@/core/utils/authUtils";
-import type { IUser, IUserProfileImage } from "./types";
+} from "@/core/middleware/auth/authUtils";
+import type { IUser, IUserProfileImage } from "./types/user.types";
 import { SUPPORTED_LOCALES } from "@/types/common";
+import type { AppRole } from "@/types/roles";
+
+const APP_ROLES: AppRole[] = [
+  "superadmin","admin","manager","support","picker","viewer",
+  "moderator","staff","customer","seller","user"
+];
 
 // --- Profile Image Embedded Subschema ---
 const UserProfileImageSchema = new Schema<IUserProfileImage>(
@@ -19,7 +25,7 @@ const UserProfileImageSchema = new Schema<IUserProfileImage>(
   { _id: false }
 );
 
-interface IUserModel extends Model<IUser> {}
+interface IUserModel extends Model<IUser> { }
 
 // --- Main User Schema ---
 const userSchema = new Schema<IUser>(
@@ -39,12 +45,8 @@ const userSchema = new Schema<IUser>(
 
     password: { type: String, required: true, select: false },
 
-    role: {
-      type: String,
-      enum: ["superadmin", "admin", "user", "customer", "moderator", "staff"],
-      default: "user",
-    },
-
+    role: { type: String, enum: APP_ROLES, default: "user", index: true },
+    roles: { type: [String], enum: APP_ROLES, default: undefined },
     addresses: [{ type: Schema.Types.ObjectId, ref: "address" }],
     payment: { type: Schema.Types.ObjectId, ref: "payment" },
     cart: { type: Schema.Types.ObjectId, ref: "cart" },

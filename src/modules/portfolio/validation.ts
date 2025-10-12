@@ -20,6 +20,15 @@ export const validateObjectId = (field: string) => [
   validateRequest,
 ];
 
+// ✅ JSON Parse Helper
+function parseIfJson(value: any) {
+  try {
+    return typeof value === "string" ? JSON.parse(value) : value;
+  } catch {
+    return value;
+  }
+}
+
 // ✅ Create Validator
 export const validateCreatePortfolio = [
   // Çok dilli zorunlu alan: title
@@ -57,7 +66,7 @@ export const validateUpdatePortfolio = [
         translations
       )
     ),
-  
+
   body("removedImages")
     .optional()
     .custom((val, { req }) => {
@@ -74,6 +83,24 @@ export const validateUpdatePortfolio = [
           path: "removedImages",
         });
         throw new Error(t("validation.invalidRemovedImages"));
+      }
+    }),
+
+  // (Opsiyonel) Sıralama: parse etmeye çalış, başarısız olsa da hataya düşürme
+  body("existingImagesOrder")
+    .optional()
+    .custom((val, { req }) => {
+      try {
+        const parsed = typeof val === "string" ? JSON.parse(val) : val;
+        if (!Array.isArray(parsed)) throw new Error();
+        return true;
+      } catch {
+        logger.withReq.warn(req as any, "portfolio.validation.invalidOrder", {
+          ...getRequestContext(req),
+          value: val,
+          path: "existingImagesOrder",
+        });
+        return true; // sıralama hatası kritik değil
       }
     }),
 
@@ -117,12 +144,3 @@ export const validateAdminQuery = [
     ),
   validateRequest,
 ];
-
-// ✅ JSON Parse Helper
-function parseIfJson(value: any) {
-  try {
-    return typeof value === "string" ? JSON.parse(value) : value;
-  } catch {
-    return value;
-  }
-}

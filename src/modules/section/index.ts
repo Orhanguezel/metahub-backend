@@ -1,28 +1,7 @@
 import express from "express";;
-import sectionmetaRoutes from "./sectionmeta.routes";
-import sectionsettingRoutes from "./sectionsetting.routes";
-import { SectionMeta } from "./section.models";
-import { SectionSetting } from "./section.models";
-import * as sectionmetaController from "./sectionmeta.controller";
-import * as sectionsettingController from "./sectionsetting.controller";
-import * as sectionValidation from "./section.validation";
-import type { ISectionMeta, ISectionSetting } from "./types";
+import routes from "./routes";
 
 const router = express.Router();
-router.use("/meta", sectionmetaRoutes);
-router.use("/setting", sectionsettingRoutes);
-
-export {
-  SectionMeta,
-  sectionmetaController,
-  sectionsettingController,
-  sectionValidation,
-  ISectionMeta,
-  ISectionSetting,
-  SectionSetting,
-  sectionmetaRoutes,
-  sectionsettingRoutes,
-
-};
+router.use("/", routes);
 
 export default router;

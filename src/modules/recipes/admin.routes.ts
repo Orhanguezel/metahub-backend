@@ -1,6 +1,6 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/auth/authMiddleware";
 import {
   createRecipe,
   updateRecipe,

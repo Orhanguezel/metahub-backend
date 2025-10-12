@@ -1,0 +1,6 @@
+{
+  "tenant.required": "Mandant-Header (x-tenant) ist erforderlich.",
+  "sitemap.urls.fetched": "Sitemap-URLs abgerufen.",
+  "seo.siteUrl.missing": "SEO siteUrl ist nicht konfiguriert.",
+  "not.found": "Nicht gefunden."
+}

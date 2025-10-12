@@ -1,6 +1,6 @@
 // src/modules/activity/admin.activity.routes.ts
 import express from "express";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/auth/authMiddleware";
 import {
   adminGetAllActivity,
   adminGetActivityById,

@@ -1,0 +1,32 @@
+{
+  "created": "Şube oluşturuldu.",
+  "updated": "Şube güncellendi.",
+  "deleted": "Şube silindi.",
+  "fetched": "Kayıt getirildi.",
+  "listFetched": "Liste getirildi.",
+  "notFound": "Kayıt bulunamadı.",
+  "invalidId": "Geçersiz kimlik.",
+  "error.create_fail": "Şube oluşturulurken bir hata oluştu.",
+  "validation": {
+    "invalidObjectId": "Geçersiz ObjectId.",
+    "booleanField": "Geçersiz boolean değer.",
+    "codeRequired": "Kod zorunludur.",
+    "locationRequired": "Konum (GeoJSON Point) zorunludur.",
+    "locationInvalid": "Konum geçersiz.",
+    "locationType": "Konum tipi 'Point' olmalıdır.",
+    "locationCoordinates": "Koordinatlar [lng, lat] formatında olmalıdır.",
+    "locationRange": "Koordinatlar izin verilen aralığın dışında.",
+    "servicesRequired": "En az bir servis türü seçilmelidir.",
+    "invalidServiceType": "Geçersiz servis türü.",
+    "openingHoursInvalid": "Çalışma saatleri dizi olmalıdır.",
+    "openingEntryInvalid": "Çalışma saatleri kaydı geçersiz.",
+    "openingDayRange": "Gün 0-6 aralığında olmalıdır.",
+    "openingTimeFormat": "Saat 'HH:mm' formatında olmalıdır.",
+    "minPrepInvalid": "Min hazırlık süresi 0-240 arasında olmalıdır.",
+    "deliveryZonesInvalid": "Teslimat bölgeleri dizisi geçersiz.",
+    "zonePolygonInvalid": "Polygon koordinatları geçersiz.",
+    "zoneFeeInvalidAmount": "Teslimat ücreti negatif olamaz.",
+    "zoneFeeInvalidCurrency": "Geçersiz para birimi.",
+    "zoneNameInvalid": "Geçersiz bölge adı."
+  }
+}

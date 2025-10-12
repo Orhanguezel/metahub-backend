@@ -6,7 +6,7 @@ import {
   updateBookingStatus,
   deleteBooking,
 } from "./admin.controller";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/auth/authMiddleware";
 import {
   validateObjectId,
   validateUpdateBookingStatus,

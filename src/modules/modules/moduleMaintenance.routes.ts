@@ -10,7 +10,7 @@ import {
   getAllAnalyticsStatus,
   batchUpdateModuleSetting,
 } from "./moduleMaintenance.controller";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/auth/authMiddleware";
 import { validateBatchAssign, validateBatchUpdate } from "./admin.validation";
 
 const router = express.Router();

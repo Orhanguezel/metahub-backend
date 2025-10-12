@@ -1,0 +1,19 @@
+{
+  "Product": {
+    "required": [
+      "id",
+      "title",
+      "image",
+      "price"
+    ],
+    "optional": [
+      "brand",
+      "review",
+      "offer_price",
+      "campaingn_product",
+      "cam_product_available",
+      "cam_product_sale",
+      "product_type"
+    ]
+  }
+}

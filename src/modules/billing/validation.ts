@@ -3,7 +3,7 @@ import { validateRequest } from "@/core/middleware/validateRequest";
 import { t as translate } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import translations from "./i18n";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 
 /* ---------------- helpers ---------------- */
 function parseIfJson(v: any) {
@@ -66,7 +66,7 @@ const validateScheduleRequired = body("schedule")
       if (typeof due.day !== "number" || due.day < 1 || due.day > 31)
         throw new Error(t("plan.validation.day"));
     } else if (due.type === "nthWeekday") {
-      if (![1,2,3,4,5].includes(Number(due.nth))) throw new Error(t("plan.validation.nth"));
+      if (![1, 2, 3, 4, 5].includes(Number(due.nth))) throw new Error(t("plan.validation.nth"));
       if (typeof due.weekday !== "number" || due.weekday < 0 || due.weekday > 6)
         throw new Error(t("plan.validation.weekday"));
     } else throw new Error(t("plan.validation.dueType"));
@@ -98,7 +98,7 @@ const validateScheduleOptional = body("schedule")
         if (typeof due.day !== "number" || due.day < 1 || due.day > 31)
           throw new Error(t("plan.validation.day"));
       } else if (due.type === "nthWeekday") {
-        if (![1,2,3,4,5].includes(Number(due.nth))) throw new Error(t("plan.validation.nth"));
+        if (![1, 2, 3, 4, 5].includes(Number(due.nth))) throw new Error(t("plan.validation.nth"));
         if (typeof due.weekday !== "number" || due.weekday < 0 || due.weekday > 6)
           throw new Error(t("plan.validation.weekday"));
       } else throw new Error(t("plan.validation.dueType"));
@@ -117,7 +117,7 @@ export const validateCreatePlan = [
   validateSourceRequired,
   validateScheduleRequired,
   body("code").optional().isString(),
-  body("status").optional().isIn(["draft","active","paused","ended"]),
+  body("status").optional().isIn(["draft", "active", "paused", "ended"]),
   body("notes").optional().customSanitizer(parseIfJson).custom(() => true),
   body("revisions").optional().customSanitizer(parseIfJson).custom((val, { req }) => {
     const t = (k: string) => translate(k, req.locale || getLogLocale(), translations);
@@ -137,7 +137,7 @@ export const validateUpdatePlan = [
   validateSourceOptional,
   validateScheduleOptional,
   body("code").optional().isString(),
-  body("status").optional().isIn(["draft","active","paused","ended"]),
+  body("status").optional().isIn(["draft", "active", "paused", "ended"]),
   body("notes").optional().customSanitizer(parseIfJson).custom(() => true),
   body("revisions").optional().customSanitizer(parseIfJson).custom((val, { req }) => {
     const t = (k: string) => translate(k, req.locale || getLogLocale(), translations);
@@ -150,14 +150,14 @@ export const validateUpdatePlan = [
 ];
 
 export const validateChangePlanStatus = [
-  body("status").isIn(["draft","active","paused","ended"]).withMessage((_, { req }) =>
+  body("status").isIn(["draft", "active", "paused", "ended"]).withMessage((_, { req }) =>
     translate("plan.validation.status", req.locale || getLogLocale(), translations)
   ),
   validateRequest,
 ];
 
 export const validatePlanListQuery = [
-  query("status").optional().isIn(["draft","active","paused","ended"]),
+  query("status").optional().isIn(["draft", "active", "paused", "ended"]),
   query("contract").optional().isMongoId(),
   query("apartment").optional().isMongoId(),
   query("customer").optional().isMongoId(),
@@ -180,7 +180,7 @@ export const validateCreateOccurrence = [
   body("dueAt").notEmpty().isISO8601(),
   body("amount").optional().isFloat({ min: 0 }),
   body("currency").optional().isString(),
-  body("status").optional().isIn(["pending","invoiced","skipped","canceled"]),
+  body("status").optional().isIn(["pending", "invoiced", "skipped", "canceled"]),
   body("invoice").optional().isMongoId(),
   body("seq").optional().isInt({ min: 1 }),
   body("notes").optional().customSanitizer(parseIfJson).custom(() => true),
@@ -194,7 +194,7 @@ export const validateUpdateOccurrence = [
   body("dueAt").optional().isISO8601(),
   body("amount").optional().isFloat({ min: 0 }),
   body("currency").optional().isString(),
-  body("status").optional().isIn(["pending","invoiced","skipped","canceled"]),
+  body("status").optional().isIn(["pending", "invoiced", "skipped", "canceled"]),
   body("invoice").optional().isMongoId(),
   body("seq").optional().isInt({ min: 1 }),
   body("notes").optional().customSanitizer(parseIfJson).custom(() => true),
@@ -202,7 +202,7 @@ export const validateUpdateOccurrence = [
 ];
 
 export const validateOccurrenceListQuery = [
-  query("status").optional().isIn(["pending","invoiced","skipped","canceled"]),
+  query("status").optional().isIn(["pending", "invoiced", "skipped", "canceled"]),
   query("plan").optional().isMongoId(),
   query("invoice").optional().isMongoId(),
   query("dueFrom").optional().isISO8601(),

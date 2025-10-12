@@ -1,0 +1,18 @@
+{
+  "seller.success.fetched": "Sellers fetched successfully.",
+  "seller.success.created": "Seller created successfully.",
+  "seller.success.updated": "Seller updated successfully.",
+  "seller.success.deleted": "Seller deleted successfully.",
+  "seller.errors.notFound": "Seller not found.",
+  "seller.errors.requiredFields": "All required fields must be provided.",
+  "seller.errors.emailExists": "This email address already exists for this tenant.",
+  "seller.validation.invalidObjectId": "Invalid seller ID.",
+  "seller.validation.companyNameRequired": "Company name is required.",
+  "seller.validation.contactNameRequired": "Contact name is required.",
+  "seller.validation.invalidEmail": "Invalid email address.",
+  "seller.validation.phoneRequired": "Phone number is required.",
+  "seller.validation.addressesRequired": "At least one address is required.",
+  "seller.validation.addressLineRequired": "Address line is required.",
+  "seller.validation.addressTypeRequired": "Address type is required.",
+  "seller.validation.invalidString": "Invalid value."
+}

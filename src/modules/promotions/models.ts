@@ -20,9 +20,10 @@ const RulesSchema = new Schema<IPromotionRules>(
       currency: { type: String, default: "TRY" },
     },
     scope: {
-      branchIds: [{ type: Schema.Types.ObjectId, ref: "branch" }],
-      categoryIds: [{ type: Schema.Types.ObjectId, ref: "menucategory" }],
-      itemIds: [{ type: Schema.Types.ObjectId, ref: "menuitem" }],
+      // Ref’siz tutuyoruz: hem product/menuitem hem category/menucategory id’leri kabul
+      branchIds: [{ type: Schema.Types.ObjectId }],
+      categoryIds: [{ type: Schema.Types.ObjectId }],
+      itemIds: [{ type: Schema.Types.ObjectId }],
       serviceTypes: [{ type: String, enum: ["delivery", "pickup", "dinein"] }],
     },
     firstOrderOnly: { type: Boolean, default: false },
@@ -41,8 +42,8 @@ const EffectSchema = new Schema<IPromotionEffect>(
       buyQty: { type: Number, min: 1 },
       getQty: { type: Number, min: 1 },
       itemScope: {
-        itemIds: [{ type: Schema.Types.ObjectId, ref: "menuitem" }],
-        categoryIds: [{ type: Schema.Types.ObjectId, ref: "menucategory" }],
+        itemIds: [{ type: Schema.Types.ObjectId }],
+        categoryIds: [{ type: Schema.Types.ObjectId }],
       },
     },
   },
@@ -59,7 +60,7 @@ const PromotionSchema = new Schema<IPromotion>(
 
     isActive: { type: Boolean, default: true },
     isPublished: { type: Boolean, default: false },
-    priority: { type: Number, default: 100 }, // düşüğü arkada istiyorsan ters çevir
+    priority: { type: Number, default: 100 },
     stackingPolicy: { type: String, enum: ["none", "with_different", "with_same"], default: "with_different" },
 
     rules: { type: RulesSchema, default: {} },
@@ -68,9 +69,19 @@ const PromotionSchema = new Schema<IPromotion>(
   { timestamps: true }
 );
 
-/* benzersizlik ve sorgu hızları */
-PromotionSchema.index({ tenant: 1, kind: 1, isActive: 1, isPublished: 1, "rules.startsAt": 1, "rules.endsAt": 1 });
-PromotionSchema.index({ tenant: 1, code: 1 }, { unique: false, partialFilterExpression: { code: { $type: "string" } } });
+/* indeksler */
+PromotionSchema.index({
+  tenant: 1,
+  kind: 1,
+  isActive: 1,
+  isPublished: 1,
+  "rules.startsAt": 1,
+  "rules.endsAt": 1,
+});
+PromotionSchema.index(
+  { tenant: 1, code: 1 },
+  { unique: false, partialFilterExpression: { code: { $type: "string" } } }
+);
 PromotionSchema.index({ tenant: 1, priority: 1 });
 
 PromotionSchema.set("toJSON", {

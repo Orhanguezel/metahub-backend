@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import slugify from "slugify";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
@@ -52,15 +52,15 @@ export const createNeighborhood = asyncHandler(async (req: Request, res: Respons
       tags: Array.isArray(req.body.tags) ? req.body.tags : safeParse<string[]>(req.body.tags),
       sortOrder:
         typeof req.body.sortOrder === "number" ? req.body.sortOrder :
-        typeof req.body.sortOrder === "string" ? Number(req.body.sortOrder) || 0 : 0,
+          typeof req.body.sortOrder === "string" ? Number(req.body.sortOrder) || 0 : 0,
       isActive:
         typeof req.body.isActive === "boolean"
           ? req.body.isActive
           : req.body.isActive === "true"
-          ? true
-          : req.body.isActive === "false"
-          ? false
-          : true,
+            ? true
+            : req.body.isActive === "false"
+              ? false
+              : true,
     };
 
     const doc = await Neighborhood.create(payload);

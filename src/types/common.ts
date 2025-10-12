@@ -1,6 +1,6 @@
 // src/types/common.ts
 // 🌍 Desteklenen diller
-export const SUPPORTED_LOCALES = ["tr", "en", "de", "pl", "fr", "es"] as const;
+export const SUPPORTED_LOCALES = ["tr", "en", "de", "pl", "fr", "es", "it", "pt", "ar", "ru", "zh", "hi"] as const;
 
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
@@ -15,6 +15,12 @@ export function getDateLocale(locale: SupportedLocale) {
     case "fr": return "fr-FR";
     case "es": return "es-ES";
     case "pl": return "pl-PL";
+    case "it": return "it-IT";
+    case "pt": return "pt-PT";
+    case "ar": return "ar-SA";
+    case "ru": return "ru-RU";
+    case "zh": return "zh-CN";
+    case "hi": return "hi-IN";
     default: return "en-US";
   }
 }

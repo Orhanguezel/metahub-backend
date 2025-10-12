@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { t as translate } from "@/core/utils/i18n/translate";
@@ -43,7 +43,7 @@ export const sendCatalogRequest = asyncHandler(
         req.tenantData?.name ||
         "Brand";
       const senderEmail = req.tenantData?.emailSettings?.senderEmail;
-      const adminEmail  = req.tenantData?.emailSettings?.adminEmail;
+      const adminEmail = req.tenantData?.emailSettings?.adminEmail;
       const brandWebsite =
         (req.tenantData?.domain?.main && `https://${req.tenantData.domain.main}`) || undefined;
 
@@ -105,12 +105,12 @@ export const sendCatalogRequest = asyncHandler(
 
       // 4) 🔔 v2 Notification (admin + moderator)
       const title: Record<SupportedLocale, string> = {} as any;
-      const msg:   Record<SupportedLocale, string> = {} as any;
+      const msg: Record<SupportedLocale, string> = {} as any;
       for (const lng of SUPPORTED_LOCALES) {
         const tLng = (k: string, p?: any) => translate(k, lng, translations, p);
         title[lng] = tLng("catalog.notification.title") || "Yeni katalog talebi";
-        msg[lng]   = tLng("catalog.notification.message", { name, email }) ||
-                     `${name} (${email}) yeni bir katalog talebinde bulundu.`;
+        msg[lng] = tLng("catalog.notification.message", { name, email }) ||
+          `${name} (${email}) yeni bir katalog talebinde bulundu.`;
       }
 
       const target = { roles: ["admin", "moderator"] };

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { IEnsotekprod } from "@/modules/ensotekprod/types";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import slugify from "slugify";
 import path from "path";
 import fs from "fs";

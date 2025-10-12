@@ -15,7 +15,7 @@ function cartT(key: string, locale: SupportedLocale, vars?: Record<string, any>)
 
 /* ---- toplam hesap ---- */
 const recalculateTotal = (items: ICartItem[]): number =>
-  items.reduce((sum, item) => sum + item.quantity * item.priceAtAddition, 0);
+  items.reduce((sum, item) => sum + Number(item.quantity || 0) * Number(item.priceAtAddition || 0), 0);
 
 /* ---- küçük util ---- */
 const norm = (s?: string) => String(s || "").trim().toLowerCase();
@@ -136,13 +136,18 @@ async function priceMenuLine(
 const getProduct = async (
   req: Request,
   productId: string,
-  productType: "bike" | "ensotekprod" | "sparepart" | "menuitem"
+  productType: "product" | "ensotekprod" | "sparepart" | "menuitem"
 ) => {
-  const { Bike, Ensotekprod, Sparepart, MenuItem } = await getTenantModels(req);
-  if (productType === "ensotekprod") return Ensotekprod.findOne({ _id: productId, tenant: req.tenant });
-  if (productType === "sparepart") return Sparepart.findOne({ _id: productId, tenant: req.tenant });
-  if (productType === "menuitem") return MenuItem.findOne({ _id: productId, tenant: req.tenant });
-  return Bike.findOne({ _id: productId, tenant: req.tenant });
+  const { Product, Ensotekprod, Sparepart, MenuItem } = await getTenantModels(req) as any;
+
+  if (productType === "product" || productType === "ensotekprod") {
+    if (Product) return Product.findOne({ _id: productId, tenant: req.tenant });
+    if (Ensotekprod) return Ensotekprod.findOne({ _id: productId, tenant: req.tenant });
+    return null;
+  }
+  if (productType === "sparepart") return Sparepart?.findOne({ _id: productId, tenant: req.tenant }) || null;
+  if (productType === "menuitem") return MenuItem?.findOne({ _id: productId, tenant: req.tenant }) || null;
+  return null;
 };
 
 /* ---- kullanıcı sepeti getir ---- */
@@ -167,7 +172,15 @@ export const getUserCart = asyncHandler(async (req: Request, res: Response) => {
   let cart = await getCartForUser(req, userId, true);
   if (!cart) {
     const { Cart } = await getTenantModels(req);
-    cart = new Cart({ user: userId, tenant: req.tenant, items: [], totalPrice: 0, couponCode: null, language: locale });
+    cart = new Cart({
+      user: userId,
+      tenant: req.tenant,
+      items: [],
+      totalPrice: 0,
+      couponCode: null,
+      language: locale,
+      currency: "TRY",
+    });
     await cart.save();
     logger.withReq.info(req, cartT("cart.created", locale, { userId }));
     res.status(201).json({ success: true, message: cartT("cart.created", locale), data: cart });
@@ -185,7 +198,7 @@ export const addToCart = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user?.id;
   const { productId, productType, quantity, menu, currency } = req.body as {
     productId: string;
-    productType: "bike" | "ensotekprod" | "sparepart" | "menuitem";
+    productType: "product" | "ensotekprod" | "sparepart" | "menuitem";
     quantity: number;
     menu?: { variantCode?: string; modifiers?: ModifierSelection[]; depositIncluded?: boolean; notes?: string };
     currency?: string;
@@ -254,7 +267,7 @@ export const addToCart = asyncHandler(async (req: Request, res: Response) => {
   let cart = await getCartForUser(req, userId);
   if (!cart) {
     const { Cart } = await getTenantModels(req);
-    cart = new Cart({ user: userId, items: [], tenant: req.tenant, totalPrice: 0, couponCode: null, language: locale });
+    cart = new Cart({ user: userId, items: [], tenant: req.tenant, totalPrice: 0, couponCode: null, language: locale, currency: fallbackCurrency });
   }
 
   const idx = cart.items.findIndex(
@@ -267,7 +280,6 @@ export const addToCart = asyncHandler(async (req: Request, res: Response) => {
 
   if (idx > -1) {
     cart.items[idx].quantity += quantity;
-    // menuitem ise priceAtAddition SABİT kalır; diğerlerinde de sabit kalsın.
     cart.items[idx].totalPriceAtAddition = cart.items[idx].quantity * cart.items[idx].priceAtAddition;
   } else {
     cart.items.push({
@@ -339,8 +351,6 @@ export const increaseQuantity = asyncHandler(async (req: Request, res: Response)
   }
 
   cart.items[itemIndex].quantity += 1;
-
-  // Not: priceAtAddition'ı değiştirmiyoruz (menuitem’de zaten hesaplandı, diğerlerinde ekleme anı fiyatı)
   cart.items[itemIndex].totalPriceAtAddition =
     cart.items[itemIndex].quantity * cart.items[itemIndex].priceAtAddition;
 
@@ -465,7 +475,6 @@ export const clearCart = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json({ success: true, message: cartT("cart.clear.success", locale), data: cart });
 });
 
-
 /* ===================== CART LINE (MENU) ===================== */
 
 export const addCartLine = asyncHandler(async (req: Request, res: Response) => {
@@ -496,7 +505,6 @@ export const addCartLine = asyncHandler(async (req: Request, res: Response) => {
 
   const { MenuItem, PriceListItem, Cart } = await getTenantModels(req);
 
-  // fiyatlama (menuitem)
   const priced = await priceMenuLine(
     MenuItem,
     PriceListItem,
@@ -512,9 +520,8 @@ export const addCartLine = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  // sepete ekle
   let cart = await getCartForUser(req, userId);
-  if (!cart) cart = new Cart({ user: userId, items: [], tenant: req.tenant, totalPrice: 0, language: locale });
+  if (!cart) cart = new Cart({ user: userId, items: [], tenant: req.tenant, totalPrice: 0, language: locale, currency });
 
   cart.items.push({
     product: Types.ObjectId.createFromHexString(String(menuItemId)),
@@ -585,13 +592,11 @@ export const updateCartLine = asyncHandler(async (req: Request, res: Response) =
     return;
   }
 
-  // miktar güncelle
   if (quantity != null) {
     const q = Math.max(1, Number(quantity));
     line.quantity = q;
   }
 
-  // varyant/modifier değişiyorsa yeniden fiyatla
   if (variantCode != null || modifiers != null || depositIncluded != null || notes != null) {
     const { MenuItem, PriceListItem } = await getTenantModels(req);
     const priced = await priceMenuLine(
@@ -703,17 +708,15 @@ export const updateCartPricing = asyncHandler(async (req: Request, res: Response
   const itemsTotal = recalculateTotal(cart.items);
   if (coupon) discount = Math.round(itemsTotal * (Number(coupon.discount || 0) / 100));
 
-  // cart alanlarını güncelle (şema esnek ise top-level tutuyoruz)
-  (cart as any).tipAmount = Number(tipAmount) || 0;
-  (cart as any).deliveryFee = Number(deliveryFee) || 0;
-  (cart as any).serviceFee = Number(serviceFee) || 0;
-  (cart as any).couponCode = coupon?.code || couponCode || null;
-  (cart as any).currency = currency || (cart as any).currency || "TRY";
+  cart.tipAmount = Number(tipAmount) || 0;
+  cart.deliveryFee = Number(deliveryFee) || 0;
+  cart.serviceFee = Number(serviceFee) || 0;
+  cart.couponCode = coupon?.code || couponCode || null;
+  cart.currency = currency || cart.currency || "TRY";
 
   const grandTotal =
     itemsTotal + Number(deliveryFee || 0) + Number(serviceFee || 0) + Number(tipAmount || 0) - discount;
 
-  // klasik totalPrice’ı (items toplamı) koruyoruz
   cart.totalPrice = itemsTotal;
   await cart.save();
 
@@ -730,7 +733,7 @@ export const updateCartPricing = asyncHandler(async (req: Request, res: Response
         tipAmount: Number(tipAmount || 0),
         discount,
         grandTotal: Math.max(0, grandTotal),
-        currency: (cart as any).currency || "TRY",
+        currency: cart.currency || "TRY",
       },
     },
   });
@@ -761,7 +764,6 @@ export const checkoutCart = asyncHandler(async (req: Request, res: Response) => 
     Payment,
   } = await getTenantModels(req);
 
-  // sepeti getir
   const cart = await getCartForUser(req, userId);
   if (!cart || !cart.items?.length) {
     res.status(400).json({ success: false, message: cartT("cart.checkout.empty", locale) });
@@ -819,7 +821,7 @@ export const checkoutCart = asyncHandler(async (req: Request, res: Response) => 
     tenant: req.tenant,
     unitPrice: it.priceAtAddition,
     unitCurrency: it.unitCurrency || currency,
-    menu: it.menu,                 // snapshot dahil
+    menu: it.menu,
     priceComponents: it.priceComponents,
   }));
 
@@ -845,7 +847,6 @@ export const checkoutCart = asyncHandler(async (req: Request, res: Response) => 
 
   const finalTotal = Math.max(0, itemsTotal + deliveryFee + serviceFee + tipAmount + taxTotal - discount);
 
-  // order create
   const order = await Order.create({
     user: req.user?._id,
     tenant: req.tenant,
@@ -870,7 +871,6 @@ export const checkoutCart = asyncHandler(async (req: Request, res: Response) => 
     language: locale,
   });
 
-  // ödeme kaydı (kart/paypal)
   if (paymentMethod === "credit_card" || paymentMethod === "paypal") {
     const methodMap = { credit_card: "card", paypal: "wallet", cash_on_delivery: "cash" } as const;
     try {
@@ -893,7 +893,7 @@ export const checkoutCart = asyncHandler(async (req: Request, res: Response) => 
     }
   }
 
-  // sepeti temizle (checkout sonrası)
+  // sepet temizliği
   cart.items = [];
   cart.totalPrice = 0;
   await cart.save();
@@ -901,4 +901,3 @@ export const checkoutCart = asyncHandler(async (req: Request, res: Response) => 
   logger.withReq.info(req, cartT("cart.checkout.success", locale, { orderId: String(order._id) }));
   res.status(201).json({ success: true, message: cartT("cart.checkout.success", locale), data: order });
 });
-

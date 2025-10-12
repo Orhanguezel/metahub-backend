@@ -1,0 +1,32 @@
+{
+  "created": "Branch created.",
+  "updated": "Branch updated.",
+  "deleted": "Branch deleted.",
+  "fetched": "Record fetched.",
+  "listFetched": "List fetched.",
+  "notFound": "Record not found.",
+  "invalidId": "Invalid id.",
+  "error.create_fail": "An error occurred while creating the branch.",
+  "validation": {
+    "invalidObjectId": "Invalid ObjectId.",
+    "booleanField": "Invalid boolean value.",
+    "codeRequired": "Code is required.",
+    "locationRequired": "Location (GeoJSON Point) is required.",
+    "locationInvalid": "Invalid location.",
+    "locationType": "Location type must be 'Point'.",
+    "locationCoordinates": "Coordinates must be [lng, lat].",
+    "locationRange": "Coordinates out of range.",
+    "servicesRequired": "At least one service type is required.",
+    "invalidServiceType": "Invalid service type.",
+    "openingHoursInvalid": "Opening hours must be an array.",
+    "openingEntryInvalid": "Invalid opening hour entry.",
+    "openingDayRange": "Day must be in 0-6.",
+    "openingTimeFormat": "Time must be in 'HH:mm' format.",
+    "minPrepInvalid": "Min preparation must be between 0-240.",
+    "deliveryZonesInvalid": "Delivery zones must be an array.",
+    "zonePolygonInvalid": "Invalid polygon coordinates.",
+    "zoneFeeInvalidAmount": "Delivery fee cannot be negative.",
+    "zoneFeeInvalidCurrency": "Invalid currency.",
+    "zoneNameInvalid": "Invalid zone name."
+  }
+}

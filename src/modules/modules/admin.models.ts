@@ -74,6 +74,16 @@ const ModuleSettingSchema = new Schema<IModuleSetting>(
     seoDescription: { type: buildLocalizedOptional(), default: () => ({}) },
     seoSummary: { type: buildLocalizedOptional(), default: () => ({}) },
     seoOgImage: { type: String, default: "", trim: true },
+    /* 🔽 Sitemap otomasyonu için opsiyonel alt belge */
+    sitemap: {
+      enabled: { type: Boolean },
+      basePath: { type: String, trim: true },
+      detailKey: { type: String, trim: true },
+      detailPathTemplate: { type: String, trim: true },
+      includeListPage: { type: Boolean },
+      filters: { type: Schema.Types.Mixed, default: undefined },
+      limit: { type: Number, min: 1, max: 1000000 },
+    },
   },
   { timestamps: true }
 );

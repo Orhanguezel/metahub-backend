@@ -7,7 +7,7 @@ import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import type { SupportedLocale } from "@/types/common";
 import type { InvoiceStatus } from "./types";
 
@@ -57,10 +57,10 @@ export const updateInvoice = asyncHandler(async (req: Request, res: Response) =>
     | "seller" | "buyer" | "links" | "items" | "invoiceDiscount" | "totals"
     | "notes" | "terms" | "attachments" | "sentAt" | "paidAt" | "reverses" | "code"
   > = [
-    "type", "status", "issueDate", "dueDate", "periodStart", "periodEnd",
-    "seller", "buyer", "links", "items", "invoiceDiscount", "totals",
-    "notes", "terms", "attachments", "sentAt", "paidAt", "reverses", "code",
-  ];
+      "type", "status", "issueDate", "dueDate", "periodStart", "periodEnd",
+      "seller", "buyer", "links", "items", "invoiceDiscount", "totals",
+      "notes", "terms", "attachments", "sentAt", "paidAt", "reverses", "code",
+    ];
 
   for (const k of updatableKeys) if (up[k] !== undefined) (inv as any).set(k, up[k]);
 
@@ -128,12 +128,12 @@ export const adminGetInvoices = asyncHandler(async (req: Request, res: Response)
   if (issueFrom || issueTo) {
     filter.issueDate = {};
     if (issueFrom) filter.issueDate.$gte = new Date(String(issueFrom));
-    if (issueTo)   filter.issueDate.$lte = new Date(String(issueTo));
+    if (issueTo) filter.issueDate.$lte = new Date(String(issueTo));
   }
   if (dueFrom || dueTo) {
     filter.dueDate = {};
     if (dueFrom) filter.dueDate.$gte = new Date(String(dueFrom));
-    if (dueTo)   filter.dueDate.$lte = new Date(String(dueTo));
+    if (dueTo) filter.dueDate.$lte = new Date(String(dueTo));
   }
 
   const p = Math.max(1, Number(page) || 1);
@@ -145,10 +145,10 @@ export const adminGetInvoices = asyncHandler(async (req: Request, res: Response)
   const list = await Invoice.find(filter)
     .select("-__v")
     .populate([
-      { path: "links.customer",         select: "companyName contactName" },
-      { path: "links.apartment",        select: "title slug" },
-      { path: "links.contract",         select: "code status" },
-      { path: "links.billingPlan",      select: "code status" },
+      { path: "links.customer", select: "companyName contactName" },
+      { path: "links.apartment", select: "title slug" },
+      { path: "links.contract", select: "code status" },
+      { path: "links.billingPlan", select: "code status" },
       { path: "links.billingOccurrences", select: "seq dueAt status" },
     ])
     .sort(sortObj)
@@ -180,7 +180,7 @@ export const adminGetInvoiceById = asyncHandler(async (req: Request, res: Respon
     .populate([
       { path: "links.customer", select: "companyName contactName email phone" },
       { path: "links.apartment", select: "title slug" },
-      { path: "links.contract",  select: "code status" },
+      { path: "links.contract", select: "code status" },
       { path: "links.billingPlan", select: "code status" },
       { path: "links.billingOccurrences", select: "seq dueAt status" },
     ])

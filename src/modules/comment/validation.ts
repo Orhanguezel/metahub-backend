@@ -103,3 +103,20 @@ export const validateListTestimonials = [
   query("minRating").optional().isInt({ min: 1, max: 5 }).withMessage("minRating must be 1..5"),
   validateRequest,
 ];
+
+// ⬇️ EK: /comment/user/me için query doğrulama
+export const validateListMine = [
+  query("page").optional().isInt({ min: 1 }).withMessage("page must be >= 1"),
+  query("limit").optional().isInt({ min: 1, max: 100 }).withMessage("limit must be 1..100"),
+  query("type")
+    .optional()
+    .isString()
+    .custom((v) => {
+      const lower = String(v).toLowerCase();
+      if (!ALLOWED_COMMENT_TYPES.includes(lower as any)) {
+        throw new Error(`type must be one of: ${ALLOWED_COMMENT_TYPES.join(", ")}`);
+      }
+      return true;
+    }),
+  validateRequest,
+];

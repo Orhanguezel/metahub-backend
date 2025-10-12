@@ -13,8 +13,6 @@ export const uploadSizeLimits: Record<UploadFolderKeys, number> = {
   product: 20 * 1024 * 1024,
   ensotekprod: 20 * 1024 * 1024,
   ensotekCategory: 20 * 1024 * 1024,
-  bikes: 20 * 1024 * 1024,
-  bikesCategory: 20 * 1024 * 1024,
   category: 10 * 1024 * 1024,
   news: 15 * 1024 * 1024,
   articles: 15 * 1024 * 1024,
@@ -34,6 +32,7 @@ export const uploadSizeLimits: Record<UploadFolderKeys, number> = {
   tenant: 20 * 1024 * 1024,
   coupons: 10 * 1024 * 1024,
   about: 10 * 1024 * 1024,
+  aboutus: 10 * 1024 * 1024,
   galleryCategory: 30 * 1024 * 1024,
   sparepartCategory: 30 * 1024 * 1024,
   team: 30 * 1024 * 1024,
@@ -43,7 +42,8 @@ export const uploadSizeLimits: Record<UploadFolderKeys, number> = {
   menucategory: 30 * 1024 * 1024,
   menuitem: 30 * 1024 * 1024,
   menu: 30 * 1024 * 1024,
-  recipe:30 * 1024 * 1024,
+  recipe: 30 * 1024 * 1024,
+  seller: 30 * 1024 * 1024,
 
   // -- yeni modüller (Apartment projesi) --
   /**

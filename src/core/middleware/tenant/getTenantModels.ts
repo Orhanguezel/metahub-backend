@@ -4,9 +4,6 @@ import { Request } from "express";
 // ✅ Doğrudan model export edilen modüller
 import { Settings } from "@/modules/settings/settings.models";
 import { User } from "@/modules/users/users.models";
-import { Product } from "@/modules/product/product.models";
-import { Order } from "@/modules/order/models";
-import { Cart } from "@/modules/cart/models";
 import { Blog } from "@/modules/blog/models";
 import { BlogCategory } from "@/modules/blogcategory/category.models";
 import { Booking } from "@/modules/booking/booking.models";
@@ -14,7 +11,7 @@ import {
   BookingSlotRule,
   BookingSlotOverride,
 } from "@/modules/bookingslot/bookingslot.models";
-import { Coupon } from "@/modules/coupon/models";
+
 import { Gallery } from "@/modules/gallery/models";
 import { GalleryCategory } from "@/modules/gallerycategory/models";
 import { Services } from "@/modules/services/models";
@@ -24,25 +21,23 @@ import { MassageCategory } from "@/modules/massagecategory/category.models";
 import { Stockmovement } from "@/modules/stockmovement/stockmovement.models";
 import { Notification } from "@/modules/notification/notification.models";
 import { Comment } from "@/modules/comment/models";
-import { Review } from "@/modules/review/review.models";
-import { ContactMessage } from "@/modules/contact/contact.models";
+import { ContactMessage } from "@/modules/contact/models";
 import { Newsletter } from "@/modules/newsletter/newsletter.models";
-import { EmailMessage } from "@/modules/email/email.models";
-import { Favorite } from "@/modules/favorite/favorite.model";
-import { Feedback } from "@/modules/feedback/feedback.models";
-import { Address } from "@/modules/address/address.models";
-import { Company } from "@/modules/company/company.models";
+import { EmailMessage } from "@/modules/email/models";
+import { Address } from "@/modules/address/models";
+import { Company } from "@/modules/company/models";
 import { Customer } from "@/modules/customer/models";
-import { FAQ } from "@/modules/faq/faq.models";
+import { FAQ } from "@/modules/faq/models";
 import { Invoice } from "@/modules/invoicing/models";
+import { Order } from "@/modules/orders/models";
 import { Offer } from "@/modules/offer/models";
-import { Payment } from "@/modules/payments/models";
-import { Shipment } from "@/modules/shipment/shipment.models";
 import { Task } from "@/modules/task/task.models";
 import { Activity } from "@/modules/activity/models";
 import { ActivityCategory } from "@/modules/activitycategory/category.models";
 import { About } from "@/modules/about/models";
+import { Aboutus } from "@/modules/aboutus/models";
 import { AboutCategory } from "@/modules/aboutcategory/category.models";
+import { AboutusCategory } from "@/modules/aboutuscategory/category.models";
 import { References } from "@/modules/references/models";
 import { ReferencesCategory } from "@/modules/referencescategory/models";
 import { Articles } from "@/modules/articles/models";
@@ -53,12 +48,7 @@ import { ChatMessage } from "@/modules/chat/message.model";
 import { ChatSession } from "@/modules/chat/session.model";
 import { Ensotekprod } from "@/modules/ensotekprod/models";
 import { EnsotekCategory } from "@/modules/ensotekcategory/models";
-import { Sport } from "@/modules/sport/sport.models";
-import { SportCategory } from "@/modules/sportcategory/sportcategory.models";
-import { Bike } from "@/modules/bikes/model";
-import { BikeCategory } from "@/modules/bikescategory/models";
-import { SectionSetting, SectionMeta } from "@/modules/section/section.models";
-import { Apikey, Apikeylog } from "@/modules/apikey/apikey.models";
+import { Section } from "@/modules/section/models";
 import { News } from "@/modules/news/models";
 import { NewsCategory } from "@/modules/newscategory/category.models";
 import { Analytics } from "@/modules/analytics/analytics.models";
@@ -71,7 +61,10 @@ import { Portfolio } from "@/modules/portfolio/models";
 import { Skill } from "@/modules/skill/models";
 import { SkillCategory } from "@/modules/skillcategory/category.models";
 import { CatalogRequest } from "@/modules/catalog/catalog.models";
-import { Pricing } from "@/modules/pricing/models";
+
+import { PricingPlan } from "@/modules/pricingplan/models";
+
+
 
 import { Apartment } from "@/modules/apartment/models";
 import { BillingPlan, BillingOccurrence } from "@/modules/billing/models";
@@ -95,17 +88,54 @@ import { MenuCategory } from "@/modules/menucategory/models";
 import { Menu } from "@/modules/menu/models";
 import { MenuItem } from "@/modules/menuitem/models";
 import { Promotion, PromotionRedemption } from "@/modules/promotions/models";
-import { WebhookDelivery, WebhookEndpoint } from "@/modules/webhooks/models";
 
 import { Reaction } from "@/modules/reactions/models";
 import { Recipe } from "@/modules/recipes/models";
 import { RecipeCategory } from "@/modules/recipescategory/models";
+import { SeoSetting } from "@/modules/seo/models";
+import { AuthIdentity, PasswordReset, EmailChange } from "@/modules/authlite/authlite.models";
+
+
+import { Cart } from "@/modules/cart/models";
+import { Coupon } from "@/modules/coupon/models";
+import { Payment } from "@/modules/payments/domain/payment.models";
+import { Shipment } from "@/modules/shipping/shipment.models";
+import { ShippingMethod } from "@/modules/shipping/method/shipping-method.model";
+
+import { Product } from "@/modules/product/models";
+import { Category } from "@/modules/category/models";
+import { Stockledger } from "@/modules/stockledger/models";
+import { InventoryModel } from "@/modules/inventory/models";
+import { PaymentGateway } from "@/modules/payments/gateway/models.gateway";
+import { Brand } from "@/modules/brand/models";
+import { ProductAttribute } from "@/modules/attributes/models";
+import { FeeRule } from "@/modules/fees/fee.model";
+import { ProductVariant } from "@/modules/variants/models";
+import { GeoZone } from "@/modules/tax/models.geozone";
+import { TaxRate } from "@/modules/tax/models.taxrate";
+import { Wishlist } from "@/modules/wishlist/models";
+import { Compare } from "@/modules/compare/models";
+import { Review } from "@/modules/review/models";
+import { WebhookDelivery, WebhookEndpoint } from "@/modules/payments/webhooks/models";
+import { Suggestion } from "@/modules/search/suggestion.model";
+import { SearchIndex } from "@/modules/search/search-index.model";
+import { Pricing } from "@/modules/pricing/models";
+import { PaymentIntent } from "@/modules/payments/intents/intent.models";
+import { StorefrontSettings } from "@/modules/storefront/models";
+import { ReturnRMA } from "@/modules/returns/model";
+import { Giftcard } from "@/modules/giftcards/models";
+import { LoyaltyLedger } from "@/modules/loyalty/models";
+import { MediaAsset } from "@/modules/media/models";
+import { Refund } from "@/modules/refunds/model";
+import { ShippingGeoZone } from "@/modules/shipping/geozones/geozones.models";
+import { UserReport } from "@/modules/product/userreport.model";
+import { Seller } from "@/modules/sellers/models";
+
 
 
 export const getTenantModels = async (req: Request) => ({
   Settings: await req.getModel("settings", Settings.schema),
   User: await req.getModel("user", User.schema),
-  Product: await req.getModel("product", Product.schema),
   Order: await req.getModel("order", Order.schema),
   Cart: await req.getModel("cart", Cart.schema),
   Blog: await req.getModel("blog", Blog.schema),
@@ -138,11 +168,8 @@ export const getTenantModels = async (req: Request) => ({
   StockMovement: await req.getModel("stockmovement", Stockmovement.schema),
   Notification: await req.getModel("notification", Notification.schema),
   Comment: await req.getModel("comment", Comment.schema),
-  Review: await req.getModel("review", Review.schema),
   ContactMessage: await req.getModel("contactmessage", ContactMessage.schema),
   EmailMessage: await req.getModel("emailmessage", EmailMessage.schema),
-  Favorite: await req.getModel("favorite", Favorite.schema),
-  Feedback: await req.getModel("feedback", Feedback.schema),
   Address: await req.getModel("address", Address.schema),
   Company: await req.getModel("company", Company.schema),
   Customer: await req.getModel("customer", Customer.schema),
@@ -180,15 +207,8 @@ export const getTenantModels = async (req: Request) => ({
     "ensotekcategory",
     EnsotekCategory.schema
   ),
-  Sport: await req.getModel("sport", Sport.schema),
-  SportCategory: await req.getModel("sportcategory", SportCategory.schema),
-  Bike: await req.getModel("bike", Bike.schema),
-  BikeCategory: await req.getModel("bikecategory", BikeCategory.schema),
-  SectionSetting: await req.getModel("sectionsetting", SectionSetting.schema),
-  SectionMeta: await req.getModel("sectionmeta", SectionMeta.schema),
+  Section: await req.getModel("section", Section.schema),
   Apartment: await req.getModel("apartment", Apartment.schema),
-  Apikey: await req.getModel("apikey", Apikey.schema),
-  Apikeylog: await req.getModel("apikeylog", Apikeylog.schema),
   News: await req.getModel("news", News.schema),
   NewsCategory: await req.getModel("newscategory", NewsCategory.schema),
   Analytics: await req.getModel("analytics", Analytics.schema),
@@ -256,8 +276,43 @@ export const getTenantModels = async (req: Request) => ({
     WebhookDelivery.schema
   ),
 
+
   Reaction: await req.getModel("reaction", Reaction.schema),
   Recipe: await req.getModel("recipe", Recipe.schema),
   RecipeCategory: await req.getModel("recipecategory", RecipeCategory.schema),
+  SeoSetting: await req.getModel("seosetting", SeoSetting.schema),
+  AuthIdentity: await req.getModel("authidentity", AuthIdentity.schema),
+  PasswordReset: await req.getModel("passwordreset", PasswordReset.schema),
+  EmailChange: await req.getModel("emailchange", EmailChange.schema),
+  Aboutus: await req.getModel("aboutus", Aboutus.schema),
+  AboutusCategory: await req.getModel("aboutuscategory", AboutusCategory.schema),
 
+  Product: await req.getModel("product", Product.schema),
+  Category: await req.getModel("category", Category.schema),
+  Stockledger: await req.getModel("stockledger", Stockledger.schema),
+  PaymentGateway: await req.getModel("paymentgateway", PaymentGateway.schema),
+  Brand: await req.getModel("brand", Brand.schema),
+  ProductAttribute: await req.getModel("productattribute", ProductAttribute.schema),
+  FeeRule: await req.getModel("fee", FeeRule.schema),
+  ProductVariant: await req.getModel("productvariant", ProductVariant.schema),
+  GeoZone: await req.getModel("geozone", GeoZone.schema),
+  TaxRate: await req.getModel("taxrate", TaxRate.schema),
+  Wishlist: await req.getModel("wishlist", Wishlist.schema),
+  Compare: await req.getModel("compare", Compare.schema),
+  Review: await req.getModel("review", Review.schema),
+  Suggestion: await req.getModel("suggestion", Suggestion.schema),
+  SearchIndex: await req.getModel("searchindex", SearchIndex.schema),
+  ShippingMethod: await req.getModel("shippingmethod", ShippingMethod.schema),
+  PricingPlan: await req.getModel("pricingplan", PricingPlan.schema),
+  PaymentIntent: await req.getModel("paymentintent", PaymentIntent.schema),
+  StorefrontSettings: await req.getModel("storefrontsettings", StorefrontSettings.schema),
+  InventoryModel: await req.getModel("inventory", InventoryModel.schema),
+  ReturnRMA: await req.getModel("returnrma", ReturnRMA.schema),
+  Giftcard: await req.getModel("giftcard", Giftcard.schema),
+  LoyaltyLedger: await req.getModel("loyaltyledger", LoyaltyLedger.schema),
+  MediaAsset: await req.getModel("mediaasset", MediaAsset.schema),
+  Refund: await req.getModel("refund", Refund.schema),
+  ShippingGeoZone: await req.getModel("shippinggeozone", ShippingGeoZone.schema),
+  UserReportModel: await req.getModel("userreport", UserReport.schema),
+  Seller: await req.getModel("seller", Seller.schema),
 });

@@ -9,7 +9,7 @@ import {
   getActiveChatSessions,
   getAllChatSessions,
 } from "./admin.controller";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/auth/authMiddleware";
 import {
   validateManualMessage,
   validateBulkDelete,

@@ -1,0 +1,6 @@
+{
+  "tenant.required": "El encabezado de inquilino (x-tenant) es obligatorio.",
+  "sitemap.urls.fetched": "URLs del mapa del sitio obtenidas.",
+  "seo.siteUrl.missing": "El siteUrl de SEO no está configurado.",
+  "not.found": "No encontrado."
+}

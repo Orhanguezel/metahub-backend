@@ -1,0 +1,18 @@
+{
+  "seller.success.fetched": "Müşteriler başarıyla getirildi.",
+  "seller.success.created": "Müşteri başarıyla oluşturuldu.",
+  "seller.success.updated": "Müşteri başarıyla güncellendi.",
+  "seller.success.deleted": "Müşteri başarıyla silindi.",
+  "seller.errors.notFound": "Müşteri bulunamadı.",
+  "seller.errors.requiredFields": "Tüm zorunlu alanlar doldurulmalıdır.",
+  "seller.errors.emailExists": "Bu e-posta adresi bu tenant için zaten kayıtlı.",
+  "seller.validation.invalidObjectId": "Geçersiz müşteri ID.",
+  "seller.validation.companyNameRequired": "Firma adı zorunludur.",
+  "seller.validation.contactNameRequired": "İlgili kişi zorunludur.",
+  "seller.validation.invalidEmail": "Geçersiz e-posta adresi.",
+  "seller.validation.phoneRequired": "Telefon numarası zorunludur.",
+  "seller.validation.addressesRequired": "En az bir adres gereklidir.",
+  "seller.validation.addressLineRequired": "Adres satırı zorunludur.",
+  "seller.validation.addressTypeRequired": "Adres tipi zorunludur.",
+  "seller.validation.invalidString": "Geçersiz değer."
+}

@@ -1,0 +1,6 @@
+{
+  "tenant.required": "Tenant zorunludur (x-tenant başlığı).",
+  "sitemap.urls.fetched": "Sitemap URL’leri getirildi.",
+  "seo.siteUrl.missing": "SEO siteUrl yapılandırılmamış.",
+  "not.found": "Bulunamadı."
+}

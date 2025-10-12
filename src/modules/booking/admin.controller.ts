@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import { BookingConfirmedTemplate } from "@/modules/booking/templates/bookingConfirmation";
 import { BookingRejectionTemplate } from "@/modules/booking/templates/bookingRejection";
 import { sendEmail } from "@/services/emailService";

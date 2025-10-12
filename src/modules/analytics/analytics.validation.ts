@@ -5,7 +5,7 @@ import { t as translate } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import translations from "./i18n";
 import { SUPPORTED_LOCALES } from "@/types/common";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 
 /* ---------------- helpers ---------------- */
 function parseIfJson(v: any) {

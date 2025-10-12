@@ -1,12 +1,10 @@
 import { Response, Request } from "express";
 import asyncHandler from "express-async-handler";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import { mergeLocalesForUpdate } from "@/core/utils/i18n/mergeLocalesForUpdate";
 import { fillAllLocales } from "@/core/utils/i18n/fillAllLocales";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
-import { SUPPORTED_LOCALES, SupportedLocale } from "@/types/common";
-import logger from "@/core/middleware/logger/logger";
-import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
+import { SupportedLocale } from "@/types/common";
 import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";

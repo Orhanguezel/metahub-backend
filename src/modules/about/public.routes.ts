@@ -1,4 +1,3 @@
-// src/modules/about/public.about.routes.ts
 import express from "express";
 import { getAllAbout, getAboutById, getAboutBySlug } from "./public.controller";
 import { validateObjectId, validatePublicQuery } from "./validation";

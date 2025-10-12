@@ -7,7 +7,7 @@ import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 
 const parseIfJson = (v: any) => {
   try { return typeof v === "string" ? JSON.parse(v) : v; } catch { return v; }

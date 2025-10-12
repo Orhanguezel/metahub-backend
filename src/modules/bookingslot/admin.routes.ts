@@ -7,7 +7,7 @@ import {
   getAllSlotRulesAdmin,
   getAllSlotOverridesAdmin,
 } from "./admin.bookingslot.controller";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/auth/authMiddleware";
 import {
   validateCreateSlotRule,
   validateCreateSlotOverride,

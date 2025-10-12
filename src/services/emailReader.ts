@@ -1,8 +1,10 @@
+// src/services/emailReader.ts
+
 import { Tenants } from "@/modules/tenants/tenants.model";
 import Imap from "imap";
 import { simpleParser, ParsedMail } from "mailparser";
 import { Readable } from "stream";
-import { EmailMessage } from "@/modules/email";
+import { EmailMessage } from "@/modules/email/models";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import translations from "@/core/config/i18n";

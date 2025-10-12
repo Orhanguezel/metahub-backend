@@ -9,7 +9,7 @@ import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 
 const parseDate = (v?: any) => {
   if (!v) return undefined;
@@ -39,55 +39,75 @@ export const getHourlySales = asyncHandler(async (req: Request, res: Response) =
   if (branchId && isValidObjectId(branchId)) {
     const bId = new Types.ObjectId(branchId);
     data = await Order.aggregate([
-      { $match: {
+      {
+        $match: {
           tenant: req.tenant,
           branch: bId,
           createdAt: { $gte: from, $lte: to },
-          status: { $in: ["completed","delivered","ready","out_for_delivery","picked_up"] } // paid'e yakın durumlar
-        } },
-      { $project: {
+          status: { $in: ["completed", "delivered", "ready", "out_for_delivery", "picked_up"] } // paid'e yakın durumlar
+        }
+      },
+      {
+        $project: {
           amount: "$finalTotal",
           ts: "$createdAt"
-        } },
-      { $addFields: {
+        }
+      },
+      {
+        $addFields: {
           parts: { $dateToParts: { date: "$ts", timezone: tz } }
-        } },
-      { $group: {
+        }
+      },
+      {
+        $group: {
           _id: { dow: "$parts.dayOfWeek", hour: "$parts.hour" },
           orders: { $sum: 1 },
           revenue: { $sum: "$amount" }
-        } },
-      { $project: {
+        }
+      },
+      {
+        $project: {
           _id: 0,
           dayOfWeek: "$_id.dow", hour: "$_id.hour",
           orders: 1, revenue: 1
-        } },
+        }
+      },
       { $sort: { dayOfWeek: 1, hour: 1 } }
     ]);
   } else {
     data = await Payment.aggregate([
-      { $match: {
+      {
+        $match: {
           tenant: req.tenant,
-          status: { $in: ["confirmed","allocated"] },
+          status: { $in: ["confirmed", "allocated"] },
           receivedAt: { $gte: from, $lte: to }
-        } },
-      { $project: {
+        }
+      },
+      {
+        $project: {
           amount: "$grossAmount",
           ts: "$receivedAt"
-        } },
-      { $addFields: {
+        }
+      },
+      {
+        $addFields: {
           parts: { $dateToParts: { date: "$ts", timezone: tz } }
-        } },
-      { $group: {
+        }
+      },
+      {
+        $group: {
           _id: { dow: "$parts.dayOfWeek", hour: "$parts.hour" },
           payments: { $sum: 1 },
           revenue: { $sum: "$amount" }
-        } },
-      { $project: {
+        }
+      },
+      {
+        $project: {
           _id: 0,
           dayOfWeek: "$_id.dow", hour: "$_id.hour",
           payments: 1, revenue: 1
-        } },
+        }
+      },
       { $sort: { dayOfWeek: 1, hour: 1 } }
     ]);
   }
@@ -112,14 +132,18 @@ export const getCouponPerformance = asyncHandler(async (req: Request, res: Respo
   const codeU = (code || "").toUpperCase().trim();
 
   const pipe: any[] = [
-    { $match: {
+    {
+      $match: {
         tenant: req.tenant,
         createdAt: { $gte: from, $lte: to },
         coupon: { $exists: true, $ne: null }
-      } },
-    { $lookup: {
+      }
+    },
+    {
+      $lookup: {
         from: "coupons", localField: "coupon", foreignField: "_id", as: "cp"
-      } },
+      }
+    },
     { $unwind: "$cp" },
   ];
 
@@ -128,7 +152,8 @@ export const getCouponPerformance = asyncHandler(async (req: Request, res: Respo
   }
 
   pipe.push(
-    { $group: {
+    {
+      $group: {
         _id: "$cp._id",
         code: { $first: "$cp.code" },
         uses: { $sum: 1 },
@@ -136,7 +161,8 @@ export const getCouponPerformance = asyncHandler(async (req: Request, res: Respo
         totalNet: { $sum: { $ifNull: ["$finalTotal", 0] } },
         totalGross: { $sum: { $ifNull: ["$subtotal", 0] } },
         avgBasket: { $avg: { $ifNull: ["$finalTotal", 0] } }
-      } },
+      }
+    },
     { $sort: { totalDiscount: -1 } },
     { $limit: Math.min(Number(limit) || 100, 500) }
   );
@@ -168,27 +194,35 @@ export const getOrderCancellations = asyncHandler(async (req: Request, res: Resp
   const { from, to } = { from: parseDate(qFrom) ?? defaultRange().from, to: parseDate(qTo) ?? defaultRange().to };
 
   const data = await Order.aggregate([
-    { $match: {
+    {
+      $match: {
         tenant: req.tenant,
         updatedAt: { $gte: from, $lte: to },
         status: "canceled"
-      } },
-    { $project: {
+      }
+    },
+    {
+      $project: {
         reason: { $ifNull: ["$cancelReason", "unknown"] },
         serviceType: 1,
         branch: 1,
         createdAt: 1
-      } },
-    { $group: {
+      }
+    },
+    {
+      $group: {
         _id: { reason: "$reason", serviceType: "$serviceType" },
         count: { $sum: 1 }
-      } },
-    { $project: {
+      }
+    },
+    {
+      $project: {
         _id: 0,
         reason: "$_id.reason",
         serviceType: "$_id.serviceType",
         count: 1
-      } },
+      }
+    },
     { $sort: { count: -1 } },
     { $limit: Math.min(Number(limit) || 100, 500) }
   ]);

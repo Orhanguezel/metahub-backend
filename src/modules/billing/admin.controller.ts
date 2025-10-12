@@ -7,7 +7,7 @@ import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 
 /* ----------------- Helpers ----------------- */
 const tByReq = (req: Request) => (k: string, p?: any) =>

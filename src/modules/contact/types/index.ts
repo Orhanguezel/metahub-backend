@@ -1,3 +1,5 @@
+// src/modules/contact/types/index.ts
+
 export interface IContactMessage {
   name: string;
   tenant: string; // Multi-tenancy

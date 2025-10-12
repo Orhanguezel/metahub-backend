@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { t as translate } from "@/core/utils/i18n/translate";
@@ -144,18 +144,18 @@ export const subscribeNewsletter = asyncHandler(
 
       const newsletter = exists
         ? await Newsletter.findOneAndUpdate(
-            { _id: exists._id },
-            { lang, meta: { ...(exists.meta || {}), ...securityMeta } },
-            { new: true }
-          )
+          { _id: exists._id },
+          { lang, meta: { ...(exists.meta || {}), ...securityMeta } },
+          { new: true }
+        )
         : await Newsletter.create({
-            tenant: req.tenant,
-            email: emailNorm,
-            verified: false,
-            lang,
-            meta: securityMeta,
-            subscribeDate: new Date(),
-          });
+          tenant: req.tenant,
+          email: emailNorm,
+          verified: false,
+          lang,
+          meta: securityMeta,
+          subscribeDate: new Date(),
+        });
 
       // Opt-in e-posta
       await sendEmail({
@@ -225,7 +225,7 @@ export const unsubscribeNewsletter = asyncHandler(
     try {
       const { email } = req.body;
       const tenantData = req.tenantData;
-      const brandName   = tenantData?.name?.[locale] || tenantData?.name?.en || tenantData?.name || "Brand";
+      const brandName = tenantData?.name?.[locale] || tenantData?.name?.en || tenantData?.name || "Brand";
       const senderEmail = tenantData?.emailSettings?.senderEmail || "noreply@example.com";
 
       if (!email) {
@@ -260,8 +260,8 @@ export const unsubscribeNewsletter = asyncHandler(
       const message: Record<SupportedLocale, string> = {} as any;
       for (const lng of SUPPORTED_LOCALES) {
         const tl = (k: string, p?: any) => translate(k, lng, translations, p);
-        title[lng]   = tl("notification.unsubscribeTitle", { brand: brandName });
-        message[lng] = tl("notification.unsubscribeMsg",   { email: emailNorm });
+        title[lng] = tl("notification.unsubscribeTitle", { brand: brandName });
+        message[lng] = tl("notification.unsubscribeMsg", { email: emailNorm });
       }
 
       await Notification.create({
@@ -270,9 +270,9 @@ export const unsubscribeNewsletter = asyncHandler(
         title,
         message,
         channels: ["inapp"],
-        target: { roles: ["admin","moderator"] },
+        target: { roles: ["admin", "moderator"] },
         source: { module: "newsletter", entity: "subscriber", refId: unsubscribed._id, event: "newsletter.unsubscribed" },
-        tags: ["newsletter","unsubscribe"],
+        tags: ["newsletter", "unsubscribe"],
         link: { routeName: "admin.newsletter.subscribers", params: { id: String(unsubscribed._id) } },
       });
 
@@ -335,7 +335,7 @@ export const deleteSubscriber = asyncHandler(
       const message: Record<SupportedLocale, string> = {} as any;
       for (const lng of SUPPORTED_LOCALES) {
         const tl = (k: string, p?: any) => translate(k, lng, translations, p);
-        title[lng]   = tl("notification.deletedTitle");
+        title[lng] = tl("notification.deletedTitle");
         message[lng] = tl("notification.deletedMsg", { email: sub.email });
       }
 
@@ -345,9 +345,9 @@ export const deleteSubscriber = asyncHandler(
         title,
         message,
         channels: ["inapp"],
-        target: { roles: ["admin","moderator"] },
+        target: { roles: ["admin", "moderator"] },
         source: { module: "newsletter", entity: "subscriber", refId: sub._id, event: "newsletter.deleted" },
-        tags: ["newsletter","delete"],
+        tags: ["newsletter", "delete"],
         link: { routeName: "admin.newsletter.subscribers" },
       });
 
@@ -387,7 +387,7 @@ export const verifySubscriber = asyncHandler(
       const message: Record<SupportedLocale, string> = {} as any;
       for (const lng of SUPPORTED_LOCALES) {
         const tl = (k: string, p?: any) => translate(k, lng, translations, p);
-        title[lng]   = tl("notification.verifiedTitle");
+        title[lng] = tl("notification.verifiedTitle");
         message[lng] = tl("notification.verifiedMsg", { email: updated.email });
       }
 
@@ -397,9 +397,9 @@ export const verifySubscriber = asyncHandler(
         title,
         message,
         channels: ["inapp"],
-        target: { roles: ["admin","moderator"] },
+        target: { roles: ["admin", "moderator"] },
         source: { module: "newsletter", entity: "subscriber", refId: updated._id, event: "newsletter.verified" },
-        tags: ["newsletter","verify"],
+        tags: ["newsletter", "verify"],
         link: { routeName: "admin.newsletter.subscribers", params: { id: String(updated._id) } },
       });
 
@@ -420,7 +420,7 @@ export const sendBulkNewsletter = asyncHandler(
     try {
       const { subject, html, filter } = req.body;
       const tenantData = req.tenantData;
-      const brandName   = tenantData?.name?.[locale] || tenantData?.name?.en || tenantData?.name || "Brand";
+      const brandName = tenantData?.name?.[locale] || tenantData?.name?.en || tenantData?.name || "Brand";
       const brandWebsite = tenantData?.domain?.main ? `https://${tenantData.domain.main}` : process.env.BRAND_WEBSITE;
       const senderEmail = tenantData?.emailSettings?.senderEmail || "noreply@example.com";
 
@@ -470,7 +470,7 @@ export const sendBulkNewsletter = asyncHandler(
       const message: Record<SupportedLocale, string> = {} as any;
       for (const lng of SUPPORTED_LOCALES) {
         const tl = (k: string, p?: any) => translate(k, lng, translations, p);
-        title[lng]   = tl("notification.bulkTitle", { brand: brandName });
+        title[lng] = tl("notification.bulkTitle", { brand: brandName });
         message[lng] = tl("notification.bulkMsg", { count: sentCount, subject });
       }
 
@@ -485,9 +485,9 @@ export const sendBulkNewsletter = asyncHandler(
           title,
           message,
           channels: ["inapp"],
-          target: { roles: ["admin","moderator"] },
+          target: { roles: ["admin", "moderator"] },
           source: { module: "newsletter", entity: "bulk", event: "newsletter.bulk_sent" },
-          tags: ["newsletter","bulk"],
+          tags: ["newsletter", "bulk"],
           link: { routeName: "admin.newsletter.subscribers" },
           data: { subject, sent: sentCount, total: subscribers.length, filter: filter || {} },
           dedupeKey,

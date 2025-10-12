@@ -1,6 +1,6 @@
 // 🔠 Veritabanında kullanılacak büyük harfli sabit değerler
 export const ALLOWED_COMMENT_CONTENT_TYPES = [
-  "news", "blog", "product", "articles", "services", "bikes",
+  "news", "blog", "product", "articles", "services",
   "about", "references", "library", "company", "ensotekprod",
   "sparepart", "portfolio", "menuitem","massage","skill", "team", 
   "global" // ⬅️ EKLENDİ: testimonial için zorunlu

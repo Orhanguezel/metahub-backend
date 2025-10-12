@@ -9,7 +9,7 @@ import {
   markNotificationAsRead,
   markAllNotificationsAsRead,
 } from "./notification.controller";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/auth/authMiddleware";
 import {
   createNotificationValidator,
   idParamValidator,

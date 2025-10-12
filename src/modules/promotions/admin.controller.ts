@@ -6,11 +6,11 @@ import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import translations from "./i18n";
 import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import type { SupportedLocale } from "@/types/common";
 
-const tByReq = (req: Request) => (k: string) =>
-  translate(k, (req.locale as SupportedLocale) || getLogLocale(), translations);
+const tByReq = (req: Request) => (k: string, vars?: Record<string, any>) =>
+  translate(k, (req.locale as SupportedLocale) || getLogLocale(), translations, vars);
 
 /* ===== CREATE ===== */
 export const createPromotion = asyncHandler(async (req: Request, res: Response) => {
@@ -49,8 +49,16 @@ export const updatePromotion = asyncHandler(async (req: Request, res: Response) 
   if (up.code) up.code = String(up.code).toUpperCase().trim();
 
   const updatable = [
-    "kind","code","name","description","isActive","isPublished","priority",
-    "stackingPolicy","rules","effect",
+    "kind",
+    "code",
+    "name",
+    "description",
+    "isActive",
+    "isPublished",
+    "priority",
+    "stackingPolicy",
+    "rules",
+    "effect",
   ] as const;
   for (const k of updatable) if (up[k] !== undefined) (promo as any)[k] = up[k];
 
@@ -64,9 +72,7 @@ export const adminGetPromotions = asyncHandler(async (req: Request, res: Respons
   const t = tByReq(req);
   const { Promotion } = await getTenantModels(req);
 
-  const {
-    q, isActive, isPublished, kind, type, page = "1", limit = "20",
-  } = req.query as Record<string, string>;
+  const { q, isActive, isPublished, kind, type, page = "1", limit = "20" } = req.query as Record<string, string>;
 
   const filter: any = { tenant: req.tenant };
   if (isActive !== undefined) filter.isActive = isActive === "true";

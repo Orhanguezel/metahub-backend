@@ -1,0 +1,32 @@
+{
+  "created": "Filiale erstellt.",
+  "updated": "Filiale aktualisiert.",
+  "deleted": "Filiale gelöscht.",
+  "fetched": "Datensatz abgerufen.",
+  "listFetched": "Liste abgerufen.",
+  "notFound": "Datensatz nicht gefunden.",
+  "invalidId": "Ungültige ID.",
+  "error.create_fail": "Beim Erstellen der Filiale ist ein Fehler aufgetreten.",
+  "validation": {
+    "invalidObjectId": "Ungültige ObjectId.",
+    "booleanField": "Ungültiger Boolescher Wert.",
+    "codeRequired": "Code ist erforderlich.",
+    "locationRequired": "Standort (GeoJSON Point) ist erforderlich.",
+    "locationInvalid": "Ungültiger Standort.",
+    "locationType": "Standorttyp muss 'Point' sein.",
+    "locationCoordinates": "Koordinaten müssen [lng, lat] sein.",
+    "locationRange": "Koordinaten außerhalb des Bereichs.",
+    "servicesRequired": "Mindestens ein Service-Typ ist erforderlich.",
+    "invalidServiceType": "Ungültiger Service-Typ.",
+    "openingHoursInvalid": "Öffnungszeiten müssen ein Array sein.",
+    "openingEntryInvalid": "Ungültiger Eintrag für Öffnungszeiten.",
+    "openingDayRange": "Tag muss zwischen 0-6 liegen.",
+    "openingTimeFormat": "Zeit muss im Format 'HH:mm' sein.",
+    "minPrepInvalid": "Mindestvorbereitungszeit 0–240.",
+    "deliveryZonesInvalid": "Lieferzonen müssen ein Array sein.",
+    "zonePolygonInvalid": "Ungültige Polygonkoordinaten.",
+    "zoneFeeInvalidAmount": "Liefergebühr darf nicht negativ sein.",
+    "zoneFeeInvalidCurrency": "Ungültige Währung.",
+    "zoneNameInvalid": "Ungültiger Zonenname."
+  }
+}

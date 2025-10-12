@@ -12,7 +12,7 @@ import {
   validateObjectId,
   validateListQuery,
 } from "./validation";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/auth/authMiddleware";
 
 const router = express.Router();
 

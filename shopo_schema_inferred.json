@@ -1,0 +1,258 @@
+{
+  "Product": {
+    "required": [
+      "_id",
+      "title",
+      "slug",
+      "price",
+      "images",
+      "categoryId"
+    ],
+    "optional": [
+      "sku",
+      "shortDescription",
+      "description",
+      "brandId",
+      "rating",
+      "reviewCount",
+      "stock",
+      "badges",
+      "salePrice",
+      "discountPercent",
+      "status",
+      "tags",
+      "videoUrl",
+      "gallery",
+      "attributes",
+      "variants",
+      "options",
+      "shippingClass",
+      "taxClass",
+      "barcode",
+      "weight",
+      "dimensions",
+      "minPurchaseQty",
+      "maxPurchaseQty",
+      "visibility",
+      "seoTitle",
+      "seoDescription",
+      "seoKeywords"
+    ]
+  },
+  "Category": {
+    "required": [
+      "_id",
+      "name",
+      "slug"
+    ],
+    "optional": [
+      "parentId",
+      "image",
+      "icon",
+      "banner",
+      "order",
+      "status",
+      "description",
+      "seoTitle",
+      "seoDescription"
+    ]
+  },
+  "Brand": {
+    "required": [
+      "_id",
+      "name",
+      "slug"
+    ],
+    "optional": [
+      "logo",
+      "banner",
+      "description",
+      "order",
+      "status",
+      "website"
+    ]
+  },
+  "User": {
+    "required": [
+      "_id",
+      "name",
+      "email",
+      "role"
+    ],
+    "optional": [
+      "phone",
+      "avatar",
+      "addresses",
+      "birthDate",
+      "gender",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  "Address": {
+    "required": [
+      "fullName",
+      "line1",
+      "city",
+      "country",
+      "zip"
+    ],
+    "optional": [
+      "line2",
+      "state",
+      "phone",
+      "company",
+      "isDefault",
+      "notes"
+    ]
+  },
+  "Cart": {
+    "required": [
+      "_id",
+      "userId",
+      "items",
+      "currency"
+    ],
+    "optional": [
+      "coupon",
+      "subtotal",
+      "discount",
+      "shipping",
+      "tax",
+      "total",
+      "sessionId",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  "CartItem": {
+    "required": [
+      "productId",
+      "qty",
+      "price"
+    ],
+    "optional": [
+      "variantId",
+      "attributes",
+      "title",
+      "sku",
+      "image"
+    ]
+  },
+  "Order": {
+    "required": [
+      "_id",
+      "orderNo",
+      "userId",
+      "items",
+      "amount",
+      "status",
+      "payment",
+      "shippingAddress",
+      "billingAddress",
+      "currency",
+      "createdAt"
+    ],
+    "optional": [
+      "notes",
+      "discount",
+      "shippingCost",
+      "tax",
+      "coupon",
+      "tracking",
+      "history",
+      "updatedAt"
+    ]
+  },
+  "OrderItem": {
+    "required": [
+      "productId",
+      "qty",
+      "price"
+    ],
+    "optional": [
+      "variantId",
+      "attributes",
+      "title",
+      "sku",
+      "image"
+    ]
+  },
+  "Coupon": {
+    "required": [
+      "code",
+      "type",
+      "value"
+    ],
+    "optional": [
+      "minAmount",
+      "maxDiscount",
+      "startAt",
+      "endAt",
+      "usageLimit",
+      "perUserLimit",
+      "status",
+      "applicableCategories",
+      "applicableProducts"
+    ]
+  },
+  "Review": {
+    "required": [
+      "_id",
+      "productId",
+      "userId",
+      "rating",
+      "title",
+      "content",
+      "createdAt"
+    ],
+    "optional": [
+      "images",
+      "status",
+      "likes",
+      "dislikes"
+    ]
+  },
+  "Variant": {
+    "required": [
+      "_id",
+      "productId",
+      "sku",
+      "price"
+    ],
+    "optional": [
+      "options",
+      "stock",
+      "barcode",
+      "image",
+      "salePrice"
+    ]
+  },
+  "Attribute": {
+    "required": [
+      "name",
+      "value"
+    ],
+    "optional": [
+      "group",
+      "sort"
+    ]
+  },
+  "Storefront": {
+    "required": [
+      "currency",
+      "currencies",
+      "locale",
+      "locales"
+    ],
+    "optional": [
+      "menus",
+      "banners",
+      "sliders",
+      "featuredCategories",
+      "featuredProducts",
+      "footerLinks",
+      "socials"
+    ]
+  }
+}

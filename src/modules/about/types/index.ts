@@ -1,6 +1,10 @@
 import type { SupportedLocale } from "@/types/common";
-import type { Types, Document } from "mongoose";
+import type { Types } from "mongoose";
 
+/** Çok dilli (zorunlu olmayan) string alan */
+export type TranslatedOptional = Partial<Record<SupportedLocale, string>>;
+
+/** Var olan tip (değiştirmiyoruz) */
 export type TranslatedLabel = { [key in SupportedLocale]: string };
 
 export interface IAboutImage {
@@ -10,10 +14,18 @@ export interface IAboutImage {
   publicId?: string;
 }
 
+/**
+ * 🔁 Sadece slug kısmını çok dilli hale getirdik.
+ * - slug: kullanıcıya görünen slug (locale->string)
+ * - slugLower: case-insensitive arama ve benzersizlik için
+ */
 export interface IAbout {
   title: TranslatedLabel;
   tenant: string;
-  slug: string;
+
+  slug: TranslatedOptional;                      // ← ÇOK DİLLİ
+  slugLower?: TranslatedOptional;                // ← indeksleme için
+
   summary: TranslatedLabel;
   content: TranslatedLabel;
   images: IAboutImage[];
@@ -24,7 +36,8 @@ export interface IAbout {
   publishedAt?: Date;
   comments: Types.ObjectId[];
   isActive: boolean;
-  order: number; 
+  order: number;
+
   createdAt: Date;
   updatedAt: Date;
 }

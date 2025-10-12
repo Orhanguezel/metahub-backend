@@ -1,6 +1,5 @@
-// src/modules/about/admin.about.routes.ts
 import express from "express";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/auth/authMiddleware";
 import {
   adminGetAllAbout,
   adminGetAboutById,
@@ -34,7 +33,8 @@ router.post(
   "/",
   uploadTypeWrapper("about"),
   upload("about").array("images", 10),
-  transformNestedFields(["title", "summary", "content", "tags"]),
+  // 🔁 slug da artık çok dilli — JSON body’den parse edelim
+  transformNestedFields(["title", "summary", "content", "tags", "slug"]),
   validateCreateAbout,
   createAbout
 );
@@ -43,7 +43,7 @@ router.put(
   "/:id",
   uploadTypeWrapper("about"),
   upload("about").array("images", 10),
-  transformNestedFields(["title", "summary", "content", "tags"]),
+  transformNestedFields(["title", "summary", "content", "tags", "slug"]),
   validateObjectId("id"),
   validateUpdateAbout,
   updateAbout

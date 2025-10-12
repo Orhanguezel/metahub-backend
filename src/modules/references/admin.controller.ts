@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { IReferences } from "@/modules/references/types";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import slugify from "slugify";
 import path from "path";
 import fs from "fs";
@@ -82,10 +82,10 @@ export const createReferences = asyncHandler(
           "logo";
         const slug = slugify(
           nameForSlug +
-            "-" +
-            Date.now() +
-            "-" +
-            Math.random().toString(36).substr(2, 5),
+          "-" +
+          Date.now() +
+          "-" +
+          Math.random().toString(36).substr(2, 5),
           { lower: true, strict: true }
         );
 
@@ -223,10 +223,10 @@ export const updateReferences = asyncHandler(
           if (imgObj && imgObj.publicId) {
             try {
               await cloudinary.uploader.destroy(imgObj.publicId);
-            } catch {}
+            } catch { }
           }
         }
-      } catch {}
+      } catch { }
     }
 
     await references.save();

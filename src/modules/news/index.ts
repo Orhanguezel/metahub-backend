@@ -3,10 +3,6 @@
 import express from "express";
 import adminRoutes from "./admin.routes";
 import publicRoutes from "./public.routes";
-import { News } from "./models";
-import * as adminController from "./admin.controller";
-import * as publicController from "./public.controller";
-import * as validation from "./validation";
 
 const router = express.Router();
 
@@ -16,7 +12,5 @@ router.use("/admin", adminRoutes);
 // 🌍 Public Routes
 router.use("/", publicRoutes);
 
-// ✅ Exports (standardized)
-export { News, adminController, publicController, validation };
 
 export default router;

@@ -1,93 +1,145 @@
-import type { SupportedLocale } from "@/types/common";
-import type { Types } from "mongoose";
+// src/modules/pricing/types.ts
 
-export type TranslatedLabel = { [key in SupportedLocale]?: string };
+/* -------- Quote (Checkout fiyat teklifi) tipleri -------- */
 
-export type PricingCurrency = "USD" | "EUR" | "TRY" | "GBP";
-export type PricingPeriod = "monthly" | "yearly" | "once";
-export type PricingStatus = "draft" | "active" | "archived";
-export type PlanType = "free" | "basic" | "pro" | "business" | "enterprise";
+export type PricingItemInput = {
+  productId: string;
+  variantId?: string;
+  title?: string;
+  image?: string;
+  qty: number;
+  price_cents: number;          // base fiyat (minor)
+  offer_price_cents?: number;   // varsa satır indirimi
+  weight_grams?: number;
+  attributes?: Record<string, string>;
+  currency: string;
+};
 
-export interface IPricingFeatureItemLimit {
-  type: "boolean" | "number" | "string" | "unlimited";
-  value?: boolean | number | string | null;
-}
+export type AddressLike = {
+  country?: string;
+  state?: string;
+  city?: string;
+  postal?: string;
+};
 
-export interface IPricingFeatureItem {
-  key: string;                               // unique per plan
-  label: TranslatedLabel;
-  tooltip?: TranslatedLabel;
-  group?: TranslatedLabel;                    // “Usage”, “Support” vb.
-  limit?: IPricingFeatureItemLimit;          // unlimited/number/boolean
-  order?: number;
-  highlight?: boolean;                       // UI’da öne çıkar
-}
-
-export interface IPricingTier {              // usage-based kademeli
-  upTo?: number;                             // undefined => infinity
-  pricePerUnit: number;                      // >= 0
-}
-
-export interface IPricing {
-  _id?: Types.ObjectId;
-
+export type PricingInput = {
   tenant: string;
-  code?: string;                             // UPPER_SNAKE (tenant unique)
-  slug?: string;                             // kebab-case (tenant unique)
-  title: TranslatedLabel;
-  description?: TranslatedLabel;
+  items: PricingItemInput[];
+  shippingMethodCode: string;
+  shippingAddress: AddressLike;
+  billingAddress?: AddressLike;
+  couponCode?: string;
+  feeFlags?: Array<"cod" | "express_shipping" | "below_free_shipping" | "all">;
+  weight_grams_override?: number;
+  currency: string;
+  locale?: string;
+};
 
-  // Görsel / CTA
+export type FeeApplied = {
+  code: string;
+  name: Record<string, string>;
+  amount_cents: number;
+  currency: string;
+};
+
+export type PricingOutput = {
+  lines: Array<{
+    productId: string;
+    variantId?: string;
+    qty: number;
+    unit_cents: number;
+    line_total_cents: number;
+    currency: string;
+    title?: string;
+    image?: string;
+    attributes?: Record<string, string>;
+  }>;
+  subtotal_cents: number;
+  discount_cents: number;
+  shipping: { code: string; price_cents: number; currency: string };
+  fees: FeeApplied[];
+  tax_cents: number;
+  total_cents: number;
+  snapshots: {
+    tax?: { id?: string; rate: number; inclusive: boolean };
+    coupon?: { code: string; type: "percent" | "fixed" | "free_shipping"; value: number } | null;
+    shippingMethod?: { id?: string; code: string; calc: "flat" | "table" | "free_over" };
+    fees?: string[];
+  };
+};
+
+/* -------- (Opsiyonel) Pricing Plan şeması için tipler -------- */
+
+export type IPricingFeatureItemLimit = {
+  type: "boolean" | "number" | "string" | "unlimited";
+  value?: any;
+};
+
+export type IPricingFeatureItem = {
+  key: string;
+  label: Record<string, string>;
+  tooltip?: Record<string, string>;
+  group?: Record<string, string>;
+  limit?: IPricingFeatureItemLimit;
+  order?: number;
+  highlight?: boolean;
+};
+
+export type IPricingTier = {
+  upTo?: number;                 // kademeli üst sınır (opsiyonel)
+  pricePerUnit: number;          // minor
+};
+
+export type IPricing = {
+  tenant: string;
+
+  code?: string;
+  slug?: string;
+
+  title: Record<string, string>;
+  description?: Record<string, string>;
+
   iconUrl?: string;
   imageUrl?: string;
-  ctaLabel?: TranslatedLabel;
+  ctaLabel?: Record<string, string>;
   ctaUrl?: string;
 
-  // Plan & görünürlük
-  planType?: PlanType;
+  planType?: "free" | "basic" | "pro" | "business" | "enterprise";
   category?: string;
-  status: PricingStatus;                     // draft/active/archived
-  isActive: boolean;
+  status?: "draft" | "active" | "archived";
+  isActive?: boolean;
 
-  // Yayınlama
-  isPublished: boolean;
+  isPublished?: boolean;
   publishedAt?: Date;
 
-  // Fiyatlandırma
-  price: number;                             // base price (>=0)
-  compareAtPrice?: number;                   // crossed-out
-  currency: PricingCurrency;
-  period: PricingPeriod;
-  setupFee?: number;                         // >=0
-  priceIncludesTax?: boolean;                // KDV dahil mi
-  vatRate?: number;                          // 0..100
+  price: number;                 // minor
+  compareAtPrice?: number;       // minor
+  currency: "USD" | "EUR" | "TRY" | "GBP";
+  period: "monthly" | "yearly" | "once";
+  setupFee?: number;             // minor
+  priceIncludesTax?: boolean;
+  vatRate?: number;              // 0..100
 
-  // Kullanım bazlı
-  unitName?: TranslatedLabel;                // “seat”, “GB”, “order”...
-  includedUnits?: number;                    // >=0
-  pricePerUnit?: number;                     // >=0
-  tiers?: IPricingTier[];                    // kademeler
+  unitName?: Record<string, string>;
+  includedUnits?: number;
+  pricePerUnit?: number;
+  tiers?: IPricingTier[];
 
-  // Deneme & sözleşme
-  trialDays?: number;                        // >=0
-  minTermMonths?: number;                    // >=0
+  trialDays?: number;
+  minTermMonths?: number;
 
-  // i18n features kısa/uzun
-  features?: { [lang in SupportedLocale]?: string[] };
+  features?: Record<string, string[]>;
   featureItems?: IPricingFeatureItem[];
 
-  // Hedefleme
-  regions?: string[];                        // ["DE","TR-IST",...]
-  segments?: string[];                       // ["b2c","b2b-enterprise",...]
+  regions?: string[];
+  segments?: string[];
 
-  // “popüler” rozet / sıralama
   isPopular?: boolean;
-  order: number;
+  order?: number;
 
-  // Etkinlik penceresi
   effectiveFrom?: Date;
   effectiveTo?: Date;
 
-  createdAt: Date;
-  updatedAt: Date;
-}
+  createdAt?: Date;
+  updatedAt?: Date;
+};

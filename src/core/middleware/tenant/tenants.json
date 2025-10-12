@@ -1,6 +1,7 @@
 {
   "koenigsmassage.com": "anastasia",
-  "guezelwebdesign.com": "metahub",
+  "guezelwebdesign.com": "guezelwebdesign",
+  "www.guezelwebdesign.com": "guezelwebdesign",
   "metahub.guezelwebdesign.com": "gzl",
   "md-hygienelogistik.de": "hygiene", 
   "ensotek.de": "ensotek", 
@@ -8,9 +9,5 @@
   "antalya-doner-pizzeria.de": "antalya",
   "test.guezelwebdesign.com": "tarifintarifi",
   "menu.guezelwebdesign.com": "antalya",
-  "tarifintarifi.com": "tarifintarifi",
-  "www.tarifintarifi.com": "tarifintarifi",
-  "localhost": "ensotek",
-  "localhost:3000": "ensotek"
-  
+  "shop.guezelwebdesign.com": "shop"
 }

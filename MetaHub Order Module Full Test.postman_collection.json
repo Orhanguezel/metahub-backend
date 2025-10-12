@@ -1,0 +1,439 @@
+{
+	"info": {
+		"_postman_id": "9ffec1fb-4fe4-4025-9f60-3cdd00a97ad7",
+		"name": "MetaHub Order Module Full Test",
+		"description": "MetaHub Order API tam kapsamlı kullanıcı ve admin senaryoları. User ve admin için ayrı JWT, x-tenant zorunlu.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20528167",
+		"_collection_link": "https://www.postman.com/red-eclipse-24199/workspace/orhan/collection/20528167-9ffec1fb-4fe4-4025-9f60-3cdd00a97ad7?action=share&source=collection_link&creator=20528167"
+	},
+	"item": [
+		{
+			"name": "Create Order - SUCCESS",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "{{TENANT_NAME}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"items\": [\n    { \"product\": \"{{BIKE_ID}}\", \"quantity\": 1 }\n  ],\n  \"shippingAddress\": {\n    \"name\": \"Ali Veli\",\n    \"phone\": \"+49123456789\",\n    \"email\": \"ali@example.com\",\n    \"street\": \"Bahnhofstr. 1\",\n    \"city\": \"Berlin\",\n    \"postalCode\": \"10115\",\n    \"country\": \"Germany\"\n  },\n  \"paymentMethod\": \"cash_on_delivery\",\n  \"totalPrice\": 1500\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/order",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Order - MISSING ADDRESS (Error)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "{{TENANT_NAME}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"items\": [\n    { \"product\": \"{{BIKE_ID}}\", \"quantity\": 1 }\n  ],\n  \"paymentMethod\": \"cash_on_delivery\",\n  \"totalPrice\": 900\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/order",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Order - OUT OF STOCK (Error)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "{{TENANT_NAME}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"items\": [\n    { \"product\": \"{{OUT_OF_STOCK_BIKE_ID}}\", \"quantity\": 99 }\n  ],\n  \"shippingAddress\": {\n    \"name\": \"Ali Veli\",\n    \"phone\": \"+49123456789\",\n    \"email\": \"ali@example.com\",\n    \"street\": \"Bahnhofstr. 1\",\n    \"city\": \"Berlin\",\n    \"postalCode\": \"10115\",\n    \"country\": \"Germany\"\n  },\n  \"paymentMethod\": \"cash_on_delivery\",\n  \"totalPrice\": 999999\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/order",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Order - INVALID PRODUCT (Error)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "{{TENANT_NAME}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"items\": [\n    { \"product\": \"INVALID_ID\", \"quantity\": 1 }\n  ],\n  \"shippingAddress\": {\n    \"name\": \"Ali Veli\",\n    \"phone\": \"+49123456789\",\n    \"email\": \"ali@example.com\",\n    \"street\": \"Bahnhofstr. 1\",\n    \"city\": \"Berlin\",\n    \"postalCode\": \"10115\",\n    \"country\": \"Germany\"\n  },\n  \"paymentMethod\": \"cash_on_delivery\",\n  \"totalPrice\": 500\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/order",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Order - INVALID PAYMENT METHOD (Error)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "{{TENANT_NAME}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{USER_TOKEN}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"items\": [\n    { \"product\": \"{{BIKE_ID}}\", \"quantity\": 1 }\n  ],\n  \"shippingAddress\": {\n    \"name\": \"Ali Veli\",\n    \"phone\": \"+49123456789\",\n    \"email\": \"ali@example.com\",\n    \"street\": \"Bahnhofstr. 1\",\n    \"city\": \"Berlin\",\n    \"postalCode\": \"10115\",\n    \"country\": \"Germany\"\n  },\n  \"paymentMethod\": \"bitcoin\",\n  \"totalPrice\": 500\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/order",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Order - COUPON SUCCESS",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "{{TENANT_NAME}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{USER_TOKEN}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"items\": [\n    { \"product\": \"{{BIKE_ID}}\", \"quantity\": 1 }\n  ],\n  \"shippingAddress\": {\n    \"name\": \"Ali Veli\",\n    \"phone\": \"+49123456789\",\n    \"email\": \"ali@example.com\",\n    \"street\": \"Bahnhofstr. 1\",\n    \"city\": \"Berlin\",\n    \"postalCode\": \"10115\",\n    \"country\": \"Germany\"\n  },\n  \"paymentMethod\": \"paypal\",\n  \"couponCode\": \"DISCOUNT2024\",\n  \"totalPrice\": 700\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/order",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Order - INVALID COUPON (Error)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "{{TENANT_NAME}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{USER_TOKEN}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"items\": [\n    { \"product\": \"{{BIKE_ID}}\", \"quantity\": 1 }\n  ],\n  \"shippingAddress\": {\n    \"name\": \"Ali Veli\",\n    \"phone\": \"+49123456789\",\n    \"email\": \"ali@example.com\",\n    \"street\": \"Bahnhofstr. 1\",\n    \"city\": \"Berlin\",\n    \"postalCode\": \"10115\",\n    \"country\": \"Germany\"\n  },\n  \"paymentMethod\": \"paypal\",\n  \"couponCode\": \"WRONGCODE\",\n  \"totalPrice\": 700\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/order",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Order By ID (User)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "{{TENANT_NAME}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{BASE_URL}}/order/{{ORDER_ID}}",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"order",
+						"{{ORDER_ID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Shipping Address (User)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "{{TENANT_NAME}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{USER_TOKEN}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"shippingAddress\": {\n    \"name\": \"Yeni İsim\",\n    \"phone\": \"+49123456780\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/order/{{ORDER_ID}}/address",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"order",
+						"{{ORDER_ID}}",
+						"address"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Orders (ADMIN)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "{{TENANT_NAME}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{BASE_URL}}/order/admin",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"order",
+						"admin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Order Status (ADMIN)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "{{TENANT_NAME}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{ADMIN_TOKEN}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"status\": \"shipped\"\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/order/admin/{{ORDER_ID}}/status",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"order",
+						"admin",
+						"{{ORDER_ID}}",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Mark as Delivered (ADMIN)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "{{TENANT_NAME}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{ADMIN_TOKEN}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{BASE_URL}}/order/admin/{{ORDER_ID}}/deliver",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"order",
+						"admin",
+						"{{ORDER_ID}}",
+						"deliver"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Order (ADMIN)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "x-tenant",
+						"value": "{{TENANT_NAME}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{ADMIN_TOKEN}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{BASE_URL}}/order/admin/{{ORDER_ID}}",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"order",
+						"admin",
+						"{{ORDER_ID}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

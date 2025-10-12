@@ -1,10 +1,7 @@
-// src/modules/apartment/index.ts
-
 import express from "express";
-import routes from "./admin.routes";
+import adminRoutes from "./admin.routes";
 
 const router = express.Router();
-router.use("/", routes);
-
+router.use("/", adminRoutes);
 
 export default router;

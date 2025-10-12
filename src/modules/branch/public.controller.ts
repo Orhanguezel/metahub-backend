@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import { t as translate } from "@/core/utils/i18n/translate";

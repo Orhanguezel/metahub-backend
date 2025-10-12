@@ -10,7 +10,6 @@ export type CommentContentType =
   | "product"
   | "articles"
   | "services"
-  | "bikes"
   | "about"
   | "references"
   | "library"

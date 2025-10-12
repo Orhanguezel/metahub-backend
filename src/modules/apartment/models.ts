@@ -8,7 +8,7 @@ import type {
   IApartmentOpsNotifyPrefs
 } from "./types";
 import { SUPPORTED_LOCALES, type SupportedLocale } from "@/types/common";
-import { isValidObjectId as isValidObjId } from "@/core/utils/validation";
+import { isValidObjectId as isValidObjId } from "@/core/middleware/auth/validation";
 
 /* i18n string alanı */
 const localizedStringField = () => {

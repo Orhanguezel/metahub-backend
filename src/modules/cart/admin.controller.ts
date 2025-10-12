@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response, NextFunction } from "express";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 import { ICartItem } from "@/modules/cart/types";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
@@ -30,7 +30,7 @@ export const getAllCarts = asyncHandler(async (req: Request, res: Response, next
       .populate("user", "name email")
       .populate({
         path: "items.product",
-        select: "name price stock code slug variants modifierGroups", // menuitem için name/variants da gelsin
+        select: "name price stock slug", // tüm ürün tipleriyle uyumlu alanlar
         strictPopulate: false,
       })
       .sort({ createdAt: -1 });
@@ -57,7 +57,7 @@ export const getSingleCart = asyncHandler(async (req: Request, res: Response, ne
     }
     const cart = await Cart.findOne({ _id: id, tenant: req.tenant }).populate({
       path: "items.product",
-      select: "name price stock code slug variants modifierGroups",
+      select: "name price stock slug",
       strictPopulate: false,
     });
     if (!cart) {
@@ -100,7 +100,10 @@ export const updateCart = asyncHandler(async (req: Request, res: Response, next:
         ...item,
         product: isValidObjectId(item.product) ? item.product : undefined,
       })) as any;
-      cart.totalPrice = cart.items.reduce((total: number, it: ICartItem) => total + it.quantity * it.priceAtAddition, 0);
+      cart.totalPrice = cart.items.reduce(
+        (total: number, it: ICartItem) => total + Number(it.quantity || 0) * Number(it.priceAtAddition || 0),
+        0
+      );
     }
 
     if (status) {

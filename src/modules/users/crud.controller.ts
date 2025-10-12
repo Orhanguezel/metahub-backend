@@ -1,9 +1,9 @@
-// controllers/admin/users.controller.ts
+// src/modules/users/crud.controller.ts
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { isValidObjectId, validateJsonField } from "@/core/utils/validation";
+import { isValidObjectId, validateJsonField } from "@/core/middleware/auth/validation";
 import path from "path";
-import fs from "fs";
+import fs from "fs/promises";
 import { v2 as cloudinary } from "cloudinary";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
@@ -15,8 +15,6 @@ import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
 function userT(key: string, locale: SupportedLocale, vars?: Record<string, string | number>) {
   return t(key, locale, userTranslations, vars);
 }
-
-const PROFILE_IMAGE_DIR = path.join(process.cwd(), "uploads", "profile-images");
 
 const SAFE_PROJECTION = {
   password: 0,
@@ -32,7 +30,7 @@ const SAFE_PROJECTION = {
 
 /* ---------------------------------- LIST ---------------------------------- */
 export const getUsers = asyncHandler(async (req: Request, res: Response) => {
-  const locale: SupportedLocale = req.locale || getLogLocale();
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale();
   const { User } = await getTenantModels(req);
 
   const {
@@ -79,7 +77,7 @@ export const getUsers = asyncHandler(async (req: Request, res: Response) => {
 /* ---------------------------------- READ ---------------------------------- */
 export const getUserById = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const locale: SupportedLocale = req.locale || getLogLocale();
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale();
   const { User } = await getTenantModels(req);
 
   if (!isValidObjectId(id)) {
@@ -105,8 +103,8 @@ export const getUserById = asyncHandler(async (req: Request, res: Response) => {
 /* --------------------------------- UPDATE --------------------------------- */
 export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const locale: SupportedLocale = req.locale || getLogLocale();
-  const { User } = await getTenantModels(req);
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale();
+  const { User, AuthIdentity } = await getTenantModels(req);
 
   if (!isValidObjectId(id)) {
     logger.withReq.warn(req, `[Admin] Invalid user ID: ${id}`);
@@ -121,14 +119,21 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
+  // Görsel hazırlığı (eskiyi temizle + yeniyi hazırla)
   let nextProfileImage = existing.profileImage;
   if (req.file) {
     try {
       const img = existing.profileImage as any;
       if (img?.publicId) await cloudinary.uploader.destroy(img.publicId);
-      if (img?.url && String(img.url).startsWith("/uploads/profile-images/")) {
-        const localPath = path.join(PROFILE_IMAGE_DIR, path.basename(img.url));
-        await fs.promises.unlink(localPath).catch(() => void 0);
+      if (img?.url && String(img.url).startsWith(`/uploads/${req.tenant}/profile-images/`)) {
+        const localPath = path.join(
+          process.cwd(),
+          "uploads",
+          String(req.tenant),
+          "profile-images",
+          path.basename(img.url)
+        );
+        await fs.unlink(localPath).catch(() => void 0);
       }
     } catch (e) {
       logger.withReq.error(req, `[Admin] Old image cleanup error: ${e}`);
@@ -143,7 +148,7 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
         publicId: f.public_id,
       };
     } else {
-      const url = `/uploads/profile-images/${f.filename}`;
+      const url = `/uploads/${req.tenant}/profile-images/${f.filename}`;
       nextProfileImage = { url, thumbnail: url, webp: "" };
     }
   }
@@ -170,11 +175,29 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
+  // E-posta değişirse local identity çakışmasını kontrol et
+  const newEmail = typeof email === "string" ? email.trim().toLowerCase() : undefined;
+  const emailChanged =
+    newEmail && newEmail !== String(existing.email || "").toLowerCase();
+
+  if (emailChanged && AuthIdentity) {
+    const otherLocal = await AuthIdentity.findOne({
+      tenant: req.tenant,
+      provider: "local",
+      providerId: newEmail,
+      userId: { $ne: existing._id },
+    });
+    if (otherLocal) {
+      res.status(409).json({ success: false, message: userT("admin.users.emailTaken", locale) });
+      return;
+    }
+  }
+
   const updates: any = {
     ...(name !== undefined && { name }),
     ...(company !== undefined && { company }),
     ...(position !== undefined && { position }),
-    ...(email !== undefined && { email }),
+    ...(email !== undefined && { email: newEmail }),
     ...(role !== undefined && { role }),
     ...(typeof isActive === "boolean" && { isActive }),
     ...(phone !== undefined && { phone }),
@@ -206,6 +229,15 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
+  // Local identity sync (e-posta değiştiyse)
+  if (emailChanged && AuthIdentity) {
+    await AuthIdentity.updateOne(
+      { tenant: req.tenant, userId: updated._id, provider: "local" },
+      { $set: { providerId: newEmail } },
+      { upsert: true }
+    ).catch(() => void 0);
+  }
+
   res.status(200).json({
     success: true,
     message: userT("admin.users.updated", locale),
@@ -216,7 +248,7 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
 /* --------------------------------- DELETE --------------------------------- */
 export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const locale: SupportedLocale = req.locale || getLogLocale();
+  const locale: SupportedLocale = (req.locale as SupportedLocale) || getLogLocale();
   const { User } = await getTenantModels(req);
 
   if (!isValidObjectId(id)) {
@@ -232,16 +264,23 @@ export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  // (Kendini silme kontrolü başka bir middleware’de yapıldığı için burada tekrar etmiyoruz)
-
   await User.deleteOne({ _id: id, tenant: req.tenant });
 
+  // Görsel temizliği
   try {
     const img: any = user.profileImage;
-    if (img?.publicId) await cloudinary.uploader.destroy(img.publicId).catch(() => void 0);
-    if (img?.url && String(img.url).startsWith("/uploads/profile-images/")) {
-      const localPath = path.join(PROFILE_IMAGE_DIR, path.basename(img.url));
-      await fs.promises.unlink(localPath).catch(() => void 0);
+    if (img?.publicId) {
+      await cloudinary.uploader.destroy(img.publicId).catch(() => void 0);
+    }
+    if (img?.url && String(img.url).startsWith(`/uploads/${req.tenant}/profile-images/`)) {
+      const localPath = path.join(
+        process.cwd(),
+        "uploads",
+        String(req.tenant),
+        "profile-images",
+        path.basename(img.url)
+      );
+      await fs.unlink(localPath).catch(() => void 0);
     }
   } catch (e) {
     logger.withReq.error(req, `[Admin] Image delete error: ${e}`);

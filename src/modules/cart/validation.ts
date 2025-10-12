@@ -1,13 +1,12 @@
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 
-const PRODUCT_TYPES = ["bike", "ensotekprod", "sparepart", "menuitem"] as const;
+const PRODUCT_TYPES = ["product", "ensotekprod", "sparepart", "menuitem"] as const;
 
 export const addToCartValidator = [
   body("productId").notEmpty().isMongoId().withMessage("Product ID must be a valid MongoDB ObjectId."),
   body("productType").notEmpty().isIn(PRODUCT_TYPES as any).withMessage("Product type is invalid."),
   body("quantity").isInt({ min: 1 }).withMessage("Quantity must be at least 1."),
-  // menu selection (opsiyonel) – menuitem için yapısal doğrulama
   body().custom((val) => {
     if (val?.productType !== "menuitem") return true;
     const m = val?.menu;
@@ -55,7 +54,7 @@ export const updateCartValidator = [
   validateRequest,
 ];
 
-/* ========== MENU CART LINE ==========${''} */
+/* ========== MENU CART LINE ========== */
 
 export const cartLineCreateValidator = [
   body("menuItemId").notEmpty().isMongoId().withMessage("menuItemId must be a valid MongoDB ObjectId."),
@@ -93,4 +92,3 @@ export const cartPricingValidator = [
   body("couponCode").optional().isString().withMessage("couponCode must be string."),
   body("currency").optional().isString().isLength({ min: 3, max: 3 }).withMessage("currency must be ISO 4217."),
 ];
-

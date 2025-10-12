@@ -44,6 +44,27 @@ export interface IModuleSetting {
   seoDescription?: TranslatedLabel;
   seoSummary?: TranslatedLabel;
   seoOgImage?: string;
+  /** 🔽 Sitemap otomasyonuna özel (tamamı opsiyonel, backward-compatible) */
+  sitemap?: {
+    /** Modül özelinde sitemap’e dahil/haric (varsayılan: ModuleMeta.enabled + enabled override) */
+    enabled?: boolean;
+    /** Liste sayfasının yolu (örn: "/blog"). Varsayılan: `/${module}` */
+    basePath?: string;
+    /** Detay URI oluştururken kullanılacak alan (örn: "slug" | "code" | "_id"). Varsayılan: slug→code→_id */
+    detailKey?: string;
+    /**
+     * Tam şablon (örn: "/blog/:slug" veya "/services/:code").
+     * Verideki ":field" token'ları encode edilerek doldurulur.
+     * Bu varsa `basePath + '/' + detailKey` yerine bu kullanılır.
+     */
+    detailPathTemplate?: string;
+    /** Liste sayfasını ekleyelim mi? (varsayılan: true) */
+    includeListPage?: boolean;
+    /** Ek filtreler (Mongo koşulları). Örn: { status: "published" } */
+    filters?: Record<string, any>;
+    /** Maks belge (varsayılan: 50000) */
+    limit?: number;
+  };
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { generateToken } from "@/core/utils/token";
-import { setTokenCookie, clearTokenCookie } from "@/core/utils/cookie";
-import { comparePasswords, hashPassword } from "@/core/utils/authUtils";
+import { generateToken } from "@/core/middleware/auth/token";
+import { setTokenCookie, clearTokenCookie } from "@/core/middleware/auth/cookie";
+import { comparePasswords, hashPassword } from "@/core/middleware/auth/authUtils";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";

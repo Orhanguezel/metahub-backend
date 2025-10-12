@@ -3,7 +3,7 @@ import { validateRequest } from "@/core/middleware/validateRequest";
 import { t as translate } from "@/core/utils/i18n/translate";
 import translations from "./i18n";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
-import { isValidObjectId } from "@/core/utils/validation";
+import { isValidObjectId } from "@/core/middleware/auth/validation";
 
 /* -------------- helpers -------------- */
 function parseIfJson(v: any) {

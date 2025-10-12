@@ -1,45 +1,45 @@
-import { Request, Response, NextFunction } from "express";
+// src/modules/users/auth.controller.ts
+import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import type { IUserProfileImage, IUser } from "@/modules/users/types";
-import crypto from "crypto";
-import { passwordResetTemplate } from "@/templates/passwordReset";
-import { sendEmail } from "@/services/emailService";
+import type { IUserProfileImage, IUser } from "@/modules/users/types/user.types";
 import logger from "@/core/middleware/logger/logger";
 import { t } from "@/core/utils/i18n/translate";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 import userTranslations from "@/modules/users/i18n";
 import type { SupportedLocale } from "@/types/common";
 import { getTenantModels } from "@/core/middleware/tenant/getTenantModels";
-import { sendEmailVerification } from "@/modules/users/auth.advanced.controller";
-import { getTenantMailContext } from "@/core/middleware/tenant/getTenantMailContext";
-import type { Address } from "@/modules/address/types";
-import type { SocialMedia, Notifications } from "@/modules/users/types";
+import { sendEmailVerification } from "@/modules/users/advanced/auth.advanced.controller";
 
-import {
-  loginAndSetToken,
-  logoutAndClearToken,
-  hashNewPassword,
-  checkPassword,
-} from "@/services/authService";
+import type { Address } from "@/modules/address/types";
+import type { SocialMedia, Notifications } from "@/modules/users/types/user.types";
+
+// ✅ Validasyon / hash
 import {
   validateJsonField,
   validateEmailFormat,
   isValidRole,
-} from "@/core/utils/validation";
+} from "@/core/middleware/auth/validation";
+import { checkPassword, hashNewPassword } from "@/services/authService";
 
-// Locale ve translation kısa yolu
+// ✅ Oturum servisleri
+import { issueSession, clearSession } from "@/modules/users/services/session.service";
+import { changePasswordService } from "@/modules/users/services/password-change.service";
+
+// ✅ Yeni şifre reset servisleri
+import {
+  requestPasswordReset,
+  resetPasswordWithCodeOrToken,
+} from "@/modules/users/services/password-reset.service";
+
+/* ----------------------------- locale helpers ---------------------------- */
 function getLocale(req: Request): SupportedLocale {
   return (req.locale as SupportedLocale) || getLogLocale();
 }
-function userT(
-  key: string,
-  locale: SupportedLocale,
-  vars?: Record<string, string | number>
-) {
+function userT(key: string, locale: SupportedLocale, vars?: Record<string, string | number>) {
   return t(key, locale, userTranslations, vars);
 }
 
-// --- FINAL REGISTER HANDLER ---
+/* -------------------------------- REGISTER ------------------------------- */
 export const registerUser = asyncHandler(async (req: Request, res: Response) => {
   const locale = getLocale(req);
   const { User, Customer } = await getTenantModels(req);
@@ -60,40 +60,32 @@ export const registerUser = asyncHandler(async (req: Request, res: Response) => 
     notifications = { emailNotifications: true, smsNotifications: false },
   } = req.body;
 
-  // --- Validasyonlar ---
   if (!validateEmailFormat(email)) {
     logger.withReq.warn(req, `[REGISTER] Geçersiz e-posta: ${email}`);
-    res.status(400).json({
-      success: false,
-      message: userT("auth.register.invalidEmail", locale),
-    });
+    res.status(400).json({ success: false, message: userT("auth.register.invalidEmail", locale) });
     return;
   }
-  const normalizedRole = role.toLowerCase();
+  const normalizedRole = String(role).toLowerCase();
   if (!isValidRole(normalizedRole)) {
     logger.withReq.warn(req, `[REGISTER] Geçersiz rol: ${role}`);
-    res.status(400).json({
-      success: false,
-      message: userT("auth.register.invalidRole", locale),
-    });
+    res.status(400).json({ success: false, message: userT("auth.register.invalidRole", locale) });
     return;
   }
+
   let parsedAddresses: Address[] = [];
-let parsedSocialMedia: SocialMedia = {};
-let parsedNotifications: Notifications = {};
+  let parsedSocialMedia: SocialMedia = {};
+  let parsedNotifications: Notifications = {};
+  try {
+    parsedAddresses = validateJsonField(addresses, "addresses") as Address[];
+    parsedSocialMedia = validateJsonField(socialMedia, "socialMedia") as SocialMedia;
+    parsedNotifications = validateJsonField(notifications, "notifications") as Notifications;
+  } catch (error: any) {
+    logger.withReq.warn(req, `[REGISTER] JSON parse hatası: ${error.message}`);
+    res.status(400).json({ success: false, message: error.message });
+    return;
+  }
 
-// Eğer emin değilsen ve null/undefined ihtimaline karşı:
-try {
-  parsedAddresses = validateJsonField(addresses, "addresses") as Address[];
-  parsedSocialMedia = validateJsonField(socialMedia, "socialMedia") as SocialMedia;
-  parsedNotifications = validateJsonField(notifications, "notifications") as Notifications;
-} catch (error: any) {
-  logger.withReq.warn(req, `[REGISTER] JSON parse hatası: ${error.message}`);
-  res.status(400).json({ success: false, message: error.message });
-  return;
-}
-
-  // Profil resmi objesi
+  // Profil resmi
   let profileImageObj: IUserProfileImage = {
     url: "/defaults/profile.png",
     thumbnail: "/defaults/profile-thumbnail.png",
@@ -118,20 +110,16 @@ try {
     }
   }
 
-  // --- 1️⃣ customerId opsiyonel: Eğer gelirse, doğrula
-  let finalCustomerId: string | undefined = undefined;
+  // customerId opsiyonel zinciri
+  let finalCustomerId: string | undefined;
   if (reqCustomerId) {
     const customer = await Customer.findOne({ _id: reqCustomerId, tenant: req.tenant });
     if (customer) finalCustomerId = customer._id.toString();
   }
-
-  // --- 2️⃣ Yoksa: Email ile eşleşen müşteri var mı? (Bağla)
   if (!finalCustomerId) {
     const existingCustomer = await Customer.findOne({ email, tenant: req.tenant });
     if (existingCustomer) finalCustomerId = existingCustomer._id.toString();
   }
-
-  // --- 3️⃣ Hala yoksa ve rolü "customer" ise yeni müşteri kaydı aç
   if (!finalCustomerId && normalizedRole === "customer") {
     const createdCustomer = await Customer.create({
       companyName: company || name,
@@ -144,13 +132,12 @@ try {
     finalCustomerId = createdCustomer._id.toString();
   }
 
-  // --- 4️⃣ User kaydı (customerId opsiyonel!)
   let user: IUser;
   try {
     user = await User.create({
       name,
       company,
-      customerId: finalCustomerId, // opsiyonel!
+      customerId: finalCustomerId,
       position,
       tenant: req.tenant,
       email,
@@ -166,308 +153,209 @@ try {
     });
   } catch (err: any) {
     logger.withReq.error(req, `[REGISTER] Kullanıcı oluşturulamadı: ${email} | ${err.message}`);
-    res.status(500).json({
-      success: false,
-      message: userT("auth.register.userCreateFail", locale),
-    });
+    res.status(500).json({ success: false, message: userT("auth.register.userCreateFail", locale) });
     return;
   }
 
   logger.withReq.info(req, `[REGISTER] Yeni kayıt: ${email} | locale: ${locale}`);
 
-  // --- E-posta doğrulama gönder
+  // E-posta doğrulama (tenant-aware)
   try {
-    await sendEmailVerification(req, res);
+    await sendEmailVerification(req, res); // handler kendi response'unu yazar
     return;
   } catch (err: any) {
     logger.withReq.error(req, `[REGISTER] E-posta doğrulama gönderilemedi: ${user.email} | ${err.message}`);
-    res.status(500).json({
-      success: false,
-      message: userT("auth.emailVerification.fail", locale),
-    });
+    res.status(500).json({ success: false, message: userT("auth.emailVerification.fail", locale) });
     return;
   }
 });
 
+/* ---------------------------------- LOGIN -------------------------------- */
+export const loginUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const { email, password } = req.body;
+  const locale = getLocale(req);
+  const { User } = await getTenantModels(req);
 
-// ✅ Login
-export const loginUser = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const { email, password } = req.body;
-    const locale = getLocale(req);
-    const { User } = await getTenantModels(req);
+  if (!validateEmailFormat(email)) {
+    logger.withReq.warn(req, `[LOGIN] Geçersiz e-posta: ${email}`);
+    res.status(400).json({ success: false, message: userT("auth.login.invalidEmail", locale) });
+    return;
+  }
 
-    if (!validateEmailFormat(email)) {
-      logger.withReq.warn(req, `[LOGIN] Geçersiz e-posta: ${email}`);
-      res.status(400).json({
-        success: false,
-        message: userT("auth.login.invalidEmail", locale),
-      });
-      return;
-    }
+  const user = await User.findOne({ email, tenant: req.tenant }).select(
+    "+password +mfaEnabled +emailVerified +isActive"
+  );
+  if (!user) {
+    logger.withReq.warn(req, `[LOGIN] Kullanıcı bulunamadı: ${email}`);
+    res.status(401).json({ success: false, message: userT("auth.login.invalidCredentials", locale) });
+    return;
+  }
 
-    const user = await User.findOne({ email, tenant: req.tenant }).select(
-      "+password +mfaEnabled +emailVerified +isActive"
-    );
-    if (!user) {
-      logger.withReq.warn(req, `[LOGIN] Kullanıcı bulunamadı: ${email}`);
-      res.status(401).json({
-        success: false,
-        message: userT("auth.login.invalidCredentials", locale),
-      });
-      return;
-    }
+  const passwordValid = await checkPassword(req, password, user.password);
+  if (!passwordValid) {
+    logger.withReq.warn(req, `[LOGIN] Hatalı şifre: ${email}`);
+    res.status(401).json({ success: false, message: userT("auth.login.invalidCredentials", locale) });
+    return;
+  }
 
-    const passwordValid = await checkPassword(req, password, user.password);
-    if (!passwordValid) {
-      logger.withReq.warn(req, `[LOGIN] Hatalı şifre: ${email}`);
-      res.status(401).json({
-        success: false,
-        message: userT("auth.login.invalidCredentials", locale),
-      });
-      return;
-    }
+  if (!user.emailVerified) {
+    logger.withReq.warn(req, `[LOGIN] E-posta doğrulanmamış: ${email}`);
+    res.status(401).json({
+      success: false,
+      emailVerificationRequired: true,
+      message: userT("auth.login.emailNotVerified", locale),
+    });
+    return;
+  }
 
-    if (!user.emailVerified) {
-      logger.withReq.warn(req, `[LOGIN] E-posta doğrulanmamış: ${email}`);
-      res.status(401).json({
-        success: false,
-        emailVerificationRequired: true,
-        message: userT("auth.login.emailNotVerified", locale),
-      });
-      return;
-    }
+  if (!user.isActive) {
+    logger.withReq.warn(req, `[LOGIN] Hesap devre dışı: ${email}`);
+    res.status(403).json({ success: false, message: userT("auth.login.accountDisabled", locale) });
+    return;
+  }
 
-    if (!user.isActive) {
-      logger.withReq.warn(req, `[LOGIN] Hesap devre dışı: ${email}`);
-      res.status(403).json({
-        success: false,
-        message: userT("auth.login.accountDisabled", locale),
-      });
-      return;
-    }
-
-    if (user.mfaEnabled) {
-      logger.withReq.info(req, `[LOGIN] MFA gerekli: ${email}`);
-      res.status(200).json({
-        success: true,
-        mfaRequired: true,
-        message: userT("auth.login.mfaRequired", locale),
-      });
-      return;
-    }
-
-    await loginAndSetToken(req, res, user.id, user.role);
-
-    logger.withReq.info(req, `[LOGIN] Başarılı giriş: ${email}`);
-
+  if (user.mfaEnabled) {
+    logger.withReq.info(req, `[LOGIN] MFA gerekli: ${email}`);
     res.status(200).json({
       success: true,
-      message: userT("auth.login.success", locale),
-      data: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        profileImage: user.profileImage,
-        customerId: user.customerId,   // 🟢 BURAYA EKLE!
-        company: user.company,
-        position: user.position,
-        phone: user.phone,
-      },
+      mfaRequired: true,
+      message: userT("auth.login.mfaRequired", locale),
     });
-
+    return;
   }
-);
 
-// ✅ Change Password
-export const changePassword = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const { currentPassword, newPassword } = req.body;
-    const locale = getLocale(req);
-    const { User } = await getTenantModels(req);
+  issueSession(req, res, { id: user.id, role: user.role });
 
-    const user = await User.findOne({
-      _id: req.user!.id,
-      tenant: req.tenant,
-    }).select("+password");
-    if (!user) {
-      logger.withReq.warn(
-        req,
-        `[CHANGE-PASSWORD] Kullanıcı bulunamadı: ${req.user!.id}`
-      );
-      res.status(404).json({
-        success: false,
-        message: userT("auth.password.userNotFound", locale),
-      });
-      return;
-    }
-
-    if (!(await checkPassword(req, currentPassword, user.password))) {
-      logger.withReq.warn(
-        req,
-        `[CHANGE-PASSWORD] Yanlış mevcut şifre: ${user.email}`
-      );
-      res.status(401).json({
-        success: false,
-        message: userT("auth.password.invalidCurrent", locale),
-      });
-      return;
-    }
-
-    if (currentPassword === newPassword) {
-      logger.withReq.warn(
-        req,
-        `[CHANGE-PASSWORD] Eski ve yeni şifre aynı: ${user.email}`
-      );
-      res.status(400).json({
-        success: false,
-        message: userT("auth.password.sameAsCurrent", locale),
-      });
-      return;
-    }
-
-    user.password = await hashNewPassword(req, newPassword);
-    await user.save();
-
-    logger.withReq.info(
-      req,
-      `[CHANGE-PASSWORD] Şifre değiştirildi: ${user.email}`
-    );
-
-    res
-      .status(200)
-      .json({ success: true, message: userT("auth.password.success", locale) });
-  }
-);
-
-// ✅ Logout
-export const logoutUser = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const locale = getLocale(req);
-    logoutAndClearToken(req, res);
-    logger.withReq.info(
-      req,
-      `[LOGOUT] Kullanıcı çıkış yaptı: ${req.user?.id ?? "Bilinmiyor"}`
-    );
-    res
-      .status(200)
-      .json({ success: true, message: userT("auth.logout.success", locale) });
-  }
-);
-
-// ✅ Forgot Password
-// Helper fonksiyon yukarıda tanımlı olmalı:
-
-export const forgotPassword = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { email } = req.body;
-    const locale = getLocale(req);
-    const { User } = await getTenantModels(req);
-
-    const user = await User.findOne({ email, tenant: req.tenant });
-    if (!user) {
-      logger.withReq.warn(
-        req,
-        `[FORGOT-PASSWORD] Kullanıcı bulunamadı: ${email}`
-      );
-      res.status(404).json({
-        success: false,
-        message: userT("auth.forgot.userNotFound", locale),
-      });
-      return;
-    }
-
-    const resetToken = crypto.randomBytes(32).toString("hex");
-    const hashedToken = crypto
-      .createHash("sha256")
-      .update(resetToken)
-      .digest("hex");
-
-    user.passwordResetToken = hashedToken;
-    user.passwordResetExpires = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
-    await user.save();
-
-    // ✅ Tenant domain/URL ve brand
-    const { brandName, senderEmail, frontendUrl } = getTenantMailContext(req);
-    const resetLink = `${frontendUrl.replace(/\/$/, "")}/reset-password/${resetToken}`;
-
-    // Şablonun parametrelerini de tenant-aware ver
-    const html = passwordResetTemplate({
+  logger.withReq.info(req, `[LOGIN] Başarılı giriş: ${email}`);
+  res.status(200).json({
+    success: true,
+    message: userT("auth.login.success", locale),
+    data: {
+      _id: user._id,
       name: user.name,
-      resetLink,
-      brandName,
-      senderEmail,
-    });
+      email: user.email,
+      role: user.role,
+      profileImage: user.profileImage,
+      customerId: user.customerId,
+      company: user.company,
+      position: user.position,
+      phone: user.phone,
+    },
+  });
+});
 
-    await sendEmail({
-      tenantSlug: req.tenant,
-      to: user.email,
-      subject: userT("auth.forgot.subject", locale, { brand: brandName }),
-      html,
-      from: senderEmail,
-    });
+/* --------------------------- CHANGE PASSWORD ----------------------------- */
+export const changePassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const locale = getLocale(req);
+  const { currentPassword, newPassword } = req.body;
 
-    logger.withReq.info(
-      req,
-      `[FORGOT-PASSWORD] Şifre sıfırlama e-postası gönderildi: ${user.email}`
-    );
-
-    res
-      .status(200)
-      .json({ success: true, message: userT("auth.forgot.success", locale) });
+  if (!req.user) {
+    res.status(401).json({ success: false, message: userT("auth.password.userNotFound", locale) });
+    return;
   }
-);
+  if (typeof currentPassword !== "string" || !currentPassword?.trim()) {
+    res.status(400).json({ success: false, message: userT("auth.password.invalidCurrent", locale) });
+    return;
+  }
+  if (typeof newPassword !== "string" || newPassword.length < 6) {
+    res.status(400).json({ success: false, message: userT("validation.newPassword.min", locale, { min: 6 }) });
+    return;
+  }
 
+  try {
+    const updated = await changePasswordService(req, req.user.id, currentPassword, newPassword);
+    // Parola değişiminde oturumu yenilemek iyi pratik:
+    issueSession(req, res, { id: updated._id.toString(), role: updated.role });
+    logger.withReq.info(req, `[CHANGE-PASSWORD] Şifre değiştirildi: ${updated.email}`);
+    res.status(200).json({ success: true, message: userT("auth.password.success", locale) });
+  } catch (e: any) {
+    const code = e.status || 500;
+    const message =
+      code === 401
+        ? userT("auth.password.invalidCurrent", locale)
+        : code === 422
+          ? userT("auth.password.sameAsCurrent", locale)
+          : "Password change failed";
+    res.status(code).json({ success: false, message });
+  }
+});
 
-// ✅ Reset Password
-export const resetPassword = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { token } = req.params;
-    const { newPassword } = req.body;
-    const locale = getLocale(req);
-    const { User } = await getTenantModels(req);
+/* ---------------------------------- LOGOUT -------------------------------- */
+export const logoutUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const locale = getLocale(req);
+  clearSession(req, res);
+  logger.withReq.info(req, `[LOGOUT] Kullanıcı çıkış yaptı: ${req.user?.id ?? "Bilinmiyor"}`);
+  res.status(200).json({ success: true, message: userT("auth.logout.success", locale) });
+});
 
-    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-    const user = await User.findOne({
-      passwordResetToken: hashedToken,
+/* ---------------------------- FORGOT PASSWORD ---------------------------- */
+/**
+ * Not: Şifre sıfırlama isteği servis tarafından oluşturulur.
+ * Güvenlik gereği _her zaman_ 200 döneriz (kullanıcı var/yok sızdırmayız).
+ * E-posta gönderimi ayrı bir işleyici/worker’da yapılabilir (servis DEV modda code/token’ı döndürür).
+ */
+export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const locale = getLocale(req);
+
+  await requestPasswordReset(req, String(email || ""));
+
+  logger.withReq.info(req, `[FORGOT-PASSWORD] İstek alındı (tenant=${req.tenant})`);
+  res.status(200).json({ success: true, message: userT("auth.forgot.success", locale) });
+});
+
+/* ----------------------------- RESET PASSWORD ---------------------------- */
+/**
+ * Rota: POST /reset-password/:token
+ * Body: { newPassword, email? }  ← email opsiyonel; yoksa token’dan lookup yaparız.
+ */
+export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { token } = req.params;
+  const { newPassword, email } = req.body as { newPassword?: string; email?: string };
+  const locale = getLocale(req);
+
+  if (!newPassword || newPassword.length < 6) {
+    logger.withReq.warn(req, `[RESET-PASSWORD] Geçersiz yeni şifre.`);
+    res.status(400).json({ success: false, message: userT("auth.reset.invalidNewPassword", locale) });
+    return;
+  }
+
+  let finalEmail = (email || "").trim().toLowerCase();
+
+  // Email gönderilmediyse token’dan çözmeye çalış
+  if (!finalEmail) {
+    const { PasswordReset } = await getTenantModels(req);
+    const pr = await PasswordReset.findOne({
       tenant: req.tenant,
-      passwordResetExpires: { $gt: new Date() },
+      token: String(token || "").trim(),
+      usedAt: { $exists: false },
+      expiresAt: { $gt: new Date() },
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    if (!pr) {
+      logger.withReq.warn(req, `[RESET-PASSWORD] Geçersiz veya süresi dolmuş token.`);
+      res.status(400).json({ success: false, message: userT("auth.reset.invalidOrExpired", locale) });
+      return;
+    }
+    finalEmail = pr.email;
+  }
+
+  try {
+    await resetPasswordWithCodeOrToken(req, {
+      email: finalEmail,
+      token: String(token || "").trim(),
+      newPassword: String(newPassword),
     });
 
-    if (!user) {
-      logger.withReq.warn(
-        req,
-        `[RESET-PASSWORD] Geçersiz veya süresi dolmuş token.`
-      );
-      res.status(400).json({
-        success: false,
-        message: userT("auth.reset.invalidOrExpired", locale),
-      });
-      return;
-    }
-
-    if (!newPassword || newPassword.length < 6) {
-      logger.withReq.warn(req, `[RESET-PASSWORD] Geçersiz yeni şifre.`);
-      res.status(400).json({
-        success: false,
-        message: userT("auth.reset.invalidNewPassword", locale),
-      });
-      return;
-    }
-
-    user.password = await hashNewPassword(req, newPassword);
-    user.passwordResetToken = undefined;
-    user.passwordResetExpires = undefined;
-    await user.save();
-
-    logger.withReq.info(
-      req,
-      `[RESET-PASSWORD] Şifre sıfırlandı: ${user.email}`
-    );
-
-    res
-      .status(200)
-      .json({ success: true, message: userT("auth.reset.success", locale) });
+    logger.withReq.info(req, `[RESET-PASSWORD] Şifre sıfırlandı | ${finalEmail}`);
+    res.status(200).json({ success: true, message: userT("auth.reset.success", locale) });
+  } catch (e: any) {
+    const code = e.status || 400;
+    const message = code === 422
+      ? userT("auth.reset.invalidOrExpired", locale)
+      : userT("auth.reset.invalidOrExpired", locale);
+    res.status(code).json({ success: false, message });
   }
-);
+});

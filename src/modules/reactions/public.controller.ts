@@ -1,3 +1,4 @@
+// src/modules/reactions/public.controller.ts
 import type { Request, Response, RequestHandler } from "express";
 import asyncHandler from "express-async-handler";
 import { Types, isValidObjectId } from "mongoose";
@@ -8,18 +9,23 @@ import logger from "@/core/middleware/logger/logger";
 import { getRequestContext } from "@/core/middleware/logger/logRequestContext";
 import { getLogLocale } from "@/core/utils/i18n/getLogLocale";
 
+/** req.user._id yoksa güvenli şekilde guest id üret */
+function ensureActorId(req: Request): string {
+  let id = (req as any).user?._id as string | undefined;
+  if (!id || !isValidObjectId(id)) {
+    id = new Types.ObjectId().toString();
+    (req as any).user = { _id: id, isGuest: true };
+  }
+  return id;
+}
+
 /* ---- POST /reactions/toggle ---- */
 export const toggleReaction: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
   const { Reaction } = await getTenantModels(req);
   const locale = (req as any).locale || getLogLocale() || "en";
   const t = (k: string) => translate(k, locale, translations);
 
-  // 🔹 ensureActor ile guest kullanıcı gelebilir (ObjectId string)
-  const userId: string | undefined = (req as any).user?._id;
-  if (!userId || !isValidObjectId(userId)) {
-    res.status(401).json({ success: false, message: "Unauthorized" });
-    return;
-  }
+  const userId = ensureActorId(req);
 
   const { targetType, targetId, kind } = req.body as {
     targetType: string;
@@ -28,6 +34,7 @@ export const toggleReaction: RequestHandler = asyncHandler(async (req: Request, 
     emoji?: string | null;
     extra?: Record<string, unknown>;
   };
+
   const emoji = kind === "EMOJI" ? String(req.body.emoji || "") : null;
 
   const query = {
@@ -58,11 +65,7 @@ export const setReaction: RequestHandler = asyncHandler(async (req: Request, res
   const locale = (req as any).locale || getLogLocale() || "en";
   const t = (k: string) => translate(k, locale, translations);
 
-  const userId: string | undefined = (req as any).user?._id;
-  if (!userId || !isValidObjectId(userId)) {
-    res.status(401).json({ success: false, message: "Unauthorized" });
-    return;
-  }
+  const userId = ensureActorId(req);
 
   const { targetType, targetId, kind, on } = req.body as {
     targetType: string;
@@ -71,6 +74,7 @@ export const setReaction: RequestHandler = asyncHandler(async (req: Request, res
     emoji?: string | null;
     on: boolean;
   };
+
   const emoji = kind === "EMOJI" ? String(req.body.emoji || "") : null;
 
   const query = {
@@ -163,6 +167,7 @@ export const getSummary: RequestHandler = asyncHandler(async (req: Request, res:
 
 /* ---- GET /reactions/me ----
    Query: targetType, targetIds (csv)
+   (Guest destekli: user yoksa boş liste döner)
 */
 export const getMyReactions: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
   const { Reaction } = await getTenantModels(req);
@@ -171,8 +176,8 @@ export const getMyReactions: RequestHandler = asyncHandler(async (req: Request, 
 
   const userId: string | undefined = (req as any).user?._id;
   if (!userId || !isValidObjectId(userId)) {
-    res.status(401).json({ success: false, message: "Unauthorized" });
-    return;
+    res.json({ success: true, message: t("fetched"), data: [] });
+    return; 
   }
 
   const tenant = (req as any).tenant;
@@ -205,10 +210,7 @@ export const rate: RequestHandler = asyncHandler(async (req, res) => {
   const locale = (req as any).locale || getLogLocale() || "en";
   const t = (k: string) => translate(k, locale, translations);
 
-  const userId: string | undefined = (req as any).user?._id;
-  if (!userId || !isValidObjectId(userId)) {
-    res.status(401).json({ success: false, message: "Unauthorized" }); return;
-  }
+  const userId = ensureActorId(req);
 
   const { targetType, targetId, value, extra } = req.body as {
     targetType: string; targetId: string; value: number; extra?: Record<string, unknown>;
@@ -280,8 +282,8 @@ export const getRatingSummary: RequestHandler = asyncHandler(async (req, res) =>
   const shaped: Record<string, { count: number; average: number | null; dist: Record<"1"|"2"|"3"|"4"|"5", number> }> = {};
   for (const r of rows) {
     const tid = String(r._id);
-    const dist = { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, ...(r.distObj || {}) };
-    shaped[tid] = { count: r.total || 0, average: r.average ?? null, dist };
+    const dist = { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, ...(r as any).distObj || {} };
+    shaped[tid] = { count: (r as any).total || 0, average: (r as any).average ?? null, dist };
   }
 
   res.json({ success: true, message: t("listed"), data: shaped });

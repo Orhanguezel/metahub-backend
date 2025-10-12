@@ -1,5 +1,5 @@
 import express from "express";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/auth/authMiddleware";
 import { upload } from "@/core/middleware/file/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/file/uploadTypeWrapper";
 import { checkFileSizeMiddleware } from "@/core/middleware/file/checkFileSizeMiddleware";

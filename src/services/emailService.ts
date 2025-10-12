@@ -14,6 +14,7 @@ interface EmailOptions {
   tenantSlug: string;
   to: string;
   subject: string;
+  currency?: string;
   html: string;
   from?: string;
 }
@@ -67,6 +68,7 @@ export const sendEmail = async ({
   to,
   subject,
   html,
+  currency,
   from,
 }: EmailOptions): Promise<void> => {
   const lang = getLogLocale();
@@ -93,11 +95,13 @@ export const sendEmailVerificationLink = async ({
   tenantSlug,
   userId,
   email,
+  currency,
   req,
 }: {
   tenantSlug: string;
   userId: string;
   email: string;
+  currency?: string;
   req: any;
 }) => {
   const lang = getLogLocale();
@@ -129,6 +133,7 @@ export const sendEmailVerificationLink = async ({
     to: email,
     subject: t("email.verification.subject", lang, emailI18n),
     html,
+    currency,
     from: senderEmail,
   });
 };

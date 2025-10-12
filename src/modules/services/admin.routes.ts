@@ -1,6 +1,6 @@
 // src/modules/services/admin.services.routes.ts
 import express from "express";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/auth/authMiddleware";
 import {
   adminGetAllServices,
   adminGetServicesById,

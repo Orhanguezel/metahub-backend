@@ -1,5 +1,6 @@
+// src/modules/coupon/routes.ts (veya router dosyan)
 import express from "express";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
+import { authenticate, authorizeRoles } from "@/core/middleware/auth/authMiddleware";
 import {
   createCoupon,
   getCoupons,
@@ -7,6 +8,7 @@ import {
   getCouponByCode,
   updateCoupon,
   deleteCoupon,
+  getCouponByIdAdmin, // <-- EKLENDİ
 } from "./coupon.controller";
 import {
   validateCreateCoupon,
@@ -20,17 +22,16 @@ import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
 
-// coupon.routes.ts
+/* ===== Public ===== */
 router.get("/", getCoupons);
 router.get("/check/:code", getCouponByCode);
 
-// Admin (auth)
+/* ===== Admin ===== */
 router.use(authenticate, authorizeRoles("admin"));
 
-// ✔ Admin list
 router.get("/admin", validateAdminQuery, getAllCoupons);
+router.get("/admin/:id", validateObjectId("id"), getCouponByIdAdmin); // <-- EKLENDİ
 
-// ✔ Admin create
 router.post(
   "/admin",
   uploadTypeWrapper("coupons"),
@@ -40,18 +41,16 @@ router.post(
   createCoupon
 );
 
-// ✔ Admin update
 router.put(
   "/admin/:id",
   uploadTypeWrapper("coupons"),
   upload("coupons").array("images", 5),
   transformNestedFields(["title", "description"]),
+  validateObjectId("id"),
   validateUpdateCoupon,
   updateCoupon
 );
 
-// ✔ Admin delete
 router.delete("/admin/:id", validateObjectId("id"), deleteCoupon);
-
 
 export default router;

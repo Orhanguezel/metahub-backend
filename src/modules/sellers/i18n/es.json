@@ -1,0 +1,18 @@
+{
+  "seller.success.fetched": "Clientes obtenidos correctamente.",
+  "seller.success.created": "Cliente creado correctamente.",
+  "seller.success.updated": "Cliente actualizado correctamente.",
+  "seller.success.deleted": "Cliente eliminado correctamente.",
+  "seller.errors.notFound": "Cliente no encontrado.",
+  "seller.errors.requiredFields": "Todos los campos obligatorios deben ser completados.",
+  "seller.errors.emailExists": "Este correo electrónico ya existe para este tenant.",
+  "seller.validation.invalidObjectId": "ID de cliente no válida.",
+  "seller.validation.companyNameRequired": "El nombre de la empresa es obligatorio.",
+  "seller.validation.contactNameRequired": "El nombre del contacto es obligatorio.",
+  "seller.validation.invalidEmail": "Correo electrónico no válido.",
+  "seller.validation.phoneRequired": "El número de teléfono es obligatorio.",
+  "seller.validation.addressesRequired": "Se requiere al menos una dirección.",
+  "seller.validation.addressLineRequired": "La línea de dirección es obligatoria.",
+  "seller.validation.addressTypeRequired": "El tipo de dirección es obligatorio.",
+  "seller.validation.invalidString": "Valor inválido."
+}

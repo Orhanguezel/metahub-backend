@@ -16,8 +16,6 @@ export const UPLOAD_FOLDERS = {
   product: "product-images",
   ensotekprod: "ensotekprod-images",
   ensotekCategory: "ensotekCategory-images",
-  bikes: "bikes-images",
-  bikesCategory: "bikesCategory-images",
   category: "category-images",
   news: "news-images",
   articles: "articles-images",
@@ -33,6 +31,7 @@ export const UPLOAD_FOLDERS = {
   settings: "settings-images",
   company: "company-images",
   about: "about-images",
+  aboutus: "aboutus-images",
   apartment: "apartment-images",
   tenant: "tenant-images",
   coupons: "coupons-images",
@@ -45,6 +44,7 @@ export const UPLOAD_FOLDERS = {
   menucategory: "menucategory-images",
   menuitem: "menuitem-images",
   menu: "menu-images",
+  seller: "seller-images",
   default: "misc",
 
   // --- yeni modüller (Apartment projesi) ---
